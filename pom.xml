@@ -48,6 +48,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
+        <!--stomp client-->
+        <dependency>
+            <groupId>com.zgiot</groupId>
+            <artifactId>stomp-client-spring-boot-starter</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
         <!--数据库相关-->
         <dependency>
             <groupId>org.springframework.boot</groupId>

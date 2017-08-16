@@ -15,3 +15,7 @@ spring.datasource.druid:
   max-active: 20
   test-on-borrow: true
   driver-class-name: com.mysql.jdbc.Driver
+
+stomp:
+  client:
+    server-url: ws://192.168.9.160:8080/device/network-websocket
