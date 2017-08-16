@@ -1,0 +1,17 @@
+# profile配置
+spring.profiles.active: dev
+
+#服务器配置
+server:
+  context-path: /app-server
+  port: 9090
+
+spring.datasource.druid:
+  url: ${mysql.url}
+  username: ${mysql.username}
+  password: ${mysql.password}
+  initial-size: 5
+  min-idle: 2
+  max-active: 20
+  test-on-borrow: true
+  driver-class-name: com.mysql.jdbc.Driver
