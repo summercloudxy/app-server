@@ -4,12 +4,12 @@ import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
 import org.springframework.stereotype.Component;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Component
-public class DataCacheImpl implements DataCache {
+@Component("simpleCache")
+public class SimpleDataCache implements DataCache {
     private ConcurrentHashMap<String, DataModel> cache = new ConcurrentHashMap<>();
 
     @Override
@@ -20,7 +20,7 @@ public class DataCacheImpl implements DataCache {
 
     @Override
     public List<DataModelWrapper> findByThing(String thingCode) {
-        LinkedList<DataModelWrapper> result = new LinkedList<>();
+        List<DataModelWrapper> result = new ArrayList<>();
         cache.forEach((key, value) -> {
             if (isThing(key, thingCode)) {
                 result.add(new DataModelWrapper(value));
@@ -31,7 +31,7 @@ public class DataCacheImpl implements DataCache {
 
     @Override
     public List<DataModelWrapper> findByMetric(String metricCode) {
-        LinkedList<DataModelWrapper> result = new LinkedList<>();
+        List<DataModelWrapper> result = new ArrayList<>();
         cache.forEach((key, value) -> {
             if (isMetric(key, metricCode)) {
                 result.add(new DataModelWrapper(value));

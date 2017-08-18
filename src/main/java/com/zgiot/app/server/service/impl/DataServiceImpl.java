@@ -1,6 +1,6 @@
 package com.zgiot.app.server.service.impl;
 
-import com.zgiot.app.server.service.cache.DataCacheImpl;
+import com.zgiot.app.server.service.cache.DataCache;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
@@ -12,7 +12,7 @@ import java.util.List;
 @Service
 public class DataServiceImpl implements DataService {
     @Autowired
-    private DataCacheImpl dataCache;
+    private DataCache dataCache;
 
     @Override
     public DataModelWrapper getData(String thingCode, String metricCode) {
