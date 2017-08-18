@@ -142,5 +142,16 @@
         </plugins>
     </build>
 
-
+    <repositories>
+        <repository>
+            <id>zgiot</id>
+            <name>zgiot</name>
+            <url>http://192.168.3.173:8081/nexus/content/groups/public</url>
+        </repository>
+        <repository>
+            <id>alimaven</id>
+            <name>aliyun maven</name>
+            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+        </repository>
+    </repositories>
 </project>
