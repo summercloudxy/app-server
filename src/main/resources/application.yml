@@ -1,11 +1,16 @@
+# 监控服务配置
+spring.boot.admin.url: http://localhost:9090/app-server
+management.security.enabled: false
+
 # profile配置
 spring.profiles.active: dev
 
-#服务器配置
+# 服务器配置
 server:
   context-path: /app-server
   port: 9090
 
+# 数据库配置
 spring.datasource.druid:
   url: ${mysql.url}
   username: ${mysql.username}
@@ -16,6 +21,8 @@ spring.datasource.druid:
   test-on-borrow: true
   driver-class-name: com.mysql.jdbc.Driver
 
+# STOMP配置
 stomp:
   client:
     server-url: ws://192.168.9.160:8080/device/network-websocket
+
