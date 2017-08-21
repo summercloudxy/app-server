@@ -2,9 +2,11 @@ package com.zgiot.app.server.service;
 
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public interface DataService {
     /**
      * 根据thing和metric获取数据
