@@ -17,6 +17,10 @@
         <version>1.5.6.RELEASE</version>
     </parent>
 
+    <modules>
+        <module>../common</module>
+    </modules>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -25,7 +29,7 @@
         <version.mybatis>1.2.0</version.mybatis>
         <version.druid>1.1.0</version.druid>
         <version.swagger>2.7.0</version.swagger>
-        <version.fastjson>1.1.43</version.fastjson>
+        <version.fastjson>1.2.37</version.fastjson>
         <version.common>2.6</version.common>
         <version.guava>22.0</version.guava>
     </properties>
