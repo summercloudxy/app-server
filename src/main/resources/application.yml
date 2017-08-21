@@ -21,8 +21,9 @@ spring.datasource.druid:
   test-on-borrow: true
   driver-class-name: com.mysql.jdbc.Driver
 
-# STOMP配置
-stomp:
-  client:
-    server-url: ws://192.168.9.160:8080/device/network-websocket
+# websocket配置
+websocket:
+  server-url: ${websocket.server-url}
+  handshake-timeout: ${websocket.handshake-timeout}
+  connection-timeout: ${websocket.connection-timeout}
 
