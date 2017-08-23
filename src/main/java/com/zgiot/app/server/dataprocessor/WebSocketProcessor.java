@@ -2,19 +2,26 @@ package com.zgiot.app.server.dataprocessor;
 
 import com.alibaba.fastjson.JSON;
 import com.zgiot.common.pojo.DataModel;
-import org.asynchttpclient.*;
+import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.AsyncHttpClientConfig;
+import org.asynchttpclient.DefaultAsyncHttpClient;
+import org.asynchttpclient.DefaultAsyncHttpClientConfig;
 import org.asynchttpclient.ws.WebSocket;
 import org.asynchttpclient.ws.WebSocketTextListener;
 import org.asynchttpclient.ws.WebSocketUpgradeHandler;
-import org.springframework.util.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class WebSocketProcessor implements DataProcessor {
+    private static final Logger logger = LoggerFactory.getLogger(WebSocketProcessor.class);
     private static final int DEFAULT_HANDSHAKE_TIMEOUT = 3;
     private static final int DEFAULT_CONNECT_TIMEOUT = 10;
     private AsyncHttpClient client;
@@ -28,6 +35,10 @@ public class WebSocketProcessor implements DataProcessor {
     private WebSocket webSocketClient;
 
     private Set<DataListener> listeners = new CopyOnWriteArraySet<>();
+
+    private Timer reconnectTimer;
+
+    private boolean autoReconnect = true;
 
     private ExecutorService executor = new ThreadPoolExecutor(1, Runtime.getRuntime().availableProcessors(), 5000L, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<>(), new ThreadFactory() {
         private AtomicInteger counter = new AtomicInteger(0);
@@ -72,11 +83,26 @@ public class WebSocketProcessor implements DataProcessor {
                             @Override
                             public void onOpen(WebSocket websocket) {
                                 webSocketClient = websocket;
+                                if (reconnectTimer != null) {
+                                    reconnectTimer.cancel();
+                                    reconnectTimer = null;//help GC
+                                    logger.info("reconnected successfully");
+                                }
                             }
 
                             @Override
                             public void onClose(WebSocket websocket) {
                                 webSocketClient = websocket;
+                                if (autoReconnect) {
+                                    reconnectTimer = new Timer("websocket-guard");
+                                    reconnectTimer.schedule(new TimerTask() {
+                                        @Override
+                                        public void run() {
+                                            logger.info("reconnecting...");
+                                            connect();
+                                        }
+                                    }, 1000L, 3000L);
+                                }
                             }
 
                             @Override
@@ -91,6 +117,7 @@ public class WebSocketProcessor implements DataProcessor {
     private void handleMessage(String message) {
         try {
             DataModel dataModel = JSON.parseObject(message, DataModel.class);
+            logger.trace("received: {}", dataModel);
             for (DataListener listener : listeners) {
                 executor.submit(() -> {
                     try {
@@ -116,7 +143,6 @@ public class WebSocketProcessor implements DataProcessor {
         CompletableFuture<Void> future = new CompletableFuture<>();
         try {
             webSocketClient.close();
-//            client.close();
             future.complete(null);
         } catch (IOException e) {
             future.completeExceptionally(e);
@@ -147,4 +173,11 @@ public class WebSocketProcessor implements DataProcessor {
         return handshakeTimeout;
     }
 
+    public boolean isAutoReconnect() {
+        return autoReconnect;
+    }
+
+    public void setAutoReconnect(boolean autoReconnect) {
+        this.autoReconnect = autoReconnect;
+    }
 }
