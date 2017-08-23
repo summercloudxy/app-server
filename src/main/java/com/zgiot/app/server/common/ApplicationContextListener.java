@@ -25,17 +25,7 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         processor.connect().thenRun(() -> {
             logger.info("connected");
-            processor.addListener(new DataListener() {
-                @Override
-                public void onDataChange(DataModel dataModel) {
-                    cacheUpdater.onDataChange(dataModel);
-                }
-
-                @Override
-                public void onError(Throwable error) {
-                    logger.error("error", error);
-                }
-            });
+            processor.addListener(cacheUpdater);
         }).exceptionally(throwable -> {
             logger.error("error", throwable);
             return null;
