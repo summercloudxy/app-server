@@ -1,5 +1,10 @@
 # 监控服务配置
-spring.boot.admin.url: http://localhost:9090/app-server
+spring:
+  application:
+    name: app-server
+  boot:
+    admin:
+      url: http://localhost:9090/app-server
 management.security.enabled: false
 
 # profile配置
@@ -21,9 +26,14 @@ spring.datasource.druid:
   test-on-borrow: true
   driver-class-name: com.mysql.jdbc.Driver
 
+
 # websocket配置
 websocket:
   server-url: ${websocket.server-url}
   handshake-timeout: ${websocket.handshake-timeout}
   connection-timeout: ${websocket.connection-timeout}
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+
 

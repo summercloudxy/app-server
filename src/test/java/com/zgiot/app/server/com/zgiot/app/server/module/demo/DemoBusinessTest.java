@@ -31,9 +31,9 @@ public class DemoBusinessTest {
 
     private ThingModel buildThingMedel() {
         ThingModel mockThing = new ThingModel();
-        mockThing.setCategoryCode(DemoBusiness.THING_CATEGORY_DEVICE);
-        mockThing.setCode("");
-        mockThing.setName("name1");
+        mockThing.setThingCategoryCode(DemoBusiness.THING_CATEGORY_DEVICE);
+        mockThing.setThingCode("");
+        mockThing.setThingName("name1");
         return mockThing;
     }
 
@@ -81,8 +81,8 @@ public class DemoBusinessTest {
 
     private String doTest(String thingCate, String mockThingCode, String mockMetricCode, Float mockValue) {
         ThingModel mockThing = buildThingMedel();
-        mockThing.setCategoryCode(thingCate);
-        mockThing.setCode(mockThingCode);
+        mockThing.setThingCategoryCode(thingCate);
+        mockThing.setThingCode(mockThingCode);
         given(mockThingService.getThing(mockThingCode)).willReturn(mockThing);
 
         DataModel mockData = new DataModel();
@@ -91,7 +91,7 @@ public class DemoBusinessTest {
         mockData.setValue(mockValue);
 
         DataModelWrapper wrapper = new DataModelWrapper(mockData);
-        given(mockDataService.getData(mockThing.getCode(), mockMetricCode)).willReturn(wrapper);
+        given(mockDataService.getData(mockThing.getThingCode(), mockMetricCode)).willReturn(wrapper);
 
         /* do test */
         return this.demoBusiness.doCalStatus(mockThingCode, mockMetricCode);
