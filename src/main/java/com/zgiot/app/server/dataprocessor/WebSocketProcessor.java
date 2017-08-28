@@ -93,7 +93,7 @@ public class WebSocketProcessor implements DataProcessor {
                             @Override
                             public void onClose(WebSocket websocket) {
                                 webSocketClient = websocket;
-                                if (autoReconnect) {
+                                if (autoReconnect && reconnectTimer == null) {
                                     reconnectTimer = new Timer("websocket-guard");
                                     reconnectTimer.schedule(new TimerTask() {
                                         @Override
