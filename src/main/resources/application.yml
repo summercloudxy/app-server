@@ -27,7 +27,7 @@ spring.datasource.druid:
   driver-class-name: com.mysql.jdbc.Driver
 
 
-# websocket配置
+# data engine配置
 dataengine:
   https: ${dataengine.https}
   server-name: ${dataengine.server-name}
