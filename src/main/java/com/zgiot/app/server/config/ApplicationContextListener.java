@@ -1,9 +1,7 @@
-package com.zgiot.app.server.common;
+package com.zgiot.app.server.config;
 
-import com.zgiot.app.server.dataprocessor.DataListener;
 import com.zgiot.app.server.dataprocessor.DataProcessor;
 import com.zgiot.app.server.dataprocessor.impl.CacheUpdater;
-import com.zgiot.common.pojo.DataModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

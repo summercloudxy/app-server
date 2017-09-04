@@ -1,4 +1,4 @@
-package com.zgiot.app.server.common;
+package com.zgiot.app.server.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
