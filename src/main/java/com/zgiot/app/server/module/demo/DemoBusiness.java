@@ -39,7 +39,7 @@ public class DemoBusiness {
 
         Float valueF = (Float) data.getValue();
 
-        if ( THING_CATEGORY_DEVICE.equals(thing.getCategoryCode())
+        if ( THING_CATEGORY_DEVICE.equals(thing.getThingCategoryCode())
                 && valueF > THRESHOLD_BAD ) {
             destStatus = STATUS_TOO_HIGH;
         }
