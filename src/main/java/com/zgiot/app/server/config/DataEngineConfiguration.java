@@ -4,6 +4,7 @@ import com.zgiot.app.server.config.prop.DataEngineProperties;
 import com.zgiot.app.server.dataprocessor.WebSocketProcessor;
 import com.zgiot.app.server.service.impl.DataEngineTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +13,7 @@ import org.springframework.http.client.Netty4ClientHttpRequestFactory;
 
 @Configuration
 @EnableConfigurationProperties(DataEngineProperties.class)
-
+@EnableAutoConfiguration
 public class DataEngineConfiguration {
     @Autowired
     private DataEngineProperties properties;

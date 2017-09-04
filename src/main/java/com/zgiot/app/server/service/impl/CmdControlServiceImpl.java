@@ -23,18 +23,8 @@ public class CmdControlServiceImpl implements CmdControlService {
     private DataEngineTemplate dataEngineTemplate;
 
     @Override
-    public int sendCmd(DataModel dataModel) {
-        return sendCmd(dataModel, RequestIdUtil.generateRequestId());
-    }
-
-    @Override
     public int sendCmd(DataModel dataModel, String requestId) {
         return sendCmd(Collections.singletonList(dataModel), requestId);
-    }
-
-    @Override
-    public int sendCmd(List<DataModel> dataModelList) {
-        return sendCmd(dataModelList, RequestIdUtil.generateRequestId());
     }
 
     @Override
