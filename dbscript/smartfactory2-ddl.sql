@@ -34,8 +34,8 @@ DROP TABLE IF EXISTS `rel_thingtype_metric`;
 
 CREATE TABLE `rel_thingtype_metric` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `thingtype_code` varchar(3) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
-  `metric_code` varchar(3) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `thingtype_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `metric_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
 
@@ -45,15 +45,16 @@ DROP TABLE IF EXISTS `tb_metric`;
 
 CREATE TABLE `tb_metric` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `metric_category_code` varchar(3) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `metric_category_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
   `metric_name` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
-  `metric_code` varchar(3) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
-  `metric_type1_code` varchar(3) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '维度1的叶子节点',
-  `metric_type2_code` varchar(3) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '维度2的叶子节点',
-  `metric_type3_code` varchar(3) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '维度3的叶子节点',
+  `metric_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `metric_type1_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '维度1的叶子节点',
+  `metric_type2_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '维度2的叶子节点',
+  `metric_type3_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '维度3的叶子节点',
   `value_type` varchar(3) DEFAULT NULL,
   `value_unit` varchar(5) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unq_code` (`metric_code`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 
 /*Table structure for table `tb_metrictype` */
@@ -63,8 +64,9 @@ DROP TABLE IF EXISTS `tb_metrictype`;
 CREATE TABLE `tb_metrictype` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `metrictype_name` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
-  `metrictype_code` varchar(3) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  `metrictype_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unq_code` (`metrictype_code`)
 ) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 
 /*Table structure for table `tb_thing` */
@@ -75,12 +77,13 @@ CREATE TABLE `tb_thing` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `parent_thing_id` int(11) DEFAULT NULL,
   `thing_code` varchar(30) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
-  `thing_category_code` varchar(3) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `thing_category_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
   `thing_name` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
-  `thing_type1_code` varchar(3) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '维度1的叶子节点',
-  `thing_type2_code` varchar(3) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '维度2的叶子节点',
-  `thing_type3_code` varchar(3) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '维度3的叶子节点',
-  PRIMARY KEY (`id`)
+  `thing_type1_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '维度1的叶子节点',
+  `thing_type2_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '维度2的叶子节点',
+  `thing_type3_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '维度3的叶子节点',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unq_code` (`thing_code`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 /*Table structure for table `tb_thingtype` */
@@ -90,7 +93,7 @@ DROP TABLE IF EXISTS `tb_thingtype`;
 CREATE TABLE `tb_thingtype` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `thingtype_name` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
-  `thingtype_code` varchar(3) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `thingtype_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
   `parent_thingtype_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
