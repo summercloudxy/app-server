@@ -118,15 +118,18 @@ public class WebSocketProcessor implements DataProcessor {
         try {
             DataModel dataModel = JSON.parseObject(message, DataModel.class);
             logger.trace("received: {}", dataModel);
-            for (DataListener listener : listeners) {
-                executor.submit(() -> {
+
+            // each data per thread, but listeners are sync for ensuring logic dependencies
+            executor.submit(() -> {
+                for (DataListener listener : listeners) {
                     try {
                         listener.onDataChange(dataModel);
                     } catch (Exception e) {
                         handleError(e);
                     }
-                });
-            }
+                }
+            });
+
         } catch (Throwable error) {
             handleError(error);
         }
