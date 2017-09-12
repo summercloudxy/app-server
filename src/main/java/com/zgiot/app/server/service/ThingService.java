@@ -5,6 +5,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface ThingService {
-    public ThingModel getThing(String thingCode);
+    ThingModel getThing(String thingCode);
 }
 
