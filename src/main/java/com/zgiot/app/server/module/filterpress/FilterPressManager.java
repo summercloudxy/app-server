@@ -31,7 +31,7 @@ public class FilterPressManager {
      * @param data
      */
     public void onDataSourceChange(DataModel data) {
-        if (data.getMetricCode().equals(FilterPressConstants.STAGE)) {
+        if (FilterPressConstants.STAGE.equals(data.getMetricCode())) {
             processStage(data);
         }
     }
@@ -45,7 +45,7 @@ public class FilterPressManager {
         String thingCode = data.getThingCode();
         short stageValue = (short) data.getValue();
         FilterPress filterPress = getFilterPress(thingCode);
-        switch (stageValue) {//回调各阶段
+        switch (stageValue) { //回调各阶段
             case FilterPressConstants.STAGE_LOOSEN:
                 filterPress.onLoosen();
                 break;

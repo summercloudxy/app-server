@@ -2,7 +2,7 @@ package com.zgiot.app.server.config;
 
 import com.zgiot.app.server.dataprocessor.DataProcessor;
 import com.zgiot.app.server.dataprocessor.impl.CacheUpdater;
-import com.zgiot.app.server.dataprocessor.impl.FilterPressDataListener;
+import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
 import com.zgiot.app.server.module.demo.DemoBusiness;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

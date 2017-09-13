@@ -1,7 +1,6 @@
-package com.zgiot.app.server.dataprocessor.impl;
+package com.zgiot.app.server.module.filterpress;
 
 import com.zgiot.app.server.dataprocessor.DataListener;
-import com.zgiot.app.server.module.filterpress.FilterPressManager;
 import com.zgiot.common.constants.FilterPressConstants;
 import com.zgiot.common.pojo.DataModel;
 import org.slf4j.Logger;
