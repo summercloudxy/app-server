@@ -1,7 +1,13 @@
 package com.zgiot.app.server.module.filterpress;
 
 public class FilterPress {
-    private String code;
+    private final String code;
+    private FilterPressManager manager;
+
+    public FilterPress(String code, FilterPressManager manager) {
+        this.code = code;
+        this.manager = manager;
+    }
 
     public void onRun() {
 
@@ -45,5 +51,9 @@ public class FilterPress {
 
     public void onCycle() {
 
+    }
+
+    public String getCode() {
+        return code;
     }
 }

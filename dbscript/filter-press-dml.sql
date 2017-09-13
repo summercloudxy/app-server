@@ -26,6 +26,7 @@ INSERT INTO `tb_metric` VALUES ('22', 'SIG', '进料泵运行信号', 'JL_PUMP_U
 INSERT INTO `tb_metric` VALUES ('23', 'SIG', '输送机运行信号', 'TRS_UP', 'S', 'TRS_UP', NULL, 'BOO', NULL);
 INSERT INTO `tb_metric` VALUES ('24', 'SIG', '进料上限', 'JL_ULMT', 'S', 'JL_ULMT', NULL, 'BOO', NULL);
 INSERT INTO `tb_metric` VALUES ('25', 'SIG', '压榨下限', 'PRS_LLMT', 'S', 'PRS_LLMT', NULL, 'BOO', NULL);
+INSERT INTO `tb_metric` VALUES ('140', 'SIG', '松开限位1', 'LOOSE_LMT1', 'S', 'LOOSE_LMT', NULL, 'BOO', NULL);
 INSERT INTO `tb_metric` VALUES ('26', 'SIG', '小车限位1', 'CAR_LMT1', 'S', 'CAR_LMT', NULL, 'BOO', NULL);
 INSERT INTO `tb_metric` VALUES ('27', 'SIG', '压榨上限', 'PRS_ULMT', 'S', 'PRS_ULMT', NULL, 'BOO', NULL);
 INSERT INTO `tb_metric` VALUES ('28', 'SIG', '进料阀0开限位', 'JL_OLMT0', 'S', 'JL_OLMT', NULL, 'BOO', NULL);
@@ -138,7 +139,7 @@ INSERT INTO `tb_metric` VALUES ('136', 'SIG', '进料结束', 'FEED_OVER', 'SS',
 INSERT INTO `tb_metric` VALUES ('137', 'SIG', '一队选择', 'T1_CHOOSE', 'SS', 'T1_CHOOSE', NULL, 'BOO', NULL);
 INSERT INTO `tb_metric` VALUES ('138', 'SIG', '二队选择', 'T2_CHOOSE', 'SS', 'T2_CHOOSE', NULL, 'BOO', NULL);
 INSERT INTO `tb_metric` VALUES ('139', 'SIG', '三队选择', 'T3_CHOOSE', 'SS', 'T3_CHOOSE', NULL, 'BOO', NULL);
-
+INSERT INTO `tb_metric` VALUES ('141', 'SIG', '远程手动/自动', 'R_AUTO', 'S', 'R_AUTO', NULL, 'BOO', NULL);
 -- ----------------------------
 -- Records of tb_metrictype
 -- ----------------------------
@@ -221,7 +222,7 @@ INSERT INTO `tb_metrictype` VALUES ('87', '喷头下移超时', 'SWDW_TMOUT');
 INSERT INTO `tb_metrictype` VALUES ('88', '喷头上移超时', 'SWUP_TMOUT');
 INSERT INTO `tb_metrictype` VALUES ('89', '一队记录', 'T1_RCD');
 INSERT INTO `tb_metrictype` VALUES ('90', '二队记录', 'T2_RCD');
-INSERT INTO `tb_metrictype` VALUES ('91', '三队纪录', 'T3_RCD');
+INSERT INTO `tb_metrictype` VALUES ('91', '三队记录', 'T3_RCD');
 INSERT INTO `tb_metrictype` VALUES ('92', '当前计时', 'CRT_TIMER');
 INSERT INTO `tb_metrictype` VALUES ('93', '过程计时', 'PRC_TIMER');
 INSERT INTO `tb_metrictype` VALUES ('94', '一队过滤次数', 'T1_COUNT');

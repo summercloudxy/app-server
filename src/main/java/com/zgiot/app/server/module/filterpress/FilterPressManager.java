@@ -2,6 +2,7 @@ package com.zgiot.app.server.module.filterpress;
 
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.DataService;
+import com.zgiot.app.server.util.RequestIdUtil;
 import com.zgiot.common.constants.FilterPressConstants;
 import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.pojo.DataModel;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -23,12 +25,22 @@ public class FilterPressManager {
 
     private Map<String, FilterPress> manager = new ConcurrentHashMap<>();
 
+    /**
+     * call back when data changed
+     *
+     * @param data
+     */
     public void onDataSourceChange(DataModel data) {
         if (data.getMetricCode().equals(FilterPressConstants.STAGE)) {
             processStage(data);
         }
     }
 
+    /**
+     * process the stage data and call the specific method of filter press
+     *
+     * @param data
+     */
     private void processStage(DataModel data) {
         String thingCode = data.getThingCode();
         short stageValue = (short) data.getValue();
@@ -60,7 +72,7 @@ public class FilterPressManager {
                 break;
             default:
         }
-
+        //calculate the state value and call the specific method of filter press
         short stateValue = calculateState(thingCode, stageValue);
         if (!Objects.equals(dataService.getData(thingCode, FilterPressConstants.STATE).getValue(), stateValue)) {//若值变化，保存并回调
             DataModel stateModel = new DataModel();
@@ -102,11 +114,32 @@ public class FilterPressManager {
         return state;
     }
 
-    private FilterPress getFilterPress(String thingCode) {
+    /**
+     * get the filter press by thing code from the manager
+     *
+     * @param thingCode
+     * @return
+     */
+    public FilterPress getFilterPress(String thingCode) {
         FilterPress filterPress = manager.get(thingCode);
         if (filterPress == null) {
-            throw new NullPointerException("no such filter press:" + thingCode);
+            throw new NoSuchElementException("no such filter press:" + thingCode);
         }
         return filterPress;
+    }
+
+    /**
+     * send the command
+     *
+     * @param filterPress
+     * @param metricCode
+     * @param value
+     */
+    void sendCmd(FilterPress filterPress, String metricCode, Object value) {
+        DataModel data = new DataModel();
+        data.setThingCode(filterPress.getCode());
+        data.setMetricCode(metricCode);
+        data.setValue(value);
+        cmdControlService.sendCmd(data, RequestIdUtil.generateRequestId());
     }
 }
