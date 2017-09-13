@@ -25,6 +25,7 @@ CREATE TABLE `rel_thing_metric_label` (
   `thing_code` varchar(8) DEFAULT NULL,
   `metric_code` varchar(8) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
   `label_path` varchar(64) DEFAULT NULL,
+  `enabled` tinyint(4) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 
@@ -51,7 +52,7 @@ CREATE TABLE `tb_metric` (
   `metric_type1_code` varchar(3) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '维度1的叶子节点',
   `metric_type2_code` varchar(3) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '维度2的叶子节点',
   `metric_type3_code` varchar(3) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '维度3的叶子节点',
-  `value_type` varchar(3) DEFAULT NULL,
+  `value_type` varchar(5) DEFAULT NULL,
   `value_unit` varchar(5) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
