@@ -43,7 +43,7 @@ public class FilterPressManager {
      */
     private void processStage(DataModel data) {
         String thingCode = data.getThingCode();
-        short stageValue = (short) data.getValue();
+        short stageValue = Short.valueOf(data.getValue());
         FilterPress filterPress = getFilterPress(thingCode);
         switch (stageValue) { //回调各阶段
             case FilterPressConstants.STAGE_LOOSEN:
@@ -74,13 +74,13 @@ public class FilterPressManager {
         }
         //calculate the state value and call the specific method of filter press
         short stateValue = calculateState(thingCode, stageValue);
-        if (!Objects.equals(dataService.getData(thingCode, FilterPressConstants.STATE).getValue(), stateValue)) {//若值变化，保存并回调
+        if (!Objects.equals(dataService.getData(thingCode, FilterPressConstants.STATE).getValue(), String.valueOf(stateValue))) {//若值变化，保存并回调
             DataModel stateModel = new DataModel();
             stateModel.setThingCode(thingCode);
             stateModel.setThingCategoryCode(data.getThingCategoryCode());
             stateModel.setMetricCode(FilterPressConstants.STATE);
             stateModel.setThingCategoryCode(data.getMetricCategoryCode());
-            stateModel.setValue(stateValue);
+            stateModel.setValue(String.valueOf(stateValue));
             stateModel.setDataTimeStamp(new Date());
             dataService.updateCache(stateModel);
             dataService.persist2NoSQL(stateModel);
@@ -104,7 +104,7 @@ public class FilterPressManager {
     private short calculateState(String thingCode, short stageValue) {
         short state;
         DataModelWrapper fault = dataService.getData(thingCode, FilterPressConstants.FAULT);
-        if ((boolean) fault.getValue()) {
+        if (Boolean.valueOf(fault.getValue())) {
             state = GlobalConstants.STATE_FAULT;
         } else if (stageValue == 0) {
             state = GlobalConstants.STATE_STOPPED;
@@ -139,7 +139,7 @@ public class FilterPressManager {
         DataModel data = new DataModel();
         data.setThingCode(filterPress.getCode());
         data.setMetricCode(metricCode);
-        data.setValue(value);
+        data.setValue(value.toString());
         cmdControlService.sendCmd(data, RequestIdUtil.generateRequestId());
     }
 }
