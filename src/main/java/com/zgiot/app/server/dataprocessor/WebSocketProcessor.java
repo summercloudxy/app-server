@@ -13,10 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Objects;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -34,7 +31,7 @@ public class WebSocketProcessor implements DataProcessor {
 
     private WebSocket webSocketClient;
 
-    private Set<DataListener> listeners = new CopyOnWriteArraySet<>();
+    private List<DataListener> listeners = new CopyOnWriteArrayList<>();
 
     private Timer reconnectTimer;
 
@@ -118,15 +115,18 @@ public class WebSocketProcessor implements DataProcessor {
         try {
             DataModel dataModel = JSON.parseObject(message, DataModel.class);
             logger.trace("received: {}", dataModel);
-            for (DataListener listener : listeners) {
-                executor.submit(() -> {
+
+            // each data per thread, but listeners are sync for ensuring logic dependencies
+            executor.submit(() -> {
+                for (DataListener listener : listeners) {
                     try {
                         listener.onDataChange(dataModel);
                     } catch (Exception e) {
                         handleError(e);
                     }
-                });
-            }
+                }
+            });
+
         } catch (Throwable error) {
             handleError(error);
         }

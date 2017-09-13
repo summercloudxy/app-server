@@ -128,7 +128,7 @@ INSERT INTO `tb_metric` VALUES ('124', 'SIG', '远程手动取板', 'TAKE', 'SS'
 INSERT INTO `tb_metric` VALUES ('125', 'SIG', '远程手动拉板', 'PULL', 'SS', 'PULL', NULL, 'BOO', NULL);
 INSERT INTO `tb_metric` VALUES ('126', 'SIG', '远程手动压紧', 'PRESS', 'SS', 'PRESS', NULL, 'BOO', NULL);
 INSERT INTO `tb_metric` VALUES ('127', 'SIG', '远程手动进料', 'FEED', 'SS', 'FEED', NULL, 'BOO', NULL);
-INSERT INTO `tb_metric` VALUES ('128', 'SIG', '远程手动压榨', 'SQUEESE', 'SS', 'SQUEESE', NULL, 'BOO', NULL);
+INSERT INTO `tb_metric` VALUES ('128', 'SIG', '远程手动压榨', 'SQUEEZE', 'SS', 'SQUEEZE', NULL, 'BOO', NULL);
 INSERT INTO `tb_metric` VALUES ('129', 'SIG', '远程手动吹风', 'BLOW', 'SS', 'BLOW', NULL, 'BOO', NULL);
 INSERT INTO `tb_metric` VALUES ('130', 'SIG', '远程报警复位', 'RESET', 'SS', 'RESET', NULL, 'BOO', NULL);
 INSERT INTO `tb_metric` VALUES ('131', 'SIG', '远程启动', 'RUN', 'SS', 'RUN', NULL, 'BOO', NULL);
@@ -270,7 +270,7 @@ INSERT INTO `tb_metrictype` VALUES ('137', '远程手动取板', 'TAKE');
 INSERT INTO `tb_metrictype` VALUES ('138', '远程手动拉板', 'PULL');
 INSERT INTO `tb_metrictype` VALUES ('139', '远程手动压紧', 'PRESS');
 INSERT INTO `tb_metrictype` VALUES ('140', '远程手动进料', 'FEED');
-INSERT INTO `tb_metrictype` VALUES ('141', '远程手动压榨', 'SQUEESE');
+INSERT INTO `tb_metrictype` VALUES ('141', '远程手动压榨', 'SQUEEZE');
 INSERT INTO `tb_metrictype` VALUES ('142', '远程手动吹风', 'BLOW');
 INSERT INTO `tb_metrictype` VALUES ('143', '远程报警复位', 'RESET');
 INSERT INTO `tb_metrictype` VALUES ('144', '远程启动', 'RUN');
