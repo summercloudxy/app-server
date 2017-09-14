@@ -75,10 +75,6 @@ public class FilterPress {
         return code;
     }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
-
     public void setFeedOverTime(Long feedOverTime) {
         this.feedOverTime = feedOverTime;
     }
