@@ -7,7 +7,7 @@ import com.zgiot.app.server.module.filterpress.pojo.FilterPressElectricity;
 import com.zgiot.app.server.module.filterpress.FilterPress;
 import com.zgiot.app.server.service.impl.CmdControlServiceImpl;
 import com.zgiot.app.server.util.RequestIdUtil;
-import com.zgiot.common.constants.FilterPressConstants;
+import com.zgiot.common.constants.FilterPressMetricConstants;
 import com.zgiot.common.pojo.DataModel;
 import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,9 +63,9 @@ public class FeedOverManager {
         if (STATE_INTELLIGENT.equals(intelligentManuState)) {
             if (STATE_AUTO_CONFIRM.equals(autoManuConfirmState)) {
                 DataModel dataModel = new DataModel();
-                dataModel.setMetricCode(FilterPressConstants.FEED_OVER);
+                dataModel.setMetricCode(FilterPressMetricConstants.FEED_OVER);
                 dataModel.setThingCode(thingCode);
-                dataModel.setValue(FEED_OVER_VALUE);
+                dataModel.setValue(FEED_OVER_VALUE.toString());
                 cmdControlService.sendCmd(dataModel, RequestIdUtil.generateRequestId());
             } else {
                 webSocketDemo.notice(FEED_OVER_NOTICE_URI, filterPress);
@@ -163,9 +163,9 @@ public class FeedOverManager {
      */
     public void feedOverPopupConfirm(String thingCode) {
         DataModel dataModel = new DataModel();
-        dataModel.setMetricCode(FilterPressConstants.FEED_OVER);
+        dataModel.setMetricCode(FilterPressMetricConstants.FEED_OVER);
         dataModel.setThingCode(thingCode);
-        dataModel.setValue(FEED_OVER_VALUE);
+        dataModel.setValue(FEED_OVER_VALUE.toString());
         cmdControlService.sendCmd(dataModel, RequestIdUtil.generateRequestId());
         webSocketDemo.notice(FEED_OVER_CONFIRMED_NOTICE_URI, thingCode);
         unConfirmedSet.remove(thingCode);
@@ -173,7 +173,7 @@ public class FeedOverManager {
 
     /**
      * 获取自动手动确认状态
-     * 
+     *
      * @return
      */
     public Integer getAutoManuConfirmState() {
