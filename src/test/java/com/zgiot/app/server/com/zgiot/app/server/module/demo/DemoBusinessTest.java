@@ -88,7 +88,7 @@ public class DemoBusinessTest {
         DataModel mockData = new DataModel();
         mockData.setThingCode(mockThingCode);
         mockData.setMetricCode(mockMetricCode);
-        mockData.setValue(mockValue);
+        mockData.setValue(mockValue.toString());
 
         DataModelWrapper wrapper = new DataModelWrapper(mockData);
         given(mockDataService.getData(mockThing.getThingCode(), mockMetricCode)).willReturn(wrapper);

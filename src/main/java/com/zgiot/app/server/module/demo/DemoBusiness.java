@@ -40,7 +40,7 @@ public class DemoBusiness implements DataListener {
         DataModelWrapper data = this.dataService.getData(thingCode, metricCode);
         ThingModel thing = this.thingService.getThing(thingCode);
 
-        Float valueF = (Float) data.getValue();
+        Float valueF = Float.valueOf(data.getValue());
 
         if (THING_CATEGORY_DEVICE.equals(thing.getThingCategoryCode())
                 && valueF > THRESHOLD_BAD) {

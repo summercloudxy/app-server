@@ -2,7 +2,13 @@ package com.zgiot.app.server.module.filterpress;
 
 
 public class FilterPress {
-    private String code;
+    private final String code;
+    private FilterPressManager manager;
+
+    public FilterPress(String code, FilterPressManager manager) {
+        this.code = code;
+        this.manager = manager;
+    }
 
     /**
      * 入料开始时间，若不处于入料状态，值为空

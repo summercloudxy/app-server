@@ -1,8 +1,7 @@
-package com.zgiot.app.server.dataprocessor.impl;
+package com.zgiot.app.server.module.filterpress;
 
 import com.zgiot.app.server.dataprocessor.DataListener;
-import com.zgiot.app.server.module.filterpress.FilterPressManager;
-import com.zgiot.common.constants.FilterPressConstants;
+import com.zgiot.common.constants.FilterPressMetricConstants;
 import com.zgiot.common.pojo.DataModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +20,7 @@ public class FilterPressDataListener implements DataListener{
     private FilterPressManager filterPressManager;
 
     static {
-        Class<FilterPressConstants> clazz = FilterPressConstants.class;
+        Class<FilterPressMetricConstants> clazz = FilterPressMetricConstants.class;
         Field[] fields = clazz.getFields();
         try {
             for (Field field : fields) {

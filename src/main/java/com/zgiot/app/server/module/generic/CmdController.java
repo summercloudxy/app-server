@@ -1,4 +1,4 @@
-package com.zgiot.app.server.module.demo;
+package com.zgiot.app.server.module.generic;
 
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.common.constants.GlobalConstants;
