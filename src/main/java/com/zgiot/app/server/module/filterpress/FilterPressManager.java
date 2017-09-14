@@ -3,7 +3,7 @@ package com.zgiot.app.server.module.filterpress;
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.util.RequestIdUtil;
-import com.zgiot.common.constants.FilterPressConstants;
+import com.zgiot.common.constants.FilterPressMetricConstants;
 import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
@@ -31,7 +31,7 @@ public class FilterPressManager {
      * @param data
      */
     public void onDataSourceChange(DataModel data) {
-        if (FilterPressConstants.STAGE.equals(data.getMetricCode())) {
+        if (FilterPressMetricConstants.STAGE.equals(data.getMetricCode())) {
             processStage(data);
         }
     }
@@ -46,39 +46,39 @@ public class FilterPressManager {
         short stageValue = Short.valueOf(data.getValue());
         FilterPress filterPress = getFilterPress(thingCode);
         switch (stageValue) { //回调各阶段
-            case FilterPressConstants.STAGE_LOOSEN:
+            case FilterPressMetricConstants.STAGE_LOOSEN:
                 filterPress.onLoosen();
                 break;
-            case FilterPressConstants.STAGE_TAKEN:
+            case FilterPressMetricConstants.STAGE_TAKEN:
                 filterPress.onTaken();
                 break;
-            case FilterPressConstants.STAGE_PULL:
+            case FilterPressMetricConstants.STAGE_PULL:
                 filterPress.onPull();
                 break;
-            case FilterPressConstants.STAGE_PRESS:
+            case FilterPressMetricConstants.STAGE_PRESS:
                 filterPress.onPress();
                 break;
-            case FilterPressConstants.STAGE_FEEDING:
+            case FilterPressMetricConstants.STAGE_FEEDING:
                 filterPress.onFeed();
                 break;
-            case FilterPressConstants.STAGE_FEED_OVER:
+            case FilterPressMetricConstants.STAGE_FEED_OVER:
                 filterPress.onFeedOver();
                 break;
-            case FilterPressConstants.STAGE_BLOW:
+            case FilterPressMetricConstants.STAGE_BLOW:
                 filterPress.onBlow();
                 break;
-            case FilterPressConstants.STAGE_CYCLE:
+            case FilterPressMetricConstants.STAGE_CYCLE:
                 filterPress.onCycle();
                 break;
             default:
         }
         //calculate the state value and call the specific method of filter press
         short stateValue = calculateState(thingCode, stageValue);
-        if (!Objects.equals(dataService.getData(thingCode, FilterPressConstants.STATE).getValue(), String.valueOf(stateValue))) {//若值变化，保存并回调
+        if (!Objects.equals(dataService.getData(thingCode, FilterPressMetricConstants.STATE).getValue(), String.valueOf(stateValue))) {//若值变化，保存并回调
             DataModel stateModel = new DataModel();
             stateModel.setThingCode(thingCode);
             stateModel.setThingCategoryCode(data.getThingCategoryCode());
-            stateModel.setMetricCode(FilterPressConstants.STATE);
+            stateModel.setMetricCode(FilterPressMetricConstants.STATE);
             stateModel.setThingCategoryCode(data.getMetricCategoryCode());
             stateModel.setValue(String.valueOf(stateValue));
             stateModel.setDataTimeStamp(new Date());
@@ -103,7 +103,7 @@ public class FilterPressManager {
      */
     private short calculateState(String thingCode, short stageValue) {
         short state;
-        DataModelWrapper fault = dataService.getData(thingCode, FilterPressConstants.FAULT);
+        DataModelWrapper fault = dataService.getData(thingCode, FilterPressMetricConstants.FAULT);
         if (Boolean.valueOf(fault.getValue())) {
             state = GlobalConstants.STATE_FAULT;
         } else if (stageValue == 0) {
