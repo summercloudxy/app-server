@@ -36,7 +36,9 @@ dataengine:
   handshake-timeout: ${dataengine.handshake-timeout}
   connection-timeout: ${dataengine.connection-timeout}
 mybatis:
+  mapper-locations: classpath:mappings/**/*.xml
   configuration:
     map-underscore-to-camel-case: true
+
 
 
