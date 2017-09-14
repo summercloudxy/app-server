@@ -3,6 +3,7 @@ package com.zgiot.app.server.module.filterpress;
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.util.RequestIdUtil;
+import com.zgiot.common.constants.FilterPressConstants;
 import com.zgiot.common.constants.FilterPressMetricConstants;
 import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.pojo.DataModel;
@@ -46,28 +47,28 @@ public class FilterPressManager {
         short stageValue = Short.valueOf(data.getValue());
         FilterPress filterPress = getFilterPress(thingCode);
         switch (stageValue) { //回调各阶段
-            case FilterPressMetricConstants.STAGE_LOOSEN:
+            case FilterPressConstants.STAGE_LOOSEN:
                 filterPress.onLoosen();
                 break;
-            case FilterPressMetricConstants.STAGE_TAKEN:
+            case FilterPressConstants.STAGE_TAKEN:
                 filterPress.onTaken();
                 break;
-            case FilterPressMetricConstants.STAGE_PULL:
+            case FilterPressConstants.STAGE_PULL:
                 filterPress.onPull();
                 break;
-            case FilterPressMetricConstants.STAGE_PRESS:
+            case FilterPressConstants.STAGE_PRESS:
                 filterPress.onPress();
                 break;
-            case FilterPressMetricConstants.STAGE_FEEDING:
+            case FilterPressConstants.STAGE_FEEDING:
                 filterPress.onFeed();
                 break;
-            case FilterPressMetricConstants.STAGE_FEED_OVER:
+            case FilterPressConstants.STAGE_FEED_OVER:
                 filterPress.onFeedOver();
                 break;
-            case FilterPressMetricConstants.STAGE_BLOW:
+            case FilterPressConstants.STAGE_BLOW:
                 filterPress.onBlow();
                 break;
-            case FilterPressMetricConstants.STAGE_CYCLE:
+            case FilterPressConstants.STAGE_CYCLE:
                 filterPress.onCycle();
                 break;
             default:
