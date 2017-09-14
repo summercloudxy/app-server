@@ -2,6 +2,7 @@ package com.zgiot.app.server.dataprocessor;
 
 import com.alibaba.fastjson.JSON;
 import com.zgiot.common.pojo.DataModel;
+import com.zgiot.common.pojo.ThingModel;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.AsyncHttpClientConfig;
 import org.asynchttpclient.DefaultAsyncHttpClient;
@@ -115,6 +116,12 @@ public class WebSocketProcessor implements DataProcessor {
         try {
             DataModel dataModel = JSON.parseObject(message, DataModel.class);
             logger.trace("received: {}", dataModel);
+
+            // exclude ERR data
+            if (ThingModel.CATEGORY_ERROR.equals(dataModel.getThingCategoryCode())){
+                logger.warn("Got error data `{}`. ", dataModel.toString());
+                return ;
+            }
 
             // each data per thread, but listeners are sync for ensuring logic dependencies
             executor.submit(() -> {
