@@ -11,6 +11,7 @@ import com.zgiot.common.constants.FilterPressMetricConstants;
 import com.zgiot.common.pojo.DataModel;
 import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -44,7 +45,8 @@ public class FeedOverManager {
     private FilterPressMapper filterPressMapper;
     @Autowired
     private CmdControlServiceImpl cmdControlService;
-    private WebSocketDemo webSocketDemo = (uri, object) -> System.out.println("notice test" + uri);
+    @Autowired
+    private SimpMessagingTemplate simpMessagingTemplate;
 
     /**
      * 进料结束时操作
@@ -68,7 +70,7 @@ public class FeedOverManager {
                 dataModel.setValue(FEED_OVER_VALUE.toString());
                 cmdControlService.sendCmd(dataModel, RequestIdUtil.generateRequestId());
             } else {
-                webSocketDemo.notice(FEED_OVER_NOTICE_URI, filterPress);
+                simpMessagingTemplate.convertAndSend(FEED_OVER_NOTICE_URI, filterPress);
                 unConfirmedSet.add(thingCode);
             }
         }
@@ -167,7 +169,7 @@ public class FeedOverManager {
         dataModel.setThingCode(thingCode);
         dataModel.setValue(FEED_OVER_VALUE.toString());
         cmdControlService.sendCmd(dataModel, RequestIdUtil.generateRequestId());
-        webSocketDemo.notice(FEED_OVER_CONFIRMED_NOTICE_URI, thingCode);
+        simpMessagingTemplate.convertAndSend(FEED_OVER_CONFIRMED_NOTICE_URI, thingCode);
         unConfirmedSet.remove(thingCode);
     }
 
