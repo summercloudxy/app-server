@@ -1,4 +1,4 @@
-package com.zgiot.app.server.service.websocket;
+package com.zgiot.app.server.config.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
