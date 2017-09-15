@@ -1,6 +1,6 @@
 package com.zgiot.app.server.config;
 
-import com.zgiot.app.server.service.websocket.WebSocketHandshakeInterceptor;
+import com.zgiot.app.server.config.config.WebSocketHandshakeInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
