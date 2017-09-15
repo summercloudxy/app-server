@@ -2,11 +2,13 @@ package com.zgiot.app.server.module.filterpress.dao;
 
 import com.zgiot.app.server.module.filterpress.pojo.FeedOverParam;
 import com.zgiot.app.server.module.filterpress.pojo.FilterPressElectricity;
+import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by xiayun on 2017/9/12.
@@ -19,5 +21,6 @@ public interface FilterPressMapper {
 
     List<FeedOverParam> getFilterFeedOverParams();
 
-    List<FilterPressElectricity> getCurrentInfoInDuration(Date startTime, Date endTime);
+    @MapKey("deviceCode")
+    Map<String, FilterPressElectricity> getCurrentInfoInDuration(Date startTime, Date endTime);
 }

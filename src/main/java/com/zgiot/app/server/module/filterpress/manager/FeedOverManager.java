@@ -227,7 +227,7 @@ public class FeedOverManager {
      * 
      * @return
      */
-    public List<FilterPressElectricity> getCurrentInfoInDuration() {
+    public Map<String, FilterPressElectricity> getCurrentInfoInDuration() {
         Date endTime = DateUtils.truncate(new Date(), Calendar.HOUR_OF_DAY);
         Date startTime = DateUtils.addDays(endTime, CURRENT_COUNT_DURATION);
         return filterPressMapper.getCurrentInfoInDuration(startTime, endTime);
