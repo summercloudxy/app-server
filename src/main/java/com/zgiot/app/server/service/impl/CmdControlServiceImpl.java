@@ -1,9 +1,11 @@
 package com.zgiot.app.server.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.zgiot.app.server.exception.CmdPulseFirstSendException;
+import com.zgiot.app.server.exception.CmdPulseSecondSendException;
 import com.zgiot.app.server.exception.CmdSendException;
 import com.zgiot.app.server.service.CmdControlService;
-import com.zgiot.app.server.util.RequestIdUtil;
+import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.restcontroller.ServerResponse;
 import org.apache.commons.lang.StringUtils;
@@ -15,10 +17,17 @@ import org.springframework.web.client.RestClientException;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 public class CmdControlServiceImpl implements CmdControlService {
     private static final Logger logger = LoggerFactory.getLogger(CmdControlService.class);
+    private static final int RETRY_NUMBER = 5;
+    private static final int RETURN_CODE_SUCCESS = 1;
+    private static final int SEND_DELAY_TIME = 0;
+    private static final int SEND_PERIOD = 1000;
     @Autowired
     private DataEngineTemplate dataEngineTemplate;
 
@@ -41,6 +50,45 @@ public class CmdControlServiceImpl implements CmdControlService {
             throw new CmdSendException(e);
         }
         return Integer.valueOf(response.getMessage());
+    }
+
+    public int sendPulseCmd(DataModel dataModel, String requestId) {
+        String value = dataModel.getValue();
+        Boolean boolValue;
+        if ("true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value)) {
+            boolValue = Boolean.valueOf(value);
+        } else {
+            throw new CmdSendException("data type error", SysException.EC_UNKOWN);
+        }
+        try {
+            sendCmd(dataModel, requestId);
+        } catch (Exception e) {
+            throw new CmdPulseFirstSendException("failed send first pulse", SysException.EC_UNKOWN);
+        }
+        dataModel.setValue(Boolean.toString(!boolValue));
+        Timer timer = new Timer();
+        AtomicBoolean sendState = new AtomicBoolean(false);
+        timer.schedule(new TimerTask() {
+            private int count = 0;
+            @Override
+            public void run() {
+                count++;
+                if (count == RETRY_NUMBER) {
+                    cancel();
+                }
+                try {
+                    sendCmd(Collections.singletonList(dataModel), requestId);
+                    sendState.set(true);
+                    cancel();
+                } catch (Exception e) {
+                    logger.error("failed send second pulse,retry number: {}", count);
+                }
+            }
+        }, SEND_DELAY_TIME, SEND_PERIOD);
+        if (!sendState.get()) {
+            throw new CmdPulseSecondSendException("failed send second pulse", SysException.EC_UNKOWN);
+        }
+        return RETURN_CODE_SUCCESS;
     }
 
 }
