@@ -285,14 +285,9 @@ INSERT INTO `tb_metrictype` VALUES ('150', '三队选择', 'T3_CHOOSE');
 -- ----------------------------
 -- Records of tb_thing
 -- ----------------------------
-INSERT INTO `tb_thing` VALUES ('1', NULL, '701', 'DVC', '煤带输送机', 'TRD', NULL, NULL);
-INSERT INTO `tb_thing` VALUES ('2', '1', '701.YB.PD-1', 'DVC', '皮带秤', 'PDC', NULL, NULL);
-INSERT INTO `tb_thing` VALUES ('3', NULL, '1301', 'DVC', '2#皮带机', 'PSJ', NULL, NULL);
-INSERT INTO `tb_thing` VALUES ('4', NULL, 'XG.XG.1303', 'DVC', '测试设备', 'D', NULL, NULL);
-INSERT INTO `tb_thing` VALUES ('5', NULL, 'CW_1.CW_1.1111', 'DVC', 'asdfasdf', 'D', NULL, NULL);
-INSERT INTO `tb_thing` VALUES ('6', NULL, '2492', 'DVC', '压滤机', 'D', NULL, NULL);
-INSERT INTO `tb_thing` VALUES ('7', NULL, '2493', 'DVC', '压滤机', 'D', NULL, NULL);
-INSERT INTO `tb_thing` VALUES ('8', NULL, '2494', 'DVC', '压滤机', 'D', NULL, NULL);
-INSERT INTO `tb_thing` VALUES ('9', NULL, '2495', 'DVC', '压滤机', 'D', NULL, NULL);
-INSERT INTO `tb_thing` VALUES ('10', NULL, '2496', 'DVC', '压滤机', 'D', NULL, NULL);
-INSERT INTO `tb_thing` VALUES ('11', NULL, '2496A', 'DVC', '压滤机', 'D', NULL, NULL);
+INSERT INTO `tb_thing` VALUES ('6', NULL, '2492', 'DVC', '压滤机', NULL, NULL, NULL);
+INSERT INTO `tb_thing` VALUES ('7', NULL, '2493', 'DVC', '压滤机', NULL, NULL, NULL);
+INSERT INTO `tb_thing` VALUES ('8', NULL, '2494', 'DVC', '压滤机', NULL, NULL, NULL);
+INSERT INTO `tb_thing` VALUES ('9', NULL, '2495', 'DVC', '压滤机', NULL, NULL, NULL);
+INSERT INTO `tb_thing` VALUES ('10', NULL, '2496', 'DVC', '压滤机', NULL, NULL, NULL);
+INSERT INTO `tb_thing` VALUES ('11', NULL, '2496A', 'DVC', '压滤机', NULL, NULL, NULL);

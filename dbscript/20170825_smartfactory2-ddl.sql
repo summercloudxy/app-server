@@ -22,8 +22,8 @@ DROP TABLE IF EXISTS `rel_thing_metric_label`;
 
 CREATE TABLE `rel_thing_metric_label` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `thing_code` varchar(8) DEFAULT NULL,
-  `metric_code` varchar(8) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `thing_code` varchar(10) DEFAULT NULL,
+  `metric_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
   `label_path` varchar(64) DEFAULT NULL,
   `enabled` tinyint(4) DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -48,10 +48,10 @@ CREATE TABLE `tb_metric` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `metric_category_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
   `metric_name` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
-  `metric_code` varchar(3) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
-  `metric_type1_code` varchar(3) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '维度1的叶子节点',
-  `metric_type2_code` varchar(3) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '维度2的叶子节点',
-  `metric_type3_code` varchar(3) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '维度3的叶子节点',
+  `metric_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `metric_type1_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '维度1的叶子节点',
+  `metric_type2_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '维度2的叶子节点',
+  `metric_type3_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '维度3的叶子节点',
   `value_type` varchar(5) DEFAULT NULL,
   `value_unit` varchar(5) DEFAULT NULL,
   PRIMARY KEY (`id`),
