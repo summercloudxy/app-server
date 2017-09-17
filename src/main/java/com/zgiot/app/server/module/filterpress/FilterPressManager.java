@@ -8,14 +8,15 @@ import com.zgiot.common.constants.FilterPressMetricConstants;
 import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
+import net.bytebuddy.asm.Advice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class FilterPressManager {
@@ -24,7 +25,11 @@ public class FilterPressManager {
     @Autowired
     private CmdControlService cmdControlService;
 
+    private static final int INIT_CAPACITY = 6;
+
     private Map<String, FilterPress> manager = new ConcurrentHashMap<>();
+
+    private UnloadManager unloadManager = new UnloadManager();
 
     /**
      * call back when data changed
@@ -32,6 +37,8 @@ public class FilterPressManager {
      * @param data
      */
     public void onDataSourceChange(DataModel data) {
+        FilterPress filterPress = manager.get(data.getThingCode());
+        filterPress.onDataSourceChange(data.getMetricCode(), data.getValue());
         if (FilterPressMetricConstants.STAGE.equals(data.getMetricCode())) {
             processStage(data);
         }
@@ -143,4 +150,89 @@ public class FilterPressManager {
         data.setValue(value.toString());
         cmdControlService.sendCmd(data, RequestIdUtil.generateRequestId());
     }
+
+    void enqueueUnload(FilterPress filterPress) {
+        unloadManager.enqueue(filterPress);
+    }
+
+    void unloadNext() {
+        unloadManager.unloadNextIfPossible();
+    }
+
+    public int getMaxUnloadParallel() {
+        return unloadManager.maxUnloadParallel;
+    }
+
+    public void setMaxUnloadParallel(int maxUnloadParallel) {
+        this.unloadManager.maxUnloadParallel = maxUnloadParallel;
+    }
+
+
+    private class UnloadManager {
+        private AtomicInteger unloading = new AtomicInteger(0);
+        private volatile int maxUnloadParallel = 1;
+        private BlockingQueue<FilterPress> queue = new PriorityBlockingQueue<>(INIT_CAPACITY, (f1, f2) -> {
+            int result;
+            if (f1.getOnCycleTime() < f2.getOnCycleTime()) {
+                result = -1;
+            } else if (f1.getOnCycleTime() > f2.getOnCycleTime()) {
+                result = 1;
+            } else {
+                result = 0;
+            }
+            return result;
+        });
+
+        private Map<String, Integer> queuePosition = new ConcurrentHashMap<>();
+
+
+        /**
+         * 加入卸料排队
+         *
+         * @param filterPress
+         */
+        void enqueue(FilterPress filterPress) {
+            queuePosition.put(filterPress.getCode(), queue.size());
+            queue.add(filterPress);
+            unloadNextIfPossible();
+        }
+
+        /**
+         * 若存在可以卸料的压滤机，则按照最大同时卸料数量进行卸料调度
+         */
+        private void unloadNextIfPossible() {
+            for (int i = unloading.get(); i <= maxUnloadParallel; i++) {
+                FilterPress candidate = queue.poll();
+                if (candidate == null) {
+                    break;
+                }
+                doUnload(candidate);
+            }
+        }
+
+        /**
+         * 执行卸料
+         *
+         * @param filterPress
+         */
+        private void doUnload(FilterPress filterPress) {
+            filterPress.startUnload();
+            queuePosition.remove(filterPress.getCode());
+            countDownPosition();
+            DataModel cmd = new DataModel();
+            cmd.setThingCode(filterPress.getCode());
+            cmd.setMetricCode(FilterPressMetricConstants.LOOSE);
+            cmd.setValue(Boolean.TRUE.toString());
+            cmdControlService.sendCmd(cmd, RequestIdUtil.generateRequestId());
+        }
+
+        /**
+         * 卸料次序递减
+         */
+        private void countDownPosition() {
+            queuePosition.forEach((code, seq) -> queuePosition.replace(code, seq - 1));
+        }
+
+    }
 }
+
