@@ -2,16 +2,16 @@ package com.zgiot.app.server.module.filterpress.controller;
 
 import com.zgiot.app.server.module.filterpress.manager.FeedOverManager;
 import com.zgiot.app.server.module.filterpress.pojo.FeedOverWholeParam;
-import com.zgiot.app.server.module.filterpress.pojo.FilterPressElectricity;
+import com.zgiot.common.restcontroller.ServerResponse;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.util.*;
 
 /**
  * Created by xiayun on 2017/9/12.
@@ -43,12 +43,16 @@ public class FilterPressController {
     @ApiOperation("获取进料设置页参数值")
     @RequestMapping(value = "api/filterPress/feedOver/parameter")
     @ResponseBody
-    public FeedOverWholeParam getFilterPressParameter() {
+    public ResponseEntity<String> getFilterPressParameter() {
+
         FeedOverWholeParam feedOverWholeParam = new FeedOverWholeParam();
         feedOverWholeParam.setIntelligentManuState(feedOverManager.getIntelligentManuStateMap());
         feedOverWholeParam.setAutoManuConfirmState(feedOverManager.getAutoManuConfirmState());
         feedOverWholeParam.setElectricityMap(feedOverManager.getCurrentInfoInDuration());
-        return feedOverWholeParam;
+
+        return new ResponseEntity<>(
+                ServerResponse.buildOkJson(feedOverWholeParam)
+                , HttpStatus.OK);
     }
 
 
