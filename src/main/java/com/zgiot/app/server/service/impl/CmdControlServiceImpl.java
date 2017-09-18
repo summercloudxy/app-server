@@ -24,9 +24,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Service
 public class CmdControlServiceImpl implements CmdControlService {
     private static final Logger logger = LoggerFactory.getLogger(CmdControlService.class);
-    private static final int RETRY_NUMBER = 5;
+    private static final int DEFAULT_RETRY_COUNT = 5;
     private static final int RETURN_CODE_SUCCESS = 1;
-    private static final int SEND_DELAY_TIME = 0;
+    private static final int DEFAULT_SEND_DELAY_TIME = 0;
     private static final int SEND_PERIOD = 1000;
     @Autowired
     private DataEngineTemplate dataEngineTemplate;
@@ -52,7 +52,11 @@ public class CmdControlServiceImpl implements CmdControlService {
         return Integer.valueOf(response.getMessage());
     }
 
-    public int sendPulseCmd(DataModel dataModel, String requestId) {
+    public int sendPulseCmd(DataModel dataModel, Integer delayTime, Integer retryCount, String requestId) {
+        final Integer retryNumber = retryCount == null ? DEFAULT_RETRY_COUNT : retryCount;
+        if (delayTime == null) {
+            delayTime = DEFAULT_SEND_DELAY_TIME;
+        }
         String value = dataModel.getValue();
         Boolean boolValue;
         if (Boolean.TRUE.toString().equalsIgnoreCase(value) || Boolean.FALSE.toString().equalsIgnoreCase(value)) {
@@ -70,10 +74,11 @@ public class CmdControlServiceImpl implements CmdControlService {
         AtomicBoolean sendState = new AtomicBoolean(false);
         timer.schedule(new TimerTask() {
             private int count = 0;
+
             @Override
             public void run() {
                 count++;
-                if (count == RETRY_NUMBER) {
+                if (count == retryNumber) {
                     cancel();
                 }
                 try {
@@ -84,7 +89,7 @@ public class CmdControlServiceImpl implements CmdControlService {
                     logger.error("failed send second pulse,retry number: {}", count);
                 }
             }
-        }, SEND_DELAY_TIME, SEND_PERIOD);
+        }, delayTime, SEND_PERIOD);
         if (!sendState.get()) {
             throw new CmdPulseSecondSendException("failed send second pulse", SysException.EC_UNKOWN);
         }
