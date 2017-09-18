@@ -1,9 +1,6 @@
 package com.zgiot.app.server.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.zgiot.app.server.exception.CmdPulseFirstSendException;
-import com.zgiot.app.server.exception.CmdPulseSecondSendException;
-import com.zgiot.app.server.exception.CmdSendException;
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.DataModel;
@@ -40,8 +37,6 @@ public class CmdControlServiceImpl implements CmdControlService {
     public int sendCmd(List<DataModel> dataModelList, String requestId) {
         if (StringUtils.isEmpty(requestId)) {
             return SysException.EC_CMD_FAILED;
-            // throw new CmdSendException(new NullPointerException("request id cannot be
-            // null"));
         }
         String data = JSON.toJSONString(dataModelList);
         ServerResponse response;
@@ -49,7 +44,6 @@ public class CmdControlServiceImpl implements CmdControlService {
             response = dataEngineTemplate.postForObject(DataEngineTemplate.CMD_URI, data, ServerResponse.class);
             logger.trace("received:{}", response);
         } catch (RestClientException e) {
-            // throw new CmdSendException(e);
             return SysException.EC_CMD_FAILED;
         }
         return Integer.valueOf(response.getMessage());
@@ -66,17 +60,10 @@ public class CmdControlServiceImpl implements CmdControlService {
             boolValue = Boolean.valueOf(value);
         } else {
             return SysException.EC_CMD_FAILED;
-            // throw new CmdSendException("data type error", SysException.EC_UNKOWN);
         }
         if (sendCmd(dataModel, requestId) < SysException.EC_SUCCESS) {
             return SysException.EC_CMD_PULSE_FIRST_FAILED;
         }
-        // try {
-        // sendCmd(dataModel, requestId);
-        // } catch (Exception e) {
-        // throw new CmdPulseFirstSendException("failed send first pulse",
-        // SysException.EC_UNKOWN);
-        // }
         dataModel.setValue(Boolean.toString(!boolValue));
         Timer timer = new Timer();
         AtomicBoolean sendState = new AtomicBoolean(false);
@@ -93,19 +80,10 @@ public class CmdControlServiceImpl implements CmdControlService {
                     sendState.set(true);
                     cancel();
                 }
-                // try {
-                // sendCmd(Collections.singletonList(dataModel), requestId);
-                // sendState.set(true);
-                // cancel();
-                // } catch (Exception e) {
-                // logger.error("failed send second pulse,retry number: {}", count);
-                // }
             }
         }, delayTime, SEND_PERIOD);
         if (!sendState.get()) {
             return SysException.EC_CMD_PULSE_SECOND_FAILED;
-            // throw new CmdPulseSecondSendException("failed send second pulse",
-            // SysException.EC_UNKOWN);
         }
         return RETURN_CODE_SUCCESS;
     }
