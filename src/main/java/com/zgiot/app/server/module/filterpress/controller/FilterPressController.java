@@ -1,6 +1,7 @@
 package com.zgiot.app.server.module.filterpress.controller;
 
 import com.zgiot.app.server.module.filterpress.manager.FeedOverManager;
+import com.zgiot.app.server.module.filterpress.pojo.FeedOverWholeParam;
 import com.zgiot.app.server.module.filterpress.pojo.FilterPressElectricity;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,20 +43,13 @@ public class FilterPressController {
     @ApiOperation("获取进料设置页参数值")
     @RequestMapping(value = "api/filterPress/feedOver/parameter")
     @ResponseBody
-    public Map<String, Integer> getFilterPressParameter() {
-        Map<String, Integer> resultMap = new HashMap<>();
-        Map<String, Integer> intelligentManuStateMap = feedOverManager.getIntelligentManuStateMap();
-        Integer autoManuState = feedOverManager.getAutoManuConfirmState();
-        resultMap.putAll(intelligentManuStateMap);
-        resultMap.put(RECONFIRM_CODE, autoManuState);
-        return resultMap;
+    public FeedOverWholeParam getFilterPressParameter() {
+        FeedOverWholeParam feedOverWholeParam = new FeedOverWholeParam();
+        feedOverWholeParam.setIntelligentManuState(feedOverManager.getIntelligentManuStateMap());
+        feedOverWholeParam.setAutoManuConfirmState(feedOverManager.getAutoManuConfirmState());
+        feedOverWholeParam.setElectricityMap(feedOverManager.getCurrentInfoInDuration());
+        return feedOverWholeParam;
     }
 
-    @ApiOperation("获取压滤电流值")
-    @RequestMapping(value = "/api/filterPress/getFilterPressCurrent", method = RequestMethod.GET)
-    @ResponseBody
-    public List<FilterPressElectricity> getFilterPressCurrent() {
-        return feedOverManager.getCurrentInfoInDuration();
-    }
 
 }

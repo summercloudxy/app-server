@@ -18,4 +18,14 @@ public interface CmdControlService {
      * @param dataModelList
      */
     int sendCmd(List<DataModel> dataModelList, String requestId);
+
+    /**
+     * 下发脉冲指令
+     * @param dataModel
+     * @param retryPeriod  重试间隔
+     * @param retryCount  第二个信号失败时重试次数
+     * @param requestId
+     * @return
+     */
+    int sendPulseCmd(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId);
 }
