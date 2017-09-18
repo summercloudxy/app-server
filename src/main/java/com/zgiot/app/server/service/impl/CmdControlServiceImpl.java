@@ -39,7 +39,9 @@ public class CmdControlServiceImpl implements CmdControlService {
     @Override
     public int sendCmd(List<DataModel> dataModelList, String requestId) {
         if (StringUtils.isEmpty(requestId)) {
-            throw new CmdSendException(new NullPointerException("request id cannot be null"));
+            return SysException.EC_CMD_FAILED;
+            // throw new CmdSendException(new NullPointerException("request id cannot be
+            // null"));
         }
         String data = JSON.toJSONString(dataModelList);
         ServerResponse response;
@@ -47,13 +49,14 @@ public class CmdControlServiceImpl implements CmdControlService {
             response = dataEngineTemplate.postForObject(DataEngineTemplate.CMD_URI, data, ServerResponse.class);
             logger.trace("received:{}", response);
         } catch (RestClientException e) {
-            throw new CmdSendException(e);
+            // throw new CmdSendException(e);
+            return SysException.EC_CMD_FAILED;
         }
         return Integer.valueOf(response.getMessage());
     }
 
     public int sendPulseCmd(DataModel dataModel, Integer delayTime, Integer retryCount, String requestId) {
-        final Integer retryNumber = retryCount == null ? DEFAULT_RETRY_COUNT : retryCount;
+        final Integer realRetryCount = retryCount == null ? DEFAULT_RETRY_COUNT : retryCount;
         if (delayTime == null) {
             delayTime = DEFAULT_SEND_DELAY_TIME;
         }
@@ -62,13 +65,18 @@ public class CmdControlServiceImpl implements CmdControlService {
         if (Boolean.TRUE.toString().equalsIgnoreCase(value) || Boolean.FALSE.toString().equalsIgnoreCase(value)) {
             boolValue = Boolean.valueOf(value);
         } else {
-            throw new CmdSendException("data type error", SysException.EC_UNKOWN);
+            return SysException.EC_CMD_FAILED;
+            // throw new CmdSendException("data type error", SysException.EC_UNKOWN);
         }
-        try {
-            sendCmd(dataModel, requestId);
-        } catch (Exception e) {
-            throw new CmdPulseFirstSendException("failed send first pulse", SysException.EC_UNKOWN);
+        if (sendCmd(dataModel, requestId) < SysException.EC_SUCCESS) {
+            return SysException.EC_CMD_PULSE_FIRST_FAILED;
         }
+        // try {
+        // sendCmd(dataModel, requestId);
+        // } catch (Exception e) {
+        // throw new CmdPulseFirstSendException("failed send first pulse",
+        // SysException.EC_UNKOWN);
+        // }
         dataModel.setValue(Boolean.toString(!boolValue));
         Timer timer = new Timer();
         AtomicBoolean sendState = new AtomicBoolean(false);
@@ -78,20 +86,26 @@ public class CmdControlServiceImpl implements CmdControlService {
             @Override
             public void run() {
                 count++;
-                if (count == retryNumber) {
+                if (count == realRetryCount) {
                     cancel();
                 }
-                try {
-                    sendCmd(Collections.singletonList(dataModel), requestId);
+                if (sendCmd(Collections.singletonList(dataModel), requestId) >= SysException.EC_SUCCESS) {
                     sendState.set(true);
                     cancel();
-                } catch (Exception e) {
-                    logger.error("failed send second pulse,retry number: {}", count);
                 }
+                // try {
+                // sendCmd(Collections.singletonList(dataModel), requestId);
+                // sendState.set(true);
+                // cancel();
+                // } catch (Exception e) {
+                // logger.error("failed send second pulse,retry number: {}", count);
+                // }
             }
         }, delayTime, SEND_PERIOD);
         if (!sendState.get()) {
-            throw new CmdPulseSecondSendException("failed send second pulse", SysException.EC_UNKOWN);
+            return SysException.EC_CMD_PULSE_SECOND_FAILED;
+            // throw new CmdPulseSecondSendException("failed send second pulse",
+            // SysException.EC_UNKOWN);
         }
         return RETURN_CODE_SUCCESS;
     }
