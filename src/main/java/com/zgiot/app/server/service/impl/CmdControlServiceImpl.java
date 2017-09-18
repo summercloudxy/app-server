@@ -55,7 +55,7 @@ public class CmdControlServiceImpl implements CmdControlService {
     public int sendPulseCmd(DataModel dataModel, String requestId) {
         String value = dataModel.getValue();
         Boolean boolValue;
-        if ("true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value)) {
+        if (Boolean.TRUE.toString().equalsIgnoreCase(value) || Boolean.FALSE.toString().equalsIgnoreCase(value)) {
             boolValue = Boolean.valueOf(value);
         } else {
             throw new CmdSendException("data type error", SysException.EC_UNKOWN);
