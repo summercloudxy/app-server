@@ -21,9 +21,9 @@ public class CmdController {
     }
 
     @PostMapping("/pulse")
-    public Integer sendPulseCmd(@RequestParam DataModel dataModel, @RequestParam(required = false) Integer delayTime,
+    public Integer sendPulseCmd(@RequestParam DataModel dataModel, @RequestParam(required = false) Integer retryPeriod,
             @RequestParam(required = false) Integer retryCount, HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
-        return cmdControlService.sendPulseCmd(dataModel, delayTime, retryCount, requestId);
+        return cmdControlService.sendPulseCmd(dataModel, retryPeriod, retryCount, requestId);
     }
 }

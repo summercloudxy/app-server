@@ -14,9 +14,6 @@ import org.springframework.web.client.RestClientException;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 public class CmdControlServiceImpl implements CmdControlService {
@@ -35,8 +32,9 @@ public class CmdControlServiceImpl implements CmdControlService {
 
     @Override
     public int sendCmd(List<DataModel> dataModelList, String requestId) {
+
         if (StringUtils.isEmpty(requestId)) {
-            return SysException.EC_CMD_FAILED;
+            throw new SysException("request id cannot be null", SysException.EC_CMD_FAILED);
         }
         String data = JSON.toJSONString(dataModelList);
         ServerResponse response;
@@ -44,46 +42,46 @@ public class CmdControlServiceImpl implements CmdControlService {
             response = dataEngineTemplate.postForObject(DataEngineTemplate.CMD_URI, data, ServerResponse.class);
             logger.trace("received:{}", response);
         } catch (RestClientException e) {
-            return SysException.EC_CMD_FAILED;
+            throw new SysException(e.getMessage(), SysException.EC_CMD_FAILED);
         }
         return Integer.valueOf(response.getMessage());
     }
 
-    public int sendPulseCmd(DataModel dataModel, Integer delayTime, Integer retryCount, String requestId) {
+    public int sendPulseCmd(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId) {
         final Integer realRetryCount = retryCount == null ? DEFAULT_RETRY_COUNT : retryCount;
-        if (delayTime == null) {
-            delayTime = DEFAULT_SEND_DELAY_TIME;
+        if (retryPeriod == null) {
+            retryPeriod = SEND_PERIOD;
         }
         String value = dataModel.getValue();
         Boolean boolValue;
         if (Boolean.TRUE.toString().equalsIgnoreCase(value) || Boolean.FALSE.toString().equalsIgnoreCase(value)) {
             boolValue = Boolean.valueOf(value);
         } else {
-            return SysException.EC_CMD_FAILED;
+            throw new SysException("data type error", SysException.EC_CMD_FAILED);
         }
-        if (sendCmd(dataModel, requestId) < SysException.EC_SUCCESS) {
-            return SysException.EC_CMD_PULSE_FIRST_FAILED;
+        try {
+            sendCmd(dataModel, requestId);
+        } catch (Exception e) {
+            throw new SysException("failed send first pulse", SysException.EC_CMD_PULSE_FIRST_FAILED);
         }
         dataModel.setValue(Boolean.toString(!boolValue));
-        Timer timer = new Timer();
-        AtomicBoolean sendState = new AtomicBoolean(false);
-        timer.schedule(new TimerTask() {
-            private int count = 0;
-
-            @Override
-            public void run() {
-                count++;
-                if (count == realRetryCount) {
-                    cancel();
-                }
-                if (sendCmd(Collections.singletonList(dataModel), requestId) >= SysException.EC_SUCCESS) {
-                    sendState.set(true);
-                    cancel();
-                }
+        Boolean state = false;
+        for (int i = 1; i <= realRetryCount; i++) {
+            try {
+                sendCmd(Collections.singletonList(dataModel), requestId);
+                state = true;
+                break;
+            } catch (Exception e) {
+                logger.error("failed send second pulse,retry number: {}", i);
             }
-        }, delayTime, SEND_PERIOD);
-        if (!sendState.get()) {
-            return SysException.EC_CMD_PULSE_SECOND_FAILED;
+            try{
+                Thread.sleep(retryPeriod);
+            } catch (InterruptedException e){
+                logger.error("thread is interrupted");
+            }
+        }
+        if (!state) {
+            throw new SysException("failed send second pulse", SysException.EC_CMD_PULSE_SECOND_FAILED);
         }
         return RETURN_CODE_SUCCESS;
     }

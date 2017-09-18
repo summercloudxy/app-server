@@ -22,10 +22,10 @@ public interface CmdControlService {
     /**
      * 下发脉冲指令
      * @param dataModel
-     * @param delayTime  发送第一个信号与第二个信号的间隔
+     * @param retryPeriod  重试间隔
      * @param retryCount  第二个信号失败时重试次数
      * @param requestId
      * @return
      */
-    int sendPulseCmd(DataModel dataModel, Integer delayTime, Integer retryCount, String requestId);
+    int sendPulseCmd(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId);
 }
