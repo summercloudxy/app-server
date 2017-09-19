@@ -6,23 +6,23 @@ import java.util.Map;
  * Created by xiayun on 2017/9/15.
  */
 public class FeedOverWholeParam {
-    private Map<String, Integer> intelligentManuState;
-    private Integer autoManuConfirmState;
+    private Map<String, Boolean> intelligentManuState;
+    private Boolean autoManuConfirmState;
     private Map<String, FilterPressElectricity> electricityMap;
 
-    public Map<String, Integer> getIntelligentManuState() {
+    public Map<String, Boolean> getIntelligentManuState() {
         return intelligentManuState;
     }
 
-    public void setIntelligentManuState(Map<String, Integer> intelligentManuState) {
+    public void setIntelligentManuState(Map<String, Boolean> intelligentManuState) {
         this.intelligentManuState = intelligentManuState;
     }
 
-    public Integer getAutoManuConfirmState() {
+    public Boolean getAutoManuConfirmState() {
         return autoManuConfirmState;
     }
 
-    public void setAutoManuConfirmState(Integer autoManuConfirmState) {
+    public void setAutoManuConfirmState(Boolean autoManuConfirmState) {
         this.autoManuConfirmState = autoManuConfirmState;
     }
 
