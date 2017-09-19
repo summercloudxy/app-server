@@ -114,6 +114,7 @@ public class FilterPress {
 
     public void onFeed() {
         logger.trace("{} on feed", code);
+        feedStartTime = System.currentTimeMillis();
     }
 
     public void onFeedOver() {

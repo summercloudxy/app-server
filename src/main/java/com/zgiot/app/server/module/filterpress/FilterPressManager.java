@@ -218,7 +218,7 @@ public class FilterPressManager {
     }
 
     void unloadNext() {
-        unloadManager.unloadNextIfPossible();
+        unloadManager.unloadNext();
     }
 
     public int getMaxUnloadParallel() {
@@ -399,16 +399,22 @@ public class FilterPressManager {
             unloadNextIfPossible();
         }
 
+        private void unloadNext() {
+            unloading.getAndDecrement();
+            unloadNextIfPossible();
+        }
+
         /**
          * 若存在可以卸料的压滤机，则按照最大同时卸料数量进行卸料调度
          */
         private void unloadNextIfPossible() {
-            for (int i = unloading.get(); i <= maxUnloadParallel; i++) {
+            for (int i = unloading.get(); i < maxUnloadParallel; i++) {
                 FilterPress candidate = queue.poll();
                 if (candidate == null) {
                     break;
                 }
                 execUnload(candidate);
+                unloading.getAndIncrement();
             }
         }
 
