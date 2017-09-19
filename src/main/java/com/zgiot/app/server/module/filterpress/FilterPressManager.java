@@ -149,17 +149,14 @@ public class FilterPressManager {
         }
         // calculate the state value and call the specific method of filter press
         short stateValue = calculateState(thingCode, stageValue);
-        if (!Objects.equals(dataService.getData(thingCode, FilterPressMetricConstants.STATE).getValue(),
+        DataModelWrapper stateData = dataService.getData(thingCode, FilterPressMetricConstants.STATE);
+        if (stateData == null) {
+            saveState(data, thingCode, stateValue);
+            return;
+        }
+        if (!Objects.equals(stateData.getValue(),
                 String.valueOf(stateValue))) {// 若值变化，保存并回调
-            DataModel stateModel = new DataModel();
-            stateModel.setThingCode(thingCode);
-            stateModel.setThingCategoryCode(data.getThingCategoryCode());
-            stateModel.setMetricCode(FilterPressMetricConstants.STATE);
-            stateModel.setThingCategoryCode(data.getMetricCategoryCode());
-            stateModel.setValue(String.valueOf(stateValue));
-            stateModel.setDataTimeStamp(new Date());
-            dataService.updateCache(stateModel);
-            dataService.persist2NoSQL(stateModel);
+            saveState(data, thingCode, stateValue);
             if (stateValue == GlobalConstants.STATE_STOPPED) {
                 filterPress.onStop();
             } else if (stateValue == GlobalConstants.STATE_RUNNING) {
@@ -168,6 +165,18 @@ public class FilterPressManager {
                 filterPress.onFault();
             }
         }
+    }
+
+    private void saveState(DataModel data, String thingCode, short stateValue) {
+        DataModel stateModel = new DataModel();
+        stateModel.setThingCode(thingCode);
+        stateModel.setThingCategoryCode(data.getThingCategoryCode());
+        stateModel.setMetricCode(FilterPressMetricConstants.STATE);
+        stateModel.setThingCategoryCode(data.getMetricCategoryCode());
+        stateModel.setValue(String.valueOf(stateValue));
+        stateModel.setDataTimeStamp(new Date());
+        dataService.updateCache(stateModel);
+        dataService.persist2NoSQL(stateModel);
     }
 
     /**
