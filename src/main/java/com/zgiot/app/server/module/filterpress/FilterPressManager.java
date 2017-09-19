@@ -420,10 +420,10 @@ public class FilterPressManager {
 
         private void execUnload(FilterPress filterPress) {
             if (!filterPress.isUnloadConfirmNeed()) {
-                logger.debug("{} unload, send cmd; confirmNeed: {}", filterPress, filterPress.isFeedConfirmNeed());
+                logger.debug("{} unload, send cmd; confirmNeed: {}", filterPress, filterPress.isUnloadConfirmNeed());
                 doUnload(filterPress);
             } else {
-                logger.debug("{} unload, notifying user; confirmNeed: {}", filterPress, filterPress.isFeedConfirmNeed());
+                logger.debug("{} unload, notifying user; confirmNeed: {}", filterPress, filterPress.isUnloadConfirmNeed());
                 messagingTemplate.convertAndSend(UNLOAD_NOTICE_URI, filterPress.getCode());
                 unConfirmedUnload.add(filterPress.getCode());
             }

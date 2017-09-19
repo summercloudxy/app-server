@@ -130,7 +130,7 @@ public class FilterPress {
         this.onCycleTime = System.currentTimeMillis();
         if (unloadIntelligent) {
             manager.enqueueUnload(this);
-            logger.debug("{} enqueue unload, intelligent:{}", code, unloadConfirmNeed);
+            logger.debug("{} enqueue unload, intelligent:{}", code, unloadIntelligent);
         }
     }
 
