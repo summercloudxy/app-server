@@ -280,7 +280,7 @@ public class FilterPressManager {
             cmd.setThingCode(filterPress.getCode());
             cmd.setMetricCode(FilterPressMetricConstants.LOOSE);
             cmd.setValue(Boolean.TRUE.toString());
-            cmdControlService.sendCmd(cmd, RequestIdUtil.generateRequestId());
+            cmdControlService.sendPulseCmd(cmd, null, null, RequestIdUtil.generateRequestId());
         }
 
         /**
