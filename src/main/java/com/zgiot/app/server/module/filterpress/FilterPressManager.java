@@ -335,6 +335,20 @@ public class FilterPressManager {
         return filterPressMapper.getCurrentInfoInDuration(startTime, endTime);
     }
 
+//     @Scheduled(cron="cnmt.FilterPressDeviceManager.clear")
+//     /**
+//     * 手动弹出模式下，超过一段时间不操作后自动进行确认
+//     */
+//     public void clear() {
+//     for (String thingCode : unconfirmedFeed) {
+//     if (System.currentTimeMillis() -
+//             manager.get(thingCode).getFeedOverTime() > cacheTimeout) {
+//     messagingTemplate.convertAndSend(FEED_OVER_CONFIRMED_NOTICE_URI, thingCode);
+//         unconfirmedFeed.remove(thingCode);
+//     }
+//     }
+//     }
+
     private class UnloadManager {
         private AtomicInteger unloading = new AtomicInteger(0);
         private volatile int maxUnloadParallel = 1;
