@@ -25,8 +25,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class FilterPressManager {
     private static final String FEED_OVER_NOTICE_URI = "/topic/filterPress/feedOver";
     private static final String FEED_OVER_CONFIRMED_NOTICE_URI = "/topic/filterPress/feedOver/confirm";
-    private static final String UNLOAD_NOTICE_URI = "/topic/filterPress/feedOver";
-    private static final String UNLOAD_CONFIRMED_NOTICE_URI = "/topic/filterPress/feedOver/confirm";
+    private static final String UNLOAD_NOTICE_URI = "/topic/filterPress/unload";
+    private static final String UNLOAD_CONFIRMED_NOTICE_URI = "/topic/filterPress/unload/confirm";
     @Autowired
     private DataService dataService;
     @Autowired
