@@ -2,7 +2,15 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zgiot.app.server.module.filterpress.dao.FilterPressMapper">
 
-    <update id="updateFilterParamState">
+    <select id="selectParamValue" resultType="java.lang.Double">
+        SELECT param_value
+        FROM
+            tb_filterpress_config
+        WHERE
+            thing_code = #{thingCode} AND param_name = #{paramName}
+    </select>
+
+    <update id="updateFilterParamValue">
         UPDATE tb_filterpress_config set param_value = #{paramValue} WHERE thing_code = #{thingCode} and param_name = #{paramName}
     </update>
 </mapper>

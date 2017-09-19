@@ -9,7 +9,13 @@ import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class FilterPress {
+    public static final String PARAM_NAME_FEEDINTELLIGENT = "feedIntelligent";
+    public static final String PARAM_NAME_UNLOADINTELLIGENT = "unloadIntelligent";
+    public static final String PARAM_NAME_FEEDCONFIRMNEED = "feedConfirmNeed";
+    public static final String PARAM_NAME_UNLOADCONFIRMNEED = "unloadConfirmNeed";
+    public static final String PARAM_NAME_MAXUNLOADPARALLEL = "maxUnloadParallel";
     private static final long UNLOAD_WAIT_DURATION = Duration.ofMinutes(3).plusSeconds(45).toMillis();
+
     private static final int UNLOAD_EXCHANGE_COUNT = 16;
     private final String code;
     private FilterPressManager manager;

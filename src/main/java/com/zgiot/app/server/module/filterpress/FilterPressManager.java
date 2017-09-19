@@ -10,9 +10,7 @@ import com.zgiot.common.constants.FilterPressMetricConstants;
 import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
-import net.bytebuddy.asm.Advice;
 import org.apache.commons.lang.time.DateUtils;
-import org.apache.ibatis.cache.decorators.FifoCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
@@ -31,6 +29,7 @@ public class FilterPressManager {
     private static final String FEED_OVER_CONFIRMED_NOTICE_URI = "/topic/filterPress/feedOver/confirm";
     private static final String UNLOAD_NOTICE_URI = "/topic/filterPress/unload";
     private static final String UNLOAD_CONFIRMED_NOTICE_URI = "/topic/filterPress/unload/confirm";
+    private static final String PARAM_NAME_SYS = "sys";
     @Autowired
     private DataService dataService;
     @Autowired
@@ -44,13 +43,7 @@ public class FilterPressManager {
 
     private static final Integer CURRENT_COUNT_DURATION = -3;
 
-    private static final String PARAM_NAME_FEEDINTELLIGENT = "feedIntelligent";
-    private static final String PARAM_NAME_UNLOADINTELLIGENT = "unloadIntelligent";
-    private static final String PARAM_NAME_FEEDCONFIRMNEED = "feedConfirmNeed";
-    private static final String PARAM_NAME_UNLOADCONFIRMNEED = "unloadConfirmNeed";
-    private static final String PARAM_NAME_MAXUNLOADPARALLEL = "maxUnloadParallel";
-
-    private Map<String, FilterPress> manager = new ConcurrentHashMap<>();
+    private Map<String, FilterPress> deviceHolder = new ConcurrentHashMap<>();
 
     private Set<String> unconfirmedFeed = new ConcurrentSkipListSet<>();
 
@@ -60,12 +53,23 @@ public class FilterPressManager {
 
     @PostConstruct
     void initFilterPress() {
-        manager.put("2492", new FilterPress("2492", this));
-        manager.put("2493", new FilterPress("2493", this));
-        manager.put("2494", new FilterPress("2494", this));
-        manager.put("2495", new FilterPress("2495", this));
-        manager.put("2496", new FilterPress("2496", this));
-        manager.put("2496A", new FilterPress("2496A", this));
+        deviceHolder.put("2492", new FilterPress("2492", this));
+        deviceHolder.put("2493", new FilterPress("2493", this));
+        deviceHolder.put("2494", new FilterPress("2494", this));
+        deviceHolder.put("2495", new FilterPress("2495", this));
+        deviceHolder.put("2496", new FilterPress("2496", this));
+        deviceHolder.put("2496A", new FilterPress("2496A", this));
+        setMaxUnloadParallel(filterPressMapper.selectParamValue(PARAM_NAME_SYS, FilterPress.PARAM_NAME_MAXUNLOADPARALLEL).intValue());
+        deviceHolder.forEach((code, filterPress) -> {
+            boolean feedIntelligent = filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_FEEDINTELLIGENT).intValue()==1;
+            filterPress.setFeedIntelligent(feedIntelligent);
+            boolean feedConfirmNeed = filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_FEEDCONFIRMNEED).intValue()==1;
+            filterPress.setFeedConfirmNeed(feedConfirmNeed);
+            boolean unloadIntelligent = filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_UNLOADINTELLIGENT).intValue() == 1;
+            filterPress.setUnloadIntelligent(unloadIntelligent);
+            boolean unloadConfirmNeed = filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_UNLOADCONFIRMNEED).intValue() == 1;
+            filterPress.setUnloadConfirmNeed(unloadConfirmNeed);
+        });
     }
 
     /**
@@ -74,7 +78,7 @@ public class FilterPressManager {
      * @param data
      */
     public void onDataSourceChange(DataModel data) {
-        FilterPress filterPress = manager.get(data.getThingCode());
+        FilterPress filterPress = deviceHolder.get(data.getThingCode());
         String metricCode = data.getMetricCode();
         filterPress.onDataSourceChange(metricCode, data.getValue());
         if (FilterPressMetricConstants.STAGE.equals(metricCode)) {
@@ -184,13 +188,13 @@ public class FilterPressManager {
     }
 
     /**
-     * get the filter press by thing code from the manager
+     * get the filter press by thing code from the deviceHolder
      *
      * @param thingCode
      * @return
      */
     public FilterPress getFilterPress(String thingCode) {
-        FilterPress filterPress = manager.get(thingCode);
+        FilterPress filterPress = deviceHolder.get(thingCode);
         if (filterPress == null) {
             throw new NoSuchElementException("no such filter press:" + thingCode);
         }
@@ -239,20 +243,20 @@ public class FilterPressManager {
     public void autoManuConfirmChange(String thingCode, boolean state) {
         boolean preState;
         if (thingCode != null) {
-            FilterPress filterPress = manager.get(thingCode);
+            FilterPress filterPress = deviceHolder.get(thingCode);
             preState = filterPress.isFeedConfirmNeed();
             if (preState != state) {
                 filterPress.setFeedConfirmNeed(state);
-                filterPressMapper.updateFilterParamValue(thingCode, PARAM_NAME_FEEDCONFIRMNEED,
+                filterPressMapper.updateFilterParamValue(thingCode, FilterPress.PARAM_NAME_FEEDCONFIRMNEED,
                         state ? 1.0 : 0.0);
             }
         } else {
-            for (Map.Entry<String, FilterPress> entry : manager.entrySet()) {
+            for (Map.Entry<String, FilterPress> entry : deviceHolder.entrySet()) {
                 FilterPress filterPress = entry.getValue();
                 preState = filterPress.isFeedConfirmNeed();
                 if (preState != state) {
                     filterPress.setFeedConfirmNeed(state);
-                    filterPressMapper.updateFilterParamValue(entry.getKey(), PARAM_NAME_FEEDCONFIRMNEED, state ? 1.0 : 0.0);
+                    filterPressMapper.updateFilterParamValue(entry.getKey(), FilterPress.PARAM_NAME_FEEDCONFIRMNEED, state ? 1.0 : 0.0);
                 }
             }
         }
@@ -267,19 +271,19 @@ public class FilterPressManager {
     public void intelligentManuChange(String thingCode, boolean state) {
         boolean preState;
         if (thingCode != null) {
-            FilterPress filterPress = manager.get(thingCode);
+            FilterPress filterPress = deviceHolder.get(thingCode);
             preState = filterPress.isFeedIntelligent();
             if (preState != state) {
                 filterPress.setFeedIntelligent(state);
-                filterPressMapper.updateFilterParamValue(thingCode, PARAM_NAME_FEEDINTELLIGENT, state ? 1.0 : 0.0);
+                filterPressMapper.updateFilterParamValue(thingCode, FilterPress.PARAM_NAME_FEEDINTELLIGENT, state ? 1.0 : 0.0);
             }
         } else {
-            for (Map.Entry<String, FilterPress> entry : manager.entrySet()) {
+            for (Map.Entry<String, FilterPress> entry : deviceHolder.entrySet()) {
                 FilterPress filterPress = entry.getValue();
                 preState = filterPress.isFeedIntelligent();
                 if (preState != state) {
                     filterPress.setFeedIntelligent(state);
-                    filterPressMapper.updateFilterParamValue(entry.getKey(), PARAM_NAME_FEEDINTELLIGENT, state ? 1.0 : 0.0);
+                    filterPressMapper.updateFilterParamValue(entry.getKey(), FilterPress.PARAM_NAME_FEEDINTELLIGENT, state ? 1.0 : 0.0);
                 }
             }
         }
@@ -303,7 +307,7 @@ public class FilterPressManager {
      */
     public boolean getAutoManuConfirmState() {
         boolean state = false;
-        for (Map.Entry<String, FilterPress> entry : manager.entrySet()) {
+        for (Map.Entry<String, FilterPress> entry : deviceHolder.entrySet()) {
             state = entry.getValue().isFeedConfirmNeed();
             break;
         }
@@ -312,12 +316,12 @@ public class FilterPressManager {
 
     /**
      * 获取智能/手动状态
-     * 
+     *
      * @return
      */
     public Map<String, Boolean> getIntelligentManuStateMap() {
         Map<String, Boolean> intelligentManuStateMap = new HashMap<>();
-        for (Map.Entry<String, FilterPress> entry : manager.entrySet()) {
+        for (Map.Entry<String, FilterPress> entry : deviceHolder.entrySet()) {
             FilterPress filterPress = entry.getValue();
             boolean state = filterPress.isFeedIntelligent();
             intelligentManuStateMap.put(entry.getKey(), state);
@@ -345,7 +349,7 @@ public class FilterPressManager {
     // public void clear() {
     // for (String thingCode : unconfirmedFeed) {
     // if (System.currentTimeMillis() -
-    // manager.get(thingCode).getFeedOverTime() > cacheTimeout) {
+    // deviceHolder.get(thingCode).getFeedOverTime() > cacheTimeout) {
     // messagingTemplate.convertAndSend(FEED_OVER_CONFIRMED_NOTICE_URI, thingCode);
     // unconfirmedFeed.remove(thingCode);
     // }
