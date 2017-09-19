@@ -243,7 +243,8 @@ public class FilterPressManager {
             preState = filterPress.isFeedConfirmNeed();
             if (preState != state) {
                 filterPress.setFeedConfirmNeed(state);
-                filterPressMapper.updateFilterParamValue(thingCode, PARAM_NAME_FEEDCONFIRMNEED, state);
+                filterPressMapper.updateFilterParamValue(thingCode, PARAM_NAME_FEEDCONFIRMNEED,
+                        state ? 1.0 : 0.0);
             }
         } else {
             for (Map.Entry<String, FilterPress> entry : manager.entrySet()) {
@@ -251,7 +252,7 @@ public class FilterPressManager {
                 preState = filterPress.isFeedConfirmNeed();
                 if (preState != state) {
                     filterPress.setFeedConfirmNeed(state);
-                    filterPressMapper.updateFilterParamValue(entry.getKey(), PARAM_NAME_FEEDCONFIRMNEED, state);
+                    filterPressMapper.updateFilterParamValue(entry.getKey(), PARAM_NAME_FEEDCONFIRMNEED, state ? 1.0 : 0.0);
                 }
             }
         }
@@ -270,7 +271,7 @@ public class FilterPressManager {
             preState = filterPress.isFeedIntelligent();
             if (preState != state) {
                 filterPress.setFeedIntelligent(state);
-                filterPressMapper.updateFilterParamValue(thingCode, PARAM_NAME_FEEDINTELLIGENT, state);
+                filterPressMapper.updateFilterParamValue(thingCode, PARAM_NAME_FEEDINTELLIGENT, state ? 1.0 : 0.0);
             }
         } else {
             for (Map.Entry<String, FilterPress> entry : manager.entrySet()) {
@@ -278,7 +279,7 @@ public class FilterPressManager {
                 preState = filterPress.isFeedIntelligent();
                 if (preState != state) {
                     filterPress.setFeedIntelligent(state);
-                    filterPressMapper.updateFilterParamValue(entry.getKey(), PARAM_NAME_FEEDINTELLIGENT, state);
+                    filterPressMapper.updateFilterParamValue(entry.getKey(), PARAM_NAME_FEEDINTELLIGENT, state ? 1.0 : 0.0);
                 }
             }
         }
@@ -337,19 +338,19 @@ public class FilterPressManager {
         return new HashMap<>();
     }
 
-//     @Scheduled(cron="cnmt.FilterPressDeviceManager.clear")
-//     /**
-//     * 手动弹出模式下，超过一段时间不操作后自动进行确认
-//     */
-//     public void clear() {
-//     for (String thingCode : unconfirmedFeed) {
-//     if (System.currentTimeMillis() -
-//             manager.get(thingCode).getFeedOverTime() > cacheTimeout) {
-//     messagingTemplate.convertAndSend(FEED_OVER_CONFIRMED_NOTICE_URI, thingCode);
-//         unconfirmedFeed.remove(thingCode);
-//     }
-//     }
-//     }
+    // @Scheduled(cron="cnmt.FilterPressDeviceManager.clear")
+    // /**
+    // * 手动弹出模式下，超过一段时间不操作后自动进行确认
+    // */
+    // public void clear() {
+    // for (String thingCode : unconfirmedFeed) {
+    // if (System.currentTimeMillis() -
+    // manager.get(thingCode).getFeedOverTime() > cacheTimeout) {
+    // messagingTemplate.convertAndSend(FEED_OVER_CONFIRMED_NOTICE_URI, thingCode);
+    // unconfirmedFeed.remove(thingCode);
+    // }
+    // }
+    // }
 
     private class UnloadManager {
         private AtomicInteger unloading = new AtomicInteger(0);
