@@ -11,6 +11,8 @@ import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
 import org.apache.commons.lang.time.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
@@ -25,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class FilterPressManager {
+    private static final Logger logger = LoggerFactory.getLogger(FilterPressManager.class);
     private static final String FEED_OVER_NOTICE_URI = "/topic/filterPress/feedOver";
     private static final String FEED_OVER_CONFIRMED_NOTICE_URI = "/topic/filterPress/feedOver/confirm";
     private static final String UNLOAD_NOTICE_URI = "/topic/filterPress/unload";
@@ -61,9 +64,9 @@ public class FilterPressManager {
         deviceHolder.put("2496A", new FilterPress("2496A", this));
         setMaxUnloadParallel(filterPressMapper.selectParamValue(PARAM_NAME_SYS, FilterPress.PARAM_NAME_MAXUNLOADPARALLEL).intValue());
         deviceHolder.forEach((code, filterPress) -> {
-            boolean feedIntelligent = filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_FEEDINTELLIGENT).intValue()==1;
+            boolean feedIntelligent = filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_FEEDINTELLIGENT).intValue() == 1;
             filterPress.setFeedIntelligent(feedIntelligent);
-            boolean feedConfirmNeed = filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_FEEDCONFIRMNEED).intValue()==1;
+            boolean feedConfirmNeed = filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_FEEDCONFIRMNEED).intValue() == 1;
             filterPress.setFeedConfirmNeed(feedConfirmNeed);
             boolean unloadIntelligent = filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_UNLOADINTELLIGENT).intValue() == 1;
             filterPress.setUnloadIntelligent(unloadIntelligent);
@@ -218,9 +221,12 @@ public class FilterPressManager {
     }
 
     void execFeedOver(FilterPress filterPress) {
+        logger.debug("{} feed over", filterPress);
         if (!filterPress.isFeedConfirmNeed()) {
+            logger.debug("{} feed over,send cmd; confirmNeed: {}", filterPress, filterPress.isFeedConfirmNeed());
             doFeedOver(filterPress);
         } else {
+            logger.debug("{} feed over,notifying user; confirmNeed: {}", filterPress, filterPress.isFeedConfirmNeed());
             messagingTemplate.convertAndSend(FEED_OVER_NOTICE_URI, filterPress.getCode());
             unconfirmedFeed.add(filterPress.getCode());
         }
@@ -399,8 +405,10 @@ public class FilterPressManager {
 
         private void execUnload(FilterPress filterPress) {
             if (!filterPress.isUnloadConfirmNeed()) {
+                logger.debug("{} unload, send cmd; confirmNeed: {}", filterPress, filterPress.isFeedConfirmNeed());
                 doUnload(filterPress);
             } else {
+                logger.debug("{} unload, notifying user; confirmNeed: {}", filterPress, filterPress.isFeedConfirmNeed());
                 messagingTemplate.convertAndSend(UNLOAD_NOTICE_URI, filterPress.getCode());
                 unConfirmedUnload.add(filterPress.getCode());
             }

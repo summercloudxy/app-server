@@ -2,6 +2,8 @@ package com.zgiot.app.server.module.filterpress;
 
 
 import com.zgiot.common.constants.FilterPressMetricConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.Timer;
@@ -14,6 +16,8 @@ public class FilterPress {
     public static final String PARAM_NAME_FEEDCONFIRMNEED = "feedConfirmNeed";
     public static final String PARAM_NAME_UNLOADCONFIRMNEED = "unloadConfirmNeed";
     public static final String PARAM_NAME_MAXUNLOADPARALLEL = "maxUnloadParallel";
+
+    private static final Logger logger = LoggerFactory.getLogger(FilterPress.class);
     private static final long UNLOAD_WAIT_DURATION = Duration.ofMinutes(3).plusSeconds(45).toMillis();
 
     private static final int UNLOAD_EXCHANGE_COUNT = 16;
@@ -76,52 +80,66 @@ public class FilterPress {
     }
 
     public void onRun() {
+        logger.trace("{} starts running", code);
     }
 
     public void onStop() {
+        logger.trace("{} stopped", code);
     }
 
     public void onFault() {
+        logger.trace("{} got faults", code);
     }
 
     public void onLoosen() {
+        logger.trace("{} on loosen", code);
     }
 
     public void onTaken() {
+        logger.trace("{} on taken", code);
         unloadManager.countTaken();
     }
 
     public void onPull() {
+        logger.trace("{} on pull", code);
         unloadManager.countPulled();
     }
 
     public void onPress() {
+        logger.trace("{} on press", code);
         //压紧后通知下一台
         unloadManager.notifyNext();
         unloadManager.stopUnload();
     }
 
     public void onFeed() {
+        logger.trace("{} on feed", code);
     }
 
     public void onFeedOver() {
+        logger.trace("{} on feed over", code);
     }
 
     public void onBlow() {
+        logger.trace("{} on blow", code);
     }
 
     public void onCycle() {
+        logger.trace("{} on cycle", code);
         this.onCycleTime = System.currentTimeMillis();
         if (unloadIntelligent) {
             manager.enqueueUnload(this);
+            logger.debug("{} enqueue unload, intelligent:{}", code, unloadConfirmNeed);
         }
     }
 
     public void onAssumeFeedOver() {
+        logger.trace("{} assume to be feed over", code);
         this.feedOverTime = System.currentTimeMillis();
         feedDuration = feedOverTime - feedStartTime;
         if (feedIntelligent) {
             manager.execFeedOver(this);
+            logger.debug("{} executed feed over, intelligent:{}", code, feedIntelligent);
         }
     }
 
@@ -129,6 +147,7 @@ public class FilterPress {
      * 开始卸料
      */
     void startUnload() {
+        logger.debug("{} starts unload counting", code);
         unloadManager.startUnload();
     }
 
@@ -250,6 +269,7 @@ public class FilterPress {
             unloadTimer.schedule(new TimerTask() {
                 @Override
                 public void run() {
+                    logger.debug("{} unload time up", code);
                     notifyNext();
                     unloadInterruptedDuration = 0;
                     latestPauseTime = null;
@@ -288,8 +308,9 @@ public class FilterPress {
          */
         private void notifyNext() {
             if (!notifiedNext) {
-                manager.unloadNext();
                 notifiedNext = true;
+                manager.unloadNext();
+                logger.debug("{} unload finished, notifying next", code);
             }
         }
 
@@ -309,6 +330,7 @@ public class FilterPress {
 
         private void checkUnloadExchange() {
             if (takeAndPullCount.incrementAndGet() >= UNLOAD_EXCHANGE_COUNT && isUnloading) {
+                logger.debug("{} take and pull enough", code);
                 cancelTimer();
                 notifyNext();
                 takeAndPullCount.set(0);
@@ -329,5 +351,12 @@ public class FilterPress {
     @Override
     public int hashCode() {
         return code.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "FilterPress{" +
+                "code='" + code + '\'' +
+                '}';
     }
 }
