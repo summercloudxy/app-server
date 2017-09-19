@@ -42,9 +42,17 @@ public class FilterPress {
      */
     private volatile boolean feedIntelligent;
     /**
+     * 是否需要人工确认进料
+     */
+    private volatile boolean feedConfirmNeed;
+    /**
      * 卸料智能
      */
     private volatile boolean unloadIntelligent;
+    /**
+     * 是否需要人工确认卸料
+     */
+    private volatile boolean unloadConfirmNeed;
 
     public FilterPress(String code, FilterPressManager manager) {
         this.code = code;
@@ -98,7 +106,17 @@ public class FilterPress {
 
     public void onCycle() {
         this.onCycleTime = System.currentTimeMillis();
-        manager.enqueueUnload(this);
+        if (unloadIntelligent) {
+            manager.enqueueUnload(this);
+        }
+    }
+
+    public void onAssumeFeedOver() {
+        this.feedOverTime = System.currentTimeMillis();
+        feedDuration = feedOverTime - feedStartTime;
+        if (feedIntelligent) {
+            manager.execFeedOver(this);
+        }
     }
 
     /**
@@ -147,6 +165,38 @@ public class FilterPress {
 
     public Long getOnCycleTime() {
         return onCycleTime;
+    }
+
+    public boolean isFeedIntelligent() {
+        return feedIntelligent;
+    }
+
+    public void setFeedIntelligent(boolean feedIntelligent) {
+        this.feedIntelligent = feedIntelligent;
+    }
+
+    public boolean isFeedConfirmNeed() {
+        return feedConfirmNeed;
+    }
+
+    public void setFeedConfirmNeed(boolean feedConfirmNeed) {
+        this.feedConfirmNeed = feedConfirmNeed;
+    }
+
+    public boolean isUnloadIntelligent() {
+        return unloadIntelligent;
+    }
+
+    public void setUnloadIntelligent(boolean unloadIntelligent) {
+        this.unloadIntelligent = unloadIntelligent;
+    }
+
+    public boolean isUnloadConfirmNeed() {
+        return unloadConfirmNeed;
+    }
+
+    public void setUnloadConfirmNeed(boolean unloadConfirmNeed) {
+        this.unloadConfirmNeed = unloadConfirmNeed;
     }
 
     private class UnloadManager {
@@ -260,4 +310,18 @@ public class FilterPress {
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FilterPress that = (FilterPress) o;
+
+        return code.equals(that.code);
+    }
+
+    @Override
+    public int hashCode() {
+        return code.hashCode();
+    }
 }

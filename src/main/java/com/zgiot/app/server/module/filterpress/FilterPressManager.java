@@ -10,25 +10,37 @@ import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
 import net.bytebuddy.asm.Advice;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class FilterPressManager {
+    private static final String FEED_OVER_NOTICE_URI = "/topic/filterPress/feedOver";
+    private static final String FEED_OVER_CONFIRMED_NOTICE_URI = "/topic/filterPress/feedOver/confirm";
+    private static final String UNLOAD_NOTICE_URI = "/topic/filterPress/feedOver";
+    private static final String UNLOAD_CONFIRMED_NOTICE_URI = "/topic/filterPress/feedOver/confirm";
     @Autowired
     private DataService dataService;
     @Autowired
     private CmdControlService cmdControlService;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     private static final int INIT_CAPACITY = 6;
 
     private Map<String, FilterPress> manager = new ConcurrentHashMap<>();
+
+    private Set<String> unconfirmedFeed = new ConcurrentSkipListSet<>();
+
+    private Set<String> unConfirmedUnload = new ConcurrentSkipListSet<>();
 
     private UnloadManager unloadManager = new UnloadManager();
 
@@ -49,9 +61,32 @@ public class FilterPressManager {
      */
     public void onDataSourceChange(DataModel data) {
         FilterPress filterPress = manager.get(data.getThingCode());
-        filterPress.onDataSourceChange(data.getMetricCode(), data.getValue());
-        if (FilterPressMetricConstants.STAGE.equals(data.getMetricCode())) {
+        String metricCode = data.getMetricCode();
+        filterPress.onDataSourceChange(metricCode, data.getValue());
+        if (FilterPressMetricConstants.STAGE.equals(metricCode)) {
             processStage(data);
+        }
+        if (FilterPressMetricConstants.FEED_ASUM.equals(metricCode)) {
+            processFeedAssumption(data);
+        }
+    }
+
+    public void confirmFeedOver(String code) {
+        if (unconfirmedFeed.remove(code)) {
+            doFeedOver(getFilterPress(code));
+        }
+    }
+
+    public void confirmUnload(String code) {
+        if (unConfirmedUnload.remove(code)) {
+            unloadManager.execUnload(getFilterPress(code));
+        }
+    }
+
+    private void processFeedAssumption(DataModel data) {
+        if (String.valueOf(FilterPressConstants.FEED_OVER_CURRENT).equals(data.getValue())
+                || String.valueOf(FilterPressConstants.FEED_OVER_TIME).equals(data.getValue())) {
+            getFilterPress(data.getThingCode()).onAssumeFeedOver();
         }
     }
 
@@ -147,21 +182,6 @@ public class FilterPressManager {
         return filterPress;
     }
 
-    /**
-     * send the command
-     *
-     * @param filterPress
-     * @param metricCode
-     * @param value
-     */
-    void sendCmd(FilterPress filterPress, String metricCode, Object value) {
-        DataModel data = new DataModel();
-        data.setThingCode(filterPress.getCode());
-        data.setMetricCode(metricCode);
-        data.setValue(value.toString());
-        cmdControlService.sendCmd(data, RequestIdUtil.generateRequestId());
-    }
-
     void enqueueUnload(FilterPress filterPress) {
         unloadManager.enqueue(filterPress);
     }
@@ -176,6 +196,23 @@ public class FilterPressManager {
 
     public void setMaxUnloadParallel(int maxUnloadParallel) {
         this.unloadManager.maxUnloadParallel = maxUnloadParallel;
+    }
+
+    void execFeedOver(FilterPress filterPress) {
+        if (!filterPress.isFeedConfirmNeed()) {
+            doFeedOver(filterPress);
+        } else {
+            messagingTemplate.convertAndSend(FEED_OVER_NOTICE_URI, filterPress.getCode());
+            unconfirmedFeed.add(filterPress.getCode());
+        }
+    }
+
+    private void doFeedOver(FilterPress filterPress) {
+        DataModel dataModel = new DataModel();
+        dataModel.setMetricCode(FilterPressMetricConstants.FEED_OVER);
+        dataModel.setThingCode(filterPress.getCode());
+        dataModel.setValue(Boolean.TRUE.toString());
+        cmdControlService.sendPulseCmd(dataModel, null, null, RequestIdUtil.generateRequestId());
     }
 
 
@@ -217,7 +254,16 @@ public class FilterPressManager {
                 if (candidate == null) {
                     break;
                 }
-                doUnload(candidate);
+                execUnload(candidate);
+            }
+        }
+
+        private void execUnload(FilterPress filterPress) {
+            if (!filterPress.isUnloadConfirmNeed()) {
+                doUnload(filterPress);
+            } else {
+                messagingTemplate.convertAndSend(UNLOAD_NOTICE_URI, filterPress.getCode());
+                unConfirmedUnload.add(filterPress.getCode());
             }
         }
 
