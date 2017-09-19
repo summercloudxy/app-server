@@ -12,6 +12,7 @@ import net.bytebuddy.asm.Advice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,6 +31,16 @@ public class FilterPressManager {
     private Map<String, FilterPress> manager = new ConcurrentHashMap<>();
 
     private UnloadManager unloadManager = new UnloadManager();
+
+    @PostConstruct
+    void initFilterPress() {
+        manager.put("2492", new FilterPress("2492", this));
+        manager.put("2493", new FilterPress("2493", this));
+        manager.put("2494", new FilterPress("2494", this));
+        manager.put("2495", new FilterPress("2495", this));
+        manager.put("2496", new FilterPress("2496", this));
+        manager.put("2496A", new FilterPress("2496A", this));
+    }
 
     /**
      * call back when data changed
