@@ -15,11 +15,10 @@ import java.util.Map;
  */
 @Mapper
 public interface FilterPressMapper {
-    void setFilterFeedOverAutoMaunState(@Param("thingCode") String thingCode, @Param("state") Integer state);
 
-    void setFilterFeedOverIntelligentMaunState(@Param("thingCode") String deviceCode, @Param("state") Integer state);
 
-    List<FeedOverParam> getFilterFeedOverParams();
+    void updateFilterParamValue(@Param("thingCode") String thingCode, @Param("paramName") String paramName,
+            @Param("paramValue") Boolean paramValue);
 
     @MapKey("deviceCode")
     Map<String, FilterPressElectricity> getCurrentInfoInDuration(Date startTime, Date endTime);
