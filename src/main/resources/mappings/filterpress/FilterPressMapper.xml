@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zgiot.app.server.module.filterpress.dao.FilterPressMapper">
-    
-    <update id="setFilterFeedOverAutoMaunState">
-        update filterpress_feedover_param set auto_manu_confirm_state = #{state}  where thing_code = #{thingCode};
-    </update>
 
-    <update id="setFilterFeedOverIntelligentMaunState">
-        update filterpress_feedover_param set intelligent_manu_state = #{state} where thing_code = #{thingCode};
-    </update>
-
-    <select id="getFilterFeedOverParams" resultType="com.zgiot.app.server.module.filterpress.pojo.FeedOverParam">
-        SELECT thing_code,auto_manu_confirm_state,intelligent_manu_state FROM filterpress_feedover_param
+    <select id="selectParamValue" resultType="java.lang.Double">
+        SELECT param_value
+        FROM
+            tb_filterpress_config
+        WHERE
+            thing_code = #{thingCode} AND param_name = #{paramName}
     </select>
 
+    <update id="updateFilterParamValue">
+        UPDATE tb_filterpress_config set param_value = #{paramValue} WHERE thing_code = #{thingCode} and param_name = #{paramName}
+    </update>
 </mapper>

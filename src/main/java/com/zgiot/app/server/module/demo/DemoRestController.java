@@ -1,6 +1,7 @@
 package com.zgiot.app.server.module.demo;
 
 import com.zgiot.app.server.service.DataService;
+import com.zgiot.common.restcontroller.ServerResponse;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,7 +33,7 @@ public class DemoRestController {
         String statusStr = this.demoBusiness.doCalStatus(thingCode, metricCode);
 
         return new ResponseEntity<String>(
-                statusStr
+                ServerResponse.buildOkJson(statusStr)
                 , HttpStatus.OK);
     }
 

@@ -1,8 +1,12 @@
 package com.zgiot.app.server.module.generic;
 
+import com.alibaba.fastjson.JSON;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.common.pojo.DataModelWrapper;
+import com.zgiot.common.restcontroller.ServerResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -16,12 +20,15 @@ public class DataController {
     private DataService dataService;
 
     @GetMapping("/thing/{thingCode}/metric/{metricCode}")
-    public DataModelWrapper getData(@PathVariable String thingCode, @PathVariable String metricCode) {
-        return dataService.getData(thingCode, metricCode);
+    public ResponseEntity<String> getData(@PathVariable String thingCode, @PathVariable String metricCode) {
+        DataModelWrapper dw = dataService.getData(thingCode, metricCode);
+        return new ResponseEntity<>(
+                JSON.toJSONString(ServerResponse.buildOK(dw))
+                , HttpStatus.OK);
     }
 
     @PostMapping
-    public Map<String, Map<String, DataModelWrapper>> getDataBatch(@RequestBody Map<String, List<String>> dataReq) {
+    public ResponseEntity<String> getDataBatch(@RequestBody Map<String, List<String>> dataReq) {
         HashMap<String, Map<String, DataModelWrapper>> result = new HashMap<>(dataReq.size());
         dataReq.forEach((thingCode, metricCodes) -> {
             HashMap<String, DataModelWrapper> valueMap = new HashMap<>(metricCodes.size());
@@ -30,6 +37,9 @@ public class DataController {
                 valueMap.put(metricCode, dataService.getData(thingCode, metricCode));
             }
         });
-        return result;
+
+        return new ResponseEntity<>(
+                JSON.toJSONString(ServerResponse.buildOK(result))
+                , HttpStatus.OK);
     }
 }

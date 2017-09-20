@@ -1,9 +1,6 @@
 package com.zgiot.app.server.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.zgiot.app.server.exception.CmdPulseFirstSendException;
-import com.zgiot.app.server.exception.CmdPulseSecondSendException;
-import com.zgiot.app.server.exception.CmdSendException;
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.DataModel;
@@ -17,16 +14,13 @@ import org.springframework.web.client.RestClientException;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 public class CmdControlServiceImpl implements CmdControlService {
     private static final Logger logger = LoggerFactory.getLogger(CmdControlService.class);
-    private static final int RETRY_NUMBER = 5;
+    private static final int DEFAULT_RETRY_COUNT = 5;
     private static final int RETURN_CODE_SUCCESS = 1;
-    private static final int SEND_DELAY_TIME = 0;
+    private static final int DEFAULT_SEND_DELAY_TIME = 0;
     private static final int SEND_PERIOD = 1000;
     @Autowired
     private DataEngineTemplate dataEngineTemplate;
@@ -38,8 +32,9 @@ public class CmdControlServiceImpl implements CmdControlService {
 
     @Override
     public int sendCmd(List<DataModel> dataModelList, String requestId) {
+
         if (StringUtils.isEmpty(requestId)) {
-            throw new CmdSendException(new NullPointerException("request id cannot be null"));
+            throw new SysException("request id cannot be null", SysException.EC_CMD_FAILED);
         }
         String data = JSON.toJSONString(dataModelList);
         ServerResponse response;
@@ -47,46 +42,46 @@ public class CmdControlServiceImpl implements CmdControlService {
             response = dataEngineTemplate.postForObject(DataEngineTemplate.CMD_URI, data, ServerResponse.class);
             logger.trace("received:{}", response);
         } catch (RestClientException e) {
-            throw new CmdSendException(e);
+            throw new SysException(e.getMessage(), SysException.EC_CMD_FAILED);
         }
         return Integer.valueOf(response.getMessage());
     }
 
-    public int sendPulseCmd(DataModel dataModel, String requestId) {
+    public int sendPulseCmd(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId) {
+        final Integer realRetryCount = retryCount == null ? DEFAULT_RETRY_COUNT : retryCount;
+        if (retryPeriod == null) {
+            retryPeriod = SEND_PERIOD;
+        }
         String value = dataModel.getValue();
         Boolean boolValue;
-        if ("true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value)) {
+        if (Boolean.TRUE.toString().equalsIgnoreCase(value) || Boolean.FALSE.toString().equalsIgnoreCase(value)) {
             boolValue = Boolean.valueOf(value);
         } else {
-            throw new CmdSendException("data type error", SysException.EC_UNKOWN);
+            throw new SysException("data type error", SysException.EC_CMD_FAILED);
         }
         try {
             sendCmd(dataModel, requestId);
         } catch (Exception e) {
-            throw new CmdPulseFirstSendException("failed send first pulse", SysException.EC_UNKOWN);
+            throw new SysException("failed send first pulse", SysException.EC_CMD_PULSE_FIRST_FAILED);
         }
         dataModel.setValue(Boolean.toString(!boolValue));
-        Timer timer = new Timer();
-        AtomicBoolean sendState = new AtomicBoolean(false);
-        timer.schedule(new TimerTask() {
-            private int count = 0;
-            @Override
-            public void run() {
-                count++;
-                if (count == RETRY_NUMBER) {
-                    cancel();
-                }
-                try {
-                    sendCmd(Collections.singletonList(dataModel), requestId);
-                    sendState.set(true);
-                    cancel();
-                } catch (Exception e) {
-                    logger.error("failed send second pulse,retry number: {}", count);
-                }
+        Boolean state = false;
+        for (int i = 1; i <= realRetryCount; i++) {
+            try {
+                sendCmd(Collections.singletonList(dataModel), requestId);
+                state = true;
+                break;
+            } catch (Exception e) {
+                logger.error("failed send second pulse,retry number: {}", i);
             }
-        }, SEND_DELAY_TIME, SEND_PERIOD);
-        if (!sendState.get()) {
-            throw new CmdPulseSecondSendException("failed send second pulse", SysException.EC_UNKOWN);
+            try{
+                Thread.sleep(retryPeriod);
+            } catch (InterruptedException e){
+                logger.error("thread is interrupted");
+            }
+        }
+        if (!state) {
+            throw new SysException("failed send second pulse", SysException.EC_CMD_PULSE_SECOND_FAILED);
         }
         return RETURN_CODE_SUCCESS;
     }
