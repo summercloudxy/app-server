@@ -44,7 +44,7 @@ public class CmdControlServiceImpl implements CmdControlService {
         } catch (RestClientException e) {
             throw new SysException(e.getMessage(), SysException.EC_CMD_FAILED);
         }
-        return Integer.valueOf(response.getMessage());
+        return (int) response.getData();
     }
 
     public int sendPulseCmd(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId) {

@@ -318,7 +318,7 @@ public class FilterPressManager {
         dataModel.setMetricCode(FilterPressMetricConstants.FEED_OVER);
         dataModel.setThingCode(filterPress.getCode());
         dataModel.setValue(Boolean.TRUE.toString());
-        cmdControlService.sendPulseCmd(dataModel, null, null, RequestIdUtil.generateRequestId());
+//        cmdControlService.sendPulseCmd(dataModel, null, null, RequestIdUtil.generateRequestId());
     }
 
     /**
