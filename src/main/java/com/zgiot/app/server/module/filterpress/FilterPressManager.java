@@ -95,12 +95,14 @@ public class FilterPressManager {
     public void confirmFeedOver(String code) {
         if (unconfirmedFeed.remove(code)) {
             doFeedOver(getFilterPress(code));
+            messagingTemplate.convertAndSend(FEED_OVER_CONFIRMED_NOTICE_URI, code);
         }
     }
 
     public void confirmUnload(String code) {
         if (unConfirmedUnload.remove(code)) {
-            unloadManager.execUnload(getFilterPress(code));
+            unloadManager.doUnload(getFilterPress(code));
+            messagingTemplate.convertAndSend(UNLOAD_CONFIRMED_NOTICE_URI, code);
         }
     }
 
