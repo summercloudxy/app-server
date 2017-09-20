@@ -10,6 +10,8 @@ import com.zgiot.common.constants.FilterPressMetricConstants;
 import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
+import com.zgiot.common.pojo.MetricModel;
+import com.zgiot.common.pojo.ThingModel;
 import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,7 +83,8 @@ public class FilterPressManager {
      * @param data
      */
     public void onDataSourceChange(DataModel data) {
-        FilterPress filterPress = deviceHolder.get(data.getThingCode());
+        String thingCode = data.getThingCode();
+        FilterPress filterPress = deviceHolder.get(thingCode);
         String metricCode = data.getMetricCode();
         filterPress.onDataSourceChange(metricCode, data.getValue());
         if (FilterPressMetricConstants.STAGE.equals(metricCode)) {
@@ -89,6 +92,73 @@ public class FilterPressManager {
         }
         if (FilterPressMetricConstants.FEED_ASUM.equals(metricCode)) {
             processFeedAssumption(data);
+        }
+        if (FilterPressMetricConstants.T1_RCD.equals(metricCode)
+                || FilterPressMetricConstants.T2_RCD.equals(metricCode)
+                || FilterPressMetricConstants.T3_RCD.equals(metricCode)) {
+            if (Boolean.TRUE.toString().equals(data.getValue())) {
+                switch (metricCode) {
+                    case FilterPressMetricConstants.T1_RCD:
+                        getFilterPress(thingCode).setProducingTeam(1);
+                        break;
+                    case FilterPressMetricConstants.T2_RCD:
+                        getFilterPress(thingCode).setProducingTeam(2);
+                        break;
+                    case FilterPressMetricConstants.T3_RCD:
+                        getFilterPress(thingCode).setProducingTeam(3);
+                        break;
+                    default:
+                }
+            }
+        }
+        if (FilterPressMetricConstants.T1_COUNT.equals(metricCode)
+                || FilterPressMetricConstants.T2_COUNT.equals(metricCode)
+                || FilterPressMetricConstants.T3_COUNT.equals(metricCode)) {
+            switch (metricCode) {
+                case FilterPressMetricConstants.T1_COUNT:
+                    getFilterPress(thingCode).updatePlateCount(1, Integer.valueOf(data.getValue()));
+                    break;
+                case FilterPressMetricConstants.T2_COUNT:
+                    getFilterPress(thingCode).updatePlateCount(2, Integer.valueOf(data.getValue()));
+                    break;
+                case FilterPressMetricConstants.T3_COUNT:
+                    getFilterPress(thingCode).updatePlateCount(3, Integer.valueOf(data.getValue()));
+                    break;
+                default:
+            }
+            calculatePlateAndSave();
+        }
+    }
+
+    private void calculatePlateAndSave() {
+        int total = 0;
+        for (Map.Entry<String, FilterPress> entry : deviceHolder.entrySet()) {
+            String code = entry.getKey();
+            FilterPress filterPress = entry.getValue();
+            int plateCount = filterPress.getPlateCount();
+            DataModel dataModel = new DataModel();
+            dataModel.setThingCode(code);
+            dataModel.setThingCategoryCode(ThingModel.CATEGORY_DEVICE);
+            dataModel.setMetricCode(FilterPressMetricConstants.PLATE_CNT);
+            dataModel.setMetricCategoryCode(MetricModel.CATEGORY_SIGNAL);
+            dataModel.setValue(String.valueOf(plateCount));
+            dataModel.setDataTimeStamp(new Date());
+            dataService.updateCache(dataModel);
+            dataService.persist2NoSQL(dataModel);
+            total += plateCount;
+        }
+
+        for (Map.Entry<String, FilterPress> entry : deviceHolder.entrySet()) {
+            String code = entry.getKey();
+            DataModel dataModel = new DataModel();
+            dataModel.setThingCode(code);
+            dataModel.setThingCategoryCode(ThingModel.CATEGORY_DEVICE);
+            dataModel.setMetricCode(FilterPressMetricConstants.PLATE_CNT);
+            dataModel.setMetricCategoryCode(MetricModel.CATEGORY_SIGNAL);
+            dataModel.setValue(String.valueOf(total));
+            dataModel.setDataTimeStamp(new Date());
+            dataService.updateCache(dataModel);
+            dataService.persist2NoSQL(dataModel);
         }
     }
 
