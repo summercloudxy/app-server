@@ -33,6 +33,7 @@ public class FilterPressDataListener implements DataListener{
 
     @Override
     public void onDataChange(DataModel dataModel) {
+        logger.trace("received data from data engine: {}", dataModel);
         if (metricCodes.contains(dataModel.getMetricCode())) {
             handleData(dataModel);
         }
