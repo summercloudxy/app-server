@@ -518,6 +518,14 @@ public class FilterPressManager {
         return new HashMap<>();
     }
 
+    /**
+     * 获取卸料次序
+     * @return
+     */
+    public Map<String, Integer> getUnloadSequence(){
+        return unloadManager.getQueuePosition();
+    }
+
     // @Scheduled(cron="cnmt.FilterPressDeviceManager.clear")
     // /**
     // * 手动弹出模式下，超过一段时间不操作后自动进行确认
@@ -548,6 +556,10 @@ public class FilterPressManager {
         });
 
         private Map<String, Integer> queuePosition = new ConcurrentHashMap<>();
+
+        public Map<String, Integer> getQueuePosition() {
+            return queuePosition;
+        }
 
         /**
          * 加入卸料排队

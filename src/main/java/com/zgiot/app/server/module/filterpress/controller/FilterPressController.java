@@ -91,5 +91,12 @@ public class FilterPressController {
                 HttpStatus.OK);
     }
 
+    @ApiOperation("获取卸料次序")
+    @GetMapping(value = "api/filterPress/unload/sequence")
+    public ResponseEntity<String> getUnloadSequence(){
+        return new ResponseEntity<>(ServerResponse.buildOkJson(filterPressManager.getUnloadSequence()),
+                HttpStatus.OK);
+    }
+
 
 }
