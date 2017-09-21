@@ -20,7 +20,7 @@ SET FOREIGN_KEY_CHECKS=0;
 -- ----------------------------
 DROP TABLE IF EXISTS `tb_thing_properties`;
 CREATE TABLE `tb_thing_properties` (
-  `id` int(11)  not  null  auto_increment,
+  `id` int(11)  not null auto_increment,
   `thing_code` varchar(30) DEFAULT NULL,
   `prop_key` varchar(30) DEFAULT NULL,
   `prop_value` varchar(255) DEFAULT NULL,
