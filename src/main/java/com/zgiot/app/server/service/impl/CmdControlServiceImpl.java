@@ -39,7 +39,7 @@ public class CmdControlServiceImpl implements CmdControlService {
         String data = JSON.toJSONString(dataModelList);
         ServerResponse response;
         try {
-            response = dataEngineTemplate.postForObject(DataEngineTemplate.CMD_URI, data, ServerResponse.class);
+            response = dataEngineTemplate.postForObject(DataEngineTemplate.URI_CMD, data, ServerResponse.class);
             logger.trace("received:{}", response);
         } catch (RestClientException e) {
             throw new SysException(e.getMessage(), SysException.EC_CMD_FAILED);

@@ -7,6 +7,11 @@ import java.util.List;
 
 public interface DataCache {
     /**
+     * 初始化缓存
+     */
+    void initCache(List<DataModel> initValues);
+
+    /**
      * 从缓存中获取数据
      *
      * @param thingCode
