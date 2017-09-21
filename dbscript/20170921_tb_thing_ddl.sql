@@ -1,1 +1,1 @@
-alter table tb_thing_copy add column thing_shortName varchar(20); 
+alter table tb_thing add column thing_shortName varchar(20);
