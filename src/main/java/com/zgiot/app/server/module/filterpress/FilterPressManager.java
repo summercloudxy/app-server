@@ -50,6 +50,8 @@ public class FilterPressManager {
 
     private Map<String, FilterPress> deviceHolder = new ConcurrentHashMap<>();
 
+    private Map<String, String> filterPressPumpMapping = new HashMap<>();
+
     private Set<String> unconfirmedFeed = new ConcurrentSkipListSet<>();
 
     private Set<String> unConfirmedUnload = new ConcurrentSkipListSet<>();
@@ -64,6 +66,12 @@ public class FilterPressManager {
         deviceHolder.put("2495", new FilterPress("2495", this));
         deviceHolder.put("2496", new FilterPress("2496", this));
         deviceHolder.put("2496A", new FilterPress("2496A", this));
+        filterPressPumpMapping.put("2487", "2492");
+        filterPressPumpMapping.put("2488", "2493");
+        filterPressPumpMapping.put("2489", "2494");
+        filterPressPumpMapping.put("2490", "2495");
+        filterPressPumpMapping.put("2491", "2496");
+        filterPressPumpMapping.put("2491A", "2496A");
         setMaxUnloadParallel(filterPressMapper.selectParamValue(PARAM_NAME_SYS, FilterPress.PARAM_NAME_MAXUNLOADPARALLEL).intValue());
         deviceHolder.forEach((code, filterPress) -> {
             boolean feedIntelligent = filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_FEEDINTELLIGENT).intValue() == 1;
@@ -179,7 +187,8 @@ public class FilterPressManager {
     private void processFeedAssumption(DataModel data) {
         if (String.valueOf(FilterPressConstants.FEED_OVER_CURRENT).equals(data.getValue())
                 || String.valueOf(FilterPressConstants.FEED_OVER_TIME).equals(data.getValue())) {
-            getFilterPress(data.getThingCode()).onAssumeFeedOver();
+            String pumpCode = data.getThingCode();
+            getFilterPress(filterPressPumpMapping.get(pumpCode)).onAssumeFeedOver();
         }
     }
 
