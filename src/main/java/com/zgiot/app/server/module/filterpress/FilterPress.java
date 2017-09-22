@@ -6,8 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class FilterPress {
@@ -24,25 +26,33 @@ public class FilterPress {
     private final String code;
     private FilterPressManager manager;
     /**
+     * 板数计数器
+     */
+    private Map<Integer, Integer> plateCount = new ConcurrentHashMap<>();
+    /**
+     * 正在生产的队伍
+     */
+    private volatile Integer producingTeam;
+    /**
      * 入料开始时间，若不处于入料状态，值为空
      */
-    private Long feedStartTime;
+    private volatile Long feedStartTime;
     /**
      * 入料结束时间
      */
-    private Long feedOverTime;
+    private volatile Long feedOverTime;
     /**
      * 进料时长
      */
-    private Long feedDuration;
+    private volatile Long feedDuration;
     /**
      * 入料泵电流
      */
-    private double feedPumpCurrent;
+    private volatile double feedPumpCurrent;
     /**
      * 进入循环等待的时间
      */
-    private Long onCycleTime;
+    private volatile Long onCycleTime;
     /**
      * 卸料条件判断管理器
      */
@@ -114,6 +124,7 @@ public class FilterPress {
 
     public void onFeed() {
         logger.trace("{} on feed", code);
+        feedStartTime = System.currentTimeMillis();
     }
 
     public void onFeedOver() {
@@ -129,7 +140,7 @@ public class FilterPress {
         this.onCycleTime = System.currentTimeMillis();
         if (unloadIntelligent) {
             manager.enqueueUnload(this);
-            logger.debug("{} enqueue unload, intelligent:{}", code, unloadConfirmNeed);
+            logger.debug("{} enqueue unload, intelligent:{}", code, unloadIntelligent);
         }
     }
 
@@ -149,6 +160,18 @@ public class FilterPress {
     void startUnload() {
         logger.debug("{} starts unload counting", code);
         unloadManager.startUnload();
+    }
+
+    void updatePlateCount(int team, int count) {
+        plateCount.put(team, count);
+    }
+
+    void setProducingTeam(int team) {
+        this.producingTeam = team;
+    }
+
+    int getProducingTeam() {
+        return producingTeam;
     }
 
 
@@ -222,6 +245,10 @@ public class FilterPress {
 
     public void setUnloadConfirmNeed(boolean unloadConfirmNeed) {
         this.unloadConfirmNeed = unloadConfirmNeed;
+    }
+
+    public int getPlateCount() {
+        return plateCount.get(producingTeam);
     }
 
     private class UnloadManager {

@@ -5,10 +5,11 @@ import java.util.Map;
 /**
  * Created by xiayun on 2017/9/15.
  */
-public class FeedOverWholeParam {
+public class FilterPressParam {
     private Map<String, Boolean> intelligentManuState;
     private Boolean autoManuConfirmState;
     private Map<String, FilterPressElectricity> electricityMap;
+    private Integer maxUnloadParallel;
 
     public Map<String, Boolean> getIntelligentManuState() {
         return intelligentManuState;
@@ -32,5 +33,13 @@ public class FeedOverWholeParam {
 
     public void setElectricityMap(Map<String, FilterPressElectricity> electricityMap) {
         this.electricityMap = electricityMap;
+    }
+
+    public Integer getMaxUnloadParallel() {
+        return maxUnloadParallel;
+    }
+
+    public void setMaxUnloadParallel(Integer maxUnloadParallel) {
+        this.maxUnloadParallel = maxUnloadParallel;
     }
 }

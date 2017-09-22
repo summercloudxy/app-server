@@ -10,6 +10,8 @@ import com.zgiot.common.constants.FilterPressMetricConstants;
 import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
+import com.zgiot.common.pojo.MetricModel;
+import com.zgiot.common.pojo.ThingModel;
 import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,15 +64,20 @@ public class FilterPressManager {
         deviceHolder.put("2495", new FilterPress("2495", this));
         deviceHolder.put("2496", new FilterPress("2496", this));
         deviceHolder.put("2496A", new FilterPress("2496A", this));
-        setMaxUnloadParallel(filterPressMapper.selectParamValue(PARAM_NAME_SYS, FilterPress.PARAM_NAME_MAXUNLOADPARALLEL).intValue());
+        setMaxUnloadParallel(filterPressMapper
+                .selectParamValue(PARAM_NAME_SYS, FilterPress.PARAM_NAME_MAXUNLOADPARALLEL).intValue());
         deviceHolder.forEach((code, filterPress) -> {
-            boolean feedIntelligent = filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_FEEDINTELLIGENT).intValue() == 1;
+            boolean feedIntelligent =
+                    filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_FEEDINTELLIGENT).intValue() == 1;
             filterPress.setFeedIntelligent(feedIntelligent);
-            boolean feedConfirmNeed = filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_FEEDCONFIRMNEED).intValue() == 1;
+            boolean feedConfirmNeed =
+                    filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_FEEDCONFIRMNEED).intValue() == 1;
             filterPress.setFeedConfirmNeed(feedConfirmNeed);
-            boolean unloadIntelligent = filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_UNLOADINTELLIGENT).intValue() == 1;
+            boolean unloadIntelligent =
+                    filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_UNLOADINTELLIGENT).intValue() == 1;
             filterPress.setUnloadIntelligent(unloadIntelligent);
-            boolean unloadConfirmNeed = filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_UNLOADCONFIRMNEED).intValue() == 1;
+            boolean unloadConfirmNeed =
+                    filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_UNLOADCONFIRMNEED).intValue() == 1;
             filterPress.setUnloadConfirmNeed(unloadConfirmNeed);
         });
     }
@@ -81,7 +88,8 @@ public class FilterPressManager {
      * @param data
      */
     public void onDataSourceChange(DataModel data) {
-        FilterPress filterPress = deviceHolder.get(data.getThingCode());
+        String thingCode = data.getThingCode();
+        FilterPress filterPress = deviceHolder.get(thingCode);
         String metricCode = data.getMetricCode();
         filterPress.onDataSourceChange(metricCode, data.getValue());
         if (FilterPressMetricConstants.STAGE.equals(metricCode)) {
@@ -90,17 +98,86 @@ public class FilterPressManager {
         if (FilterPressMetricConstants.FEED_ASUM.equals(metricCode)) {
             processFeedAssumption(data);
         }
+        if (FilterPressMetricConstants.T1_RCD.equals(metricCode)
+                || FilterPressMetricConstants.T2_RCD.equals(metricCode)
+                || FilterPressMetricConstants.T3_RCD.equals(metricCode)) {
+            if (Boolean.TRUE.toString().equals(data.getValue())) {
+                switch (metricCode) {
+                    case FilterPressMetricConstants.T1_RCD:
+                        getFilterPress(thingCode).setProducingTeam(1);
+                        break;
+                    case FilterPressMetricConstants.T2_RCD:
+                        getFilterPress(thingCode).setProducingTeam(2);
+                        break;
+                    case FilterPressMetricConstants.T3_RCD:
+                        getFilterPress(thingCode).setProducingTeam(3);
+                        break;
+                    default:
+                }
+            }
+        }
+        if (FilterPressMetricConstants.T1_COUNT.equals(metricCode)
+                || FilterPressMetricConstants.T2_COUNT.equals(metricCode)
+                || FilterPressMetricConstants.T3_COUNT.equals(metricCode)) {
+            switch (metricCode) {
+                case FilterPressMetricConstants.T1_COUNT:
+                    getFilterPress(thingCode).updatePlateCount(1, Integer.valueOf(data.getValue()));
+                    break;
+                case FilterPressMetricConstants.T2_COUNT:
+                    getFilterPress(thingCode).updatePlateCount(2, Integer.valueOf(data.getValue()));
+                    break;
+                case FilterPressMetricConstants.T3_COUNT:
+                    getFilterPress(thingCode).updatePlateCount(3, Integer.valueOf(data.getValue()));
+                    break;
+                default:
+            }
+            calculatePlateAndSave();
+        }
+    }
+
+    private void calculatePlateAndSave() {
+        int total = 0;
+        for (Map.Entry<String, FilterPress> entry : deviceHolder.entrySet()) {
+            String code = entry.getKey();
+            FilterPress filterPress = entry.getValue();
+            int plateCount = filterPress.getPlateCount();
+            DataModel dataModel = new DataModel();
+            dataModel.setThingCode(code);
+            dataModel.setThingCategoryCode(ThingModel.CATEGORY_DEVICE);
+            dataModel.setMetricCode(FilterPressMetricConstants.PLATE_CNT);
+            dataModel.setMetricCategoryCode(MetricModel.CATEGORY_SIGNAL);
+            dataModel.setValue(String.valueOf(plateCount));
+            dataModel.setDataTimeStamp(new Date());
+            dataService.updateCache(dataModel);
+            dataService.persist2NoSQL(dataModel);
+            total += plateCount;
+        }
+
+        for (Map.Entry<String, FilterPress> entry : deviceHolder.entrySet()) {
+            String code = entry.getKey();
+            DataModel dataModel = new DataModel();
+            dataModel.setThingCode(code);
+            dataModel.setThingCategoryCode(ThingModel.CATEGORY_DEVICE);
+            dataModel.setMetricCode(FilterPressMetricConstants.PLATE_CNT);
+            dataModel.setMetricCategoryCode(MetricModel.CATEGORY_SIGNAL);
+            dataModel.setValue(String.valueOf(total));
+            dataModel.setDataTimeStamp(new Date());
+            dataService.updateCache(dataModel);
+            dataService.persist2NoSQL(dataModel);
+        }
     }
 
     public void confirmFeedOver(String code) {
         if (unconfirmedFeed.remove(code)) {
             doFeedOver(getFilterPress(code));
+            messagingTemplate.convertAndSend(FEED_OVER_CONFIRMED_NOTICE_URI, code);
         }
     }
 
     public void confirmUnload(String code) {
         if (unConfirmedUnload.remove(code)) {
-            unloadManager.execUnload(getFilterPress(code));
+            unloadManager.doUnload(getFilterPress(code));
+            messagingTemplate.convertAndSend(UNLOAD_CONFIRMED_NOTICE_URI, code);
         }
     }
 
@@ -149,17 +226,13 @@ public class FilterPressManager {
         }
         // calculate the state value and call the specific method of filter press
         short stateValue = calculateState(thingCode, stageValue);
-        if (!Objects.equals(dataService.getData(thingCode, FilterPressMetricConstants.STATE).getValue(),
-                String.valueOf(stateValue))) {// 若值变化，保存并回调
-            DataModel stateModel = new DataModel();
-            stateModel.setThingCode(thingCode);
-            stateModel.setThingCategoryCode(data.getThingCategoryCode());
-            stateModel.setMetricCode(FilterPressMetricConstants.STATE);
-            stateModel.setThingCategoryCode(data.getMetricCategoryCode());
-            stateModel.setValue(String.valueOf(stateValue));
-            stateModel.setDataTimeStamp(new Date());
-            dataService.updateCache(stateModel);
-            dataService.persist2NoSQL(stateModel);
+        DataModelWrapper stateData = dataService.getData(thingCode, FilterPressMetricConstants.STATE);
+        if (stateData == null) {
+            saveState(data, thingCode, stateValue);
+            return;
+        }
+        if (!Objects.equals(stateData.getValue(), String.valueOf(stateValue))) {// 若值变化，保存并回调
+            saveState(data, thingCode, stateValue);
             if (stateValue == GlobalConstants.STATE_STOPPED) {
                 filterPress.onStop();
             } else if (stateValue == GlobalConstants.STATE_RUNNING) {
@@ -168,6 +241,18 @@ public class FilterPressManager {
                 filterPress.onFault();
             }
         }
+    }
+
+    private void saveState(DataModel data, String thingCode, short stateValue) {
+        DataModel stateModel = new DataModel();
+        stateModel.setThingCode(thingCode);
+        stateModel.setThingCategoryCode(data.getThingCategoryCode());
+        stateModel.setMetricCode(FilterPressMetricConstants.STATE);
+        stateModel.setThingCategoryCode(data.getMetricCategoryCode());
+        stateModel.setValue(String.valueOf(stateValue));
+        stateModel.setDataTimeStamp(new Date());
+        dataService.updateCache(stateModel);
+        dataService.persist2NoSQL(stateModel);
     }
 
     /**
@@ -209,7 +294,7 @@ public class FilterPressManager {
     }
 
     void unloadNext() {
-        unloadManager.unloadNextIfPossible();
+        unloadManager.unloadNext();
     }
 
     public int getMaxUnloadParallel() {
@@ -241,12 +326,12 @@ public class FilterPressManager {
     }
 
     /**
-     * 更新缓存及数据库中的自动手动确认状态
+     * 更新缓存及数据库中进料的自动手动确认状态
      *
      * @param thingCode
      * @param state
      */
-    public void autoManuConfirmChange(String thingCode, boolean state) {
+    public void feedAutoManuConfirmChange(String thingCode, boolean state) {
         boolean preState;
         if (thingCode != null) {
             FilterPress filterPress = deviceHolder.get(thingCode);
@@ -262,26 +347,28 @@ public class FilterPressManager {
                 preState = filterPress.isFeedConfirmNeed();
                 if (preState != state) {
                     filterPress.setFeedConfirmNeed(state);
-                    filterPressMapper.updateFilterParamValue(entry.getKey(), FilterPress.PARAM_NAME_FEEDCONFIRMNEED, state ? 1.0 : 0.0);
+                    filterPressMapper.updateFilterParamValue(entry.getKey(), FilterPress.PARAM_NAME_FEEDCONFIRMNEED,
+                            state ? 1.0 : 0.0);
                 }
             }
         }
     }
 
     /**
-     * 更新缓存及数据库中的智能手动状态
+     * 更新缓存及数据库中进料的智能手动状态
      *
      * @param thingCode
      * @param state
      */
-    public void intelligentManuChange(String thingCode, boolean state) {
+    public void feedIntelligentManuChange(String thingCode, boolean state) {
         boolean preState;
         if (thingCode != null) {
             FilterPress filterPress = deviceHolder.get(thingCode);
             preState = filterPress.isFeedIntelligent();
             if (preState != state) {
                 filterPress.setFeedIntelligent(state);
-                filterPressMapper.updateFilterParamValue(thingCode, FilterPress.PARAM_NAME_FEEDINTELLIGENT, state ? 1.0 : 0.0);
+                filterPressMapper.updateFilterParamValue(thingCode, FilterPress.PARAM_NAME_FEEDINTELLIGENT,
+                        state ? 1.0 : 0.0);
             }
         } else {
             for (Map.Entry<String, FilterPress> entry : deviceHolder.entrySet()) {
@@ -289,29 +376,19 @@ public class FilterPressManager {
                 preState = filterPress.isFeedIntelligent();
                 if (preState != state) {
                     filterPress.setFeedIntelligent(state);
-                    filterPressMapper.updateFilterParamValue(entry.getKey(), FilterPress.PARAM_NAME_FEEDINTELLIGENT, state ? 1.0 : 0.0);
+                    filterPressMapper.updateFilterParamValue(entry.getKey(), FilterPress.PARAM_NAME_FEEDINTELLIGENT,
+                            state ? 1.0 : 0.0);
                 }
             }
         }
     }
 
     /**
-     * 弹窗确认
-     *
-     * @param code
-     */
-    public void feedOverPopupConfirm(String code) {
-        doFeedOver(getFilterPress(code));
-        messagingTemplate.convertAndSend(FEED_OVER_CONFIRMED_NOTICE_URI, code);
-        unconfirmedFeed.remove(code);
-    }
-
-    /**
-     * 获取系统自动/手动确认状态
+     * 获取进料系统自动/手动确认状态
      *
      * @return
      */
-    public boolean getAutoManuConfirmState() {
+    public boolean getFeedAutoManuConfirmState() {
         boolean state = false;
         for (Map.Entry<String, FilterPress> entry : deviceHolder.entrySet()) {
             state = entry.getValue().isFeedConfirmNeed();
@@ -321,11 +398,11 @@ public class FilterPressManager {
     }
 
     /**
-     * 获取智能/手动状态
+     * 获取进料智能/手动状态
      *
      * @return
      */
-    public Map<String, Boolean> getIntelligentManuStateMap() {
+    public Map<String, Boolean> getFeedIntelligentManuStateMap() {
         Map<String, Boolean> intelligentManuStateMap = new HashMap<>();
         for (Map.Entry<String, FilterPress> entry : deviceHolder.entrySet()) {
             FilterPress filterPress = entry.getValue();
@@ -336,6 +413,99 @@ public class FilterPressManager {
     }
 
     /**
+     * 更新缓存及数据库中卸料的自动手动确认状态
+     *
+     * @param thingCode
+     * @param state
+     */
+    public void unloadAutoManuConfirmChange(String thingCode, boolean state) {
+        boolean preState;
+        if (thingCode != null) {
+            FilterPress filterPress = deviceHolder.get(thingCode);
+            preState = filterPress.isUnloadConfirmNeed();
+            if (preState != state) {
+                filterPress.setUnloadConfirmNeed(state);
+                filterPressMapper.updateFilterParamValue(thingCode, FilterPress.PARAM_NAME_UNLOADCONFIRMNEED,
+                        state ? 1.0 : 0.0);
+            }
+        } else {
+            for (Map.Entry<String, FilterPress> entry : deviceHolder.entrySet()) {
+                FilterPress filterPress = entry.getValue();
+                preState = filterPress.isUnloadConfirmNeed();
+                if (preState != state) {
+                    filterPress.setUnloadConfirmNeed(state);
+                    filterPressMapper.updateFilterParamValue(entry.getKey(), FilterPress.PARAM_NAME_UNLOADCONFIRMNEED,
+                            state ? 1.0 : 0.0);
+                }
+            }
+        }
+    }
+
+    /**
+     * 更新缓存及数据库中卸料的智能手动状态
+     *
+     * @param thingCode
+     * @param state
+     */
+    public void unloadIntelligentManuChange(String thingCode, boolean state) {
+        boolean preState;
+        if (thingCode != null) {
+            FilterPress filterPress = deviceHolder.get(thingCode);
+            preState = filterPress.isUnloadIntelligent();
+            if (preState != state) {
+                filterPress.setUnloadIntelligent(state);
+                filterPressMapper.updateFilterParamValue(thingCode, FilterPress.PARAM_NAME_UNLOADINTELLIGENT,
+                        state ? 1.0 : 0.0);
+            }
+        } else {
+            for (Map.Entry<String, FilterPress> entry : deviceHolder.entrySet()) {
+                FilterPress filterPress = entry.getValue();
+                preState = filterPress.isUnloadIntelligent();
+                if (preState != state) {
+                    filterPress.setUnloadIntelligent(state);
+                    filterPressMapper.updateFilterParamValue(entry.getKey(), FilterPress.PARAM_NAME_UNLOADINTELLIGENT,
+                            state ? 1.0 : 0.0);
+                }
+            }
+        }
+    }
+
+    /**
+     * 获取卸料系统自动/手动确认状态
+     *
+     * @return
+     */
+    public boolean getUnloadAutoManuConfirmState() {
+        boolean state = false;
+        for (Map.Entry<String, FilterPress> entry : deviceHolder.entrySet()) {
+            state = entry.getValue().isUnloadConfirmNeed();
+            break;
+        }
+        return state;
+    }
+
+    /**
+     * 获取卸料智能/手动状态
+     *
+     * @return
+     */
+    public Map<String, Boolean> getUnloadIntelligentManuStateMap() {
+        Map<String, Boolean> intelligentManuStateMap = new HashMap<>();
+        for (Map.Entry<String, FilterPress> entry : deviceHolder.entrySet()) {
+            FilterPress filterPress = entry.getValue();
+            boolean state = filterPress.isUnloadIntelligent();
+            intelligentManuStateMap.put(entry.getKey(), state);
+        }
+        return intelligentManuStateMap;
+    }
+
+    public void updateMaxUnloadParallel(int num) {
+        setMaxUnloadParallel(num);
+        filterPressMapper.updateFilterParamValue(PARAM_NAME_SYS, FilterPress.PARAM_NAME_MAXUNLOADPARALLEL,
+                (double) num);
+    }
+
+    /**
      * 获取一段时间内的电流最大值、最小值及平均值
      *
      * @return
@@ -343,9 +513,17 @@ public class FilterPressManager {
     public Map<String, FilterPressElectricity> getCurrentInfoInDuration() {
         Date endTime = DateUtils.truncate(new Date(), Calendar.HOUR_OF_DAY);
         Date startTime = DateUtils.addDays(endTime, CURRENT_COUNT_DURATION);
-//        return filterPressMapper.getCurrentInfoInDuration(startTime, endTime);
-        //TODO get real data
+        // return filterPressMapper.getCurrentInfoInDuration(startTime, endTime);
+        // TODO get real data
         return new HashMap<>();
+    }
+
+    /**
+     * 获取卸料次序
+     * @return
+     */
+    public Map<String, Integer> getUnloadSequence(){
+        return unloadManager.getQueuePosition();
     }
 
     // @Scheduled(cron="cnmt.FilterPressDeviceManager.clear")
@@ -379,6 +557,10 @@ public class FilterPressManager {
 
         private Map<String, Integer> queuePosition = new ConcurrentHashMap<>();
 
+        public Map<String, Integer> getQueuePosition() {
+            return queuePosition;
+        }
+
         /**
          * 加入卸料排队
          *
@@ -390,25 +572,32 @@ public class FilterPressManager {
             unloadNextIfPossible();
         }
 
+        private void unloadNext() {
+            unloading.getAndDecrement();
+            unloadNextIfPossible();
+        }
+
         /**
          * 若存在可以卸料的压滤机，则按照最大同时卸料数量进行卸料调度
          */
         private void unloadNextIfPossible() {
-            for (int i = unloading.get(); i <= maxUnloadParallel; i++) {
+            for (int i = unloading.get(); i < maxUnloadParallel; i++) {
                 FilterPress candidate = queue.poll();
                 if (candidate == null) {
                     break;
                 }
                 execUnload(candidate);
+                unloading.getAndIncrement();
             }
         }
 
         private void execUnload(FilterPress filterPress) {
             if (!filterPress.isUnloadConfirmNeed()) {
-                logger.debug("{} unload, send cmd; confirmNeed: {}", filterPress, filterPress.isFeedConfirmNeed());
+                logger.debug("{} unload, send cmd; confirmNeed: {}", filterPress, filterPress.isUnloadConfirmNeed());
                 doUnload(filterPress);
             } else {
-                logger.debug("{} unload, notifying user; confirmNeed: {}", filterPress, filterPress.isFeedConfirmNeed());
+                logger.debug("{} unload, notifying user; confirmNeed: {}", filterPress,
+                        filterPress.isUnloadConfirmNeed());
                 messagingTemplate.convertAndSend(UNLOAD_NOTICE_URI, filterPress.getCode());
                 unConfirmedUnload.add(filterPress.getCode());
             }

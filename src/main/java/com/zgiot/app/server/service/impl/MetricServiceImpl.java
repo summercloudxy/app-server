@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -21,6 +22,11 @@ public class MetricServiceImpl implements MetricService {
     @Override
     public MetricModel getMetric(String metricCode) {
         return metricCache.get(metricCode);
+    }
+
+    @Override
+    public Map<String, MetricModel> getMetricMap() {
+        return metricCache;
     }
 
     @PostConstruct
