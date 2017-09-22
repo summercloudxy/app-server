@@ -1,16 +1,26 @@
 package com.zgiot.app.server.service;
 
 import com.zgiot.common.pojo.ThingModel;
+import com.zgiot.common.pojo.ThingPropertyModel;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public interface ThingService {
-    ThingModel getThing(String thingCode);
-    public ConcurrentHashMap<String,ConcurrentHashMap<String,String>> getThingProperties(String thingCode, String prop_type, String disPropType);
+    /*
+    * 根据thingCode获取thing基本信息
+    * */
+    public ThingModel getThing(String thingCode);
 
-    public List<ConcurrentHashMap<String,ConcurrentHashMap<String,String>>> getThings(String thingCode, String propType);
+    /*
+    * 获取所有thing基本信息
+    * */
+    public List<ThingModel> findAllThing();
+
+    /*
+    * 根据thingCode和propType获取thing property信息
+    * */
+    public List<ThingPropertyModel> findThingProperties(String thingCode, String[] propType);
+
 }
 

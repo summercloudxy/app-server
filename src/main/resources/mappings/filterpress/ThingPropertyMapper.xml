@@ -20,14 +20,14 @@
         tb_thing
     </select>
 
-    <resultMap id="prop" type="com.zgiot.common.pojo.ThingPropModel">
+    <resultMap id="prop" type="com.zgiot.common.pojo.ThingPropertyModel">
         <result column="prop_key" property="propKey"/>
         <result column="prop_value" property="propValue"/>
     </resultMap>
 
     <!--******** prop_type为区分prop信息和disProp信息标志， prop_type=“BASE”为prop信息，prop_type=“DISP”为disProp信息 ********-->
     <select id="getPropOrDisPropPropertiy" parameterType="java.lang.String" resultMap="prop">
-        SELECT prop_key,prop_value
+        SELECT prop_key,prop_value,prop_type
         FROM
         tb_thing_properties
         WHERE
