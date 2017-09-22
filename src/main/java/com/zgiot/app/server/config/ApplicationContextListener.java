@@ -2,8 +2,8 @@ package com.zgiot.app.server.config;
 
 import com.zgiot.app.server.dataprocessor.DataProcessor;
 import com.zgiot.app.server.dataprocessor.impl.CacheUpdater;
-import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
 import com.zgiot.app.server.module.demo.DemoBusiness;
+import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +25,7 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
     @Autowired
     private FilterPressDataListener filterPressListener;
 
+    @SuppressWarnings("unchecked")
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         processor.connect().thenRun(() -> {

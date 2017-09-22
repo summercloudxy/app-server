@@ -13,6 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
@@ -90,7 +92,7 @@ public class DemoBusinessTest {
         mockData.setMetricCode(mockMetricCode);
         mockData.setValue(mockValue.toString());
 
-        DataModelWrapper wrapper = new DataModelWrapper(mockData);
+        Optional<DataModelWrapper> wrapper = Optional.of(new DataModelWrapper(mockData));
         given(mockDataService.getData(mockThing.getThingCode(), mockMetricCode)).willReturn(wrapper);
 
         /* do test */

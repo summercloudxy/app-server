@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class DataServiceImpl implements DataService {
@@ -15,8 +16,9 @@ public class DataServiceImpl implements DataService {
     private DataCache dataCache;
 
     @Override
-    public DataModelWrapper getData(String thingCode, String metricCode) {
-        return dataCache.getValue(thingCode, metricCode);
+    public Optional<DataModelWrapper> getData(String thingCode, String metricCode) {
+        DataModelWrapper data = dataCache.getValue(thingCode, metricCode);
+        return Optional.of(data);
     }
 
     @Override

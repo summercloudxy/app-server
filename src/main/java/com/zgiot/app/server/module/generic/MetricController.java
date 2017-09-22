@@ -24,4 +24,11 @@ public class MetricController {
                 ServerResponse.buildOkJson(mm)
                 , HttpStatus.OK);
     }
+
+    @GetMapping
+    public ResponseEntity<String> getMetricMap(){
+        return new ResponseEntity<>(
+                ServerResponse.buildOkJson(metricService.getMetricMap())
+                , HttpStatus.OK);
+    }
 }
