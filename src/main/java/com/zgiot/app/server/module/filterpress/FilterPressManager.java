@@ -50,6 +50,8 @@ public class FilterPressManager {
 
     private Map<String, FilterPress> deviceHolder = new ConcurrentHashMap<>();
 
+    private Map<String, String> filterPressPumpMapping = new HashMap<>();
+
     private Set<String> unconfirmedFeed = new ConcurrentSkipListSet<>();
 
     private Set<String> unConfirmedUnload = new ConcurrentSkipListSet<>();
@@ -64,20 +66,22 @@ public class FilterPressManager {
         deviceHolder.put("2495", new FilterPress("2495", this));
         deviceHolder.put("2496", new FilterPress("2496", this));
         deviceHolder.put("2496A", new FilterPress("2496A", this));
+        filterPressPumpMapping.put("2487", "2492");
+        filterPressPumpMapping.put("2488", "2493");
+        filterPressPumpMapping.put("2489", "2494");
+        filterPressPumpMapping.put("2490", "2495");
+        filterPressPumpMapping.put("2491", "2496");
+        filterPressPumpMapping.put("2491A", "2496A");
         setMaxUnloadParallel(filterPressMapper
                 .selectParamValue(PARAM_NAME_SYS, FilterPress.PARAM_NAME_MAXUNLOADPARALLEL).intValue());
         deviceHolder.forEach((code, filterPress) -> {
-            boolean feedIntelligent =
-                    filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_FEEDINTELLIGENT).intValue() == 1;
+            boolean feedIntelligent = filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_FEEDINTELLIGENT).intValue() == 1;
             filterPress.setFeedIntelligent(feedIntelligent);
-            boolean feedConfirmNeed =
-                    filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_FEEDCONFIRMNEED).intValue() == 1;
+            boolean feedConfirmNeed = filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_FEEDCONFIRMNEED).intValue() == 1;
             filterPress.setFeedConfirmNeed(feedConfirmNeed);
-            boolean unloadIntelligent =
-                    filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_UNLOADINTELLIGENT).intValue() == 1;
+            boolean unloadIntelligent = filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_UNLOADINTELLIGENT).intValue() == 1;
             filterPress.setUnloadIntelligent(unloadIntelligent);
-            boolean unloadConfirmNeed =
-                    filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_UNLOADCONFIRMNEED).intValue() == 1;
+            boolean unloadConfirmNeed = filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_UNLOADCONFIRMNEED).intValue() == 1;
             filterPress.setUnloadConfirmNeed(unloadConfirmNeed);
         });
     }
@@ -184,7 +188,8 @@ public class FilterPressManager {
     private void processFeedAssumption(DataModel data) {
         if (String.valueOf(FilterPressConstants.FEED_OVER_CURRENT).equals(data.getValue())
                 || String.valueOf(FilterPressConstants.FEED_OVER_TIME).equals(data.getValue())) {
-            getFilterPress(data.getThingCode()).onAssumeFeedOver();
+            String pumpCode = data.getThingCode();
+            getFilterPress(filterPressPumpMapping.get(pumpCode)).onAssumeFeedOver();
         }
     }
 
@@ -226,12 +231,12 @@ public class FilterPressManager {
         }
         // calculate the state value and call the specific method of filter press
         short stateValue = calculateState(thingCode, stageValue);
-        DataModelWrapper stateData = dataService.getData(thingCode, FilterPressMetricConstants.STATE);
-        if (stateData == null) {
+        Optional<DataModelWrapper> stateData = dataService.getData(thingCode, FilterPressMetricConstants.STATE);
+        if (!stateData.isPresent()) {
             saveState(data, thingCode, stateValue);
             return;
         }
-        if (!Objects.equals(stateData.getValue(), String.valueOf(stateValue))) {// 若值变化，保存并回调
+        if (!Objects.equals(stateData.get().getValue(), String.valueOf(stateValue))) {// 若值变化，保存并回调
             saveState(data, thingCode, stateValue);
             if (stateValue == GlobalConstants.STATE_STOPPED) {
                 filterPress.onStop();
@@ -264,7 +269,8 @@ public class FilterPressManager {
      */
     private short calculateState(String thingCode, short stageValue) {
         short state;
-        DataModelWrapper fault = dataService.getData(thingCode, FilterPressMetricConstants.FAULT);
+        DataModelWrapper fault = dataService.getData(thingCode, FilterPressMetricConstants.FAULT)
+                .orElse(new DataModelWrapper(new DataModel(null, thingCode, null, FilterPressMetricConstants.FAULT, Boolean.FALSE.toString(), new Date())));
         if (Boolean.valueOf(fault.getValue())) {
             state = GlobalConstants.STATE_FAULT;
         } else if (stageValue == 0) {
@@ -520,9 +526,10 @@ public class FilterPressManager {
 
     /**
      * 获取卸料次序
+     *
      * @return
      */
-    public Map<String, Integer> getUnloadSequence(){
+    public Map<String, Integer> getUnloadSequence() {
         return unloadManager.getQueuePosition();
     }
 

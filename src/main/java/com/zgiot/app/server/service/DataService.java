@@ -5,6 +5,7 @@ import com.zgiot.common.pojo.DataModelWrapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public interface DataService {
@@ -15,7 +16,7 @@ public interface DataService {
      * @param metricCode
      * @return
      */
-    DataModelWrapper getData(String thingCode, String metricCode);
+    Optional<DataModelWrapper> getData(String thingCode, String metricCode);
 
     /**
      * 根据thing获取数据

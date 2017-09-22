@@ -21,7 +21,7 @@ public class DataController {
 
     @GetMapping("/thing/{thingCode}/metric/{metricCode}")
     public ResponseEntity<String> getData(@PathVariable String thingCode, @PathVariable String metricCode) {
-        DataModelWrapper dw = dataService.getData(thingCode, metricCode);
+        DataModelWrapper dw = dataService.getData(thingCode, metricCode).orElse(null);
         return new ResponseEntity<>(
                 JSON.toJSONString(ServerResponse.buildOK(dw))
                 , HttpStatus.OK);
@@ -34,7 +34,7 @@ public class DataController {
             HashMap<String, DataModelWrapper> valueMap = new HashMap<>(metricCodes.size());
             result.put(thingCode, valueMap);
             for (String metricCode : metricCodes) {
-                valueMap.put(metricCode, dataService.getData(thingCode, metricCode));
+                valueMap.put(metricCode, dataService.getData(thingCode, metricCode).orElse(null));
             }
         });
 
