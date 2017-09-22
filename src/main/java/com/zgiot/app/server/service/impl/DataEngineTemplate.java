@@ -12,7 +12,8 @@ import java.util.Map;
 import java.util.Objects;
 
 public class DataEngineTemplate extends RestTemplate {
-    public static final String CMD_URI = "/cmd/send";
+    public static final String URI_CMD = "/cmd/send";
+    public static final String URI_DATA_ALL = "/data";
     private final String host;
 
     public DataEngineTemplate(String host) {
