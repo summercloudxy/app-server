@@ -24,14 +24,14 @@ public interface ThingService {
     public List<ThingModel> findAllThing();
 
 
-    /**
-     *
-     * @param thingCode
-     * @param propType
-     * @return List<ThingPropertyModel>
-     * 根据thingCode和propType获取thing property信息
-     */
-    public List<ThingPropertyModel> findThingProperties(String thingCode, String[] propType);
+//    /**
+//     *
+//     * @param thingCode
+//     * @param propType
+//     * @return List<ThingPropertyModel>
+//     * 根据thingCode和propType获取thing property信息
+//     */
+//    public List<ThingPropertyModel> findThingProperties(String thingCode, String[] propType);
 
 }
 

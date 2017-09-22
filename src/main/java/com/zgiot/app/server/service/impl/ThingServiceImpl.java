@@ -41,19 +41,19 @@ public class ThingServiceImpl implements ThingService {
         return baseThings;
     }
 
-    @Override
-    public List<ThingPropertyModel> findThingProperties(String thingCode, String[] propType) {
-        List<ThingPropertyModel> temp = new ArrayList<>();
-        List<ThingPropertyModel> thingPropertyModels = new ArrayList<>();
-        if (StringUtils.isNotBlank(thingCode)) {
-            for (String type : propType) {
-                temp = tmlMapper.getProperties(thingCode, type);
-                if (temp.size() > 0) {
-                    thingPropertyModels.addAll(temp);
-                }
-            }
-            temp = null;
-        }
-        return thingPropertyModels;
-    }
+//    @Override
+//    public List<ThingPropertyModel> findThingProperties(String thingCode, String[] propType) {
+//        List<ThingPropertyModel> temp = new ArrayList<>();
+//        List<ThingPropertyModel> thingPropertyModels = new ArrayList<>();
+//        if (StringUtils.isNotBlank(thingCode)) {
+//            for (String type : propType) {
+//                temp = tmlMapper.getProperties(thingCode, type);
+//                if (temp.size() > 0) {
+//                    thingPropertyModels.addAll(temp);
+//                }
+//            }
+//            temp = null;
+//        }
+//        return thingPropertyModels;
+//    }
 }

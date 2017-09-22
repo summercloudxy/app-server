@@ -1,5 +1,6 @@
 package com.zgiot.app.server.module.generic;
 
+import com.zgiot.app.server.service.PropertyService;
 import com.zgiot.app.server.service.ThingService;
 import com.zgiot.common.pojo.ThingModel;
 import com.zgiot.common.pojo.ThingPropertyModel;
@@ -25,6 +26,9 @@ public class ThingController {
     @Autowired
     private ThingService thingService;
 
+    @Autowired
+    private PropertyService propertyService;
+
     @GetMapping("/{thingCode}")
     public ResponseEntity<String> getThing(@PathVariable String thingCode) {
         ThingModel tm = thingService.getThing(thingCode);
@@ -40,7 +44,7 @@ public class ThingController {
         if (StringUtils.isNotBlank(thingCode)) {
             ThingModel thingModel = thingService.getThing(thingCode);
             String[] propType = new String[]{ThingPropertyModel.PROP_TYPE_BASE, ThingPropertyModel.PROP_TYPE_DISP};
-            thingPropertyModels = thingService.findThingProperties(thingCode, propType);
+            thingPropertyModels = propertyService.findThingProperties(thingCode, propType);
             Map<String, String> baseThingMap = new LinkedHashMap<>();
             Map<String, String> propMap = new LinkedHashMap<>();
             Map<String, String> disPropMap = new LinkedHashMap<>();
@@ -84,7 +88,7 @@ public class ThingController {
                 base.put(ThingModel.THING_NAME, baseProperty.getThingName());
                 base.put(ThingModel.THING_SHORT_NAME, baseProperty.getShortName());
                 String[] propType = new String[]{ThingPropertyModel.PROP_TYPE_BASE, ThingPropertyModel.PROP_TYPE_DISP};
-                thingPropertyModels = thingService.findThingProperties(baseProperty.getThingCode(), propType);
+                thingPropertyModels = propertyService.findThingProperties(baseProperty.getThingCode(), propType);
                 if (thingPropertyModels.size() > 0) {
                     for (ThingPropertyModel model : thingPropertyModels) {
                         if (model.getPropType().equals(ThingPropertyModel.PROP_TYPE_BASE)) {
