@@ -231,12 +231,12 @@ public class FilterPressManager {
         }
         // calculate the state value and call the specific method of filter press
         short stateValue = calculateState(thingCode, stageValue);
-        DataModelWrapper stateData = dataService.getData(thingCode, FilterPressMetricConstants.STATE);
-        if (stateData == null) {
+        Optional<DataModelWrapper> stateData = dataService.getData(thingCode, FilterPressMetricConstants.STATE);
+        if (!stateData.isPresent()) {
             saveState(data, thingCode, stateValue);
             return;
         }
-        if (!Objects.equals(stateData.getValue(), String.valueOf(stateValue))) {// 若值变化，保存并回调
+        if (!Objects.equals(stateData.get().getValue(), String.valueOf(stateValue))) {// 若值变化，保存并回调
             saveState(data, thingCode, stateValue);
             if (stateValue == GlobalConstants.STATE_STOPPED) {
                 filterPress.onStop();
@@ -269,7 +269,8 @@ public class FilterPressManager {
      */
     private short calculateState(String thingCode, short stageValue) {
         short state;
-        DataModelWrapper fault = dataService.getData(thingCode, FilterPressMetricConstants.FAULT);
+        DataModelWrapper fault = dataService.getData(thingCode, FilterPressMetricConstants.FAULT)
+                .orElse(new DataModelWrapper(new DataModel(null, thingCode, null, FilterPressMetricConstants.FAULT, Boolean.FALSE.toString(), new Date())));
         if (Boolean.valueOf(fault.getValue())) {
             state = GlobalConstants.STATE_FAULT;
         } else if (stageValue == 0) {
@@ -525,9 +526,10 @@ public class FilterPressManager {
 
     /**
      * 获取卸料次序
+     *
      * @return
      */
-    public Map<String, Integer> getUnloadSequence(){
+    public Map<String, Integer> getUnloadSequence() {
         return unloadManager.getQueuePosition();
     }
 
