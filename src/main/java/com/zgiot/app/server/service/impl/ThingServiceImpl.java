@@ -1,7 +1,6 @@
 package com.zgiot.app.server.service.impl;
 
 import com.zgiot.app.server.mapper.TMLMapper;
-import com.zgiot.app.server.module.filterpress.dao.ThingPropertyMapper;
 import com.zgiot.app.server.service.ThingService;
 import com.zgiot.common.pojo.ThingModel;
 import com.zgiot.common.pojo.ThingPropertyModel;
@@ -19,8 +18,11 @@ public class ThingServiceImpl implements ThingService {
     private final ConcurrentHashMap<String, ThingModel> thingCache = new ConcurrentHashMap<>(5000);
     @Autowired
     private TMLMapper tmlMapper;
-    @Autowired
-    ThingPropertyMapper thingPropertyMapper;
+
+    @Override
+    public ThingModel getThing(String thingCode) {
+        return thingCache.get(thingCode);
+    }
 
     @PostConstruct
     private void initCache() {
@@ -31,17 +33,8 @@ public class ThingServiceImpl implements ThingService {
     }
 
     @Override
-    public ThingModel getThing(String thingCode) {
-        ThingModel thingModel = thingPropertyMapper.getBasePropertiy(thingCode);
-        if (thingModel == null) {
-            thingModel = new ThingModel();
-        }
-        return thingModel;
-    }
-
-    @Override
     public List<ThingModel> findAllThing() {
-        List<ThingModel> baseThings = thingPropertyMapper.getThings();
+        List<ThingModel> baseThings = tmlMapper.findAllThings();
         if (baseThings.size() == 0) {
             baseThings = new ArrayList<>();
         }
@@ -54,7 +47,7 @@ public class ThingServiceImpl implements ThingService {
         List<ThingPropertyModel> thingPropertyModels = new ArrayList<>();
         if (StringUtils.isNotBlank(thingCode)) {
             for (String type : propType) {
-                temp = thingPropertyMapper.getPropOrDisPropPropertiy(thingCode, type);
+                temp = tmlMapper.getProperties(thingCode, type);
                 if (temp.size() > 0) {
                     thingPropertyModels.addAll(temp);
                 }

@@ -26,6 +26,14 @@ public class ThingController {
     private ThingService thingService;
 
     @GetMapping("/{thingCode}")
+    public ResponseEntity<String> getThing(@PathVariable String thingCode) {
+        ThingModel tm = thingService.getThing(thingCode);
+        return new ResponseEntity<>(
+                ServerResponse.buildOkJson(tm)
+                , HttpStatus.OK);
+    }
+
+    @GetMapping("/properties/{thingCode}")
     public ResponseEntity<String> findThingProperties(@PathVariable String thingCode) {
         Map<String, Map<String, String>> thingPropMap = new LinkedHashMap<>();
         List<ThingPropertyModel> thingPropertyModels = new ArrayList<>();
