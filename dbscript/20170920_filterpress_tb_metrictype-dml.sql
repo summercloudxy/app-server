@@ -1,0 +1,11 @@
+INSERT INTO `tb_metrictype` (`metrictype_name`, `metrictype_code`) VALUES ('开到位', 'TAP_OPEN');
+INSERT INTO `tb_metrictype` (`metrictype_name`, `metrictype_code`) VALUES ('关到位', 'TAP_CLOSE');
+INSERT INTO `tb_metrictype` (`metrictype_name`, `metrictype_code`) VALUES ('联锁切换按钮', 'INTERLOCK');
+INSERT INTO `tb_metrictype` (`metrictype_name`, `metrictype_code`) VALUES ('液位选择联锁', 'LEVEL_LOCK');
+INSERT INTO `tb_metrictype` (`metrictype_name`, `metrictype_code`) VALUES ('瞬时带煤量', 'COAL_CAP');
+INSERT INTO `tb_metrictype` (`metrictype_name`, `metrictype_code`) VALUES ('当前液位', 'LEVEL');
+INSERT INTO `tb_metrictype` (`metrictype_name`, `metrictype_code`) VALUES ('智能控制', 'I_CONTROL');
+INSERT INTO `tb_metrictype` (`metrictype_name`, `metrictype_code`) VALUES ('卸料次序', 'UNLOAD_SEQ');
+INSERT INTO `tb_metrictype` (`metrictype_name`, `metrictype_code`) VALUES ('压滤机当前板数', 'PLATE_CNT');
+INSERT INTO `tb_metrictype` (`metrictype_name`, `metrictype_code`) VALUES ('压滤机总板数', 'PLATE_TTL');
+INSERT INTO `tb_metrictype` (`metrictype_name`, `metrictype_code`) VALUES ('进料结束系统判断', 'FEED_ASUM');
