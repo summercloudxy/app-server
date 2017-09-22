@@ -26,5 +26,5 @@ CREATE TABLE `tb_thing_properties` (
   `prop_value` varchar(255) DEFAULT NULL,
   `prop_type` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `thing_index` (`thing_code`) USING BTREE
+  KEY `thing_index` (`thing_code`,`prop_key`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

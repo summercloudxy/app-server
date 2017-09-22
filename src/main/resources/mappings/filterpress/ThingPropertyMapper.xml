@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zgiot.app.server.module.filterpress.dao.ThingPropertyMapper">
-    <resultMap id="base" type="com.zgiot.app.server.module.filterpress.pojo.BaseProperty">
-        <result column="thing_name" property="name"/>
-        <result column="thing_shortName" property="shortName"/>
+    <resultMap id="base" type="com.zgiot.common.pojo.ThingModel">
+        <result column="thing_name" property="thingName"/>
+        <result column="thing_shortname" property="shortName"/>
         <result column="thing_code" property="thingCode"/>
     </resultMap>
     <select id="getBasePropertiy" parameterType="java.lang.String" resultMap="base">
-        SELECT thing_name,thing_shortName
+        SELECT thing_name,thing_shortname
         FROM
             tb_thing
         WHERE
@@ -15,14 +15,14 @@
     </select>
 
     <select id="getThings" parameterType="java.lang.String" resultMap="base">
-        SELECT thing_name,thing_shortName,thing_code
+        SELECT thing_name,thing_shortname,thing_code
         FROM
         tb_thing
     </select>
 
-    <resultMap id="prop" type="com.zgiot.app.server.module.filterpress.pojo.PropOrDisProp">
-        <result column="prop_key" property="prop_key"/>
-        <result column="prop_value" property="prop_value"/>
+    <resultMap id="prop" type="com.zgiot.common.pojo.ThingPropModel">
+        <result column="prop_key" property="propKey"/>
+        <result column="prop_value" property="propValue"/>
     </resultMap>
 
     <!--******** prop_type为区分prop信息和disProp信息标志， prop_type=“BASE”为prop信息，prop_type=“DISP”为disProp信息 ********-->
@@ -31,6 +31,6 @@
         FROM
         tb_thing_properties
         WHERE
-        thing_code = #{thingCode} and prop_type=#{prop_type}
+        thing_code = #{thingCode} and prop_type=#{propType}
     </select>
 </mapper>
