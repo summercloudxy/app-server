@@ -15,7 +15,11 @@ public class SimpleDataCache implements DataCache {
     @Override
     public DataModelWrapper getValue(String thingCode, String metricCode) {
         DataModel data = cache.get(generateKey(thingCode, metricCode));
-        return new DataModelWrapper(data);
+        DataModelWrapper rtn = null;
+        if (data != null) {
+            rtn = new DataModelWrapper(data);
+        }
+        return rtn;
     }
 
     @Override

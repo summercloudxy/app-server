@@ -18,7 +18,7 @@ public class DataServiceImpl implements DataService {
     @Override
     public Optional<DataModelWrapper> getData(String thingCode, String metricCode) {
         DataModelWrapper data = dataCache.getValue(thingCode, metricCode);
-        return Optional.of(data);
+        return (data == null) ? Optional.empty() : Optional.of(data);
     }
 
     @Override
