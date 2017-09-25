@@ -11,11 +11,13 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class ThingServiceImpl implements ThingService {
     private final ConcurrentHashMap<String, ThingModel> thingCache = new ConcurrentHashMap<>(5000);
+    private Map<String,ThingPropertyModel> propertyCache = new ConcurrentHashMap<>(50000);
     @Autowired
     private TMLMapper tmlMapper;
 
@@ -30,6 +32,11 @@ public class ThingServiceImpl implements ThingService {
         for (ThingModel thing : allThings) {
             thingCache.put(thing.getThingCode(), thing);
         }
+
+        List<ThingPropertyModel> allProperties = tmlMapper.findAllProperties();
+        for(ThingPropertyModel property:allProperties){
+            propertyCache.put(property.getThingCode() + "_" + property.getPropKey(),property);
+        }
     }
 
     @Override
@@ -41,19 +48,25 @@ public class ThingServiceImpl implements ThingService {
         return baseThings;
     }
 
-//    @Override
-//    public List<ThingPropertyModel> findThingProperties(String thingCode, String[] propType) {
-//        List<ThingPropertyModel> temp = new ArrayList<>();
-//        List<ThingPropertyModel> thingPropertyModels = new ArrayList<>();
-//        if (StringUtils.isNotBlank(thingCode)) {
-//            for (String type : propType) {
-//                temp = tmlMapper.getProperties(thingCode, type);
-//                if (temp.size() > 0) {
-//                    thingPropertyModels.addAll(temp);
-//                }
-//            }
-//            temp = null;
-//        }
-//        return thingPropertyModels;
-//    }
+    @Override
+    public List<ThingPropertyModel> findThingProperties() {
+        List<ThingPropertyModel> thingPropertyModelList = new ArrayList<>();
+        thingPropertyModelList = tmlMapper.findAllProperties();
+        return thingPropertyModelList;
+    }
+
+    @Override
+    public List<ThingPropertyModel> findThingProperties(String thingCode,String[] propType) {
+        List<ThingPropertyModel> thingPropertyModelList = new ArrayList<>();
+        for(String propKey:propertyCache.keySet()){
+            for(String type:propType){
+                if(propKey.startsWith(thingCode + "_") && (propertyCache.get(propKey) != null)
+                        && (StringUtils.isNotBlank(propertyCache.get(propKey).getPropType()))
+                        && propertyCache.get(propKey).getPropType().equals(type)){
+                    thingPropertyModelList.add(propertyCache.get(propKey));
+                }
+            }
+        }
+        return thingPropertyModelList;
+    }
 }

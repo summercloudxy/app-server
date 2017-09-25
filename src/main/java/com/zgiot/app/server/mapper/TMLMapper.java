@@ -18,12 +18,6 @@ public interface TMLMapper {
     @Select("SELECT * FROM `tb_thing` ")
     List<ThingModel> findAllThings();
 
-    @Select("SELECT * FROM `tb_thing` where thing_code = #{thingCode}")
-    public ThingModel getThingProperties(@Param("thingCode") String thingCode);
-
-    @Select("SELECT * FROM `tb_thing_properties` where thing_code = #{thingCode} and prop_type=#{propType}")
-    public List<ThingPropertyModel> getProperties(@Param("thingCode") String thingCode, @Param("propType") String propType);
-
     @Select("SELECT * FROM `tb_thing_properties`")
     public List<ThingPropertyModel> findAllProperties();
 

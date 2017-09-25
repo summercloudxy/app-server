@@ -23,15 +23,22 @@ public interface ThingService {
      */
     public List<ThingModel> findAllThing();
 
+    /**
+     *
+     * @return List<ThingPropertyModel>
+     *  获取所有properties
+     */
+    public List<ThingPropertyModel> findThingProperties();
 
-//    /**
-//     *
-//     * @param thingCode
-//     * @param propType
-//     * @return List<ThingPropertyModel>
-//     * 根据thingCode和propType获取thing property信息
-//     */
-//    public List<ThingPropertyModel> findThingProperties(String thingCode, String[] propType);
+
+    /**
+     *
+     * @param thingCode
+     * @param propType
+     * @return List<ThingPropertyModel>
+     * 根据thingCode获取propType类型为BASE和DISP的所有properties
+     */
+    public List<ThingPropertyModel> findThingProperties(String thingCode,String[] propType);
 
 }
 

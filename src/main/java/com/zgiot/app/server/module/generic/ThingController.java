@@ -1,6 +1,5 @@
 package com.zgiot.app.server.module.generic;
 
-import com.zgiot.app.server.service.PropertyService;
 import com.zgiot.app.server.service.ThingService;
 import com.zgiot.common.pojo.ThingModel;
 import com.zgiot.common.pojo.ThingPropertyModel;
@@ -26,8 +25,33 @@ public class ThingController {
     @Autowired
     private ThingService thingService;
 
-    @Autowired
-    private PropertyService propertyService;
+    /**
+     *  /thing/{thingCode}接口返回json值的name属性名
+     */
+    public static final String THING_NAME = "name";
+
+    /**
+     *  /thing/{thingCode}接口返回json值的shortName属性名
+     */
+    public static final String THING_SHORT_NAME = "shortName";
+
+    /**
+     *  /thing/{thingCode}接口返回json值的base属性名
+     */
+    public static final String BASE = "base";
+
+    /**
+     *  /thing/{thingCode}接口返回json值的prop属性名
+     */
+    public static final String PROP = "prop";
+
+    /**
+     *  /thing/{thingCode}接口返回json值的disProp属性名
+     */
+    public static final String DIS_PROP= "disProp";
+
+
+
 
     @GetMapping("/{thingCode}")
     public ResponseEntity<String> getThing(@PathVariable String thingCode) {
@@ -43,26 +67,18 @@ public class ThingController {
         List<ThingPropertyModel> thingPropertyModels = new ArrayList<>();
         if (StringUtils.isNotBlank(thingCode)) {
             ThingModel thingModel = thingService.getThing(thingCode);
-            String[] propType = new String[]{ThingPropertyModel.PROP_TYPE_BASE, ThingPropertyModel.PROP_TYPE_DISP};
-            thingPropertyModels = propertyService.findThingProperties(thingCode, propType);
+            String[] propType = new String[]{ThingPropertyModel.PROP_TYPE_PROP, ThingPropertyModel.PROP_TYPE_DISP_PROP};
+            thingPropertyModels = thingService.findThingProperties(thingCode, propType);
             Map<String, String> baseThingMap = new LinkedHashMap<>();
             Map<String, String> propMap = new LinkedHashMap<>();
             Map<String, String> disPropMap = new LinkedHashMap<>();
 
-            baseThingMap.put(ThingModel.THING_NAME, thingModel.getThingName());
-            baseThingMap.put(ThingModel.THING_SHORT_NAME, thingModel.getShortName());
-            if (thingPropertyModels.size() > 0) {
-                for (ThingPropertyModel model : thingPropertyModels) {
-                    if (model.getPropType().equals(ThingPropertyModel.PROP_TYPE_BASE)) {
-                        propMap.put(model.getPropKey(), model.getPropValue());
-                    } else if (model.getPropType().equals(ThingPropertyModel.PROP_TYPE_DISP)) {
-                        disPropMap.put(model.getPropKey(), model.getPropValue());
-                    }
-                }
-            }
-            thingPropMap.put(ThingModel.BASE, baseThingMap);
-            thingPropMap.put(ThingModel.PROP, propMap);
-            thingPropMap.put(ThingModel.DIS_PROP, disPropMap);
+            baseThingMap.put(THING_NAME, thingModel.getThingName());
+            baseThingMap.put(THING_SHORT_NAME, thingModel.getShortName());
+            parsePropertiesByType(thingPropertyModels,propMap,disPropMap);
+            thingPropMap.put(BASE, baseThingMap);
+            thingPropMap.put(PROP, propMap);
+            thingPropMap.put(DIS_PROP, disPropMap);
         }
         return new ResponseEntity<>(
                 ServerResponse.buildOkJson(thingPropMap)
@@ -85,27 +101,31 @@ public class ThingController {
                 prop = new LinkedHashMap<>();
                 disProp = new LinkedHashMap<>();
                 thingMap = new LinkedHashMap<>();
-                base.put(ThingModel.THING_NAME, baseProperty.getThingName());
-                base.put(ThingModel.THING_SHORT_NAME, baseProperty.getShortName());
-                String[] propType = new String[]{ThingPropertyModel.PROP_TYPE_BASE, ThingPropertyModel.PROP_TYPE_DISP};
-                thingPropertyModels = propertyService.findThingProperties(baseProperty.getThingCode(), propType);
-                if (thingPropertyModels.size() > 0) {
-                    for (ThingPropertyModel model : thingPropertyModels) {
-                        if (model.getPropType().equals(ThingPropertyModel.PROP_TYPE_BASE)) {
-                            prop.put(model.getPropKey(), model.getPropValue());
-                        } else if (model.getPropType().equals(ThingPropertyModel.PROP_TYPE_DISP)) {
-                            disProp.put(model.getPropKey(), model.getPropValue());
-                        }
-                    }
-                }
-                thingMap.put(ThingModel.BASE, base);
-                thingMap.put(ThingModel.PROP, prop);
-                thingMap.put(ThingModel.DIS_PROP, disProp);
+                base.put(THING_NAME, baseProperty.getThingName());
+                base.put(THING_SHORT_NAME, baseProperty.getShortName());
+                String[] propType = new String[]{ThingPropertyModel.PROP_TYPE_PROP, ThingPropertyModel.PROP_TYPE_DISP_PROP};
+                thingPropertyModels = thingService.findThingProperties(baseProperty.getThingCode(), propType);
+                parsePropertiesByType(thingPropertyModels,prop,disProp);
+                thingMap.put(BASE, base);
+                thingMap.put(PROP, prop);
+                thingMap.put(DIS_PROP, disProp);
                 things.add(thingMap);
             }
         }
         return new ResponseEntity<>(
                 ServerResponse.buildOkJson(things)
                 , HttpStatus.OK);
+    }
+
+    private void parsePropertiesByType(List<ThingPropertyModel> base,Map<String,String> propMap,Map<String,String> dispPropMap){
+        if ( base.size() > 0) {
+            for (ThingPropertyModel model : base) {
+                if (model.getPropType().equals(ThingPropertyModel.PROP_TYPE_PROP)) {
+                    propMap.put(model.getPropKey(), model.getPropValue());
+                } else if (model.getPropType().equals(ThingPropertyModel.PROP_TYPE_DISP_PROP)) {
+                    dispPropMap.put(model.getPropKey(), model.getPropValue());
+                }
+            }
+        }
     }
 }
