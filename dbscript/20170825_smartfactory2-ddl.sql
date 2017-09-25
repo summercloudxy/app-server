@@ -22,7 +22,7 @@ DROP TABLE IF EXISTS `rel_thing_metric_label`;
 
 CREATE TABLE `rel_thing_metric_label` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `thing_code` varchar(10) DEFAULT NULL,
+  `thing_code` varchar(30) DEFAULT NULL,
   `metric_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
   `label_path` varchar(64) DEFAULT NULL,
   `enabled` tinyint(4) DEFAULT NULL,
