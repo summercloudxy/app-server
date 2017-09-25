@@ -36,7 +36,7 @@ public interface ThingService {
      * @param thingCode
      * @param propType
      * @return List<ThingPropertyModel>
-     * 根据thingCode获取propType类型为BASE和DISP的所有properties
+     *  根据thingCode获取propType类型为PROP和DISP_PROP的所有properties
      */
     public List<ThingPropertyModel> findThingProperties(String thingCode,String[] propType);
 
