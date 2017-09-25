@@ -20,8 +20,18 @@ public class CacheUpdater implements DataListener {
     @Override
     public void onDataChange(DataModel dataModel) {
         Optional<DataModelWrapper> old = dataService.getData(dataModel.getThingCode(), dataModel.getMetricCode());
+        boolean toUpdate = false;
+
+        if (!old.isPresent()) {
+            toUpdate = true;
+        } else {
+            if (dataModel.getDataTimeStamp().getTime() > old.get().getDataTimeStamp().getTime()) {
+                toUpdate = true;
+            }
+        }
+
         // only update later one
-        if (!old.isPresent() || dataModel.getDataTimeStamp().getTime() > old.get().getDataTimeStamp().getTime()) {
+        if (toUpdate) {
             dataService.updateCache(dataModel);
         }
     }
