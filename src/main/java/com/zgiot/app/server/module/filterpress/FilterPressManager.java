@@ -72,7 +72,8 @@ public class FilterPressManager {
         filterPressPumpMapping.put("2490", "2495");
         filterPressPumpMapping.put("2491", "2496");
         filterPressPumpMapping.put("2491A", "2496A");
-        setMaxUnloadParallel(filterPressMapper.selectParamValue(PARAM_NAME_SYS, FilterPress.PARAM_NAME_MAXUNLOADPARALLEL).intValue());
+        setMaxUnloadParallel(filterPressMapper
+                .selectParamValue(PARAM_NAME_SYS, FilterPress.PARAM_NAME_MAXUNLOADPARALLEL).intValue());
         deviceHolder.forEach((code, filterPress) -> {
             boolean feedIntelligent = filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_FEEDINTELLIGENT).intValue() == 1;
             filterPress.setFeedIntelligent(feedIntelligent);
@@ -230,13 +231,12 @@ public class FilterPressManager {
         }
         // calculate the state value and call the specific method of filter press
         short stateValue = calculateState(thingCode, stageValue);
-        DataModelWrapper stateData = dataService.getData(thingCode, FilterPressMetricConstants.STATE);
-        if (stateData == null) {
+        Optional<DataModelWrapper> stateData = dataService.getData(thingCode, FilterPressMetricConstants.STATE);
+        if (!stateData.isPresent()) {
             saveState(data, thingCode, stateValue);
             return;
         }
-        if (!Objects.equals(stateData.getValue(),
-                String.valueOf(stateValue))) {// 若值变化，保存并回调
+        if (!Objects.equals(stateData.get().getValue(), String.valueOf(stateValue))) {// 若值变化，保存并回调
             saveState(data, thingCode, stateValue);
             if (stateValue == GlobalConstants.STATE_STOPPED) {
                 filterPress.onStop();
@@ -269,7 +269,8 @@ public class FilterPressManager {
      */
     private short calculateState(String thingCode, short stageValue) {
         short state;
-        DataModelWrapper fault = dataService.getData(thingCode, FilterPressMetricConstants.FAULT);
+        DataModelWrapper fault = dataService.getData(thingCode, FilterPressMetricConstants.FAULT)
+                .orElse(new DataModelWrapper(new DataModel(null, thingCode, null, FilterPressMetricConstants.FAULT, Boolean.FALSE.toString(), new Date())));
         if (Boolean.valueOf(fault.getValue())) {
             state = GlobalConstants.STATE_FAULT;
         } else if (stageValue == 0) {
@@ -525,9 +526,10 @@ public class FilterPressManager {
 
     /**
      * 获取卸料次序
+     *
      * @return
      */
-    public Map<String, Integer> getUnloadSequence(){
+    public Map<String, Integer> getUnloadSequence() {
         return unloadManager.getQueuePosition();
     }
 
@@ -601,7 +603,8 @@ public class FilterPressManager {
                 logger.debug("{} unload, send cmd; confirmNeed: {}", filterPress, filterPress.isUnloadConfirmNeed());
                 doUnload(filterPress);
             } else {
-                logger.debug("{} unload, notifying user; confirmNeed: {}", filterPress, filterPress.isUnloadConfirmNeed());
+                logger.debug("{} unload, notifying user; confirmNeed: {}", filterPress,
+                        filterPress.isUnloadConfirmNeed());
                 messagingTemplate.convertAndSend(UNLOAD_NOTICE_URI, filterPress.getCode());
                 unConfirmedUnload.add(filterPress.getCode());
             }

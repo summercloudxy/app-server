@@ -37,7 +37,7 @@ public class DemoBusiness implements DataListener {
     public String doCalStatus(String thingCode, String metricCode) {
         String destStatus = STATUS_NORMAL;
 
-        DataModelWrapper data = this.dataService.getData(thingCode, metricCode);
+        DataModelWrapper data = this.dataService.getData(thingCode, metricCode).orElse(null);
         ThingModel thing = this.thingService.getThing(thingCode);
 
         Float valueF = Float.valueOf(data.getValue());

@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
 public class CacheUpdater implements DataListener {
     private static final Logger logger = LoggerFactory.getLogger(CacheUpdater.class);
@@ -17,9 +19,19 @@ public class CacheUpdater implements DataListener {
 
     @Override
     public void onDataChange(DataModel dataModel) {
-        DataModelWrapper old = dataService.getData(dataModel.getThingCode(), dataModel.getMetricCode());
+        Optional<DataModelWrapper> old = dataService.getData(dataModel.getThingCode(), dataModel.getMetricCode());
+        boolean toUpdate = false;
+
+        if (!old.isPresent()) {
+            toUpdate = true;
+        } else {
+            if (dataModel.getDataTimeStamp().getTime() > old.get().getDataTimeStamp().getTime()) {
+                toUpdate = true;
+            }
+        }
+
         // only update later one
-        if (old == null || dataModel.getDataTimeStamp().getTime() > old.getDataTimeStamp().getTime() ){
+        if (toUpdate) {
             dataService.updateCache(dataModel);
         }
     }
