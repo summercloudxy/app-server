@@ -13,10 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @RestController
@@ -50,18 +47,9 @@ public class ThingController {
      */
     public static final String DIS_PROP= "disProp";
 
-    public static final String THING_CODE = "thingCode";
-
-
-
-
-
-    @GetMapping(value="/{thingCode}")
-    public ResponseEntity<String> getThing(@PathVariable String thingCode) {
-        ThingModel tm = thingService.getThing(thingCode);
-        return new ResponseEntity<>(
-                ServerResponse.buildOkJson(tm)
-                , HttpStatus.OK);
+    @GetMapping("/{thingCode}")
+    public ThingModel getThing(@PathVariable String thingCode) {
+        return thingService.getThing(thingCode);
     }
 
     @GetMapping("/properties/{thingCode}")
@@ -78,7 +66,6 @@ public class ThingController {
 
             baseThingMap.put(THING_NAME, thingModel.getThingName());
             baseThingMap.put(THING_SHORT_NAME, thingModel.getShortName());
-            baseThingMap.put(THING_CODE, thingModel.getThingCode());
             parsePropertiesByType(thingPropertyModels,propMap,disPropMap);
             thingPropMap.put(BASE, baseThingMap);
             thingPropMap.put(PROP, propMap);
@@ -107,7 +94,6 @@ public class ThingController {
                 thingMap = new LinkedHashMap<>();
                 base.put(THING_NAME, baseProperty.getThingName());
                 base.put(THING_SHORT_NAME, baseProperty.getShortName());
-                base.put(THING_CODE, baseProperty.getThingCode());
                 String[] propType = new String[]{ThingPropertyModel.PROP_TYPE_PROP, ThingPropertyModel.PROP_TYPE_DISP_PROP};
                 thingPropertyModels = thingService.findThingProperties(baseProperty.getThingCode(), propType);
                 parsePropertiesByType(thingPropertyModels,prop,disProp);
