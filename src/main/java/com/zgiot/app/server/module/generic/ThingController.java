@@ -13,10 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @RestController
@@ -50,15 +47,9 @@ public class ThingController {
      */
     public static final String DIS_PROP= "disProp";
 
-
-
-
     @GetMapping("/{thingCode}")
-    public ResponseEntity<String> getThing(@PathVariable String thingCode) {
-        ThingModel tm = thingService.getThing(thingCode);
-        return new ResponseEntity<>(
-                ServerResponse.buildOkJson(tm)
-                , HttpStatus.OK);
+    public ThingModel getThing(@PathVariable String thingCode) {
+        return thingService.getThing(thingCode);
     }
 
     @GetMapping("/properties/{thingCode}")
