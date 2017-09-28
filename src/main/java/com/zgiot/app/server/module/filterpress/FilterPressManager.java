@@ -8,6 +8,8 @@ import com.zgiot.app.server.util.RequestIdUtil;
 import com.zgiot.common.constants.FilterPressConstants;
 import com.zgiot.common.constants.FilterPressMetricConstants;
 import com.zgiot.common.constants.GlobalConstants;
+import com.zgiot.common.constants.MetricCodes;
+import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
 import com.zgiot.common.pojo.MetricModel;
@@ -93,7 +95,14 @@ public class FilterPressManager {
      */
     public void onDataSourceChange(DataModel data) {
         String thingCode = data.getThingCode();
-        FilterPress filterPress = deviceHolder.get(thingCode);
+        FilterPress filterPress = null;
+        if(deviceHolder.containsKey(thingCode)){
+            filterPress = deviceHolder.get(thingCode);
+        }else if(filterPressPumpMapping.containsKey(thingCode)){
+           filterPress = deviceHolder.get(filterPressPumpMapping.get(thingCode));
+        }else{
+            throw new SysException("filterPress is null",SysException.EC_UNKOWN);
+        }
         String metricCode = data.getMetricCode();
         filterPress.onDataSourceChange(metricCode, data.getValue());
         if (FilterPressMetricConstants.STAGE.equals(metricCode)) {
@@ -231,7 +240,7 @@ public class FilterPressManager {
         }
         // calculate the state value and call the specific method of filter press
         short stateValue = calculateState(thingCode, stageValue);
-        Optional<DataModelWrapper> stateData = dataService.getData(thingCode, FilterPressMetricConstants.STATE);
+        Optional<DataModelWrapper> stateData = dataService.getData(thingCode, MetricCodes.STATE);
         if (!stateData.isPresent()) {
             saveState(data, thingCode, stateValue);
             return;
@@ -252,7 +261,7 @@ public class FilterPressManager {
         DataModel stateModel = new DataModel();
         stateModel.setThingCode(thingCode);
         stateModel.setThingCategoryCode(data.getThingCategoryCode());
-        stateModel.setMetricCode(FilterPressMetricConstants.STATE);
+        stateModel.setMetricCode(MetricCodes.STATE);
         stateModel.setThingCategoryCode(data.getMetricCategoryCode());
         stateModel.setValue(String.valueOf(stateValue));
         stateModel.setDataTimeStamp(new Date());

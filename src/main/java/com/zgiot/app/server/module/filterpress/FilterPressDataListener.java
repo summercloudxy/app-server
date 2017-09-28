@@ -41,7 +41,7 @@ public class FilterPressDataListener implements DataListener{
 
     @Override
     public void onError(Throwable error) {
-        logger.error("data engine error", error);
+        logger.error("data invalid", error);
     }
 
     private void handleData(DataModel data) {

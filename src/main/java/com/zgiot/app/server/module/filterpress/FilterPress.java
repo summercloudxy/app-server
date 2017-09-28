@@ -147,7 +147,7 @@ public class FilterPress {
     public void onAssumeFeedOver() {
         logger.trace("{} assume to be feed over", code);
         this.feedOverTime = System.currentTimeMillis();
-        feedDuration = feedOverTime - feedStartTime;
+//        feedDuration = feedOverTime - feedStartTime;
         if (feedIntelligent) {
             manager.execFeedOver(this);
             logger.debug("{} executed feed over, intelligent:{}", code, feedIntelligent);
