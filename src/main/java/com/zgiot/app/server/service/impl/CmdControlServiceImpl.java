@@ -48,11 +48,12 @@ public class CmdControlServiceImpl implements CmdControlService {
     }
 
     public int sendPulseCmd(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId) {
+        DataModel dataModelCopy = dataModel.clone();
         final Integer realRetryCount = retryCount == null ? DEFAULT_RETRY_COUNT : retryCount;
         if (retryPeriod == null) {
             retryPeriod = SEND_PERIOD;
         }
-        String value = dataModel.getValue();
+        String value = dataModelCopy.getValue();
         Boolean boolValue;
         if (Boolean.TRUE.toString().equalsIgnoreCase(value) || Boolean.FALSE.toString().equalsIgnoreCase(value)) {
             boolValue = Boolean.valueOf(value);
@@ -60,15 +61,15 @@ public class CmdControlServiceImpl implements CmdControlService {
             throw new SysException("data type error", SysException.EC_CMD_FAILED);
         }
         try {
-            sendCmd(dataModel, requestId);
+            sendCmd(dataModelCopy, requestId);
         } catch (Exception e) {
             throw new SysException("failed send first pulse", SysException.EC_CMD_PULSE_FIRST_FAILED);
         }
-        dataModel.setValue(Boolean.toString(!boolValue));
+        dataModelCopy.setValue(Boolean.toString(!boolValue));
         Boolean state = false;
         for (int i = 1; i <= realRetryCount; i++) {
             try {
-                sendCmd(Collections.singletonList(dataModel), requestId);
+                sendCmd(Collections.singletonList(dataModelCopy), requestId);
                 state = true;
                 break;
             } catch (Exception e) {
