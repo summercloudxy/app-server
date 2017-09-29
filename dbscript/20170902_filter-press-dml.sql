@@ -281,13 +281,3 @@ INSERT INTO `tb_metrictype` VALUES ('147', '进料结束', 'FEED_OVER');
 INSERT INTO `tb_metrictype` VALUES ('148', '一队选择', 'T1_CHOOSE');
 INSERT INTO `tb_metrictype` VALUES ('149', '二队选择', 'T2_CHOOSE');
 INSERT INTO `tb_metrictype` VALUES ('150', '三队选择', 'T3_CHOOSE');
-
--- ----------------------------
--- Records of tb_thing
--- ----------------------------
-INSERT INTO `tb_thing` VALUES ('6', NULL, '2492', 'DVC', '压滤机', NULL, NULL, NULL);
-INSERT INTO `tb_thing` VALUES ('7', NULL, '2493', 'DVC', '压滤机', NULL, NULL, NULL);
-INSERT INTO `tb_thing` VALUES ('8', NULL, '2494', 'DVC', '压滤机', NULL, NULL, NULL);
-INSERT INTO `tb_thing` VALUES ('9', NULL, '2495', 'DVC', '压滤机', NULL, NULL, NULL);
-INSERT INTO `tb_thing` VALUES ('10', NULL, '2496', 'DVC', '压滤机', NULL, NULL, NULL);
-INSERT INTO `tb_thing` VALUES ('11', NULL, '2496A', 'DVC', '压滤机', NULL, NULL, NULL);
