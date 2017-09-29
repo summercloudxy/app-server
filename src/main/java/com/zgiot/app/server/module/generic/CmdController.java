@@ -1,5 +1,6 @@
 package com.zgiot.app.server.module.generic;
 
+import com.alibaba.fastjson.JSON;
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.pojo.DataModel;
@@ -18,8 +19,9 @@ public class CmdController {
     private CmdControlService cmdControlService;
 
     @PostMapping("")
-    public ResponseEntity<String> sendCmd(@RequestBody DataModel dataModel, HttpServletRequest request) {
+    public ResponseEntity<String> sendCmd(@RequestBody String reqBody , HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
+        DataModel dataModel = JSON.parseObject(reqBody.trim(), DataModel.class);
         int count = cmdControlService.sendCmd(dataModel, requestId);
 
         return new ResponseEntity<>(
