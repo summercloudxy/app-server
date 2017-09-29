@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.service.impl.AlertMapper">
+    <resultMap id="getAllSetDaysResult"   type="HashMap">
+        <result property="key" column="metric_code" />
+        <result property="value" column="alert_type" />
+    </resultMap>
+
+    <select id="getAlertRuleList" resultType="com.zgiot.app.server.module.alert.pojo.AlertRule">
+        SELECT id,thing_code,metric_code,rule_type,alert_level,lower_limit,upper_limit
+        FROM
+            tb_alert_rule
+        WHERE
+            rule_type = #{alertType}
+    </select>
+
+    <select id="getCurrentAlertData" resultType="com.zgiot.app.server.module.alert.pojo.AlertData">
+        SELECT id,thing_code,metric_code,alert_source,alert_type,alert_level,alert_datetime,alert_info,reporter,alert_stage,is_repair,repair_confirm_user,repair_start_time,repair_end_time,is_manual_intervention,feedback_image,feedback_video,scene_confirm_state,scene_confirm_time,scene_confirm_user FROM tb_alert_data WHERE alert_stage != 'RELEASE'
+    </select>
+
+    <select id="getMetricAlertType" resultType="com.zgiot.app.server.module.alert.pojo.MetricAlertType">
+        SELECT metric_code,alert_type FROM rel_metric_alert_type WHERE 1=1
+    </select>
+
+    <insert id="createAlertDate" keyColumn="id" keyProperty="id" useGeneratedKeys="true" parameterType="com.zgiot.app.server.module.alert.pojo.AlertData">
+        INSERT INTO tb_alert_data(thing_code,metric_code,alert_source,alert_type,alert_level,alert_info,reporter,alert_stage,is_repair,repair_confirm_user,repair_start_time,repair_end_time,is_manual_intervention,feedback_image,feedback_video,scene_confirm_state,scene_confirm_time,scene_confirm_user) VALUES (#{thingCode},#{metricCode},#{alertSource},#{alertType},#{alertLevel},#{alertInfo},#{reporter},#{alertStage},#{repair},#{repairConfirmUser},#{repairStartTime},#{repairEndTime},#{manualIntervention},#{feedBackImage},#{feedBackVideo},#{sceneConfirmState},#{sceneConfirmTime},#{sceneConfirmUser})
+    </insert>
+
+    <update id="updateAlertDate">
+        UPDATE tb_alert_data
+        SET
+        thing_code =#{thingCode},
+        metric_code = #{metricCode},
+        alert_source = #{alertSource},
+        alert_type = #{alertType},
+        alert_level = #{alertLevel},
+        alert_datetime = #{alertDateTime},
+        alert_info = #{alertInfo},
+        reporter = #{reporter},
+        alert_stage = #{alertStage},
+        is_repair = #{isRepair},
+        repair_confirm_user = #{repairConfirmUser},
+        repair_start_time = #{repairStartTime},
+        repair_end_time = #{repairEndTime},
+        is_manual_intervention = #{isManualIntervention},
+        feedback_image = #{feedBackImage},
+        feedback_video = #{feedBackVideo},
+        scene_confirm_state = #{sceneConfirmState},
+        scene_confirm_time = #{sceneConfirmTime},
+        scene_confirm_user = #{sceneConfirmUser}
+        WHERE id = #{id}
+    </update>
+
+    <insert id="saveAlertMessage" keyProperty="id" keyColumn="id" useGeneratedKeys="true">
+        INSERT INTO tb_alert_message(info,type,alert_id,"time",is_read) VALUES (#{info},#{type},#{alertId},#{time},#{isRead})
+    </insert>
+
+    <select id="getAlertMessage" resultType="com.zgiot.app.server.module.alert.pojo.AlertMessage">
+        SELECT id,info,type,alert_id,"time",is_read,user_id,permission FROM tb_alert_message WHERE alert_id = #{alertId} ORDER BY "time"
+    </select>
+
+</mapper>

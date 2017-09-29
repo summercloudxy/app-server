@@ -2,6 +2,7 @@ package com.zgiot.app.server.config;
 
 import com.zgiot.app.server.dataprocessor.DataProcessor;
 import com.zgiot.app.server.dataprocessor.impl.CacheUpdater;
+import com.zgiot.app.server.module.alert.AlertListener;
 import com.zgiot.app.server.module.demo.DemoBusiness;
 import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
 import org.slf4j.Logger;
@@ -24,6 +25,8 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
     private DataProcessor processor;
     @Autowired
     private FilterPressDataListener filterPressListener;
+    @Autowired
+    private AlertListener alertListener;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -31,7 +34,8 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
         processor.connect().thenRun(() -> {
             logger.info("connected");
             processor.addListener(cacheUpdater);
-            processor.addListener(filterPressListener);
+//            processor.addListener(filterPressListener);
+            processor.addListener(alertListener);
             //processor.addListener(demoBusiness);
         }).exceptionally(throwable -> {
             logger.error("error", throwable);
