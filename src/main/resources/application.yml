@@ -33,6 +33,7 @@ mongo:
 
 # data engine配置
 dataengine:
+  enable: true
   https: ${dataengine.https}
   server-name: ${dataengine.server-name}
   websocket-endpoint: ${dataengine.websocket-endpoint}

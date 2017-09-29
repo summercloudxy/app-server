@@ -6,11 +6,20 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class MongoDBProperties {
     public static final int DEFAULT_PORT = 27017;
 
+    private Boolean enable = false;
     private String url;
     private Integer port = DEFAULT_PORT;
     private String dbName;
     private String username;
     private char[] password;
+
+    public Boolean getEnable() {
+        return enable;
+    }
+
+    public void setEnable(Boolean enable) {
+        this.enable = enable;
+    }
 
     public static int getDefaultPort() {
         return DEFAULT_PORT;

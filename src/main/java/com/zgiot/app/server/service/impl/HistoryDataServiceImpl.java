@@ -22,7 +22,7 @@ import static com.mongodb.client.model.Filters.*;
 
 @Service
 public class HistoryDataServiceImpl implements HistoryDataService {
-    private static final Logger logger = LoggerFactory.getLogger(HistoryDataService.class);
+    private static final Logger logger = LoggerFactory.getLogger(HistoryDataServiceImpl.class);
     private static final String COLLECTION_NAME = "metricdata";
     @Autowired
     private MongoDatabase database;
@@ -61,18 +61,22 @@ public class HistoryDataServiceImpl implements HistoryDataService {
         }
 
         List<DataModel> result = new LinkedList<>();
-        collection.find(criteria)
-                .sort(Sorts.descending("dt"))
-                .forEach((Block<Document>) document -> {
-                    DataModel model = new DataModel();
-                    model.setThingCode(document.getString("tc"));
-                    model.setThingCategoryCode(document.getString("tcc"));
-                    model.setMetricCode(document.getString("mc"));
-                    model.setMetricCategoryCode(document.getString("mcc"));
-                    model.setValue(document.getString("v"));
-                    model.setDataTimeStamp(new Date(document.getLong("dt")));
-                    result.add(model);
-                });
+        if (collection != null) {
+            collection.find(criteria)
+                    .sort(Sorts.descending("dt"))
+                    .forEach((Block<Document>) document -> {
+                        DataModel model = new DataModel();
+                        model.setThingCode(document.getString("tc"));
+                        model.setThingCategoryCode(document.getString("tcc"));
+                        model.setMetricCode(document.getString("mc"));
+                        model.setMetricCategoryCode(document.getString("mcc"));
+                        model.setValue(document.getString("v"));
+                        model.setDataTimeStamp(new Date(document.getLong("dt")));
+                        result.add(model);
+                    });
+        } else {
+            logger.warn("mongo disabled");
+        }
         return result;
     }
 
@@ -84,18 +88,23 @@ public class HistoryDataServiceImpl implements HistoryDataService {
 
     @Override
     public int insertBatch(List<DataModel> modelList) {
-        List<Document> models = new LinkedList<>();
-        for (DataModel dataModel : modelList) {
-            Document document = new Document()
-                    .append("tc", dataModel.getThingCode())
-                    .append("tcc", dataModel.getThingCategoryCode())
-                    .append("mc", dataModel.getMetricCode())
-                    .append("mcc", dataModel.getMetricCategoryCode())
-                    .append("v", dataModel.getValue())
-                    .append("dt", dataModel.getDataTimeStamp().getTime());
-            models.add(document);
+        if (collection != null) {
+            List<Document> models = new LinkedList<>();
+            for (DataModel dataModel : modelList) {
+                Document document = new Document()
+                        .append("tc", dataModel.getThingCode())
+                        .append("tcc", dataModel.getThingCategoryCode())
+                        .append("mc", dataModel.getMetricCode())
+                        .append("mcc", dataModel.getMetricCategoryCode())
+                        .append("v", dataModel.getValue())
+                        .append("dt", dataModel.getDataTimeStamp().getTime());
+                models.add(document);
+            }
+            collection.insertMany(models);
+            return models.size();
+        } else {
+            logger.warn("mongo disabled");
+            return 0;
         }
-        collection.insertMany(models);
-        return models.size();
     }
 }
