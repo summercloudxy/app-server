@@ -24,6 +24,6 @@ INSERT INTO `tb_thing_properties`(thing_code,prop_key,prop_value,prop_type) VALU
 INSERT INTO `tb_thing_properties`(thing_code,prop_key,prop_value,prop_type) VALUES ('2500', 'IMAGE_NAME', 'guaban.png', 'DISP_PROP');
 INSERT INTO `tb_thing_properties`(thing_code,prop_key,prop_value,prop_type) VALUES ('2490', 'IMAGE_NAME', 'beng.png', 'DISP_PROP');
 INSERT INTO `tb_thing_properties`(thing_code,prop_key,prop_value,prop_type) VALUES ('2501', 'IMAGE_NAME', 'guaban.png', 'DISP_PROP');
-INSERT INTO `tb_thing_properties`(thing_code,prop_key,prop_value,prop_type) VALUES ('2491', 'IMAGE_NAME', 'lixinji.png', 'DISP_PROP');
+INSERT INTO `tb_thing_properties`(thing_code,prop_key,prop_value,prop_type) VALUES ('2491', 'IMAGE_NAME', 'beng.png', 'DISP_PROP');
 INSERT INTO `tb_thing_properties`(thing_code,prop_key,prop_value,prop_type) VALUES ('2501A', 'IMAGE_NAME', 'guaban.png', 'DISP_PROP');
 INSERT INTO `tb_thing_properties`(thing_code,prop_key,prop_value,prop_type) VALUES ('2491A', 'IMAGE_NAME', 'beng.png', 'DISP_PROP');
