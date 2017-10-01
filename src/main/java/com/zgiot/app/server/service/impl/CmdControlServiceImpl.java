@@ -37,14 +37,15 @@ public class CmdControlServiceImpl implements CmdControlService {
             throw new SysException("request id cannot be null", SysException.EC_CMD_FAILED);
         }
         String data = JSON.toJSONString(dataModelList);
-        ServerResponse response;
+        ServerResponse response = null;
         try {
             response = dataEngineTemplate.postForObject(DataEngineTemplate.URI_CMD, data, ServerResponse.class);
-            logger.trace("received:{}", response);
         } catch (RestClientException e) {
-            throw new SysException(e.getMessage(), SysException.EC_CMD_FAILED);
+            throw new SysException(response.getErrorMsg(), SysException.EC_CMD_FAILED);
         }
-        return (int)response.getObj();
+
+        logger.trace("received:{}", response);
+        return (int) response.getObj();
     }
 
     public int sendPulseCmd(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId) {
@@ -74,9 +75,9 @@ public class CmdControlServiceImpl implements CmdControlService {
             } catch (Exception e) {
                 logger.error("failed send second pulse,retry number: {}", i);
             }
-            try{
+            try {
                 Thread.sleep(retryPeriod);
-            } catch (InterruptedException e){
+            } catch (InterruptedException e) {
                 logger.error("thread is interrupted");
             }
         }
