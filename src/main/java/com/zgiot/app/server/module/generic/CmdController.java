@@ -29,9 +29,10 @@ public class CmdController {
                 , HttpStatus.OK);
     }
 
-    @PostMapping("/pulse")
-    public ResponseEntity<String> sendPulseCmd(@RequestParam DataModel dataModel, @RequestParam(required = false) Integer retryPeriod,
-                                @RequestParam(required = false) Integer retryCount, HttpServletRequest request) {
+    @RequestMapping(value = "/pulse",method = RequestMethod.POST)
+    public ResponseEntity<String> sendPulseCmd(@RequestBody String data, @RequestParam(required = false,defaultValue = "5000") Integer retryPeriod,
+                                @RequestParam(required = false,defaultValue = "3") Integer retryCount, HttpServletRequest request) {
+        DataModel dataModel = JSON.parseObject(data,DataModel.class);
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
         int count = cmdControlService.sendPulseCmd(dataModel, retryPeriod, retryCount, requestId);
 
