@@ -19,17 +19,17 @@ public class AlertData {
     private String alertInfo;
     private String reporter;
     private String alertStage = AlertConstants.STAGE_NOT_VERIFY;
-    private Boolean repair = false;
+    private Boolean isRepair = false;
     private String repairConfirmUser;
     private Date repairStartTime;
     private Date repairEndTime;
-    private Boolean manualIntervention = false;
+    private Boolean isManualIntervention = false;
     private String feedBackImage;
     private String feedBackVideo;
     private String sceneConfirmUser;
     private Date sceneConfirmTime;
     private Boolean sceneConfirmState;
-    private Boolean recovery = false;
+    private Boolean isRecovery = false;
     private Double paramValue;
     private Date lastUpdateTime;
     private Date verifyTime;
@@ -128,12 +128,12 @@ public class AlertData {
         this.alertStage = alertStage;
     }
 
-    public Boolean getRepair() {
-        return repair;
+    public Boolean isRepair() {
+        return isRepair;
     }
 
-    public void setRepair(Boolean repair) {
-        this.repair = repair;
+    public void setRepair(Boolean isRepair) {
+        this.isRepair = isRepair;
     }
 
     public String getRepairConfirmUser() {
@@ -160,12 +160,12 @@ public class AlertData {
         this.repairEndTime = repairEndTime;
     }
 
-    public Boolean getManualIntervention() {
-        return manualIntervention;
+    public Boolean isManualIntervention() {
+        return isManualIntervention;
     }
 
-    public void setManualIntervention(Boolean manualIntervention) {
-        this.manualIntervention = manualIntervention;
+    public void setManualIntervention(Boolean isManualIntervention) {
+        this.isManualIntervention = isManualIntervention;
     }
 
     public String getFeedBackImage() {
@@ -208,12 +208,12 @@ public class AlertData {
         this.sceneConfirmState = sceneConfirmState;
     }
 
-    public Boolean getRecovery() {
-        return recovery;
+    public Boolean isRecovery() {
+        return isRecovery;
     }
 
-    public void setRecovery(Boolean recovery) {
-        this.recovery = recovery;
+    public void setRecovery(Boolean isRecovery) {
+        this.isRecovery = isRecovery;
     }
 
     public Double getParamValue() {
@@ -253,17 +253,17 @@ public class AlertData {
                 ", alertInfo='" + alertInfo + '\'' +
                 ", reporter='" + reporter + '\'' +
                 ", alertStage='" + alertStage + '\'' +
-                ", repair=" + repair +
+                ", isRepair=" + isRepair +
                 ", repairConfirmUser='" + repairConfirmUser + '\'' +
                 ", repairStartTime=" + repairStartTime +
                 ", repairEndTime=" + repairEndTime +
-                ", manualIntervention=" + manualIntervention +
+                ", isManualIntervention=" + isManualIntervention +
                 ", feedBackImage='" + feedBackImage + '\'' +
                 ", feedBackVideo='" + feedBackVideo + '\'' +
                 ", sceneConfirmUser='" + sceneConfirmUser + '\'' +
                 ", sceneConfirmTime=" + sceneConfirmTime +
                 ", sceneConfirmState=" + sceneConfirmState +
-                ", recovery=" + recovery +
+                ", isRecovery=" + isRecovery +
                 ", paramValue=" + paramValue +
                 ", lastUpdateTime=" + lastUpdateTime +
                 ", verifyTime=" + verifyTime +

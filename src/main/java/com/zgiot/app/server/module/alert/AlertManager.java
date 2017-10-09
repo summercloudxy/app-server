@@ -27,6 +27,7 @@ public class AlertManager {
     private Map<String, Map<String, List<AlertRule>>> paramRuleMap;
     private Map<String, Map<String, AlertRule>> protectRuleMap;
     private Map<String, Short> metricAlertTypeMap = new HashMap<>();
+    private Map<String, Map<String, AlertData>> alertParamDataMap = new ConcurrentHashMap<>();
     private String uri = "";
     private String repair_uri = "";
     private String feedback_uri = "";
@@ -209,7 +210,26 @@ public class AlertManager {
                 alertDataMap.put(alertData.getThingCode(), metricAlertData);
             }
             metricAlertData.put(alertData.getMetricCode(), alertData);
+            if(alertData.getAlertType().equals(AlertConstants.TYPE_PARAM)){
+                Map<String, AlertData> metricParamAlertData;
+                if (alertParamDataMap.containsKey(alertData.getThingCode())) {
+                    metricParamAlertData = alertParamDataMap.get(alertData.getThingCode());
+                } else {
+                    metricParamAlertData = new HashMap<>();
+                    alertParamDataMap.put(alertData.getThingCode(), metricParamAlertData);
+                }
+                metricParamAlertData.put(alertData.getMetricCode(), alertData);
+            }
         }
+    }
+
+
+    /**
+     * 获取已有参数报警
+     * @return
+     */
+    public Map<String, Map<String, AlertData>> getAlertParamDataMap() {
+        return alertParamDataMap;
     }
 
     /**
@@ -254,7 +274,7 @@ public class AlertManager {
             case AlertConstants.MESSAGE_TYPE_REPAIR_END: // 结束维修（岗位）
                 endRepair(alertData);
             case AlertConstants.MESSAGE_TYPE_REQ_SCENE_CONFIRM: // 现场确认（调度）
-                if (!alertData.getRecovery()) {
+                if (!alertData.isRecovery()) {
                     throw new Exception();
                 }
                 alertMapper.saveAlertMessage(alertMessage);

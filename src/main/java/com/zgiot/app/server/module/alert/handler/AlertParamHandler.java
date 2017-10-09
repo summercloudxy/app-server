@@ -29,13 +29,14 @@ public class AlertParamHandler implements AlertHandler {
     @Autowired
     private MetricServiceImpl metricService;
     private Map<String, Map<String, List<AlertRule>>> alertRuleMap;
-    private Map<String, Map<String, AlertData>> alertDataCache = new HashMap<>();
+    private Map<String, Map<String, AlertData>> alertDataCache ;
     @Value("${alert.param.period}")
     private Long paramAlertUpdatePeriod;
     private static final Logger logger = LoggerFactory.getLogger(AlertParamHandler.class);
 
     @Override
     public void check(DataModel dataModel) {
+        alertDataCache = alertManager.getAlertParamDataMap();
         String thingCode = dataModel.getThingCode();
         String metricCode = dataModel.getMetricCode();
         Double value = Double.parseDouble(dataModel.getValue());
@@ -64,8 +65,9 @@ public class AlertParamHandler implements AlertHandler {
 
     }
 
-    // @Scheduled(cron = "")
+    @Scheduled(cron = "0/10 * * * * ?")
     private void updateAlertLevel() {
+        alertDataCache = alertManager.getAlertParamDataMap();
         for (Map.Entry<String, Map<String, AlertData>> entry : alertDataCache.entrySet()) {
             String thingCode = entry.getKey();
             Map<String, AlertData> metricAlertDataMap = entry.getValue();
@@ -76,7 +78,7 @@ public class AlertParamHandler implements AlertHandler {
                     Short alertLevel = getAlertLevel(thingCode, metricCode, alertData.getParamValue());
                     if (alertLevel == null) {
                         alertData.setRecovery(true);
-                        if (!alertData.getManualIntervention()) {
+                        if (!alertData.isManualIntervention()) {
                             alertManager.releaseAlert(alertData);
                             metricAlertDataMap.remove(metricCode);
                         }
@@ -88,7 +90,7 @@ public class AlertParamHandler implements AlertHandler {
                         alertData.setAlertInfo(alertInfo);
                         alertData.setLastUpdateTime(new Date());
                         alertManager.updateAlert(alertData);
-                        logger.debug("调整报警等级，thingCode {}，metriceCode {}，当前等级为{}", thingCode, metricCode, alertLevel);
+                        logger.debug("调整报警等级，thingCode {}，metricCode {}，当前等级为{}", thingCode, metricCode, alertLevel);
                     }
                 }
             }
