@@ -42,7 +42,7 @@ public class AlertProtectHandler implements AlertHandler {
             logger.debug("生成一条保护类报警，thing:{},metric:{}", thingCode, metricCode);
         } else if (DISABLE_VALUE.equalsIgnoreCase(dataModel.getValue()) && alertData != null) {
             alertData.setRecovery(true);
-            if (!alertData.getManualIntervention()) {
+            if (!alertData.isManualIntervention()) {
                 alertManager.releaseAlert(alertData);
             }
         }

@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zgiot.app.server.service.impl.AlertMapper">
-    <resultMap id="getAllSetDaysResult"   type="HashMap">
-        <result property="key" column="metric_code" />
-        <result property="value" column="alert_type" />
+
+    <resultMap id="alertDataMap" type="com.zgiot.app.server.module.alert.pojo.AlertData">
+        <id property="id" column="id"/>
+        <result property="thingCode" column="thing_code"/>
+        <result property="metricCode" column="metric_code"/>
+        <result property="alertSource" column="alert_source"/>
+        <result property="alertType" column="alert_type"/>
+        <result property="alertLevel" column="alert_level"/>
+        <result property="alertDateTime" column="alert_datetime"/>
+        <result property="alertInfo" column="alert_info"/>
+    </resultMap>
+
+    <resultMap id="alertRecordMap" type="com.zgiot.app.server.module.alert.pojo.AlertRecord">
+        <result property="thingCode" column="thing_code"/>
+        <collection property="alertDataList" ofType="com.zgiot.app.server.module.alert.pojo.AlertData"/>
     </resultMap>
 
     <select id="getAlertRuleList" resultType="com.zgiot.app.server.module.alert.pojo.AlertRule">
@@ -15,7 +27,7 @@
     </select>
 
     <select id="getCurrentAlertData" resultType="com.zgiot.app.server.module.alert.pojo.AlertData">
-        SELECT id,thing_code,metric_code,alert_source,alert_type,alert_level,alert_datetime,alert_info,reporter,alert_stage,is_repair,repair_confirm_user,repair_start_time,repair_end_time,is_manual_intervention,feedback_image,feedback_video,scene_confirm_state,scene_confirm_time,scene_confirm_user FROM tb_alert_data WHERE alert_stage != 'RELEASE'
+        SELECT id,thing_code,metric_code,alert_source,alert_type,alert_level,alert_datetime,alert_info,reporter,alert_stage,is_repair,repair_confirm_user,repair_start_time,repair_end_time,is_manual_intervention,feedback_image,feedback_video,scene_confirm_state,scene_confirm_time,scene_confirm_user,is_recovery,param_value,last_update_time,verify_time FROM tb_alert_data WHERE alert_stage != 'RELEASE'
     </select>
 
     <select id="getMetricAlertType" resultType="com.zgiot.app.server.module.alert.pojo.MetricAlertType">
@@ -23,7 +35,7 @@
     </select>
 
     <insert id="createAlertDate" keyColumn="id" keyProperty="id" useGeneratedKeys="true" parameterType="com.zgiot.app.server.module.alert.pojo.AlertData">
-        INSERT INTO tb_alert_data(thing_code,metric_code,alert_source,alert_type,alert_level,alert_info,reporter,alert_stage,is_repair,repair_confirm_user,repair_start_time,repair_end_time,is_manual_intervention,feedback_image,feedback_video,scene_confirm_state,scene_confirm_time,scene_confirm_user) VALUES (#{thingCode},#{metricCode},#{alertSource},#{alertType},#{alertLevel},#{alertInfo},#{reporter},#{alertStage},#{repair},#{repairConfirmUser},#{repairStartTime},#{repairEndTime},#{manualIntervention},#{feedBackImage},#{feedBackVideo},#{sceneConfirmState},#{sceneConfirmTime},#{sceneConfirmUser})
+        INSERT INTO tb_alert_data(thing_code,metric_code,alert_source,alert_type,alert_level,alert_datetime,alert_info,reporter,alert_stage,is_repair,repair_confirm_user,repair_start_time,repair_end_time,is_manual_intervention,feedback_image,feedback_video,scene_confirm_state,scene_confirm_time,scene_confirm_user,is_recovery,param_value,last_update_time,verify_time) VALUES (#{thingCode},#{metricCode},#{alertSource},#{alertType},#{alertLevel},#{alertDateTime},#{alertInfo},#{reporter},#{alertStage},#{isRepair},#{repairConfirmUser},#{repairStartTime},#{repairEndTime},#{isManualIntervention},#{feedBackImage},#{feedBackVideo},#{sceneConfirmState},#{sceneConfirmTime},#{sceneConfirmUser},#{isRecovery},#{paramValue},#{lastUpdateTime},#{verifyTime})
     </insert>
 
     <update id="updateAlertDate">
@@ -47,16 +59,74 @@
         feedback_video = #{feedBackVideo},
         scene_confirm_state = #{sceneConfirmState},
         scene_confirm_time = #{sceneConfirmTime},
-        scene_confirm_user = #{sceneConfirmUser}
+        scene_confirm_user = #{sceneConfirmUser},
+        is_recovery = #{isRecovery},
+        param_value = #{paramValue},
+        last_update_time = #{lastUpdateTime},
+        verify_time = #{verifyTime}
         WHERE id = #{id}
     </update>
 
     <insert id="saveAlertMessage" keyProperty="id" keyColumn="id" useGeneratedKeys="true">
-        INSERT INTO tb_alert_message(info,type,alert_id,"time",is_read) VALUES (#{info},#{type},#{alertId},#{time},#{isRead})
+        INSERT INTO tb_alert_message(info,type,alert_id,"time",is_read,user_id,permission) VALUES (#{info},#{type},#{alertId},#{time},#{isRead},#{userId},#{permission})
     </insert>
 
     <select id="getAlertMessage" resultType="com.zgiot.app.server.module.alert.pojo.AlertMessage">
         SELECT id,info,type,alert_id,"time",is_read,user_id,permission FROM tb_alert_message WHERE alert_id = #{alertId} ORDER BY "time"
     </select>
+
+    <select id="getAlertDataList" resultMap="alertRecordMap">
+        SELECT thing_code,metric_code,alert_source,alert_type,alert_level,alert_datetime,alert_info,reporter,alert_stage,is_repair,repair_confirm_user,repair_start_time,repair_end_time,is_manual_intervention,feedback_image,feedback_video,scene_confirm_state,scene_confirm_time,scene_confirm_user,is_recovery,param_value,last_update_time,verify_time FROM tb_alert_data
+        <trim prefix="where" prefixOverrides="AND">
+            <if test="stage !=null">
+                AND
+                alert_stage = #{stage}
+            </if>
+            <if test="stage == null">
+                AND
+                alert_stage != 'RELEASE'
+            </if>
+            <if test="levels != null">
+                AND
+                <foreach collection="levels" item="level" index="index" open="alert_level in (" close=")" separator=",">
+                    #{level}
+                </foreach>
+            </if>
+            <if test="types != null">
+                AND
+                <foreach collection="types" item="type" index="index" open="alert_type in (3," close=")" separator=",">
+                    #{type}
+                </foreach>
+            </if>
+            <if test="buildingIds != null">
+                AND
+                <foreach collection="buildingIds" item="buildingId" index="index" open="building_id in (" close=")" separator=",">
+                    #{buildingId}
+                </foreach>
+            </if>
+            <if test="floors != null">
+                AND
+                <foreach collection="floors" item="floor" index="index" open="floor in (" close=")" separator=",">
+                    #{floor}
+                </foreach>
+            </if>
+            <if test="systems != null">
+                AND
+                <foreach collection="systems" item="system" index="index" open="system in (" close=")" separator=",">
+                    #{system}
+                </foreach>
+            </if>
+        </trim>
+        <if test="sortType == 0">
+            ORDER BY alert_level DESC
+        </if>
+        <if test="sortType == 1">
+            ORDER BY alert_datetime DESC
+        </if>
+
+    </select>
+
+
+
 
 </mapper>
