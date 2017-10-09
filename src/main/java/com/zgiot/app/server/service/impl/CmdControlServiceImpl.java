@@ -38,10 +38,10 @@ public class CmdControlServiceImpl implements CmdControlService {
         }
         String data = JSON.toJSONString(dataModelList);
         ServerResponse response = null;
-        try { 
+        try {
             String resStr = dataEngineTemplate.postForObject(DataEngineTemplate.URI_CMD, data, String.class);
             logger.debug("dataengine response: `{}`", resStr);
-            response = JSON.parseObject(resStr,ServerResponse.class);
+            response = JSON.parseObject(resStr, ServerResponse.class);
 
             cmdSendResponseData.setErrorMessage(response.getErrorMsg());
             cmdSendResponseData.setOkCount((Integer) response.getObj());
@@ -52,13 +52,13 @@ public class CmdControlServiceImpl implements CmdControlService {
         return cmdSendResponseData;
     }
 
-    public int sendPulseCmd(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId) {
-        DataModel dataModelCopy = dataModel.clone();
+    public CmdSendResponseData sendPulseCmd(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId) {
+        CmdSendResponseData cmdSendResponseData = new CmdSendResponseData();
         final Integer realRetryCount = retryCount == null ? DEFAULT_RETRY_COUNT : retryCount;
         if (retryPeriod == null) {
             retryPeriod = SEND_PERIOD;
         }
-        String value = dataModelCopy.getValue();
+        String value = dataModel.getValue();
         Boolean boolValue;
         if (Boolean.TRUE.toString().equalsIgnoreCase(value) || Boolean.FALSE.toString().equalsIgnoreCase(value)) {
             boolValue = Boolean.valueOf(value);
@@ -66,19 +66,22 @@ public class CmdControlServiceImpl implements CmdControlService {
             throw new SysException("data type error", SysException.EC_CMD_FAILED);
         }
         try {
-            sendCmd(dataModelCopy, requestId);
+            sendCmd(dataModel, requestId);
         } catch (Exception e) {
-            throw new SysException("failed send first pulse", SysException.EC_CMD_PULSE_FIRST_FAILED);
+            throw new SysException("failed send first pulse," + e.getMessage(), SysException.EC_CMD_PULSE_FIRST_FAILED);
         }
-        dataModelCopy.setValue(Boolean.toString(!boolValue));
+        dataModel.setValue(Boolean.toString(!boolValue));
         Boolean state = false;
+        String errorMsg = null;
         for (int i = 1; i <= realRetryCount; i++) {
             try {
-                sendCmd(Collections.singletonList(dataModelCopy), requestId);
+                cmdSendResponseData = sendCmd(Collections.singletonList(dataModel), requestId);
+                errorMsg = cmdSendResponseData.getErrorMessage();
                 state = true;
                 break;
             } catch (Exception e) {
-                logger.error("failed send second pulse,retry number: {}", i);
+                errorMsg = e.getMessage();
+                logger.error("failed send second pulse,retry number: {},error msg is {}", i, errorMsg);
             }
             try {
                 Thread.sleep(retryPeriod);
@@ -87,9 +90,9 @@ public class CmdControlServiceImpl implements CmdControlService {
             }
         }
         if (!state) {
-            throw new SysException("failed send second pulse", SysException.EC_CMD_PULSE_SECOND_FAILED);
+            throw new SysException("failed send second pulse," + errorMsg, SysException.EC_CMD_PULSE_SECOND_FAILED);
         }
-        return RETURN_CODE_SUCCESS;
+        return cmdSendResponseData;
     }
 
 }

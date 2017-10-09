@@ -53,10 +53,18 @@ public class CmdController {
                                 @RequestParam(required = false,defaultValue = "3") Integer retryCount, HttpServletRequest request) {
         DataModel dataModel = JSON.parseObject(data,DataModel.class);
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
-        int count = cmdControlService.sendPulseCmd(dataModel, retryPeriod, retryCount, requestId);
+        if (StringUtils.isBlank(data) || dataModel.getThingCode() == null
+                || dataModel.getMetricCode() == null) {
+            ServerResponse res = new ServerResponse<>(
+                    "Not valid request data. The incoming req body is: `" + data + "`", SysException.EC_UNKOWN, 0);
+            String resJson = JSON.toJSONString(res);
+            return new ResponseEntity<>(resJson, HttpStatus.BAD_REQUEST);
+        }
+        CmdControlService.CmdSendResponseData res = cmdControlService.sendPulseCmd(dataModel, retryPeriod, retryCount, requestId);
 
         return new ResponseEntity<>(
-                ServerResponse.buildOkJson(count)
+                ServerResponse.buildJson(res.getErrorMessage()
+                        , SysException.EC_SUCCESS, res.getOkCount())
                 , HttpStatus.OK);
     }
 }
