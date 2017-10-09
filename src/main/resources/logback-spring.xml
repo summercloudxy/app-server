@@ -7,7 +7,17 @@
 
     <logger name="root" level="INFO"/>
 
-    <logger name="com.zgiot.app.server.dataprocessor.WebSocketProcessor" level="TRACE" additivity="false">
+    <logger name="com.zgiot.app.server.dataprocessor.WebSocketProcessor" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <!--appender-ref ref="FILE"/-->
+    </logger>
+
+    <logger name="com.zgiot.app.server.module.filterpress.FilterPressManager" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <!--appender-ref ref="FILE"/-->
+    </logger>
+
+    <logger name="com.zgiot.app.server.module.filterpress.FilterPress" level="INFO" additivity="false">
         <appender-ref ref="CONSOLE"/>
         <!--appender-ref ref="FILE"/-->
     </logger>

@@ -13,7 +13,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -47,9 +50,19 @@ public class ThingController {
      */
     public static final String DIS_PROP= "disProp";
 
+    public static final String THING_CODE = "thingCode";
+
+    public static final String THING_CATEGORY_CODE = "thingCategoryCode";
+
+
+
+
     @GetMapping("/{thingCode}")
-    public ThingModel getThing(@PathVariable String thingCode) {
-        return thingService.getThing(thingCode);
+    public ResponseEntity<String> getThing(@PathVariable String thingCode) {
+        ThingModel tm = thingService.getThing(thingCode);
+        return new ResponseEntity<>(
+                ServerResponse.buildOkJson(tm)
+                , HttpStatus.OK);
     }
 
     @GetMapping("/properties/{thingCode}")
@@ -66,6 +79,8 @@ public class ThingController {
 
             baseThingMap.put(THING_NAME, thingModel.getThingName());
             baseThingMap.put(THING_SHORT_NAME, thingModel.getShortName());
+            baseThingMap.put(THING_CODE, thingModel.getThingCode());
+            baseThingMap.put(THING_CATEGORY_CODE, thingModel.getThingCategoryCode());
             parsePropertiesByType(thingPropertyModels,propMap,disPropMap);
             thingPropMap.put(BASE, baseThingMap);
             thingPropMap.put(PROP, propMap);
@@ -94,6 +109,8 @@ public class ThingController {
                 thingMap = new LinkedHashMap<>();
                 base.put(THING_NAME, baseProperty.getThingName());
                 base.put(THING_SHORT_NAME, baseProperty.getShortName());
+                base.put(THING_CODE, baseProperty.getThingCode());
+                base.put(THING_CATEGORY_CODE, baseProperty.getThingCategoryCode());
                 String[] propType = new String[]{ThingPropertyModel.PROP_TYPE_PROP, ThingPropertyModel.PROP_TYPE_DISP_PROP};
                 thingPropertyModels = thingService.findThingProperties(baseProperty.getThingCode(), propType);
                 parsePropertiesByType(thingPropertyModels,prop,disProp);

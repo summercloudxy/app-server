@@ -5,19 +5,20 @@ import com.zgiot.common.pojo.DataModel;
 import java.util.List;
 
 public interface CmdControlService {
+
     /**
      * 下发指令
      *
      * @param dataModel
      */
-    int sendCmd(DataModel dataModel, String requestId);
+    CmdSendResponseData sendCmd(DataModel dataModel, String requestId);
 
     /**
      * 下发指令（批量）
      *
      * @param dataModelList
      */
-    int sendCmd(List<DataModel> dataModelList, String requestId);
+    CmdSendResponseData sendCmd(List<DataModel> dataModelList, String requestId);
 
     /**
      * 下发脉冲指令
@@ -28,4 +29,27 @@ public interface CmdControlService {
      * @return
      */
     int sendPulseCmd(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId);
+
+    class CmdSendResponseData {
+        int okCount;
+        String errorMessage;
+
+        public int getOkCount() {
+            return okCount;
+        }
+
+        public void setOkCount(int okCount) {
+            this.okCount = okCount;
+        }
+
+        public String getErrorMessage() {
+            return errorMessage;
+        }
+
+        public void setErrorMessage(String errorMessage) {
+            this.errorMessage = errorMessage;
+        }
+
+    }
+
 }
