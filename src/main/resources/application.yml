@@ -27,6 +27,7 @@ spring.datasource.druid:
   driver-class-name: com.mysql.jdbc.Driver
 
 mongo:
+  enable: ${mongodb.enable}
   url: ${mongodb.url}
   port: ${mongodb.port}
   db-name: ${mongodb.db-name}
