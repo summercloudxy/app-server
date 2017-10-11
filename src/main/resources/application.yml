@@ -26,6 +26,10 @@ spring.datasource.druid:
   test-on-borrow: true
   driver-class-name: com.mysql.jdbc.Driver
 
+mongo:
+  url: ${mongodb.url}
+  port: ${mongodb.port}
+  db-name: ${mongodb.db-name}
 
 # data engine配置
 dataengine:

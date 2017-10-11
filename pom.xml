@@ -94,6 +94,11 @@
             <artifactId>mybatis-spring-boot-starter</artifactId>
             <version>${version.mybatis}</version>
         </dependency>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver</artifactId>
+            <version>3.5.0</version>
+        </dependency>
         <!--Json相关-->
         <dependency>
             <groupId>com.alibaba</groupId>
