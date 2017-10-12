@@ -334,7 +334,7 @@ public class FilterPressManager {
             logger.debug("{} feed over,notifying user; confirmNeed: {}", filterPress, filterPress.isFeedConfirmNeed());
             FeedAsumConfirmBean feedAsumConfirmBean = new FeedAsumConfirmBean();
             feedAsumConfirmBean.setDeviceCode(filterPress.getCode());
-            feedAsumConfirmBean.setFeedOverDuration(filterPress.getFeedOverTime());
+            feedAsumConfirmBean.setFeedOverDuration(filterPress.getFeedOverTime() - filterPress.getFeedStartTime());
             List<String> feedPumpCodes = getKeyByValueFromMap(filterPressPumpMapping,filterPress.getCode());
             String feedPumpCode = feedPumpCodes.get(0);
             if(feedPumpCodes.size() == 0){
