@@ -1,9 +1,11 @@
 package com.zgiot.app.server.module.filterpress;
 
 import com.zgiot.app.server.module.filterpress.dao.FilterPressMapper;
+import com.zgiot.app.server.module.filterpress.pojo.FeedAsumConfirmBean;
 import com.zgiot.app.server.module.filterpress.pojo.FilterPressElectricity;
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.DataService;
+import com.zgiot.app.server.service.cache.SimpleDataCache;
 import com.zgiot.app.server.util.RequestIdUtil;
 import com.zgiot.common.constants.FilterPressConstants;
 import com.zgiot.common.constants.FilterPressMetricConstants;
@@ -45,6 +47,9 @@ public class FilterPressManager {
     private SimpMessagingTemplate messagingTemplate;
     @Autowired
     private FilterPressMapper filterPressMapper;
+
+    @Autowired
+    private SimpleDataCache simpleDataCache;
 
     private static final int INIT_CAPACITY = 6;
 
@@ -327,9 +332,29 @@ public class FilterPressManager {
             doFeedOver(filterPress);
         } else {
             logger.debug("{} feed over,notifying user; confirmNeed: {}", filterPress, filterPress.isFeedConfirmNeed());
-            messagingTemplate.convertAndSend(FEED_OVER_NOTICE_URI, filterPress.getCode());
+            FeedAsumConfirmBean feedAsumConfirmBean = new FeedAsumConfirmBean();
+            feedAsumConfirmBean.setDeviceCode(filterPress.getCode());
+            feedAsumConfirmBean.setFeedOverDuration(filterPress.getFeedOverTime());
+            List<String> feedPumpCodes = getKeyByValueFromMap(filterPressPumpMapping,filterPress.getCode());
+            String feedPumpCode = feedPumpCodes.get(0);
+            if(feedPumpCodes.size() == 0){
+                throw new SysException("feedPump thingCode is null",SysException.EC_UNKOWN);
+            }
+            Float current = Float.parseFloat(simpleDataCache.getValue(feedPumpCode,FilterPressMetricConstants.FEED_PUMP_CURRENT).getValue());
+            feedAsumConfirmBean.setFeedOverCurrent(current);
+            messagingTemplate.convertAndSend(FEED_OVER_NOTICE_URI, feedAsumConfirmBean);
             unconfirmedFeed.add(filterPress.getCode());
         }
+    }
+
+    private List<String> getKeyByValueFromMap(Map<String,String> map,String value){
+        List<String> keys = new ArrayList<>();
+        for(String key:map.keySet()){
+            if(map.get(key).equals(value)){
+                keys.add(key);
+            }
+        }
+        return keys;
     }
 
     private void doFeedOver(FilterPress filterPress) {
