@@ -176,7 +176,7 @@ public class FilterPressManager {
             DataModel dataModel = new DataModel();
             dataModel.setThingCode(code);
             dataModel.setThingCategoryCode(ThingModel.CATEGORY_DEVICE);
-            dataModel.setMetricCode(FilterPressMetricConstants.PLATE_CNT);
+            dataModel.setMetricCode(FilterPressMetricConstants.PLATE_TTL);
             dataModel.setMetricCategoryCode(MetricModel.CATEGORY_SIGNAL);
             dataModel.setValue(String.valueOf(total));
             dataModel.setDataTimeStamp(new Date());
@@ -608,7 +608,7 @@ public class FilterPressManager {
          * @param filterPress
          */
         void enqueue(FilterPress filterPress) {
-            queuePosition.put(filterPress.getCode(), queue.size());
+            queuePosition.put(filterPress.getCode(), queuePosition.size());
             queue.add(filterPress);
             unloadNextIfPossible();
         }
