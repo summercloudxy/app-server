@@ -16,12 +16,12 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Dumping data for table `tb_thingtype`
+-- Dumping data for table `rel_thingtype_metric`
 --
 
-LOCK TABLES `tb_thingtype` WRITE;
-/*!40000 ALTER TABLE `tb_thingtype` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tb_thingtype` ENABLE KEYS */;
+LOCK TABLES `rel_thingtype_metric` WRITE;
+/*!40000 ALTER TABLE `rel_thingtype_metric` DISABLE KEYS */;
+/*!40000 ALTER TABLE `rel_thingtype_metric` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -33,4 +33,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-10-13 15:33:11
+-- Dump completed on 2017-10-13 16:17:38
