@@ -1,1 +1,0 @@
-alter table tb_thing add column thing_shortname varchar(20);
