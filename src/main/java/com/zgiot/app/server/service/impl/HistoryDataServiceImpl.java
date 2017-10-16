@@ -67,7 +67,7 @@ public class HistoryDataServiceImpl implements HistoryDataService {
                     .forEach((Block<Document>) document -> {
                         DataModel model = new DataModel();
                         model.setThingCode(document.getString("tc"));
-                        model.setThingCategoryCode(document.getString("tcc"));
+                        model.setMetricDataType(document.getString("mdt"));
                         model.setMetricCode(document.getString("mc"));
                         model.setMetricCategoryCode(document.getString("mcc"));
                         model.setValue(document.getString("v"));
@@ -93,7 +93,7 @@ public class HistoryDataServiceImpl implements HistoryDataService {
             for (DataModel dataModel : modelList) {
                 Document document = new Document()
                         .append("tc", dataModel.getThingCode())
-                        .append("tcc", dataModel.getThingCategoryCode())
+                        .append("mdt", dataModel.getMetricDataType())
                         .append("mc", dataModel.getMetricCode())
                         .append("mcc", dataModel.getMetricCategoryCode())
                         .append("v", dataModel.getValue())
