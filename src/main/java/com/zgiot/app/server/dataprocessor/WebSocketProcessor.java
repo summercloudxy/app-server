@@ -1,6 +1,7 @@
 package com.zgiot.app.server.dataprocessor;
 
 import com.alibaba.fastjson.JSON;
+import com.zgiot.common.enums.MetricDataTypeEnum;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.ThingModel;
 import org.asynchttpclient.AsyncHttpClient;
@@ -118,7 +119,7 @@ public class WebSocketProcessor implements DataProcessor {
             logger.trace("received: {}", dataModel);
 
             // exclude ERR data
-            if (ThingModel.CATEGORY_ERROR.equals(dataModel.getThingCategoryCode())) {
+            if (MetricDataTypeEnum.METRIC_DATA_TYPE_ERROR.getName().equals(dataModel.getMetricDataType())) {
                 logger.warn("Got error data `{}`. ", dataModel.toString());
                 return;
             }

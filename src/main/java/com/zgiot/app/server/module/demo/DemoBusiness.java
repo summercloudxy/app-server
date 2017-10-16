@@ -3,6 +3,7 @@ package com.zgiot.app.server.module.demo;
 import com.zgiot.app.server.dataprocessor.DataListener;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.service.ThingService;
+import com.zgiot.common.enums.MetricDataTypeEnum;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
 import com.zgiot.common.pojo.ThingModel;
@@ -16,7 +17,6 @@ import java.util.Optional;
 public class DemoBusiness implements DataListener {
     public static final String STATUS_NORMAL = "NOR";
     public static final String STATUS_TOO_HIGH = "HIG";
-    public static final String THING_CATEGORY_DEVICE = "DEV";
     public static final Float THRESHOLD_BAD = Float.valueOf(10f);
 
     @Autowired
@@ -42,8 +42,7 @@ public class DemoBusiness implements DataListener {
 
         Float valueF = Float.valueOf(data.getValue());
 
-        if (THING_CATEGORY_DEVICE.equals(thing.getThingCategoryCode())
-                && valueF > THRESHOLD_BAD) {
+        if (valueF > THRESHOLD_BAD) {
             destStatus = STATUS_TOO_HIGH;
         }
 
@@ -54,7 +53,7 @@ public class DemoBusiness implements DataListener {
     public void onDataChange(DataModel dataModel) {
         // cal new status via new data value
         String sValue = doCalStatus(dataModel.getThingCode(), dataModel.getMetricCode());
-        DataModel sData = new DataModel(ThingModel.CATEGORY_DEVICE
+        DataModel sData = new DataModel(MetricDataTypeEnum.METRIC_DATA_TYPE_OK.getName()
                 , dataModel.getThingCode(), dataModel.getMetricCategoryCode()
                 , "NEW_STATUS", sValue, dataModel.getDataTimeStamp()
         );
