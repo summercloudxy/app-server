@@ -12,10 +12,10 @@ import java.util.List;
 public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-        FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
-        //自定义配置...
-        FastJsonConfig config = new FastJsonConfig();
-        converter.setFastJsonConfig(config);
-        converters.add(converter);
+//        FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
+//        //自定义配置...
+//        FastJsonConfig config = new FastJsonConfig();
+//        converter.setFastJsonConfig(config);
+//        converters.add(converter);
     }
 }
