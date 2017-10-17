@@ -101,7 +101,7 @@ public class FilterPressManager {
         }else if(filterPressPumpMapping.containsKey(thingCode)){
            filterPress = deviceHolder.get(filterPressPumpMapping.get(thingCode));
         }else{
-            throw new SysException("filterPress is null",SysException.EC_UNKOWN);
+            throw new SysException("filterPress is null",SysException.EC_UNKNOWN);
         }
         String metricCode = data.getMetricCode();
         filterPress.onDataSourceChange(metricCode, data.getValue());

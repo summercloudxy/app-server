@@ -1,5 +1,6 @@
 package com.zgiot.app.server.service.impl;
 
+import com.zgiot.app.server.module.message.mapper.MessageMapper;
 import com.zgiot.app.server.module.message.pojo.FixMessage;
 import com.zgiot.app.server.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;

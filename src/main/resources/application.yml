@@ -44,5 +44,10 @@ alert:
   param:
     period: 60000
 
+uploadFile:
+  dir: D:/uploadFile
+  uri: http://localhost:9090/app-server/files/
+
+
 
 

@@ -1,4 +1,4 @@
-package com.zgiot.app.server.service.impl;
+package com.zgiot.app.server.module.message.mapper;
 
 import com.zgiot.app.server.module.message.pojo.FixMessage;
 import org.apache.ibatis.annotations.Mapper;

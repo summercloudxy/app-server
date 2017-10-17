@@ -2,6 +2,8 @@ package com.zgiot.app.server.service.impl;
 
 import com.zgiot.app.server.mapper.TMLMapper;
 import com.zgiot.app.server.service.ThingService;
+import com.zgiot.common.pojo.BuildingModel;
+import com.zgiot.common.pojo.SystemModel;
 import com.zgiot.common.pojo.ThingModel;
 import com.zgiot.common.pojo.ThingPropertyModel;
 import org.apache.commons.lang.StringUtils;
@@ -74,5 +76,15 @@ public class ThingServiceImpl implements ThingService {
     @Override
     public Set<String> findMetricsOfThing(String thingCode) {
         return tmlMapper.findMetricsOfThing(thingCode);
+    }
+
+    @Override
+    public List<BuildingModel> findAllBuilding() {
+        return tmlMapper.findAllBuildings();
+    }
+
+    @Override
+    public List<SystemModel> findAllSystem() {
+        return tmlMapper.findAllSystems();
     }
 }

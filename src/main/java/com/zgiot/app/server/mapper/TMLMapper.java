@@ -1,8 +1,6 @@
 package com.zgiot.app.server.mapper;
 
-import com.zgiot.common.pojo.MetricModel;
-import com.zgiot.common.pojo.ThingModel;
-import com.zgiot.common.pojo.ThingPropertyModel;
+import com.zgiot.common.pojo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -25,4 +23,10 @@ public interface TMLMapper {
     @Select("SELECT metric_code FROM `rel_thing_metric_label` WHERE thing_code = #{thingCode}")
     Set<String> findMetricsOfThing(String thingCode);
 
+
+    @Select("SELECT * FROM `tb_building`")
+    List<BuildingModel> findAllBuildings();
+
+    @Select("SELECT * FROM `tb_system`")
+    List<SystemModel> findAllSystems();
 }

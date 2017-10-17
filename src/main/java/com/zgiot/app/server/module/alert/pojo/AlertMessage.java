@@ -7,7 +7,7 @@ import java.util.Date;
  */
 public class AlertMessage {
     private Integer id;
-    private Boolean isRead;
+    private Boolean isRead = false;
     private String info;
     private Short type;
     private Integer alertId;

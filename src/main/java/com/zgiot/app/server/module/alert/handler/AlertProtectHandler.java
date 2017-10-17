@@ -44,6 +44,8 @@ public class AlertProtectHandler implements AlertHandler {
             alertData.setRecovery(true);
             if (!alertData.isManualIntervention()) {
                 alertManager.releaseAlert(alertData);
+            }else {
+                alertManager.updateAlert(alertData);
             }
         }
 

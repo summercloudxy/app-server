@@ -2,8 +2,11 @@ package com.zgiot.app.server.module.alert.pojo;
 
 import com.zgiot.common.constants.AlertConstants;
 import com.zgiot.common.pojo.DataModel;
+import com.zgiot.common.pojo.SystemModel;
+import com.zgiot.common.pojo.ThingModel;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by xiayun on 2017/9/25.
@@ -19,20 +22,43 @@ public class AlertData {
     private String alertInfo;
     private String reporter;
     private String alertStage = AlertConstants.STAGE_NOT_VERIFY;
-    private Boolean isRepair = false;
+    private Boolean repair = false;
     private String repairConfirmUser;
     private Date repairStartTime;
     private Date repairEndTime;
-    private Boolean isManualIntervention = false;
+    private Boolean manualIntervention = false;
     private String feedBackImage;
     private String feedBackVideo;
     private String sceneConfirmUser;
     private Date sceneConfirmTime;
     private Boolean sceneConfirmState;
-    private Boolean isRecovery = false;
+    private Boolean recovery = false;
     private Double paramValue;
+    private Double paramLower;
+    private Double paramUpper;
     private Date lastUpdateTime;
     private Date verifyTime;
+    private String postWorker;
+    private String dispatcher;
+    private Date releaseTime;
+    private Long alertDuration;
+    private Long repairDuration;
+    private List<AlertMessage> alertMessageList;
+    private int messageUnreadCount;
+    private List<String> feedBackImageList;
+    private ThingModel thingModel;
+    private SystemModel systemModel;
+
+
+    public List<AlertMessage> getAlertMessageList() {
+        return alertMessageList;
+    }
+
+    public void setAlertMessageList(List<AlertMessage> alertMessageList) {
+        this.alertMessageList = alertMessageList;
+    }
+
+
 
     public AlertData() {}
 
@@ -129,11 +155,11 @@ public class AlertData {
     }
 
     public Boolean isRepair() {
-        return isRepair;
+        return repair;
     }
 
     public void setRepair(Boolean isRepair) {
-        this.isRepair = isRepair;
+        this.repair = isRepair;
     }
 
     public String getRepairConfirmUser() {
@@ -161,11 +187,11 @@ public class AlertData {
     }
 
     public Boolean isManualIntervention() {
-        return isManualIntervention;
+        return manualIntervention;
     }
 
     public void setManualIntervention(Boolean isManualIntervention) {
-        this.isManualIntervention = isManualIntervention;
+        this.manualIntervention = isManualIntervention;
     }
 
     public String getFeedBackImage() {
@@ -209,11 +235,11 @@ public class AlertData {
     }
 
     public Boolean isRecovery() {
-        return isRecovery;
+        return recovery;
     }
 
-    public void setRecovery(Boolean isRecovery) {
-        this.isRecovery = isRecovery;
+    public void setRecovery(Boolean recovery) {
+        this.recovery = recovery;
     }
 
     public Double getParamValue() {
@@ -240,33 +266,91 @@ public class AlertData {
         this.verifyTime = verifyTime;
     }
 
-    @Override
-    public String toString() {
-        return "AlertData{" +
-                "id=" + id +
-                ", thingCode='" + thingCode + '\'' +
-                ", metricCode='" + metricCode + '\'' +
-                ", alertSource=" + alertSource +
-                ", alertType=" + alertType +
-                ", alertLevel=" + alertLevel +
-                ", alertDateTime=" + alertDateTime +
-                ", alertInfo='" + alertInfo + '\'' +
-                ", reporter='" + reporter + '\'' +
-                ", alertStage='" + alertStage + '\'' +
-                ", isRepair=" + isRepair +
-                ", repairConfirmUser='" + repairConfirmUser + '\'' +
-                ", repairStartTime=" + repairStartTime +
-                ", repairEndTime=" + repairEndTime +
-                ", isManualIntervention=" + isManualIntervention +
-                ", feedBackImage='" + feedBackImage + '\'' +
-                ", feedBackVideo='" + feedBackVideo + '\'' +
-                ", sceneConfirmUser='" + sceneConfirmUser + '\'' +
-                ", sceneConfirmTime=" + sceneConfirmTime +
-                ", sceneConfirmState=" + sceneConfirmState +
-                ", isRecovery=" + isRecovery +
-                ", paramValue=" + paramValue +
-                ", lastUpdateTime=" + lastUpdateTime +
-                ", verifyTime=" + verifyTime +
-                '}';
+    public String getPostWorker() {
+        return postWorker;
+    }
+
+    public void setPostWorker(String postWorker) {
+        this.postWorker = postWorker;
+    }
+
+    public String getDispatcher() {
+        return dispatcher;
+    }
+
+    public void setDispatcher(String dispatcher) {
+        this.dispatcher = dispatcher;
+    }
+
+    public Double getParamLower() {
+        return paramLower;
+    }
+
+    public void setParamLower(Double paramLower) {
+        this.paramLower = paramLower;
+    }
+
+    public Double getParamUpper() {
+        return paramUpper;
+    }
+
+    public void setParamUpper(Double paramUpper) {
+        this.paramUpper = paramUpper;
+    }
+
+    public Date getReleaseTime() {
+        return releaseTime;
+    }
+
+    public void setReleaseTime(Date releaseTime) {
+        this.releaseTime = releaseTime;
+    }
+
+    public Long getAlertDuration() {
+        return alertDuration;
+    }
+
+    public void setAlertDuration(Long alertDuration) {
+        this.alertDuration = alertDuration;
+    }
+
+    public int getMessageUnreadCount() {
+        return messageUnreadCount;
+    }
+
+    public void setMessageUnreadCount(int messageUnreadCount) {
+        this.messageUnreadCount = messageUnreadCount;
+    }
+
+    public List<String> getFeedBackImageList() {
+        return feedBackImageList;
+    }
+
+    public void setFeedBackImageList(List<String> feedBackImageList) {
+        this.feedBackImageList = feedBackImageList;
+    }
+
+    public Long getRepairDuration() {
+        return repairDuration;
+    }
+
+    public void setRepairDuration(Long repairDuration) {
+        this.repairDuration = repairDuration;
+    }
+
+    public ThingModel getThingModel() {
+        return thingModel;
+    }
+
+    public void setThingModel(ThingModel thingModel) {
+        this.thingModel = thingModel;
+    }
+
+    public SystemModel getSystemModel() {
+        return systemModel;
+    }
+
+    public void setSystemModel(SystemModel systemModel) {
+        this.systemModel = systemModel;
     }
 }

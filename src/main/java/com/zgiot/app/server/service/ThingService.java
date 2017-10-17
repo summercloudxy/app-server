@@ -1,5 +1,7 @@
 package com.zgiot.app.server.service;
 
+import com.zgiot.common.pojo.BuildingModel;
+import com.zgiot.common.pojo.SystemModel;
 import com.zgiot.common.pojo.ThingModel;
 import com.zgiot.common.pojo.ThingPropertyModel;
 import org.springframework.stereotype.Service;
@@ -46,5 +48,17 @@ public interface ThingService {
      */
     Set<String> findMetricsOfThing(String thingCode);
 
+
+    /**
+     * 获取所有建筑信息
+     * @return
+     */
+    List<BuildingModel> findAllBuilding();
+
+    /**
+     * 获取所有系统信息
+     * @return
+     */
+    List<SystemModel> findAllSystem();
 }
 
