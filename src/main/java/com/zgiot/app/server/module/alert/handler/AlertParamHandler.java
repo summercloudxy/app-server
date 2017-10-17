@@ -42,12 +42,14 @@ public class AlertParamHandler implements AlertHandler {
         Double value = Double.parseDouble(dataModel.getValue());
         MetricModel metricModel = metricService.getMetric(metricCode);
         String alertInfo = metricModel.getMetricName() + dataModel.getValue() + metricModel.getValueUnit();
-        Short alertLevel = getAlertLevel(thingCode, metricCode, value);
+        AlertRule alertRule = getAlertLevel(thingCode, metricCode, value);
         AlertData alertData = alertManager.getAlertDataByThingAndMetricCode(thingCode, metricCode);
-        if (alertData == null && alertLevel != null) {
-            alertData = new AlertData(dataModel, AlertConstants.TYPE_PARAM, alertLevel, alertInfo,
+        if (alertData == null && alertRule != null) {
+            alertData = new AlertData(dataModel, AlertConstants.TYPE_PARAM, alertRule.getAlertLevel(), alertInfo,
                     AlertConstants.SOURCE_SYSTEM, AlertConstants.REPORTER_SYSTEM);
             alertData.setParamValue(value);
+            alertData.setParamLower(alertRule.getLowerLimit());
+            alertData.setParamUpper(alertRule.getUpperLimit());
             alertData.setLastUpdateTime(new Date());
             alertManager.generateAlert(alertData);
             Map<String, AlertData> metricAlertDataCache;
@@ -75,39 +77,39 @@ public class AlertParamHandler implements AlertHandler {
                 String metricCode = dataEntry.getKey();
                 AlertData alertData = dataEntry.getValue();
                 if (new Date().getTime() - alertData.getLastUpdateTime().getTime() > paramAlertUpdatePeriod) {
-                    Short alertLevel = getAlertLevel(thingCode, metricCode, alertData.getParamValue());
-                    if (alertLevel == null) {
+                    AlertRule alertRule = getAlertLevel(thingCode, metricCode, alertData.getParamValue());
+                    if (alertRule == null) {
                         alertData.setRecovery(true);
                         if (!alertData.isManualIntervention()) {
                             alertManager.releaseAlert(alertData);
                             metricAlertDataMap.remove(metricCode);
                         }
-                    } else if (!alertLevel.equals(alertData.getAlertLevel())) {
-                        alertData.setAlertLevel(alertLevel);
+                    } else if (!alertRule.getAlertLevel().equals(alertData.getAlertLevel())) {
+                        alertData.setAlertLevel(alertRule.getAlertLevel());
+                        alertData.setParamUpper(alertRule.getUpperLimit());
+                        alertData.setParamLower(alertRule.getLowerLimit());
                         MetricModel metricModel = metricService.getMetric(metricCode);
                         String alertInfo =
                                 metricModel.getMetricName() + alertData.getParamValue() + metricModel.getValueUnit();
                         alertData.setAlertInfo(alertInfo);
                         alertData.setLastUpdateTime(new Date());
                         alertManager.updateAlert(alertData);
-                        logger.debug("调整报警等级，thingCode {}，metricCode {}，当前等级为{}", thingCode, metricCode, alertLevel);
+                        logger.debug("调整报警等级，thingCode {}，metricCode {}，当前等级为{}", thingCode, metricCode, alertRule.getAlertLevel());
                     }
                 }
             }
         }
     }
 
-    private Short getAlertLevel(String thingCode, String metricCode, double value) {
+    private AlertRule getAlertLevel(String thingCode, String metricCode, double value) {
         alertRuleMap = alertManager.getParamRuleMap();
         List<AlertRule> alertRuleList = alertRuleMap.get(thingCode).get(metricCode);
-        Short alertLevel = null;
         for (AlertRule alertRule : alertRuleList) {
             if (value < alertRule.getUpperLimit() && value >= alertRule.getLowerLimit()) {
-                alertLevel = alertRule.getAlertLevel();
-                break;
+                return alertRule;
             }
         }
-        return alertLevel;
+        return null;
     }
 
 }

@@ -42,8 +42,13 @@ public class AlertFaultHandler implements AlertHandler {
         AlertData alertData = alertManager.getAlertDataByThingAndMetricCode(thingCode, metricCode);
         if (ENABLE_VALUE.equalsIgnoreCase(dataModel.getValue()) && alertData == null) {
             Set<String> metricCodeSet = thingService.findMetricsOfThing(thingCode);
-            Short level ;
-//            if (metricCodeSet.contains(MetricCodes.STATE)) {
+            Short level;
+            if (metricCodeSet.contains(MetricCodes.STATE)) {
+                try {
+                    Thread.sleep(10);
+                } catch (Exception e) {
+                    logger.debug("thread is interrupted");
+                }
                 if (dataService.getData(thingCode, MetricCodes.STATE).isPresent()) {
                     DataModelWrapper dataModelWrapper = dataService.getData(thingCode, MetricCodes.STATE).get();
                     String preState = dataModelWrapper.getPreValue();
@@ -57,9 +62,9 @@ public class AlertFaultHandler implements AlertHandler {
                 } else {
                     level = AlertConstants.LEVEL_30;
                 }
-//            } else {
-//                level = AlertConstants.LEVEL_10;
-//            }
+            } else {
+                level = AlertConstants.LEVEL_10;
+            }
             alertData = new AlertData(dataModel, AlertConstants.TYPE_FAULT, level,
                     metricService.getMetric(dataModel.getMetricCode()).getMetricName(), AlertConstants.SOURCE_SYSTEM,
                     AlertConstants.REPORTER_SYSTEM);
@@ -70,6 +75,8 @@ public class AlertFaultHandler implements AlertHandler {
             logger.debug("报警恢复，thing:{},metric:{}", thingCode, metricCode);
             if (!alertData.isManualIntervention()) {
                 alertManager.releaseAlert(alertData);
+            }else {
+                alertManager.updateAlert(alertData);
             }
         }
     }
