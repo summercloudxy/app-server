@@ -105,7 +105,7 @@ public class AlertParamHandler implements AlertHandler {
         alertRuleMap = alertManager.getParamRuleMap();
         List<AlertRule> alertRuleList = alertRuleMap.get(thingCode).get(metricCode);
         for (AlertRule alertRule : alertRuleList) {
-            if (value < alertRule.getUpperLimit() && value >= alertRule.getLowerLimit()) {
+            if (value <= alertRule.getUpperLimit() && value > alertRule.getLowerLimit()) {
                 return alertRule;
             }
         }
