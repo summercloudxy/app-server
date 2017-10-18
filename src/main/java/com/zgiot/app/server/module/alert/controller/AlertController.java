@@ -118,6 +118,14 @@ public class AlertController {
                 HttpStatus.OK);
     }
 
+    @ApiOperation("设置消息已读")
+    @PostMapping(value = "alert/message/read")
+    public ResponseEntity<String> setMessageRead(@RequestParam int messageId) {
+        alertManager.setRead(messageId);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null),
+                HttpStatus.OK);
+    }
+
     @ApiOperation("反馈图片和视频信息")
     @PostMapping(value = "alert/feedback")
     public ResponseEntity<String> feedbackImageAndVideo(@RequestParam String thingCode, @RequestParam String metricCode, @RequestBody List<MultipartFile> files,@RequestParam String userId,
