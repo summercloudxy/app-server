@@ -16,6 +16,8 @@ public interface AlertMapper {
 
     void updateAlertDate(AlertData alertData);
 
+    void releaseAlertDate(AlertData alertData);
+
     List<AlertRule> getAlertRuleList(@Param("alertType") int alertType, @Param("assetType") Integer assetType,
             @Param("category") String category, @Param("system") String system, @Param("metricType") String metricType,
             @Param("thingCode") String thingCode, @Param("enable") Boolean enable, @Param("level") Integer level,

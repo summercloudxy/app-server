@@ -196,6 +196,19 @@
         WHERE id = #{id}
     </update>
 
+    <update id="releaseAlertDate">
+        UPDATE tb_alert_data
+        SET
+        alert_stage = #{alertStage},
+        scene_confirm_state = #{sceneConfirmState},
+        scene_confirm_time = #{sceneConfirmTime},
+        scene_confirm_user = #{sceneConfirmUser},
+        is_recovery = #{recovery},
+        post_worker = #{postWorker},
+        dispatcher = #{dispatcher},
+        release_time = #{releaseTime}
+        WHERE id = #{id}
+    </update>
     <insert id="saveAlertMessage" keyProperty="id" keyColumn="id" useGeneratedKeys="true">
         INSERT INTO tb_alert_message(info,type,alert_id,time,is_read,user_id,permission) VALUES (#{info},#{type},#{alertId},#{time},#{isRead},#{userId},#{permission})
     </insert>

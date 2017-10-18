@@ -66,8 +66,8 @@ public class AlertController {
     public ResponseEntity<String> sendAlertCmd(@RequestParam String thingCode, @RequestParam String metricCode,
             @RequestBody AlertMessage alertMessage, HttpServletRequest request) throws Exception {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
-        alertManager.sendAlertCmd(thingCode, metricCode, alertMessage, requestId);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(null),
+        Integer messageId = alertManager.sendAlertCmd(thingCode, metricCode, alertMessage, requestId);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(messageId),
                 HttpStatus.OK);
     }
 
