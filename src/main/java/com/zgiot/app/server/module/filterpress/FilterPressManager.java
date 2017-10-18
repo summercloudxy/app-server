@@ -340,7 +340,7 @@ public class FilterPressManager {
             List<String> feedPumpCodes = getKeyByValueFromMap(filterPressPumpMapping,filterPress.getCode());
             String feedPumpCode = feedPumpCodes.get(0);
             if(feedPumpCodes.size() == 0){
-                throw new SysException("feedPump thingCode is null",SysException.EC_UNKOWN);
+                throw new SysException("feedPump thingCode is null",SysException.EC_UNKNOWN);
             }
             Float current = Float.parseFloat(simpleDataCache.getValue(feedPumpCode,FilterPressMetricConstants.FEED_PUMP_CURRENT).getValue());
             feedAsumConfirmBean.setFeedOverCurrent(current);
