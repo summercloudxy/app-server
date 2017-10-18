@@ -33,7 +33,6 @@ public class DemoBusinessTest {
 
     private ThingModel buildThingMedel() {
         ThingModel mockThing = new ThingModel();
-        mockThing.setThingCategoryCode(DemoBusiness.THING_CATEGORY_DEVICE);
         mockThing.setThingCode("");
         mockThing.setThingName("name1");
         return mockThing;
@@ -47,7 +46,7 @@ public class DemoBusinessTest {
         Float mockValue = 11f;
 
         /* do test */
-        String status = doTest(DemoBusiness.THING_CATEGORY_DEVICE, mockThingCode, mockMetricCode, mockValue);
+        String status = doTest( mockThingCode, mockMetricCode, mockValue);
 
         /* assertion */
         assertThat(DemoBusiness.STATUS_TOO_HIGH.equals(status)).isTrue();
@@ -61,7 +60,7 @@ public class DemoBusinessTest {
         Float mockValue = 9f;
 
         /* do test */
-        String status = doTest(DemoBusiness.THING_CATEGORY_DEVICE, mockThingCode, mockMetricCode, mockValue);
+        String status = doTest(mockThingCode, mockMetricCode, mockValue);
 
         /* assertion */
         assertThat(DemoBusiness.STATUS_NORMAL.equals(status)).isTrue();
@@ -75,15 +74,14 @@ public class DemoBusinessTest {
         Float mockValue = 11f;
 
         /* do test */
-        String status = doTest("other", mockThingCode, mockMetricCode, mockValue);
+        String status = doTest(mockThingCode, mockMetricCode, mockValue);
 
         /* assertion */
         assertThat(DemoBusiness.STATUS_NORMAL.equals(status)).isTrue();
     }
 
-    private String doTest(String thingCate, String mockThingCode, String mockMetricCode, Float mockValue) {
+    private String doTest(String mockThingCode, String mockMetricCode, Float mockValue) {
         ThingModel mockThing = buildThingMedel();
-        mockThing.setThingCategoryCode(thingCate);
         mockThing.setThingCode(mockThingCode);
         given(mockThingService.getThing(mockThingCode)).willReturn(mockThing);
 

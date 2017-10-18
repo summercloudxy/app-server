@@ -50,10 +50,13 @@ public class ThingController {
      */
     public static final String DIS_PROP= "disProp";
 
+    public static final String THING_CODE = "thingCode";
 
 
 
-    @GetMapping("/{thingCode}")
+
+
+    @GetMapping(value="/{thingCode}")
     public ResponseEntity<String> getThing(@PathVariable String thingCode) {
         ThingModel tm = thingService.getThing(thingCode);
         return new ResponseEntity<>(
@@ -75,6 +78,7 @@ public class ThingController {
 
             baseThingMap.put(THING_NAME, thingModel.getThingName());
             baseThingMap.put(THING_SHORT_NAME, thingModel.getShortName());
+            baseThingMap.put(THING_CODE, thingModel.getThingCode());
             parsePropertiesByType(thingPropertyModels,propMap,disPropMap);
             thingPropMap.put(BASE, baseThingMap);
             thingPropMap.put(PROP, propMap);
@@ -103,6 +107,7 @@ public class ThingController {
                 thingMap = new LinkedHashMap<>();
                 base.put(THING_NAME, baseProperty.getThingName());
                 base.put(THING_SHORT_NAME, baseProperty.getShortName());
+                base.put(THING_CODE, baseProperty.getThingCode());
                 String[] propType = new String[]{ThingPropertyModel.PROP_TYPE_PROP, ThingPropertyModel.PROP_TYPE_DISP_PROP};
                 thingPropertyModels = thingService.findThingProperties(baseProperty.getThingCode(), propType);
                 parsePropertiesByType(thingPropertyModels,prop,disProp);

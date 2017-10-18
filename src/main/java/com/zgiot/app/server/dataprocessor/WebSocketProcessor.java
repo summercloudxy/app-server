@@ -1,6 +1,7 @@
 package com.zgiot.app.server.dataprocessor;
 
 import com.alibaba.fastjson.JSON;
+import com.zgiot.common.enums.MetricDataTypeEnum;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.ThingModel;
 import org.asynchttpclient.AsyncHttpClient;
@@ -105,7 +106,7 @@ public class WebSocketProcessor implements DataProcessor {
 
                             @Override
                             public void onError(Throwable t) {
-                                handleError(t);
+                                logger.error("websocket error! ", t);
                             }
                         }).build())
                 .toCompletableFuture()
@@ -118,9 +119,9 @@ public class WebSocketProcessor implements DataProcessor {
             logger.trace("received: {}", dataModel);
 
             // exclude ERR data
-            if (ThingModel.CATEGORY_ERROR.equals(dataModel.getThingCategoryCode())){
+            if (MetricDataTypeEnum.METRIC_DATA_TYPE_ERROR.getName().equals(dataModel.getMetricDataType())) {
                 logger.warn("Got error data `{}`. ", dataModel.toString());
-                return ;
+                return;
             }
 
             // each data per thread, but listeners are sync for ensuring logic dependencies
@@ -128,20 +129,14 @@ public class WebSocketProcessor implements DataProcessor {
                 for (DataListener listener : listeners) {
                     try {
                         listener.onDataChange(dataModel);
-                    } catch (Exception e) {
-                        handleError(e);
+                    } catch (Throwable e) {
+                        listener.onError(e);
                     }
                 }
             });
 
         } catch (Throwable error) {
-            handleError(error);
-        }
-    }
-
-    private void handleError(Throwable t) {
-        for (DataListener listener : listeners) {
-            executor.submit(() -> listener.onError(t));
+            logger.error("Unknown data processor exception! ", error);
         }
     }
 

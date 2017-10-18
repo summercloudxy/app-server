@@ -1,13 +1,18 @@
 package com.zgiot.app.server.module.filterpress;
 
 import com.zgiot.app.server.module.filterpress.dao.FilterPressMapper;
+import com.zgiot.app.server.module.filterpress.pojo.FeedAsumConfirmBean;
 import com.zgiot.app.server.module.filterpress.pojo.FilterPressElectricity;
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.DataService;
+import com.zgiot.app.server.service.cache.SimpleDataCache;
 import com.zgiot.app.server.util.RequestIdUtil;
 import com.zgiot.common.constants.FilterPressConstants;
 import com.zgiot.common.constants.FilterPressMetricConstants;
 import com.zgiot.common.constants.GlobalConstants;
+import com.zgiot.common.constants.MetricCodes;
+import com.zgiot.common.enums.MetricDataTypeEnum;
+import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
 import com.zgiot.common.pojo.MetricModel;
@@ -43,6 +48,9 @@ public class FilterPressManager {
     private SimpMessagingTemplate messagingTemplate;
     @Autowired
     private FilterPressMapper filterPressMapper;
+
+    @Autowired
+    private SimpleDataCache simpleDataCache;
 
     private static final int INIT_CAPACITY = 6;
 
@@ -93,7 +101,15 @@ public class FilterPressManager {
      */
     public void onDataSourceChange(DataModel data) {
         String thingCode = data.getThingCode();
-        FilterPress filterPress = deviceHolder.get(thingCode);
+        FilterPress filterPress = null;
+        if(deviceHolder.containsKey(thingCode)){
+            filterPress = deviceHolder.get(thingCode);
+        }else if(filterPressPumpMapping.containsKey(thingCode)){
+           filterPress = deviceHolder.get(filterPressPumpMapping.get(thingCode));
+        }else{
+            return;
+            //throw new SysException("filterPress is null",SysException.EC_UNKOWN);
+        }
         String metricCode = data.getMetricCode();
         filterPress.onDataSourceChange(metricCode, data.getValue());
         if (FilterPressMetricConstants.STAGE.equals(metricCode)) {
@@ -147,7 +163,7 @@ public class FilterPressManager {
             int plateCount = filterPress.getPlateCount();
             DataModel dataModel = new DataModel();
             dataModel.setThingCode(code);
-            dataModel.setThingCategoryCode(ThingModel.CATEGORY_DEVICE);
+            dataModel.setMetricDataType(MetricDataTypeEnum.METRIC_DATA_TYPE_OK.getName());
             dataModel.setMetricCode(FilterPressMetricConstants.PLATE_CNT);
             dataModel.setMetricCategoryCode(MetricModel.CATEGORY_SIGNAL);
             dataModel.setValue(String.valueOf(plateCount));
@@ -161,8 +177,8 @@ public class FilterPressManager {
             String code = entry.getKey();
             DataModel dataModel = new DataModel();
             dataModel.setThingCode(code);
-            dataModel.setThingCategoryCode(ThingModel.CATEGORY_DEVICE);
-            dataModel.setMetricCode(FilterPressMetricConstants.PLATE_CNT);
+            dataModel.setMetricDataType(MetricDataTypeEnum.METRIC_DATA_TYPE_OK.getName());
+            dataModel.setMetricCode(FilterPressMetricConstants.PLATE_TTL);
             dataModel.setMetricCategoryCode(MetricModel.CATEGORY_SIGNAL);
             dataModel.setValue(String.valueOf(total));
             dataModel.setDataTimeStamp(new Date());
@@ -231,7 +247,7 @@ public class FilterPressManager {
         }
         // calculate the state value and call the specific method of filter press
         short stateValue = calculateState(thingCode, stageValue);
-        Optional<DataModelWrapper> stateData = dataService.getData(thingCode, FilterPressMetricConstants.STATE);
+        Optional<DataModelWrapper> stateData = dataService.getData(thingCode, MetricCodes.STATE);
         if (!stateData.isPresent()) {
             saveState(data, thingCode, stateValue);
             return;
@@ -251,9 +267,9 @@ public class FilterPressManager {
     private void saveState(DataModel data, String thingCode, short stateValue) {
         DataModel stateModel = new DataModel();
         stateModel.setThingCode(thingCode);
-        stateModel.setThingCategoryCode(data.getThingCategoryCode());
-        stateModel.setMetricCode(FilterPressMetricConstants.STATE);
-        stateModel.setThingCategoryCode(data.getMetricCategoryCode());
+        stateModel.setMetricDataType(data.getMetricDataType());
+        stateModel.setMetricCode(MetricCodes.STATE);
+        stateModel.setMetricCategoryCode(data.getMetricCategoryCode());
         stateModel.setValue(String.valueOf(stateValue));
         stateModel.setDataTimeStamp(new Date());
         dataService.updateCache(stateModel);
@@ -318,9 +334,29 @@ public class FilterPressManager {
             doFeedOver(filterPress);
         } else {
             logger.debug("{} feed over,notifying user; confirmNeed: {}", filterPress, filterPress.isFeedConfirmNeed());
-            messagingTemplate.convertAndSend(FEED_OVER_NOTICE_URI, filterPress.getCode());
+            FeedAsumConfirmBean feedAsumConfirmBean = new FeedAsumConfirmBean();
+            feedAsumConfirmBean.setDeviceCode(filterPress.getCode());
+            feedAsumConfirmBean.setFeedOverDuration(filterPress.getFeedOverTime() - filterPress.getFeedStartTime());
+            List<String> feedPumpCodes = getKeyByValueFromMap(filterPressPumpMapping,filterPress.getCode());
+            String feedPumpCode = feedPumpCodes.get(0);
+            if(feedPumpCodes.size() == 0){
+                throw new SysException("feedPump thingCode is null",SysException.EC_UNKOWN);
+            }
+            Float current = Float.parseFloat(simpleDataCache.getValue(feedPumpCode,FilterPressMetricConstants.FEED_PUMP_CURRENT).getValue());
+            feedAsumConfirmBean.setFeedOverCurrent(current);
+            messagingTemplate.convertAndSend(FEED_OVER_NOTICE_URI, feedAsumConfirmBean);
             unconfirmedFeed.add(filterPress.getCode());
         }
+    }
+
+    private List<String> getKeyByValueFromMap(Map<String,String> map,String value){
+        List<String> keys = new ArrayList<>();
+        for(String key:map.keySet()){
+            if(map.get(key).equals(value)){
+                keys.add(key);
+            }
+        }
+        return keys;
     }
 
     private void doFeedOver(FilterPress filterPress) {
@@ -574,7 +610,7 @@ public class FilterPressManager {
          * @param filterPress
          */
         void enqueue(FilterPress filterPress) {
-            queuePosition.put(filterPress.getCode(), queue.size());
+            queuePosition.put(filterPress.getCode(), queuePosition.size());
             queue.add(filterPress);
             unloadNextIfPossible();
         }

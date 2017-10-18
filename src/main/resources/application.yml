@@ -26,9 +26,15 @@ spring.datasource.druid:
   test-on-borrow: true
   driver-class-name: com.mysql.jdbc.Driver
 
+mongo:
+  enable: ${mongodb.enable}
+  url: ${mongodb.url}
+  port: ${mongodb.port}
+  db-name: ${mongodb.db-name}
 
 # data engine配置
 dataengine:
+  enable: true
   https: ${dataengine.https}
   server-name: ${dataengine.server-name}
   websocket-endpoint: ${dataengine.websocket-endpoint}
@@ -40,5 +46,12 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
 
+# STOMP client
+stomp:
+  client:
+    server-url:
+      ${stomp.client.server-url}
+    topics:
+      topic/ss,topic/12
 
 

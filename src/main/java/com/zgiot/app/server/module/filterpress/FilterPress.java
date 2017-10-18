@@ -2,6 +2,7 @@ package com.zgiot.app.server.module.filterpress;
 
 
 import com.zgiot.common.constants.FilterPressMetricConstants;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -147,7 +148,7 @@ public class FilterPress {
     public void onAssumeFeedOver() {
         logger.trace("{} assume to be feed over", code);
         this.feedOverTime = System.currentTimeMillis();
-        feedDuration = feedOverTime - feedStartTime;
+//        feedDuration = feedOverTime - feedStartTime;
         if (feedIntelligent) {
             manager.execFeedOver(this);
             logger.debug("{} executed feed over, intelligent:{}", code, feedIntelligent);
@@ -248,6 +249,9 @@ public class FilterPress {
     }
 
     public int getPlateCount() {
+        if(producingTeam == null){
+            return 0;
+        }
         return plateCount.get(producingTeam);
     }
 
@@ -259,7 +263,7 @@ public class FilterPress {
         /**
          * 卸料暂停时已过计时
          */
-        private volatile long unloadInterruptedDuration = 0;
+        private volatile long unloadTimedDuration = 0;
         /**
          * 是否正在卸料
          */
@@ -267,7 +271,7 @@ public class FilterPress {
         /**
          * 上一次暂停的时间
          */
-        private Long latestPauseTime;
+        private Long latestStartTime;
         /**
          * 拉板和取板的交替次数
          */
@@ -290,18 +294,16 @@ public class FilterPress {
          */
         private void scheduleTimer() {
             unloadTimer = new Timer("unload timer");
-            if (latestPauseTime != null) {
-                unloadInterruptedDuration += System.currentTimeMillis() - latestPauseTime;
-            }
+            latestStartTime = System.currentTimeMillis();
             unloadTimer.schedule(new TimerTask() {
                 @Override
                 public void run() {
                     logger.debug("{} unload time up", code);
                     notifyNext();
-                    unloadInterruptedDuration = 0;
-                    latestPauseTime = null;
+                    unloadTimedDuration = 0;
+                    latestStartTime = null;
                 }
-            }, UNLOAD_WAIT_DURATION - unloadInterruptedDuration);
+            }, UNLOAD_WAIT_DURATION - unloadTimedDuration);
         }
 
         /**
@@ -317,7 +319,9 @@ public class FilterPress {
          */
         private void pauseTimer() {
             cancelTimer();
-            latestPauseTime = System.currentTimeMillis();
+            if (latestStartTime != null) {
+                unloadTimedDuration += System.currentTimeMillis() - latestStartTime;
+            }
         }
 
         /**
