@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.DelayQueue;
 import java.util.stream.Collectors;
 
 /**
@@ -29,11 +30,12 @@ import java.util.stream.Collectors;
 @Service
 public class AlertManager {
     private Map<String, Map<String, AlertData>> alertDataMap = new ConcurrentHashMap<>();
-    private Set<AlertData> verifySet = new HashSet<>();
+//    private Set<AlertData> verifySet = new HashSet<>();
     private Map<String, Map<String, List<AlertRule>>> paramRuleMap;
     private Map<String, Map<String, AlertRule>> protectRuleMap;
     private Map<String, Short> metricAlertTypeMap = new HashMap<>();
     private Map<String, Map<String, AlertData>> alertParamDataMap = new ConcurrentHashMap<>();
+    private DelayQueue<VerifyDelayed> verifyDelayQueue = new DelayQueue<>();
     private String uri = "";
     private String repair_uri = "";
     private String feedback_uri = "";
@@ -59,6 +61,18 @@ public class AlertManager {
         updateParamRuleMap();
         updateProtectRuleMap();
         initAlertDataMap();
+        Thread thread = new Thread(() -> {
+            while (true) {
+                try {
+                    AlertData alertData = verifyDelayQueue.take().getAlertData();
+                    alertData.setAlertStage(AlertConstants.STAGE_UNTREATED);
+                    updateAlert(alertData);
+                } catch (Exception e) {
+
+                }
+            }
+        });
+        thread.start();
     }
 
     /**
@@ -256,7 +270,8 @@ public class AlertManager {
                 metricParamAlertData.put(alertData.getMetricCode(), alertData);
             }
             if (AlertConstants.STAGE_VERIFIED.equals(alertData.getAlertStage())) {
-                verifySet.add(alertData);
+                verifyDelayQueue.put(new VerifyDelayed(alertData,VERIFY_TO_UNTREATED_PERIOD));
+//                verifySet.add(alertData);
             }
         }
     }
@@ -397,7 +412,8 @@ public class AlertManager {
         alertData.setVerifyTime(new Date());
         alertData.setReporter(alertMessage.getUserId());
         // updateAlert(alertData);
-        verifySet.add(alertData);
+//        verifySet.add(alertData);
+        verifyDelayQueue.put(new VerifyDelayed(alertData,VERIFY_TO_UNTREATED_PERIOD));
         alertMapper.saveAlertMessage(alertMessage);
         messagingTemplate.convertAndSend(uri, alertMessage);
         logger.debug("推送消息");
@@ -488,7 +504,7 @@ public class AlertManager {
         alertData.setAlertLevel(Short.parseShort(alertMessage.getInfo()));
         alertData.setVerifyTime(new Date());
         // updateAlert(alertData);
-        verifySet.add(alertData);
+//        verifySet.add(alertData);
         alertMapper.saveAlertMessage(alertMessage);
         messagingTemplate.convertAndSend(uri, alertMessage);
         logger.debug("推送消息");
@@ -549,16 +565,16 @@ public class AlertManager {
     /**
      * 检查未处理的报警
      */
-    @Scheduled(cron = "0/10 * * * * ?")
-    public void checkVerifiedAlert() {
-        for (AlertData alertData : verifySet) {
-            if (new Date().getTime() - alertData.getVerifyTime().getTime() > VERIFY_TO_UNTREATED_PERIOD) {
-                alertData.setAlertStage(AlertConstants.STAGE_UNTREATED);
-                updateAlert(alertData);
-                verifySet.remove(alertData);
-            }
-        }
-    }
+//    @Scheduled(cron = "0/10 * * * * ?")
+//    public void checkVerifiedAlert() {
+//        for (AlertData alertData : verifySet) {
+//            if (new Date().getTime() - alertData.getVerifyTime().getTime() > VERIFY_TO_UNTREATED_PERIOD) {
+//                alertData.setAlertStage(AlertConstants.STAGE_UNTREATED);
+//                updateAlert(alertData);
+//                verifySet.remove(alertData);
+//            }
+//        }
+//    }
 
     /**
      * 消息已读
@@ -870,13 +886,10 @@ public class AlertManager {
         return alertMapper.getRepairStatisticsInfo(startTime, endTime, alertLevel);
     }
 
-
     /**
      * 获取报警列表，不按设备分组
+     * 
      * @param stage
-     * @param levels
-     * @param types
-     * @param systems
      * @param assetType
      * @param category
      * @param sortType
@@ -886,8 +899,8 @@ public class AlertManager {
      * @param count
      * @return
      */
-    public List<AlertData> getAlertDataList(String stage, Integer level, Short type,Integer system, String assetType, String category,
-                                                                     Integer sortType, Long duration, String thingCode, Integer page, Integer count) {
+    public List<AlertData> getAlertDataList(String stage, Integer level, Short type, Integer system, String assetType,
+            String category, Integer sortType, Long duration, String thingCode, Integer page, Integer count) {
         Date endTime = null;
         Date startTime = null;
         Integer offset = null;
@@ -898,6 +911,7 @@ public class AlertManager {
         if (page != null && count != null) {
             offset = page * count;
         }
-        return alertMapper.getAlertDataList(stage,level,type,system,assetType,category,sortType,startTime,endTime,thingCode,offset,count);
+        return alertMapper.getAlertDataList(stage, level, type, system, assetType, category, sortType, startTime,
+                endTime, thingCode, offset, count);
     }
 }
