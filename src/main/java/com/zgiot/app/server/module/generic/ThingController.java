@@ -55,10 +55,15 @@ public class ThingController {
 
     public static final String THING_CATEGORY_CODE = "thingCategoryCode";
 
-    @GetMapping("/{thingCode}")
+
+
+
+    @GetMapping(value="/{thingCode}")
     public ResponseEntity<String> getThing(@PathVariable String thingCode) {
         ThingModel tm = thingService.getThing(thingCode);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(tm), HttpStatus.OK);
+        return new ResponseEntity<>(
+                ServerResponse.buildOkJson(tm)
+                , HttpStatus.OK);
     }
 
     @GetMapping("/properties/{thingCode}")
@@ -76,13 +81,14 @@ public class ThingController {
             baseThingMap.put(THING_NAME, thingModel.getThingName());
             baseThingMap.put(THING_SHORT_NAME, thingModel.getShortName());
             baseThingMap.put(THING_CODE, thingModel.getThingCode());
-            baseThingMap.put(THING_CATEGORY_CODE, thingModel.getThingCategoryCode());
-            parsePropertiesByType(thingPropertyModels, propMap, disPropMap);
+            parsePropertiesByType(thingPropertyModels,propMap,disPropMap);
             thingPropMap.put(BASE, baseThingMap);
             thingPropMap.put(PROP, propMap);
             thingPropMap.put(DIS_PROP, disPropMap);
         }
-        return new ResponseEntity<>(ServerResponse.buildOkJson(thingPropMap), HttpStatus.OK);
+        return new ResponseEntity<>(
+                ServerResponse.buildOkJson(thingPropMap)
+                , HttpStatus.OK);
     }
 
     @GetMapping("")
@@ -104,23 +110,22 @@ public class ThingController {
                 base.put(THING_NAME, baseProperty.getThingName());
                 base.put(THING_SHORT_NAME, baseProperty.getShortName());
                 base.put(THING_CODE, baseProperty.getThingCode());
-                base.put(THING_CATEGORY_CODE, baseProperty.getThingCategoryCode());
-                String[] propType =
-                        new String[]{ThingPropertyModel.PROP_TYPE_PROP, ThingPropertyModel.PROP_TYPE_DISP_PROP};
+                String[] propType = new String[]{ThingPropertyModel.PROP_TYPE_PROP, ThingPropertyModel.PROP_TYPE_DISP_PROP};
                 thingPropertyModels = thingService.findThingProperties(baseProperty.getThingCode(), propType);
-                parsePropertiesByType(thingPropertyModels, prop, disProp);
+                parsePropertiesByType(thingPropertyModels,prop,disProp);
                 thingMap.put(BASE, base);
                 thingMap.put(PROP, prop);
                 thingMap.put(DIS_PROP, disProp);
                 things.add(thingMap);
             }
         }
-        return new ResponseEntity<>(ServerResponse.buildOkJson(things), HttpStatus.OK);
+        return new ResponseEntity<>(
+                ServerResponse.buildOkJson(things)
+                , HttpStatus.OK);
     }
 
-    private void parsePropertiesByType(List<ThingPropertyModel> base, Map<String, String> propMap,
-            Map<String, String> dispPropMap) {
-        if (base.size() > 0) {
+    private void parsePropertiesByType(List<ThingPropertyModel> base,Map<String,String> propMap,Map<String,String> dispPropMap){
+        if ( base.size() > 0) {
             for (ThingPropertyModel model : base) {
                 if (model.getPropType().equals(ThingPropertyModel.PROP_TYPE_PROP)) {
                     propMap.put(model.getPropKey(), model.getPropValue());
