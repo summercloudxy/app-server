@@ -7,9 +7,12 @@ import com.zgiot.app.server.service.FileService;
 import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.FileModel;
+import com.zgiot.common.restcontroller.ServerResponse;
 import io.swagger.annotations.ApiOperation;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,38 +34,46 @@ public class AlertController {
 
     @ApiOperation("获取参数类报警规则")
     @GetMapping(value = "alert/rule/param")
-    public void getParamRule(@RequestParam int alertType, @RequestParam(required = false) Integer assetType,
-            @RequestParam(required = false) String category, @RequestParam(required = false) String system,
-            @RequestParam(required = false) String metricType, @RequestParam(required = false) String thingCode,
-            @RequestParam(required = false) Boolean enable, @RequestParam(required = false) Integer level,
-            @RequestParam(required = false) String metricCode, @RequestParam(required = false) Integer buildingId) {
-        alertManager.getAlertRuleList(alertType, assetType, category, system, metricType, thingCode, enable, level,
+    public ResponseEntity<String> getParamRule(@RequestParam int alertType, @RequestParam(required = false) Integer assetType,
+                                               @RequestParam(required = false) String category, @RequestParam(required = false) String system,
+                                               @RequestParam(required = false) String metricType, @RequestParam(required = false) String thingCode,
+                                               @RequestParam(required = false) Boolean enable, @RequestParam(required = false) Integer level,
+                                               @RequestParam(required = false) String metricCode, @RequestParam(required = false) Integer buildingId) {
+        List<AlertRule> alertRules = alertManager.getAlertRuleList(alertType, assetType, category, system, metricType, thingCode, enable, level,
                 metricCode, buildingId);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(alertRules),
+                HttpStatus.OK);
     }
 
     @ApiOperation("更新参数类报警规则")
     @PostMapping(value = "alert/rule/param")
-    public void updateParamRule() {
+    public ResponseEntity<String> updateParamRule() {
         alertManager.updateParamRuleMap();
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null),
+                HttpStatus.OK);
     }
 
     @ApiOperation("更新保护类报警规则")
     @PostMapping(value = "alert/rule/protect")
-    public void updateProtectRule() {
+    public ResponseEntity<String> updateProtectRule() {
         alertManager.updateProtectRuleMap();
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null),
+                HttpStatus.OK);
     }
 
     @ApiOperation("下发报警指令")
     @PostMapping(value = "alert/cmd")
-    public void sendAlertCmd(@RequestParam String thingCode, @RequestParam String metricCode,
+    public ResponseEntity<String> sendAlertCmd(@RequestParam String thingCode, @RequestParam String metricCode,
             @RequestBody AlertMessage alertMessage, HttpServletRequest request) throws Exception {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
         alertManager.sendAlertCmd(thingCode, metricCode, alertMessage, requestId);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null),
+                HttpStatus.OK);
     }
 
     @ApiOperation("获取报警记录,按设备分组")
     @GetMapping(value = "alert/record/group")
-    public List<AlertRecord> getAlertRecordGroupByThing(@RequestParam(required = false) String stage,
+    public ResponseEntity<String> getAlertRecordGroupByThing(@RequestParam(required = false) String stage,
             @RequestParam(required = false) List<Integer> levels, @RequestParam(required = false) List<Short> types,
             @RequestParam(required = false) List<Integer> buildingIds,
             @RequestParam(required = false) List<Integer> floors, @RequestParam(required = false) List<Integer> systems,
@@ -70,38 +81,46 @@ public class AlertController {
             @RequestParam(required = false) Integer sortType, @RequestParam(required = false) Long duration,
             @RequestParam(required = false) String thingCode, @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer count) {
-        return alertManager.getAlertDataListGroupByThing(stage, levels, types, buildingIds, floors, systems, assetType,
+        List<AlertRecord> alertDataListGroupByThing = alertManager.getAlertDataListGroupByThing(stage, levels, types, buildingIds, floors, systems, assetType,
                 category, sortType, duration, thingCode, page, count);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(alertDataListGroupByThing),
+                HttpStatus.OK);
     }
 
     @ApiOperation("获取报警记录")
     @GetMapping(value = "alert/record")
-    public List<AlertData> getAlertRecord(@RequestParam(required = false) String stage,
+    public ResponseEntity<String> getAlertRecord(@RequestParam(required = false) String stage,
             @RequestParam(required = false) Integer level, @RequestParam(required = false) Short type,
             @RequestParam(required = false) Integer system, @RequestParam(required = false) String assetType,
             @RequestParam(required = false) String category, @RequestParam(required = false) Integer sortType,
             @RequestParam(required = false) Long duration, @RequestParam(required = false) String thingCode,
             @RequestParam(required = false) Integer page, @RequestParam(required = false) Integer count) {
-        return alertManager.getAlertDataList(stage, level, type, system, assetType, category, sortType, duration,
+        List<AlertData> alertDataList = alertManager.getAlertDataList(stage, level, type, system, assetType, category, sortType, duration,
                 thingCode, page, count);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(alertDataList),
+                HttpStatus.OK);
     }
 
     @ApiOperation("人为生成报警")
     @PostMapping(value = "alert/generate")
-    public void generateManuAlert(@RequestParam String thingCode, @RequestParam String info,
+    public ResponseEntity<String> generateManuAlert(@RequestParam String thingCode, @RequestParam String info,
             @RequestParam String userId, @RequestParam String permission) {
         alertManager.generateManuAlert(thingCode, info, userId, permission);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null),
+                HttpStatus.OK);
     }
 
     @ApiOperation("获取报警消息列表")
     @GetMapping(value = "alert/message")
-    public List<AlertMessage> getAlertMessages(@RequestParam int alertId) {
-        return alertManager.getAlertMessage(alertId);
+    public ResponseEntity<String> getAlertMessages(@RequestParam int alertId) {
+        List<AlertMessage> alertMessage = alertManager.getAlertMessage(alertId);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(alertMessage),
+                HttpStatus.OK);
     }
 
     @ApiOperation("反馈图片和视频信息")
     @PostMapping(value = "alert/feedback")
-    public void feedbackImageAndVideo(String thingCode, String metricCode, List<MultipartFile> files, String userId,
+    public ResponseEntity<String> feedbackImageAndVideo(@RequestParam String thingCode, @RequestParam String metricCode, @RequestBody List<MultipartFile> files,@RequestParam String userId,
             int type) {
         StringBuilder stringBuilder = new StringBuilder();
         for (MultipartFile file : files) {
@@ -116,26 +135,34 @@ public class AlertController {
 
         }
         alertManager.feedback(thingCode, metricCode, stringBuilder.toString(), type);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null),
+                HttpStatus.OK);
     }
 
     @ApiOperation("获取统计数量信息")
     @GetMapping(value = "alert/statistics")
-    public AlertStatisticsRsp getStatisticsInfo(@RequestParam int type,
+    public ResponseEntity<String> getStatisticsInfo(@RequestParam int type,
             @RequestParam(required = false) String alertStage, @RequestParam Date startTime,
             @RequestParam Date endTime) {
-        return alertManager.getStatisticsInfo(type, alertStage, startTime, endTime);
+        AlertStatisticsRsp statisticsInfo = alertManager.getStatisticsInfo(type, alertStage, startTime, endTime);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(statisticsInfo),
+                HttpStatus.OK);
     }
 
     @ApiOperation("按类型获取统计数量信息")
     @GetMapping(value = "alert/statistics/type")
-    public AlertStatisticsRsp getTypeStatisticsInfo(Date startTime, Date endTime) {
-        return alertManager.getTypeStatisticsInfo(startTime, endTime);
+    public ResponseEntity<String> getTypeStatisticsInfo(@RequestParam Date startTime,@RequestParam Date endTime) {
+        AlertStatisticsRsp typeStatisticsInfo = alertManager.getTypeStatisticsInfo(startTime, endTime);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(typeStatisticsInfo),
+                HttpStatus.OK);
     }
 
     @ApiOperation("获取统计维修信息")
     @GetMapping(value = "alert/statistics/repair")
-    public List<AlertRepairStatistics> getRepairStatisticsInfo(Date startTime, Date endTime, @RequestParam(required = false) Short alertLevel) {
-        return alertManager.getRepairStatisticsInfo(startTime, endTime, alertLevel);
+    public ResponseEntity<String> getRepairStatisticsInfo(@RequestParam Date startTime,@RequestParam Date endTime, @RequestParam(required = false) Short alertLevel) {
+        List<AlertRepairStatistics> repairStatisticsInfo = alertManager.getRepairStatisticsInfo(startTime, endTime, alertLevel);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(repairStatisticsInfo),
+                HttpStatus.OK);
     }
 
 }
