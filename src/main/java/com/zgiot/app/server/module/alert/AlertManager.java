@@ -13,9 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import sun.awt.windows.ThemeReader;
 
 import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
@@ -37,10 +35,10 @@ public class AlertManager {
     private Map<String, Short> metricAlertTypeMap = new HashMap<>();
     private Map<String, Map<String, AlertData>> alertParamDataMap = new ConcurrentHashMap<>();
     private DelayQueue<VerifyDelayed> verifyDelayQueue = new DelayQueue<>();
-    private String uri = "";
-    private String repair_uri = "";
-    private String feedback_uri = "";
-    private String read_state_uri = "";
+    private String message_uri = "topic/alert/message";
+    private String repair_uri = "topic/alert/repair";
+    private String feedback_uri = "topic/alert/feedback";
+    private String read_state_uri = "topic/alert/readstate";
     private static final int VERIFY_TO_UNTREATED_PERIOD = 60000;
     private static final int SORT_TYPE_TIME_DESC = 0;
     private static final int SORT_TYPE_TIME_ASC = 1;
@@ -156,7 +154,7 @@ public class AlertManager {
                 alertDataMetricMap.remove(alertData.getMetricCode());
             }
         }
-        alertMapper.updateAlertDate(alertData);
+        alertMapper.releaseAlertDate(alertData);
         logger.debug("报警解除：thingCode {},metricCode {}", alertData.getThingCode(), alertData.getMetricCode());
     }
 
@@ -313,12 +311,23 @@ public class AlertManager {
         }
         alertMessage.setTime(new Date());
         alertMessage.setAlertId(alertData.getId());
+        if (AlertConstants.PERMISSION_POSTWORKER.equals(alertMessage.getPermission())) {
+            if (!alertMessage.getUserId().equals(alertData.getPostWorker())) {
+                alertData.setPostWorker(alertMessage.getUserId());
+                updateFlag = true;
+            }
+        } else if (AlertConstants.PERMISSION_DISPATCHER.equals(alertMessage.getPermission())) {
+            if (!alertMessage.getUserId().equals(alertData.getDispatcher())) {
+                alertData.setDispatcher(alertMessage.getUserId());
+                updateFlag = true;
+            }
+        }
         switch (alertMessage.getType()) {
             case AlertConstants.MESSAGE_TYPE_REQ_VERIFY: // 请求核实报警（调度）
             case AlertConstants.MESSAGE_TYPE_REQ_REPAIR: // 申请维修（岗位）
             case AlertConstants.MESSAGE_TYPE_OTHER: // 用户自定义
                 alertMapper.saveAlertMessage(alertMessage);
-                messagingTemplate.convertAndSend(uri, alertMessage);
+                messagingTemplate.convertAndSend(message_uri, alertMessage);
                 logger.debug("推送报警消息，报警设备{}，报警内容{}，消息类型为{}",alertData.getThingCode(),alertData.getMetricCode(),alertMessage.getType());
                 break;
             case AlertConstants.MESSAGE_TYPE_RECOMMENDED_SHIELDING: // 建议屏蔽（岗位）
@@ -349,7 +358,7 @@ public class AlertManager {
                     throw new SysException("the alert is not recovery", SysException.EC_UNKNOWN);
                 }
                 alertMapper.saveAlertMessage(alertMessage);
-                messagingTemplate.convertAndSend(uri, alertMessage);
+                messagingTemplate.convertAndSend(message_uri, alertMessage);
                 logger.debug("推送报警消息，报警设备{}，报警内容{}，消息类型为{}",alertData.getThingCode(),alertData.getMetricCode(),alertMessage.getType());
                 break;
             case AlertConstants.MESSAGE_TYPE_SCENE_CONFIRM_RELEASE: // 现场确认报警已解除（岗位）
@@ -373,17 +382,7 @@ public class AlertManager {
                 messagingTemplate.convertAndSend(feedback_uri, alertMessage.getPermission());
                 break;
         }
-        if (AlertConstants.PERMISSION_POSTWORKER.equals(alertMessage.getPermission())) {
-            if (!alertMessage.getUserId().equals(alertData.getPostWorker())) {
-                alertData.setPostWorker(alertMessage.getUserId());
-                updateFlag = true;
-            }
-        } else if (AlertConstants.PERMISSION_DISPATCHER.equals(alertMessage.getPermission())) {
-            if (!alertMessage.getUserId().equals(alertData.getDispatcher())) {
-                alertData.setDispatcher(alertMessage.getUserId());
-                updateFlag = true;
-            }
-        }
+
         if (updateFlag) {
             updateAlert(alertData);
         }
@@ -398,7 +397,7 @@ public class AlertManager {
      */
     public void notFoundAlert(AlertData alertData, AlertMessage alertMessage) {
         alertData.setReporter(alertMessage.getUserId());
-        messagingTemplate.convertAndSend(uri, alertMessage);
+        messagingTemplate.convertAndSend(message_uri, alertMessage);
         logger.debug("推送报警消息，报警设备{}，报警内容{}，未发现报警存在",alertData.getThingCode(),alertData.getMetricCode(),alertMessage.getType());
     }
 
@@ -416,7 +415,7 @@ public class AlertManager {
 //        verifySet.add(alertData);
         verifyDelayQueue.put(new VerifyDelayed(alertData,VERIFY_TO_UNTREATED_PERIOD));
         alertMapper.saveAlertMessage(alertMessage);
-        messagingTemplate.convertAndSend(uri, alertMessage);
+        messagingTemplate.convertAndSend(message_uri, alertMessage);
         logger.debug("推送报警消息，报警设备{}，报警内容{}，核实报警存在",alertData.getThingCode(),alertData.getMetricCode(),alertMessage.getType());
     }
 
@@ -430,7 +429,7 @@ public class AlertManager {
         alertData.setRepair(true);
         // updateAlert(alertData);
         alertMapper.saveAlertMessage(alertMessage);
-        messagingTemplate.convertAndSend(uri, alertMessage);
+        messagingTemplate.convertAndSend(message_uri, alertMessage);
         messagingTemplate.convertAndSend(repair_uri, alertData);
         logger.debug("推送报警消息，报警设备{}，报警内容{}，申报维修",alertData.getThingCode(),alertData.getMetricCode(),alertMessage.getType());
     }
@@ -473,7 +472,7 @@ public class AlertManager {
         alertData.setManualIntervention(true);
         // updateAlert(alertData);
         alertMapper.saveAlertMessage(alertMessage);
-        messagingTemplate.convertAndSend(uri, alertMessage);
+        messagingTemplate.convertAndSend(message_uri, alertMessage);
         logger.debug("推送报警消息，报警设备{}，报警内容{}，申请复位",alertData.getThingCode(),alertData.getMetricCode());
     }
 
@@ -490,7 +489,7 @@ public class AlertManager {
         dataModel.setValue(Boolean.TRUE.toString());
         cmdControlService.sendCmd(dataModel, requestId);
         alertMapper.saveAlertMessage(alertMessage);
-        messagingTemplate.convertAndSend(uri, alertMessage);
+        messagingTemplate.convertAndSend(message_uri, alertMessage);
         logger.debug("推送报警消息，报警设备{}，报警内容{}，进行复位",alertData.getThingCode(),alertData.getMetricCode());
     }
 
@@ -507,7 +506,7 @@ public class AlertManager {
         // updateAlert(alertData);
 //        verifySet.add(alertData);
         alertMapper.saveAlertMessage(alertMessage);
-        messagingTemplate.convertAndSend(uri, alertMessage);
+        messagingTemplate.convertAndSend(message_uri, alertMessage);
         logger.debug("推送报警消息，报警设备{}，报警内容{}，报警评级",alertData.getThingCode(),alertData.getMetricCode());
     }
 
@@ -524,7 +523,7 @@ public class AlertManager {
         alertData.setSceneConfirmUser(alertMessage.getUserId());
         releaseAlert(alertData);
         alertMapper.saveAlertMessage(alertMessage);
-        messagingTemplate.convertAndSend(uri, alertMessage);
+        messagingTemplate.convertAndSend(message_uri, alertMessage);
         logger.debug("推送报警消息，报警设备{}，报警内容{}，现场确认报警解除状态：",alertData.getThingCode(),alertData.getMetricCode(),sceneConfirmState);
     }
 
@@ -550,7 +549,7 @@ public class AlertManager {
         }
         alertMapper.saveAlertShield(alertMasks);
         alertMapper.saveAlertMessage(alertMessage);
-        messagingTemplate.convertAndSend(uri, alertMessage);
+        messagingTemplate.convertAndSend(message_uri, alertMessage);
         logger.debug("推送报警消息，报警设备{}，报警内容{}，建议屏蔽，屏蔽内容为：{}",alertData.getThingCode(),alertData.getMetricCode(),alertMessage.getInfo());
     }
 
