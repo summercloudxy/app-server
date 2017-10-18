@@ -444,7 +444,7 @@ public class FilterPressManager {
             List<String> feedPumpCodes = getKeyByValueFromMap(filterPressPumpMapping,filterPress.getCode());
             String feedPumpCode = feedPumpCodes.get(0);
             if(feedPumpCodes.size() == 0){
-                throw new SysException("feedPump thingCode is null",SysException.EC_UNKOWN);
+                throw new SysException("feedPump thingCode is null",SysException.EC_UNKNOWN);
             }
             Optional<DataModelWrapper> currentWrapper = dataService.getData(feedPumpCode,FilterPressMetricConstants.FEED_PUMP_CURRENT);
             Float current = new Float(0);
