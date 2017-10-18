@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import sun.awt.windows.ThemeReader;
 
 import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
@@ -64,11 +65,12 @@ public class AlertManager {
         Thread thread = new Thread(() -> {
             while (true) {
                 try {
+                    Thread.sleep(10);
                     AlertData alertData = verifyDelayQueue.take().getAlertData();
                     alertData.setAlertStage(AlertConstants.STAGE_UNTREATED);
                     updateAlert(alertData);
                 } catch (Exception e) {
-
+                    logger.error("get verified alert data error");
                 }
             }
         });
