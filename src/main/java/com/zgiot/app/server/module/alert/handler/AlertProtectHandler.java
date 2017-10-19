@@ -33,7 +33,15 @@ public class AlertProtectHandler implements AlertHandler {
         Map<String, Map<String, AlertRule>> alertRuleMap = alertManager.getProtectRuleMap();
         AlertData alertData =
                 alertManager.getAlertDataByThingAndMetricCode(thingCode, metricCode);
-        AlertRule alertRule = alertRuleMap.get(thingCode).get(metricCode);
+        AlertRule alertRule = null;
+        if(alertRuleMap.containsKey(thingCode)){
+            if(alertRuleMap.get(thingCode).containsKey(metricCode)){
+                alertRule = alertRuleMap.get(thingCode).get(metricCode);
+            }
+        }
+        if(alertRule == null){
+            return;
+        }
         if (ENABLE_VALUE.equalsIgnoreCase(dataModel.getValue()) && alertData == null) {
             alertData = new AlertData(dataModel, AlertConstants.TYPE_PROTECT, alertRule.getAlertLevel(),
                     metricService.getMetric(metricCode).getMetricName(), AlertConstants.SOURCE_SYSTEM,

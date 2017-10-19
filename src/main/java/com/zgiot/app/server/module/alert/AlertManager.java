@@ -758,6 +758,18 @@ public class AlertManager {
     }
 
     /**
+     * 删除视频信息
+     * @param thingCode
+     * @param metricCode
+     */
+    public void delVideo(String thingCode,String metricCode){
+        AlertData alertData = getAlertDataByThingAndMetricCode(thingCode,metricCode);
+        alertData.setFeedBackVideo(null);
+        updateAlert(alertData);
+    }
+
+
+    /**
      * 获取统计信息
      * 
      * @param type
