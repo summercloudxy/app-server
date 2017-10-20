@@ -41,8 +41,8 @@ public interface CmdControlService {
      * @param isHolding 是否保持
      * @return
      */
-    int sendPulseCmdBoolByShort(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId, int position, int cleanPeriod, Boolean isHolding);
-
+    int sendPulseCmdBoolByShort(DataModel dataModel, Integer retryPeriod, Integer retryCount
+            , String requestId, int position, int cleanPeriod, boolean isHolding);
 
         class CmdSendResponseData {
         int okCount;

@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.DataModel;
+import com.zgiot.common.pojo.MetricModel;
+import com.zgiot.common.pojo.ThingModel;
 import com.zgiot.common.restcontroller.ServerResponse;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -11,9 +13,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
+import springfox.documentation.spring.web.json.Json;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class CmdControlServiceImpl implements CmdControlService {
@@ -79,28 +84,37 @@ public class CmdControlServiceImpl implements CmdControlService {
      * @param isHolding 是否保持
      * @return
      */
-    public int sendPulseCmdBoolByShort(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId, int position, int cleanPeriod, Boolean isHolding){
+    public int sendPulseCmdBoolByShort(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId
+            , int position, int cleanPeriod, boolean isHolding){
         if(1 > position){
             throw new SysException("data type error", SysException.EC_CMD_FAILED);
         }
         ServerResponse response = null;
         try {
-            String readDataModelByString = dataEngineTemplate.getForObject(DataEngineTemplate.URI_DATA_SYNC, String.class, dataModel.getThingCode(), dataModel.getMetricCode());
-            response = JSON.parseObject(readDataModelByString,ServerResponse.class);
+            Map<String, String> uriVariables = new HashMap<>();
+            uriVariables.put("thingCode", dataModel.getThingCode());
+            uriVariables.put("metricCode", dataModel.getMetricCode());
+
+            String readDataModelByString = dataEngineTemplate.getForObject(DataEngineTemplate.URI_DATA_SYNC + "/{thingCode}/{metricCode}"
+                    , String.class, uriVariables);
+
+            response = JSON.parseObject(readDataModelByString, ServerResponse.class );
+
         } catch (RestClientException e) {
             throw new SysException(response.getErrorMsg(), SysException.EC_CMD_FAILED);
         }
         // 拼装下发信号值
-        DataModel readDataModel = (DataModel) response.getObj();
-        String value = readDataModel.getValue();
-        double valueInt = Integer.getInteger(value);
-        valueInt += Math.pow(2, (position-1));
+        String readValue = (String) response.getObj();
+        int valueInt = Integer.parseInt(readValue);
+        valueInt += (int)Math.pow(2, (position-1));
+
         // 信号首次发送
+        dataModel.setMetricCategoryCode(MetricModel.CATEGORY_SIGNAL);
         dataModel.setValue(String.valueOf(valueInt));
         sendfirst(dataModel, requestId);
         // 信号脉冲清除发送
-        dataModel.setValue(value);
         if(!isHolding) {
+            dataModel.setValue(readValue);
             sendSecond(dataModel, retryPeriod, retryCount, requestId, cleanPeriod);
         }
         return RETURN_CODE_SUCCESS;
