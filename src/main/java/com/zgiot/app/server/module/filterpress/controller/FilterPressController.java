@@ -128,7 +128,7 @@ public class FilterPressController {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
         int position = -1;
         int cleanPeriod = -1;
-        Boolean isHolding = null;
+        boolean isHolding = false;
         if(!StringUtils.isBlank(dataModel.getMetricCode())){
             Map<String,String> map = getMapByMetricCode(dataModel.getMetricCode());
             if((!map.isEmpty()) && (map.size() > 0)){
@@ -138,7 +138,7 @@ public class FilterPressController {
                     }else if(CLEAN_PERIOD.equals(key)){
                         cleanPeriod = Integer.valueOf(map.get(key));
                     }else if(IS_HOLDING.equals(key)){
-                        isHolding = Boolean.valueOf(map.get(key));
+                        isHolding = (map.get(key).equals(IS_HOLDING_OK) ? true : false);
                     }
                 }
             }
