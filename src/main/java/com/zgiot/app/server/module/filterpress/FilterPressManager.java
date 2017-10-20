@@ -39,6 +39,13 @@ public class FilterPressManager {
     private static final String UNLOAD_NOTICE_URI = "/topic/filterPress/unload";
     private static final String UNLOAD_CONFIRMED_NOTICE_URI = "/topic/filterPress/unload/confirm";
     private static final String PARAM_NAME_SYS = "sys";
+
+    private static final int POSITION_FEED_OVER = 5;
+    private static final int POSITION_LOOSE = 9;
+    private static final int CLAEN_PERIOD = 0;
+    private static final boolean IS_HOLDING_FEED_OVER = true;
+    private static final boolean IS_HOLDING_LOOSE = false;
+
     @Autowired
     private DataService dataService;
     @Autowired
@@ -363,7 +370,7 @@ public class FilterPressManager {
         dataModel.setMetricCode(FilterPressMetricConstants.FEED_OVER);
         dataModel.setThingCode(filterPress.getCode());
         dataModel.setValue(Boolean.TRUE.toString());
-        cmdControlService.sendPulseCmd(dataModel, null, null, RequestIdUtil.generateRequestId());
+        cmdControlService.sendPulseCmdBoolByShort(dataModel,null,null,RequestIdUtil.generateRequestId(),POSITION_FEED_OVER,CLAEN_PERIOD,IS_HOLDING_FEED_OVER);
     }
 
     /**
@@ -658,7 +665,7 @@ public class FilterPressManager {
             cmd.setThingCode(filterPress.getCode());
             cmd.setMetricCode(FilterPressMetricConstants.LOOSE);
             cmd.setValue(Boolean.TRUE.toString());
-            cmdControlService.sendPulseCmd(cmd, null, null, RequestIdUtil.generateRequestId());
+            cmdControlService.sendPulseCmdBoolByShort(cmd,null,null,RequestIdUtil.generateRequestId(),POSITION_LOOSE,CLAEN_PERIOD,IS_HOLDING_LOOSE);
         }
 
         /**
