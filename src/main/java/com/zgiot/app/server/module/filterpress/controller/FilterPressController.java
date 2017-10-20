@@ -159,7 +159,9 @@ public class FilterPressController {
             if(fieldHasAnno && metricCode.equals(field.getName())){
                 KepServerMapping fieldAnno = field.getAnnotation(KepServerMapping.class);
                 String position = fieldAnno.position();
-                index = position.split(".")[1];
+                if(position.split(".").length > 1){
+                    index = position.split(".")[1];
+                }
                 position = null;
                 resultMap.put(POSITION,index);
 
