@@ -14,7 +14,7 @@ import java.util.Objects;
 public class DataEngineTemplate extends RestTemplate {
     public static final String URI_CMD = "/cmd/send";
     public static final String URI_DATA_ALL = "/data";
-    public static final String URI_DATA_SYNC = " /data/sync";
+    public static final String URI_DATA_SYNC = "/data/sync";
     private final String host;
 
     public DataEngineTemplate(String host) {
