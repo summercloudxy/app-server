@@ -143,7 +143,7 @@ public class FilterPressController {
                 }
             }
         }
-        int count = cmdControlService.sendPulseCmdBoolByShort(dataModel,retryPeriod,retryCount,requestId,position,cleanPeriod,isHolding);
+        int count = cmdControlService.sendPulseCmdBoolByShort(dataModel,retryPeriod,retryCount,requestId,position,500,isHolding);
         return new ResponseEntity<>(
                 ServerResponse.buildOkJson(count)
                 , HttpStatus.OK);
@@ -159,8 +159,8 @@ public class FilterPressController {
             if(fieldHasAnno && metricCode.equals(field.getName())){
                 KepServerMapping fieldAnno = field.getAnnotation(KepServerMapping.class);
                 String position = fieldAnno.position();
-                if(position.indexOf('.') != -1 && position.split(".").length > 1){
-                    index = position.split(".")[1];
+                if(position.indexOf('.') != -1 && position.split("\\.").length > 1){
+                    index = position.split("\\.")[1];
                 }
                 position = null;
                 resultMap.put(POSITION,index);

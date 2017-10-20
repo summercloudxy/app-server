@@ -37,15 +37,15 @@ public class FilterPress {
     /**
      * 入料开始时间，若不处于入料状态，值为空
      */
-    private volatile Long feedStartTime;
+    private volatile long feedStartTime;
     /**
      * 入料结束时间
      */
-    private volatile Long feedOverTime;
+    private volatile long feedOverTime;
     /**
      * 进料时长
      */
-    private volatile Long feedDuration;
+    private volatile long feedDuration;
     /**
      * 入料泵电流
      */
@@ -53,7 +53,7 @@ public class FilterPress {
     /**
      * 进入循环等待的时间
      */
-    private volatile Long onCycleTime;
+    private volatile long onCycleTime;
     /**
      * 卸料条件判断管理器
      */
