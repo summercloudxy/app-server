@@ -53,10 +53,6 @@ public class CmdControlServiceImpl implements CmdControlService {
     }
 
     public int sendPulseCmd(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId) {
-        final Integer realRetryCount = retryCount == null ? DEFAULT_RETRY_COUNT : retryCount;
-        if (retryPeriod == null) {
-            retryPeriod = SEND_PERIOD;
-        }
         String value = dataModel.getValue();
         Boolean boolValue;
         if (Boolean.TRUE.toString().equalsIgnoreCase(value) || Boolean.FALSE.toString().equalsIgnoreCase(value)) {
@@ -64,15 +60,83 @@ public class CmdControlServiceImpl implements CmdControlService {
         } else {
             throw new SysException("data type error", SysException.EC_CMD_FAILED);
         }
+        // 信号首次发送
+        sendfirst(dataModel, requestId);
+        dataModel.setValue(Boolean.toString(!boolValue));
+        // 信号脉冲清除发送
+        sendSecond(dataModel, retryPeriod, retryCount, requestId, null);
+        return RETURN_CODE_SUCCESS;
+    }
+
+    /**
+     * 根据信号位置下发信号
+     * @param dataModel 信号发送类（包括信号地址和发送值，本接口无视发送值）
+     * @param retryPeriod 重发等待时间
+     * @param retryCount 重发次数
+     * @param requestId 请求id
+     * @param position 发送位置
+     * @param cleanPeriod 清除等待时间
+     * @param isHolding 是否保持
+     * @return
+     */
+    public int sendPulseCmdBoolByShort(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId, int position, int cleanPeriod, Boolean isHolding){
+        if(1 > position){
+            throw new SysException("data type error", SysException.EC_CMD_FAILED);
+        }
+        ServerResponse response = null;
+        try {
+            String readDataModelByString = dataEngineTemplate.getForObject(DataEngineTemplate.URI_DATA_SYNC, String.class, dataModel.getThingCode(), dataModel.getMetricCode());
+            response = JSON.parseObject(readDataModelByString,ServerResponse.class);
+        } catch (RestClientException e) {
+            throw new SysException(response.getErrorMsg(), SysException.EC_CMD_FAILED);
+        }
+        // 拼装下发信号值
+        DataModel readDataModel = (DataModel) response.getObj();
+        String value = readDataModel.getValue();
+        double valueInt = Integer.getInteger(value);
+        valueInt += Math.pow(2, (position-1));
+        // 信号首次发送
+        dataModel.setValue(String.valueOf(valueInt));
+        sendfirst(dataModel, requestId);
+        // 信号脉冲清除发送
+        dataModel.setValue(value);
+        if(!isHolding) {
+            sendSecond(dataModel, retryPeriod, retryCount, requestId, cleanPeriod);
+        }
+        return RETURN_CODE_SUCCESS;
+    }
+
+    /**
+     * 信号首次发送
+     * @param dataModel 信号发送类（包括信号地址和发送值）
+     * @param requestId 请求id
+     */
+    private void sendfirst(DataModel dataModel, String requestId){
         try {
             sendCmd(dataModel, requestId);
         } catch (Exception e) {
             throw new SysException("failed send first pulse", SysException.EC_CMD_PULSE_FIRST_FAILED);
         }
-        dataModel.setValue(Boolean.toString(!boolValue));
+    }
+
+    /**
+     * 信号重新发送清除
+     * @param dataModel 信号发送类（包括信号地址和发送值）
+     * @param retryPeriod 重发等待时间
+     * @param retryCount 重发次数
+     * @param requestId 请求id
+     */
+    private void sendSecond(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId, Integer cleanPeriod){
+        final Integer realRetryCount = retryCount == null ? DEFAULT_RETRY_COUNT : retryCount;
+        if (retryPeriod == null) {
+            retryPeriod = SEND_PERIOD;
+        }
         Boolean state = false;
         for (int i = 1; i <= realRetryCount; i++) {
             try {
+                if (null != cleanPeriod) {
+                    Thread.sleep(cleanPeriod);
+                }
                 sendCmd(Collections.singletonList(dataModel), requestId);
                 state = true;
                 break;
@@ -88,7 +152,5 @@ public class CmdControlServiceImpl implements CmdControlService {
         if (!state) {
             throw new SysException("failed send second pulse", SysException.EC_CMD_PULSE_SECOND_FAILED);
         }
-        return RETURN_CODE_SUCCESS;
     }
-
 }
