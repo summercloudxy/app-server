@@ -111,10 +111,10 @@ public class CmdControlServiceImpl implements CmdControlService {
         if(!isHolding) {
             String readValueBeforeClean = getDataSync(dataModel);
             int cleanValueInt = Integer.parseInt(readValueBeforeClean);
-            if(dataModelOperate && getBit(valueInt, position, VALUE_TRUE)){
+            if(dataModelOperate && getBit(cleanValueInt, position, VALUE_TRUE)){
                 cleanValueInt -= (int) Math.pow(2, (position - 1));
             }
-            if(!dataModelOperate && getBit(valueInt, position, VALUE_FALSE)) {
+            if(!dataModelOperate && getBit(cleanValueInt, position, VALUE_FALSE)) {
                 cleanValueInt += (int) Math.pow(2, (position - 1));
             }
             dataModel.setValue(String.valueOf(cleanValueInt));
