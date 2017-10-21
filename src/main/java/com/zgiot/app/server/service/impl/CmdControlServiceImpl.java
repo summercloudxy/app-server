@@ -91,27 +91,13 @@ public class CmdControlServiceImpl implements CmdControlService {
         if(1 > position){
             throw new SysException("data type error", SysException.EC_CMD_FAILED);
         }
-        ServerResponse response = null;
-        try {
-            Map<String, String> uriVariables = new HashMap<>();
-            uriVariables.put("thingCode", dataModel.getThingCode());
-            uriVariables.put("metricCode", dataModel.getMetricCode());
-
-            String readDataModelByString = dataEngineTemplate.getForObject(DataEngineTemplate.URI_DATA_SYNC + "/{thingCode}/{metricCode}"
-                    , String.class, uriVariables);
-
-            response = JSON.parseObject(readDataModelByString, ServerResponse.class );
-
-        } catch (RestClientException e) {
-            throw new SysException(response.getErrorMsg(), SysException.EC_CMD_FAILED);
-        }
-        // 拼装下发信号值
-        String readValue = (String) response.getObj();
+        String readValue = getDataSync(dataModel);
         int valueInt = Integer.parseInt(readValue);
-        if("true".equals(dataModel.getValue()) && getBit(valueInt, position, VALUE_FALSE)) {
+        boolean dataModelOperate = Boolean.parseBoolean(dataModel.getValue());
+        if(dataModelOperate && getBit(valueInt, position, VALUE_FALSE)) {
             valueInt += (int) Math.pow(2, (position - 1));
         }
-        if("false".equals(dataModel.getValue()) && getBit(valueInt, position, VALUE_TRUE)){
+        if(!dataModelOperate && getBit(valueInt, position, VALUE_TRUE)){
             valueInt -= (int) Math.pow(2, (position - 1));
         }
         if(0 > valueInt){
@@ -123,7 +109,15 @@ public class CmdControlServiceImpl implements CmdControlService {
         sendfirst(dataModel, requestId);
         // 信号脉冲清除发送
         if(!isHolding) {
-            dataModel.setValue(readValue);
+            String readValueBeforeClean = getDataSync(dataModel);
+            int cleanValueInt = Integer.parseInt(readValueBeforeClean);
+            if(dataModelOperate && getBit(valueInt, position, VALUE_TRUE)){
+                cleanValueInt -= (int) Math.pow(2, (position - 1));
+            }
+            if(!dataModelOperate && getBit(valueInt, position, VALUE_FALSE)) {
+                cleanValueInt += (int) Math.pow(2, (position - 1));
+            }
+            dataModel.setValue(String.valueOf(cleanValueInt));
             sendSecond(dataModel, retryPeriod, retryCount, requestId, cleanPeriod);
         }
         return RETURN_CODE_SUCCESS;
@@ -178,12 +172,12 @@ public class CmdControlServiceImpl implements CmdControlService {
     }
 
     /**
-     *
+     * 判断二进制第几位是否为预期值
      * @param value
      * @param position
      * @return
      */
-    private boolean getBit(int value, int position, int compareValue){
+     boolean getBit(int value, int position, int compareValue){
         boolean flag = false;
         for(int i=1;i<= position;i++){
             if(value %2 == compareValue){
@@ -194,5 +188,29 @@ public class CmdControlServiceImpl implements CmdControlService {
             value = value/2;
         }
         return flag;
+    }
+
+    /**
+     * 获取/data/sync接口反馈数据值
+     * @param dataModel
+     * @return
+     */
+    public String getDataSync(DataModel dataModel){
+        ServerResponse response = null;
+        try {
+            Map<String, String> uriVariables = new HashMap<>();
+            uriVariables.put("thingCode", dataModel.getThingCode());
+            uriVariables.put("metricCode", dataModel.getMetricCode());
+
+            String readDataModelByString = dataEngineTemplate.getForObject(DataEngineTemplate.URI_DATA_SYNC + "/{thingCode}/{metricCode}"
+                    , String.class, uriVariables);
+
+            response = JSON.parseObject(readDataModelByString, ServerResponse.class );
+
+        } catch (RestClientException e) {
+            throw new SysException(response.getErrorMsg(), SysException.EC_CMD_FAILED);
+        }
+        String readValue = (String) response.getObj();
+        return readValue;
     }
 }
