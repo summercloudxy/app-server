@@ -94,11 +94,17 @@ public class CmdControlServiceImpl implements CmdControlService {
         String readValue = getDataSync(dataModel);
         int valueInt = Integer.parseInt(readValue);
         boolean dataModelOperate = Boolean.parseBoolean(dataModel.getValue());
-        if(dataModelOperate && getBit(valueInt, position, VALUE_FALSE)) {
+        int compareValue;
+        if(dataModelOperate) {
             valueInt += (int) Math.pow(2, (position - 1));
-        }
-        if(!dataModelOperate && getBit(valueInt, position, VALUE_TRUE)){
+            compareValue = VALUE_FALSE;
+        }else{
             valueInt -= (int) Math.pow(2, (position - 1));
+            compareValue = VALUE_TRUE;
+        }
+        if(!getBit(valueInt, position, compareValue)){
+            logger.info("ThingCode:{},MetricCode:{},信号与现在相同，不下发",dataModel.getThingCode(),dataModel.getMetricCode());
+            return RETURN_CODE_SUCCESS;
         }
         if(0 > valueInt){
             throw new SysException("valueInt is less than zero", SysException.EC_CMD_FAILED);
@@ -111,11 +117,13 @@ public class CmdControlServiceImpl implements CmdControlService {
         if(!isHolding) {
             String readValueBeforeClean = getDataSync(dataModel);
             int cleanValueInt = Integer.parseInt(readValueBeforeClean);
-            if(dataModelOperate && getBit(cleanValueInt, position, VALUE_TRUE)){
+            if(dataModelOperate){
                 cleanValueInt -= (int) Math.pow(2, (position - 1));
+                compareValue = VALUE_TRUE;
             }
-            if(!dataModelOperate && getBit(cleanValueInt, position, VALUE_FALSE)) {
-                cleanValueInt += (int) Math.pow(2, (position - 1));
+            if(!getBit(valueInt, position, compareValue)){
+                logger.info("ThingCode:{},MetricCode:{},清零信号与现在相同，清零不下发",dataModel.getThingCode(),dataModel.getMetricCode());
+                return RETURN_CODE_SUCCESS;
             }
             dataModel.setValue(String.valueOf(cleanValueInt));
             sendSecond(dataModel, retryPeriod, retryCount, requestId, cleanPeriod);
