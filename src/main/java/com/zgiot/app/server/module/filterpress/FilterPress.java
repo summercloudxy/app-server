@@ -249,9 +249,11 @@ public class FilterPress {
     }
 
     public int getPlateCount() {
+        logger.info("producingTeam:" + producingTeam);
         if(producingTeam == null){
             return 0;
         }
+        logger.info("plateCount:" + plateCount);
         return plateCount.get(producingTeam);
     }
 
