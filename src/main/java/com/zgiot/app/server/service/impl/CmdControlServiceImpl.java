@@ -27,6 +27,8 @@ public class CmdControlServiceImpl implements CmdControlService {
     private static final int RETURN_CODE_SUCCESS = 1;
     private static final int DEFAULT_SEND_DELAY_TIME = 0;
     private static final int SEND_PERIOD = 1000;
+    private static final int VALUE_TRUE = 1;
+    private static final int VALUE_FALSE = 0;
     @Autowired
     private DataEngineTemplate dataEngineTemplate;
 
@@ -106,8 +108,15 @@ public class CmdControlServiceImpl implements CmdControlService {
         // 拼装下发信号值
         String readValue = (String) response.getObj();
         int valueInt = Integer.parseInt(readValue);
-        valueInt += (int)Math.pow(2, (position-1));
-
+        if("true".equals(dataModel.getValue()) && getBit(valueInt, position, VALUE_FALSE)) {
+            valueInt += (int) Math.pow(2, (position - 1));
+        }
+        if("false".equals(dataModel.getValue()) && getBit(valueInt, position, VALUE_TRUE)){
+            valueInt -= (int) Math.pow(2, (position - 1));
+        }
+        if(0 > valueInt){
+            throw new SysException("valueInt is less than zero", SysException.EC_CMD_FAILED);
+        }
         // 信号首次发送
         dataModel.setMetricCategoryCode(MetricModel.CATEGORY_SIGNAL);
         dataModel.setValue(String.valueOf(valueInt));
@@ -166,5 +175,24 @@ public class CmdControlServiceImpl implements CmdControlService {
         if (!state) {
             throw new SysException("failed send second pulse", SysException.EC_CMD_PULSE_SECOND_FAILED);
         }
+    }
+
+    /**
+     *
+     * @param value
+     * @param position
+     * @return
+     */
+    private boolean getBit(int value, int position, int compareValue){
+        boolean flag = false;
+        for(int i=1;i<= position;i++){
+            if(value %2 == compareValue){
+                flag = true;
+            }else{
+                flag = false;
+            }
+            value = value/2;
+        }
+        return flag;
     }
 }
