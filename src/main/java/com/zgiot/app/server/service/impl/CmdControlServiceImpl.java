@@ -111,7 +111,7 @@ public class CmdControlServiceImpl implements CmdControlService {
         // 信号脉冲清除发送
         if(!isHolding) {
             int cleanValueInt = Integer.parseInt(readValue);
-            if(dataModelOperate && getBit(Integer.parseInt(readValue), position, VALUE_TRUE)){
+            if(getBit(Integer.parseInt(readValue), position, VALUE_TRUE)){
                 logger.info("ThingCode:{},MetricCode:{},清除信号原始值为{},在{}位置",dataModel.getThingCode(),dataModel.getMetricCode(), cleanValueInt, position);
                 cleanValueInt -= (int) Math.pow(2, (position - 1));
             }
