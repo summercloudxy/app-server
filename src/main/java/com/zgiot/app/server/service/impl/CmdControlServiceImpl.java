@@ -102,8 +102,8 @@ public class CmdControlServiceImpl implements CmdControlService {
             valueInt -= (int) Math.pow(2, (position - 1));
             compareValue = VALUE_TRUE;
         }
-        if(!getBit(valueInt, position, compareValue)){
-            logger.info("ThingCode:{},MetricCode:{},信号与现在相同，不下发",dataModel.getThingCode(),dataModel.getMetricCode());
+        if(!getBit(Integer.parseInt(readValue), position, compareValue)){
+            logger.info("ThingCode:{},MetricCode:{},信号现在值为{},在{}位置，值预计为{}，不下发",dataModel.getThingCode(),dataModel.getMetricCode(), readValue, position, compareValue);
             return RETURN_CODE_SUCCESS;
         }
         if(0 > valueInt){
@@ -121,8 +121,8 @@ public class CmdControlServiceImpl implements CmdControlService {
                 cleanValueInt -= (int) Math.pow(2, (position - 1));
                 compareValue = VALUE_TRUE;
             }
-            if(!getBit(valueInt, position, compareValue)){
-                logger.info("ThingCode:{},MetricCode:{},清零信号与现在相同，清零不下发",dataModel.getThingCode(),dataModel.getMetricCode());
+            if(!getBit(Integer.parseInt(readValueBeforeClean), position, compareValue)){
+                logger.info("ThingCode:{},MetricCode:{},信号现在值为{},在{}位置，值预计为{}，不下发",dataModel.getThingCode(),dataModel.getMetricCode(), readValueBeforeClean, position, compareValue);
                 return RETURN_CODE_SUCCESS;
             }
             dataModel.setValue(String.valueOf(cleanValueInt));
