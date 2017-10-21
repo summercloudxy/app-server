@@ -178,8 +178,7 @@ public class FilterPressController {
                         ||FilterPressMetricConstants.GATE_ALARM.equals(metricCode)
                         ||FilterPressMetricConstants.SCR_BLK.equals(metricCode)
                         ||FilterPressMetricConstants.STOP.equals(metricCode)
-                        ||FilterPressMetricConstants.R_AUTO.equals(metricCode)
-                        ||FilterPressMetricConstants.FEED_OVER.equals(metricCode)){
+                        ||FilterPressMetricConstants.R_AUTO.equals(metricCode)){
                     resultMap.put(IS_HOLDING,IS_HOLDING_OK);
                 }else{
                     resultMap.put(IS_HOLDING,IS_HOLDING_NOT);
