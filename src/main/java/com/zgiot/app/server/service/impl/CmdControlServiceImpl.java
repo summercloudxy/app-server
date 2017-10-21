@@ -94,18 +94,13 @@ public class CmdControlServiceImpl implements CmdControlService {
         String readValue = getDataSync(dataModel);
         int valueInt = Integer.parseInt(readValue);
         boolean dataModelOperate = Boolean.parseBoolean(dataModel.getValue());
-        int compareValue;
-        if(dataModelOperate) {
+        if(dataModelOperate && getBit(Integer.parseInt(readValue), position, VALUE_FALSE)){
             valueInt += (int) Math.pow(2, (position - 1));
-            compareValue = VALUE_FALSE;
-        }else{
+        }
+        if(!dataModelOperate && getBit(Integer.parseInt(readValue), position, VALUE_TRUE)){
             valueInt -= (int) Math.pow(2, (position - 1));
-            compareValue = VALUE_TRUE;
         }
-        if(!getBit(Integer.parseInt(readValue), position, compareValue)){
-            logger.info("ThingCode:{},MetricCode:{},信号现在值为{},在{}位置，值预计为{}，不下发",dataModel.getThingCode(),dataModel.getMetricCode(), readValue, position, compareValue);
-            return RETURN_CODE_SUCCESS;
-        }
+        logger.info("ThingCode:{},MetricCode:{},信号现在值为{},在{}位置，值预计为{}",dataModel.getThingCode(),dataModel.getMetricCode(), readValue, position);
         if(0 > valueInt){
             throw new SysException("valueInt is less than zero", SysException.EC_CMD_FAILED);
         }
@@ -115,15 +110,10 @@ public class CmdControlServiceImpl implements CmdControlService {
         sendfirst(dataModel, requestId);
         // 信号脉冲清除发送
         if(!isHolding) {
-            String readValueBeforeClean = getDataSync(dataModel);
-            int cleanValueInt = Integer.parseInt(readValueBeforeClean);
-            if(dataModelOperate){
+            int cleanValueInt = Integer.parseInt(readValue);
+            if(dataModelOperate && getBit(Integer.parseInt(readValue), position, VALUE_TRUE)){
+                logger.info("ThingCode:{},MetricCode:{},清除信号原始值为{},在{}位置",dataModel.getThingCode(),dataModel.getMetricCode(), cleanValueInt, position);
                 cleanValueInt -= (int) Math.pow(2, (position - 1));
-                compareValue = VALUE_TRUE;
-            }
-            if(!getBit(Integer.parseInt(readValueBeforeClean), position, compareValue)){
-                logger.info("ThingCode:{},MetricCode:{},信号现在值为{},在{}位置，值预计为{}，不下发",dataModel.getThingCode(),dataModel.getMetricCode(), readValueBeforeClean, position, compareValue);
-                return RETURN_CODE_SUCCESS;
             }
             dataModel.setValue(String.valueOf(cleanValueInt));
             sendSecond(dataModel, retryPeriod, retryCount, requestId, cleanPeriod);
