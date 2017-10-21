@@ -30,7 +30,21 @@ public interface CmdControlService {
      */
     int sendPulseCmd(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId);
 
-    class CmdSendResponseData {
+    /**
+     * 根据信号位置下发信号
+     * @param dataModel 信号发送类（包括信号地址和发送值，本接口无视发送值）
+     * @param retryPeriod 重发等待时间
+     * @param retryCount 重发次数
+     * @param requestId 请求id
+     * @param position 发送位置
+     * @param cleanPeriod 清除等待时间
+     * @param isHolding 是否保持
+     * @return
+     */
+    int sendPulseCmdBoolByShort(DataModel dataModel, Integer retryPeriod, Integer retryCount
+            , String requestId, int position, int cleanPeriod, boolean isHolding);
+
+        class CmdSendResponseData {
         int okCount;
         String errorMessage;
 
