@@ -88,6 +88,7 @@ public class CmdControlServiceImpl implements CmdControlService {
      */
     public int sendPulseCmdBoolByShort(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId
             , int position, int cleanPeriod, boolean isHolding){
+        logger.info("sendPulseCmdBoolByShort: ThingCode:{},MetricCode:{},在{}位置下发请求开始",dataModel.getThingCode(),dataModel.getMetricCode(), position);
         if(1 > position){
             throw new SysException("data type error", SysException.EC_CMD_FAILED);
         }
@@ -100,7 +101,7 @@ public class CmdControlServiceImpl implements CmdControlService {
         if(!dataModelOperate && getBit(Integer.parseInt(readValue), position, VALUE_TRUE)){
             valueInt -= (int) Math.pow(2, (position - 1));
         }
-        logger.info("ThingCode:{},MetricCode:{},信号现在值为{},在{}位置，值预计为{}",dataModel.getThingCode(),dataModel.getMetricCode(), readValue, position);
+        logger.info("sendPulseCmdBoolByShort: ThingCode:{},MetricCode:{},信号现在值为{},在{}位置",dataModel.getThingCode(),dataModel.getMetricCode(), readValue, position);
         if(0 > valueInt){
             throw new SysException("valueInt is less than zero", SysException.EC_CMD_FAILED);
         }
@@ -112,9 +113,9 @@ public class CmdControlServiceImpl implements CmdControlService {
         if(!isHolding) {
             int cleanValueInt = Integer.parseInt(readValue);
             if(getBit(Integer.parseInt(readValue), position, VALUE_TRUE)){
-                logger.info("ThingCode:{},MetricCode:{},清除信号原始值为{},在{}位置",dataModel.getThingCode(),dataModel.getMetricCode(), cleanValueInt, position);
                 cleanValueInt -= (int) Math.pow(2, (position - 1));
             }
+            logger.info("sendPulseCmdBoolByShort: ThingCode:{},MetricCode:{},清除信号发送值为{},在{}位置",dataModel.getThingCode(),dataModel.getMetricCode(), cleanValueInt, position);
             dataModel.setValue(String.valueOf(cleanValueInt));
             sendSecond(dataModel, retryPeriod, retryCount, requestId, cleanPeriod);
         }
@@ -199,13 +200,11 @@ public class CmdControlServiceImpl implements CmdControlService {
             Map<String, String> uriVariables = new HashMap<>();
             uriVariables.put("thingCode", dataModel.getThingCode());
             uriVariables.put("metricCode", dataModel.getMetricCode());
-
             String readDataModelByString = dataEngineTemplate.getForObject(DataEngineTemplate.URI_DATA_SYNC + "/{thingCode}/{metricCode}"
                     , String.class, uriVariables);
-
             response = JSON.parseObject(readDataModelByString, ServerResponse.class );
 
-        } catch (RestClientException e) {
+        } catch (Exception e) {
             throw new SysException(response.getErrorMsg(), SysException.EC_CMD_FAILED);
         }
         String readValue = (String) response.getObj();
