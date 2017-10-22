@@ -113,9 +113,9 @@ public class CmdControlServiceImpl implements CmdControlService {
         if(!isHolding) {
             int cleanValueInt = Integer.parseInt(readValue);
             if(getBit(Integer.parseInt(readValue), position, VALUE_TRUE)){
-                logger.info("sendPulseCmdBoolByShort: ThingCode:{},MetricCode:{},清除信号原始值为{},在{}位置",dataModel.getThingCode(),dataModel.getMetricCode(), cleanValueInt, position);
                 cleanValueInt -= (int) Math.pow(2, (position - 1));
             }
+            logger.info("sendPulseCmdBoolByShort: ThingCode:{},MetricCode:{},清除信号发送值为{},在{}位置",dataModel.getThingCode(),dataModel.getMetricCode(), cleanValueInt, position);
             dataModel.setValue(String.valueOf(cleanValueInt));
             sendSecond(dataModel, retryPeriod, retryCount, requestId, cleanPeriod);
         }
