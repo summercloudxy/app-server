@@ -43,7 +43,7 @@ public class FilterPressManager {
     private static final int POSITION_FEED_OVER = 5;
     private static final int POSITION_LOOSE = 9;
     private static final int CLAEN_PERIOD = 0;
-    private static final boolean IS_HOLDING_FEED_OVER = true;
+    private static final boolean IS_HOLDING_FEED_OVER = false;
     private static final boolean IS_HOLDING_LOOSE = false;
 
     @Autowired
