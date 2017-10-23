@@ -74,7 +74,7 @@ public class FilterPressManager {
     private UnloadManager unloadManager = new UnloadManager();
 
     static{
-        filterPressStage.put(FilterPressMetricConstants.RO_LOOSEN,"");
+        filterPressStage.put(FilterPressMetricConstants.RO_LOOSE,"");
         filterPressStage.put(FilterPressMetricConstants.RO_TAKEN,"");
         filterPressStage.put(FilterPressMetricConstants.RO_PULL,"");
         filterPressStage.put(FilterPressMetricConstants.RO_PRESS,"");
@@ -243,7 +243,7 @@ public class FilterPressManager {
         FilterPress filterPress = getFilterPress(thingCode);
         Boolean isRunning = Boolean.FALSE;
         switch (metricCode) { // 回调各阶段
-            case FilterPressMetricConstants.RO_LOOSEN:
+            case FilterPressMetricConstants.RO_LOOSE:
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onLoosen();
                     isRunning = Boolean.TRUE;
@@ -371,7 +371,7 @@ public class FilterPressManager {
         Optional<DataModelWrapper> data = null;
         for(String value:filterPressStage.values()){
             data = dataService.getData(thingCode,value);
-            if(Boolean.parseBoolean(data.get().getValue())){
+            if(data != null && data.isPresent() && Boolean.parseBoolean(data.get().getValue())){
                 isRunning = Boolean.TRUE;
                 break;
             }
