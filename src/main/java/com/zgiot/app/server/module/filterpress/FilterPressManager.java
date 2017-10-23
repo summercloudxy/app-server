@@ -751,7 +751,7 @@ public class FilterPressManager {
             queuePosition.forEach((code, seq) -> queuePosition.replace(code, seq - 1));
         }
 
-        private void reSort(){
+        private synchronized void reSort(){
             queuePosition.clear();
             for(FilterPress filterPress:queue){
                 queuePosition.put(filterPress.getCode(),queuePosition.size() + 1);
