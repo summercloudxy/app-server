@@ -288,6 +288,7 @@ public class FilterPress {
          */
         private void startUnload() {
             isUnloading = true;
+            notifiedNext = false;
             scheduleTimer();
         }
 

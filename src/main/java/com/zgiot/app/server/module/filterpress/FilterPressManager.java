@@ -692,7 +692,7 @@ public class FilterPressManager {
          * @param filterPress
          */
         void enqueue(FilterPress filterPress) {
-            queuePosition.put(filterPress.getCode(), queuePosition.size());
+            queuePosition.put(filterPress.getCode(), queuePosition.size() + 1);
             queue.add(filterPress);
             unloadNextIfPossible();
         }
