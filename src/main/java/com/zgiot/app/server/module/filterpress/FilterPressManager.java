@@ -75,7 +75,7 @@ public class FilterPressManager {
 
     static{
         filterPressStage.put(FilterPressMetricConstants.RO_LOOSE,"");
-        filterPressStage.put(FilterPressMetricConstants.RO_TAKEN,"");
+        filterPressStage.put(FilterPressMetricConstants.RO_TAKE,"");
         filterPressStage.put(FilterPressMetricConstants.RO_PULL,"");
         filterPressStage.put(FilterPressMetricConstants.RO_PRESS,"");
         filterPressStage.put(FilterPressMetricConstants.RO_FEEDING,"");
@@ -249,7 +249,7 @@ public class FilterPressManager {
                     isRunning = Boolean.TRUE;
                 }
                 break;
-            case FilterPressMetricConstants.RO_TAKEN:
+            case FilterPressMetricConstants.RO_TAKE:
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onTaken();
                     isRunning = Boolean.TRUE;
@@ -691,13 +691,13 @@ public class FilterPressManager {
          *
          * @param filterPress
          */
-        void enqueue(FilterPress filterPress) {
+        synchronized  void enqueue(FilterPress filterPress) {
             queuePosition.put(filterPress.getCode(), queuePosition.size() + 1);
             queue.add(filterPress);
             unloadNextIfPossible();
         }
 
-        private void unloadNext() {
+        private synchronized void unloadNext() {
             unloading.getAndDecrement();
             unloadNextIfPossible();
         }
@@ -705,7 +705,7 @@ public class FilterPressManager {
         /**
          * 若存在可以卸料的压滤机，则按照最大同时卸料数量进行卸料调度
          */
-        private void unloadNextIfPossible() {
+        private synchronized void unloadNextIfPossible() {
             for (int i = unloading.get(); i < maxUnloadParallel; i++) {
                 FilterPress candidate = queue.poll();
                 if (candidate == null) {
@@ -716,7 +716,7 @@ public class FilterPressManager {
             }
         }
 
-        private void execUnload(FilterPress filterPress) {
+        private synchronized void execUnload(FilterPress filterPress) {
             if (!filterPress.isUnloadConfirmNeed()) {
                 logger.debug("{} unload, send cmd; confirmNeed: {}", filterPress, filterPress.isUnloadConfirmNeed());
                 doUnload(filterPress);
@@ -733,10 +733,10 @@ public class FilterPressManager {
          *
          * @param filterPress
          */
-        private void doUnload(FilterPress filterPress) {
+        private synchronized void doUnload(FilterPress filterPress) {
             filterPress.startUnload();
             queuePosition.remove(filterPress.getCode());
-            countDownPosition();
+            reSort();
             DataModel cmd = new DataModel();
             cmd.setThingCode(filterPress.getCode());
             cmd.setMetricCode(FilterPressMetricConstants.LOOSE);
@@ -751,5 +751,11 @@ public class FilterPressManager {
             queuePosition.forEach((code, seq) -> queuePosition.replace(code, seq - 1));
         }
 
+        private void reSort(){
+            queuePosition.clear();
+            for(FilterPress filterPress:queue){
+                queuePosition.put(filterPress.getCode(),queuePosition.size() + 1);
+            }
+        }
     }
 }
