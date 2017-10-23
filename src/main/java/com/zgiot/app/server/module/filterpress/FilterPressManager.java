@@ -45,6 +45,7 @@ public class FilterPressManager {
     private static final int CLAEN_PERIOD = 0;
     private static final boolean IS_HOLDING_FEED_OVER = false;
     private static final boolean IS_HOLDING_LOOSE = false;
+    private static final Map<String,String> filterPressStage = new ConcurrentHashMap<>();;
 
     @Autowired
     private DataService dataService;
@@ -71,6 +72,21 @@ public class FilterPressManager {
     private Set<String> unConfirmedUnload = new ConcurrentSkipListSet<>();
 
     private UnloadManager unloadManager = new UnloadManager();
+
+    static{
+        filterPressStage.put("RO_LOOSEN","RO_LOOSEN");
+        filterPressStage.put("RO_TAKEN","RO_TAKEN");
+        filterPressStage.put("RO_PULL","RO_PULL");
+        filterPressStage.put("RO_PRESS","RO_PRESS");
+        filterPressStage.put("RO_FEEDING","RO_FEEDING");
+        filterPressStage.put("RO_FEED_OVER","RO_FEED_OVER");
+        filterPressStage.put("RO_BLOW","RO_BLOW");
+        filterPressStage.put("RO_EMPTYING","RO_EMPTYING");
+        filterPressStage.put("RO_SQUEEZE","RO_SQUEEZE");
+        filterPressStage.put("RO_SQUEEZE_OVER","RO_SQUEEZE_OVER");
+        filterPressStage.put("RO_HOLD_PRESS","RO_HOLD_PRESS");
+        filterPressStage.put("RO_CYCLE","RO_CYCLE");
+    }
 
     @PostConstruct
     void initFilterPress() {
@@ -118,7 +134,7 @@ public class FilterPressManager {
         }
         String metricCode = data.getMetricCode();
         filterPress.onDataSourceChange(metricCode, data.getValue());
-        if (FilterPressMetricConstants.STAGE.equals(metricCode)) {
+        if (filterPressStage.containsValue(metricCode)) {
             processStage(data);
         }
         if (FilterPressMetricConstants.FEED_ASUM.equals(metricCode)) {
@@ -222,37 +238,83 @@ public class FilterPressManager {
      */
     private void processStage(DataModel data) {
         String thingCode = data.getThingCode();
-        short stageValue = Short.valueOf(data.getValue());
+        String metricCodeValue = data.getValue();
+        String metricCode = data.getMetricCode();
         FilterPress filterPress = getFilterPress(thingCode);
-        switch (stageValue) { // 回调各阶段
-            case FilterPressConstants.STAGE_LOOSEN:
-                filterPress.onLoosen();
+        Boolean isRunning = Boolean.FALSE;
+        switch (metricCode) { // 回调各阶段
+            case FilterPressMetricConstants.RO_LOOSEN:
+                if(Boolean.TRUE.toString().equals(metricCodeValue)){
+                    filterPress.onLoosen();
+                    isRunning = Boolean.TRUE;
+                }
                 break;
-            case FilterPressConstants.STAGE_TAKEN:
-                filterPress.onTaken();
+            case FilterPressMetricConstants.RO_TAKEN:
+                if(Boolean.TRUE.toString().equals(metricCodeValue)){
+                    filterPress.onTaken();
+                    isRunning = Boolean.TRUE;
+                }
                 break;
-            case FilterPressConstants.STAGE_PULL:
-                filterPress.onPull();
+            case FilterPressMetricConstants.RO_PULL:
+                if(Boolean.TRUE.toString().equals(metricCodeValue)){
+                    filterPress.onPull();
+                    isRunning = Boolean.TRUE;
+                }
                 break;
-            case FilterPressConstants.STAGE_PRESS:
-                filterPress.onPress();
+            case FilterPressMetricConstants.RO_PRESS:
+                if(Boolean.TRUE.toString().equals(metricCodeValue)){
+                    filterPress.onPress();
+                    isRunning = Boolean.TRUE;
+                }
                 break;
-            case FilterPressConstants.STAGE_FEEDING:
-                filterPress.onFeed();
+            case FilterPressMetricConstants.RO_FEEDING:
+                if(Boolean.TRUE.toString().equals(metricCodeValue)){
+                    filterPress.onFeed();
+                    isRunning = Boolean.TRUE;
+                }
                 break;
-            case FilterPressConstants.STAGE_FEED_OVER:
-                filterPress.onFeedOver();
+            case FilterPressMetricConstants.RO_FEED_OVER:
+                if(Boolean.TRUE.toString().equals(metricCodeValue)){
+                    filterPress.onFeedOver();
+                    isRunning = Boolean.TRUE;
+                }
                 break;
-            case FilterPressConstants.STAGE_BLOW:
-                filterPress.onBlow();
+            case FilterPressMetricConstants.RO_BLOW:
+                if(Boolean.TRUE.toString().equals(metricCodeValue)){
+                    filterPress.onBlow();
+                    isRunning = Boolean.TRUE;
+                }
                 break;
-            case FilterPressConstants.STAGE_CYCLE:
-                filterPress.onCycle();
+            case FilterPressMetricConstants.RO_HOLD_PRESS:
+                if(Boolean.TRUE.toString().equals(metricCodeValue)){
+                    isRunning = Boolean.TRUE;
+                }
+                break;
+            case FilterPressMetricConstants.RO_SQUEEZE_OVER:
+                if(Boolean.TRUE.toString().equals(metricCodeValue)){
+                    isRunning = Boolean.TRUE;
+                }
+                break;
+            case FilterPressMetricConstants.RO_SQUEEZE:
+                if(Boolean.TRUE.toString().equals(metricCodeValue)){
+                    isRunning = Boolean.TRUE;
+                }
+                break;
+            case FilterPressMetricConstants.RO_EMPTYING:
+                if(Boolean.TRUE.toString().equals(metricCodeValue)){
+                    isRunning = Boolean.TRUE;
+                }
+                break;
+            case FilterPressMetricConstants.RO_CYCLE:
+                if(Boolean.TRUE.toString().equals(metricCodeValue)){
+                    filterPress.onCycle();
+                    isRunning = Boolean.TRUE;
+                }
                 break;
             default:
         }
         // calculate the state value and call the specific method of filter press
-        short stateValue = calculateState(thingCode, stageValue);
+        short stateValue = calculateState(thingCode, isRunning);
         Optional<DataModelWrapper> stateData = dataService.getData(thingCode, MetricCodes.STATE);
         if (!stateData.isPresent()) {
             saveState(data, thingCode, stateValue);
@@ -289,18 +351,32 @@ public class FilterPressManager {
      * @param stageValue
      * @return
      */
-    private short calculateState(String thingCode, short stageValue) {
+    private short calculateState(String thingCode, Boolean isRunning) {
         short state;
         DataModelWrapper fault = dataService.getData(thingCode, FilterPressMetricConstants.FAULT)
                 .orElse(new DataModelWrapper(new DataModel(null, thingCode, null, FilterPressMetricConstants.FAULT, Boolean.FALSE.toString(), new Date())));
+        Boolean isRunningFromCache = isRunningFromCache(thingCode);
         if (Boolean.valueOf(fault.getValue())) {
             state = GlobalConstants.STATE_FAULT;
-        } else if (stageValue == 0) {
+        } else if (Boolean.FALSE.toString().equals(isRunning) && (!isRunningFromCache)) {
             state = GlobalConstants.STATE_STOPPED;
         } else {
             state = GlobalConstants.STATE_RUNNING;
         }
         return state;
+    }
+
+    private boolean isRunningFromCache(String thingCode){
+        Boolean isRunning = Boolean.FALSE;
+        Optional<DataModelWrapper> data = null;
+        for(String value:filterPressStage.values()){
+            data = dataService.getData(thingCode,value);
+            if(Boolean.TRUE.toString().equals(data.get().getValue())){
+                isRunning = Boolean.TRUE;
+                break;
+            }
+        }
+        return isRunning;
     }
 
     /**
