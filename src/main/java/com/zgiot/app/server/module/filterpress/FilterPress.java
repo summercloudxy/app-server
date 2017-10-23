@@ -139,6 +139,7 @@ public class FilterPress {
     public void onCycle() {
         logger.trace("{} on cycle", code);
         this.onCycleTime = System.currentTimeMillis();
+        this.unloadManager.notifiedNext = false;
         if (unloadIntelligent) {
             manager.enqueueUnload(this);
             logger.debug("{} enqueue unload, intelligent:{}", code, unloadIntelligent);
@@ -257,7 +258,7 @@ public class FilterPress {
         return plateCount.get(producingTeam);
     }
 
-    private class UnloadManager {
+    class UnloadManager {
         /**
          * 卸料计时
          */
@@ -281,14 +282,13 @@ public class FilterPress {
         /**
          * 已通知下一台
          */
-        private volatile boolean notifiedNext = false;
+        volatile boolean notifiedNext = false;
 
         /**
          * 开始卸料
          */
         private void startUnload() {
             isUnloading = true;
-            notifiedNext = false;
             scheduleTimer();
         }
 
