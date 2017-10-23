@@ -56,8 +56,6 @@ public class FilterPressManager {
     @Autowired
     private FilterPressMapper filterPressMapper;
 
-    @Autowired
-    private SimpleDataCache simpleDataCache;
 
     private static final int INIT_CAPACITY = 6;
 
@@ -424,7 +422,11 @@ public class FilterPressManager {
             if(feedPumpCodes.size() == 0){
                 throw new SysException("feedPump thingCode is null",SysException.EC_UNKOWN);
             }
-            Float current = Float.parseFloat(simpleDataCache.getValue(feedPumpCode,FilterPressMetricConstants.FEED_PUMP_CURRENT).getValue());
+            Optional<DataModelWrapper> currentWrapper = dataService.getData(feedPumpCode,FilterPressMetricConstants.FEED_PUMP_CURRENT);
+            Float current = new Float(0);
+            if(currentWrapper.isPresent()){
+                current = Float.parseFloat(currentWrapper.get().getValue());
+            }
             feedAsumConfirmBean.setFeedOverCurrent(current);
             messagingTemplate.convertAndSend(FEED_OVER_NOTICE_URI, feedAsumConfirmBean);
             unconfirmedFeed.add(filterPress.getCode());
