@@ -11,6 +11,7 @@ import com.zgiot.common.constants.FilterPressConstants;
 import com.zgiot.common.constants.FilterPressMetricConstants;
 import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.constants.MetricCodes;
+import com.zgiot.common.enums.MetricDataTypeEnum;
 import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
@@ -183,7 +184,7 @@ public class FilterPressManager {
             int plateCount = filterPress.getPlateCount();
             DataModel dataModel = new DataModel();
             dataModel.setThingCode(code);
-            dataModel.setThingCategoryCode(ThingModel.CATEGORY_DEVICE);
+            dataModel.setMetricDataType(MetricDataTypeEnum.METRIC_DATA_TYPE_OK.getName());
             dataModel.setMetricCode(FilterPressMetricConstants.PLATE_CNT);
             dataModel.setMetricCategoryCode(MetricModel.CATEGORY_SIGNAL);
             dataModel.setValue(String.valueOf(plateCount));
@@ -197,7 +198,7 @@ public class FilterPressManager {
             String code = entry.getKey();
             DataModel dataModel = new DataModel();
             dataModel.setThingCode(code);
-            dataModel.setThingCategoryCode(ThingModel.CATEGORY_DEVICE);
+            dataModel.setMetricDataType(MetricDataTypeEnum.METRIC_DATA_TYPE_OK.getName());
             dataModel.setMetricCode(FilterPressMetricConstants.PLATE_TTL);
             dataModel.setMetricCategoryCode(MetricModel.CATEGORY_SIGNAL);
             dataModel.setValue(String.valueOf(total));
@@ -333,9 +334,9 @@ public class FilterPressManager {
     private void saveState(DataModel data, String thingCode, short stateValue) {
         DataModel stateModel = new DataModel();
         stateModel.setThingCode(thingCode);
-        stateModel.setThingCategoryCode(data.getThingCategoryCode());
+        stateModel.setMetricDataType(data.getMetricDataType());
         stateModel.setMetricCode(MetricCodes.STATE);
-        stateModel.setThingCategoryCode(data.getMetricCategoryCode());
+        stateModel.setMetricCategoryCode(data.getMetricCategoryCode());
         stateModel.setValue(String.valueOf(stateValue));
         stateModel.setDataTimeStamp(new Date());
         dataService.updateCache(stateModel);

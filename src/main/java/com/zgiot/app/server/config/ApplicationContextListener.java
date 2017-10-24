@@ -37,6 +37,5 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
             logger.error("error", throwable);
             return null;
         });
-
     }
 }
