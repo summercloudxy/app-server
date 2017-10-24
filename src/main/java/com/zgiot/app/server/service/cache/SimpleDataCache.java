@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component("simpleCache")
-public class SimpleDataCache implements DataCache {
+class SimpleDataCache implements DataCache {
     private ConcurrentHashMap<String, DataModel> cache = new ConcurrentHashMap<>();
 
     @Override
