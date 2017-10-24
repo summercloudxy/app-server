@@ -45,13 +45,3 @@ mybatis:
   mapper-locations: classpath:mappings/**/*.xml
   configuration:
     map-underscore-to-camel-case: true
-
-# STOMP client
-stomp:
-  client:
-    server-url:
-      ${stomp.client.server-url}
-    topics:
-      topic/ss,topic/12
-
-
