@@ -56,6 +56,9 @@ public class FilterPressManager {
     @Autowired
     private FilterPressMapper filterPressMapper;
 
+    public UnloadManager getUnloadManager() {
+        return unloadManager;
+    }
 
     private static final int INIT_CAPACITY = 6;
 
@@ -84,6 +87,7 @@ public class FilterPressManager {
         filterPressStage.put(FilterPressMetricConstants.RO_SQUEEZE_OVER,"");
         filterPressStage.put(FilterPressMetricConstants.RO_HOLD_PRESS,"");
         filterPressStage.put(FilterPressMetricConstants.RO_CYCLE,"");
+        filterPressStage.put(FilterPressMetricConstants.LOCAL,"");
     }
 
     @PostConstruct
@@ -241,6 +245,11 @@ public class FilterPressManager {
         FilterPress filterPress = getFilterPress(thingCode);
         Boolean isRunning = Boolean.FALSE;
         switch (metricCode) { // 回调各阶段
+            case FilterPressMetricConstants.LOCAL:
+                if(!Boolean.parseBoolean(metricCodeValue)){
+                    filterPress.onLocal();
+                }
+                break;
             case FilterPressMetricConstants.RO_LOOSE:
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onLoosen();
@@ -405,6 +414,17 @@ public class FilterPressManager {
 
     public void setMaxUnloadParallel(int maxUnloadParallel) {
         this.unloadManager.maxUnloadParallel = maxUnloadParallel;
+    }
+
+    public void removeQueue(String thingCode,Boolean state){
+        if(!state){
+            int position = getUnloadSequence().get(thingCode);
+            unloadManager.queue.remove(deviceHolder.get(thingCode));
+            unloadManager.queuePosition.remove(thingCode);
+            if(position > 0){
+                unloadManager.reSort(position);
+            }
+        }
     }
 
     void execFeedOver(FilterPress filterPress) {
@@ -667,10 +687,10 @@ public class FilterPressManager {
     // }
     // }
 
-    private class UnloadManager {
+    class UnloadManager {
         private AtomicInteger unloading = new AtomicInteger(0);
         private volatile int maxUnloadParallel = 1;
-        private BlockingQueue<FilterPress> queue = new PriorityBlockingQueue<>(INIT_CAPACITY, (f1, f2) -> {
+        BlockingQueue<FilterPress> queue = new PriorityBlockingQueue<>(INIT_CAPACITY, (f1, f2) -> {
             int result;
             if (f1.getOnCycleTime() < f2.getOnCycleTime()) {
                 result = -1;
@@ -681,6 +701,11 @@ public class FilterPressManager {
             }
             return result;
         });
+
+        BlockingQueue<FilterPress> getQueue() {
+            return queue;
+        }
+
 
         private Map<String, Integer> queuePosition = new ConcurrentHashMap<>();
 
@@ -709,7 +734,7 @@ public class FilterPressManager {
          */
         private synchronized void unloadNextIfPossible() {
             for (int i = unloading.get(); i < maxUnloadParallel; i++) {
-                FilterPress candidate = queue.poll();
+                FilterPress candidate = queue.peek();
                 if (candidate == null) {
                     break;
                 }
@@ -736,9 +761,9 @@ public class FilterPressManager {
          * @param filterPress
          */
         private synchronized void doUnload(FilterPress filterPress) {
-            filterPress.startUnload();
-            queuePosition.remove(filterPress.getCode());
-            reSort();
+//            filterPress.startUnload();
+//            queuePosition.remove(filterPress.getCode());
+//            reSort();
             DataModel cmd = new DataModel();
             cmd.setThingCode(filterPress.getCode());
             cmd.setMetricCode(FilterPressMetricConstants.LOOSE);
@@ -753,10 +778,10 @@ public class FilterPressManager {
             queuePosition.forEach((code, seq) -> queuePosition.replace(code, seq - 1));
         }
 
-        private synchronized void reSort(){
-            queuePosition.clear();
-            for(FilterPress filterPress:queue){
-                queuePosition.put(filterPress.getCode(),queuePosition.size() + 1);
+        public synchronized void reSort(int position){
+            for(String thingCode:queuePosition.keySet()){
+                if(queuePosition.get(thingCode) > position)
+                queuePosition.put(thingCode, queuePosition.get(thingCode) - 1);
             }
         }
     }

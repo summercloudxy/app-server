@@ -102,8 +102,25 @@ public class FilterPress {
         logger.trace("{} got faults", code);
     }
 
+    public void onLocal(){
+        logger.trace("{} on local", code);
+        int position = manager.getUnloadSequence().get(this.getCode());
+        manager.getUnloadManager().getQueue().remove(this);
+        manager.getUnloadSequence().remove(this.getCode());
+        if(position > 0){
+            manager.getUnloadManager().reSort(position);
+        }
+    }
+
     public void onLoosen() {
         logger.trace("{} on loosen", code);
+        this.startUnload();
+        int position = manager.getUnloadSequence().get(this.getCode());
+        manager.getUnloadManager().getQueue().remove(this);
+        manager.getUnloadSequence().remove(this.getCode());
+        if(position > 0){
+            manager.getUnloadManager().reSort(position);
+        }
     }
 
     public void onTaken() {

@@ -63,6 +63,8 @@ public class FilterPressController {
             filterPressManager.feedIntelligentManuChange(thingCode, state);
         } else if (TYPE_UNLOAD.equals(type)) {
             filterPressManager.unloadIntelligentManuChange(thingCode, state);
+            filterPressManager.removeQueue(thingCode,state);
+
         }
         return new ResponseEntity<>(ServerResponse.buildOkJson(null),
                 HttpStatus.OK);
