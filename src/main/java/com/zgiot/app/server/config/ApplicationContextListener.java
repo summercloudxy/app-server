@@ -4,7 +4,6 @@ import com.zgiot.app.server.dataprocessor.DataProcessor;
 import com.zgiot.app.server.dataprocessor.impl.CacheUpdater;
 import com.zgiot.app.server.module.demo.DemoBusiness;
 import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
-import com.zgiot.app.server.module.notice.StompForwarder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +24,10 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
     private DataProcessor processor;
     @Autowired
     private FilterPressDataListener filterPressListener;
-    @Autowired
-    private StompForwarder stompForwarder;
 
     @SuppressWarnings("unchecked")
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-        stompForwarder.initForwarder();
         processor.connect().thenRun(() -> {
             logger.info("connected");
             processor.addListener(cacheUpdater);
@@ -41,6 +37,5 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
             logger.error("error", throwable);
             return null;
         });
-
     }
 }
