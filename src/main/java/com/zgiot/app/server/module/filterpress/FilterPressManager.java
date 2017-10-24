@@ -421,6 +421,11 @@ public class FilterPressManager {
             int position = getUnloadSequence().get(thingCode);
             unloadManager.queue.remove(deviceHolder.get(thingCode));
             unloadManager.queuePosition.remove(thingCode);
+            try{
+                unConfirmedUnload.remove(thingCode);
+            }catch (NullPointerException e){
+                throw new SysException("未确定卸料set中不存在这台压滤机thingCode",SysException.EC_UNKOWN);
+            }
             if(position > 0){
                 unloadManager.reSort(position);
             }
@@ -671,6 +676,10 @@ public class FilterPressManager {
      */
     public Map<String, Integer> getUnloadSequence() {
         return unloadManager.getQueuePosition();
+    }
+
+    public Set<String> getUnConfirmedUnload() {
+        return unConfirmedUnload;
     }
 
     // @Scheduled(cron="cnmt.FilterPressDeviceManager.clear")

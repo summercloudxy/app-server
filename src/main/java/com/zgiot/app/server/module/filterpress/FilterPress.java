@@ -2,6 +2,7 @@ package com.zgiot.app.server.module.filterpress;
 
 
 import com.zgiot.common.constants.FilterPressMetricConstants;
+import com.zgiot.common.exceptions.SysException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,6 +108,11 @@ public class FilterPress {
         int position = manager.getUnloadSequence().get(this.getCode());
         manager.getUnloadManager().getQueue().remove(this);
         manager.getUnloadSequence().remove(this.getCode());
+        try{
+            manager.getUnConfirmedUnload().remove(this.getCode());
+        }catch (NullPointerException e){
+            throw new SysException("未确定卸料set中不存在这台压滤机thingCode",SysException.EC_UNKOWN);
+        }
         if(position > 0){
             manager.getUnloadManager().reSort(position);
         }
@@ -118,6 +124,11 @@ public class FilterPress {
         int position = manager.getUnloadSequence().get(this.getCode());
         manager.getUnloadManager().getQueue().remove(this);
         manager.getUnloadSequence().remove(this.getCode());
+        try{
+            manager.getUnConfirmedUnload().remove(this.getCode());
+        }catch (NullPointerException e){
+           throw new SysException("未确定卸料set中不存在这台压滤机thingCode",SysException.EC_UNKOWN);
+        }
         if(position > 0){
             manager.getUnloadManager().reSort(position);
         }

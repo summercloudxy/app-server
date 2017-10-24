@@ -86,6 +86,13 @@ public class FilterPressController {
                 HttpStatus.OK);
     }
 
+    @ApiOperation("给app端返回弹窗时未点击确定卸料的thingCodes")
+    @RequestMapping(value = "api/filterPress/unload/unConfirmUnload", method = RequestMethod.GET)
+    public ResponseEntity<String> unConfirmUnload() {
+        return new ResponseEntity<>(ServerResponse.buildOkJson(filterPressManager.getUnConfirmedUnload()),
+                HttpStatus.OK);
+    }
+
     @ApiOperation("获取进料/卸料设置页参数值")
     @GetMapping(value = "api/filterPress/parameter")
     @ResponseBody
