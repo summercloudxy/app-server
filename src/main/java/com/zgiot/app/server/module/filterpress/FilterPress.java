@@ -106,7 +106,7 @@ public class FilterPress {
     public void onLocal(){
         logger.trace("{} on local", code);
         int position = -1;
-        if(manager != null && manager.getUnloadSequence() != null && (!StringUtils.isBlank(getCode()))){
+        if(manager != null && (!manager.getUnloadSequence().isEmpty()) && (!StringUtils.isBlank(getCode()))){
             position = manager.getUnloadSequence().get(this.getCode());
         }
         manager.getUnloadManager().getQueue().remove(this);
@@ -125,7 +125,7 @@ public class FilterPress {
         logger.trace("{} on loosen", code);
         this.startUnload();
         int position = -1;
-        if(manager != null && manager.getUnloadSequence() != null && (!StringUtils.isBlank(getCode()))){
+        if(manager != null && (!manager.getUnloadSequence().isEmpty()) && (!StringUtils.isBlank(getCode()))){
             position = manager.getUnloadSequence().get(this.getCode());
         }
         manager.getUnloadManager().getQueue().remove(this);
