@@ -5,7 +5,7 @@ import com.zgiot.app.server.module.filterpress.pojo.FeedAsumConfirmBean;
 import com.zgiot.app.server.module.filterpress.pojo.FilterPressElectricity;
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.DataService;
-import com.zgiot.app.server.service.cache.SimpleDataCache;
+//import com.zgiot.app.server.service.cache.SimpleDataCache;
 import com.zgiot.app.server.util.RequestIdUtil;
 import com.zgiot.common.constants.FilterPressConstants;
 import com.zgiot.common.constants.FilterPressMetricConstants;
