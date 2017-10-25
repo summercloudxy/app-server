@@ -775,7 +775,7 @@ public class FilterPressManager {
 //            reSort();
             DataModel cmd = new DataModel();
             cmd.setThingCode(filterPress.getCode());
-            cmd.setMetricCode(FilterPressMetricConstants.LOOSE);
+            cmd.setMetricCode(FilterPressMetricConstants.RUN);
             cmd.setValue(Boolean.TRUE.toString());
             cmdControlService.sendPulseCmdBoolByShort(cmd,null,null,RequestIdUtil.generateRequestId(),POSITION_LOOSE,CLAEN_PERIOD,IS_HOLDING_LOOSE);
         }
