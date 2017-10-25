@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.zgiot.app.server.service.HistoryDataService;
 import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.DataModel;
-import com.zgiot.common.pojo.HistoryModel;
 import com.zgiot.common.restcontroller.ServerResponse;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +18,8 @@ import java.util.List;
  * @author wangwei
  */
 @RestController
-@RequestMapping(value = "/history")
-public class HistoryController {
+@RequestMapping(value = "/historydata")
+public class HistoryDataController {
 
     @Autowired
     private HistoryDataService historyDataService;
@@ -51,14 +50,14 @@ public class HistoryController {
 
     @GetMapping("")
     public ResponseEntity<String> list(@RequestBody String requestData) {
-        HistoryModel param = null;
+        HistoryDataDto param = null;
         boolean valid = true;
 
         if (StringUtils.isBlank(requestData)) {
             //check requestData
             valid = false;
         } else {
-            param = JSON.parseObject(requestData, HistoryModel.class);
+            param = JSON.parseObject(requestData, HistoryDataDto.class);
             //check parse result
             if (param.getDuration() == null && param.getEndDate() == null && param.getStartDate() == null
                     && param.getThingCodes() == null && param.getMetricCodes() == null) {
