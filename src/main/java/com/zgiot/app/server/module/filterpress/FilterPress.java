@@ -22,7 +22,7 @@ public class FilterPress {
     public static final String PARAM_NAME_MAXUNLOADPARALLEL = "maxUnloadParallel";
 
     private static final Logger logger = LoggerFactory.getLogger(FilterPress.class);
-    private static final long UNLOAD_WAIT_DURATION = Duration.ofMinutes(3).plusSeconds(45).toMillis();
+    private static final long UNLOAD_WAIT_DURATION = Duration.ofMinutes(30).plusSeconds(45).toMillis();
 
     private static final int UNLOAD_EXCHANGE_COUNT = 16;
     private final String code;
