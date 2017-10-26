@@ -423,7 +423,7 @@ public class FilterPressManager {
             try{
                 unConfirmedUnload.remove(thingCode);
             }catch (NullPointerException e){
-                throw new SysException("未确定卸料set中不存在这台压滤机thingCode",SysException.EC_UNKOWN);
+                throw new SysException("未确定卸料set中不存在这台压滤机thingCode",SysException.EC_UNKNOWN);
             }
             if(position > 0){
                 unloadManager.reSort(position);
