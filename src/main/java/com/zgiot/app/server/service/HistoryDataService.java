@@ -4,6 +4,7 @@ import com.zgiot.common.pojo.DataModel;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public interface HistoryDataService {
     /**
@@ -34,6 +35,18 @@ public interface HistoryDataService {
      */
     List<DataModel> findHistoryData(List<String> thingCodes, List<String> metricCodes
             , Date startDate, long durationMs);
+
+
+    /**
+     *
+     * @param thingCodes    thingCode array
+     * @param metricCode
+     * @param startDate
+     * @param endDate
+     * @param segment
+     * @return
+     */
+    List<Map<String, Object>> findHistoryDataMap(String[] thingCodes, String metricCode, Date startDate, Date endDate, Integer segment);
 
     /**
      * @param list MongoData use MongoData directly to avoid another loop to convert obj.
