@@ -94,10 +94,10 @@ public class HistoryDataServiceImpl implements HistoryDataService {
      * created by wangwei
      */
     @Override
-    public List<Map<String, Object>> findMultiThingsHistoryDataOfMetric(String[] thingCodes, String metricCode, Date startDate, Date endDate, Integer segment) {
+    public Map<String, DataModel[]> findMultiThingsHistoryDataOfMetric(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment) {
         if (collection == null) {
             logger.warn("mongo disabled");
-            return new ArrayList<>();
+            return new HashMap<>();
         }
 
         long startTime = startDate.getTime();
@@ -116,7 +116,7 @@ public class HistoryDataServiceImpl implements HistoryDataService {
         Bson criteria = and(gte(DataModel.DATA_TIMESTAMP, startTime), lte(DataModel.DATA_TIMESTAMP, endTime), eq(DataModel.METRIC_CODE, metricCode), in(DataModel.THING_CODE, thingCodes));
         FindIterable<Document> iterable = collection.find(criteria).sort(Sorts.descending(DataModel.DATA_TIMESTAMP));
 
-        Map<String, Map<String, Object>> map = new HashMap<>(thingCodes.length);    //store dataModel array, timestamp and unset size
+        Map<String, Map<String, Object>> map = new HashMap<>(thingCodes.size());    //store dataModel array, timestamp and unset size
         for (Document document : iterable) {
             String tc = document.getString(DataModel.THING_CODE);
             Map<String, Object> temp = map.get(tc);
@@ -132,8 +132,8 @@ public class HistoryDataServiceImpl implements HistoryDataService {
             checkDocument(document, temp, interval);
         }
 
-        //generate result list
-        List<Map<String, Object>> result = new ArrayList<>(thingCodes.length);  //result
+        //generate result map
+        Map<String, DataModel[]> result = new LinkedHashMap<>(thingCodes.size());
         for (String thingCode : thingCodes) {
             Map<String, Object> temp = map.get(thingCode);
             DataModel[] dataModels;
@@ -148,11 +148,7 @@ public class HistoryDataServiceImpl implements HistoryDataService {
                 }
             }
 
-            Map<String, Object> resultMap = new HashMap<>(2);
-            resultMap.put(DataModel.THING_CODE, thingCode);
-            resultMap.put("values", dataModels);
-
-            result.add(resultMap);
+            result.put(thingCode, dataModels);
         }
 
         return result;

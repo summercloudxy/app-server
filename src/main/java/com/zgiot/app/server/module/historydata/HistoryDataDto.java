@@ -14,7 +14,7 @@ public class HistoryDataDto {
 
     private Date endTime;
 
-    private String thingCodes;
+    private List<String> thingCodes;
 
     private Integer segment;
 
@@ -34,11 +34,11 @@ public class HistoryDataDto {
         this.endTime = endTime;
     }
 
-    public String getThingCodes() {
+    public List<String> getThingCodes() {
         return thingCodes;
     }
 
-    public void setThingCodes(String thingCodes) {
+    public void setThingCodes(List<String> thingCodes) {
         this.thingCodes = thingCodes;
     }
 

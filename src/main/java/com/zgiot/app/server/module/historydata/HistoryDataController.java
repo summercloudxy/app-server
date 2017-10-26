@@ -52,13 +52,14 @@ public class HistoryDataController {
     public ResponseEntity<String> metricData(@PathVariable String metricCode, @RequestBody String requestData) {
         HistoryDataDto historyDataDto = JSON.parseObject(requestData, HistoryDataDto.class);
         //check parse result
-        if (historyDataDto.getEndTime() == null || historyDataDto.getStartTime() == null || StringUtils.isBlank(historyDataDto.getThingCodes()) || historyDataDto.getSegment() == null) {
+        if (historyDataDto.getEndTime() == null || historyDataDto.getStartTime() == null || historyDataDto.getThingCodes() == null || historyDataDto.getThingCodes().isEmpty()
+                || historyDataDto.getSegment() == null) {
             ServerResponse res = new ServerResponse("Invalid request data.The incoming req body is: `" + requestData + "`", SysException.EC_UNKOWN, 0);
             String resJSON = JSON.toJSONString(res);
             return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
         }
 
-        List<Map<String, Object>> result = historyDataService.findMultiThingsHistoryDataOfMetric(historyDataDto.getThingCodes().split(","), metricCode,
+        Map<String, DataModel[]> result = historyDataService.findMultiThingsHistoryDataOfMetric(historyDataDto.getThingCodes(), metricCode,
                 historyDataDto.getStartTime(), historyDataDto.getEndTime(), historyDataDto.getSegment());
 
         return new ResponseEntity<>(ServerResponse.buildOkJson(result), HttpStatus.OK);
