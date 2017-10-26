@@ -1,6 +1,7 @@
 package com.zgiot.app.server.config;
 
 import com.zgiot.common.restcontroller.AccessLogInterceptor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -14,6 +15,8 @@ import java.util.Date;
 
 @Configuration
 public class WebConfig extends WebMvcConfigurerAdapter {
+    @Value("${uploadFile.dir}")
+    private String uploadFileUri;
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new AccessLogInterceptor()).addPathPatterns("/**");
@@ -24,7 +27,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         //将所有/product/images/** 访问都映射到classpath:/product/images/ 目录下
         registry.addResourceHandler("/product/images/**").addResourceLocations("classpath:/product/images/");
-        registry.addResourceHandler("/files/**").addResourceLocations("file:D:/uploadFile/");
+        registry.addResourceHandler("/files/**").addResourceLocations("file:"+uploadFileUri);
         super.addResourceHandlers(registry);
     }
 
