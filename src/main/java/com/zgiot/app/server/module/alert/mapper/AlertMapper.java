@@ -33,7 +33,7 @@ public interface AlertMapper {
 
     List<AlertMessage> getAlertMessage(int alertId);
 
-    void setRead(int messageId);
+    void setRead(List<Integer> messageIds);
 
     void saveAlertShield(List<AlertMask> alertMasks);
 

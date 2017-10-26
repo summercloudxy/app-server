@@ -353,4 +353,5 @@ public class AlertData {
     public void setSystemModel(SystemModel systemModel) {
         this.systemModel = systemModel;
     }
+
 }

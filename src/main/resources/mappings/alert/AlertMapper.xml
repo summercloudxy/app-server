@@ -231,13 +231,13 @@
             <if test="stage != 'RELEASE'">
                 ,am.id as message_id,am.user_id,am.time,am.info,am.alert_id,am.is_read,am.permission,am.type
             </if>
-            <if test="stage == 'RELEASE'">
-                ,rts.system_id
-            </if>
+        </if>
+        <if test="stage == 'RELEASE'">
+            ,rts.system_id
         </if>
         FROM tb_alert_data ad
         <if test="thingCode == null">
-            <if test="systems != null">
+            <if test="systems != null or stage == 'RELEASE'">
                 ,rel_thing_system rts
             </if>
             <if test="buildingIds != null or floors != null">
@@ -248,9 +248,6 @@
             <if test="stage != 'RELEASE'">
                 ,tb_alert_message am
             </if>
-            <if test="stage == 'RELEASE'">
-                ,rel_thing_system rts
-            </if>
         </if>
         <trim prefix="where" prefixOverrides="AND">
             <if test="thingCode != null">
@@ -258,12 +255,9 @@
                     AND
                     ad.id = am.alert_id
                 </if>
-                <if test="stage == 'RELEASE'">
-                    AND ad.thing_code = rts.thing_code
-                </if>
             </if>
             <if test="thingCode == null">
-                <if test="systems != null">
+                <if test="systems != null or stage == 'RELEASE'">
                     AND ad.thing_code = rts.thing_code
                 </if>
                 <if test="buildingIds != null or floors != null">
@@ -314,7 +308,11 @@
             </if>
             <if test="startTime != null">
                 AND
-                ad.alert_datetime BETWEEN #{startTime} AND #{endTime}
+                ad.alert_datetime &gt; #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND
+                ad.alert_datetime &lt;= #{endTime}
             </if>
             <if test="thingCode != null">
                 AND
@@ -322,15 +320,22 @@
             </if>
         </trim>
         <if test="thingCode == null">
-            ORDER BY ad.alert_level desc,ad.alert_datetime desc
+            ORDER BY ad.alert_level is not null,ad.alert_level desc,ad.alert_datetime desc
         </if>
         <if test="thingCode != null">
-            ORDER BY ad.alert_datetime DESC
+            ORDER BY ad.alert_level is not null,ad.alert_datetime DESC
         </if>
         <if test="offset != null">
             limit #{offset},#{count}
         </if>
     </select>
+
+    <update id="setRead" parameterType="java.lang.Integer">
+        UPDATE tb_alert_message SET is_read = 1 WHERE id IN
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </update>
 
 
     <select id="getAlertDataList" resultMap="alertDataMap">
@@ -408,14 +413,14 @@
 
     <insert id="saveAlertShield" parameterType="com.zgiot.app.server.module.alert.pojo.AlertMask"
             useGeneratedKeys="true" keyColumn="id" keyProperty="id">
-        INSERT INTO tb_alert_shield (alert_id, shield_id, time, user_id, param_value, param_lower, param_upper) VALUES
+        INSERT INTO tb_alert_mask (alert_id, mask_id, time, user_id, param_value, param_lower, param_upper) VALUES
         <foreach collection="list" item="item" separator=",">
             (#{item.alertId},#{item.maskId},#{item.time},#{item.userId},#{item.paramValue},#{item.paramLower},#{item.paramUpper})
         </foreach>
     </insert>
 
     <select id="getAlertShieldInfo" resultType="com.zgiot.app.server.module.alert.pojo.AlertMask">
-        SELECT d.thing_code,d.metric_code,d.alert_type,s.shield_id,m.info,s."time",s.user_id,s.param_upper,s.param_lower,s.param_value FROM tb_alert_data d, tb_alert_shield s, tb_fix_message m WHERE  s.shield_id = m.id
+        SELECT d.thing_code,d.metric_code,d.alert_type,s.mask_id,m.info,s."time",s.user_id,s.param_upper,s.param_lower,s.param_value FROM tb_alert_data d, tb_alert_mask s, tb_fix_message m WHERE  s.mask_id = m.id
     </select>
 
     <insert id="insertAlertRule" useGeneratedKeys="true" keyProperty="id" keyColumn="id"

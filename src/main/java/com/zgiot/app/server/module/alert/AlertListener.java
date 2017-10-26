@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-
 import java.util.Map;
+
 /**
  * Created by xiayun on 2017/9/22.
  */
@@ -40,6 +40,8 @@ public class AlertListener implements DataListener {
                     break;
                 case AlertConstants.TYPE_PROTECT:
                     protectHandler.check(dataModel);
+                    break;
+                default:
                     break;
             }
 
