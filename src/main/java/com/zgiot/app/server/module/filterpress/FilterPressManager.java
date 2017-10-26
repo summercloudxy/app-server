@@ -41,10 +41,10 @@ public class FilterPressManager {
     private static final String PARAM_NAME_SYS = "sys";
 
     private static final int POSITION_FEED_OVER = 5;
-    private static final int POSITION_LOOSE = 9;
+    private static final int POSITION_RUN = 1;
     private static final int CLAEN_PERIOD = 0;
     private static final boolean IS_HOLDING_FEED_OVER = false;
-    private static final boolean IS_HOLDING_LOOSE = false;
+    private static final boolean IS_HOLDING_RUN = false;
     private static final Map<String,String> filterPressStage = new HashMap<>();
 
     @Autowired
@@ -777,7 +777,7 @@ public class FilterPressManager {
             cmd.setThingCode(filterPress.getCode());
             cmd.setMetricCode(FilterPressMetricConstants.RUN);
             cmd.setValue(Boolean.TRUE.toString());
-            cmdControlService.sendPulseCmdBoolByShort(cmd,null,null,RequestIdUtil.generateRequestId(),POSITION_LOOSE,CLAEN_PERIOD,IS_HOLDING_LOOSE);
+            cmdControlService.sendPulseCmdBoolByShort(cmd,null,null,RequestIdUtil.generateRequestId(),POSITION_RUN,CLAEN_PERIOD,IS_HOLDING_RUN);
         }
 
         /**

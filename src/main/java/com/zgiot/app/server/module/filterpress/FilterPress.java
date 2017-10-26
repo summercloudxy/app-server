@@ -174,6 +174,7 @@ public class FilterPress {
 
     public void onCycle() {
         logger.trace("{} on cycle", code);
+        unloadManager.takeAndPullCount.set(0);
         this.onCycleTime = System.currentTimeMillis();
         this.unloadManager.notifiedNext = false;
         if (unloadIntelligent) {
@@ -314,7 +315,7 @@ public class FilterPress {
         /**
          * 拉板和取板的交替次数
          */
-        private AtomicInteger takeAndPullCount = new AtomicInteger(0);
+        AtomicInteger takeAndPullCount = new AtomicInteger(0);
         /**
          * 已通知下一台
          */
@@ -380,7 +381,7 @@ public class FilterPress {
             if (!notifiedNext) {
                 notifiedNext = true;
                 manager.unloadNext();
-                logger.debug("{} unload finished, notifying next", code);
+                logger.debug("{} unload enough to notify next", code);
             }
         }
 
