@@ -29,16 +29,17 @@ import java.util.stream.Collectors;
 @Service
 public class AlertManager {
     private Map<String, Map<String, AlertData>> alertDataMap = new ConcurrentHashMap<>();
-//    private Set<AlertData> verifySet = new HashSet<>();
+    // private Set<AlertData> verifySet = new HashSet<>();
     private Map<String, Map<String, List<AlertRule>>> paramRuleMap;
     private Map<String, Map<String, AlertRule>> protectRuleMap;
     private Map<String, Short> metricAlertTypeMap = new HashMap<>();
     private Map<String, Map<String, AlertData>> alertParamDataMap = new ConcurrentHashMap<>();
     private DelayQueue<VerifyDelayed> verifyDelayQueue = new DelayQueue<>();
-    private String message_uri = "topic/alert/message";
-    private String repair_uri = "topic/alert/repair";
-    private String feedback_uri = "topic/alert/feedback";
-    private String read_state_uri = "topic/alert/readstate";
+    private static String MESSAGE_URI = "/topic/alert/message";
+    private static String REPAIR_URI = "/topic/alert/repair";
+    private static String FEEDBACK_URI = "/topic/alert/feedback";
+    private static String READ_STATE_URI = "/topic/alert/readstate";
+//    private static String REQ_RESET_URI= "topic/alert/reset";
     private static final int VERIFY_TO_UNTREATED_PERIOD = 60000;
     private static final int SORT_TYPE_TIME_DESC = 0;
     private static final int SORT_TYPE_TIME_ASC = 1;
@@ -269,8 +270,8 @@ public class AlertManager {
                 metricParamAlertData.put(alertData.getMetricCode(), alertData);
             }
             if (AlertConstants.STAGE_VERIFIED.equals(alertData.getAlertStage())) {
-                verifyDelayQueue.put(new VerifyDelayed(alertData,VERIFY_TO_UNTREATED_PERIOD));
-//                verifySet.add(alertData);
+                verifyDelayQueue.put(new VerifyDelayed(alertData, VERIFY_TO_UNTREATED_PERIOD));
+                // verifySet.add(alertData);
             }
         }
     }
@@ -327,8 +328,9 @@ public class AlertManager {
             case AlertConstants.MESSAGE_TYPE_REQ_REPAIR: // 申请维修（岗位）
             case AlertConstants.MESSAGE_TYPE_OTHER: // 用户自定义
                 alertMapper.saveAlertMessage(alertMessage);
-                messagingTemplate.convertAndSend(message_uri, alertMessage);
-                logger.debug("推送报警消息，报警设备{}，报警内容{}，消息类型为{}",alertData.getThingCode(),alertData.getMetricCode(),alertMessage.getType());
+                messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
+                logger.debug("推送报警消息，报警设备{}，报警内容{}，消息类型为{}", alertData.getThingCode(), alertData.getMetricCode(),
+                        alertMessage.getType());
                 break;
             case AlertConstants.MESSAGE_TYPE_RECOMMENDED_SHIELDING: // 建议屏蔽（岗位）
                 maskAlert(alertData, alertMessage);
@@ -358,8 +360,9 @@ public class AlertManager {
                     throw new SysException("the alert is not recovery", SysException.EC_UNKNOWN);
                 }
                 alertMapper.saveAlertMessage(alertMessage);
-                messagingTemplate.convertAndSend(message_uri, alertMessage);
-                logger.debug("推送报警消息，报警设备{}，报警内容{}，消息类型为{}",alertData.getThingCode(),alertData.getMetricCode(),alertMessage.getType());
+                messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
+                logger.debug("推送报警消息，报警设备{}，报警内容{}，消息类型为{}", alertData.getThingCode(), alertData.getMetricCode(),
+                        alertMessage.getType());
                 break;
             case AlertConstants.MESSAGE_TYPE_SCENE_CONFIRM_RELEASE: // 现场确认报警已解除（岗位）
                 sceneConfirmReleaseAlert(alertData, alertMessage, true);
@@ -367,19 +370,21 @@ public class AlertManager {
             case AlertConstants.MESSAGE_TYPE_SCENE_CONFIRM_DIS_RELEASE: // 现场确认报警未解除
                 sceneConfirmReleaseAlert(alertData, alertMessage, false);
                 break;
-            case AlertConstants.MESSAGE_REQ_RESET: // 申请复位（岗位）
-                requestReset(alertData, alertMessage);
-                updateFlag = true;
-                break;
-            case AlertConstants.MESSAGE_RESET: // 复位（调度）
-                reset(alertData, alertMessage, requestId);
-                break;
+//            case AlertConstants.MESSAGE_REQ_RESET: // 申请复位（岗位）
+//                requestReset(alertData, alertMessage);
+//                updateFlag = true;
+//                break;
+//            case AlertConstants.MESSAGE_RESET: // 复位（调度）
+//                reset(alertData, alertMessage, requestId);
+//                break;
             case AlertConstants.MESSAGE_TYPE_SET_LEVEL: // 报警评级（调度）
                 gradeAlert(alertData, alertMessage);
                 updateFlag = true;
                 break;
             case AlertConstants.MESSAGE_TYPE_REQ_FEEDBACK: // 请求反馈
-                messagingTemplate.convertAndSend(feedback_uri, alertMessage.getPermission());
+                messagingTemplate.convertAndSend(FEEDBACK_URI, alertMessage.getPermission());
+                break;
+            default:
                 break;
         }
 
@@ -395,10 +400,11 @@ public class AlertManager {
      * @param alertData
      * @param alertMessage
      */
-    public void notFoundAlert(AlertData alertData, AlertMessage alertMessage) {
+    private void notFoundAlert(AlertData alertData, AlertMessage alertMessage) {
         alertData.setReporter(alertMessage.getUserId());
-        messagingTemplate.convertAndSend(message_uri, alertMessage);
-        logger.debug("推送报警消息，报警设备{}，报警内容{}，未发现报警存在",alertData.getThingCode(),alertData.getMetricCode(),alertMessage.getType());
+        messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
+        logger.debug("推送报警消息，报警设备{}，报警内容{}，未发现报警存在", alertData.getThingCode(), alertData.getMetricCode(),
+                alertMessage.getType());
     }
 
     /**
@@ -407,16 +413,17 @@ public class AlertManager {
      * @param alertData
      * @param alertMessage
      */
-    public void checkAlert(AlertData alertData, AlertMessage alertMessage) {
+    private void checkAlert(AlertData alertData, AlertMessage alertMessage) {
         alertData.setAlertStage(AlertConstants.STAGE_VERIFIED);
         alertData.setVerifyTime(new Date());
         alertData.setReporter(alertMessage.getUserId());
         // updateAlert(alertData);
-//        verifySet.add(alertData);
-        verifyDelayQueue.put(new VerifyDelayed(alertData,VERIFY_TO_UNTREATED_PERIOD));
+        // verifySet.add(alertData);
+        verifyDelayQueue.put(new VerifyDelayed(alertData, VERIFY_TO_UNTREATED_PERIOD));
         alertMapper.saveAlertMessage(alertMessage);
-        messagingTemplate.convertAndSend(message_uri, alertMessage);
-        logger.debug("推送报警消息，报警设备{}，报警内容{}，核实报警存在",alertData.getThingCode(),alertData.getMetricCode(),alertMessage.getType());
+        messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
+        logger.debug("推送报警消息，报警设备{}，报警内容{}，核实报警存在", alertData.getThingCode(), alertData.getMetricCode(),
+                alertMessage.getType());
     }
 
     /**
@@ -424,14 +431,15 @@ public class AlertManager {
      *
      * @param alertData
      */
-    public void assignRepair(AlertData alertData, AlertMessage alertMessage) {
+    private void assignRepair(AlertData alertData, AlertMessage alertMessage) {
         alertData.setAlertStage(AlertConstants.STAGE_REQUEST_REPAIR);
         alertData.setRepair(true);
         // updateAlert(alertData);
         alertMapper.saveAlertMessage(alertMessage);
-        messagingTemplate.convertAndSend(message_uri, alertMessage);
-        messagingTemplate.convertAndSend(repair_uri, alertData);
-        logger.debug("推送报警消息，报警设备{}，报警内容{}，申报维修",alertData.getThingCode(),alertData.getMetricCode(),alertMessage.getType());
+        messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
+        messagingTemplate.convertAndSend(REPAIR_URI, alertData);
+        logger.debug("推送报警消息，报警设备{}，报警内容{}，申报维修", alertData.getThingCode(), alertData.getMetricCode(),
+                alertMessage.getType());
     }
 
     /**
@@ -440,13 +448,13 @@ public class AlertManager {
      * @param alertData
      * @param userId
      */
-    public void startRepair(AlertData alertData, String userId) {
+    private void startRepair(AlertData alertData, String userId) {
         alertData.setAlertStage(AlertConstants.STAGE_REPAIRING);
         alertData.setRepairConfirmUser(userId);
         alertData.setRepairStartTime(new Date());
         // updateAlert(alertData);
-        messagingTemplate.convertAndSend(repair_uri, alertData);
-        logger.debug("推送报警消息，报警设备{}，报警内容{}，开始维修",alertData.getThingCode(),alertData.getMetricCode());
+        messagingTemplate.convertAndSend(REPAIR_URI, alertData);
+        logger.debug("推送报警消息，报警设备{}，报警内容{}，开始维修", alertData.getThingCode(), alertData.getMetricCode());
     }
 
     /**
@@ -454,43 +462,75 @@ public class AlertManager {
      *
      * @param alertData
      */
-    public void endRepair(AlertData alertData) {
+    private void endRepair(AlertData alertData) {
         alertData.setAlertStage(AlertConstants.STAGE_REPAIRED);
         alertData.setRepairEndTime(new Date());
         // updateAlert(alertData);
-        messagingTemplate.convertAndSend(repair_uri, alertData);
-        logger.debug("推送报警消息，报警设备{}，报警内容{}，结束维修",alertData.getThingCode(),alertData.getMetricCode());
+        messagingTemplate.convertAndSend(REPAIR_URI, alertData);
+        logger.debug("推送报警消息，报警设备{}，报警内容{}，结束维修", alertData.getThingCode(), alertData.getMetricCode());
     }
+
+
+//    public void requestReset(AlertData alertData, AlertMessage alertMessage) {
+//        alertData.setManualIntervention(true);
+//        // updateAlert(alertData);
+//        alertMapper.saveAlertMessage(alertMessage);
+//        messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
+//        logger.debug("推送报警消息，报警设备{}，报警内容{}，申请复位", alertData.getThingCode(), alertData.getMetricCode());
+//    }
 
     /**
      * 申请复位（岗位）
-     *
-     * @param alertData
-     * @param alertMessage
+     * @param thingCode
+     * @param userId
+     * @param permission
      */
-    public void requestReset(AlertData alertData, AlertMessage alertMessage) {
-        alertData.setManualIntervention(true);
-        // updateAlert(alertData);
-        alertMapper.saveAlertMessage(alertMessage);
-        messagingTemplate.convertAndSend(message_uri, alertMessage);
-        logger.debug("推送报警消息，报警设备{}，报警内容{}，申请复位",alertData.getThingCode(),alertData.getMetricCode());
+    public void requestReset(String thingCode,String userId,String permission){
+        Map<String,AlertData> thingAlertMap = alertDataMap.get(thingCode);
+        if(thingAlertMap == null || alertDataMap.size() == 0){
+            throw new SysException("the thing does not have alert date",SysException.EC_UNKNOWN);
+        }
+        for (Map.Entry<String,AlertData> entry: thingAlertMap.entrySet()){
+            AlertData alertData = entry.getValue();
+            alertData.setManualIntervention(true);
+            AlertMessage alertMessage = new AlertMessage();
+            alertMessage.setTime(new Date());
+            alertMessage.setAlertId(alertData.getId());
+            alertMessage.setUserId(userId);
+            alertMessage.setPermission(permission);
+            alertMessage.setType(AlertConstants.MESSAGE_REQ_RESET);
+            alertMapper.saveAlertMessage(alertMessage);
+            updateAlert(alertData);
+            messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
+            logger.debug("推送报警消息，报警设备{}，报警内容{}，申请复位", alertData.getThingCode(), alertData.getMetricCode());
+        }
+//        messagingTemplate.convertAndSend(REQ_RESET_URI,thingCode);
     }
+
+
+//    public void reset(AlertData alertData, AlertMessage alertMessage, String requestId) {
+//        DataModel dataModel = new DataModel();
+//        dataModel.setThingCode(alertData.getThingCode());
+//        dataModel.setMetricCode(MetricCodes.RESET);
+//        dataModel.setValue(Boolean.TRUE.toString());
+//        cmdControlService.sendCmd(dataModel, requestId);
+//        alertMapper.saveAlertMessage(alertMessage);
+//        messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
+//        logger.debug("推送报警消息，报警设备{}，报警内容{}，进行复位", alertData.getThingCode(), alertData.getMetricCode());
+//    }
 
     /**
      * 复位（调度）
-     *
-     * @param alertData
-     * @param alertMessage
+     * @param thingCode
+     * @param requestId
      */
-    public void reset(AlertData alertData, AlertMessage alertMessage, String requestId) {
+    public void reset(String thingCode,String requestId){
         DataModel dataModel = new DataModel();
-        dataModel.setThingCode(alertData.getThingCode());
+        dataModel.setThingCode(thingCode);
         dataModel.setMetricCode(MetricCodes.RESET);
         dataModel.setValue(Boolean.TRUE.toString());
         cmdControlService.sendCmd(dataModel, requestId);
-        alertMapper.saveAlertMessage(alertMessage);
-        messagingTemplate.convertAndSend(message_uri, alertMessage);
-        logger.debug("推送报警消息，报警设备{}，报警内容{}，进行复位",alertData.getThingCode(),alertData.getMetricCode());
+        logger.debug("报警设备{}进行复位操作", thingCode);
     }
 
     /**
@@ -504,10 +544,10 @@ public class AlertManager {
         alertData.setAlertLevel(Short.parseShort(alertMessage.getInfo()));
         alertData.setVerifyTime(new Date());
         // updateAlert(alertData);
-//        verifySet.add(alertData);
+        // verifySet.add(alertData);
         alertMapper.saveAlertMessage(alertMessage);
-        messagingTemplate.convertAndSend(message_uri, alertMessage);
-        logger.debug("推送报警消息，报警设备{}，报警内容{}，报警评级",alertData.getThingCode(),alertData.getMetricCode());
+        messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
+        logger.debug("推送报警消息，报警设备{}，报警内容{}，报警评级", alertData.getThingCode(), alertData.getMetricCode());
     }
 
     /**
@@ -523,8 +563,9 @@ public class AlertManager {
         alertData.setSceneConfirmUser(alertMessage.getUserId());
         releaseAlert(alertData);
         alertMapper.saveAlertMessage(alertMessage);
-        messagingTemplate.convertAndSend(message_uri, alertMessage);
-        logger.debug("推送报警消息，报警设备{}，报警内容{}，现场确认报警解除状态：",alertData.getThingCode(),alertData.getMetricCode(),sceneConfirmState);
+        messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
+        logger.debug("推送报警消息，报警设备{}，报警内容{}，现场确认报警解除状态：", alertData.getThingCode(), alertData.getMetricCode(),
+                sceneConfirmState);
     }
 
     /**
@@ -534,7 +575,7 @@ public class AlertManager {
      * @param alertMessage
      */
     public void maskAlert(AlertData alertData, AlertMessage alertMessage) {
-        String maskIds[] = alertMessage.getInfo().split(";");
+        String[] maskIds = alertMessage.getInfo().split(";");
         List<AlertMask> alertMasks = new ArrayList<>();
         for (String maskId : maskIds) {
             AlertMask alertMask = new AlertMask();
@@ -549,8 +590,9 @@ public class AlertManager {
         }
         alertMapper.saveAlertShield(alertMasks);
         alertMapper.saveAlertMessage(alertMessage);
-        messagingTemplate.convertAndSend(message_uri, alertMessage);
-        logger.debug("推送报警消息，报警设备{}，报警内容{}，建议屏蔽，屏蔽内容为：{}",alertData.getThingCode(),alertData.getMetricCode(),alertMessage.getInfo());
+        messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
+        logger.debug("推送报警消息，报警设备{}，报警内容{}，建议屏蔽，屏蔽内容为：{}", alertData.getThingCode(), alertData.getMetricCode(),
+                alertMessage.getInfo());
     }
 
     /**
@@ -566,25 +608,27 @@ public class AlertManager {
     /**
      * 检查未处理的报警
      */
-//    @Scheduled(cron = "0/10 * * * * ?")
-//    public void checkVerifiedAlert() {
-//        for (AlertData alertData : verifySet) {
-//            if (new Date().getTime() - alertData.getVerifyTime().getTime() > VERIFY_TO_UNTREATED_PERIOD) {
-//                alertData.setAlertStage(AlertConstants.STAGE_UNTREATED);
-//                updateAlert(alertData);
-//                verifySet.remove(alertData);
-//            }
-//        }
-//    }
+    // @Scheduled(cron = "0/10 * * * * ?")
+    // public void checkVerifiedAlert() {
+    // for (AlertData alertData : verifySet) {
+    // if (new Date().getTime() - alertData.getVerifyTime().getTime() >
+    // VERIFY_TO_UNTREATED_PERIOD) {
+    // alertData.setAlertStage(AlertConstants.STAGE_UNTREATED);
+    // updateAlert(alertData);
+    // verifySet.remove(alertData);
+    // }
+    // }
+    // }
 
     /**
      * 消息已读
      *
-     * @param messageId
+     * @param messageIds
      */
-    public void setRead(int messageId) {
-        alertMapper.setRead(messageId);
-        messagingTemplate.convertAndSend(read_state_uri, messageId);
+    public void setRead(List<Integer> messageIds) {
+        alertMapper.setRead(messageIds);
+        messagingTemplate.convertAndSend(READ_STATE_URI, messageIds);
+        logger.debug("设置消息已读");
 
     }
 
@@ -602,12 +646,11 @@ public class AlertManager {
      */
     public List<AlertRecord> getAlertDataListGroupByThing(String stage, List<Integer> levels, List<Short> types,
             List<Integer> buildingIds, List<Integer> floors, List<Integer> systems, String assetType, String category,
-            Integer sortType, Long duration, String thingCode, Integer page, Integer count) {
-        Date endTime = null;
+            Integer sortType, Long duration, String thingCode, Integer page, Integer count, Date timeStamp) {
+        Date endTime = timeStamp;
         Date startTime = null;
         Integer offset = null;
         if (duration != null) {
-            endTime = new Date();
             startTime = new Date(endTime.getTime() - duration);
         }
         if (page != null && count != null) {
@@ -624,7 +667,9 @@ public class AlertManager {
                 }
             }
         }
+
         sortRecords(sortType, alertRecords);
+
         return alertRecords;
     }
 
@@ -662,12 +707,15 @@ public class AlertManager {
                 return alertData2.getAlertDateTime().compareTo(alertData1.getAlertDateTime());
             } else if (alertData1.getAlertLevel() == null) {
                 return -1;
+            } else if(alertData2.getAlertLevel() == null){
+                return 1;
             }
             if (type == SORT_DESC) {
                 return alertData2.getAlertDateTime().compareTo(alertData1.getAlertDateTime());
             } else {
                 return alertData1.getAlertDateTime().compareTo(alertData2.getAlertDateTime());
             }
+
         });
     }
 
@@ -684,6 +732,8 @@ public class AlertManager {
                 return alertData2.getAlertDateTime().compareTo(alertData1.getAlertDateTime());
             } else if (alertData1.getAlertLevel() == null) {
                 return -1;
+            } else if(alertData2.getAlertLevel() == null){
+                return 1;
             }
             if (alertData1.getAlertLevel().equals(alertData2.getAlertLevel())) {
                 return alertData2.getAlertDateTime().compareTo(alertData1.getAlertDateTime());
@@ -716,7 +766,7 @@ public class AlertManager {
     private void transImageStrToList(AlertData alertData) {
         String feedBackImage = alertData.getFeedBackImage();
         if (StringUtils.isNotBlank(feedBackImage)) {
-            String images[] = feedBackImage.split(";");
+            String[] images = feedBackImage.split(";");
             List<String> imageList = Arrays.asList(images);
             alertData.setFeedBackImageList(imageList);
         }
@@ -759,15 +809,15 @@ public class AlertManager {
 
     /**
      * 删除视频信息
+     * 
      * @param thingCode
      * @param metricCode
      */
-    public void delVideo(String thingCode,String metricCode){
-        AlertData alertData = getAlertDataByThingAndMetricCode(thingCode,metricCode);
+    public void delVideo(String thingCode, String metricCode) {
+        AlertData alertData = getAlertDataByThingAndMetricCode(thingCode, metricCode);
         alertData.setFeedBackVideo(null);
         updateAlert(alertData);
     }
-
 
     /**
      * 获取统计信息
@@ -928,4 +978,5 @@ public class AlertManager {
         return alertMapper.getAlertDataList(stage, level, type, system, assetType, category, sortType, startTime,
                 endTime, thingCode, offset, count);
     }
+
 }

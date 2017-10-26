@@ -77,10 +77,14 @@ public class AlertController {
             @RequestParam(required = false) String assetType, @RequestParam(required = false) String category,
             @RequestParam(required = false) Integer sortType, @RequestParam(required = false) Long duration,
             @RequestParam(required = false) String thingCode, @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer count) {
+            @RequestParam(required = false) Integer count,@RequestParam(required = false)Date timeStamp) {
+        if(timeStamp==null){
+            timeStamp = new Date();
+        }
         List<AlertRecord> alertDataListGroupByThing = alertManager.getAlertDataListGroupByThing(stage, levels, types,
-                buildingIds, floors, systems, assetType, category, sortType, duration, thingCode, page, count);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(alertDataListGroupByThing), HttpStatus.OK);
+                buildingIds, floors, systems, assetType, category, sortType, duration, thingCode, page, count,timeStamp);
+        AlertRecordRsp alertRecordRsp = new AlertRecordRsp(alertDataListGroupByThing,timeStamp);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(alertRecordRsp), HttpStatus.OK);
     }
 
     @ApiOperation("获取报警记录")
@@ -113,8 +117,8 @@ public class AlertController {
 
     @ApiOperation("设置消息已读")
     @PostMapping(value = "alert/message/read")
-    public ResponseEntity<String> setMessageRead(@RequestParam int messageId) {
-        alertManager.setRead(messageId);
+    public ResponseEntity<String> setMessageRead(@RequestParam List<Integer> messageIds) {
+        alertManager.setRead(messageIds);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
@@ -196,7 +200,20 @@ public class AlertController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
+    @ApiOperation("申请复位")
+    @PostMapping(value = "alert/reset/req")
+    public ResponseEntity<String> requestReset(@RequestParam String thingCode,@RequestParam String userId,@RequestParam String permission){
+        alertManager.requestReset(thingCode,userId,permission);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
 
+    @ApiOperation("复位")
+    @PostMapping(value = "alert/reset")
+    public ResponseEntity<String> requestReset(@RequestParam String thingCode,HttpServletRequest request){
+        String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
+        alertManager.reset(thingCode,requestId);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
 
 
 }
