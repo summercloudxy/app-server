@@ -114,7 +114,7 @@ public class FilterPress {
         try{
             manager.getUnConfirmedUnload().remove(this.getCode());
         }catch (NullPointerException e){
-            throw new SysException("未确定卸料set中不存在这台压滤机thingCode",SysException.EC_UNKOWN);
+            throw new SysException("未确定卸料set中不存在这台压滤机thingCode",SysException.EC_UNKNOWN);
         }
         if(position > 0){
             manager.getUnloadManager().reSort(position);
@@ -135,7 +135,7 @@ public class FilterPress {
         try{
             manager.getUnConfirmedUnload().remove(this.getCode());
         }catch (NullPointerException e){
-           throw new SysException("未确定卸料set中不存在这台压滤机thingCode",SysException.EC_UNKOWN);
+           throw new SysException("未确定卸料set中不存在这台压滤机thingCode",SysException.EC_UNKNOWN);
         }
         if(position > 0){
             manager.getUnloadManager().reSort(position);

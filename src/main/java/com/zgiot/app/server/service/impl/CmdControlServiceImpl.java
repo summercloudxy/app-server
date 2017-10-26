@@ -59,7 +59,8 @@ public class CmdControlServiceImpl implements CmdControlService {
         return cmdSendResponseData;
     }
 
-    public int sendPulseCmd(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId) {
+    public CmdSendResponseData sendPulseCmd(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId) {
+        CmdSendResponseData cmdSendResponseData = new CmdSendResponseData();
         String value = dataModel.getValue();
         Boolean boolValue;
         if (Boolean.TRUE.toString().equalsIgnoreCase(value) || Boolean.FALSE.toString().equalsIgnoreCase(value)) {
@@ -71,8 +72,8 @@ public class CmdControlServiceImpl implements CmdControlService {
         sendfirst(dataModel, requestId);
         dataModel.setValue(Boolean.toString(!boolValue));
         // 信号脉冲清除发送
-        sendSecond(dataModel, retryPeriod, retryCount, requestId, null);
-        return RETURN_CODE_SUCCESS;
+        cmdSendResponseData = sendSecond(dataModel, retryPeriod, retryCount, requestId, null);
+        return cmdSendResponseData;
     }
 
     /**
@@ -142,7 +143,8 @@ public class CmdControlServiceImpl implements CmdControlService {
      * @param retryCount 重发次数
      * @param requestId 请求id
      */
-    private void sendSecond(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId, Integer cleanPeriod){
+    private CmdSendResponseData sendSecond(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId, Integer cleanPeriod){
+        CmdSendResponseData cmdSendResponseData = new CmdSendResponseData();
         final Integer realRetryCount = retryCount == null ? DEFAULT_RETRY_COUNT : retryCount;
         if (retryPeriod == null) {
             retryPeriod = SEND_PERIOD;
@@ -153,7 +155,7 @@ public class CmdControlServiceImpl implements CmdControlService {
                 if (null != cleanPeriod) {
                     Thread.sleep(cleanPeriod);
                 }
-                sendCmd(Collections.singletonList(dataModel), requestId);
+                cmdSendResponseData = sendCmd(Collections.singletonList(dataModel), requestId);
                 state = true;
                 break;
             } catch (Exception e) {
@@ -168,6 +170,7 @@ public class CmdControlServiceImpl implements CmdControlService {
         if (!state) {
             throw new SysException("failed send second pulse", SysException.EC_CMD_PULSE_SECOND_FAILED);
         }
+        return cmdSendResponseData;
     }
 
     /**
