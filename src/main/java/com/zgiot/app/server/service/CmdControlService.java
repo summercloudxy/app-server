@@ -28,7 +28,7 @@ public interface CmdControlService {
      * @param requestId
      * @return
      */
-    int sendPulseCmd(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId);
+    CmdSendResponseData sendPulseCmd(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId);
 
     /**
      * 根据信号位置下发信号

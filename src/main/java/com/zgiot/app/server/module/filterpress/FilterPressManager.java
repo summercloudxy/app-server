@@ -423,7 +423,7 @@ public class FilterPressManager {
             try{
                 unConfirmedUnload.remove(thingCode);
             }catch (NullPointerException e){
-                throw new SysException("未确定卸料set中不存在这台压滤机thingCode",SysException.EC_UNKOWN);
+                throw new SysException("未确定卸料set中不存在这台压滤机thingCode",SysException.EC_UNKNOWN);
             }
             if(position > 0){
                 unloadManager.reSort(position);
@@ -444,7 +444,7 @@ public class FilterPressManager {
             List<String> feedPumpCodes = getKeyByValueFromMap(filterPressPumpMapping,filterPress.getCode());
             String feedPumpCode = feedPumpCodes.get(0);
             if(feedPumpCodes.size() == 0){
-                throw new SysException("feedPump thingCode is null",SysException.EC_UNKOWN);
+                throw new SysException("feedPump thingCode is null",SysException.EC_UNKNOWN);
             }
             Optional<DataModelWrapper> currentWrapper = dataService.getData(feedPumpCode,FilterPressMetricConstants.FEED_PUMP_CURRENT);
             Float current = new Float(0);

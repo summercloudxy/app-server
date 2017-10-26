@@ -45,3 +45,22 @@ mybatis:
   mapper-locations: classpath:mappings/**/*.xml
   configuration:
     map-underscore-to-camel-case: true
+
+alert:
+  param:
+    period: 60000
+
+uploadFile:
+  dir: D:/uploadFile
+  uri: http://localhost:9090/app-server/files/
+
+
+# STOMP client
+stomp:
+  client:
+    server-url:
+      ${stomp.client.server-url}
+    topics:
+      topic/ss,topic/12
+
+
