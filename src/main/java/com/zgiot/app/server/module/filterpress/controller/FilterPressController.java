@@ -63,6 +63,8 @@ public class FilterPressController {
             filterPressManager.feedIntelligentManuChange(thingCode, state);
         } else if (TYPE_UNLOAD.equals(type)) {
             filterPressManager.unloadIntelligentManuChange(thingCode, state);
+            filterPressManager.removeQueue(thingCode,state);
+
         }
         return new ResponseEntity<>(ServerResponse.buildOkJson(null),
                 HttpStatus.OK);
@@ -81,6 +83,13 @@ public class FilterPressController {
     public ResponseEntity<String> unloadPopupConfirm(@PathVariable String thingCode) {
         filterPressManager.confirmUnload(thingCode);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null),
+                HttpStatus.OK);
+    }
+
+    @ApiOperation("给app端返回弹窗时未点击确定卸料的thingCodes")
+    @RequestMapping(value = "api/filterPress/unload/unConfirmUnload", method = RequestMethod.GET)
+    public ResponseEntity<String> unConfirmUnload() {
+        return new ResponseEntity<>(ServerResponse.buildOkJson(filterPressManager.getUnConfirmedUnload()),
                 HttpStatus.OK);
     }
 
@@ -178,8 +187,7 @@ public class FilterPressController {
                         ||FilterPressMetricConstants.GATE_ALARM.equals(metricCode)
                         ||FilterPressMetricConstants.SCR_BLK.equals(metricCode)
                         ||FilterPressMetricConstants.STOP.equals(metricCode)
-                        ||FilterPressMetricConstants.R_AUTO.equals(metricCode)
-                        ||FilterPressMetricConstants.FEED_OVER.equals(metricCode)){
+                        ||FilterPressMetricConstants.R_AUTO.equals(metricCode)){
                     resultMap.put(IS_HOLDING,IS_HOLDING_OK);
                 }else{
                     resultMap.put(IS_HOLDING,IS_HOLDING_NOT);

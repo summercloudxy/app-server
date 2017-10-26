@@ -2,6 +2,7 @@ package com.zgiot.app.server.module.filterpress;
 
 
 import com.zgiot.common.constants.FilterPressMetricConstants;
+import com.zgiot.common.exceptions.SysException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,7 @@ public class FilterPress {
     public static final String PARAM_NAME_MAXUNLOADPARALLEL = "maxUnloadParallel";
 
     private static final Logger logger = LoggerFactory.getLogger(FilterPress.class);
-    private static final long UNLOAD_WAIT_DURATION = Duration.ofMinutes(3).plusSeconds(45).toMillis();
+    private static final long UNLOAD_WAIT_DURATION = Duration.ofMinutes(30).plusSeconds(45).toMillis();
 
     private static final int UNLOAD_EXCHANGE_COUNT = 16;
     private final String code;
@@ -102,8 +103,43 @@ public class FilterPress {
         logger.trace("{} got faults", code);
     }
 
+    public void onLocal(){
+        logger.trace("{} on local", code);
+        int position = -1;
+        if(manager != null && (!manager.getUnloadSequence().isEmpty()) && (!StringUtils.isBlank(getCode()))){
+            position = manager.getUnloadSequence().get(this.getCode());
+        }
+        manager.getUnloadManager().getQueue().remove(this);
+        manager.getUnloadSequence().remove(this.getCode());
+        try{
+            manager.getUnConfirmedUnload().remove(this.getCode());
+        }catch (NullPointerException e){
+            throw new SysException("未确定卸料set中不存在这台压滤机thingCode",SysException.EC_UNKOWN);
+        }
+        if(position > 0){
+            manager.getUnloadManager().reSort(position);
+        }
+    }
+
     public void onLoosen() {
         logger.trace("{} on loosen", code);
+        this.startUnload();
+        int position = -1;
+        if(manager != null && (!manager.getUnloadSequence().isEmpty())
+                && (!StringUtils.isBlank(getCode()))
+                && manager.getUnloadSequence().containsKey(this.getCode())){
+            position = manager.getUnloadSequence().get(this.getCode());
+        }
+        manager.getUnloadManager().getQueue().remove(this);
+        manager.getUnloadSequence().remove(this.getCode());
+        try{
+            manager.getUnConfirmedUnload().remove(this.getCode());
+        }catch (NullPointerException e){
+           throw new SysException("未确定卸料set中不存在这台压滤机thingCode",SysException.EC_UNKOWN);
+        }
+        if(position > 0){
+            manager.getUnloadManager().reSort(position);
+        }
     }
 
     public void onTaken() {
@@ -138,7 +174,9 @@ public class FilterPress {
 
     public void onCycle() {
         logger.trace("{} on cycle", code);
+        unloadManager.takeAndPullCount.set(0);
         this.onCycleTime = System.currentTimeMillis();
+        this.unloadManager.notifiedNext = false;
         if (unloadIntelligent) {
             manager.enqueueUnload(this);
             logger.debug("{} enqueue unload, intelligent:{}", code, unloadIntelligent);
@@ -249,13 +287,15 @@ public class FilterPress {
     }
 
     public int getPlateCount() {
+        logger.info("producingTeam:" + producingTeam);
         if(producingTeam == null){
             return 0;
         }
+        logger.info("plateCount:" + plateCount);
         return plateCount.get(producingTeam);
     }
 
-    private class UnloadManager {
+    class UnloadManager {
         /**
          * 卸料计时
          */
@@ -275,11 +315,11 @@ public class FilterPress {
         /**
          * 拉板和取板的交替次数
          */
-        private AtomicInteger takeAndPullCount = new AtomicInteger(0);
+        AtomicInteger takeAndPullCount = new AtomicInteger(0);
         /**
          * 已通知下一台
          */
-        private volatile boolean notifiedNext = false;
+        volatile boolean notifiedNext = false;
 
         /**
          * 开始卸料
@@ -341,7 +381,7 @@ public class FilterPress {
             if (!notifiedNext) {
                 notifiedNext = true;
                 manager.unloadNext();
-                logger.debug("{} unload finished, notifying next", code);
+                logger.debug("{} unload enough to notify next", code);
             }
         }
 
