@@ -1,6 +1,7 @@
 package com.zgiot.app.server.mapper;
 
 import com.zgiot.common.pojo.MetricModel;
+import com.zgiot.common.pojo.ThingMetricModel;
 import com.zgiot.common.pojo.ThingModel;
 import com.zgiot.common.pojo.ThingPropertyModel;
 import org.apache.ibatis.annotations.Mapper;
@@ -20,5 +21,8 @@ public interface TMLMapper {
 
     @Select("SELECT * FROM `tb_thing_properties`")
     public List<ThingPropertyModel> findAllProperties();
+
+    @Select("SELECT * FROM rel_historydata_whitelist")
+    public List<ThingMetricModel> findAllHistdataWhitelist();
 
 }
