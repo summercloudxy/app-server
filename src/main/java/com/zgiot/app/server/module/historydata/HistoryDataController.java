@@ -58,7 +58,7 @@ public class HistoryDataController {
             return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
         }
 
-        List<Map<String, Object>> result = historyDataService.findHistoryDataMap(historyDataDto.getThingCodes().split(","), metricCode,
+        List<Map<String, Object>> result = historyDataService.findMultiThingsHistoryDataOfMetric(historyDataDto.getThingCodes().split(","), metricCode,
                 historyDataDto.getStartTime(), historyDataDto.getEndTime(), historyDataDto.getSegment());
 
         return new ResponseEntity<>(ServerResponse.buildOkJson(result), HttpStatus.OK);

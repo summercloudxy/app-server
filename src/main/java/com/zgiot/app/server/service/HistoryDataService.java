@@ -44,9 +44,9 @@ public interface HistoryDataService {
      * @param startDate
      * @param endDate
      * @param segment
-     * @return
+     * @return [{"tc":"2492","values":[{"dt":1508833769000,"v":"1.3"},{"dt":1508833769001,"v":"1.4"}]},{"tc":"2493","values":[{"dt":1508833769000,"v":"1.3"},{"dt":1508833769001,"v":"1.4"}]}]
      */
-    List<Map<String, Object>> findHistoryDataMap(String[] thingCodes, String metricCode, Date startDate, Date endDate, Integer segment);
+    List<Map<String, Object>> findMultiThingsHistoryDataOfMetric(String[] thingCodes, String metricCode, Date startDate, Date endDate, Integer segment);
 
     /**
      * @param list MongoData use MongoData directly to avoid another loop to convert obj.

@@ -23,6 +23,11 @@ import static com.mongodb.client.model.Filters.*;
 public class HistoryDataServiceImpl implements HistoryDataService {
     private static final Logger logger = LoggerFactory.getLogger(HistoryDataServiceImpl.class);
     private static final String COLLECTION_NAME = "metricdata";
+
+    private static final String KEY_ARRAY = "array";
+    private static final String KEY_SIZE = "size";
+    private static final String KEY_TIMESTAMP = "timestamp";
+
     @Autowired
     private MongoDatabase database;
     private MongoCollection<Document> collection;
@@ -49,28 +54,28 @@ public class HistoryDataServiceImpl implements HistoryDataService {
         if (startDate != null) {
             startDateL = startDate.getTime();
         }
-        criteria = and(gte("dt", startDateL), lte("dt", endDate.getTime()));
+        criteria = and(gte(DataModel.DATA_TIMESTAMP, startDateL), lte(DataModel.DATA_TIMESTAMP, endDate.getTime()));
         // for tc
         if (thingCodes != null && thingCodes.size() > 0) {
-            criteria = and(criteria, in("tc", thingCodes));
+            criteria = and(criteria, in(DataModel.THING_CODE, thingCodes));
         }
         // for mc
         if (metricCodes != null && metricCodes.size() > 0) {
-            criteria = and(criteria, in("mc", metricCodes));
+            criteria = and(criteria, in(DataModel.METRIC_CODE, metricCodes));
         }
 
         List<DataModel> result = new LinkedList<>();
         if (collection != null) {
             collection.find(criteria)
-                    .sort(Sorts.descending("dt"))
+                    .sort(Sorts.descending(DataModel.DATA_TIMESTAMP))
                     .forEach((Block<Document>) document -> {
                         DataModel model = new DataModel();
-                        model.setThingCode(document.getString("tc"));
-                        model.setMetricDataType(document.getString("mdt"));
-                        model.setMetricCode(document.getString("mc"));
-                        model.setMetricCategoryCode(document.getString("mcc"));
-                        model.setValue(document.getString("v"));
-                        model.setDataTimeStamp(new Date(document.getLong("dt")));
+                        model.setThingCode(document.getString(DataModel.THING_CODE));
+                        model.setMetricDataType(document.getString(DataModel.METRIC_DATA_TYPE));
+                        model.setMetricCode(document.getString(DataModel.METRIC_CODE));
+                        model.setMetricCategoryCode(document.getString(DataModel.METRIC_CATEGORY_CODE));
+                        model.setValue(document.getString(DataModel.VALUE));
+                        model.setDataTimeStamp(new Date(document.getLong(DataModel.DATA_TIMESTAMP)));
                         result.add(model);
                     });
         } else {
@@ -89,7 +94,7 @@ public class HistoryDataServiceImpl implements HistoryDataService {
      * created by wangwei
      */
     @Override
-    public List<Map<String, Object>> findHistoryDataMap(String[] thingCodes, String metricCode, Date startDate, Date endDate, Integer segment) {
+    public List<Map<String, Object>> findMultiThingsHistoryDataOfMetric(String[] thingCodes, String metricCode, Date startDate, Date endDate, Integer segment) {
         if (collection == null) {
             logger.warn("mongo disabled");
             return new ArrayList<>();
@@ -108,19 +113,19 @@ public class HistoryDataServiceImpl implements HistoryDataService {
         }
 
         //query
-        Bson criteria = and(gte("dt", startTime), lte("dt", endTime), eq("mc", metricCode), in("tc", thingCodes));
-        FindIterable<Document> iterable = collection.find(criteria).sort(Sorts.descending("dt"));
+        Bson criteria = and(gte(DataModel.DATA_TIMESTAMP, startTime), lte(DataModel.DATA_TIMESTAMP, endTime), eq(DataModel.METRIC_CODE, metricCode), in(DataModel.THING_CODE, thingCodes));
+        FindIterable<Document> iterable = collection.find(criteria).sort(Sorts.descending(DataModel.DATA_TIMESTAMP));
 
         Map<String, Map<String, Object>> map = new HashMap<>(thingCodes.length);    //store dataModel array, timestamp and unset size
         for (Document document : iterable) {
-            String tc = document.getString("tc");
-            Map<String, Object> temp = map.get("tc");
+            String tc = document.getString(DataModel.THING_CODE);
+            Map<String, Object> temp = map.get(tc);
             if (temp == null) {
                 //init temp map
                 temp = new HashMap<>(3);
-                temp.put("array", new DataModel[segment]);  //empty dataModel array
-                temp.put("timestamp", endTime); //timestamp for check
-                temp.put("size", segment);  //unset size
+                temp.put(KEY_ARRAY, new DataModel[segment]);  //empty dataModel array
+                temp.put(KEY_TIMESTAMP, endTime); //timestamp for check
+                temp.put(KEY_SIZE, segment);  //unset size
                 map.put(tc, temp);
             }
 
@@ -136,15 +141,15 @@ public class HistoryDataServiceImpl implements HistoryDataService {
                 dataModels = new DataModel[segment];
                 queryForUnsetDataModel(thingCode, metricCode, startTime, dataModels, segment);
             } else {
-                dataModels = (DataModel[]) temp.get("array");
-                int size = (int)temp.get("size");
+                dataModels = (DataModel[]) temp.get(KEY_ARRAY);
+                int size = (int)temp.get(KEY_SIZE);
                 if (size > 0) {
                     queryForUnsetDataModel(thingCode, metricCode, startTime, dataModels, size);
                 }
             }
 
             Map<String, Object> resultMap = new HashMap<>(2);
-            resultMap.put("tc", thingCode);
+            resultMap.put(DataModel.THING_CODE, thingCode);
             resultMap.put("values", dataModels);
 
             result.add(resultMap);
@@ -161,32 +166,31 @@ public class HistoryDataServiceImpl implements HistoryDataService {
      * @param interval interval by segment
      */
     private void checkDocument(Document document, Map<String, Object> tempMap, long interval) {
-        int size = (int)tempMap.get("size");
-        if (size == 0) {
-            return;
+        while (true) {
+            int size = (int)tempMap.get(KEY_SIZE);
+            if (size == 0) {
+                return;
+            }
+
+            //check timestamp
+            long timestamp = (long) tempMap.get(KEY_TIMESTAMP);
+            long dt = document.getLong(DataModel.DATA_TIMESTAMP);
+            if (dt > timestamp) {
+                return;
+            }
+
+            //store dataModel
+            size--;
+            DataModel[] dataModels = (DataModel[])tempMap.get(KEY_ARRAY);
+            DataModel model = new DataModel();
+            model.setValue(document.getString(DataModel.VALUE));
+            model.setDataTimeStamp(new Date(dt));
+            dataModels[size] = model;
+
+            timestamp -= interval;
+            tempMap.put(KEY_TIMESTAMP, timestamp);
+            tempMap.put(KEY_SIZE, size);
         }
-
-        //check timestamp
-        long timestamp = (long) tempMap.get("timestamp");
-        long dt = document.getLong("dt");
-        if (dt > timestamp) {
-            return;
-        }
-
-        //store dataModel
-        size--;
-        DataModel[] dataModels = (DataModel[])tempMap.get("array");
-        DataModel model = new DataModel();
-        model.setValue(document.getString("v"));
-        model.setDataTimeStamp(new Date(dt));
-        dataModels[size] = model;
-
-        timestamp -= interval;
-        tempMap.put("timestamp", timestamp);
-        tempMap.put("size", size);
-
-        //check next timestamp
-        checkDocument(document, tempMap, interval);
     }
 
 
@@ -200,12 +204,12 @@ public class HistoryDataServiceImpl implements HistoryDataService {
      * @param size
      */
     private void queryForUnsetDataModel(String thingCode, String metricCode, long endTime, DataModel[] dataModels, int size) {
-        Bson criteria = and(lt("dt", endTime), eq("mc", metricCode), eq("tc", thingCode));
-        FindIterable<Document> iterable = collection.find(criteria).sort(Sorts.descending("dt")).limit(1);
+        Bson criteria = and(lt(DataModel.DATA_TIMESTAMP, endTime), eq(DataModel.METRIC_CODE, metricCode), eq(DataModel.THING_CODE, thingCode));
+        FindIterable<Document> iterable = collection.find(criteria).sort(Sorts.descending(DataModel.DATA_TIMESTAMP)).limit(1);
         for (Document document : iterable) {
             DataModel model = new DataModel();
-            model.setValue(document.getString("v"));
-            model.setDataTimeStamp(new Date(document.getLong("dt")));
+            model.setValue(document.getString(DataModel.VALUE));
+            model.setDataTimeStamp(new Date(document.getLong(DataModel.DATA_TIMESTAMP)));
             for (int i=0;i<size;i++) {
                 dataModels[i] = model.clone();
             }
@@ -219,12 +223,12 @@ public class HistoryDataServiceImpl implements HistoryDataService {
             List<Document> models = new LinkedList<>();
             for (DataModel dataModel : modelList) {
                 Document document = new Document()
-                        .append("tc", dataModel.getThingCode())
-                        .append("mdt", dataModel.getMetricDataType())
-                        .append("mc", dataModel.getMetricCode())
-                        .append("mcc", dataModel.getMetricCategoryCode())
-                        .append("v", dataModel.getValue())
-                        .append("dt", dataModel.getDataTimeStamp().getTime());
+                        .append(DataModel.THING_CODE, dataModel.getThingCode())
+                        .append(DataModel.METRIC_DATA_TYPE, dataModel.getMetricDataType())
+                        .append(DataModel.METRIC_CODE, dataModel.getMetricCode())
+                        .append(DataModel.METRIC_CATEGORY_CODE, dataModel.getMetricCategoryCode())
+                        .append(DataModel.VALUE, dataModel.getValue())
+                        .append(DataModel.DATA_TIMESTAMP, dataModel.getDataTimeStamp().getTime());
                 models.add(document);
             }
             collection.insertMany(models);
