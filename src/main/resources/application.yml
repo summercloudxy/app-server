@@ -52,7 +52,7 @@ alert:
 
 uploadFile:
   dir: D:/uploadFile/
-  uri: http://localhost:9090/app-server/files/
+  uri: http://192.168.9.198:9090/app-server/files/
 
 
 # STOMP client
