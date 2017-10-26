@@ -658,15 +658,15 @@ public class AlertManager {
         }
         List<AlertRecord> alertRecords = alertMapper.getAlertDataListGroupByThing(stage, levels, types, buildingIds,
                 floors, systems, assetType, category, sortType, startTime, endTime, thingCode, offset, count);
-        if (thingCode != null) {
+//        if (thingCode != null) {
             for (AlertRecord alertRecord : alertRecords) {
                 List<AlertData> alertDatas = alertRecord.getAlertDataList();
                 for (AlertData alertData : alertDatas) {
                     transImageStrToList(alertData);
-                    countUnreadMessage(alertData);
+//                    countUnreadMessage(alertData);
                 }
             }
-        }
+//        }
 
         sortRecords(sortType, alertRecords);
 
