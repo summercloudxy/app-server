@@ -1,6 +1,8 @@
 package com.zgiot.app.server.module.generic;
 
 import com.zgiot.app.server.service.ThingService;
+import com.zgiot.common.pojo.BuildingModel;
+import com.zgiot.common.pojo.SystemModel;
 import com.zgiot.common.pojo.ThingModel;
 import com.zgiot.common.pojo.ThingPropertyModel;
 import com.zgiot.common.restcontroller.ServerResponse;
@@ -13,8 +15,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/thing")
@@ -23,33 +27,43 @@ public class ThingController {
     private ThingService thingService;
 
     /**
-     *  /thing/{thingCode}接口返回json值的name属性名
+     * /thing/{thingCode}接口返回json值的name属性名
      */
     public static final String THING_NAME = "name";
 
     /**
-     *  /thing/{thingCode}接口返回json值的shortName属性名
+     * /thing/{thingCode}接口返回json值的shortName属性名
      */
     public static final String THING_SHORT_NAME = "shortName";
 
     /**
-     *  /thing/{thingCode}接口返回json值的base属性名
+     * /thing/{thingCode}接口返回json值的base属性名
      */
     public static final String BASE = "base";
 
     /**
-     *  /thing/{thingCode}接口返回json值的prop属性名
+     * /thing/{thingCode}接口返回json值的prop属性名
      */
     public static final String PROP = "prop";
 
     /**
-     *  /thing/{thingCode}接口返回json值的disProp属性名
+     * /thing/{thingCode}接口返回json值的disProp属性名
      */
-    public static final String DIS_PROP= "disProp";
+    public static final String DIS_PROP = "disProp";
 
-    @GetMapping("/{thingCode}")
-    public ThingModel getThing(@PathVariable String thingCode) {
-        return thingService.getThing(thingCode);
+    public static final String THING_CODE = "thingCode";
+
+    public static final String THING_CATEGORY_CODE = "thingCategoryCode";
+
+
+
+
+    @GetMapping(value="/{thingCode}")
+    public ResponseEntity<String> getThing(@PathVariable String thingCode) {
+        ThingModel tm = thingService.getThing(thingCode);
+        return new ResponseEntity<>(
+                ServerResponse.buildOkJson(tm)
+                , HttpStatus.OK);
     }
 
     @GetMapping("/properties/{thingCode}")
@@ -66,6 +80,7 @@ public class ThingController {
 
             baseThingMap.put(THING_NAME, thingModel.getThingName());
             baseThingMap.put(THING_SHORT_NAME, thingModel.getShortName());
+            baseThingMap.put(THING_CODE, thingModel.getThingCode());
             parsePropertiesByType(thingPropertyModels,propMap,disPropMap);
             thingPropMap.put(BASE, baseThingMap);
             thingPropMap.put(PROP, propMap);
@@ -94,6 +109,7 @@ public class ThingController {
                 thingMap = new LinkedHashMap<>();
                 base.put(THING_NAME, baseProperty.getThingName());
                 base.put(THING_SHORT_NAME, baseProperty.getShortName());
+                base.put(THING_CODE, baseProperty.getThingCode());
                 String[] propType = new String[]{ThingPropertyModel.PROP_TYPE_PROP, ThingPropertyModel.PROP_TYPE_DISP_PROP};
                 thingPropertyModels = thingService.findThingProperties(baseProperty.getThingCode(), propType);
                 parsePropertiesByType(thingPropertyModels,prop,disProp);
@@ -119,4 +135,17 @@ public class ThingController {
             }
         }
     }
+
+    @GetMapping("/building")
+    public ResponseEntity<String> findAllBuilding() {
+        List<BuildingModel> buildingModels = thingService.findAllBuilding();
+        return new ResponseEntity<>(ServerResponse.buildOkJson(buildingModels), HttpStatus.OK);
+    }
+
+    @GetMapping("/system")
+    public ResponseEntity<String> findAllSystem() {
+        List<SystemModel> systemModels = thingService.findAllSystem();
+        return new ResponseEntity<>(ServerResponse.buildOkJson(systemModels), HttpStatus.OK);
+    }
+
 }

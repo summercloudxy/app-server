@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
+import java.util.Set;
 
 @Mapper
 public interface TMLMapper {
@@ -17,9 +18,18 @@ public interface TMLMapper {
     List<ThingModel> findAllThings();
 
     @Select("SELECT * FROM `tb_thing_properties`")
-    public List<ThingPropertyModel> findAllProperties();
+    List<ThingPropertyModel> findAllProperties();
 
     @Select("SELECT * FROM rel_historydata_whitelist")
     public List<ThingMetricModel> findAllHistdataWhitelist();
 
+    @Select("SELECT metric_code FROM `rel_thing_metric_label` WHERE thing_code = #{thingCode}")
+    Set<String> findMetricsOfThing(String thingCode);
+
+
+    @Select("SELECT * FROM `tb_building`")
+    List<BuildingModel> findAllBuildings();
+
+    @Select("SELECT * FROM `tb_system`")
+    List<SystemModel> findAllSystems();
 }

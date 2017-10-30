@@ -3,6 +3,7 @@ package com.zgiot.app.server.config;
 import com.zgiot.app.server.dataprocessor.CompleterDataListener;
 import com.zgiot.app.server.dataprocessor.DataProcessor;
 import com.zgiot.app.server.dataprocessor.impl.CacheUpdater;
+import com.zgiot.app.server.module.alert.AlertListener;
 import com.zgiot.app.server.module.demo.DemoBusiness;
 import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
 import com.zgiot.app.server.module.historydata.HistoryDataListener;
@@ -30,6 +31,9 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
     private CompleterDataListener completerDataListener;
     @Autowired
     private HistoryDataListener historyDataListener;
+    @Autowired
+    private AlertListener alertListener;
+
 
     @SuppressWarnings("unchecked")
     @Override
@@ -48,6 +52,7 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
         processor.addListener(completerDataListener);
         processor.addListener(historyDataListener);
         processor.addListener(filterPressListener);
+        processor.addListener(alertListener);
         //processor.addListener(demoBusiness);
     }
 
