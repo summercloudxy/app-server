@@ -126,21 +126,17 @@ public class AlertController {
     @ApiOperation("反馈图片和视频信息")
     @PostMapping(value = "alert/feedback")
     public ResponseEntity<String> feedbackImageAndVideo(@RequestParam String thingCode, @RequestParam String metricCode,
-            @RequestBody List<MultipartFile> files, @RequestParam String userId, @RequestParam int type) {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (MultipartFile file : files) {
+            @RequestBody MultipartFile files, @RequestParam String userId, @RequestParam int type) {
+        String url ;
             try {
-                FileModel attach = fileService.uploadFile(file, file.getOriginalFilename(), MODULE_NAME, type, userId);
-                String url = attach.getAbsolutePath();
-                stringBuilder.append(url);
-                stringBuilder.append(";");
+                FileModel attach = fileService.uploadFile(files, files.getOriginalFilename(), MODULE_NAME, type, userId);
+                url = attach.getAbsolutePath();
             } catch (Exception e) {
                 throw new SysException("file upload fail", SysException.EC_UNKNOWN);
             }
 
-        }
-        alertManager.feedback(thingCode, metricCode, stringBuilder.toString(), type);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+        alertManager.feedback(thingCode, metricCode, url, type);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(url), HttpStatus.OK);
     }
 
     @ApiOperation("获取统计数量信息")
