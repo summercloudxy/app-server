@@ -18,7 +18,7 @@ public class ModuleListConfig {
     public static final String MODULE_ALERT = "ALERT";
     public static final String MODULE_HIST_PERSIST = "HIST_PERSIST";
 
-    @Value("sf.modules.list")
+    @Value("${sf.modules.list}")
     private String moduleListStr;
     private Set configedModules = new HashSet();
 
