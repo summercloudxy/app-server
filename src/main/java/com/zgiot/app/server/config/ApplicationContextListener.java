@@ -7,6 +7,7 @@ import com.zgiot.app.server.module.alert.AlertListener;
 import com.zgiot.app.server.module.demo.DemoBusiness;
 import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
 import com.zgiot.app.server.module.historydata.HistoryDataListener;
+import com.zgiot.app.server.service.impl.HistoryDataPersistDaemon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,8 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
     private AlertListener alertListener;
     @Autowired
     ModuleListConfig moduleListConfig;
+    @Autowired
+    HistoryDataPersistDaemon historyDataPersistDaemon;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -54,6 +57,7 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
 
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
                 || moduleListConfig.containModule(ModuleListConfig.MODULE_HIST_PERSIST)) {
+            this.historyDataPersistDaemon.start();
             processor.addListener(historyDataListener);
         }
 
