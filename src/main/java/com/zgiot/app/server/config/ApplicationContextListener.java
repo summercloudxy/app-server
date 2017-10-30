@@ -33,7 +33,8 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
     private HistoryDataListener historyDataListener;
     @Autowired
     private AlertListener alertListener;
-
+    @Autowired
+    ModuleListConfig moduleListConfig;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -47,12 +48,25 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
         });
     }
 
-    void installModules(DataProcessor processor){
+    void installModules(DataProcessor processor) {
         processor.addListener(cacheUpdater);
         processor.addListener(completerDataListener);
-        processor.addListener(historyDataListener);
-        processor.addListener(filterPressListener);
-        processor.addListener(alertListener);
+
+        if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
+                || moduleListConfig.containModule(ModuleListConfig.MODULE_HIST_PERSIST)) {
+            processor.addListener(historyDataListener);
+        }
+
+        if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
+                || moduleListConfig.containModule(ModuleListConfig.MODULE_FILTERPRESS)) {
+            processor.addListener(filterPressListener);
+        }
+
+        if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
+                || moduleListConfig.containModule(ModuleListConfig.MODULE_ALERT)) {
+            processor.addListener(alertListener);
+        }
+
         //processor.addListener(demoBusiness);
     }
 
