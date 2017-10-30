@@ -4,6 +4,7 @@ import com.zgiot.common.pojo.DataModel;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public interface HistoryDataService {
     /**
@@ -35,10 +36,28 @@ public interface HistoryDataService {
     List<DataModel> findHistoryData(List<String> thingCodes, List<String> metricCodes
             , Date startDate, long durationMs);
 
+
+    /**
+     *
+     * @param thingCodes    thingCode list
+     * @param metricCode
+     * @param startDate
+     * @param endDate
+     * @param segment
+     * @return {"2492":[{"dt":1508833769000,"v":"1.3"},{"dt":1508833769001,"v":"1.4"}],"2493":[{"dt":1508833769000,"v":"1.3"},{"dt":1508833769001,"v":"1.4"}]}
+     */
+    Map<String, DataModel[]> findMultiThingsHistoryDataOfMetric(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment);
+
     /**
      * @param list MongoData use MongoData directly to avoid another loop to convert obj.
      * @return count of success.
      */
     int insertBatch(List<DataModel> list);
+
+    /**
+     * Check whitelist and determine how to add to batch insert queue.
+     * @param dm
+     */
+    void asyncSmartAddData(DataModel dm);
 
 }
