@@ -54,4 +54,10 @@ public interface HistoryDataService {
      */
     int insertBatch(List<DataModel> list);
 
+    /**
+     * Check whitelist and determine how to add to batch insert queue.
+     * @param dm
+     */
+    void asyncSmartAddData(DataModel dm);
+
 }

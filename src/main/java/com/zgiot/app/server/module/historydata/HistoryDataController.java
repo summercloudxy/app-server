@@ -28,7 +28,7 @@ public class HistoryDataController {
     public ResponseEntity<String> insertBatch(@RequestBody String requestData) {
         //check requestData
         if (StringUtils.isBlank(requestData)) {
-            ServerResponse res = new ServerResponse("Blank request.", SysException.EC_UNKOWN, 0);
+            ServerResponse res = new ServerResponse("Blank request.", SysException.EC_UNKNOWN, 0);
             String resJSON = JSON.toJSONString(res);
             return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
         }
@@ -36,7 +36,7 @@ public class HistoryDataController {
         List<DataModel> modelList = JSON.parseArray(requestData, DataModel.class);
         //check modelList
         if (modelList == null || modelList.isEmpty()) {
-            ServerResponse res = new ServerResponse("Empty list.The incoming req body is: `" + requestData + "`", SysException.EC_UNKOWN, 0);
+            ServerResponse res = new ServerResponse("Empty list.The incoming req body is: `" + requestData + "`", SysException.EC_UNKNOWN, 0);
             String resJSON = JSON.toJSONString(res);
             return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
         }
@@ -54,7 +54,7 @@ public class HistoryDataController {
         //check parse result
         if (historyDataDto.getEndTime() == null || historyDataDto.getStartTime() == null || historyDataDto.getThingCodes() == null || historyDataDto.getThingCodes().isEmpty()
                 || historyDataDto.getSegment() == null) {
-            ServerResponse res = new ServerResponse("Invalid request data.The incoming req body is: `" + requestData + "`", SysException.EC_UNKOWN, 0);
+            ServerResponse res = new ServerResponse("Invalid request data.The incoming req body is: `" + requestData + "`", SysException.EC_UNKNOWN, 0);
             String resJSON = JSON.toJSONString(res);
             return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
         }

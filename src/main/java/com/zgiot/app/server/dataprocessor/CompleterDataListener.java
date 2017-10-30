@@ -35,6 +35,11 @@ public class CompleterDataListener implements DataListener {
         }
     }
 
+
+    public void addCompleter(DataCompleter c ){
+        this.completers.add(c);
+    }
+
     @Override
     public void onError(Throwable error) {
         logger.error("Unknown data completer error! ", error);

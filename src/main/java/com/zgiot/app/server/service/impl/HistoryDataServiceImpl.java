@@ -5,8 +5,13 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Sorts;
+import com.zgiot.app.server.common.QueueManager;
+import com.zgiot.app.server.mapper.TMLMapper;
 import com.zgiot.app.server.service.HistoryDataService;
 import com.zgiot.common.pojo.DataModel;
+import com.zgiot.common.pojo.ThingMetricModel;
+import com.zgiot.common.reloader.Reloader;
+import com.zgiot.common.reloader.ServerReloadManager;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.slf4j.Logger;
@@ -16,12 +21,16 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import static com.mongodb.client.model.Filters.*;
 
 @Service
-public class HistoryDataServiceImpl implements HistoryDataService {
+public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
     private static final Logger logger = LoggerFactory.getLogger(HistoryDataServiceImpl.class);
+    private static final Map<String, Map<String, Object>> WHITE_MAP = new HashMap();
+
     private static final String COLLECTION_NAME = "metricdata";
 
     private static final String KEY_ARRAY = "array";
@@ -31,6 +40,8 @@ public class HistoryDataServiceImpl implements HistoryDataService {
     @Autowired
     private MongoDatabase database;
     private MongoCollection<Document> collection;
+    @Autowired
+    TMLMapper tmlMapper;
 
     @PostConstruct
     private void initCollection() {
@@ -102,7 +113,7 @@ public class HistoryDataServiceImpl implements HistoryDataService {
 
         long startTime = startDate.getTime();
         long endTime = endDate.getTime();
-        long interval = (endTime - startTime)/segment;
+        long interval = (endTime - startTime) / segment;
 
         //param validator
         if (segment <= 0) {
@@ -142,7 +153,7 @@ public class HistoryDataServiceImpl implements HistoryDataService {
                 queryForUnsetDataModel(thingCode, metricCode, startTime, dataModels, segment);
             } else {
                 dataModels = (DataModel[]) temp.get(KEY_ARRAY);
-                int size = (int)temp.get(KEY_SIZE);
+                int size = (int) temp.get(KEY_SIZE);
                 if (size > 0) {
                     queryForUnsetDataModel(thingCode, metricCode, startTime, dataModels, size);
                 }
@@ -157,13 +168,14 @@ public class HistoryDataServiceImpl implements HistoryDataService {
     /**
      * created by wangwei
      * check document, save dataModel to tempMap
+     *
      * @param document document from mongoDB
      * @param tempMap  store dataModel array, timestamp and unset size
      * @param interval interval by segment
      */
     private void checkDocument(Document document, Map<String, Object> tempMap, long interval) {
         while (true) {
-            int size = (int)tempMap.get(KEY_SIZE);
+            int size = (int) tempMap.get(KEY_SIZE);
             if (size == 0) {
                 return;
             }
@@ -177,7 +189,7 @@ public class HistoryDataServiceImpl implements HistoryDataService {
 
             //store dataModel
             size--;
-            DataModel[] dataModels = (DataModel[])tempMap.get(KEY_ARRAY);
+            DataModel[] dataModels = (DataModel[]) tempMap.get(KEY_ARRAY);
             DataModel model = new DataModel();
             model.setValue(document.getString(DataModel.VALUE));
             model.setDataTimeStamp(new Date(dt));
@@ -193,6 +205,7 @@ public class HistoryDataServiceImpl implements HistoryDataService {
     /**
      * created by wangwei
      * query from mongoDB again for unset dataModel
+     *
      * @param thingCode
      * @param metricCode
      * @param endTime
@@ -206,7 +219,7 @@ public class HistoryDataServiceImpl implements HistoryDataService {
             DataModel model = new DataModel();
             model.setValue(document.getString(DataModel.VALUE));
             model.setDataTimeStamp(new Date(document.getLong(DataModel.DATA_TIMESTAMP)));
-            for (int i=0;i<size;i++) {
+            for (int i = 0; i < size; i++) {
                 dataModels[i] = model.clone();
             }
         }
@@ -232,6 +245,72 @@ public class HistoryDataServiceImpl implements HistoryDataService {
         } else {
             logger.warn("mongo disabled");
             return 0;
+        }
+    }
+
+    @Override
+    public void asyncSmartAddData(DataModel dm) {
+        synchronized (inited) {
+            if (!inited) {
+                logger.info("Start to init HistoryDataListener ... ");
+                init();
+            }
+        }
+
+        boolean toStore = false;
+        if (WHITE_MAP.containsKey(dm.getThingCode())) {
+            Map metricMap = WHITE_MAP.get(dm.getThingCode());
+
+            if (metricMap != null && metricMap.containsKey(dm.getMetricCode())) {
+                toStore = true;
+            }
+        }
+
+        if (toStore){
+            BlockingQueue q = (BlockingQueue) QueueManager.getQueue(QueueManager.HIST_BUFFER);
+            q.add(dm);
+            if (logger.isDebugEnabled()){
+                logger.debug("Added to hist data queue (data=`{}`).", dm.toString());
+            }
+        }else{
+            if (logger.isDebugEnabled()){
+                logger.debug("Not added to hist data queue (data=`{}`).", dm.toString());
+            }
+        }
+
+    }
+
+    void init() {
+        synchronized (inited) {
+            if (inited) {
+                return;
+            }
+
+            ServerReloadManager.addReloader(this);
+            reload();
+        }
+
+    }
+
+    private static Boolean inited = false;
+
+    @Override
+    public void reload() {
+        synchronized (inited) {
+            inited = false;
+
+            WHITE_MAP.clear();
+            List<ThingMetricModel> list = this.tmlMapper.findAllHistdataWhitelist();
+            for (ThingMetricModel tm : list) {
+                Map metricMap = WHITE_MAP.get(tm.getThingCode());
+                if (metricMap == null) {
+                    metricMap = new HashMap();
+                    WHITE_MAP.put(tm.getThingCode(), metricMap);
+                }
+                metricMap.put(tm.getMetricCode(), null);
+            }
+
+            inited = true;
         }
     }
 
