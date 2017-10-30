@@ -39,7 +39,7 @@ public class AlertManager {
     private static String REPAIR_URI = "/topic/alert/repair";
     private static String FEEDBACK_URI = "/topic/alert/feedback";
     private static String READ_STATE_URI = "/topic/alert/readstate";
-//    private static String REQ_RESET_URI= "topic/alert/reset";
+    // private static String REQ_RESET_URI= "topic/alert/reset";
     private static final int VERIFY_TO_UNTREATED_PERIOD = 60000;
     private static final int SORT_TYPE_TIME_DESC = 0;
     private static final int SORT_TYPE_TIME_ASC = 1;
@@ -370,13 +370,13 @@ public class AlertManager {
             case AlertConstants.MESSAGE_TYPE_SCENE_CONFIRM_DIS_RELEASE: // 现场确认报警未解除
                 sceneConfirmReleaseAlert(alertData, alertMessage, false);
                 break;
-//            case AlertConstants.MESSAGE_REQ_RESET: // 申请复位（岗位）
-//                requestReset(alertData, alertMessage);
-//                updateFlag = true;
-//                break;
-//            case AlertConstants.MESSAGE_RESET: // 复位（调度）
-//                reset(alertData, alertMessage, requestId);
-//                break;
+            // case AlertConstants.MESSAGE_REQ_RESET: // 申请复位（岗位）
+            // requestReset(alertData, alertMessage);
+            // updateFlag = true;
+            // break;
+            // case AlertConstants.MESSAGE_RESET: // 复位（调度）
+            // reset(alertData, alertMessage, requestId);
+            // break;
             case AlertConstants.MESSAGE_TYPE_SET_LEVEL: // 报警评级（调度）
                 gradeAlert(alertData, alertMessage);
                 updateFlag = true;
@@ -470,27 +470,28 @@ public class AlertManager {
         logger.debug("推送报警消息，报警设备{}，报警内容{}，结束维修", alertData.getThingCode(), alertData.getMetricCode());
     }
 
-
-//    public void requestReset(AlertData alertData, AlertMessage alertMessage) {
-//        alertData.setManualIntervention(true);
-//        // updateAlert(alertData);
-//        alertMapper.saveAlertMessage(alertMessage);
-//        messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
-//        logger.debug("推送报警消息，报警设备{}，报警内容{}，申请复位", alertData.getThingCode(), alertData.getMetricCode());
-//    }
+    // public void requestReset(AlertData alertData, AlertMessage alertMessage) {
+    // alertData.setManualIntervention(true);
+    // // updateAlert(alertData);
+    // alertMapper.saveAlertMessage(alertMessage);
+    // messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
+    // logger.debug("推送报警消息，报警设备{}，报警内容{}，申请复位", alertData.getThingCode(),
+    // alertData.getMetricCode());
+    // }
 
     /**
      * 申请复位（岗位）
+     * 
      * @param thingCode
      * @param userId
      * @param permission
      */
-    public void requestReset(String thingCode,String userId,String permission){
-        Map<String,AlertData> thingAlertMap = alertDataMap.get(thingCode);
-        if(thingAlertMap == null || alertDataMap.size() == 0){
-            throw new SysException("the thing does not have alert date",SysException.EC_UNKNOWN);
+    public void requestReset(String thingCode, String userId, String permission) {
+        Map<String, AlertData> thingAlertMap = alertDataMap.get(thingCode);
+        if (thingAlertMap == null || alertDataMap.size() == 0) {
+            throw new SysException("the thing does not have alert date", SysException.EC_UNKNOWN);
         }
-        for (Map.Entry<String,AlertData> entry: thingAlertMap.entrySet()){
+        for (Map.Entry<String, AlertData> entry : thingAlertMap.entrySet()) {
             AlertData alertData = entry.getValue();
             alertData.setManualIntervention(true);
             AlertMessage alertMessage = new AlertMessage();
@@ -504,27 +505,29 @@ public class AlertManager {
             messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
             logger.debug("推送报警消息，报警设备{}，报警内容{}，申请复位", alertData.getThingCode(), alertData.getMetricCode());
         }
-//        messagingTemplate.convertAndSend(REQ_RESET_URI,thingCode);
+        // messagingTemplate.convertAndSend(REQ_RESET_URI,thingCode);
     }
 
-
-//    public void reset(AlertData alertData, AlertMessage alertMessage, String requestId) {
-//        DataModel dataModel = new DataModel();
-//        dataModel.setThingCode(alertData.getThingCode());
-//        dataModel.setMetricCode(MetricCodes.RESET);
-//        dataModel.setValue(Boolean.TRUE.toString());
-//        cmdControlService.sendCmd(dataModel, requestId);
-//        alertMapper.saveAlertMessage(alertMessage);
-//        messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
-//        logger.debug("推送报警消息，报警设备{}，报警内容{}，进行复位", alertData.getThingCode(), alertData.getMetricCode());
-//    }
+    // public void reset(AlertData alertData, AlertMessage alertMessage, String
+    // requestId) {
+    // DataModel dataModel = new DataModel();
+    // dataModel.setThingCode(alertData.getThingCode());
+    // dataModel.setMetricCode(MetricCodes.RESET);
+    // dataModel.setValue(Boolean.TRUE.toString());
+    // cmdControlService.sendCmd(dataModel, requestId);
+    // alertMapper.saveAlertMessage(alertMessage);
+    // messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
+    // logger.debug("推送报警消息，报警设备{}，报警内容{}，进行复位", alertData.getThingCode(),
+    // alertData.getMetricCode());
+    // }
 
     /**
      * 复位（调度）
+     * 
      * @param thingCode
      * @param requestId
      */
-    public void reset(String thingCode,String requestId){
+    public void reset(String thingCode, String requestId) {
         DataModel dataModel = new DataModel();
         dataModel.setThingCode(thingCode);
         dataModel.setMetricCode(MetricCodes.RESET);
@@ -647,6 +650,7 @@ public class AlertManager {
     public List<AlertRecord> getAlertDataListGroupByThing(String stage, List<Integer> levels, List<Short> types,
             List<Integer> buildingIds, List<Integer> floors, List<Integer> systems, String assetType, String category,
             Integer sortType, Long duration, String thingCode, Integer page, Integer count, Date timeStamp) {
+        List<AlertRecord> result = new ArrayList<>();
         Date endTime = timeStamp;
         Date startTime = null;
         Integer offset = null;
@@ -658,17 +662,27 @@ public class AlertManager {
         }
         List<AlertRecord> alertRecords = alertMapper.getAlertDataListGroupByThing(stage, levels, types, buildingIds,
                 floors, systems, assetType, category, sortType, startTime, endTime, thingCode, offset, count);
-//        if (thingCode != null) {
-            for (AlertRecord alertRecord : alertRecords) {
-                List<AlertData> alertDatas = alertRecord.getAlertDataList();
-                for (AlertData alertData : alertDatas) {
-                    transImageStrToList(alertData);
-//                    countUnreadMessage(alertData);
-                }
+        // if (thingCode != null) {
+        for (AlertRecord alertRecord : alertRecords) {
+            List<AlertData> alertDatas = alertRecord.getAlertDataList();
+            for (AlertData alertData : alertDatas) {
+                transImageStrToList(alertData);
+                // countUnreadMessage(alertData);
             }
-//        }
+        }
+        // }
 
         sortRecords(sortType, alertRecords);
+        if (page != null && count != null) {
+            if (page * count < alertRecords.size()) {
+                if ((page + 1) * count < alertRecords.size()) {
+                    result = alertRecords.subList(page * count, (page + 1) * count);
+                } else {
+                    result = alertRecords.subList(page * count, alertRecords.size() - 1);
+                }
+            }
+            return result;
+        }
 
         return alertRecords;
     }
@@ -707,7 +721,7 @@ public class AlertManager {
                 return alertData2.getAlertDateTime().compareTo(alertData1.getAlertDateTime());
             } else if (alertData1.getAlertLevel() == null) {
                 return -1;
-            } else if(alertData2.getAlertLevel() == null){
+            } else if (alertData2.getAlertLevel() == null) {
                 return 1;
             }
             if (type == SORT_DESC) {
@@ -732,7 +746,7 @@ public class AlertManager {
                 return alertData2.getAlertDateTime().compareTo(alertData1.getAlertDateTime());
             } else if (alertData1.getAlertLevel() == null) {
                 return -1;
-            } else if(alertData2.getAlertLevel() == null){
+            } else if (alertData2.getAlertLevel() == null) {
                 return 1;
             }
             if (alertData1.getAlertLevel().equals(alertData2.getAlertLevel())) {

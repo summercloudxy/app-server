@@ -325,9 +325,9 @@
         <if test="thingCode != null">
             ORDER BY ad.alert_level is not null,ad.alert_datetime DESC
         </if>
-        <if test="offset != null">
-            limit #{offset},#{count}
-        </if>
+        <!--<if test="offset != null">-->
+            <!--limit #{offset},#{count}-->
+        <!--</if>-->
     </select>
 
     <update id="setRead" parameterType="java.lang.Integer">
