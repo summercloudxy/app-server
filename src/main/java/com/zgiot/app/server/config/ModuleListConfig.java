@@ -18,15 +18,6 @@ public class ModuleListConfig {
     public static final String MODULE_ALERT = "ALERT";
     public static final String MODULE_HIST_PERSIST = "HIST_PERSIST";
 
-    private static final Set moduleSet = new HashSet();
-
-    static {
-        moduleSet.add(MODULE_ALL);
-        moduleSet.add(MODULE_FILTERPRESS);
-        moduleSet.add(MODULE_ALERT);
-        moduleSet.add(MODULE_HIST_PERSIST);
-    }
-
     @Value("sf.modules.list")
     private String moduleListStr;
     private Set configedModules = new HashSet();
