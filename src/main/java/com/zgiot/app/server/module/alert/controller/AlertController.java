@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -173,11 +174,13 @@ public class AlertController {
             @RequestParam(required = false) List<String> existedUri, @RequestParam(required = false) MultipartFile file,
             @RequestParam String userId) {
         StringBuilder stringBuilder = new StringBuilder();
+        List<String> result = new ArrayList<>();
         if (existedUri != null) {
             for (String uri : existedUri) {
                 stringBuilder.append(uri);
                 stringBuilder.append(";");
             }
+            result.addAll(existedUri);
         }
         if (file != null) {
             try {
@@ -185,12 +188,13 @@ public class AlertController {
                         FileService.IMAGE, userId);
                 String url = attach.getAbsolutePath();
                 stringBuilder.append(url);
+                result.add(url);
             } catch (Exception e) {
                 throw new SysException("file upload fail", SysException.EC_UNKNOWN);
             }
         }
         alertManager.feedback(thingCode, metricCode, stringBuilder.toString(),  FileService.IMAGE);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(result), HttpStatus.OK);
     }
 
     @ApiOperation("删除视频信息")
