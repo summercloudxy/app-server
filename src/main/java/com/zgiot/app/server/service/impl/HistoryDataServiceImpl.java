@@ -82,9 +82,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
                     .forEach((Block<Document>) document -> {
                         DataModel model = new DataModel();
                         model.setThingCode(document.getString(DataModel.THING_CODE));
-                        model.setMetricDataType(document.getString(DataModel.METRIC_DATA_TYPE));
                         model.setMetricCode(document.getString(DataModel.METRIC_CODE));
-                        model.setMetricCategoryCode(document.getString(DataModel.METRIC_CATEGORY_CODE));
                         model.setValue(document.getString(DataModel.VALUE));
                         model.setDataTimeStamp(new Date(document.getLong(DataModel.DATA_TIMESTAMP)));
                         result.add(model);
@@ -233,9 +231,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
             for (DataModel dataModel : modelList) {
                 Document document = new Document()
                         .append(DataModel.THING_CODE, dataModel.getThingCode())
-                        .append(DataModel.METRIC_DATA_TYPE, dataModel.getMetricDataType())
                         .append(DataModel.METRIC_CODE, dataModel.getMetricCode())
-                        .append(DataModel.METRIC_CATEGORY_CODE, dataModel.getMetricCategoryCode())
                         .append(DataModel.VALUE, dataModel.getValue())
                         .append(DataModel.DATA_TIMESTAMP, dataModel.getDataTimeStamp().getTime());
                 models.add(document);
