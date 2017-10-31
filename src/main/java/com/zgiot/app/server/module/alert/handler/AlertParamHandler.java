@@ -67,8 +67,8 @@ public class AlertParamHandler implements AlertHandler {
 
     }
 
-    @Scheduled(cron = "0/10 * * * * ?")
-    private void updateAlertLevel() {
+//    @Scheduled(cron = "0/10 * * * * ?")
+    public void updateAlertLevel() {
         alertDataCache = alertManager.getAlertParamDataMap();
         for (Map.Entry<String, Map<String, AlertData>> entry : alertDataCache.entrySet()) {
             String thingCode = entry.getKey();
