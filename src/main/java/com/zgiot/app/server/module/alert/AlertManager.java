@@ -66,8 +66,10 @@ public class AlertManager {
                 try {
                     Thread.sleep(10);
                     AlertData alertData = verifyDelayQueue.take().getAlertData();
-                    alertData.setAlertStage(AlertConstants.STAGE_UNTREATED);
-                    updateAlert(alertData);
+                    if(AlertConstants.STAGE_VERIFIED.equals(alertData.getAlertStage())) {
+                        alertData.setAlertStage(AlertConstants.STAGE_UNTREATED);
+                        updateAlert(alertData);
+                    }
                 } catch (Exception e) {
                     logger.error("get verified alert data error");
                 }
