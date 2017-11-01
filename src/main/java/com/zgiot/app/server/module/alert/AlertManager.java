@@ -678,7 +678,7 @@ public class AlertManager {
                 if ((page + 1) * count < alertRecords.size()) {
                     result = alertRecords.subList(page * count, (page + 1) * count);
                 } else {
-                    result = alertRecords.subList(page * count, alertRecords.size() - 1);
+                    result = alertRecords.subList(page * count, alertRecords.size());
                 }
             }
             return result;
