@@ -2,6 +2,7 @@ package com.zgiot.app.server.module.demo;
 
 import com.zgiot.app.server.dataprocessor.DataListener;
 import com.zgiot.app.server.service.DataService;
+import com.zgiot.app.server.service.HistoryDataService;
 import com.zgiot.app.server.service.ThingService;
 import com.zgiot.common.enums.MetricDataTypeEnum;
 import com.zgiot.common.pojo.DataModel;
@@ -21,7 +22,8 @@ public class DemoBusiness implements DataListener {
 
     @Autowired
     private DataService dataService;
-
+    @Autowired
+    HistoryDataService historyDataService;
     @Autowired
     private ThingService thingService;
 
@@ -59,10 +61,11 @@ public class DemoBusiness implements DataListener {
         );
 
         // save new status to cache
-        this.dataService.updateCache(sData);
+        this.dataService.smartUpdateCache(sData);
 
         // save to history data
-        // ...
+        this.historyDataService.asyncSmartAddData(sData);
+
     }
 
     @Override

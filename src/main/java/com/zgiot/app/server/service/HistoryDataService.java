@@ -1,12 +1,18 @@
 package com.zgiot.app.server.service;
 
+import com.zgiot.app.server.service.impl.HistoryDataServiceImpl;
 import com.zgiot.common.pojo.DataModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 public interface HistoryDataService {
+    Logger fulldataLogger = LoggerFactory.getLogger(
+            HistoryDataServiceImpl.class.getPackage().getName() + ".FullHistData");
+
     /**
      * @see
      */

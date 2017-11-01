@@ -34,24 +34,6 @@ public interface DataService {
      */
     List<DataModelWrapper> findDataByMetric(String metricCode);
 
-    /**
-     * 更新cache的值
-     *
-     * @param dataModel
-     */
-    void updateCache(DataModel dataModel);
+    void smartUpdateCache(DataModel dataModel);
 
-    /**
-     * 将数据持久化至关系型数据库（默认MySQL）
-     *
-     * @param dataModel
-     */
-    void persistData(DataModel dataModel);
-
-    /**
-     * 将数据持久化至NoSQL数据库
-     *
-     * @param dataModel
-     */
-    void persist2NoSQL(DataModel dataModel);
 }

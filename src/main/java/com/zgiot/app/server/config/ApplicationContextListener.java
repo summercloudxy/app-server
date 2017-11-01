@@ -7,6 +7,7 @@ import com.zgiot.app.server.module.alert.AlertListener;
 import com.zgiot.app.server.module.alert.AlertParamJob;
 import com.zgiot.app.server.module.alert.handler.AlertParamHandler;
 import com.zgiot.app.server.module.demo.DemoBusiness;
+import com.zgiot.app.server.module.demo.DemoDataCompleter;
 import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
 import com.zgiot.app.server.module.historydata.HistoryDataListener;
 import com.zgiot.app.server.service.impl.HistoryDataPersistDaemon;
@@ -87,7 +88,11 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
             });
         }
 
-        // processor.addListener(demoBusiness);
+        if (true){
+            processor.addListener(demoBusiness);
+            completerDataListener.addCompleter(new DemoDataCompleter());
+        }
+
     }
 
     public static ApplicationContext getApplicationContext() {

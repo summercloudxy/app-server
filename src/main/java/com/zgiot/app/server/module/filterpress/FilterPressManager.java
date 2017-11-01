@@ -5,6 +5,7 @@ import com.zgiot.app.server.module.filterpress.pojo.FeedAsumConfirmBean;
 import com.zgiot.app.server.module.filterpress.pojo.FilterPressElectricity;
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.DataService;
+import com.zgiot.app.server.service.HistoryDataService;
 import com.zgiot.app.server.util.RequestIdUtil;
 import com.zgiot.common.constants.FilterPressConstants;
 import com.zgiot.common.constants.FilterPressMetricConstants;
@@ -48,6 +49,8 @@ public class FilterPressManager {
 
     @Autowired
     private DataService dataService;
+    @Autowired
+    HistoryDataService historyDataService;
     @Autowired
     private CmdControlService cmdControlService;
     @Autowired
@@ -191,8 +194,8 @@ public class FilterPressManager {
             dataModel.setMetricCategoryCode(MetricModel.CATEGORY_SIGNAL);
             dataModel.setValue(String.valueOf(plateCount));
             dataModel.setDataTimeStamp(new Date());
-            dataService.updateCache(dataModel);
-            dataService.persist2NoSQL(dataModel);
+            dataService.smartUpdateCache(dataModel);
+            historyDataService.asyncSmartAddData(dataModel);
             total += plateCount;
         }
 
@@ -205,8 +208,8 @@ public class FilterPressManager {
             dataModel.setMetricCategoryCode(MetricModel.CATEGORY_SIGNAL);
             dataModel.setValue(String.valueOf(total));
             dataModel.setDataTimeStamp(new Date());
-            dataService.updateCache(dataModel);
-            dataService.persist2NoSQL(dataModel);
+            dataService.smartUpdateCache(dataModel);
+            historyDataService.asyncSmartAddData(dataModel);
         }
     }
 
@@ -346,8 +349,8 @@ public class FilterPressManager {
         stateModel.setMetricCategoryCode(data.getMetricCategoryCode());
         stateModel.setValue(String.valueOf(stateValue));
         stateModel.setDataTimeStamp(new Date());
-        dataService.updateCache(stateModel);
-        dataService.persist2NoSQL(stateModel);
+        dataService.smartUpdateCache(stateModel);
+        historyDataService.asyncSmartAddData(stateModel);
     }
 
     /**

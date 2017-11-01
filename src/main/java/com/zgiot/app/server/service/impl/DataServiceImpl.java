@@ -31,18 +31,31 @@ public class DataServiceImpl implements DataService {
         return dataCache.findByMetric(metricCode);
     }
 
-    @Override
-    public void updateCache(DataModel dataModel) {
+    void updateCache(DataModel dataModel) {
         dataCache.updateValue(dataModel);
     }
 
     @Override
-    public void persistData(DataModel dataModel) {
+    public void smartUpdateCache(DataModel newData) {
+        Optional<DataModelWrapper> old = this.getData(newData.getThingCode(), newData.getMetricCode());
+        boolean toUpdate = false;
 
+        String oldValue = null;
+        if (!old.isPresent()) {
+            toUpdate = true;
+        } else {
+            DataModelWrapper oldW = old.get();
+            oldValue = oldW.getValue();
+            if (newData.getDataTimeStamp().getTime() > oldW.getDataTimeStamp().getTime()) {
+                toUpdate = true;
+            }
+        }
+
+        // only update later one
+        if (toUpdate) {
+            newData.setPreValue(oldValue);
+            this.updateCache(newData);
+        }
     }
 
-    @Override
-    public void persist2NoSQL(DataModel dataModel) {
-
-    }
 }

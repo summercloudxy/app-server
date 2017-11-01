@@ -19,26 +19,7 @@ public class CacheUpdater implements DataListener {
 
     @Override
     public void onDataChange(DataModel newData) {
-        Optional<DataModelWrapper> old = dataService.getData(newData.getThingCode(), newData.getMetricCode());
-        boolean toUpdate = false;
-
-        String oldValue = null;
-        if (!old.isPresent()) {
-            toUpdate = true;
-        } else {
-            DataModelWrapper oldW = old.get();
-            oldValue = oldW.getValue();
-            if (newData.getDataTimeStamp().getTime() > oldW.getDataTimeStamp().getTime()) {
-                toUpdate = true;
-            }
-        }
-
-        // only update later one
-        if (toUpdate) {
-            newData.setPreValue(oldValue);
-            dataService.updateCache(newData);
-        }
-
+        dataService.smartUpdateCache(newData);
     }
 
     @Override
