@@ -141,6 +141,8 @@ public class AlertManager {
         alertMessage.setUserId(userId);
         alertMessage.setPermission(permission);
         alertMapper.saveAlertMessage(alertMessage);
+        alertMessage.setType(AlertConstants.MESSAGE_TYPE_SET_LEVEL);
+        alertMapper.saveAlertMessage(alertMessage);
     }
 
     /**
