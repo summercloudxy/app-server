@@ -66,8 +66,10 @@ public class AlertManager {
                 try {
                     Thread.sleep(10);
                     AlertData alertData = verifyDelayQueue.take().getAlertData();
-                    alertData.setAlertStage(AlertConstants.STAGE_UNTREATED);
-                    updateAlert(alertData);
+                    if(AlertConstants.STAGE_VERIFIED.equals(alertData.getAlertStage())) {
+                        alertData.setAlertStage(AlertConstants.STAGE_UNTREATED);
+                        updateAlert(alertData);
+                    }
                 } catch (Exception e) {
                     logger.error("get verified alert data error");
                 }
@@ -138,6 +140,8 @@ public class AlertManager {
         alertMessage.setTime(new Date());
         alertMessage.setUserId(userId);
         alertMessage.setPermission(permission);
+        alertMapper.saveAlertMessage(alertMessage);
+        alertMessage.setType(AlertConstants.MESSAGE_TYPE_SET_LEVEL);
         alertMapper.saveAlertMessage(alertMessage);
     }
 
@@ -678,7 +682,7 @@ public class AlertManager {
                 if ((page + 1) * count < alertRecords.size()) {
                     result = alertRecords.subList(page * count, (page + 1) * count);
                 } else {
-                    result = alertRecords.subList(page * count, alertRecords.size() - 1);
+                    result = alertRecords.subList(page * count, alertRecords.size());
                 }
             }
             return result;
