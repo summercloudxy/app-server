@@ -21,16 +21,13 @@ public class QuartzManager {
 
 
     /**
-     * @Description: 添加一个定时任务，使用默认的任务组名，触发器名，触发器组名
-     *
+     * 添加一个定时任务
      * @param jobName
-     *            任务名
+     * @param jobGroup
+     * @param triggerName
+     * @param triggerGroup
      * @param cls
-     *            任务
      * @param cronExpression
-     *            时间设置，参考quartz说明文档
-     *
-     * @Title: QuartzManager.java
      */
     public static void addJob(String jobName, String jobGroup, String triggerName, String triggerGroup,
             @SuppressWarnings("rawtypes") Class cls, String cronExpression) {
@@ -95,12 +92,9 @@ public class QuartzManager {
     }
 
     /**
-     * @Description: 修改一个任务的触发时间(使用默认的任务组名，触发器名，触发器组名)
-     *
+     * 修改一个任务的触发时间
      * @param jobName
      * @param time
-     *
-     * @Title: QuartzManager.java
      */
     @SuppressWarnings("rawtypes")
     public static void modifyJobTime(String jobName, String time) {
@@ -124,13 +118,10 @@ public class QuartzManager {
     }
 
     /**
-     * @Description: 修改一个任务的触发时间
-     *
+     * 修改一个任务的触发时间
      * @param triggerName
      * @param triggerGroupName
      * @param time
-     *
-     * @Title: QuartzManager.java
      */
     public static void modifyJobTime(String triggerName, String triggerGroupName, String time) {
         try {
@@ -154,10 +145,8 @@ public class QuartzManager {
     }
 
     /**
-     * @Description: 移除一个任务(使用默认的任务组名，触发器名，触发器组名)
+     * 移除一个任务
      * @param jobName
-     *
-     * @Title: QuartzManager.java
      */
     public static void removeJob(String jobName) {
         try {
@@ -171,15 +160,13 @@ public class QuartzManager {
         }
     }
 
+
     /**
-     * @Description: 移除一个任务
-     *
+     * 移除一个任务
      * @param jobName
      * @param jobGroupName
      * @param triggerName
      * @param triggerGroupName
-     *
-     * @Title: QuartzManager.java
      */
     public static void removeJob(String jobName, String jobGroupName, String triggerName, String triggerGroupName) {
         try {
@@ -194,12 +181,8 @@ public class QuartzManager {
     }
 
     /**
-     * @Description:启动所有定时任务
-     *
+     * 启动所有定时任务
      * @param sched
-     *            调度器
-     *
-     * @Title: QuartzManager.java
      */
     public static void startJobs(Scheduler sched) {
         try {
@@ -210,14 +193,8 @@ public class QuartzManager {
     }
 
     /**
-     * @Description:关闭所有定时任务
-     *
-     *
+     * 关闭所有定时任务
      * @param sched
-     *            调度器
-     *
-     *
-     * @Title: QuartzManager.java
      */
     public static void shutdownJobs(Scheduler sched) {
         try {
