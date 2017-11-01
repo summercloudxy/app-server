@@ -68,7 +68,7 @@ public class FileServiceImpl implements FileService{
         FileModel attachment = new FileModel();
         attachment.setFileName(fileName);
         attachment.setFilePath(relatePath);
-        attachment.setAbsolutePath(catPath + relatePath);
+        attachment.setAbsolutePath(catPath +"/"+ relatePath);
         attachment.setFile(file2);
         attachment.setContentType(file.getContentType());
         attachment.setCreatUserId(userId);

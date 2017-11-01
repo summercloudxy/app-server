@@ -27,7 +27,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         //将所有/product/images/** 访问都映射到classpath:/product/images/ 目录下
         registry.addResourceHandler("/product/images/**").addResourceLocations("classpath:/product/images/");
-        registry.addResourceHandler("/files/**").addResourceLocations("file:"+uploadFileUri);
+        registry.addResourceHandler("/files/**").addResourceLocations("file:"+uploadFileUri + "/");
         super.addResourceHandlers(registry);
     }
 
