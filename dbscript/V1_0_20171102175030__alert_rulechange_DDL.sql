@@ -1,0 +1,1 @@
+UPDATE `tb_alert_rule` set metric_code = 'LDF' WHERE metric_code = 'LD';
