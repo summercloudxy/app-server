@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.filterpress.dao.FilterPressLogMapper">
+    <resultMap id="filterPressLog" type="com.zgiot.app.server.module.filterpress.FilterPressLogBean">
+        <result column="thing_code"  property="thingCode"/>
+        <result column="feed_start_time" property="feedStartTime"/>
+        <result column="feed_duration" property="feedDuration"/>
+        <result column="feed_current" property="feedCurrent"/>
+        <result column="unload_start_time" property="unloadTime"/>
+        <result column="unload_duration" property="unloadDuration"/>
+        <result column="feed_state" property="feedState"/>
+        <result column="unload_state" property="unloadState"/>
+        <result column="plate_count" property="plateCount"/>
+        <result column="total_plate_count" property="totalPlateCount"/>
+        <result column="waiting_time" property="waitDuration"/>
+        <result column="proceeding_time" property="proceedingDuration"/>
+        <result column="team" property="team"/>
+        <result column="save_time" property="saveTime"/>
+        <result column="plate_start_time" property="plateStartTime"/>
+        <result column="is_day_shift" property="isDayShift"/>
+        <result column="period" property="period"/>
+    </resultMap>
+
+    <resultMap id="filterPressPlateInfo" type="com.zgiot.app.server.module.filterpress.pojo.FilterPressPlateCountBean">
+        <result column="thing_code"  property="thingCode"/>
+        <result column="plate_count"  property="timeLineMap.key"/>
+        <result column="plate_start_time"  property="timeLineMap.value"/>
+        <!--result column="plate_count" property="plateCount"/>
+        <result column="team" property="team"/>
+        <result column="save_time" property="saveTime"/>
+        <result column="plate_start_time" property="plateStartTime"/>
+        <result column="is_day_shift" property="isDayShift"/>
+        <result column="period" property="period"/-->
+    </resultMap>
+    <insert id="insertFilterPressLog" parameterType="com.zgiot.app.server.module.filterpress.FilterPressLogBean">
+        insert into tb_filterpress_log(thing_code,feed_start_time,feed_duration,feed_current,unload_start_time,unload_duration,feed_state,plate_count,waiting_time,proceeding_time,team,save_time,unload_state,total_plate_count,plate_start_time,is_day_shift,period) value(#{thingCode},#{feedStartTime},#{feedDuration},#{feedCurrent},#{unloadTime},#{unloadDuration},#{feedState},#{plateCount},#{waitDuration},#{proceedingDuration},#{team},#{saveTime},#{unloadState},#{totalPlateCount},#{plateStartTime},#{isDayShift},#{period})
+    </insert>
+
+    <select id="queryLogByDate" parameterType="String" resultMap="filterPressLog">
+        SELECT thing_code,feed_start_time,feed_duration,feed_current,unload_start_time,unload_duration,feed_state,plate_count,waiting_time,proceeding_time,team,save_time,unload_state,total_plate_count FROM `tb_filterpress_log` where #{queryDate}=date_format(save_time,'%Y-%m-%d')
+    </select>
+
+    <select id="queryPlateInfos" parameterType="boolean" resultMap="filterPressPlateInfo">
+        select thing_code,plate_count,plate_start_time from `tb_filterpress_log` where thing_code in
+        (select distinct thing_code from `tb_filterpress_log` where is_day_shift=#{isDayShift}) and is_day_shift=#{isDayShift}
+    </select>
+</mapper>

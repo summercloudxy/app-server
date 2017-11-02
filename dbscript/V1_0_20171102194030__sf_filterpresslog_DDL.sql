@@ -1,0 +1,22 @@
+CREATE TABLE `tb_filterpress_log` (
+  `id` int(30) NOT NULL AUTO_INCREMENT,
+  `thing_code` varchar(20) NOT NULL,
+  `feed_start_time` datetime NOT NULL,
+  `feed_duration` int(14) NOT NULL,
+  `feed_current` double(20,0) NOT NULL,
+  `unload_start_time` datetime NOT NULL,
+  `unload_duration` int(20) NOT NULL,
+  `feed_state` varchar(10) DEFAULT NULL,
+  `plate_count` int(20) DEFAULT NULL,
+  `waiting_time` int(20) NOT NULL,
+  `proceeding_time` int(20) NOT NULL,
+  `save_time` datetime NOT NULL,
+  `team` int(3) DEFAULT NULL,
+  `plate_start_time` datetime DEFAULT NULL,
+  `is_day_shift` tinyint(4) NOT NULL,
+  `period` int(2) DEFAULT NULL,
+  `unload_state` varchar(10) DEFAULT NULL,
+  `total_plate_count` int(6) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id` (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

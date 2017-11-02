@@ -6,6 +6,7 @@ import com.zgiot.app.server.module.filterpress.pojo.FilterPressElectricity;
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.service.HistoryDataService;
+import com.zgiot.app.server.service.FilterPressLogService;
 import com.zgiot.app.server.util.RequestIdUtil;
 import com.zgiot.common.constants.FilterPressConstants;
 import com.zgiot.common.constants.FilterPressMetricConstants;
@@ -48,7 +49,7 @@ public class FilterPressManager {
     private static final Map<String,String> filterPressStage = new HashMap<>();
 
     @Autowired
-    private DataService dataService;
+    DataService dataService;
     @Autowired
     HistoryDataService historyDataService;
     @Autowired
@@ -57,6 +58,9 @@ public class FilterPressManager {
     private SimpMessagingTemplate messagingTemplate;
     @Autowired
     private FilterPressMapper filterPressMapper;
+
+    @Autowired
+    FilterPressLogService filterPressLogService;
 
     public UnloadManager getUnloadManager() {
         return unloadManager;
@@ -75,6 +79,8 @@ public class FilterPressManager {
     private Set<String> unConfirmedUnload = new ConcurrentSkipListSet<>();
 
     private UnloadManager unloadManager = new UnloadManager();
+
+    private Map<String,FilterPressLogBean> statisticLogs = new ConcurrentHashMap<>();
 
     static{
         filterPressStage.put(FilterPressMetricConstants.RO_LOOSE,"");
@@ -131,10 +137,14 @@ public class FilterPressManager {
         if(deviceHolder.containsKey(thingCode)){
             filterPress = deviceHolder.get(thingCode);
         }else if(filterPressPumpMapping.containsKey(thingCode)){
-           filterPress = deviceHolder.get(filterPressPumpMapping.get(thingCode));
+            filterPress = deviceHolder.get(filterPressPumpMapping.get(thingCode));
         }else{
             return;
             //throw new SysException("filterPress is null",SysException.EC_UNKOWN);
+        }
+
+        if(!statisticLogs.containsKey(thingCode)){
+            statisticLogs.put(thingCode,new FilterPressLogBean());
         }
         String metricCode = data.getMetricCode();
         filterPress.onDataSourceChange(metricCode, data.getValue());
@@ -254,18 +264,24 @@ public class FilterPressManager {
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onLoosen();
                     isRunning = Boolean.TRUE;
+                }else{
+                    filterPress.offLoosen();
                 }
                 break;
             case FilterPressMetricConstants.RO_TAKE:
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onTaken();
                     isRunning = Boolean.TRUE;
+                }else{
+                    filterPress.offTaken();
                 }
                 break;
             case FilterPressMetricConstants.RO_PULL:
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onPull();
                     isRunning = Boolean.TRUE;
+                }else{
+                    filterPress.offPull();
                 }
                 break;
             case FilterPressMetricConstants.RO_PRESS:
@@ -452,6 +468,7 @@ public class FilterPressManager {
                 current = Float.parseFloat(currentWrapper.get().getValue());
             }
             feedAsumConfirmBean.setFeedOverCurrent(current);
+            filterPress.setFeedPumpCurrent(current);
             messagingTemplate.convertAndSend(FEED_OVER_NOTICE_URI, feedAsumConfirmBean);
             unconfirmedFeed.add(filterPress.getCode());
         }
@@ -473,6 +490,19 @@ public class FilterPressManager {
         dataModel.setThingCode(filterPress.getCode());
         dataModel.setValue(Boolean.TRUE.toString());
         cmdControlService.sendPulseCmdBoolByShort(dataModel,null,null,RequestIdUtil.generateRequestId(),POSITION_FEED_OVER,CLAEN_PERIOD,IS_HOLDING_FEED_OVER);
+
+        filterPress.setFeedDuration(System.currentTimeMillis() - filterPress.getFeedStartTime());
+        List<String> feedPumpCodes = getKeyByValueFromMap(filterPressPumpMapping,filterPress.getCode());
+        String feedPumpCode = feedPumpCodes.get(0);
+        if(feedPumpCodes.size() == 0){
+            throw new SysException("feedPump thingCode is null",SysException.EC_UNKNOWN);
+        }
+        Optional<DataModelWrapper> currentWrapper = dataService.getData(feedPumpCode,FilterPressMetricConstants.FEED_PUMP_CURRENT);
+        Float current = new Float(0);
+        if(currentWrapper.isPresent()){
+            current = Float.parseFloat(currentWrapper.get().getValue());
+        }
+        filterPress.setFeedPumpCurrent(current);
     }
 
     /**
@@ -681,6 +711,10 @@ public class FilterPressManager {
         return unConfirmedUnload;
     }
 
+    public Map<String, FilterPressLogBean> getStatisticLogs() {
+        return statisticLogs;
+    }
+
     // @Scheduled(cron="cnmt.FilterPressDeviceManager.clear")
     // /**
     // * 手动弹出模式下，超过一段时间不操作后自动进行确认
@@ -789,7 +823,7 @@ public class FilterPressManager {
         public synchronized void reSort(int position){
             for(String thingCode:queuePosition.keySet()){
                 if(queuePosition.get(thingCode) > position)
-                queuePosition.put(thingCode, queuePosition.get(thingCode) - 1);
+                    queuePosition.put(thingCode, queuePosition.get(thingCode) - 1);
             }
         }
     }
