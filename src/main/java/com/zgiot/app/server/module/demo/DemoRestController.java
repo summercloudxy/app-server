@@ -1,6 +1,5 @@
 package com.zgiot.app.server.module.demo;
 
-import com.zgiot.app.server.service.DataService;
 import com.zgiot.common.restcontroller.ServerResponse;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,7 +1,7 @@
 package com.zgiot.app.server.module.alert;
 
-import com.zgiot.app.server.module.alert.pojo.*;
 import com.zgiot.app.server.module.alert.mapper.AlertMapper;
+import com.zgiot.app.server.module.alert.pojo.*;
 import com.zgiot.app.server.service.impl.CmdControlServiceImpl;
 import com.zgiot.app.server.service.impl.FileServiceImpl;
 import com.zgiot.common.constants.AlertConstants;
@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
 import java.util.stream.Collectors;

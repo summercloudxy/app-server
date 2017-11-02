@@ -1,15 +1,18 @@
 package com.zgiot.app.server.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Lists;
 import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Sorts;
 import com.zgiot.app.server.common.QueueManager;
-import com.zgiot.app.server.mapper.TMLMapper;
+import com.zgiot.app.server.config.prop.MongoDBProperties;
 import com.zgiot.app.server.service.HistoryDataService;
+import com.zgiot.app.server.service.impl.mapper.TMLMapper;
+import com.zgiot.app.server.service.pojo.HistdataWhitelistModel;
 import com.zgiot.common.pojo.DataModel;
-import com.zgiot.common.pojo.ThingMetricModel;
 import com.zgiot.common.reloader.Reloader;
 import com.zgiot.common.reloader.ServerReloadManager;
 import org.bson.Document;
@@ -23,7 +26,6 @@ import javax.annotation.PostConstruct;
 import javax.print.Doc;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import static com.mongodb.client.model.Filters.*;
 
@@ -44,18 +46,37 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
     @Autowired
     TMLMapper tmlMapper;
 
+    @Autowired
+    private MongoDBProperties mongoDBProperties;
+
+
+    boolean checkEnabled() {
+        return mongoDBProperties.getEnable();
+    }
+
     @PostConstruct
     private void initCollection() {
+        if (!checkEnabled()) {
+            return;
+        }
+
         collection = database.getCollection(COLLECTION_NAME);
     }
 
     @Override
     public List<DataModel> findHistoryData(List<String> thingCodes, List<String> metricCodes, Date endDate) {
+        if (!checkEnabled()) {
+            return Lists.newArrayList();
+        }
         return findHistoryDataList(thingCodes, metricCodes, new Date(0), endDate);
     }
 
     @Override
     public List<DataModel> findHistoryDataList(List<String> thingCodes, List<String> metricCodes, Date startDate, Date endDate) {
+        if (!checkEnabled()) {
+            return Lists.newArrayList();
+        }
+
         Bson criteria;
         // for end date
         if (endDate == null) {
@@ -96,6 +117,10 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
 
     @Override
     public List<DataModel> findHistoryData(List<String> thingCodes, List<String> metricCodes, Date startDate, long durationMs) {
+        if (!checkEnabled()) {
+            return Lists.newArrayList();
+        }
+
         Date endDate = new Date(startDate.getTime() + durationMs);
         return findHistoryDataList(thingCodes, metricCodes, startDate, endDate);
     }
@@ -105,6 +130,10 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
      */
     @Override
     public Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment) {
+        if (!checkEnabled()) {
+            return new HashMap<>();
+        }
+
         if (collection == null) {
             logger.warn("mongo disabled");
             return new HashMap<>();
@@ -279,6 +308,10 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
 
     @Override
     public int insertBatch(List<DataModel> modelList) {
+        if (!checkEnabled()) {
+            return 0;
+        }
+
         if (collection != null) {
             List<Document> models = new LinkedList<>();
             for (DataModel dataModel : modelList) {
@@ -299,6 +332,15 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
 
     @Override
     public void asyncSmartAddData(DataModel dm) {
+
+        if (fulldataLogger.isDebugEnabled()) {
+            fulldataLogger.debug(JSON.toJSONString(dm));
+        }
+
+        if (!checkEnabled()) {
+            return;
+        }
+
         synchronized (inited) {
             if (!inited) {
                 logger.info("Start to init HistoryDataListener ... ");
@@ -315,14 +357,14 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
             }
         }
 
-        if (toStore){
+        if (toStore) {
             BlockingQueue q = (BlockingQueue) QueueManager.getQueue(QueueManager.HIST_BUFFER);
             q.add(dm);
-            if (logger.isDebugEnabled()){
+            if (logger.isDebugEnabled()) {
                 logger.debug("Added to hist data queue (data=`{}`).", dm.toString());
             }
-        }else{
-            if (logger.isDebugEnabled()){
+        } else {
+            if (logger.isDebugEnabled()) {
                 logger.debug("Not added to hist data queue (data=`{}`).", dm.toString());
             }
         }
@@ -349,8 +391,12 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
             inited = false;
 
             WHITE_MAP.clear();
-            List<ThingMetricModel> list = this.tmlMapper.findAllHistdataWhitelist();
-            for (ThingMetricModel tm : list) {
+            List<HistdataWhitelistModel> list = this.tmlMapper.findAllHistdataWhitelist();
+            for (HistdataWhitelistModel tm : list) {
+                if (tm.getToStore() != 1) {
+                    continue;
+                }
+
                 Map metricMap = WHITE_MAP.get(tm.getThingCode());
                 if (metricMap == null) {
                     metricMap = new HashMap();

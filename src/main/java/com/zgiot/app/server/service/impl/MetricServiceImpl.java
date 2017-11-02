@@ -1,11 +1,9 @@
 package com.zgiot.app.server.service.impl;
 
-import com.zgiot.app.server.mapper.TMLMapper;
+import com.zgiot.app.server.service.impl.mapper.TMLMapper;
 import com.zgiot.app.server.service.MetricService;
 import com.zgiot.common.pojo.MetricModel;
-import com.zgiot.common.pojo.ThingModel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;

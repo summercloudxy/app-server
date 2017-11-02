@@ -7,8 +7,8 @@ import com.zgiot.app.server.module.alert.AlertListener;
 import com.zgiot.app.server.module.alert.AlertParamJob;
 import com.zgiot.app.server.module.alert.handler.AlertParamHandler;
 import com.zgiot.app.server.module.demo.DemoBusiness;
+import com.zgiot.app.server.module.demo.DemoDataCompleter;
 import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
-import com.zgiot.app.server.module.historydata.HistoryDataListener;
 import com.zgiot.app.server.service.impl.HistoryDataPersistDaemon;
 import com.zgiot.app.server.service.impl.QuartzManager;
 import org.quartz.JobDataMap;
@@ -37,8 +37,6 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
     @Autowired
     private CompleterDataListener completerDataListener;
     @Autowired
-    private HistoryDataListener historyDataListener;
-    @Autowired
     private AlertListener alertListener;
     @Autowired
     ModuleListConfig moduleListConfig;
@@ -50,7 +48,7 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
     @SuppressWarnings("unchecked")
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-        if(applicationContext == null){
+        if (applicationContext == null) {
             applicationContext = contextRefreshedEvent.getApplicationContext();
         }
         processor.connect().thenRun(() -> {
@@ -69,7 +67,6 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
                 || moduleListConfig.containModule(ModuleListConfig.MODULE_HIST_PERSIST)) {
             this.historyDataPersistDaemon.start();
-            processor.addListener(historyDataListener);
         }
 
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
@@ -87,7 +84,11 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
             });
         }
 
-        // processor.addListener(demoBusiness);
+        if (false) {
+            processor.addListener(demoBusiness);
+            completerDataListener.addCompleter(new DemoDataCompleter());
+        }
+
     }
 
     public static ApplicationContext getApplicationContext() {
