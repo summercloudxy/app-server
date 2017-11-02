@@ -33,10 +33,12 @@ public class CompleterDataListener implements DataListener {
                 es.submit(() -> {
                     try {
                         List<DataModel> list = completer.onComplete(dataModel);
-                        for (DataModel dm : list){
-                            dataService.smartUpdateCache(dm);
-                            historyDataService.asyncSmartAddData(dm);
+                        if (list != null) {
+                            for (DataModel dm : list) {
+                                dataService.saveData(dm);
+                            }
                         }
+
                     } catch (Throwable e) {
                         completer.onError(dataModel, e);
                     }
@@ -49,7 +51,7 @@ public class CompleterDataListener implements DataListener {
     }
 
 
-    public void addCompleter(DataCompleter c ){
+    public void addCompleter(DataCompleter c) {
         this.completers.add(c);
     }
 

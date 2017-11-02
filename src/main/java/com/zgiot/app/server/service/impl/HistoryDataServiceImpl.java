@@ -9,10 +9,10 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Sorts;
 import com.zgiot.app.server.common.QueueManager;
 import com.zgiot.app.server.config.prop.MongoDBProperties;
-import com.zgiot.app.server.mapper.TMLMapper;
 import com.zgiot.app.server.service.HistoryDataService;
+import com.zgiot.app.server.service.impl.mapper.TMLMapper;
+import com.zgiot.app.server.service.pojo.HistdataWhitelistModel;
 import com.zgiot.common.pojo.DataModel;
-import com.zgiot.common.pojo.ThingMetricModel;
 import com.zgiot.common.reloader.Reloader;
 import com.zgiot.common.reloader.ServerReloadManager;
 import org.bson.Document;
@@ -280,7 +280,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
     @Override
     public void asyncSmartAddData(DataModel dm) {
 
-        if (fulldataLogger.isDebugEnabled()){
+        if (fulldataLogger.isDebugEnabled()) {
             fulldataLogger.debug(JSON.toJSONString(dm));
         }
 
@@ -338,8 +338,12 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
             inited = false;
 
             WHITE_MAP.clear();
-            List<ThingMetricModel> list = this.tmlMapper.findAllHistdataWhitelist();
-            for (ThingMetricModel tm : list) {
+            List<HistdataWhitelistModel> list = this.tmlMapper.findAllHistdataWhitelist();
+            for (HistdataWhitelistModel tm : list) {
+                if (tm.getToStore() != 1) {
+                    continue;
+                }
+
                 Map metricMap = WHITE_MAP.get(tm.getThingCode());
                 if (metricMap == null) {
                     metricMap = new HashMap();

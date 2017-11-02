@@ -1,8 +1,8 @@
-package com.zgiot.app.server.mapper;
+package com.zgiot.app.server.service.impl.mapper;
 
+import com.zgiot.app.server.service.pojo.HistdataWhitelistModel;
 import com.zgiot.common.pojo.*;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
@@ -21,7 +21,7 @@ public interface TMLMapper {
     List<ThingPropertyModel> findAllProperties();
 
     @Select("SELECT * FROM rel_historydata_whitelist")
-    public List<ThingMetricModel> findAllHistdataWhitelist();
+    public List<HistdataWhitelistModel> findAllHistdataWhitelist();
 
     @Select("SELECT metric_code FROM `rel_thing_metric_label` WHERE thing_code = #{thingCode}")
     Set<String> findMetricsOfThing(String thingCode);

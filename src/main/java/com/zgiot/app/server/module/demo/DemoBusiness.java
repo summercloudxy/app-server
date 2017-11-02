@@ -11,9 +11,6 @@ import com.zgiot.common.pojo.ThingModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-import java.util.Optional;
-
 @Component
 public class DemoBusiness implements DataListener {
     public static final String STATUS_NORMAL = "NOR";
@@ -61,10 +58,7 @@ public class DemoBusiness implements DataListener {
         );
 
         // save new status to cache
-        this.dataService.smartUpdateCache(sData);
-
-        // save to history data
-        this.historyDataService.asyncSmartAddData(sData);
+        this.dataService.saveData(sData);
 
     }
 

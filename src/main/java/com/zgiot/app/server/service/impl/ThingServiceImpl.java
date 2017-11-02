@@ -1,6 +1,6 @@
 package com.zgiot.app.server.service.impl;
 
-import com.zgiot.app.server.mapper.TMLMapper;
+import com.zgiot.app.server.service.impl.mapper.TMLMapper;
 import com.zgiot.app.server.service.ThingService;
 import com.zgiot.common.pojo.BuildingModel;
 import com.zgiot.common.pojo.SystemModel;

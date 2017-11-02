@@ -194,8 +194,7 @@ public class FilterPressManager {
             dataModel.setMetricCategoryCode(MetricModel.CATEGORY_SIGNAL);
             dataModel.setValue(String.valueOf(plateCount));
             dataModel.setDataTimeStamp(new Date());
-            dataService.smartUpdateCache(dataModel);
-            historyDataService.asyncSmartAddData(dataModel);
+            dataService.saveData(dataModel);
             total += plateCount;
         }
 
@@ -208,8 +207,7 @@ public class FilterPressManager {
             dataModel.setMetricCategoryCode(MetricModel.CATEGORY_SIGNAL);
             dataModel.setValue(String.valueOf(total));
             dataModel.setDataTimeStamp(new Date());
-            dataService.smartUpdateCache(dataModel);
-            historyDataService.asyncSmartAddData(dataModel);
+            dataService.saveData(dataModel);
         }
     }
 
@@ -349,8 +347,7 @@ public class FilterPressManager {
         stateModel.setMetricCategoryCode(data.getMetricCategoryCode());
         stateModel.setValue(String.valueOf(stateValue));
         stateModel.setDataTimeStamp(new Date());
-        dataService.smartUpdateCache(stateModel);
-        historyDataService.asyncSmartAddData(stateModel);
+        dataService.saveData(stateModel);
     }
 
     /**

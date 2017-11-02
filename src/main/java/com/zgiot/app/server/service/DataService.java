@@ -34,6 +34,13 @@ public interface DataService {
      */
     List<DataModelWrapper> findDataByMetric(String metricCode);
 
-    void smartUpdateCache(DataModel dataModel);
+    /**
+     * 1. 数据较新的更新缓存
+     * 2. 如果历史存储模块启用
+     *    - 输出全量文本
+     *    - 如果nosql启用，输出到nosql
+     * @param dataModel
+     */
+    void saveData(DataModel dataModel);
 
 }

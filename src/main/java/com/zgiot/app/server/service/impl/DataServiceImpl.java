@@ -1,7 +1,9 @@
 package com.zgiot.app.server.service.impl;
 
-import com.zgiot.app.server.service.cache.DataCache;
+import com.zgiot.app.server.config.ModuleListConfig;
 import com.zgiot.app.server.service.DataService;
+import com.zgiot.app.server.service.HistoryDataService;
+import com.zgiot.app.server.service.cache.DataCache;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,10 @@ import java.util.Optional;
 public class DataServiceImpl implements DataService {
     @Autowired
     private DataCache dataCache;
+    @Autowired
+    ModuleListConfig moduleListConfig;
+    @Autowired
+    HistoryDataService historyDataService;
 
     @Override
     public Optional<DataModelWrapper> getData(String thingCode, String metricCode) {
@@ -36,7 +42,7 @@ public class DataServiceImpl implements DataService {
     }
 
     @Override
-    public void smartUpdateCache(DataModel newData) {
+    public void saveData(DataModel newData) {
         Optional<DataModelWrapper> old = this.getData(newData.getThingCode(), newData.getMetricCode());
         boolean toUpdate = false;
 
@@ -55,7 +61,13 @@ public class DataServiceImpl implements DataService {
         if (toUpdate) {
             newData.setPreValue(oldValue);
             this.updateCache(newData);
+
+            // hist data save?
+            if (moduleListConfig.containModule(ModuleListConfig.MODULE_HIST_PERSIST)){
+                this.historyDataService.asyncSmartAddData(newData);
+            }
         }
+
     }
 
 }
