@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.print.Doc;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -103,7 +104,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
      * created by wangwei
      */
     @Override
-    public Map<String, DataModel[]> findMultiThingsHistoryDataOfMetric(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment) {
+    public Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment) {
         if (collection == null) {
             logger.warn("mongo disabled");
             return new HashMap<>();
@@ -154,7 +155,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
 
 
         //generate result map
-        Map<String, DataModel[]> result = new LinkedHashMap<>(thingCodes.size());
+        Map<String, List<DataModel>> result = new LinkedHashMap<>(thingCodes.size());
         for (String thingCode : thingCodes) {
             Map<String, Object> temp = map.get(thingCode);
             DataModel[] dataModels;
@@ -169,7 +170,47 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
                 }
             }
 
-            result.put(thingCode, dataModels);
+            List<DataModel> dataModelList = Arrays.asList(dataModels);
+            result.put(thingCode, dataModelList);
+        }
+
+        return result;
+    }
+
+
+    /**
+     * create by wangwei
+     */
+    @Override
+    public Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetric(List<String> thingCodes, String metricCode, Date startDate, Date endDate) {
+        if (collection == null) {
+            logger.warn("mongo disabled");
+            return new HashMap<>();
+        }
+
+        long startTime = startDate.getTime();
+        long endTime = endDate.getTime();
+
+        //param validator
+        if (startTime >= endTime) {
+            throw new IllegalArgumentException("StartDate must be earlier than endDate");
+        }
+
+        //query
+        Bson criteria = and(gte(DataModel.DATA_TIMESTAMP, startTime), lt(DataModel.DATA_TIMESTAMP, endTime), eq(DataModel.METRIC_CODE, metricCode), in(DataModel.THING_CODE, thingCodes));
+        FindIterable<Document> iterable = collection.find(criteria).sort(Sorts.ascending(DataModel.DATA_TIMESTAMP));
+
+        //generate result map
+        Map<String, List<DataModel>> result = new LinkedHashMap<>(thingCodes.size());
+        for (String tc : thingCodes) {
+            result.put(tc, new ArrayList<>());
+        }
+        for (Document document : iterable) {
+            String tc = document.getString(DataModel.THING_CODE);
+            DataModel model = new DataModel();
+            model.setValue(document.getString(DataModel.VALUE));
+            model.setDataTimeStamp(new Date(document.getLong(DataModel.DATA_TIMESTAMP)));
+            result.get(tc).add(model);
         }
 
         return result;

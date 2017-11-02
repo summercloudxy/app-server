@@ -38,7 +38,7 @@ public interface HistoryDataService {
 
 
     /**
-     *
+     * find history data of one metricCode of multi thingCodes in a time range by segment
      * @param thingCodes    thingCode list
      * @param metricCode
      * @param startDate
@@ -46,7 +46,18 @@ public interface HistoryDataService {
      * @param segment
      * @return {"2492":[{"dt":1508833769000,"v":"1.3"},{"dt":1508833769001,"v":"1.4"}],"2493":[{"dt":1508833769000,"v":"1.3"},{"dt":1508833769001,"v":"1.4"}]}
      */
-    Map<String, DataModel[]> findMultiThingsHistoryDataOfMetric(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment);
+    Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment);
+
+
+    /**
+     * find all history data of one metricCode of multi thingCodes in a time range
+     * @param thingCodes    thingCode list
+     * @param metricCode
+     * @param startDate
+     * @param endDate
+     * @return {"2492":[{"dt":1508833769000,"v":"1.3"},{"dt":1508833769001,"v":"1.4"}],"2493":[{"dt":1508833769000,"v":"1.3"},{"dt":1508833769001,"v":"1.4"}]}
+     */
+    Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetric(List<String> thingCodes, String metricCode, Date startDate, Date endDate);
 
     /**
      * @param list MongoData use MongoData directly to avoid another loop to convert obj.

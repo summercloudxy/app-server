@@ -52,15 +52,22 @@ public class HistoryDataController {
     public ResponseEntity<String> metricData(@PathVariable String metricCode, @RequestBody String requestData) {
         HistoryDataDto historyDataDto = JSON.parseObject(requestData, HistoryDataDto.class);
         //check parse result
-        if (historyDataDto.getEndTime() == null || historyDataDto.getStartTime() == null || historyDataDto.getThingCodes() == null || historyDataDto.getThingCodes().isEmpty()
-                || historyDataDto.getSegment() == null) {
+        if (historyDataDto.getEndTime() == null || historyDataDto.getStartTime() == null || historyDataDto.getThingCodes() == null || historyDataDto.getThingCodes().isEmpty()) {
             ServerResponse res = new ServerResponse("Invalid request data.The incoming req body is: `" + requestData + "`", SysException.EC_UNKNOWN, 0);
             String resJSON = JSON.toJSONString(res);
             return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
         }
 
-        Map<String, DataModel[]> result = historyDataService.findMultiThingsHistoryDataOfMetric(historyDataDto.getThingCodes(), metricCode,
-                historyDataDto.getStartTime(), historyDataDto.getEndTime(), historyDataDto.getSegment());
+        Map<String, List<DataModel>> result;
+        if (historyDataDto.getSegment() != null) {
+            // by segment
+            result = historyDataService.findMultiThingsHistoryDataOfMetricBySegment(historyDataDto.getThingCodes(), metricCode,
+                    historyDataDto.getStartTime(), historyDataDto.getEndTime(), historyDataDto.getSegment());
+        } else {
+            // all data in time range
+            result = historyDataService.findMultiThingsHistoryDataOfMetric(historyDataDto.getThingCodes(), metricCode, historyDataDto.getStartTime(), historyDataDto.getEndTime());
+        }
+
 
         return new ResponseEntity<>(ServerResponse.buildOkJson(result), HttpStatus.OK);
     }
