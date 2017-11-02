@@ -111,8 +111,6 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
 
         long startTime = startDate.getTime();
         long endTime = endDate.getTime();
-        long interval = (endTime - startTime) / segment;
-
         //param validator
         if (segment <= 0) {
             throw new IllegalArgumentException("Segment must be greater than 0");
@@ -121,25 +119,39 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
             throw new IllegalArgumentException("StartDate must be earlier than endDate");
         }
 
-        //query
-        Bson criteria = and(gte(DataModel.DATA_TIMESTAMP, startTime), lte(DataModel.DATA_TIMESTAMP, endTime), eq(DataModel.METRIC_CODE, metricCode), in(DataModel.THING_CODE, thingCodes));
-        FindIterable<Document> iterable = collection.find(criteria).sort(Sorts.descending(DataModel.DATA_TIMESTAMP));
+        long interval;
+        FindIterable<Document> iterable = null; //query result
+
+        if (segment == 1) {
+            //when segment eq 1, take startTime as the standard
+            interval = 0;
+        } else {
+            interval = (endTime - startTime) / (segment - 1);
+            //query
+            Bson criteria = and(gte(DataModel.DATA_TIMESTAMP, startTime), lt(DataModel.DATA_TIMESTAMP, endTime), eq(DataModel.METRIC_CODE, metricCode), in(DataModel.THING_CODE, thingCodes));
+            iterable = collection.find(criteria).sort(Sorts.descending(DataModel.DATA_TIMESTAMP));
+        }
+
+
 
         Map<String, Map<String, Object>> map = new HashMap<>(thingCodes.size());    //store dataModel array, timestamp and unset size
-        for (Document document : iterable) {
-            String tc = document.getString(DataModel.THING_CODE);
-            Map<String, Object> temp = map.get(tc);
-            if (temp == null) {
-                //init temp map
-                temp = new HashMap<>(3);
-                temp.put(KEY_ARRAY, new DataModel[segment]);  //empty dataModel array
-                temp.put(KEY_TIMESTAMP, endTime); //timestamp for check
-                temp.put(KEY_SIZE, segment);  //unset size
-                map.put(tc, temp);
-            }
+        if (iterable != null) {
+            for (Document document : iterable) {
+                String tc = document.getString(DataModel.THING_CODE);
+                Map<String, Object> temp = map.get(tc);
+                if (temp == null) {
+                    //init temp map
+                    temp = new HashMap<>(3);
+                    temp.put(KEY_ARRAY, new DataModel[segment]);  //empty dataModel array
+                    temp.put(KEY_TIMESTAMP, endTime); //timestamp for check
+                    temp.put(KEY_SIZE, segment);  //unset size
+                    map.put(tc, temp);
+                }
 
-            checkDocument(document, temp, interval);
+                checkDocument(document, temp, interval);
+            }
         }
+
 
         //generate result map
         Map<String, DataModel[]> result = new LinkedHashMap<>(thingCodes.size());
@@ -211,7 +223,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
      * @param size
      */
     private void queryForUnsetDataModel(String thingCode, String metricCode, long endTime, DataModel[] dataModels, int size) {
-        Bson criteria = and(lt(DataModel.DATA_TIMESTAMP, endTime), eq(DataModel.METRIC_CODE, metricCode), eq(DataModel.THING_CODE, thingCode));
+        Bson criteria = and(lte(DataModel.DATA_TIMESTAMP, endTime), eq(DataModel.METRIC_CODE, metricCode), eq(DataModel.THING_CODE, thingCode));
         FindIterable<Document> iterable = collection.find(criteria).sort(Sorts.descending(DataModel.DATA_TIMESTAMP)).limit(1);
         for (Document document : iterable) {
             DataModel model = new DataModel();
