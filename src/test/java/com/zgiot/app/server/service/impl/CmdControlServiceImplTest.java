@@ -21,11 +21,6 @@ public class CmdControlServiceImplTest {
     }
 
     @Test
-    public void sendfirst() throws Exception {
-
-    }
-
-    @Test
     public void sendPulseCmdBoolByShortWhenIsHolding() throws Exception {
         // 正常写1
         testSendPulseCmdBoolByShort(3, "true", "1", "5", Boolean.TRUE, "0");
