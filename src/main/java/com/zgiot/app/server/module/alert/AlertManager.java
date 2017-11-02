@@ -405,6 +405,7 @@ public class AlertManager {
      */
     private void notFoundAlert(AlertData alertData, AlertMessage alertMessage) {
         alertData.setReporter(alertMessage.getUserId());
+        alertMapper.saveAlertMessage(alertMessage);
         messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
         logger.debug("推送报警消息，报警设备{}，报警内容{}，未发现报警存在", alertData.getThingCode(), alertData.getMetricCode(),
                 alertMessage.getType());
