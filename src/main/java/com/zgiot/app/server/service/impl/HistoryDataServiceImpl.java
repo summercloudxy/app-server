@@ -212,6 +212,10 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
      */
     @Override
     public Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetric(List<String> thingCodes, String metricCode, Date startDate, Date endDate) {
+        if (!checkEnabled()) {
+            return new HashMap<>();
+        }
+
         if (collection == null) {
             logger.warn("mongo disabled");
             return new HashMap<>();
