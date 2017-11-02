@@ -1,6 +1,8 @@
 package com.zgiot.app.server.module.generic;
 
 import com.zgiot.app.server.service.ThingService;
+import com.zgiot.common.pojo.BuildingModel;
+import com.zgiot.common.pojo.SystemModel;
 import com.zgiot.common.pojo.ThingModel;
 import com.zgiot.common.pojo.ThingPropertyModel;
 import com.zgiot.common.restcontroller.ServerResponse;
@@ -18,7 +20,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-
 @RestController
 @RequestMapping("/thing")
 public class ThingController {
@@ -26,32 +27,33 @@ public class ThingController {
     private ThingService thingService;
 
     /**
-     *  /thing/{thingCode}接口返回json值的name属性名
+     * /thing/{thingCode}接口返回json值的name属性名
      */
     public static final String THING_NAME = "name";
 
     /**
-     *  /thing/{thingCode}接口返回json值的shortName属性名
+     * /thing/{thingCode}接口返回json值的shortName属性名
      */
     public static final String THING_SHORT_NAME = "shortName";
 
     /**
-     *  /thing/{thingCode}接口返回json值的base属性名
+     * /thing/{thingCode}接口返回json值的base属性名
      */
     public static final String BASE = "base";
 
     /**
-     *  /thing/{thingCode}接口返回json值的prop属性名
+     * /thing/{thingCode}接口返回json值的prop属性名
      */
     public static final String PROP = "prop";
 
     /**
-     *  /thing/{thingCode}接口返回json值的disProp属性名
+     * /thing/{thingCode}接口返回json值的disProp属性名
      */
-    public static final String DIS_PROP= "disProp";
+    public static final String DIS_PROP = "disProp";
 
     public static final String THING_CODE = "thingCode";
 
+    public static final String THING_CATEGORY_CODE = "thingCategoryCode";
 
 
 
@@ -133,4 +135,17 @@ public class ThingController {
             }
         }
     }
+
+    @GetMapping("/building")
+    public ResponseEntity<String> findAllBuilding() {
+        List<BuildingModel> buildingModels = thingService.findAllBuilding();
+        return new ResponseEntity<>(ServerResponse.buildOkJson(buildingModels), HttpStatus.OK);
+    }
+
+    @GetMapping("/system")
+    public ResponseEntity<String> findAllSystem() {
+        List<SystemModel> systemModels = thingService.findAllSystem();
+        return new ResponseEntity<>(ServerResponse.buildOkJson(systemModels), HttpStatus.OK);
+    }
+
 }

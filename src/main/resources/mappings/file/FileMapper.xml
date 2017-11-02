@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.service.impl.FileMapper">
+
+	<insert id="saveFile" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO tb_file (
+			name,
+			filePath,
+			type,
+			state,
+			create_date,
+			create_user
+		) VALUES (
+			#{fileName},
+			#{filePath},
+			#{fileType},
+			1,
+			#{creatDate},
+			#{creatUserId}
+		)	
+	</insert>
+</mapper>
+ 

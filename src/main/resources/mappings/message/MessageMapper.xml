@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.message.mapper.MessageMapper">
+
+    <select id="getFixMessage" resultType="com.zgiot.app.server.module.message.pojo.FixMessage">
+        SELECT id,info,"module",type FROM tb_fix_message WHERE "module"= #{module} AND type= #{type}
+    </select>
+
+</mapper>

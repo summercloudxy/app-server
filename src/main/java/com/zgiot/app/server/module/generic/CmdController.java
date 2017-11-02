@@ -1,7 +1,6 @@
 package com.zgiot.app.server.module.generic;
 
 import com.alibaba.fastjson.JSON;
-import com.sun.javafx.binding.StringFormatter;
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.exceptions.SysException;
@@ -15,11 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.sound.midi.SysexMessage;
-import java.util.List;
 
 @RestController
-@RequestMapping(value = "/cmd",consumes = MediaType.APPLICATION_JSON_UTF8_VALUE
+@RequestMapping(value = "/cmd", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE
         , produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 public class CmdController {
     @Autowired
@@ -33,7 +30,7 @@ public class CmdController {
         if (StringUtils.isBlank(reqBody) || dataModel.getThingCode() == null
                 || dataModel.getMetricCode() == null) {
             ServerResponse res = new ServerResponse<>(
-                    "Not valid request data. The incoming req body is: `" + reqBody + "`", SysException.EC_UNKOWN, 0);
+                    "Not valid request data. The incoming req body is: `" + reqBody + "`", SysException.EC_UNKNOWN, 0);
             String resJson = JSON.toJSONString(res);
             return new ResponseEntity<>(resJson, HttpStatus.BAD_REQUEST);
         }
@@ -48,15 +45,23 @@ public class CmdController {
 
     }
 
-    @RequestMapping(value = "/pulse",method = RequestMethod.POST)
-    public ResponseEntity<String> sendPulseCmd(@RequestBody String data, @RequestParam(required = false,defaultValue = "5000") Integer retryPeriod,
-                                @RequestParam(required = false,defaultValue = "3") Integer retryCount, HttpServletRequest request) {
-        DataModel dataModel = JSON.parseObject(data,DataModel.class);
+    @RequestMapping(value = "/pulse", method = RequestMethod.POST)
+    public ResponseEntity<String> sendPulseCmd(@RequestBody String data, @RequestParam(required = false, defaultValue = "5000") Integer retryPeriod,
+                                               @RequestParam(required = false, defaultValue = "3") Integer retryCount, HttpServletRequest request) {
+        DataModel dataModel = JSON.parseObject(data, DataModel.class);
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
-        int count = cmdControlService.sendPulseCmd(dataModel, retryPeriod, retryCount, requestId);
+        if (StringUtils.isBlank(data) || dataModel.getThingCode() == null
+                || dataModel.getMetricCode() == null) {
+            ServerResponse res = new ServerResponse<>(
+                    "Not valid request data. The incoming req body is: `" + data + "`", SysException.EC_UNKNOWN, 0);
+            String resJson = JSON.toJSONString(res);
+            return new ResponseEntity<>(resJson, HttpStatus.BAD_REQUEST);
+        }
+        CmdControlService.CmdSendResponseData res = cmdControlService.sendPulseCmd(dataModel, retryPeriod, retryCount, requestId);
 
         return new ResponseEntity<>(
-                ServerResponse.buildOkJson(count)
+                ServerResponse.buildJson(res.getErrorMessage()
+                        , SysException.EC_SUCCESS, res.getOkCount())
                 , HttpStatus.OK);
     }
 }

@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.alert.mapper.AlertMapper">
+
+    <resultMap id="alertDataMap" type="com.zgiot.app.server.module.alert.pojo.AlertData">
+        <id property="id" column="id"/>
+        <result property="thingCode" column="thing_code"/>
+        <result property="metricCode" column="metric_code"/>
+        <result property="alertSource" column="alert_source"/>
+        <result property="alertType" column="alert_type"/>
+        <result property="alertLevel" column="alert_level"/>
+        <result property="alertDateTime" column="alert_datetime"/>
+        <result property="alertInfo" column="alert_info"/>
+        <result property="reporter" column="reporter"/>
+        <result property="alertStage" column="alert_stage"/>
+        <result property="repair" column="is_repair"/>
+        <result property="repairConfirmUser" column="repair_confirm_user"/>
+        <result property="repairStartTime" column="repair_start_time"/>
+        <result property="repairEndTime" column="repair_end_time"/>
+        <result property="manualIntervention" column="is_manual_intervention"/>
+        <result property="feedBackImage" column="feedback_image"/>
+        <result property="feedBackVideo" column="feedback_video"/>
+        <result property="sceneConfirmUser" column="scene_confirm_user"/>
+        <result property="sceneConfirmTime" column="scene_confirm_time"/>
+        <result property="sceneConfirmState" column="scene_confirm_state"/>
+        <result property="recovery" column="is_recovery"/>
+        <result property="paramValue" column="param_value"/>
+        <result property="paramLower" column="param_lower"/>
+        <result property="paramUpper" column="param_upper"/>
+        <result property="lastUpdateTime" column="last_update_time"/>
+        <result property="verifyTime" column="verify_time"/>
+        <result property="postWorker" column="post_worker"/>
+        <result property="dispatcher" column="dispatcher"/>
+        <result property="releaseTime" column="release_time"/>
+        <result property="alertDuration" column="alertDuration"/>
+        <result property="repairDuration" column="repair_duration"/>
+        <association property="thingModel" resultMap="thingMap"/>
+        <association property="systemModel" resultMap="systemMap"/>
+        <collection property="alertMessageList" resultMap="alertMessageMap"/>
+    </resultMap>
+
+    <resultMap id="thingMap" type="com.zgiot.common.pojo.ThingModel">
+        <result property="thingName" column="thing_name"/>
+        <result property="thingType1Code" column="thing_type1_code"/>
+        <result property="thingType2Code" column="thing_type2_code"/>
+    </resultMap>
+
+    <resultMap id="systemMap" type="com.zgiot.common.pojo.SystemModel">
+        <result property="id" column="system_id"/>
+        <result property="systemName" column="system_name"/>
+    </resultMap>
+
+    <resultMap id="alertRecordMap" type="com.zgiot.app.server.module.alert.pojo.AlertRecord">
+        <result property="thingCode" column="thing_code"/>
+        <collection property="alertDataList" resultMap="alertDataMap"/>
+    </resultMap>
+
+    <resultMap id="alertMessageMap" type="com.zgiot.app.server.module.alert.pojo.AlertMessage">
+        <id property="id" column="message_id"/>
+        <result property="isRead" column="is_read"/>
+        <result property="info" column="info"/>
+        <result property="type" column="type"/>
+        <result property="alertId" column="alert_id"/>
+        <result property="time" column="time"/>
+        <result property="userId" column="user_id"/>
+        <result property="permission" column="permission"/>
+    </resultMap>
+
+    <resultMap id="alertMaskRspMap" type="com.zgiot.app.server.module.alert.pojo.AlertMaskRsp">
+        <result property="thingCode" column="thing_code"/>
+        <result property="systemId" column="system_id"/>
+        <result property="alertType" column="alert_type"/>
+        <result property="alertInfo" column="alert_info"/>
+        <association property="thingModel" resultMap="thingMap"/>
+        <collection property="alertMasks" resultMap="alertMaskMap"/>
+    </resultMap>
+
+    <resultMap id="alertMaskMap" type="com.zgiot.app.server.module.alert.pojo.AlertMask">
+        <result property="alertId" column="alert_id"/>
+        <result property="maskId" column="mask_id"/>
+        <result property="time" column="time"/>
+        <result property="userId" column="user_id"/>
+        <result property="paramValue" column="param_value"/>
+        <result property="paramLower" column="param_lower"/>
+        <result property="paramUpper" column="param_upper"/>
+        <result property="maskInfo" column="mask_info"/>
+    </resultMap>
+
+    <select id="getAlertRuleList" resultType="com.zgiot.app.server.module.alert.pojo.AlertRule">
+        SELECT id,thing_code,metric_code,rule_type,alert_level,lower_limit,upper_limit
+        FROM
+        tb_alert_rule
+        WHERE
+        rule_type = #{alertType}
+        <if test="assetType != null">
+            AND
+            asset_type = #{assetType}
+        </if>
+        <if test="category != null">
+            AND
+            category = #{category}
+        </if>
+        <if test="system != null">
+            AND
+            system = #{system}
+        </if>
+        <if test="metricType != null">
+            AND
+            metric_type = #{metricType}
+        </if>
+        <if test="metricCode != null">
+            AND
+            metric_code = #{metricCode}
+        </if>
+        <if test="thingCode != null">
+            AND
+            thingCode = #{thingCode}
+        </if>
+        <if test="buildingId != null">
+            AND
+            buildingId = #{buildingId}
+        </if>
+        <if test="level != null">
+            AND
+            level = #{level}
+        </if>
+        <if test="enable == true">
+            AND
+            enable = TRUE
+        </if>
+        <if test="sortType == 2">
+            ORDER BY thing_code ASC
+        </if>
+        <if test="sortType == 3">
+            order BY metric_name ASC
+        </if>
+        <if test="sortType == 4">
+            ORDER BY category ASC
+        </if>
+
+    </select>
+
+    <select id="getWholeAlertRuleList" resultType="com.zgiot.app.server.module.alert.pojo.AlertRule">
+        SELECT id,thing_code,metric_code,rule_type,alert_level,lower_limit,upper_limit
+        FROM
+        tb_alert_rule
+        WHERE
+        rule_type = #{alertType}
+        and enable = true
+    </select>
+
+    <select id="getCurrentAlertData" resultMap="alertDataMap">
+        SELECT id,thing_code,metric_code,alert_source,alert_type,alert_level,alert_datetime,alert_info,reporter,alert_stage,is_repair,repair_confirm_user,repair_start_time,repair_end_time,is_manual_intervention,feedback_image,feedback_video,scene_confirm_state,scene_confirm_time,scene_confirm_user,is_recovery,param_value,param_lower,param_upper,last_update_time,verify_time,post_worker,release_time FROM tb_alert_data WHERE alert_stage != 'RELEASE'
+    </select>
+
+    <select id="getMetricAlertType" resultType="com.zgiot.app.server.module.alert.pojo.MetricAlertType">
+        SELECT metric_code,alert_type FROM rel_metric_alert_type WHERE 1=1
+    </select>
+
+    <insert id="createAlertDate" keyColumn="id" keyProperty="id" useGeneratedKeys="true"
+            parameterType="com.zgiot.app.server.module.alert.pojo.AlertData">
+        INSERT INTO tb_alert_data(thing_code,metric_code,alert_source,alert_type,alert_level,alert_datetime,alert_info,reporter,alert_stage,is_repair,repair_confirm_user,repair_start_time,repair_end_time,is_manual_intervention,feedback_image,feedback_video,scene_confirm_state,scene_confirm_time,scene_confirm_user,is_recovery,param_value,param_lower,param_upper,last_update_time,verify_time,post_worker,dispatcher,release_time) VALUES (#{thingCode},#{metricCode},#{alertSource},#{alertType},#{alertLevel},#{alertDateTime},#{alertInfo},#{reporter},#{alertStage},#{repair},#{repairConfirmUser},#{repairStartTime},#{repairEndTime},#{manualIntervention},#{feedBackImage},#{feedBackVideo},#{sceneConfirmState},#{sceneConfirmTime},#{sceneConfirmUser},#{recovery},#{paramValue},#{paramLower},#{paramUpper},#{lastUpdateTime},#{verifyTime},#{postWorker},#{dispatcher},#{releaseTime})
+    </insert>
+
+    <update id="updateAlertDate">
+        UPDATE tb_alert_data
+        SET
+        thing_code =#{thingCode},
+        metric_code = #{metricCode},
+        alert_source = #{alertSource},
+        alert_type = #{alertType},
+        alert_level = #{alertLevel},
+        alert_datetime = #{alertDateTime},
+        alert_info = #{alertInfo},
+        reporter = #{reporter},
+        alert_stage = #{alertStage},
+        is_repair = #{repair},
+        repair_confirm_user = #{repairConfirmUser},
+        repair_start_time = #{repairStartTime},
+        repair_end_time = #{repairEndTime},
+        is_manual_intervention = #{manualIntervention},
+        feedback_image = #{feedBackImage},
+        feedback_video = #{feedBackVideo},
+        scene_confirm_state = #{sceneConfirmState},
+        scene_confirm_time = #{sceneConfirmTime},
+        scene_confirm_user = #{sceneConfirmUser},
+        is_recovery = #{recovery},
+        param_value = #{paramValue},
+        param_lower = #{paramLower},
+        param_upper = #{paramUpper},
+        last_update_time = #{lastUpdateTime},
+        verify_time = #{verifyTime},
+        post_worker = #{postWorker},
+        dispatcher = #{dispatcher},
+        release_time = #{releaseTime}
+        WHERE id = #{id}
+    </update>
+
+    <update id="releaseAlertDate">
+        UPDATE tb_alert_data
+        SET
+        alert_stage = #{alertStage},
+        scene_confirm_state = #{sceneConfirmState},
+        scene_confirm_time = #{sceneConfirmTime},
+        scene_confirm_user = #{sceneConfirmUser},
+        is_recovery = #{recovery},
+        post_worker = #{postWorker},
+        dispatcher = #{dispatcher},
+        release_time = #{releaseTime}
+        WHERE id = #{id}
+    </update>
+    <insert id="saveAlertMessage" keyProperty="id" keyColumn="id" useGeneratedKeys="true">
+        INSERT INTO tb_alert_message(info,type,alert_id,time,is_read,user_id,permission) VALUES (#{info},#{type},#{alertId},#{time},#{isRead},#{userId},#{permission})
+    </insert>
+
+    <select id="getAlertMessage" resultType="com.zgiot.app.server.module.alert.pojo.AlertMessage">
+        SELECT id,info,type,alert_id,time,is_read,user_id,permission FROM tb_alert_message WHERE alert_id = #{alertId} ORDER BY time
+    </select>
+
+    <select id="getAlertDataListGroupByThing" resultMap="alertRecordMap">
+        SELECT
+        ad.id,ad.thing_code,ad.metric_code,ad.alert_source,ad.alert_type,ad.alert_level,ad.alert_datetime,ad.alert_info,ad.reporter,
+        ad.alert_stage,ad.is_repair,ad.repair_confirm_user,ad.repair_start_time,ad.repair_end_time,
+        ad.is_manual_intervention,ad.feedback_image,ad.feedback_video,ad.scene_confirm_state,ad.scene_confirm_time,
+        ad.scene_confirm_user,ad.is_recovery,ad.param_value,ad.param_lower,ad.param_upper,ad.last_update_time,ad.verify_time,
+        ad.post_worker,ad.dispatcher,ad.release_time
+        <if test="stage == 'RELEASE'">
+            ,ABS(ad.release_time-ad.alert_datetime) as alertDuration
+        </if>
+        <if test="thingCode != null">
+            <if test="stage != 'RELEASE'">
+                ,am.id as message_id,am.user_id,am.time,am.info,am.alert_id,am.is_read,am.permission,am.type
+            </if>
+        </if>
+        <if test="stage == 'RELEASE'">
+            ,rts.system_id
+        </if>
+        FROM tb_alert_data ad
+        <if test="thingCode == null">
+            <if test="systems != null or stage == 'RELEASE'">
+                ,rel_thing_system rts
+            </if>
+            <if test="buildingIds != null or floors != null">
+                ,tb_thing_position ttp
+            </if>
+        </if>
+        <if test="thingCode != null">
+            <if test="stage != 'RELEASE'">
+                ,tb_alert_message am
+            </if>
+        </if>
+        <trim prefix="where" prefixOverrides="AND">
+            <if test="thingCode != null">
+                <if test="stage != 'RELEASE'">
+                    AND
+                    ad.id = am.alert_id
+                </if>
+            </if>
+            <if test="thingCode == null">
+                <if test="systems != null or stage == 'RELEASE'">
+                    AND ad.thing_code = rts.thing_code
+                </if>
+                <if test="buildingIds != null or floors != null">
+                    AND ad.thing_code = ttp.thing_code
+                </if>
+            </if>
+            <if test="stage !=null">
+                AND
+                ad.alert_stage = #{stage}
+            </if>
+            <if test="stage == null">
+                AND
+                ad.alert_stage != 'RELEASE'
+            </if>
+            <if test="levels != null">
+                AND
+                <foreach collection="levels" item="level" index="index" open="ad.alert_level in (" close=")"
+                         separator=",">
+                    #{level}
+                </foreach>
+            </if>
+            <if test="types != null">
+                AND
+                <foreach collection="types" item="type" index="index" open="ad.alert_type in (3," close=")"
+                         separator=",">
+                    #{type}
+                </foreach>
+            </if>
+            <if test="buildingIds != null">
+                AND
+                <foreach collection="buildingIds" item="buildingId" index="index" open="ttp.building_id in (" close=")"
+                         separator=",">
+                    #{buildingId}
+                </foreach>
+            </if>
+            <if test="floors != null">
+                AND
+                <foreach collection="floors" item="floor" index="index" open="ttp.floor in (" close=")" separator=",">
+                    #{floor}
+                </foreach>
+            </if>
+            <if test="systems != null">
+                AND
+                <foreach collection="systems" item="system" index="index" open="rts.system_id in (" close=")"
+                         separator=",">
+                    #{system}
+                </foreach>
+            </if>
+            <if test="startTime != null">
+                AND
+                ad.alert_datetime &gt; #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND
+                ad.alert_datetime &lt;= #{endTime}
+            </if>
+            <if test="thingCode != null">
+                AND
+                ad.thing_code = #{thingCode}
+            </if>
+        </trim>
+        <if test="thingCode == null">
+            ORDER BY ad.alert_level is not null,ad.alert_level desc,ad.alert_datetime desc
+        </if>
+        <if test="thingCode != null">
+            ORDER BY ad.alert_level is not null,ad.alert_datetime DESC
+        </if>
+        <!--<if test="offset != null">-->
+            <!--limit #{offset},#{count}-->
+        <!--</if>-->
+    </select>
+
+    <update id="setRead" parameterType="java.lang.Integer">
+        UPDATE tb_alert_message SET is_read = 1 WHERE id IN
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </update>
+
+
+    <select id="getAlertDataList" resultMap="alertDataMap">
+        SELECT
+        ad.id,ad.thing_code,ad.metric_code,ad.alert_source,ad.alert_type,ad.alert_level,ad.alert_datetime,ad.alert_info,ad.reporter,ad.alert_stage,ad.is_repair,ad.repair_confirm_user,ad.repair_start_time,ad.repair_end_time,ad.is_manual_intervention,ad.feedback_image,ad.feedback_video,ad.scene_confirm_state,ad.scene_confirm_time,ad.scene_confirm_user,ad.is_recovery,ad.param_value,ad.param_lower,ad.param_upper,ad.last_update_time,ad.verify_time,ad.post_worker,ad.dispatcher,ad.release_time
+        ,abs(ad.repair_end_time-ad.repair_start_time) as repair_duration,
+        tt.thing_name,tt.thing_type1_code,tt.thing_type2_code,rts.system_id
+        <if test="stage == 'RELEASE'">
+            ,ABS(ad.release_time-ad.alert_datetime) as alertDuration
+        </if>
+        FROM tb_alert_data ad,tb_thing tt,rel_thing_system rts
+        WHERE ad.thing_code = tt.thing_code AND ad.thing_code = rts.thing_code
+        <if test="stage !=null">
+            AND
+            ad.alert_stage = #{stage}
+        </if>
+        <if test="stage == null">
+            AND
+            ad.alert_stage != 'RELEASE'
+        </if>
+        <if test="level != null">
+            AND
+            ad.alert_level= #{level}
+        </if>
+        <if test="type != null">
+            AND
+            ad.alert_type = #{type}
+        </if>
+        <if test="system != null">
+            AND
+            rts.system_id= #{system}
+        </if>
+        <if test="startTime != null">
+            AND
+            ad.alert_datetime BETWEEN #{startTime} AND #{endTime}
+        </if>
+        <if test="assetType != null">
+            AND
+            tt.thing_type1_code = #{assetType}
+        </if>
+        <if test="category != null">
+            AND
+            tt.thing_type2_code = #{category}
+        </if>
+        <if test="thingCode != null">
+            AND
+            ad.thing_code = #{thingCode}
+        </if>
+        <if test="thingCode == null and stage == 'RELEASE'">
+            <if test="sortType == 0">
+                ORDER BY alert_type, alert_level,repair_duration DESC ,repair_start_time
+            </if>
+            <if test="sortType == 1">
+                ORDER BY alert_level desc,alertDuration ASC,thing_code ASC
+            </if>
+            <if test="sortType == 2">
+                ORDER BY thing_code ASC, alert_info ASC
+            </if>
+            <if test="sortType == 3">
+                order BY alert_info ASC,category ASC,thing_code ASC
+            </if>
+            <if test="sortType == 4">
+                ORDER BY category ASC, alert_info ASC,thing_code ASC
+            </if>
+        </if>
+        <if test="thingCode != null and stage == 'RELEASE'">
+            ORDER BY ad.alert_level desc,alertDuration ASC
+        </if>
+        <if test="offset != null">
+            limit #{offset},#{count}
+        </if>
+
+    </select>
+
+
+    <insert id="saveAlertShield" parameterType="com.zgiot.app.server.module.alert.pojo.AlertMask"
+            useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        INSERT INTO tb_alert_mask (alert_id, mask_id, time, user_id, param_value, param_lower, param_upper) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.alertId},#{item.maskId},#{item.time},#{item.userId},#{item.paramValue},#{item.paramLower},#{item.paramUpper})
+        </foreach>
+    </insert>
+
+    <select id="getAlertShieldInfo" resultType="com.zgiot.app.server.module.alert.pojo.AlertMask">
+        SELECT d.thing_code,d.metric_code,d.alert_type,s.mask_id,m.info,s."time",s.user_id,s.param_upper,s.param_lower,s.param_value FROM tb_alert_data d, tb_alert_mask s, tb_fix_message m WHERE  s.mask_id = m.id
+    </select>
+
+    <insert id="insertAlertRule" useGeneratedKeys="true" keyProperty="id" keyColumn="id"
+            parameterType="com.zgiot.app.server.module.alert.pojo.AlertRule">
+        INSERT INTO tb_alert_rule(id,thing_code,metric_code,rule_type,alert_level,lower_limit,upper_limit) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.id},#{item.thingCode},#{item.metricCode},#{item.ruleType},#{item.alertLevel},#{item.lowerLimit},#{item.upperLimit})
+        </foreach>
+    </insert>
+
+    <update id="updateAlertRule" parameterType="com.zgiot.app.server.module.alert.pojo.AlertRule">
+        <foreach collection="list" item="item" separator=";">
+            UPDATE tb_alert_rule SET thing_code = #{item.thingCode},metric_code=
+            #{item.metricCode},rule_type=#{item.ruleType},alert_level=#{item.alertLevel},lower_limit=#{item.lowerLimit},upper_limit=#{item.upperLimit}
+            WHERE id=#{item.id}
+        </foreach>
+    </update>
+
+    <delete id="deleteAlertRule">
+        DELETE FROM tb_alert_rule WHERE id in (
+        <foreach collection="list" item="item" separator=",">
+            #{item.id}
+        </foreach>
+        )
+    </delete>
+
+
+    <select id="getStatisticsInfo" resultType="com.zgiot.app.server.module.alert.pojo.AlertStatisticsNum">
+        SELECT
+        <if test="type == 1">
+            thing_code,
+        </if>
+        COUNT(alert_level) as sumNum,COUNT(alert_level=30 or null) as level30num, COUNT(alert_level=20 or null) as
+        level20num, COUNT(alert_level=10 or null) as level10num FROM `tb_alert_data`
+        WHERE alert_datetime BETWEEN #{startTime} AND #{endTime}
+        <if test="alertStage != null">
+            <if test="alertStage == 'UNRELEASE'">
+                AND alert_stage != 'RELEASE'
+            </if>
+            <if test="alertStage != 'UNRELEASE'">
+                AND alert_stage = #{alertStage}
+            </if>
+        </if>
+        <if test="type == 1">
+            GROUP BY thing_code
+            ORDER BY sumNum DESC,thingCode ASC ;
+        </if>
+
+    </select>
+
+    <select id="getTypeStatisticsInfo" resultType="com.zgiot.app.server.module.alert.pojo.AlertStatisticsNum">
+        select DATE_FORMAT(alert_datetime,'%Y%m%d') dayStr,count(alert_type) as sumNum from tb_alert_data
+        WHERE alert_type = #{alertType}
+        and alert_datetime BETWEEN #{startTime} and #{endTime}
+        group by dayStr ORDER BY dayStr DESC ;
+    </select>
+
+
+    <select id="getRepairStatisticsInfo" resultType="com.zgiot.app.server.module.alert.pojo.AlertRepairStatistics">
+        SELECT thing_code, sum(
+        repair_end_time - repair_start_time
+        ) repair_duration
+        FROM `tb_alert_data`
+        <trim prefix="and" prefixOverrides="where">
+            <if test="startTime != null">
+                AND
+                alert_datetime BETWEEN #{startTime} and #{endTime}
+            </if>
+            <if test="alertLevel != null">
+                and
+                alert_level = alertLevel
+            </if>
+        </trim>
+        GROUP BY thing_code
+        ORDER BY repair_duration DESC ;
+    </select>
+
+    <select id="getMaskStatisticsInfo" resultMap="alertMaskRspMap">
+        select d.thing_code,d.alert_type,d.alert_info,t.thing_name,t.thing_type1_code,t.thing_type2_code,
+        s.system_id,m.time,m.user_id,m.param_value,m.param_lower,m.param_upper,m.mask_id,f.info as mask_info
+        from tb_alert_data d,tb_alert_mask m,tb_thing t,rel_thing_system s,tb_fix_message f
+        WHERE d.id = m.alert_id
+        AND d.thing_code = t.thing_code
+        AND d.thing_code = s.thing_code
+        AND m.mask_id = f.id
+        <if test="system != null">
+            AND
+            s.system_id = #{system}
+        </if>
+        <if test="startTime != null">
+            AND
+            d.alert_datetime BETWEEN #{startTime} AND #{endTime}
+        </if>
+        <if test="assetType != null">
+            AND
+            t.thing_type1_code = #{assetType}
+        </if>
+        <if test="category != null">
+            AND
+            t.thing_type2_code = #{category}
+        </if>
+        <if test="thingCode != null">
+            AND
+            d.thing_code = #{thingCode}
+        </if>
+        <if test="level != null">
+            AND
+            d.alert_level = #{level}
+        </if>
+        <if test="type != null">
+            AND
+            d.alert_type = #{type}
+        </if>
+        <if test="offset != null">
+            limit #{offset},#{count}
+        </if>
+    </select>
+
+
+</mapper>

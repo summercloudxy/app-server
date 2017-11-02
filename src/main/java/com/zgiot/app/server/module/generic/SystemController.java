@@ -1,5 +1,6 @@
 package com.zgiot.app.server.module.generic;
 
+import com.zgiot.common.reloader.ServerReloadManager;
 import com.zgiot.common.restcontroller.ServerResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,15 @@ public class SystemController {
     @GetMapping("/time")
     public ResponseEntity<String> getSystemTime(){
         return new ResponseEntity<>(ServerResponse.buildOkJson(new Date())
+                , HttpStatus.OK);
+    }
+
+    @GetMapping("/reloadAll")
+    public ResponseEntity<String> reloadAll(){
+
+        ServerReloadManager.reloadAll();
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson("reloaded.")
                 , HttpStatus.OK);
     }
 }

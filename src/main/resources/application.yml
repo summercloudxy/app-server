@@ -46,6 +46,15 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
 
+alert:
+  param:
+    period: 60000
+
+uploadFile:
+  dir: D:/uploadFile/
+  uri: http://192.168.9.198:9090/app-server/files/
+
+
 # STOMP client
 stomp:
   client:
