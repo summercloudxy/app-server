@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +42,9 @@ public class AlertParamHandler implements AlertHandler {
         String metricCode = dataModel.getMetricCode();
         Double value = Double.parseDouble(dataModel.getValue());
         MetricModel metricModel = metricService.getMetric(metricCode);
-        String alertInfo = metricModel.getMetricName() + dataModel.getValue() + metricModel.getValueUnit();
+        BigDecimal valueStr  =   new BigDecimal(dataModel.getValue());
+        valueStr = valueStr.setScale(2,BigDecimal.ROUND_HALF_UP);
+        String alertInfo = metricModel.getMetricName() + valueStr + metricModel.getValueUnit();
         AlertRule alertRule = getAlertLevel(thingCode, metricCode, value);
         AlertData alertData = alertManager.getAlertDataByThingAndMetricCode(thingCode, metricCode);
         if (alertData == null && alertRule != null) {
