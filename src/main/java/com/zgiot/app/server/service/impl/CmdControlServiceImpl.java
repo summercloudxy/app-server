@@ -128,7 +128,7 @@ public class CmdControlServiceImpl implements CmdControlService {
      * @param dataModel 信号发送类（包括信号地址和发送值）
      * @param requestId 请求id
      */
-    private void sendfirst(DataModel dataModel, String requestId){
+     void sendfirst(DataModel dataModel, String requestId){
         try {
             sendCmd(dataModel, requestId);
         } catch (Exception e) {
@@ -143,7 +143,7 @@ public class CmdControlServiceImpl implements CmdControlService {
      * @param retryCount 重发次数
      * @param requestId 请求id
      */
-    private CmdSendResponseData sendSecond(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId, Integer cleanPeriod){
+    CmdSendResponseData sendSecond(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId, Integer cleanPeriod){
         CmdSendResponseData cmdSendResponseData = new CmdSendResponseData();
         final Integer realRetryCount = retryCount == null ? DEFAULT_RETRY_COUNT : retryCount;
         if (retryPeriod == null) {
