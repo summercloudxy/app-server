@@ -10,5 +10,5 @@ import java.util.List;
 public interface FilterPressLogService {
     public void saveFilterPressLog(FilterPressLogBean filterPressLogBean);
     public List<FilterPressLogBean> getLogByDate(String date);
-    public FilterPressPlateCountWrapper getPlateInfos(boolean isDatShift);
+    public FilterPressPlateCountWrapper getPlateInfos();
 }

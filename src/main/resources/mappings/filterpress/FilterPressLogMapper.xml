@@ -40,8 +40,19 @@
         SELECT thing_code,feed_start_time,feed_duration,feed_current,unload_start_time,unload_duration,feed_state,plate_count,waiting_time,proceeding_time,team,save_time,unload_state,total_plate_count FROM `tb_filterpress_log` where #{queryDate}=date_format(save_time,'%Y-%m-%d')
     </select>
 
-    <select id="queryPlateInfos" parameterType="boolean" resultMap="filterPressPlateInfo">
+    <select id="queryPlateInfos"  resultMap="filterPressPlateInfo">
         select thing_code,plate_count,plate_start_time from `tb_filterpress_log` where thing_code in
         (select distinct thing_code from `tb_filterpress_log` where is_day_shift=#{isDayShift}) and is_day_shift=#{isDayShift}
+        <where>
+            thing_code in
+            (select distinct thing_code from `tb_filterpress_log` where is_day_shift=#{isDayShift})
+             and is_day_shift=#{isDayShift}
+            <if test="currentDay !=null ">
+                and #{currentDay}=date_format(save_time,'%Y-%m-%d')
+            </if>
+            <if test="nextDay !=null ">
+                and #{nextDay}=date_format(save_time,'%Y-%m-%d')
+            </if>
+        </where>
     </select>
 </mapper>

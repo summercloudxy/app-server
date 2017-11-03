@@ -266,7 +266,7 @@ public class FilterPress {
 
             filterPressLogBean.setPlateStartTime(parseDate(looseStartTime));
 
-            if(isDayShift(FilterPressLogConstants.DAY_SHIFT_START_TIME_SCOPE,FilterPressLogConstants.DAY_SHIFT_END_TIME_SCOPE) ){
+            if(FilterPressLogUtil.isDayShift(FilterPressLogConstants.DAY_SHIFT_START_TIME_SCOPE,FilterPressLogConstants.DAY_SHIFT_END_TIME_SCOPE) ){
                 filterPressLogBean.setDayShift(FilterPressLogConstants.IS_DAY_SHIFT_OK);
             }else{
                 filterPressLogBean.setDayShift(FilterPressLogConstants.IS_DAY_SHIFT_NO);
@@ -595,21 +595,21 @@ public class FilterPress {
         return null;
     }
 
-    public boolean isDayShift(int start,int end){
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, start);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        long startHour = calendar.getTimeInMillis();
-        calendar.set(Calendar.HOUR_OF_DAY, end);
-        long endHour = calendar.getTimeInMillis();
-        if(System.currentTimeMillis() > startHour && System.currentTimeMillis() < endHour){
-            return true;
-        }
-        return false;
-    }
+//    public boolean isDayShift(int start,int end){
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.setTimeInMillis(System.currentTimeMillis());
+//        calendar.set(Calendar.HOUR_OF_DAY, start);
+//        calendar.set(Calendar.MINUTE, 0);
+//        calendar.set(Calendar.SECOND, 0);
+//        calendar.set(Calendar.MILLISECOND, 0);
+//        long startHour = calendar.getTimeInMillis();
+//        calendar.set(Calendar.HOUR_OF_DAY, end);
+//        long endHour = calendar.getTimeInMillis();
+//        if(System.currentTimeMillis() > startHour && System.currentTimeMillis() < endHour){
+//            return true;
+//        }
+//        return false;
+//    }
 
     class UnloadManager {
         /**

@@ -4,6 +4,7 @@ import com.zgiot.app.server.module.filterpress.FilterPressLogBean;
 import com.zgiot.app.server.module.filterpress.pojo.FilterPressPlateCountBean;
 import com.zgiot.app.server.module.filterpress.pojo.FilterPressPlateCountWrapper;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
 import java.util.List;
@@ -17,5 +18,5 @@ public interface FilterPressLogMapper {
 
     List<FilterPressLogBean> queryLogByDate(String queryDate);
 
-    List<FilterPressPlateCountBean> queryPlateInfos(boolean isDayShift);
+    List<FilterPressPlateCountBean> queryPlateInfos(boolean isDayShift,String currentDay,String nextDay);
 }

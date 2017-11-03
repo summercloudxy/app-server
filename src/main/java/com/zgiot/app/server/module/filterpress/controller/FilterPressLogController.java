@@ -29,9 +29,9 @@ public class FilterPressLogController {
     }
 
     @ApiOperation("压板信息查询")
-    @GetMapping(value="api/filterPress/plate/queryPlateInfo/{isDayShift}")
-    public ResponseEntity<String> queryPlateInfo(@PathVariable boolean isDayShift){
-        FilterPressPlateCountWrapper filterPressPlateCountWrapper = filterPressLogService.getPlateInfos(isDayShift);
+    @GetMapping(value="api/filterPress/plate/queryPlateInfo")
+    public ResponseEntity<String> queryPlateInfo(){
+        FilterPressPlateCountWrapper filterPressPlateCountWrapper = filterPressLogService.getPlateInfos();
         return new ResponseEntity<>(ServerResponse.buildOkJson(filterPressPlateCountWrapper),
                 HttpStatus.OK);
     }
