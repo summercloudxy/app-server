@@ -1,7 +1,9 @@
 package com.zgiot.app.server.service.impl;
 
-import com.zgiot.app.server.service.cache.DataCache;
+import com.zgiot.app.server.config.ModuleListConfig;
 import com.zgiot.app.server.service.DataService;
+import com.zgiot.app.server.service.HistoryDataService;
+import com.zgiot.app.server.service.cache.DataCache;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,10 @@ import java.util.Optional;
 public class DataServiceImpl implements DataService {
     @Autowired
     private DataCache dataCache;
+    @Autowired
+    ModuleListConfig moduleListConfig;
+    @Autowired
+    HistoryDataService historyDataService;
 
     @Override
     public Optional<DataModelWrapper> getData(String thingCode, String metricCode) {
@@ -31,18 +37,37 @@ public class DataServiceImpl implements DataService {
         return dataCache.findByMetric(metricCode);
     }
 
-    @Override
-    public void updateCache(DataModel dataModel) {
+    void updateCache(DataModel dataModel) {
         dataCache.updateValue(dataModel);
     }
 
     @Override
-    public void persistData(DataModel dataModel) {
+    public void saveData(DataModel newData) {
+        Optional<DataModelWrapper> old = this.getData(newData.getThingCode(), newData.getMetricCode());
+        boolean toUpdate = false;
+
+        String oldValue = null;
+        if (!old.isPresent()) {
+            toUpdate = true;
+        } else {
+            DataModelWrapper oldW = old.get();
+            oldValue = oldW.getValue();
+            if (newData.getDataTimeStamp().getTime() > oldW.getDataTimeStamp().getTime()) {
+                toUpdate = true;
+            }
+        }
+
+        // only update later one
+        if (toUpdate) {
+            newData.setPreValue(oldValue);
+            this.updateCache(newData);
+
+            // hist data save?
+            if (moduleListConfig.containModule(ModuleListConfig.MODULE_HIST_PERSIST)){
+                this.historyDataService.asyncSmartAddData(newData);
+            }
+        }
 
     }
 
-    @Override
-    public void persist2NoSQL(DataModel dataModel) {
-
-    }
 }

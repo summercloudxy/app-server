@@ -1,9 +1,9 @@
 package com.zgiot.app.server.dataprocessor;
 
 import com.alibaba.fastjson.JSON;
+import com.zgiot.app.server.service.HistoryDataService;
 import com.zgiot.common.enums.MetricDataTypeEnum;
 import com.zgiot.common.pojo.DataModel;
-import com.zgiot.common.pojo.ThingModel;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.AsyncHttpClientConfig;
 import org.asynchttpclient.DefaultAsyncHttpClient;
@@ -15,7 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -116,10 +119,14 @@ public class WebSocketProcessor implements DataProcessor {
     private void handleMessage(String message) {
         try {
             DataModel dataModel = JSON.parseObject(message, DataModel.class);
+
             logger.trace("received: {}", dataModel);
 
             // exclude ERR data
             if (MetricDataTypeEnum.METRIC_DATA_TYPE_ERROR.getName().equals(dataModel.getMetricDataType())) {
+                if (HistoryDataService.fulldataLogger.isDebugEnabled()) {
+                    HistoryDataService.fulldataLogger.debug(JSON.toJSONString(dataModel));
+                }
                 logger.warn("Got error data `{}`. ", dataModel.toString());
                 return;
             }

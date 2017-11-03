@@ -1,6 +1,5 @@
 package com.zgiot.app.server.module.alert.controller;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.zgiot.app.server.module.alert.AlertManager;
 import com.zgiot.app.server.module.alert.pojo.*;
 import com.zgiot.app.server.service.FileService;
@@ -9,7 +8,6 @@ import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.FileModel;
 import com.zgiot.common.restcontroller.ServerResponse;
 import io.swagger.annotations.ApiOperation;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -5,13 +5,11 @@ import org.quartz.*;
 import org.quartz.impl.StdScheduler;
 import org.quartz.impl.triggers.CronTriggerImpl;
 import org.springframework.context.ApplicationContext;
-
 import org.springframework.web.context.ContextLoader;
 
-import static org.quartz.JobBuilder.newJob;
-
-import static org.quartz.TriggerBuilder.newTrigger;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.TriggerBuilder.newTrigger;
 
 /**
  * Quartz调度管理器

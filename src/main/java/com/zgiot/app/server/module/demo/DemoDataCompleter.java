@@ -4,21 +4,25 @@ import com.zgiot.app.server.dataprocessor.DataCompleter;
 import com.zgiot.common.pojo.DataModel;
 import org.springframework.beans.BeanUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DemoDataCompleter implements DataCompleter{
 
     @Override
-    public void onComplete(DataModel dm) {
+    public List<DataModel> onComplete(DataModel dm) {
         int valueI = Integer.parseInt(dm.getValue());
         int newValue = valueI * 1000;
 
         DataModel newDM = new DataModel();
         BeanUtils.copyProperties(dm, newDM);
+        newDM.setMetricCode("demo1");
         newDM.setValue(String.valueOf(newValue));
 
-        // update cache
+        List<DataModel> list = new ArrayList<>();
+        list.add(newDM);
 
-        // add to history data , buz will decide save or not
-
+        return list;
     }
 
     @Override

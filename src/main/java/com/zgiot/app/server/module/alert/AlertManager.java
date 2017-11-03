@@ -1,8 +1,8 @@
 package com.zgiot.app.server.module.alert;
 
-import com.zgiot.app.server.module.alert.pojo.*;
 import com.zgiot.app.server.module.alert.mapper.AlertMapper;
 import com.zgiot.app.server.service.CmdControlService;
+import com.zgiot.app.server.module.alert.pojo.*;
 import com.zgiot.app.server.service.impl.CmdControlServiceImpl;
 import com.zgiot.app.server.service.impl.FileServiceImpl;
 import com.zgiot.common.constants.AlertConstants;
@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
 import java.util.stream.Collectors;
@@ -538,10 +537,7 @@ public class AlertManager {
         dataModel.setThingCode(thingCode);
         dataModel.setMetricCode(MetricCodes.RESET);
         dataModel.setValue(Boolean.TRUE.toString());
-        CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(dataModel, requestId);
-        if(cmdSendResponseData.getOkCount()<=0){
-            throw new SysException(cmdSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
-        }
+        cmdControlService.sendCmd(dataModel, requestId);
         logger.debug("报警设备{}进行复位操作", thingCode);
     }
 
