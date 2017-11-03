@@ -1,7 +1,6 @@
 package com.zgiot.app.server.module.alert;
 
 import com.zgiot.app.server.module.alert.mapper.AlertMapper;
-import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.module.alert.pojo.*;
 import com.zgiot.app.server.service.impl.CmdControlServiceImpl;
 import com.zgiot.app.server.service.impl.FileServiceImpl;
