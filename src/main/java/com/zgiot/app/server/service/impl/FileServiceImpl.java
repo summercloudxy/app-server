@@ -53,7 +53,7 @@ public class FileServiceImpl implements FileService{
         // 相对路径
         String relatePath = currentDay + "/" + moduleName + "/" + fileTypePath;
         relatePath = relatePath + "/" + fileName;
-        String pcPath = basePath + relatePath;
+        String pcPath = basePath+ "/"  + relatePath;
 
         File file2 = new File(pcPath);
         if (!file2.getParentFile().exists()) {
