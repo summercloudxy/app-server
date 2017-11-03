@@ -148,7 +148,7 @@ public class FilterPressManager {
         }
         String metricCode = data.getMetricCode();
         filterPress.onDataSourceChange(metricCode, data.getValue());
-        if (filterPressStage.containsKey(metricCode)) {
+        if (deviceHolder.containsKey(thingCode) && filterPressStage.containsKey(metricCode)) {
             processStage(data);
         }
         if (FilterPressMetricConstants.FEED_ASUM.equals(metricCode)) {
