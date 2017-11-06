@@ -1,0 +1,1 @@
+INSERT INTO `rel_metric_alert_type` VALUES ('105', 'COAL_CAP', '1');
