@@ -80,7 +80,7 @@ public class FilterPressManager {
 
     private UnloadManager unloadManager = new UnloadManager();
 
-    private Map<String,FilterPressLogBean> statisticLogs = new ConcurrentHashMap<>();
+    Map<String,FilterPressLogBean> statisticLogs = new ConcurrentHashMap<>();
 
     static{
         filterPressStage.put(FilterPressMetricConstants.RO_LOOSE,"");

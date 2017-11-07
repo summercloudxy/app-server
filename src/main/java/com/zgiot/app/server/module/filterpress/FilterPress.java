@@ -132,6 +132,12 @@ public class FilterPress {
      * 拉板结束时间
      */
     private volatile  long pullEndTime;
+    /**
+     * 统计每台压滤机第几板，用于日志保存和查询
+     * 每天0点置0
+     */
+    private volatile  int statisticLogplateCount;
+
 
 
     public FilterPress(String code, FilterPressManager manager) {
@@ -241,13 +247,9 @@ public class FilterPress {
                 if(plateCount > 0){
                     filterPressLogBean.setPlateCount(plateCount);
                 }
-                String totalPlateCount = getValueFromCacheByMetric(FilterPressMetricConstants.TOTL_COUNT);
-                if(!StringUtils.isBlank(totalPlateCount)){
-                    filterPressLogBean.setTotalPlateCount(Integer.valueOf(totalPlateCount));
-                }
+                filterPressLogBean.setTotalPlateCount(getAllFilterPressTotalPlateCount(Boolean.FALSE));
             }
             filterPressLogBean.setSaveTime(parseDate(System.currentTimeMillis()));
-
             String proceedingTime = getValueFromCacheByMetric(FilterPressMetricConstants.PRC_TIMER);
             if(!StringUtils.isBlank(proceedingTime)){
                 filterPressLogBean.setProceedingDuration(Long.parseLong(proceedingTime));
@@ -275,6 +277,12 @@ public class FilterPress {
             filterPressLogBean.setPeriod(FilterPressLogConstants.PERIOD_TWO);
 
             if(!filterPressLogBean.isEmpty()){
+                if(FilterPressLogUtil.isFirstLooseEveryDay(unloadStartTime,unloadTime)){
+                    statisticLogplateCount = 0;
+                }
+                statisticLogplateCount ++;
+                filterPressLogBean.setStatisticLogPlateCount(statisticLogplateCount);
+                filterPressLogBean.setStatisticLogTotalPlateCount(getAllFilterPressTotalPlateCount(Boolean.TRUE));
                 manager.filterPressLogService.saveFilterPressLog(filterPressLogBean);
             }
         }
@@ -522,6 +530,10 @@ public class FilterPress {
         return pullEndTime;
     }
 
+    public int getStatisticLogplateCount() {
+        return statisticLogplateCount;
+    }
+
     public void setFeedStartTime(long feedStartTime) {
         this.feedStartTime = feedStartTime;
     }
@@ -562,6 +574,10 @@ public class FilterPress {
         this.pullEndTime = pullEndTime;
     }
 
+    public void setStatisticLogplateCount(int statisticLogplateCount) {
+        this.statisticLogplateCount = statisticLogplateCount;
+    }
+
     public void setUnloadConfirmNeed(boolean unloadConfirmNeed) {
         this.unloadConfirmNeed = unloadConfirmNeed;
     }
@@ -595,21 +611,20 @@ public class FilterPress {
         return null;
     }
 
-//    public boolean isDayShift(int start,int end){
-//        Calendar calendar = Calendar.getInstance();
-//        calendar.setTimeInMillis(System.currentTimeMillis());
-//        calendar.set(Calendar.HOUR_OF_DAY, start);
-//        calendar.set(Calendar.MINUTE, 0);
-//        calendar.set(Calendar.SECOND, 0);
-//        calendar.set(Calendar.MILLISECOND, 0);
-//        long startHour = calendar.getTimeInMillis();
-//        calendar.set(Calendar.HOUR_OF_DAY, end);
-//        long endHour = calendar.getTimeInMillis();
-//        if(System.currentTimeMillis() > startHour && System.currentTimeMillis() < endHour){
-//            return true;
-//        }
-//        return false;
-//    }
+    private int getAllFilterPressTotalPlateCount(boolean isLogPlateCount){
+        Map<String,FilterPressLogBean> filterPressLogBeanMap = manager.getStatisticLogs();
+        int totalPlateCount = 0;
+        if(!filterPressLogBeanMap.isEmpty()){
+            for(String thingCode:filterPressLogBeanMap.keySet()){
+                if(isLogPlateCount){
+                    totalPlateCount += filterPressLogBeanMap.get(thingCode).getStatisticLogPlateCount();
+                }else{
+                    totalPlateCount += filterPressLogBeanMap.get(thingCode).getPlateCount();
+                }
+            }
+        }
+        return totalPlateCount;
+    }
 
     class UnloadManager {
         /**

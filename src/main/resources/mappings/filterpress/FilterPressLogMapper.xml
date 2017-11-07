@@ -11,7 +11,9 @@
         <result column="feed_state" property="feedState"/>
         <result column="unload_state" property="unloadState"/>
         <result column="plate_count" property="plateCount"/>
+        <result column="statistic_log_plate_count" property="statisticLogPlateCount"/>
         <result column="total_plate_count" property="totalPlateCount"/>
+        <result column="statistic_log_total_plate_count" property="statisticLogTotalPlateCount"/>
         <result column="waiting_time" property="waitDuration"/>
         <result column="proceeding_time" property="proceedingDuration"/>
         <result column="team" property="team"/>
@@ -21,32 +23,36 @@
         <result column="period" property="period"/>
     </resultMap>
 
-    <resultMap id="filterPressPlateInfo" type="com.zgiot.app.server.module.filterpress.pojo.FilterPressPlateCountBean">
+    <resultMap id="filterPressPlateInfo" type="com.zgiot.app.server.module.filterpress.pojo.FilterPressSinglePlateCountBean">
         <result column="thing_code"  property="thingCode"/>
-        <result column="plate_count"  property="timeLineMap.key"/>
-        <result column="plate_start_time"  property="timeLineMap.value"/>
-        <!--result column="plate_count" property="plateCount"/>
-        <result column="team" property="team"/>
-        <result column="save_time" property="saveTime"/>
-        <result column="plate_start_time" property="plateStartTime"/>
-        <result column="is_day_shift" property="isDayShift"/>
-        <result column="period" property="period"/-->
+        <result column="plate_count"  property="filterPressPlateAndTimeBean.plateCount"/>
+        <result column="plate_start_time"  property="filterPressPlateAndTimeBean.time"/>
     </resultMap>
+
+    <resultMap id="filterPressTotalPlateInfo" type="com.zgiot.app.server.module.filterpress.pojo.FilterPressPlateAndTimeBean">
+        <result column="total_plate_count"  property="plateCount"/>
+        <result column="plate_start_time"  property="time"/>
+    </resultMap>
+
+    <resultMap id="filterPressHisPlateInfo" type="com.zgiot.app.server.module.filterpress.pojo.FilterPressTcAndMaxPlateCount">
+        <result column="thing_code" property="thingCode"/>
+        <result column="plate_count" property="maxPlateCount"/>
+    </resultMap>
+
     <insert id="insertFilterPressLog" parameterType="com.zgiot.app.server.module.filterpress.FilterPressLogBean">
-        insert into tb_filterpress_log(thing_code,feed_start_time,feed_duration,feed_current,unload_start_time,unload_duration,feed_state,plate_count,waiting_time,proceeding_time,team,save_time,unload_state,total_plate_count,plate_start_time,is_day_shift,period) value(#{thingCode},#{feedStartTime},#{feedDuration},#{feedCurrent},#{unloadTime},#{unloadDuration},#{feedState},#{plateCount},#{waitDuration},#{proceedingDuration},#{team},#{saveTime},#{unloadState},#{totalPlateCount},#{plateStartTime},#{isDayShift},#{period})
+        insert into tb_filterpress_log(thing_code,feed_start_time,feed_duration,feed_current,unload_start_time,unload_duration,feed_state,plate_count,statistic_log_plate_count,waiting_time,proceeding_time,team,save_time,unload_state,total_plate_count,statistic_log_total_plate_count,plate_start_time,is_day_shift,period) value(#{thingCode},#{feedStartTime},#{feedDuration},#{feedCurrent},#{unloadTime},#{unloadDuration},#{feedState},#{plateCount},#{statisticLogPlateCount},#{waitDuration},#{proceedingDuration},#{team},#{saveTime},#{unloadState},#{totalPlateCount},#{statisticLogTotalPlateCount},#{plateStartTime},#{isDayShift},#{period})
     </insert>
 
     <select id="queryLogByDate" parameterType="String" resultMap="filterPressLog">
-        SELECT thing_code,feed_start_time,feed_duration,feed_current,unload_start_time,unload_duration,feed_state,plate_count,waiting_time,proceeding_time,team,save_time,unload_state,total_plate_count FROM `tb_filterpress_log` where #{queryDate}=date_format(save_time,'%Y-%m-%d')
+        SELECT thing_code,feed_start_time,feed_duration,feed_current,unload_start_time,unload_duration,feed_state,statistic_log_plate_count,waiting_time,proceeding_time,team,save_time,unload_state,statistic_log_total_plate_count FROM `tb_filterpress_log` where #{queryDate}=date_format(save_time,'%Y-%m-%d')
     </select>
 
     <select id="queryPlateInfos"  resultMap="filterPressPlateInfo">
-        select thing_code,plate_count,plate_start_time from `tb_filterpress_log` where thing_code in
-        (select distinct thing_code from `tb_filterpress_log` where is_day_shift=#{isDayShift}) and is_day_shift=#{isDayShift}
+        select thing_code,plate_count,plate_start_time from `tb_filterpress_log`
         <where>
             thing_code in
             (select distinct thing_code from `tb_filterpress_log` where is_day_shift=#{isDayShift})
-             and is_day_shift=#{isDayShift}
+            and is_day_shift=#{isDayShift}
             <if test="currentDay !=null ">
                 and #{currentDay}=date_format(save_time,'%Y-%m-%d')
             </if>
@@ -54,5 +60,36 @@
                 and #{nextDay}=date_format(save_time,'%Y-%m-%d')
             </if>
         </where>
+    </select>
+
+    <select id="queryTotalPlateInfos"  resultMap="filterPressTotalPlateInfo">
+        select total_plate_count,plate_start_time from `tb_filterpress_log`
+        <where>
+            is_day_shift=#{isDayShift}
+            <if test="currentDay !=null ">
+                and #{currentDay}=date_format(save_time,'%Y-%m-%d')
+            </if>
+            <if test="nextDay !=null ">
+                and #{nextDay}=date_format(save_time,'%Y-%m-%d')
+            </if>
+        </where>
+    </select>
+
+    <select id="queryHisPlateCount" resultMap="filterPressHisPlateInfo">
+        select thing_code,max(plate_count) as plate_count from (select thing_code,plate_count from `tb_filterpress_log`
+        <where>
+            is_day_shift=#{isDayShift}
+            <if test="currentDay !=null ">
+                and date_format(save_time,'%Y-%m-%d')=#{currentDay}
+            </if>
+            <if test="nextDay !=null ">
+                or date_format(save_time,'%Y-%m-%d')=#{nextDay}
+            </if>
+        </where>) as t group by thing_code
+    </select>
+
+    <select id="getPriorTeam"  resultType="Integer">
+      select distinct team from `tb_filterpress_log`
+        where  is_day_shift=#{isDayShift} and date_format(save_time,'%Y-%m-%d')=#{priorShiftDay}
     </select>
 </mapper>

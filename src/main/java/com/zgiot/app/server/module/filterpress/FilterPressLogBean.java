@@ -15,6 +15,8 @@ public class FilterPressLogBean {
     private String unloadState;
     private int plateCount;
     private int totalPlateCount;
+    private int statisticLogPlateCount;
+    private int statisticLogTotalPlateCount;
     private long waitDuration;
     private long proceedingDuration;
     private int team;
@@ -61,6 +63,14 @@ public class FilterPressLogBean {
 
     public int getTotalPlateCount() {
         return totalPlateCount;
+    }
+
+    public int getStatisticLogPlateCount() {
+        return statisticLogPlateCount;
+    }
+
+    public int getStatisticLogTotalPlateCount() {
+        return statisticLogTotalPlateCount;
     }
 
     public long getWaitDuration() {
@@ -131,6 +141,14 @@ public class FilterPressLogBean {
         this.totalPlateCount = totalPlateCount;
     }
 
+    public void setStatisticLogPlateCount(int statisticLogPlateCount) {
+        this.statisticLogPlateCount = statisticLogPlateCount;
+    }
+
+    public void setStatisticLogTotalPlateCount(int statisticLogTotalPlateCount) {
+        this.statisticLogTotalPlateCount = statisticLogTotalPlateCount;
+    }
+
     public void setWaitDuration(long waitDuration) {
         this.waitDuration = waitDuration;
     }
@@ -165,7 +183,7 @@ public class FilterPressLogBean {
                 && unloadDuration > 0 && (unloadTime != null)
                 && waitDuration > 0 && (saveTime != null)
                 &&  feedCurrent > 0 && (!StringUtils.isBlank(feedState))
-                && (!StringUtils.isBlank(feedState)))
+                && (!StringUtils.isBlank(unloadState)))
         {
            return false;
         }
