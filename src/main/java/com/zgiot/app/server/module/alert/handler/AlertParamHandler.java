@@ -43,7 +43,7 @@ public class AlertParamHandler implements AlertHandler {
         MetricModel metricModel = metricService.getMetric(metricCode);
         BigDecimal valueStr  =   new BigDecimal(dataModel.getValue());
         valueStr = valueStr.setScale(2,BigDecimal.ROUND_HALF_UP);
-        String alertInfo = metricModel.getMetricName() + valueStr + metricModel.getValueUnit();
+        String alertInfo = metricModel.getMetricName() + "-" + valueStr + metricModel.getValueUnit();
         AlertRule alertRule = getAlertLevel(thingCode, metricCode, value);
         AlertData alertData = alertManager.getAlertDataByThingAndMetricCode(thingCode, metricCode);
         if (alertData == null && alertRule != null) {
@@ -92,7 +92,7 @@ public class AlertParamHandler implements AlertHandler {
                         alertData.setParamLower(alertRule.getLowerLimit());
                         MetricModel metricModel = metricService.getMetric(metricCode);
                         String alertInfo =
-                                metricModel.getMetricName() + alertData.getParamValue() + metricModel.getValueUnit();
+                                metricModel.getMetricName() + "-" + alertData.getParamValue() + metricModel.getValueUnit();
                         alertData.setAlertInfo(alertInfo);
                         alertData.setLastUpdateTime(new Date());
                         alertManager.updateAlert(alertData);
@@ -109,7 +109,7 @@ public class AlertParamHandler implements AlertHandler {
             if(alertRuleMap.get(thingCode).containsKey(metricCode)){
                 List<AlertRule> alertRuleList = alertRuleMap.get(thingCode).get(metricCode);
                 for (AlertRule alertRule : alertRuleList) {
-                    if (value <= alertRule.getUpperLimit() && value > alertRule.getLowerLimit()) {
+                    if (value < alertRule.getUpperLimit() && value >= alertRule.getLowerLimit()) {
                         return alertRule;
                     }
                 }
