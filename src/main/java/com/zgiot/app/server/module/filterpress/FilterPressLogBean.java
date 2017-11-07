@@ -11,8 +11,8 @@ public class FilterPressLogBean {
     private float feedCurrent;
     private Date unloadTime;
     private long unloadDuration;
-    private String feedState;
-    private String unloadState;
+    private boolean feedState;
+    private boolean unloadState;
     private int plateCount;
     private int totalPlateCount;
     private int statisticLogPlateCount;
@@ -49,11 +49,11 @@ public class FilterPressLogBean {
         return unloadDuration;
     }
 
-    public String getFeedState() {
+    public boolean isFeedState() {
         return feedState;
     }
 
-    public String getUnloadState() {
+    public boolean isUnloadState() {
         return unloadState;
     }
 
@@ -125,11 +125,11 @@ public class FilterPressLogBean {
         this.unloadDuration = unloadDuration;
     }
 
-    public void setFeedState(String feedState) {
+    public void setFeedState(boolean feedState) {
         this.feedState = feedState;
     }
 
-    public void setUnloadState(String unloadState) {
+    public void setUnloadState(boolean unloadState) {
         this.unloadState = unloadState;
     }
 
@@ -182,8 +182,7 @@ public class FilterPressLogBean {
                 && feedDuration > 0 && (feedStartTime != null)
                 && unloadDuration > 0 && (unloadTime != null)
                 && waitDuration > 0 && (saveTime != null)
-                &&  feedCurrent > 0 && (!StringUtils.isBlank(feedState))
-                && (!StringUtils.isBlank(unloadState)))
+                &&  feedCurrent > 0 )
         {
            return false;
         }
