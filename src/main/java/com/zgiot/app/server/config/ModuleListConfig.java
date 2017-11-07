@@ -17,6 +17,7 @@ public class ModuleListConfig {
     public static final String MODULE_FILTERPRESS = "FILTERPRESS";
     public static final String MODULE_ALERT = "ALERT";
     public static final String MODULE_HIST_PERSIST = "HIST_PERSIST";
+    public static final String MODULE_BELLOWS = "BELLOWS";
 
     @Value("${sf.modules.list}")
     private String moduleListStr;

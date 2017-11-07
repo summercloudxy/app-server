@@ -6,6 +6,7 @@ import com.zgiot.app.server.dataprocessor.impl.CacheUpdater;
 import com.zgiot.app.server.module.alert.AlertListener;
 import com.zgiot.app.server.module.alert.AlertParamJob;
 import com.zgiot.app.server.module.alert.handler.AlertParamHandler;
+import com.zgiot.app.server.module.bellows.BellowsDataListener;
 import com.zgiot.app.server.module.demo.DemoBusiness;
 import com.zgiot.app.server.module.demo.DemoDataCompleter;
 import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
@@ -39,11 +40,15 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
     @Autowired
     private AlertListener alertListener;
     @Autowired
+    private BellowsDataListener bellowsDataListener;
+    @Autowired
     ModuleListConfig moduleListConfig;
     @Autowired
     AlertParamHandler alertParamHandler;
     @Autowired
     HistoryDataPersistDaemon historyDataPersistDaemon;
+
+
 
     @SuppressWarnings("unchecked")
     @Override
@@ -82,6 +87,11 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
                     put("handler", alertParamHandler);
                 }
             });
+        }
+
+        if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
+                || moduleListConfig.containModule(ModuleListConfig.MODULE_BELLOWS)) {
+            processor.addListener(bellowsDataListener);
         }
 
         if (false) {
