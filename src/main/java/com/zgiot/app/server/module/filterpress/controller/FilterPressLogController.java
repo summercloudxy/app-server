@@ -22,6 +22,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -86,6 +87,7 @@ public class FilterPressLogController {
                 dataModelList = filterPressLogService.getDataModelAllFilterPressByMetricCode(FilterPressMetricConstants.T3_RCD);
                 position = FilterPressLogConstants.T3_RCD_POSITION;
                 break;
+            default:
         }
         for(DataModel dataModel:dataModelList){
             cmdControlService.sendPulseCmdBoolByShort(dataModel,5000,3,requestId,position,500,isHolding);
@@ -116,6 +118,7 @@ public class FilterPressLogController {
                 dataModelList = filterPressLogService.getDataModelAllFilterPressByMetricCode(FilterPressMetricConstants.T2_CHOOSE);
                 position = FilterPressLogConstants.T3_CHOOSE_POSITION;
                 break;
+            default:
         }
         for(DataModel dataModel:dataModelList){
             cmdControlService.sendPulseCmdBoolByShort(dataModel,5000,3,requestId,position,cleanPeriod,isHolding);
