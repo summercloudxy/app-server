@@ -26,7 +26,7 @@ public class CmdControlServiceImpl implements CmdControlService {
     private static final int DEFAULT_RETRY_COUNT = 5;
     private static final int RETURN_CODE_SUCCESS = 1;
     private static final int DEFAULT_SEND_DELAY_TIME = 0;
-    private static final int SEND_PERIOD = 1000;
+    private static final int SEND_PERIOD = 500;
     private static final int VALUE_TRUE = 1;
     private static final int VALUE_FALSE = 0;
     @Autowired
