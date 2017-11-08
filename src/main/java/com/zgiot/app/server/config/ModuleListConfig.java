@@ -37,8 +37,11 @@ public class ModuleListConfig {
     }
 
     public boolean containModule(String moduleName) {
+        if (configedModules.contains(MODULE_ALL)){
+            return true;
+        }
+
         return configedModules.contains(moduleName);
     }
 
 }
-

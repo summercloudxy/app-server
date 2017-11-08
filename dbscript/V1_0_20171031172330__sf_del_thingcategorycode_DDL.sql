@@ -1,0 +1,1 @@
+alter table tb_thing drop thing_category_code;

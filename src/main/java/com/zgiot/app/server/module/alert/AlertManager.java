@@ -1,7 +1,8 @@
 package com.zgiot.app.server.module.alert;
 
-import com.zgiot.app.server.module.alert.pojo.*;
 import com.zgiot.app.server.module.alert.mapper.AlertMapper;
+import com.zgiot.app.server.module.alert.pojo.*;
+import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.impl.CmdControlServiceImpl;
 import com.zgiot.app.server.service.impl.FileServiceImpl;
 import com.zgiot.common.constants.AlertConstants;
@@ -18,7 +19,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
 import java.util.stream.Collectors;
@@ -66,8 +66,10 @@ public class AlertManager {
                 try {
                     Thread.sleep(10);
                     AlertData alertData = verifyDelayQueue.take().getAlertData();
-                    alertData.setAlertStage(AlertConstants.STAGE_UNTREATED);
-                    updateAlert(alertData);
+                    if (AlertConstants.STAGE_VERIFIED.equals(alertData.getAlertStage())) {
+                        alertData.setAlertStage(AlertConstants.STAGE_UNTREATED);
+                        updateAlert(alertData);
+                    }
                 } catch (Exception e) {
                     logger.error("get verified alert data error");
                 }
@@ -138,6 +140,8 @@ public class AlertManager {
         alertMessage.setTime(new Date());
         alertMessage.setUserId(userId);
         alertMessage.setPermission(permission);
+        alertMapper.saveAlertMessage(alertMessage);
+        alertMessage.setType(AlertConstants.MESSAGE_TYPE_SET_LEVEL);
         alertMapper.saveAlertMessage(alertMessage);
     }
 
@@ -402,6 +406,7 @@ public class AlertManager {
      */
     private void notFoundAlert(AlertData alertData, AlertMessage alertMessage) {
         alertData.setReporter(alertMessage.getUserId());
+        alertMapper.saveAlertMessage(alertMessage);
         messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
         logger.debug("推送报警消息，报警设备{}，报警内容{}，未发现报警存在", alertData.getThingCode(), alertData.getMetricCode(),
                 alertMessage.getType());
@@ -532,7 +537,19 @@ public class AlertManager {
         dataModel.setThingCode(thingCode);
         dataModel.setMetricCode(MetricCodes.RESET);
         dataModel.setValue(Boolean.TRUE.toString());
-        cmdControlService.sendCmd(dataModel, requestId);
+        CmdControlService.CmdSendResponseData resetSendResponseData = cmdControlService.sendCmd(dataModel, requestId);
+        if (resetSendResponseData.getOkCount() <= 0) {
+            throw new SysException("下发复位信号失败，失败原因："+resetSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
+        }
+        Map<String, AlertData> metricAlertDataMap = alertDataMap.get(thingCode);
+        if (metricAlertDataMap != null && metricAlertDataMap.containsKey(MetricCodes.WARNING)) {
+            dataModel.setMetricCode(MetricCodes.ALERT_CONFIRM);
+            CmdControlService.CmdSendResponseData alertConfirmSendResponseData =
+                    cmdControlService.sendCmd(dataModel, requestId);
+            if (alertConfirmSendResponseData.getOkCount() <= 0) {
+                throw new SysException("下发报警确认信号失败，失败原因："+alertConfirmSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
+            }
+        }
         logger.debug("报警设备{}进行复位操作", thingCode);
     }
 
@@ -678,7 +695,7 @@ public class AlertManager {
                 if ((page + 1) * count < alertRecords.size()) {
                     result = alertRecords.subList(page * count, (page + 1) * count);
                 } else {
-                    result = alertRecords.subList(page * count, alertRecords.size() - 1);
+                    result = alertRecords.subList(page * count, alertRecords.size());
                 }
             }
             return result;

@@ -5,7 +5,6 @@ import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.MetricModel;
-import com.zgiot.common.pojo.ThingModel;
 import com.zgiot.common.restcontroller.ServerResponse;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -13,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
-import springfox.documentation.spring.web.json.Json;
 
 import java.util.Collections;
 import java.util.HashMap;

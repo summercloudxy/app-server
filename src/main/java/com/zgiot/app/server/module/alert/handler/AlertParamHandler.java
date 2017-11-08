@@ -11,9 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +41,9 @@ public class AlertParamHandler implements AlertHandler {
         String metricCode = dataModel.getMetricCode();
         Double value = Double.parseDouble(dataModel.getValue());
         MetricModel metricModel = metricService.getMetric(metricCode);
-        String alertInfo = metricModel.getMetricName() + dataModel.getValue() + metricModel.getValueUnit();
+        BigDecimal valueStr  =   new BigDecimal(dataModel.getValue());
+        valueStr = valueStr.setScale(2,BigDecimal.ROUND_HALF_UP);
+        String alertInfo = metricModel.getMetricName() + "-" + valueStr + metricModel.getValueUnit();
         AlertRule alertRule = getAlertLevel(thingCode, metricCode, value);
         AlertData alertData = alertManager.getAlertDataByThingAndMetricCode(thingCode, metricCode);
         if (alertData == null && alertRule != null) {
@@ -67,8 +69,8 @@ public class AlertParamHandler implements AlertHandler {
 
     }
 
-    @Scheduled(cron = "0/10 * * * * ?")
-    private void updateAlertLevel() {
+//    @Scheduled(cron = "0/10 * * * * ?")
+    public void updateAlertLevel() {
         alertDataCache = alertManager.getAlertParamDataMap();
         for (Map.Entry<String, Map<String, AlertData>> entry : alertDataCache.entrySet()) {
             String thingCode = entry.getKey();
@@ -90,7 +92,7 @@ public class AlertParamHandler implements AlertHandler {
                         alertData.setParamLower(alertRule.getLowerLimit());
                         MetricModel metricModel = metricService.getMetric(metricCode);
                         String alertInfo =
-                                metricModel.getMetricName() + alertData.getParamValue() + metricModel.getValueUnit();
+                                metricModel.getMetricName() + "-" + alertData.getParamValue() + metricModel.getValueUnit();
                         alertData.setAlertInfo(alertInfo);
                         alertData.setLastUpdateTime(new Date());
                         alertManager.updateAlert(alertData);
@@ -107,7 +109,7 @@ public class AlertParamHandler implements AlertHandler {
             if(alertRuleMap.get(thingCode).containsKey(metricCode)){
                 List<AlertRule> alertRuleList = alertRuleMap.get(thingCode).get(metricCode);
                 for (AlertRule alertRule : alertRuleList) {
-                    if (value <= alertRule.getUpperLimit() && value > alertRule.getLowerLimit()) {
+                    if (value < alertRule.getUpperLimit() && value >= alertRule.getLowerLimit()) {
                         return alertRule;
                     }
                 }

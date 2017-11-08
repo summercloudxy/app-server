@@ -4,14 +4,19 @@ import com.zgiot.app.server.dataprocessor.CompleterDataListener;
 import com.zgiot.app.server.dataprocessor.DataProcessor;
 import com.zgiot.app.server.dataprocessor.impl.CacheUpdater;
 import com.zgiot.app.server.module.alert.AlertListener;
+import com.zgiot.app.server.module.alert.AlertParamJob;
+import com.zgiot.app.server.module.alert.handler.AlertParamHandler;
 import com.zgiot.app.server.module.demo.DemoBusiness;
+import com.zgiot.app.server.module.demo.DemoDataCompleter;
 import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
-import com.zgiot.app.server.module.historydata.HistoryDataListener;
 import com.zgiot.app.server.service.impl.HistoryDataPersistDaemon;
+import com.zgiot.app.server.service.impl.QuartzManager;
+import org.quartz.JobDataMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -19,6 +24,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ApplicationContextListener implements ApplicationListener<ContextRefreshedEvent> {
     private static final Logger logger = LoggerFactory.getLogger(ApplicationContextListener.class);
+    private static ApplicationContext applicationContext = null;
     @Autowired
     private CacheUpdater cacheUpdater;
     @Autowired
@@ -31,17 +37,20 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
     @Autowired
     private CompleterDataListener completerDataListener;
     @Autowired
-    private HistoryDataListener historyDataListener;
-    @Autowired
     private AlertListener alertListener;
     @Autowired
     ModuleListConfig moduleListConfig;
+    @Autowired
+    AlertParamHandler alertParamHandler;
     @Autowired
     HistoryDataPersistDaemon historyDataPersistDaemon;
 
     @SuppressWarnings("unchecked")
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+        if (applicationContext == null) {
+            applicationContext = contextRefreshedEvent.getApplicationContext();
+        }
         processor.connect().thenRun(() -> {
             logger.info("Connected DataEngine. ");
             installModules(processor);
@@ -58,7 +67,6 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
                 || moduleListConfig.containModule(ModuleListConfig.MODULE_HIST_PERSIST)) {
             this.historyDataPersistDaemon.start();
-            processor.addListener(historyDataListener);
         }
 
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
@@ -69,9 +77,22 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
                 || moduleListConfig.containModule(ModuleListConfig.MODULE_ALERT)) {
             processor.addListener(alertListener);
+            QuartzManager.addJob(ModuleListConfig.MODULE_ALERT, AlertParamJob.class, "0/10 * * * * ?", new JobDataMap() {
+                {
+                    put("handler", alertParamHandler);
+                }
+            });
         }
 
-        //processor.addListener(demoBusiness);
+        if (false) {
+            processor.addListener(demoBusiness);
+            completerDataListener.addCompleter(new DemoDataCompleter());
+        }
+
+    }
+
+    public static ApplicationContext getApplicationContext() {
+        return applicationContext;
     }
 
 }

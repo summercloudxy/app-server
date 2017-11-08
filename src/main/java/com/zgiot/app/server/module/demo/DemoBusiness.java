@@ -2,6 +2,7 @@ package com.zgiot.app.server.module.demo;
 
 import com.zgiot.app.server.dataprocessor.DataListener;
 import com.zgiot.app.server.service.DataService;
+import com.zgiot.app.server.service.HistoryDataService;
 import com.zgiot.app.server.service.ThingService;
 import com.zgiot.common.enums.MetricDataTypeEnum;
 import com.zgiot.common.pojo.DataModel;
@@ -9,9 +10,6 @@ import com.zgiot.common.pojo.DataModelWrapper;
 import com.zgiot.common.pojo.ThingModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.Date;
-import java.util.Optional;
 
 @Component
 public class DemoBusiness implements DataListener {
@@ -21,7 +19,8 @@ public class DemoBusiness implements DataListener {
 
     @Autowired
     private DataService dataService;
-
+    @Autowired
+    HistoryDataService historyDataService;
     @Autowired
     private ThingService thingService;
 
@@ -59,10 +58,8 @@ public class DemoBusiness implements DataListener {
         );
 
         // save new status to cache
-        this.dataService.updateCache(sData);
+        this.dataService.saveData(sData);
 
-        // save to history data
-        // ...
     }
 
     @Override
