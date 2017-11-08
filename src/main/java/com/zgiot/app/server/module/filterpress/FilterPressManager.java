@@ -80,7 +80,6 @@ public class FilterPressManager {
 
     private UnloadManager unloadManager = new UnloadManager();
 
-    Map<String,FilterPressLogBean> statisticLogs = new ConcurrentHashMap<>();
 
     static{
         filterPressStage.put(FilterPressMetricConstants.RO_LOOSE,"");
@@ -141,10 +140,6 @@ public class FilterPressManager {
         }else{
             return;
             //throw new SysException("filterPress is null",SysException.EC_UNKOWN);
-        }
-
-        if(!statisticLogs.containsKey(thingCode)){
-            statisticLogs.put(thingCode,new FilterPressLogBean());
         }
         String metricCode = data.getMetricCode();
         filterPress.onDataSourceChange(metricCode, data.getValue());
@@ -709,10 +704,6 @@ public class FilterPressManager {
 
     public Set<String> getUnConfirmedUnload() {
         return unConfirmedUnload;
-    }
-
-    public Map<String, FilterPressLogBean> getStatisticLogs() {
-        return statisticLogs;
     }
 
     // @Scheduled(cron="cnmt.FilterPressDeviceManager.clear")
