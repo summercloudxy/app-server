@@ -24,7 +24,8 @@ public class CmdControlServiceImpl implements CmdControlService {
     private static final int DEFAULT_RETRY_COUNT = 5;
     private static final int RETURN_CODE_SUCCESS = 1;
     private static final int DEFAULT_SEND_DELAY_TIME = 0;
-    private static final int SEND_PERIOD = 500;
+    private static final int SEND_PERIOD = 1000;
+    private static final int CLEAN_WAIT_PERIOD = 500;
     private static final int VALUE_TRUE = 1;
     private static final int VALUE_FALSE = 0;
     @Autowired
@@ -150,9 +151,10 @@ public class CmdControlServiceImpl implements CmdControlService {
         Boolean state = false;
         for (int i = 1; i <= realRetryCount; i++) {
             try {
-                if (null != cleanPeriod) {
-                    Thread.sleep(cleanPeriod);
+                if (null == cleanPeriod) {
+                    cleanPeriod = CLEAN_WAIT_PERIOD;
                 }
+                Thread.sleep(cleanPeriod);
                 cmdSendResponseData = sendCmd(Collections.singletonList(dataModel), requestId);
                 state = true;
                 break;
