@@ -3,7 +3,7 @@ package com.zgiot.app.server.module.alert.handler;
 import com.zgiot.app.server.module.alert.AlertManager;
 import com.zgiot.app.server.module.alert.pojo.AlertData;
 import com.zgiot.app.server.module.alert.pojo.AlertRule;
-import com.zgiot.app.server.service.impl.MetricServiceImpl;
+import com.zgiot.app.server.service.MetricService;
 import com.zgiot.common.constants.AlertConstants;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.MetricModel;
@@ -27,9 +27,9 @@ public class AlertParamHandler implements AlertHandler {
     @Autowired
     private AlertManager alertManager;
     @Autowired
-    private MetricServiceImpl metricService;
+    private MetricService metricService;
     private Map<String, Map<String, List<AlertRule>>> alertRuleMap;
-    private Map<String, Map<String, AlertData>> alertDataCache ;
+    private Map<String, Map<String, AlertData>> alertDataCache;
     @Value("${alert.param.period}")
     private Long paramAlertUpdatePeriod;
     private static final Logger logger = LoggerFactory.getLogger(AlertParamHandler.class);
@@ -41,8 +41,8 @@ public class AlertParamHandler implements AlertHandler {
         String metricCode = dataModel.getMetricCode();
         Double value = Double.parseDouble(dataModel.getValue());
         MetricModel metricModel = metricService.getMetric(metricCode);
-        BigDecimal valueStr  =   new BigDecimal(dataModel.getValue());
-        valueStr = valueStr.setScale(2,BigDecimal.ROUND_HALF_UP);
+        BigDecimal valueStr = new BigDecimal(dataModel.getValue());
+        valueStr = valueStr.setScale(2, BigDecimal.ROUND_HALF_UP);
         String alertInfo = metricModel.getMetricName() + "-" + valueStr + metricModel.getValueUnit();
         AlertRule alertRule = getAlertLevel(thingCode, metricCode, value);
         AlertData alertData = alertManager.getAlertDataByThingAndMetricCode(thingCode, metricCode);
@@ -69,7 +69,7 @@ public class AlertParamHandler implements AlertHandler {
 
     }
 
-//    @Scheduled(cron = "0/10 * * * * ?")
+    // @Scheduled(cron = "0/10 * * * * ?")
     public void updateAlertLevel() {
         alertDataCache = alertManager.getAlertParamDataMap();
         for (Map.Entry<String, Map<String, AlertData>> entry : alertDataCache.entrySet()) {
@@ -91,12 +91,13 @@ public class AlertParamHandler implements AlertHandler {
                         alertData.setParamUpper(alertRule.getUpperLimit());
                         alertData.setParamLower(alertRule.getLowerLimit());
                         MetricModel metricModel = metricService.getMetric(metricCode);
-                        String alertInfo =
-                                metricModel.getMetricName() + "-" + alertData.getParamValue() + metricModel.getValueUnit();
+                        String alertInfo = metricModel.getMetricName() + "-" + alertData.getParamValue()
+                                + metricModel.getValueUnit();
                         alertData.setAlertInfo(alertInfo);
                         alertData.setLastUpdateTime(new Date());
                         alertManager.updateAlert(alertData);
-                        logger.debug("调整报警等级，thingCode {}，metricCode {}，当前等级为{}", thingCode, metricCode, alertRule.getAlertLevel());
+                        logger.debug("调整报警等级，thingCode {}，metricCode {}，当前等级为{}", thingCode, metricCode,
+                                alertRule.getAlertLevel());
                     }
                 }
             }
@@ -105,8 +106,8 @@ public class AlertParamHandler implements AlertHandler {
 
     private AlertRule getAlertLevel(String thingCode, String metricCode, double value) {
         alertRuleMap = alertManager.getParamRuleMap();
-        if(alertRuleMap.containsKey(thingCode)){
-            if(alertRuleMap.get(thingCode).containsKey(metricCode)){
+        if (alertRuleMap.containsKey(thingCode)) {
+            if (alertRuleMap.get(thingCode).containsKey(metricCode)) {
                 List<AlertRule> alertRuleList = alertRuleMap.get(thingCode).get(metricCode);
                 for (AlertRule alertRule : alertRuleList) {
                     if (value < alertRule.getUpperLimit() && value >= alertRule.getLowerLimit()) {

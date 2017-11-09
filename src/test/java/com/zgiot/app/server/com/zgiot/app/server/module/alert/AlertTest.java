@@ -1,17 +1,10 @@
 package com.zgiot.app.server.com.zgiot.app.server.module.alert;
 
-import com.zgiot.app.server.module.alert.AlertManager;
 import com.zgiot.app.server.module.alert.handler.AlertFaultHandler;
-import com.zgiot.app.server.module.alert.pojo.AlertData;
-import com.zgiot.app.server.service.MetricService;
-import com.zgiot.app.server.service.impl.DataServiceImpl;
-import com.zgiot.app.server.service.impl.MetricServiceImpl;
-import com.zgiot.app.server.service.impl.ThingServiceImpl;
+import com.zgiot.app.server.service.DataService;
 import com.zgiot.common.constants.MetricCodes;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
-import com.zgiot.common.pojo.MetricModel;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -29,18 +23,11 @@ import static org.mockito.BDDMockito.given;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class AlertTest {
+
     @MockBean
-    ThingServiceImpl mockThingService;
-    @MockBean
-    DataServiceImpl mockDataService;
-//    @MockBean
-//    AlertManager mockAlertManager;
-    @MockBean
-    MetricServiceImpl mockMetricService;
+    DataService mockDataService;
     @Autowired
     AlertFaultHandler alertFaultHandler;
-    @Autowired
-    AlertManager alertManager;
 
     private Set<String> metricSetContainState(){
         return new HashSet<String>(){{
@@ -69,6 +56,17 @@ public class AlertTest {
         return Optional.of(new DataModelWrapper(dataModel));
     }
 
+    private Optional<DataModelWrapper> otherToFaultState(){
+        DataModel dataModel = new DataModel();
+        dataModel.setValue("4");
+        dataModel.setPreValue("3");
+        return Optional.of(new DataModelWrapper(dataModel));
+    }
+
+    private Optional<DataModelWrapper> nullState(){
+        return Optional.empty();
+    }
+
     private DataModel faultData(){
         DataModel dataModel = new DataModel();
         dataModel.setValue(Boolean.TRUE.toString());
@@ -77,68 +75,80 @@ public class AlertTest {
         return dataModel;
     }
 
-    private DataModel normalData(){
-        DataModel dataModel = new DataModel();
-        dataModel.setValue(Boolean.FALSE.toString());
-        dataModel.setThingCode("1301");
-        dataModel.setMetricCode("故障");
-        return dataModel;
-    }
-
-    private MetricModel metricModel(){
-        MetricModel metricModel = new MetricModel();
-        metricModel.setMetricName("故障");
-        return metricModel;
-    }
+//    private DataModel normalData(){
+//        DataModel dataModel = new DataModel();
+//        dataModel.setValue(Boolean.FALSE.toString());
+//        dataModel.setThingCode("1301");
+//        dataModel.setMetricCode("故障");
+//        return dataModel;
+//    }
+//
+//    private MetricModel metricModel(){
+//        MetricModel metricModel = new MetricModel();
+//        metricModel.setMetricName("故障");
+//        return metricModel;
+//    }
 
     @Test
-    public void testFaultHandle(){
-        testReleaseFault();
-        DataModel dataModel = faultData();
-        testRunToFault(dataModel);
-        AlertData runToFault
-                = alertManager.getAlertDataByThingAndMetricCode(dataModel.getThingCode(), dataModel.getMetricCode());
+    public void testFaultHandle() throws Exception{
+        Short level = testRunToFault(faultData());
         Short alertLevel = 30;
-        assertThat(alertLevel.equals(runToFault.getAlertLevel())).isTrue();
+        assertThat(alertLevel.equals(level)).isTrue();
 
-        testReleaseFault();
-        testStopToFault(dataModel);
         alertLevel =20;
-        AlertData stopToFault = alertManager.getAlertDataByThingAndMetricCode(dataModel.getThingCode(), dataModel.getMetricCode());
-        assertThat(alertLevel.equals(stopToFault.getAlertLevel())).isTrue();
+        level = testStopToFault(faultData());
+        assertThat(alertLevel.equals(level)).isTrue();
 
-        testReleaseFault();
-        testWithOutState(dataModel);
         alertLevel =10;
-        AlertData withoutStateFault = alertManager.getAlertDataByThingAndMetricCode(dataModel.getThingCode(), dataModel.getMetricCode());
-        assertThat(alertLevel.equals(withoutStateFault.getAlertLevel())).isTrue();
+        level = testWithOutState(faultData());
+        assertThat(alertLevel.equals(level)).isTrue();
 
+        alertLevel = 30;
+        level = testNullState(faultData());
+        assertThat(alertLevel.equals(level)).isTrue();
+
+        level = testOtherToFault(faultData());
+        assertThat(alertLevel.equals(level)).isTrue();
     }
 
 
-    public void testRunToFault(DataModel dataModel){
-        given(mockThingService.findMetricsOfThing(dataModel.getThingCode())).willReturn(metricSetContainState());
+    public Short testRunToFault(DataModel dataModel) throws Exception{
         given(mockDataService.getData(dataModel.getThingCode(), MetricCodes.STATE)).willReturn(runToFaultState());
-//        given(mockAlertManager.getAlertDataByThingAndMetricCode(dataModel.getThingCode(),dataModel.getMetricCode())).willReturn(null);
-        given(mockMetricService.getMetric(dataModel.getMetricCode())).willReturn(metricModel());
-        alertFaultHandler.check(dataModel);
+        Method testGetLevel = alertFaultHandler.getClass().getDeclaredMethod("getAlertLevel", String.class,Set.class);
+        testGetLevel.setAccessible(true);
+        return  (Short) testGetLevel.invoke(alertFaultHandler, dataModel.getThingCode(),metricSetContainState());
     }
 
-    public void testStopToFault(DataModel dataModel){
-        given(mockThingService.findMetricsOfThing(dataModel.getThingCode())).willReturn(metricSetContainState());
+    public Short testStopToFault(DataModel dataModel)  throws Exception{
         given(mockDataService.getData(dataModel.getThingCode(), MetricCodes.STATE)).willReturn(stopToFaultState());
-        given(mockMetricService.getMetric(dataModel.getMetricCode())).willReturn(metricModel());
-        alertFaultHandler.check(dataModel);
+        Method testGetLevel = alertFaultHandler.getClass().getDeclaredMethod("getAlertLevel", String.class,Set.class);
+        testGetLevel.setAccessible(true);
+        return (Short) testGetLevel.invoke(alertFaultHandler, dataModel.getThingCode(),metricSetContainState());
     }
 
-    public void testWithOutState(DataModel dataModel){
-        given(mockThingService.findMetricsOfThing(dataModel.getThingCode())).willReturn(metricSetWithoutState());
+
+    public Short testOtherToFault(DataModel dataModel) throws Exception{
+        given(mockDataService.getData(dataModel.getThingCode(), MetricCodes.STATE)).willReturn(otherToFaultState());
+        Method testGetLevel = alertFaultHandler.getClass().getDeclaredMethod("getAlertLevel", String.class,Set.class);
+        testGetLevel.setAccessible(true);
+        return (Short) testGetLevel.invoke(alertFaultHandler, dataModel.getThingCode(),metricSetContainState());
+    }
+
+    public Short testNullState(DataModel dataModel) throws Exception{
+        given(mockDataService.getData(dataModel.getThingCode(), MetricCodes.STATE)).willReturn(nullState());
+        Method testGetLevel = alertFaultHandler.getClass().getDeclaredMethod("getAlertLevel", String.class,Set.class);
+        testGetLevel.setAccessible(true);
+        return (Short) testGetLevel.invoke(alertFaultHandler, dataModel.getThingCode(),metricSetContainState());
+    }
+
+    public Short testWithOutState(DataModel dataModel) throws Exception{
         given(mockDataService.getData(dataModel.getThingCode(), MetricCodes.STATE)).willReturn(stopToFaultState());
-        given(mockMetricService.getMetric(dataModel.getMetricCode())).willReturn(metricModel());
-        alertFaultHandler.check(dataModel);
+        Method testGetLevel = alertFaultHandler.getClass().getDeclaredMethod("getAlertLevel", String.class,Set.class);
+        testGetLevel.setAccessible(true);
+        return  (Short) testGetLevel.invoke(alertFaultHandler, dataModel.getThingCode(),metricSetWithoutState());
     }
-
-    public void testReleaseFault(){
-        alertFaultHandler.check(normalData());
-    }
+//
+//    public void testReleaseFault(){
+//        alertFaultHandler.check(normalData());
+//    }
 }

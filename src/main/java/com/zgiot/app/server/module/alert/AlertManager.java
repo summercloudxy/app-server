@@ -3,7 +3,6 @@ package com.zgiot.app.server.module.alert;
 import com.zgiot.app.server.module.alert.mapper.AlertMapper;
 import com.zgiot.app.server.module.alert.pojo.*;
 import com.zgiot.app.server.service.CmdControlService;
-import com.zgiot.app.server.service.impl.CmdControlServiceImpl;
 import com.zgiot.app.server.service.impl.FileServiceImpl;
 import com.zgiot.common.constants.AlertConstants;
 import com.zgiot.common.constants.MetricCodes;
@@ -50,7 +49,7 @@ public class AlertManager {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
     @Autowired
-    private CmdControlServiceImpl cmdControlService;
+    private CmdControlService cmdControlService;
     private static final Logger logger = LoggerFactory.getLogger(AlertManager.class);
     private static final int SORT_DESC = 0;
     private static final int SORT_ASC = 1;
