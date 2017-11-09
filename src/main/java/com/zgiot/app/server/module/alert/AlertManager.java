@@ -467,6 +467,7 @@ public class AlertManager {
      * @param alertData
      */
     private void endRepair(AlertData alertData) {
+        alertData.setRepair(false);
         alertData.setAlertStage(AlertConstants.STAGE_REPAIRED);
         alertData.setRepairEndTime(new Date());
         // updateAlert(alertData);
