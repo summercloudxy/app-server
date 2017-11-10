@@ -2,7 +2,7 @@ package com.zgiot.app.server.module.alert;
 
 import com.zgiot.app.server.module.alert.mapper.AlertMapper;
 import com.zgiot.app.server.module.alert.pojo.*;
-import com.zgiot.app.server.service.impl.CmdControlServiceImpl;
+import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.impl.FileServiceImpl;
 import com.zgiot.common.constants.AlertConstants;
 import com.zgiot.common.constants.MetricCodes;
@@ -49,7 +49,7 @@ public class AlertManager {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
     @Autowired
-    private CmdControlServiceImpl cmdControlService;
+    private CmdControlService cmdControlService;
     private static final Logger logger = LoggerFactory.getLogger(AlertManager.class);
     private static final int SORT_DESC = 0;
     private static final int SORT_ASC = 1;
@@ -65,7 +65,7 @@ public class AlertManager {
                 try {
                     Thread.sleep(10);
                     AlertData alertData = verifyDelayQueue.take().getAlertData();
-                    if(AlertConstants.STAGE_VERIFIED.equals(alertData.getAlertStage())) {
+                    if (AlertConstants.STAGE_VERIFIED.equals(alertData.getAlertStage())) {
                         alertData.setAlertStage(AlertConstants.STAGE_UNTREATED);
                         updateAlert(alertData);
                     }
@@ -467,6 +467,7 @@ public class AlertManager {
      * @param alertData
      */
     private void endRepair(AlertData alertData) {
+        alertData.setRepair(false);
         alertData.setAlertStage(AlertConstants.STAGE_REPAIRED);
         alertData.setRepairEndTime(new Date());
         // updateAlert(alertData);
@@ -536,7 +537,19 @@ public class AlertManager {
         dataModel.setThingCode(thingCode);
         dataModel.setMetricCode(MetricCodes.RESET);
         dataModel.setValue(Boolean.TRUE.toString());
-        cmdControlService.sendCmd(dataModel, requestId);
+        CmdControlService.CmdSendResponseData resetSendResponseData = cmdControlService.sendCmd(dataModel, requestId);
+        if (resetSendResponseData.getOkCount() <= 0) {
+            throw new SysException("下发复位信号失败，失败原因："+resetSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
+        }
+        Map<String, AlertData> metricAlertDataMap = alertDataMap.get(thingCode);
+        if (metricAlertDataMap != null && metricAlertDataMap.containsKey(MetricCodes.WARNING)) {
+            dataModel.setMetricCode(MetricCodes.ALERT_CONFIRM);
+            CmdControlService.CmdSendResponseData alertConfirmSendResponseData =
+                    cmdControlService.sendCmd(dataModel, requestId);
+            if (alertConfirmSendResponseData.getOkCount() <= 0) {
+                throw new SysException("下发报警确认信号失败，失败原因："+alertConfirmSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
+            }
+        }
         logger.debug("报警设备{}进行复位操作", thingCode);
     }
 

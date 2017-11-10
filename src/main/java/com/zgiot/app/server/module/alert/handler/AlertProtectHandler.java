@@ -3,7 +3,7 @@ package com.zgiot.app.server.module.alert.handler;
 import com.zgiot.app.server.module.alert.AlertManager;
 import com.zgiot.app.server.module.alert.pojo.AlertData;
 import com.zgiot.app.server.module.alert.pojo.AlertRule;
-import com.zgiot.app.server.service.impl.MetricServiceImpl;
+import com.zgiot.app.server.service.MetricService;
 import com.zgiot.common.constants.AlertConstants;
 import com.zgiot.common.pojo.DataModel;
 import org.slf4j.Logger;
@@ -21,7 +21,7 @@ public class AlertProtectHandler implements AlertHandler {
     @Autowired
     private AlertManager alertManager;
     @Autowired
-    private MetricServiceImpl metricService;
+    private MetricService metricService;
     private static final String ENABLE_VALUE = Boolean.TRUE.toString();
     private static final String DISABLE_VALUE = Boolean.FALSE.toString();
     private static final Logger logger = LoggerFactory.getLogger(AlertProtectHandler.class);
@@ -31,15 +31,14 @@ public class AlertProtectHandler implements AlertHandler {
         String thingCode = dataModel.getThingCode();
         String metricCode = dataModel.getMetricCode();
         Map<String, Map<String, AlertRule>> alertRuleMap = alertManager.getProtectRuleMap();
-        AlertData alertData =
-                alertManager.getAlertDataByThingAndMetricCode(thingCode, metricCode);
+        AlertData alertData = alertManager.getAlertDataByThingAndMetricCode(thingCode, metricCode);
         AlertRule alertRule = null;
-        if(alertRuleMap.containsKey(thingCode)){
-            if(alertRuleMap.get(thingCode).containsKey(metricCode)){
+        if (alertRuleMap.containsKey(thingCode)) {
+            if (alertRuleMap.get(thingCode).containsKey(metricCode)) {
                 alertRule = alertRuleMap.get(thingCode).get(metricCode);
             }
         }
-        if(alertRule == null){
+        if (alertRule == null) {
             return;
         }
         if (ENABLE_VALUE.equalsIgnoreCase(dataModel.getValue()) && alertData == null) {
@@ -52,7 +51,7 @@ public class AlertProtectHandler implements AlertHandler {
             alertData.setRecovery(true);
             if (!alertData.isManualIntervention()) {
                 alertManager.releaseAlert(alertData);
-            }else {
+            } else {
                 alertManager.updateAlert(alertData);
             }
         }

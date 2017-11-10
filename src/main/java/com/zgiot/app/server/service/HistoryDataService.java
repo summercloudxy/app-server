@@ -11,7 +11,7 @@ import java.util.Map;
 
 public interface HistoryDataService {
     Logger fulldataLogger = LoggerFactory.getLogger(
-            HistoryDataServiceImpl.class.getPackage().getName() + ".FullHistData");
+            HistoryDataService.class.getPackage().getName() + ".FullHistData");
 
     /**
      * @see
