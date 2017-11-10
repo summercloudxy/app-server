@@ -1,4 +1,4 @@
-delete from tb_thing;
+TRUNCATE tb_thing;
 -- ----------------------------
 -- Records of tb_thing
 -- ----------------------------

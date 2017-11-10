@@ -1,4 +1,4 @@
-DELETE from rel_thing_metric_label;
+truncate rel_thing_metric_label;
 -- ----------------------------
 -- Records of rel_thing_metric_label
 -- ----------------------------
