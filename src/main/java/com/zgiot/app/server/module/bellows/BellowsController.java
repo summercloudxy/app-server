@@ -3,6 +3,8 @@ package com.zgiot.app.server.module.bellows;
 import com.alibaba.fastjson.JSON;
 import com.zgiot.app.server.module.bellows.compressor.Compressor;
 import com.zgiot.app.server.module.bellows.compressor.CompressorManager;
+import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorOperation;
+import com.zgiot.common.constants.BellowsConstants;
 import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.restcontroller.ServerResponse;
@@ -38,10 +40,10 @@ public class BellowsController {
      * @return
      */
     @PostMapping(value = "api/bellows/compressor/intelligent")
-    public ResponseEntity<String> setLowCompressorIntelligent(String state, HttpServletRequest request) {
+    public ResponseEntity<String> setLowCompressorIntelligent(Integer state, HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
         //param validate
-        if (StringUtils.isEmpty(state)) {
+        if (state == null) {
             if (logger.isDebugEnabled()) {
                 logger.debug("RequestId: {} send a bland request", requestId);
             }
@@ -51,29 +53,63 @@ public class BellowsController {
             return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
         }
 
-        if (!NumberUtils.isDigits(state)) {
+        if (state != Compressor.YES && state != Compressor.NO) {
             if (logger.isDebugEnabled()) {
                 logger.debug("RequestId: {} send a wrong state: {}", requestId, state);
             }
-            ServerResponse res = new ServerResponse("State cannot be parse to number.State :" + state, SysException.EC_UNKNOWN, 0);
-            String resJSON = JSON.toJSONString(res);
-            return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
-        }
-
-        int intelligent = Integer.parseInt(state);
-        if (intelligent != Compressor.YES && intelligent != Compressor.NO) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("RequestId: {} send a wrong state: {}", requestId, state);
-            }
-            ServerResponse res = new ServerResponse("State must be 1 or 0.State :" + state, SysException.EC_UNKNOWN, 0);
+            ServerResponse res = new ServerResponse("State must be 1 or 0.Got state :" + state + ".", SysException.EC_UNKNOWN, 0);
             String resJSON = JSON.toJSONString(res);
             return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
         }
 
         logger.info("RequestId: {} set low press compressor intelligent state: {}", requestId, state);
-        compressorManager.changeLowCompressorIntelligent(intelligent, requestId);
+        compressorManager.changeLowCompressorIntelligent(state, requestId);
 
         return new ResponseEntity<>(ServerResponse.buildOkJson(null),
+                HttpStatus.OK);
+    }
+
+    /**
+     * 空压机手动启动/停止
+     * @param thingCode 空压机设备号
+     * @param operation 1：运行，0：停止
+     * @return
+     */
+    @PostMapping(value = "api/bellows/compressor/operation")
+    public ResponseEntity<String> operateCompressor(String thingCode, Integer operation, HttpServletRequest request) {
+        String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
+
+        //param validate
+        if (StringUtils.isEmpty(thingCode) || operation == null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("RequestId: {} send a wrong request.ThingCode:{}, operation: {}.", requestId, thingCode, operation);
+            }
+
+            ServerResponse res = new ServerResponse("Wrong request.Got thingCode:" + thingCode + ",operation:" + operation + ".", SysException.EC_UNKNOWN, 0);
+            String resJSON = JSON.toJSONString(res);
+            return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
+        }
+        if (operation != Compressor.YES && operation != Compressor.NO) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("RequestId: {} send a wrong operation: {}", requestId, operation);
+            }
+            ServerResponse res = new ServerResponse("Operation must be 1 or 0.Got operation :" + operation + ".", SysException.EC_UNKNOWN, 0);
+            String resJSON = JSON.toJSONString(res);
+            return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
+        }
+
+        logger.info("RequestId: {} operate compressor: {} to running: {}", requestId, thingCode, operation);
+
+        EnumCompressorOperation opt;
+        if (Compressor.YES == operation) {
+            opt = EnumCompressorOperation.START;
+        } else {
+            opt = EnumCompressorOperation.STOP;
+        }
+
+        int count = compressorManager.operateCompressor(thingCode, opt, BellowsConstants.TYPE_MANUAL, requestId);
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(count),
                 HttpStatus.OK);
     }
 }

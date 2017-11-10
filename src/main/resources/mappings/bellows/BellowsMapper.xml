@@ -13,4 +13,17 @@
     <update id="updateParamValue">
         UPDATE tb_bellows_config set param_value = #{paramValue} WHERE thing_code = #{thingCode} and param_name = #{paramName}
     </update>
+    
+    <insert id="saveCompressorLog" useGeneratedKeys="true" keyProperty="log.id">
+        INSERT INTO tb_bellows_compressor_log
+        (thing_code, operation, operate_type, operate_time, pre_state, request_id)
+        VALUES
+        (#{log.thingCode}, #{log.operation}, #{log.operateType}, #{log.operateTime}, #{log.preState}, #{log.requestId})
+    </insert>
+
+    <update id="updateCompressorLog">
+        UPDATE tb_bellows_compressor_log
+        SET post_state = #{log.postState}, confirm_time = #{log.confirmTime}, pressure = #{log.pressure}
+        WHERE id = #{log.id}
+    </update>
 </mapper>
