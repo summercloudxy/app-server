@@ -57,6 +57,11 @@ public class CompressorLog {
      */
     private String requestId;
 
+    /**
+     * 备注
+     */
+    private String memo;
+
     public Long getId() {
         return id;
     }
@@ -135,5 +140,13 @@ public class CompressorLog {
 
     public void setRequestId(String requestId) {
         this.requestId = requestId;
+    }
+
+    public String getMemo() {
+        return memo;
+    }
+
+    public void setMemo(String memo) {
+        this.memo = memo;
     }
 }

@@ -2,6 +2,8 @@ package com.zgiot.app.server.module.bellows.compressor;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorOperation;
+import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorState;
+import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.util.RequestIdUtil;
 import com.zgiot.common.constants.BellowsConstants;
@@ -101,6 +103,11 @@ public class Compressor {
     private volatile int runState;
 
     /**
+     * 故障状态
+     */
+    private volatile int errorState;
+
+    /**
      * 排气压力
      */
     private volatile double pressure;
@@ -148,6 +155,48 @@ public class Compressor {
         this.type = type;
         this.sort = sort;
         this.manager = manager;
+    }
+
+    /**
+     * 状态初始化
+     * @return
+     */
+    public Compressor initState(DataService dataService, CmdControlService cmdControlService) {
+        //故障状态
+        Optional<DataModelWrapper> errorData = dataService.getData(thingCode, CompressorMetricConstants.ERROR);
+        if (errorData.isPresent()) {
+            errorState = Integer.parseInt(errorData.get().getValue());
+        } else {
+            //TODO: 调用cmdService接口取数据
+        }
+
+        //运行状态
+        Optional<DataModelWrapper> runData = dataService.getData(thingCode, CompressorMetricConstants.RUN_STATE);
+        if (runData.isPresent()) {
+            runState = Integer.parseInt(runData.get().getValue());
+        } else {
+            //TODO: 调用cmdService接口取数据
+        }
+
+        //加载状态
+        Optional<DataModelWrapper> loadData = dataService.getData(thingCode, CompressorMetricConstants.LOAD_STATE);
+        if (loadData.isPresent()) {
+            loadState = Integer.parseInt(loadData.get().getValue());
+        } else {
+            //TODO: 调用cmdService接口取数据
+        }
+
+        //远程/就地状态
+        Optional<DataModelWrapper> remoteData = dataService.getData(thingCode, CompressorMetricConstants.REMOTE);
+        if (remoteData.isPresent()) {
+            remote = Integer.parseInt(remoteData.get().getValue());
+        } else {
+            //TODO: 调用cmdService接口取数据
+        }
+
+        confirmState();
+
+        return this;
     }
 
     /**
@@ -236,12 +285,12 @@ public class Compressor {
 
     /**
      * 运行状态变化
-     * @param dataModel
+     * @param value
      */
-    public void onRunStateChange(DataModel dataModel) {
-        runState = Integer.parseInt(dataModel.getValue());
+    public void onRunStateChange(String value, String requestId) {
+        runState = Integer.parseInt(value);
         if (logger.isDebugEnabled()) {
-            logger.debug("Compressor: {} get run state signal: {}.", thingCode, runState);
+            logger.debug("Compressor: {} get run state signal: {}. RequestId: {}.", thingCode, runState, requestId);
         }
 
         confirmState();
@@ -249,15 +298,15 @@ public class Compressor {
 
     /**
      * 加载状态变化
-     * @param dataModel
+     * @param value
      */
-    public void onLoadStateChange(DataModel dataModel) {
-        loadState = Integer.parseInt(dataModel.getValue());
+    public void onLoadStateChange(String value, String requestId) {
+        loadState = Integer.parseInt(value);
         if (logger.isDebugEnabled()) {
-            logger.debug("Compressor: {} get load state signal: {}.", thingCode, runState);
+            logger.debug("Compressor: {} get load state signal: {}.RequestId: {}", thingCode, runState, requestId);
         }
 
-        if (runState == YES && loadState == YES) {
+        if (errorState == NO && runState == YES && loadState == YES) {
             //收到加载信号，启动定时器，判断是否是保护模式
             synchronized (stateLock) {
                 if (stateTimer != null) {
@@ -283,6 +332,20 @@ public class Compressor {
     }
 
     /**
+     * 故障状态变化
+     * @param value
+     * @param requestId
+     */
+    public void onErrorStateChange(String value, String requestId) {
+        errorState = Integer.parseInt(value);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Compressor: {} get error state signal: {}.RequestId: {}", thingCode, runState, requestId);
+        }
+
+        confirmState();
+    }
+
+    /**
      * 等待状态确认
      */
     public void waitForStateConfirm() {
@@ -302,16 +365,21 @@ public class Compressor {
 
     /**
      * 远程、就地状态变化
-     * @param dataModel
+     * @param value
      */
-    public void onRemoteChange(DataModel dataModel) {
-        remote = Integer.parseInt(dataModel.getValue());
+    public void onRemoteChange(String value, String requestId) {
+        remote = Integer.parseInt(value);
         if (logger.isDebugEnabled()) {
-            logger.debug("Compressor: {} get remote signal: {}.", thingCode, remote);
+            logger.debug("Compressor: {} get remote signal: {}.RequestId: {}.", thingCode, remote, requestId);
         }
 
-        //就地状态删除stopTimer
-        turnOffStopTimer();
+        if (remote == NO) {
+            //就地状态删除stopTimer
+            turnOffStopTimer();
+        } else if (manager.isIntelligent()){
+            //远程状态下设置stopTimer
+            turnOnStopTimer();
+        }
     }
 
     /**
@@ -320,7 +388,7 @@ public class Compressor {
     public void turnOnStopTimer() {
         if (TYPE_HIGH.equals(type)) {
             if (logger.isDebugEnabled()) {
-                logger.debug("High press compressor {} need not turn on stop timer.", thingCode);
+                logger.debug("High press compressor {} cannot turn on stop timer.", thingCode);
             }
             return;
         }
@@ -332,7 +400,7 @@ public class Compressor {
             return;
         }
 
-        if (!BellowsConstants.STATE_UNLOAD.equals(state)) {
+        if (!EnumCompressorState.UNLOAD.getState().equals(state)) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Compressor {} is not unload, cannot turn on stopTimer.", thingCode);
             }
@@ -355,7 +423,9 @@ public class Compressor {
                         logger.trace("Compressor {} in stopTimer.", thingCode);
                     }
                     waitForStateConfirm();
-                    manager.operateCompressor(thingCode, EnumCompressorOperation.STOP, BellowsConstants.TYPE_AUTO, RequestIdUtil.generateRequestId());
+                    if (EnumCompressorState.UNLOAD.getState().equals(state)) {
+                        manager.operateCompressor(thingCode, EnumCompressorOperation.STOP, BellowsConstants.TYPE_AUTO, RequestIdUtil.generateRequestId());
+                    }
                     turnOffStopTimer();
                 }
             }, STOP_WAIT_TIME);
@@ -384,14 +454,16 @@ public class Compressor {
     private void confirmState() {
         String oldState = state;
 
-        if (runState == YES) {
+        if (errorState == YES) {
+            state = EnumCompressorState.ERROR.getState();
+        } else if (runState == YES) {
             if (loadState == YES) {
-                state = BellowsConstants.STATE_RUNNING;
+                state = EnumCompressorState.RUNNING.getState();
             } else {
-                state = BellowsConstants.STATE_UNLOAD;
+                state = EnumCompressorState.UNLOAD.getState();
             }
         } else {
-            state = BellowsConstants.STATE_STOPPED;
+            state = EnumCompressorState.STOPPED.getState();
         }
 
         if (logger.isDebugEnabled()) {
@@ -399,12 +471,41 @@ public class Compressor {
         }
 
 
-        if (!oldState.equals(state)) {
+        if (!state.equals(oldState)) {
             onStateChange();
         }
 
 
         //清除stateTimer
+        removeStateTimer();
+
+        //日志确认更新
+        updateLogs();
+    }
+
+    /**
+     * 状态变化
+     */
+    private void onStateChange() {
+        if (EnumCompressorState.UNLOAD.getState().equals(state)) {
+            //卸载状态下开启stopTimer
+            if (!manager.isIntelligent()) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Low press intelligent is {},  cannot turn on stop timer.", manager.isIntelligent());
+                }
+                return;
+            }
+            turnOnStopTimer();
+        } else {
+            //其他状态下关闭stopTimer
+            turnOffStopTimer();
+        }
+    }
+
+    /**
+     * 清除stateTimer
+     */
+    private void removeStateTimer() {
         synchronized (stateLock) {
             if (stateTimer != null) {
                 if (logger.isTraceEnabled()) {
@@ -416,27 +517,18 @@ public class Compressor {
             }
             stateLock.notifyAll();
         }
+    }
 
-        //保存日志确认
+    /**
+     * 日志确认更新
+     */
+    private void updateLogs() {
         synchronized (logLock) {
             if (!logTimerMap.isEmpty()) {
                 logTimerMap.forEach((logId, logTimerTask) ->{
                     manager.updateLog(logId, thingCode, logTimerTask.requestId);
                 });
             }
-        }
-    }
-
-    /**
-     * 状态变化
-     */
-    private void onStateChange() {
-        if (BellowsConstants.STATE_UNLOAD.equals(state)) {
-            //卸载状态下开启stopTimer
-            manager.turnOnStopTimer(this);
-        } else {
-            //其他状态下关闭stopTimer
-            turnOffStopTimer();
         }
     }
 
@@ -482,6 +574,14 @@ public class Compressor {
 
     public void setRunState(int runState) {
         this.runState = runState;
+    }
+
+    public int getErrorState() {
+        return errorState;
+    }
+
+    public void setErrorState(int errorState) {
+        this.errorState = errorState;
     }
 
     public double getPressure() {

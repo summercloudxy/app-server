@@ -3,6 +3,7 @@ package com.zgiot.app.server.module.bellows;
 import com.alibaba.fastjson.JSON;
 import com.zgiot.app.server.module.bellows.compressor.Compressor;
 import com.zgiot.app.server.module.bellows.compressor.CompressorManager;
+import com.zgiot.app.server.module.bellows.compressor.pojo.CompressorLog;
 import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorOperation;
 import com.zgiot.common.constants.BellowsConstants;
 import com.zgiot.common.constants.GlobalConstants;
@@ -18,9 +19,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author wangwei
@@ -111,5 +115,21 @@ public class BellowsController {
 
         return new ResponseEntity<>(ServerResponse.buildOkJson(count),
                 HttpStatus.OK);
+    }
+
+
+    /**
+     * 获取空压机日志
+     * @param startTime
+     * @param endTime
+     * @param page
+     * @param count
+     * @return
+     */
+    @GetMapping(value = "api/bellows/compressor/log")
+    public ResponseEntity<String> getCompressorLog(@RequestParam Date startTime, @RequestParam Date endTime, @RequestParam(required = false) Integer page,
+                                                   @RequestParam(required = false) Integer count) {
+        List<CompressorLog> list = compressorManager.getCompressorLog(startTime, endTime, page, count);
+        return new ResponseEntity<String>(ServerResponse.buildOkJson(list), HttpStatus.OK);
     }
 }

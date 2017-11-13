@@ -4,6 +4,9 @@ import com.zgiot.app.server.module.bellows.compressor.pojo.CompressorLog;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Date;
+import java.util.List;
+
 /**
  * @author wangwei
  */
@@ -39,4 +42,14 @@ public interface BellowsMapper {
      * @param compressorLog
      */
     void updateCompressorLog(@Param("log") CompressorLog compressorLog);
+
+    /**
+     * 查询空压机操作日志
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @param offset    偏移量
+     * @param count 个数
+     * @return
+     */
+    List<CompressorLog> getCompressorLog(@Param("startTime") Date startTime, @Param("endTime") Date endTime, @Param("offset") Integer offset, @Param("count") Integer count);
 }

@@ -16,9 +16,9 @@
     
     <insert id="saveCompressorLog" useGeneratedKeys="true" keyProperty="log.id">
         INSERT INTO tb_bellows_compressor_log
-        (thing_code, operation, operate_type, operate_time, pre_state, request_id)
+        (thing_code, operation, operate_type, operate_time, pre_state, request_id, memo, post_state, confirm_time, pressure)
         VALUES
-        (#{log.thingCode}, #{log.operation}, #{log.operateType}, #{log.operateTime}, #{log.preState}, #{log.requestId})
+        (#{log.thingCode}, #{log.operation}, #{log.operateType}, #{log.operateTime}, #{log.preState}, #{log.requestId}, #{log.memo}, #{log.postState}, #{log.confirmTime}, #{log.pressure})
     </insert>
 
     <update id="updateCompressorLog">
@@ -26,4 +26,14 @@
         SET post_state = #{log.postState}, confirm_time = #{log.confirmTime}, pressure = #{log.pressure}
         WHERE id = #{log.id}
     </update>
+
+    <select id="getCompressorLog" resultType="com.zgiot.app.server.module.bellows.compressor.pojo.CompressorLog">
+        SELECT * FROM tb_bellows_compressor_log
+        WHERE operate_time &gt;= #{startTime}
+        AND operate_time &lt;= #{endTime}
+        ORDER BY operate_time DESC
+        <if test="offset != null">
+            LIMIT #{offset},#{count}
+        </if>
+    </select>
 </mapper>
