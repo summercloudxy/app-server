@@ -188,4 +188,25 @@ public class FilterPressLogBean {
         }
         return true;
     }
+    public void clear(){
+        thingCode = null;
+        feedStartTime = null;
+        feedDuration = 0;
+        feedCurrent = 0;
+        unloadTime = null;
+        unloadDuration = 0;
+        feedState = false;
+        unloadState = false;
+        plateCount = 0;
+        totalPlateCount = 0;
+        statisticLogPlateCount = 0;
+        statisticLogTotalPlateCount = 0;
+        waitDuration = 0;
+        proceedingDuration = 0;
+        team =  0;
+        saveTime = null;
+        plateStartTime = null;
+        isDayShift = false;
+        period = 0;
+    }
 }

@@ -1,6 +1,8 @@
 package com.zgiot.app.server.module.filterpress;
 
 import com.zgiot.common.constants.FilterPressLogConstants;
+import com.zgiot.common.exceptions.SysException;
+import org.apache.commons.lang.StringUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,15 +33,18 @@ public class FilterPressLogUtil {
         return false;
     }
 
-    public static Map<String,String> getCurrentDayAndNextOrPriorDay(short nextOrPriorDay){
+    public static Map<String,String> getCurrentDayAndNextOrPriorDay(int currentOffset,int nextOrPriorOffset){
         Map<String,String> dayMap = new HashMap<>();
         Date date = new Date();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd ");
-        String currentDay = simpleDateFormat.format(date);
-        dayMap.put(FilterPressLogConstants.CURRENT_DAY,currentDay);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
-        calendar.add(Calendar.DAY_OF_MONTH, nextOrPriorDay);
+        calendar.add(Calendar.DAY_OF_MONTH, currentOffset);
+        date = calendar.getTime();
+        String currentDay = simpleDateFormat.format(date);
+        dayMap.put(FilterPressLogConstants.CURRENT_DAY,currentDay);
+        calendar.setTime(new Date());
+        calendar.add(Calendar.DAY_OF_MONTH, nextOrPriorOffset);
         date = calendar.getTime();
         String nextOrPrior = simpleDateFormat.format(date);
         dayMap.put(FilterPressLogConstants.NEXT_OR_PRIOR_DAY,nextOrPrior);
@@ -66,7 +71,10 @@ public class FilterPressLogUtil {
         return isPriorOrNextPartNightShift;
     }
 
-    public static Date getNightShiftRateStartTime(String attchTime){
+    public static Date getDayOrNightShiftRateStartTime(String attchTime,int currentOrPrior){
+        if(StringUtils.isBlank(attchTime)){
+            throw new SysException("ratedStartTimeOffset is null",SysException.EC_UNKNOWN);
+        }
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date date = new Date();
         String day = simpleDateFormat.format(date);
@@ -78,13 +86,11 @@ public class FilterPressLogUtil {
         try{
             nightTimeLine = simpleDateFormat.parse(day + FilterPressLogConstants.NIGHT_SHIFT_LINE);
             simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            if(date.getTime() < nightTimeLine.getTime()){
+            if(date.getTime() < nightTimeLine.getTime() || currentOrPrior == 1){
                 calendar.add(Calendar.DAY_OF_MONTH, FilterPressLogConstants.DAY_DEC_ONE);
-                dayOrNightShiftAttach = FilterPressLogConstants.DAY_SHIFT_START + attchTime;
-            }else{
-                dayOrNightShiftAttach = FilterPressLogConstants.DAY_SHIFT_START + attchTime;
             }
-            String currentDay = simpleDateFormat.format(calendar.getTime())  + dayOrNightShiftAttach;
+            dayOrNightShiftAttach = attchTime;
+            String currentDay = simpleDateFormat.format(calendar.getTime()) + " " + dayOrNightShiftAttach;
             simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             date = simpleDateFormat.parse(currentDay);
         }catch(ParseException e){
@@ -101,7 +107,7 @@ public class FilterPressLogUtil {
         try{
             currentDayStartTimeMills = simpleDateFormat.parse(currentDayStartTime).getTime();
         }catch(ParseException e){
-            e.printStackTrace();
+            throw new SysException("simpleDateFormat parse exception",SysException.EC_UNKNOWN);
         }
         if(priorLooseTime < currentDayStartTimeMills){
             return true;

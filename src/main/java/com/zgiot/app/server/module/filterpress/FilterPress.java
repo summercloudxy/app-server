@@ -221,6 +221,7 @@ public class FilterPress {
          */
         if(manager.getStatisticLogs().containsKey(this.code)){
             FilterPressLogBean filterPressLogBean = manager.getStatisticLogs().get(this.code);
+            filterPressLogBean.clear();
             filterPressLogBean.setThingCode(this.code);
             if(unloadDuration > 0){
                 filterPressLogBean.setUnloadDuration(unloadDuration);
@@ -266,7 +267,7 @@ public class FilterPress {
             filterPressLogBean.setFeedState(feedIntelligent ? FilterPressLogConstants.FEED_INTELLIGENT : FilterPressLogConstants.FEED_AUTO);
             filterPressLogBean.setUnloadState(unloadIntelligent ? FilterPressLogConstants.UNLOAD_INTELLIGENT : FilterPressLogConstants.UNLOAD_AUTO);
 
-            filterPressLogBean.setPlateStartTime(parseDate(looseStartTime));
+            filterPressLogBean.setPlateStartTime(parseDate(unloadStartTime));
 
             if(FilterPressLogUtil.isDayShift(FilterPressLogConstants.DAY_SHIFT_START_TIME_SCOPE,FilterPressLogConstants.DAY_SHIFT_END_TIME_SCOPE) ){
                 filterPressLogBean.setDayShift(FilterPressLogConstants.IS_DAY_SHIFT_OK);
@@ -284,11 +285,14 @@ public class FilterPress {
                 filterPressLogBean.setStatisticLogPlateCount(statisticLogplateCount);
                 filterPressLogBean.setStatisticLogTotalPlateCount(getAllFilterPressTotalPlateCount(Boolean.TRUE));
                 manager.filterPressLogService.saveFilterPressLog(filterPressLogBean);
+            }else{
+                logger.info("server is reset or filterPress first link server");
             }
         }
     }
 
     public void offLoosen(){
+        logger.trace("{} off loosen", code);
         looseEndTime = System.currentTimeMillis();
         looseDuration += looseEndTime - looseStartTime;
     }

@@ -5,8 +5,8 @@ import com.zgiot.app.server.module.filterpress.pojo.FeedAsumConfirmBean;
 import com.zgiot.app.server.module.filterpress.pojo.FilterPressElectricity;
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.DataService;
+import com.zgiot.app.server.module.filterpress.filterPressService.FilterPressLogService;
 import com.zgiot.app.server.service.HistoryDataService;
-import com.zgiot.app.server.service.FilterPressLogService;
 import com.zgiot.app.server.util.RequestIdUtil;
 import com.zgiot.common.constants.FilterPressConstants;
 import com.zgiot.common.constants.FilterPressMetricConstants;
@@ -154,18 +154,18 @@ public class FilterPressManager {
         if (FilterPressMetricConstants.FEED_ASUM.equals(metricCode)) {
             processFeedAssumption(data);
         }
-        if (FilterPressMetricConstants.T1_RCD.equals(metricCode)
-                || FilterPressMetricConstants.T2_RCD.equals(metricCode)
-                || FilterPressMetricConstants.T3_RCD.equals(metricCode)) {
+        if (FilterPressMetricConstants.T1_CHOOSE.equals(metricCode)
+                || FilterPressMetricConstants.T2_CHOOSE.equals(metricCode)
+                || FilterPressMetricConstants.T3_CHOOSE.equals(metricCode)) {
             if (Boolean.TRUE.toString().equals(data.getValue())) {
                 switch (metricCode) {
-                    case FilterPressMetricConstants.T1_RCD:
+                    case FilterPressMetricConstants.T1_CHOOSE:
                         getFilterPress(thingCode).setProducingTeam(1);
                         break;
-                    case FilterPressMetricConstants.T2_RCD:
+                    case FilterPressMetricConstants.T2_CHOOSE:
                         getFilterPress(thingCode).setProducingTeam(2);
                         break;
-                    case FilterPressMetricConstants.T3_RCD:
+                    case FilterPressMetricConstants.T3_CHOOSE:
                         getFilterPress(thingCode).setProducingTeam(3);
                         break;
                     default:
@@ -256,7 +256,7 @@ public class FilterPressManager {
         Boolean isRunning = Boolean.FALSE;
         switch (metricCode) { // 回调各阶段
             case FilterPressMetricConstants.LOCAL:
-                if(!Boolean.parseBoolean(metricCodeValue)){
+                if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onLocal();
                 }
                 break;

@@ -1,5 +1,5 @@
 CREATE TABLE `tb_filterpress_log` (
-  `id` int(20) NOT NULL AUTO_INCREMENT,
+  `id` int(30) NOT NULL AUTO_INCREMENT,
   `thing_code` varchar(20) NOT NULL,
   `feed_start_time` datetime NOT NULL,
   `feed_duration` int(14) NOT NULL,
@@ -20,5 +20,6 @@ CREATE TABLE `tb_filterpress_log` (
   `statistic_log_plate_count` int(6) DEFAULT NULL,
   `statistic_log_total_plate_count` int(6) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `id` (`id`) USING BTREE
+  UNIQUE KEY `id` (`id`) USING BTREE,
+  UNIQUE KEY `save_time` (`save_time`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

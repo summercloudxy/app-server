@@ -4,6 +4,7 @@ import com.zgiot.app.server.module.filterpress.FilterPressLogBean;
 import com.zgiot.app.server.module.filterpress.pojo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.Date;
 import java.util.List;
@@ -22,43 +23,47 @@ public interface FilterPressLogMapper {
 
     /**
      * 根据日期查询压滤日志
-     * @param queryDate
+     * @param startTime
+     * @param endTime
      * @return
      */
-    List<FilterPressLogBean> queryLogByDate(String queryDate);
+    List<FilterPressLogBean> queryLogByDate(@Param("startTime") String startTime,@Param("endTime") String endTime);
 
     /**
      * 查询各压滤机压板信息
      * @param isDayShift
-     * @param currentDay
-     * @param nextDay
+     * @param startTime
+     * @param endTime
      * @return
      */
-    List<FilterPressSinglePlateCountBean> queryPlateInfos(@Param("isDayShift") boolean isDayShift, @Param("currentDay") String currentDay, @Param("nextDay") String nextDay);
+    List<FilterPressSinglePlateCountBean> queryPlateInfos(@Param("isDayShift") boolean isDayShift, @Param("startTime") String startTime, @Param("endTime") String endTime);
 
     /**
      * 查询各压滤机压板总数信息
      * @param isDayShift
-     * @param currentDay
-     * @param nextDay
+     * @param startTime
+     * @param endTime
      * @return
      */
-    List<FilterPressPlateAndTimeBean> queryTotalPlateInfos(@Param("isDayShift") boolean isDayShift,@Param("currentDay") String currentDay,@Param("nextDay") String nextDay);
+    List<FilterPressPlateAndTimeBean> queryTotalPlateInfos(@Param("isDayShift") boolean isDayShift,@Param("startTime") String startTime,@Param("endTime") String endTime);
 
     /**
      * 查询上一班次历史压板信息
-     * @param isDayShift
-     * @param currentDay
-     * @param nextDay
+     * @param startTime
+     * @param endTime
      * @return
      */
-    List<FilterPressTcAndMaxPlateCount> queryHisPlateCount(@Param("isDayShift") boolean isDayShift, @Param("currentDay") String currentDay, @Param("nextDay") String nextDay);
+    List<FilterPressHisPlateCountBean> queryHisPlateCount(@Param("startTime") String startTime, @Param("endTime") String endTime);
 
     /**
      * 人工清零前查询上一班次所属对组
      * @param isDayShift
-     * @param priorShiftDay
+     * @param startTime
+     * @param endTime
      * @return
      */
-    int getPriorTeam(@Param("isDayShift") boolean isDayShift, @Param("priorShiftDay") String priorShiftDay);
+    int getPriorTeam(@Param("isDayShift") boolean isDayShift, @Param("startTime") String startTime, @Param("endTime") String endTime);
+
+
+    FilterPressRatedStartTimeBean getFilterPressRatedStartTime(@Param("thingCode") String thingCode,@Param("dayOrNightRatedTime") String dayOrNightRatedTime);
 }

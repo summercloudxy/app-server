@@ -20,6 +20,11 @@ public class FilterPressTotalPlateCountBean {
     private Integer ratedTotalPlateCount;
 
     /**
+     * 时间
+     */
+    private Date startTime;
+
+    /**
      *     //时间轴(总板数,时间)
      */
     private Map<Integer,Date> timeLineMap;
@@ -38,6 +43,14 @@ public class FilterPressTotalPlateCountBean {
 
     public Map<Integer, Date> getTimeLineMap() {
         return timeLineMap;
+    }
+
+    public Date getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
     }
 
     public void setPeriod(int period) {

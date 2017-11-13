@@ -1,30 +1,29 @@
 package com.zgiot.app.server.module.filterpress.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.zgiot.app.server.module.filterpress.FilterPressLogBean;
+import com.zgiot.app.server.module.filterpress.filterPressService.FilterPressLogService;
 import com.zgiot.app.server.module.filterpress.pojo.FilterPressHisPlateCountBean;
-import com.zgiot.app.server.module.filterpress.pojo.FilterPressPlateCountBean;
+import com.zgiot.app.server.module.filterpress.pojo.FilterPressHisPlateCountWrapper;
 import com.zgiot.app.server.module.filterpress.pojo.FilterPressPlateCountWrapper;
 import com.zgiot.app.server.module.filterpress.pojo.FilterPressTotalPlateCountBean;
 import com.zgiot.app.server.service.CmdControlService;
-import com.zgiot.app.server.service.FilterPressLogService;
 import com.zgiot.common.constants.FilterPressLogConstants;
 import com.zgiot.common.constants.FilterPressMetricConstants;
 import com.zgiot.common.constants.GlobalConstants;
+import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.restcontroller.ServerResponse;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.lang.StringUtils;
+import org.omg.CORBA.SystemException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import com.zgiot.app.server.module.filterpress.filterPressService.FilterPressLogService;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Controller
 public class FilterPressLogController {
@@ -61,8 +60,8 @@ public class FilterPressLogController {
     @ApiOperation("上一班历史压板信息查询")
     @GetMapping(value="api/filterPress/plate/queryHisPlateInfo")
     public ResponseEntity<String> queryHisPlateInfo(){
-        FilterPressHisPlateCountBean filterPressHisPlateCountBean = filterPressLogService.getHisPlateInfos();
-        return new ResponseEntity<>(ServerResponse.buildOkJson(filterPressHisPlateCountBean),
+        List<FilterPressHisPlateCountWrapper> filterPressHisPlateCountWrapperList = filterPressLogService.getHisPlateInfos();
+        return new ResponseEntity<>(ServerResponse.buildOkJson(filterPressHisPlateCountWrapperList),
                 HttpStatus.OK);
     }
 
@@ -90,6 +89,7 @@ public class FilterPressLogController {
             default:
         }
         for(DataModel dataModel:dataModelList){
+            //TODO TEST
             cmdControlService.sendPulseCmdBoolByShort(dataModel,5000,3,requestId,position,500,isHolding);
         }
         return new ResponseEntity<>(
@@ -97,7 +97,7 @@ public class FilterPressLogController {
                 , HttpStatus.OK);
     }
 
-    @ApiOperation("对组选择")
+    @ApiOperation("队组选择")
     @PostMapping(value="api/filterPress/plate/chooseTeam")
     public ResponseEntity<String> chooseTeam( @PathVariable String team, HttpServletRequest request){
         List<DataModel> dataModelList = null;
@@ -121,7 +121,11 @@ public class FilterPressLogController {
             default:
         }
         for(DataModel dataModel:dataModelList){
-            cmdControlService.sendPulseCmdBoolByShort(dataModel,5000,3,requestId,position,cleanPeriod,isHolding);
+            try{
+                cmdControlService.sendPulseCmdBoolByShort(dataModel,5000,3,requestId,position,cleanPeriod,isHolding);
+            }catch(Exception e){
+                throw new SysException("filterPress:" + dataModel.getThingCode() + "sendPulseBoolByShort exception", SysException.EC_UNKNOWN);
+            }
         }
         return new ResponseEntity<>(
                 ServerResponse.buildOkJson(null)
