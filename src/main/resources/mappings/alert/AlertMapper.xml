@@ -157,12 +157,17 @@
         SELECT metric_code,alert_type FROM rel_metric_alert_type WHERE 1=1
     </select>
 
-    <insert id="createAlertDate" keyColumn="id" keyProperty="id" useGeneratedKeys="true"
+    <insert id="createAlertData" keyColumn="id" keyProperty="id" useGeneratedKeys="true"
             parameterType="com.zgiot.app.server.module.alert.pojo.AlertData">
         INSERT INTO tb_alert_data(thing_code,metric_code,alert_source,alert_type,alert_level,alert_datetime,alert_info,reporter,alert_stage,is_repair,repair_confirm_user,repair_start_time,repair_end_time,is_manual_intervention,feedback_image,feedback_video,scene_confirm_state,scene_confirm_time,scene_confirm_user,is_recovery,param_value,param_lower,param_upper,last_update_time,verify_time,post_worker,dispatcher,release_time) VALUES (#{thingCode},#{metricCode},#{alertSource},#{alertType},#{alertLevel},#{alertDateTime},#{alertInfo},#{reporter},#{alertStage},#{repair},#{repairConfirmUser},#{repairStartTime},#{repairEndTime},#{manualIntervention},#{feedBackImage},#{feedBackVideo},#{sceneConfirmState},#{sceneConfirmTime},#{sceneConfirmUser},#{recovery},#{paramValue},#{paramLower},#{paramUpper},#{lastUpdateTime},#{verifyTime},#{postWorker},#{dispatcher},#{releaseTime})
     </insert>
 
-    <update id="updateAlertDate">
+    <insert id="createAlertDataBackup"
+            parameterType="com.zgiot.app.server.module.alert.pojo.AlertData">
+        INSERT INTO tb_alert_data_backup(id,thing_code,metric_code,alert_source,alert_type,alert_level,alert_datetime,alert_info,reporter,alert_stage,is_repair,repair_confirm_user,repair_start_time,repair_end_time,is_manual_intervention,feedback_image,feedback_video,scene_confirm_state,scene_confirm_time,scene_confirm_user,is_recovery,param_value,param_lower,param_upper,last_update_time,verify_time,post_worker,dispatcher,release_time) VALUES (#{id},#{thingCode},#{metricCode},#{alertSource},#{alertType},#{alertLevel},#{alertDateTime},#{alertInfo},#{reporter},#{alertStage},#{repair},#{repairConfirmUser},#{repairStartTime},#{repairEndTime},#{manualIntervention},#{feedBackImage},#{feedBackVideo},#{sceneConfirmState},#{sceneConfirmTime},#{sceneConfirmUser},#{recovery},#{paramValue},#{paramLower},#{paramUpper},#{lastUpdateTime},#{verifyTime},#{postWorker},#{dispatcher},#{releaseTime})
+    </insert>
+
+    <update id="updateAlertData">
         UPDATE tb_alert_data
         SET
         thing_code =#{thingCode},
@@ -196,7 +201,41 @@
         WHERE id = #{id}
     </update>
 
-    <update id="releaseAlertDate">
+    <update id="updateAlertDataBackup">
+        UPDATE tb_alert_data_backup
+        SET
+        thing_code =#{thingCode},
+        metric_code = #{metricCode},
+        alert_source = #{alertSource},
+        alert_type = #{alertType},
+        alert_level = #{alertLevel},
+        alert_datetime = #{alertDateTime},
+        alert_info = #{alertInfo},
+        reporter = #{reporter},
+        alert_stage = #{alertStage},
+        is_repair = #{repair},
+        repair_confirm_user = #{repairConfirmUser},
+        repair_start_time = #{repairStartTime},
+        repair_end_time = #{repairEndTime},
+        is_manual_intervention = #{manualIntervention},
+        feedback_image = #{feedBackImage},
+        feedback_video = #{feedBackVideo},
+        scene_confirm_state = #{sceneConfirmState},
+        scene_confirm_time = #{sceneConfirmTime},
+        scene_confirm_user = #{sceneConfirmUser},
+        is_recovery = #{recovery},
+        param_value = #{paramValue},
+        param_lower = #{paramLower},
+        param_upper = #{paramUpper},
+        last_update_time = #{lastUpdateTime},
+        verify_time = #{verifyTime},
+        post_worker = #{postWorker},
+        dispatcher = #{dispatcher},
+        release_time = #{releaseTime}
+        WHERE id = #{id}
+    </update>
+
+    <update id="releaseAlertData">
         UPDATE tb_alert_data
         SET
         alert_stage = #{alertStage},
@@ -209,6 +248,21 @@
         release_time = #{releaseTime}
         WHERE id = #{id}
     </update>
+
+    <update id="releaseAlertDataBackup">
+        UPDATE tb_alert_data_backup
+        SET
+        alert_stage = #{alertStage},
+        scene_confirm_state = #{sceneConfirmState},
+        scene_confirm_time = #{sceneConfirmTime},
+        scene_confirm_user = #{sceneConfirmUser},
+        is_recovery = #{recovery},
+        post_worker = #{postWorker},
+        dispatcher = #{dispatcher},
+        release_time = #{releaseTime}
+        WHERE id = #{id}
+    </update>
+
     <insert id="saveAlertMessage" keyProperty="id" keyColumn="id" useGeneratedKeys="true">
         INSERT INTO tb_alert_message(info,type,alert_id,time,is_read,user_id,permission) VALUES (#{info},#{type},#{alertId},#{time},#{isRead},#{userId},#{permission})
     </insert>
@@ -539,5 +593,8 @@
         </if>
     </select>
 
+    <delete id="clearAlertDateHistory">
+        DELETE FROM tb_alert_data WHERE alert_datetime  &lt; #{timeStamp} AND  alert_stage = 'RELEASE';
+    </delete>
 
 </mapper>

@@ -5,7 +5,6 @@ import org.quartz.*;
 import org.quartz.impl.StdScheduler;
 import org.quartz.impl.triggers.CronTriggerImpl;
 import org.springframework.context.ApplicationContext;
-import org.springframework.web.context.ContextLoader;
 
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import static org.quartz.JobBuilder.newJob;
@@ -30,7 +29,7 @@ public class QuartzManager {
     public static void addJob(String jobName, String jobGroup, String triggerName, String triggerGroup,
             @SuppressWarnings("rawtypes") Class cls, String cronExpression) {
         try {
-            ApplicationContext context = ContextLoader.getCurrentWebApplicationContext();
+            ApplicationContext context = ApplicationContextListener.getApplicationContext();
             StdScheduler scheduler = (StdScheduler) context.getBean("quartzScheduler");
             JobDetail jobDetail = newJob().withIdentity(JobKey.jobKey(jobName, jobGroup)).ofType(cls).build();
             // 触发器
@@ -97,7 +96,7 @@ public class QuartzManager {
     @SuppressWarnings("rawtypes")
     public static void modifyJobTime(String jobName, String time) {
         try {
-            ApplicationContext context = ContextLoader.getCurrentWebApplicationContext();
+            ApplicationContext context = ApplicationContextListener.getApplicationContext();
             StdScheduler scheduler = (StdScheduler) context.getBean("quartzScheduler");
             CronTrigger trigger = (CronTrigger) scheduler.getTrigger(TriggerKey.triggerKey(jobName));
             if (trigger == null) {
@@ -123,7 +122,7 @@ public class QuartzManager {
      */
     public static void modifyJobTime(String triggerName, String triggerGroupName, String time) {
         try {
-            ApplicationContext context = ContextLoader.getCurrentWebApplicationContext();
+            ApplicationContext context = ApplicationContextListener.getApplicationContext();
             StdScheduler scheduler = (StdScheduler) context.getBean("quartzScheduler");
             CronTriggerImpl trigger =
                     (CronTriggerImpl) scheduler.getTrigger(TriggerKey.triggerKey(triggerName, triggerGroupName));
@@ -148,7 +147,7 @@ public class QuartzManager {
      */
     public static void removeJob(String jobName) {
         try {
-            ApplicationContext context = ContextLoader.getCurrentWebApplicationContext();
+            ApplicationContext context = ApplicationContextListener.getApplicationContext();
             StdScheduler scheduler = (StdScheduler) context.getBean("quartzScheduler");
             scheduler.pauseTrigger(TriggerKey.triggerKey(jobName));// 停止触发器
             scheduler.unscheduleJob(TriggerKey.triggerKey(jobName));// 移除触发器
@@ -168,7 +167,7 @@ public class QuartzManager {
      */
     public static void removeJob(String jobName, String jobGroupName, String triggerName, String triggerGroupName) {
         try {
-            ApplicationContext context = ContextLoader.getCurrentWebApplicationContext();
+            ApplicationContext context = ApplicationContextListener.getApplicationContext();
             StdScheduler scheduler = (StdScheduler) context.getBean("quartzScheduler");
             scheduler.pauseTrigger(TriggerKey.triggerKey(triggerName, triggerGroupName));// 停止触发器
             scheduler.unscheduleJob(TriggerKey.triggerKey(triggerName, triggerGroupName));// 移除触发器

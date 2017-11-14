@@ -12,11 +12,17 @@ import java.util.List;
  */
 @Mapper
 public interface AlertMapper {
-    void createAlertDate(AlertData alertData);
+    void createAlertData(AlertData alertData);
 
-    void updateAlertDate(AlertData alertData);
+    void createAlertDataBackup(AlertData alertData);
 
-    void releaseAlertDate(AlertData alertData);
+    void updateAlertData(AlertData alertData);
+
+    void updateAlertDataBackup(AlertData alertData);
+
+    void releaseAlertData(AlertData alertData);
+
+    void releaseAlertDataBackup(AlertData alertData);
 
     List<AlertRule> getAlertRuleList(@Param("alertType") int alertType, @Param("assetType") Integer assetType,
             @Param("category") String category, @Param("system") String system, @Param("metricType") String metricType,
@@ -79,4 +85,6 @@ public interface AlertMapper {
     List<AlertStatisticsNum> getTypeStatisticsInfo(@Param("alertType")Short alertType,@Param("startTime")Date startTime ,@Param("endTime")Date endTime);
 
     List<AlertRepairStatistics> getRepairStatisticsInfo(@Param("startTime")Date startTime,@Param("endTime")Date endTime,@Param("alertLevel")Short alertLevel);
+
+    void clearAlertDateHistory(@Param("timeStamp")Date timeStamp);
 }
