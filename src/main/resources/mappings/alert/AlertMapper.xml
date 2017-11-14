@@ -227,11 +227,11 @@
         <if test="stage == 'RELEASE'">
             ,ABS(ad.release_time-ad.alert_datetime) as alertDuration
         </if>
-        <if test="thingCode != null">
+        <!--<if test="thingCode != null"> -->
             <if test="stage != 'RELEASE'">
                 ,am.id as message_id,am.user_id,am.time,am.info,am.alert_id,am.is_read,am.permission,am.type
             </if>
-        </if>
+        <!--</if>-->
         <if test="stage == 'RELEASE'">
             ,rts.system_id
         </if>
@@ -244,88 +244,88 @@
                 ,tb_thing_position ttp
             </if>
         </if>
-        <if test="thingCode != null">
+        <!--<if test="thingCode != null"> -->
             <if test="stage != 'RELEASE'">
                 ,tb_alert_message am
             </if>
-        </if>
+        <!--</if>-->
         <trim prefix="where" prefixOverrides="AND">
-            <if test="thingCode != null">
+        <!--<if test="thingCode != null"> -->
                 <if test="stage != 'RELEASE'">
                     AND
                     ad.id = am.alert_id
                 </if>
-            </if>
-            <if test="thingCode == null">
-                <if test="systems != null or stage == 'RELEASE'">
-                    AND ad.thing_code = rts.thing_code
-                </if>
-                <if test="buildingIds != null or floors != null">
-                    AND ad.thing_code = ttp.thing_code
-                </if>
-            </if>
-            <if test="stage !=null">
-                AND
-                ad.alert_stage = #{stage}
-            </if>
-            <if test="stage == null">
-                AND
-                ad.alert_stage != 'RELEASE'
-            </if>
-            <if test="levels != null">
-                AND
-                <foreach collection="levels" item="level" index="index" open="ad.alert_level in (" close=")"
-                         separator=",">
-                    #{level}
-                </foreach>
-            </if>
-            <if test="types != null">
-                AND
-                <foreach collection="types" item="type" index="index" open="ad.alert_type in (3," close=")"
-                         separator=",">
-                    #{type}
-                </foreach>
-            </if>
-            <if test="buildingIds != null">
-                AND
-                <foreach collection="buildingIds" item="buildingId" index="index" open="ttp.building_id in (" close=")"
-                         separator=",">
-                    #{buildingId}
-                </foreach>
-            </if>
-            <if test="floors != null">
-                AND
-                <foreach collection="floors" item="floor" index="index" open="ttp.floor in (" close=")" separator=",">
-                    #{floor}
-                </foreach>
-            </if>
-            <if test="systems != null">
-                AND
-                <foreach collection="systems" item="system" index="index" open="rts.system_id in (" close=")"
-                         separator=",">
-                    #{system}
-                </foreach>
-            </if>
-            <if test="startTime != null">
-                AND
-                ad.alert_datetime &gt; #{startTime}
-            </if>
-            <if test="endTime != null">
-                AND
-                ad.alert_datetime &lt;= #{endTime}
-            </if>
-            <if test="thingCode != null">
-                AND
-                ad.thing_code = #{thingCode}
-            </if>
-        </trim>
+        <!--</if>-->
         <if test="thingCode == null">
-            ORDER BY ad.alert_level is not null,ad.alert_level desc,ad.alert_datetime desc
+            <if test="systems != null or stage == 'RELEASE'">
+                AND ad.thing_code = rts.thing_code
+            </if>
+            <if test="buildingIds != null or floors != null">
+                AND ad.thing_code = ttp.thing_code
+            </if>
+        </if>
+        <if test="stage !=null">
+            AND
+            ad.alert_stage = #{stage}
+        </if>
+        <if test="stage == null">
+            AND
+            ad.alert_stage != 'RELEASE'
+        </if>
+        <if test="levels != null">
+            AND
+            <foreach collection="levels" item="level" index="index" open="ad.alert_level in (" close=")"
+                     separator=",">
+                #{level}
+            </foreach>
+        </if>
+        <if test="types != null">
+            AND
+            <foreach collection="types" item="type" index="index" open="ad.alert_type in (3," close=")"
+                     separator=",">
+                #{type}
+            </foreach>
+        </if>
+        <if test="buildingIds != null">
+            AND
+            <foreach collection="buildingIds" item="buildingId" index="index" open="ttp.building_id in (" close=")"
+                     separator=",">
+                #{buildingId}
+            </foreach>
+        </if>
+        <if test="floors != null">
+            AND
+            <foreach collection="floors" item="floor" index="index" open="ttp.floor in (" close=")" separator=",">
+                #{floor}
+            </foreach>
+        </if>
+        <if test="systems != null">
+            AND
+            <foreach collection="systems" item="system" index="index" open="rts.system_id in (" close=")"
+                     separator=",">
+                #{system}
+            </foreach>
+        </if>
+        <if test="startTime != null">
+            AND
+            ad.alert_datetime &gt; #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND
+            ad.alert_datetime &lt;= #{endTime}
         </if>
         <if test="thingCode != null">
-            ORDER BY ad.alert_level is not null,ad.alert_datetime DESC
+            AND
+            ad.thing_code = #{thingCode}
         </if>
-        <!--<if test="offset != null">-->
+    </trim>
+    <if test="thingCode == null">
+        ORDER BY ad.alert_level is not null,ad.alert_level desc,ad.alert_datetime desc
+    </if>
+    <if test="thingCode != null">
+        ORDER BY ad.alert_level is not null,ad.alert_datetime DESC
+    </if>
+    <!--<if test="offset != null">-->
             <!--limit #{offset},#{count}-->
         <!--</if>-->
     </select>

@@ -684,7 +684,7 @@ public class AlertManager {
             List<AlertData> alertDatas = alertRecord.getAlertDataList();
             for (AlertData alertData : alertDatas) {
                 transImageStrToList(alertData);
-                // countUnreadMessage(alertData);
+                 countUnreadMessage(alertData);
             }
         }
         // }
@@ -786,9 +786,11 @@ public class AlertManager {
     private void countUnreadMessage(AlertData alertData) {
         List<AlertMessage> alertMessages = alertData.getAlertMessageList();
         int messageUnreadCount = 0;
-        for (AlertMessage alertMessage : alertMessages) {
-            if (!alertMessage.getRead()) {
-                messageUnreadCount++;
+        if (alertMessages != null && alertMessages.size() != 0) {
+            for (AlertMessage alertMessage : alertMessages) {
+                if (!alertMessage.getRead()) {
+                    messageUnreadCount++;
+                }
             }
         }
         alertData.setMessageUnreadCount(messageUnreadCount);
