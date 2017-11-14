@@ -90,22 +90,22 @@ public class Compressor {
     /**
      * 是否就地，1集控，0就地
      */
-    private volatile int remote;
+    private volatile boolean remote;
 
     /**
      * 加载状态
      */
-    private volatile int loadState;
+    private volatile boolean loadState;
 
     /**
      * 运行状态
      */
-    private volatile int runState;
+    private volatile boolean runState;
 
     /**
      * 故障状态
      */
-    private volatile int errorState;
+    private volatile boolean errorState;
 
     /**
      * 排气压力
@@ -163,17 +163,28 @@ public class Compressor {
      */
     public Compressor initState(DataService dataService, CmdControlService cmdControlService) {
         //故障状态
-        Optional<DataModelWrapper> errorData = dataService.getData(thingCode, CompressorMetricConstants.ERROR);
-        if (errorData.isPresent()) {
-            errorState = Integer.parseInt(errorData.get().getValue());
-        } else {
+        Optional<DataModelWrapper> warnData = dataService.getData(thingCode, CompressorMetricConstants.WARN);
+        if (!warnData.isPresent()) {
             //TODO: 调用cmdService接口取数据
+            return this;
         }
+        boolean warn = Boolean.parseBoolean(warnData.get().getValue());
+
+        Optional<DataModelWrapper> errorData = dataService.getData(thingCode, CompressorMetricConstants.ERROR);
+        if (!errorData.isPresent()) {
+            //TODO: 调用cmdService接口取数据
+            return this;
+        }
+        boolean error = Boolean.parseBoolean(errorData.get().getValue());
+        if (warn == true || error == true) {
+            errorState = true;
+        }
+
 
         //运行状态
         Optional<DataModelWrapper> runData = dataService.getData(thingCode, CompressorMetricConstants.RUN_STATE);
         if (runData.isPresent()) {
-            runState = Integer.parseInt(runData.get().getValue());
+            runState = Boolean.parseBoolean(runData.get().getValue());
         } else {
             //TODO: 调用cmdService接口取数据
         }
@@ -181,7 +192,7 @@ public class Compressor {
         //加载状态
         Optional<DataModelWrapper> loadData = dataService.getData(thingCode, CompressorMetricConstants.LOAD_STATE);
         if (loadData.isPresent()) {
-            loadState = Integer.parseInt(loadData.get().getValue());
+            loadState = Boolean.parseBoolean(loadData.get().getValue());
         } else {
             //TODO: 调用cmdService接口取数据
         }
@@ -189,7 +200,7 @@ public class Compressor {
         //远程/就地状态
         Optional<DataModelWrapper> remoteData = dataService.getData(thingCode, CompressorMetricConstants.REMOTE);
         if (remoteData.isPresent()) {
-            remote = Integer.parseInt(remoteData.get().getValue());
+            remote = Boolean.parseBoolean(remoteData.get().getValue());
         } else {
             //TODO: 调用cmdService接口取数据
         }
@@ -288,7 +299,7 @@ public class Compressor {
      * @param value
      */
     public void onRunStateChange(String value, String requestId) {
-        runState = Integer.parseInt(value);
+        runState = Boolean.parseBoolean(value);
         if (logger.isDebugEnabled()) {
             logger.debug("Compressor: {} get run state signal: {}. RequestId: {}.", thingCode, runState, requestId);
         }
@@ -301,12 +312,12 @@ public class Compressor {
      * @param value
      */
     public void onLoadStateChange(String value, String requestId) {
-        loadState = Integer.parseInt(value);
+        loadState = Boolean.parseBoolean(value);
         if (logger.isDebugEnabled()) {
             logger.debug("Compressor: {} get load state signal: {}.RequestId: {}", thingCode, runState, requestId);
         }
 
-        if (errorState == NO && runState == YES && loadState == YES) {
+        if (errorState == false && runState == true && loadState == true) {
             //收到加载信号，启动定时器，判断是否是保护模式
             synchronized (stateLock) {
                 if (stateTimer != null) {
@@ -337,7 +348,7 @@ public class Compressor {
      * @param requestId
      */
     public void onErrorStateChange(String value, String requestId) {
-        errorState = Integer.parseInt(value);
+        errorState = Boolean.parseBoolean(value);
         if (logger.isDebugEnabled()) {
             logger.debug("Compressor: {} get error state signal: {}.RequestId: {}", thingCode, runState, requestId);
         }
@@ -368,12 +379,12 @@ public class Compressor {
      * @param value
      */
     public void onRemoteChange(String value, String requestId) {
-        remote = Integer.parseInt(value);
+        remote = Boolean.parseBoolean(value);
         if (logger.isDebugEnabled()) {
             logger.debug("Compressor: {} get remote signal: {}.RequestId: {}.", thingCode, remote, requestId);
         }
 
-        if (remote == NO) {
+        if (remote == false) {
             //就地状态删除stopTimer
             turnOffStopTimer();
         } else if (manager.isIntelligent()){
@@ -393,7 +404,7 @@ public class Compressor {
             return;
         }
 
-        if (remote == NO) {
+        if (remote == false) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Compressor {} is local, cannot turn on stopTimer.", thingCode);
             }
@@ -451,13 +462,13 @@ public class Compressor {
     /**
      * 确认空压机状态
      */
-    private void confirmState() {
+    private synchronized void confirmState() {
         String oldState = state;
 
-        if (errorState == YES) {
+        if (errorState == true) {
             state = EnumCompressorState.ERROR.getState();
-        } else if (runState == YES) {
-            if (loadState == YES) {
+        } else if (runState == true) {
+            if (loadState == true) {
                 state = EnumCompressorState.RUNNING.getState();
             } else {
                 state = EnumCompressorState.UNLOAD.getState();
@@ -472,7 +483,7 @@ public class Compressor {
 
 
         if (!state.equals(oldState)) {
-            onStateChange();
+            onStateChange(state, oldState);
         }
 
 
@@ -486,7 +497,7 @@ public class Compressor {
     /**
      * 状态变化
      */
-    private void onStateChange() {
+    private void onStateChange(String postState, String preState) {
         if (EnumCompressorState.UNLOAD.getState().equals(state)) {
             //卸载状态下开启stopTimer
             if (!manager.isIntelligent()) {
@@ -500,6 +511,9 @@ public class Compressor {
             //其他状态下关闭stopTimer
             turnOffStopTimer();
         }
+
+        //保存状态日志
+        manager.saveCompressorState(thingCode, postState, preState);
     }
 
     /**
@@ -552,35 +566,35 @@ public class Compressor {
         return manager;
     }
 
-    public int getRemote() {
+    public boolean isRemote() {
         return remote;
     }
 
-    public void setRemote(int remote) {
+    public void setRemote(boolean remote) {
         this.remote = remote;
     }
 
-    public int getLoadState() {
+    public boolean isLoadState() {
         return loadState;
     }
 
-    public void setLoadState(int loadState) {
+    public void setLoadState(boolean loadState) {
         this.loadState = loadState;
     }
 
-    public int getRunState() {
+    public boolean isRunState() {
         return runState;
     }
 
-    public void setRunState(int runState) {
+    public void setRunState(boolean runState) {
         this.runState = runState;
     }
 
-    public int getErrorState() {
+    public boolean isErrorState() {
         return errorState;
     }
 
-    public void setErrorState(int errorState) {
+    public void setErrorState(boolean errorState) {
         this.errorState = errorState;
     }
 

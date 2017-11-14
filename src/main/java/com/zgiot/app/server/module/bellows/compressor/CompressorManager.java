@@ -2,6 +2,7 @@ package com.zgiot.app.server.module.bellows.compressor;
 
 import com.zgiot.app.server.module.bellows.compressor.cache.CompressorCache;
 import com.zgiot.app.server.module.bellows.compressor.pojo.CompressorLog;
+import com.zgiot.app.server.module.bellows.compressor.pojo.CompressorState;
 import com.zgiot.app.server.module.bellows.dao.BellowsMapper;
 import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorOperation;
 import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorState;
@@ -161,6 +162,7 @@ public class CompressorManager {
                 }
                 compressor.onLoadStateChange(data.getValue(), requestId);
                 break;
+            case CompressorMetricConstants.WARN:
             case CompressorMetricConstants.ERROR:
                 compressor = getCompressorFromCache(data.getThingCode());
                 if (compressor == null) {
@@ -235,7 +237,7 @@ public class CompressorManager {
         compressor.refresh(dataService);
 
         //判断是否是远程状态
-        if (compressor.getRemote() == Compressor.YES) {
+        if (compressor.isRemote()) {
             logger.warn("Compressor: {} is local, cannot be operated remotely.RequestId: {}", thingCode, requestId);
             String error = "空压机" + thingCode + "处于就地模式，无法进行远程操作";
             saveFullLog(compressor, operation, operationType, requestId, error);
@@ -362,7 +364,7 @@ public class CompressorManager {
      * @param count
      * @return
      */
-    public List<CompressorLog> getCompressorLog(Date startTime, Date endTime, Integer page, Integer count) {
+    public List<CompressorLog> getCompressorLog(Date startTime, Date endTime, Integer page, Integer count, String requestId) {
         Integer offset = null;
         if (page != null && count != null) {
             offset = page * count;
@@ -370,6 +372,120 @@ public class CompressorManager {
 
         return bellowsMapper.getCompressorLog(startTime, endTime, offset, count);
     }
+
+    /**
+     * 保存空压机状态
+     * @param thingCode 设备号
+     * @param postState 修改后状态
+     * @param preState  修改前状态
+     */
+    public void saveCompressorState(String thingCode, String postState, String preState) {
+        CompressorState state = new CompressorState();
+        state.setPostState(postState);
+        if (preState == null) {
+            //没有修改前状态，从数据库里查询
+            List<CompressorState> list = bellowsMapper.getCompressorState(null, new Date(), Arrays.asList(thingCode),0, 1);
+            if (list == null || list.isEmpty()) {
+                preState = postState;
+            } else if (list.get(0).getPostState().equals(postState)){
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Compressor {} state {} is not changed.", thingCode, postState);
+                }
+                return;
+            } else {
+                preState = list.get(0).getPostState();
+            }
+        }
+        state.setPreState(preState);
+        state.setThingCode(thingCode);
+        state.setTime(new Date());
+
+        bellowsMapper.saveCompressorState(state);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Compressor {} save postState {}, preState {}, id {}.", thingCode, postState, preState, state.getId());
+        }
+    }
+
+
+    /**
+     * 分析低压空压机状态
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    public Map<String, Map<String, Long>> analyseCompressorState(Date startTime, Date endTime, String requestId) {
+        //保存结果
+        Map<String, Map<String, Long>> result = new HashMap<>(3);
+
+        //记录thingCode对应上一条state
+        Map<String, CompressorState> thingCodeStateMap = new HashMap<>(3);
+
+        List<String> thingCodes = new ArrayList<>(3);
+        for (Compressor compressor : low.getCompressors()) {
+            thingCodes.add(compressor.getThingCode());
+            result.put(compressor.getThingCode(), new HashMap<>(4));
+            thingCodeStateMap.put(compressor.getThingCode(), null);
+        }
+
+        //数据库查询
+        List<CompressorState> list = bellowsMapper.getCompressorState(startTime, endTime, thingCodes, null, null);
+
+        if (list != null && !list.isEmpty()) {
+            //遍历compressorStateList
+            for (CompressorState state : list) {
+                String thingCode = state.getThingCode();
+                CompressorState lastState = thingCodeStateMap.get(thingCode);
+                Map<String, Long> stateMap = result.get(thingCode);
+                long add;
+                if (lastState == null) {
+                    add = endTime.getTime() - state.getTime().getTime();
+                } else {
+                    add = lastState.getTime().getTime() - state.getTime().getTime();
+                }
+                Long time = stateMap.get(state.getPostState());
+                if (time == null) {
+                    time = add;
+                } else {
+                    time += add;
+                }
+                stateMap.put(state.getPostState(), time);
+
+                thingCodeStateMap.put(thingCode, state);
+            }
+        }
+
+
+        thingCodeStateMap.forEach((thingCode, state) -> {
+            if (state != null) {
+                long add = state.getTime().getTime() - startTime.getTime();
+                Long time = result.get(thingCode).get(state.getPreState());
+                if (time == null) {
+                    time = add;
+                } else {
+                    time += add;
+                }
+                result.get(thingCode).put(state.getPreState(), time);
+            } else {
+                //未查询到该thingCode数据，再次查询上一条数据
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Compressor {} cannot found state log in startTime {} , endTime{}.RequestId: {}.", thingCode, startTime, endTime, requestId);
+                }
+
+                List<CompressorState> lastState = bellowsMapper.getCompressorState(null, startTime, Arrays.asList(thingCode), 0, 1);
+                if (lastState != null && !lastState.isEmpty()) {
+                    result.get(thingCode).put(lastState.get(0).getPostState(), endTime.getTime() - startTime.getTime());
+                } else {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Compressor {} found no state log.RequestId: {}.", thingCode, requestId);
+                    }
+                }
+            }
+        });
+
+        return result;
+    }
+
 
     /**
      * 刷新空压机组
@@ -635,7 +751,8 @@ public class CompressorManager {
             }
         }
 
-        if (EnumCompressorState.RUNNING.getState().equals(result.getState())) {
+        if (EnumCompressorState.RUNNING.getState().equals(result.getState()) || EnumCompressorState.ERROR.getState().equals(result.getState())) {
+            //选中的空压机是运行中或故障
             if (logger.isDebugEnabled()) {
                 logger.debug("Compressor {} state is {}.No compressor is chose.", result.getThingCode(), result.getState());
             }

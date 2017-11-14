@@ -36,4 +36,32 @@
             LIMIT #{offset},#{count}
         </if>
     </select>
+
+
+    <insert id="saveCompressorState" useGeneratedKeys="true" keyProperty="state.id">
+        INSERT INTO tb_bellows_compressor_state
+        (thing_code, post_state, pre_state, time)
+        VALUES
+        (#{state.thingCode}, #{state.postState}, #{state.preState}, #{state.time})
+    </insert>
+
+
+    <select id="getCompressorState" resultType="com.zgiot.app.server.module.bellows.compressor.pojo.CompressorState">
+        SELECT * FROM tb_bellows_compressor_state
+        WHERE 1 = 1
+        <if test="thingCodes != null">
+        AND thing_code IN
+        <foreach collection="thingCodes" item="tc" open="(" close=")" separator=",">
+            #{tc}
+        </foreach>
+        </if>
+        <if test="startTime != null">
+          AND time &gt;= #{startTime}
+        </if>
+        AND time &lt;= #{endTime}
+        ORDER BY time DESC
+        <if test="offset != null">
+            LIMIT #{offset},#{count}
+        </if>
+    </select>
 </mapper>

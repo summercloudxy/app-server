@@ -1,6 +1,7 @@
 package com.zgiot.app.server.module.bellows.dao;
 
 import com.zgiot.app.server.module.bellows.compressor.pojo.CompressorLog;
+import com.zgiot.app.server.module.bellows.compressor.pojo.CompressorState;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -52,4 +53,23 @@ public interface BellowsMapper {
      * @return
      */
     List<CompressorLog> getCompressorLog(@Param("startTime") Date startTime, @Param("endTime") Date endTime, @Param("offset") Integer offset, @Param("count") Integer count);
+
+
+    /**
+     * 保存空压机状态
+     * @param state
+     */
+    void saveCompressorState(@Param("state")CompressorState state);
+
+    /**
+     * 查询空压机状态
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @param thingCodes    查询thingCode列表
+     * @param offset    偏移量
+     * @param count 个数
+     * @return
+     */
+    List<CompressorState> getCompressorState(@Param("startTime") Date startTime, @Param("endTime") Date endTime, @Param("thingCodes") List<String> thingCodes,
+                                             @Param("offset") Integer offset, @Param("count") Integer count);
 }

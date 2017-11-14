@@ -91,6 +91,7 @@ public class CompressorGroup {
             Optional<DataModelWrapper> data = dataService.getData(deviceThingCodes.get(i), CompressorMetricConstants.PRESSURE);
             if (!data.isPresent()) {
                 logger.warn("Pressure device {} return no data.", deviceThingCodes.get(i));
+                pressure = 0.0;
                 return this;
             }
 

@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author wangwei
@@ -120,16 +121,36 @@ public class BellowsController {
 
     /**
      * 获取空压机日志
-     * @param startTime
-     * @param endTime
-     * @param page
-     * @param count
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @param page  页数（从0开始）
+     * @param count 每页个数
      * @return
      */
     @GetMapping(value = "api/bellows/compressor/log")
     public ResponseEntity<String> getCompressorLog(@RequestParam Date startTime, @RequestParam Date endTime, @RequestParam(required = false) Integer page,
-                                                   @RequestParam(required = false) Integer count) {
-        List<CompressorLog> list = compressorManager.getCompressorLog(startTime, endTime, page, count);
-        return new ResponseEntity<String>(ServerResponse.buildOkJson(list), HttpStatus.OK);
+                                                   @RequestParam(required = false) Integer count, HttpServletRequest request) {
+        String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
+        logger.info("RequestId {} query compressor log, startTime: {}, endTime: {}, page: {}, count: {}.", requestId, startTime, endTime, page, count);
+
+        List<CompressorLog> result = compressorManager.getCompressorLog(startTime, endTime, page, count, requestId);
+        return new ResponseEntity<String>(ServerResponse.buildOkJson(result), HttpStatus.OK);
+    }
+
+    /**
+     * 获取空压机状态统计
+     * @param startTime     开始时间
+     * @param endTime   结束时间
+     * @param request
+     * @return
+     */
+    @GetMapping(value = "api/bellows/compressor/state")
+    public ResponseEntity<String> analyseCompressorState(@RequestParam Date startTime, @RequestParam Date endTime, HttpServletRequest request) {
+        String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
+        logger.info("RequestId {} query compressor state analysis, startTime: {}, endTime: {}.", requestId, startTime, endTime);
+
+        Map<String, Map<String, Long>> result = compressorManager.analyseCompressorState(startTime, endTime, requestId);
+        String json = ServerResponse.buildOkJson(result);
+        return new ResponseEntity<String>(json, HttpStatus.OK);
     }
 }
