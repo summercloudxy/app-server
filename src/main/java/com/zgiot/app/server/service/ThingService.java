@@ -60,5 +60,7 @@ public interface ThingService {
      * @return
      */
     List<SystemModel> findAllSystem();
+
+    void validateThing(String thingCode);
 }
 

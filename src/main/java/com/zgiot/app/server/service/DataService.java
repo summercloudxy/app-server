@@ -43,4 +43,12 @@ public interface DataService {
      */
     void saveData(DataModel dataModel);
 
+    /**
+     * 即时同步取设备信号，并且返回给DataListener
+     * @param thingCode
+     * @param metricCode
+     * @return
+     */
+    DataModelWrapper adhocLoadData(String thingCode, String metricCode);
+
 }

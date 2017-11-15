@@ -2,6 +2,7 @@ package com.zgiot.app.server.service.impl;
 
 import com.zgiot.app.server.service.impl.mapper.TMLMapper;
 import com.zgiot.app.server.service.ThingService;
+import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.BuildingModel;
 import com.zgiot.common.pojo.SystemModel;
 import com.zgiot.common.pojo.ThingModel;
@@ -86,5 +87,18 @@ public class ThingServiceImpl implements ThingService {
     @Override
     public List<SystemModel> findAllSystem() {
         return tmlMapper.findAllSystems();
+    }
+
+    @Override
+    public void validateThing(String thingCode) {
+        if (thingCode == null) {
+            throw new SysException("thingCode is required.", SysException.EC_UNKNOWN);
+        }
+
+        ThingModel tm = this.getThing(thingCode);
+        if (tm == null) {
+            throw new SysException("thingCode not found. (thingCode=`" + thingCode + "`)"
+                    , SysException.EC_UNKNOWN);
+        }
     }
 }

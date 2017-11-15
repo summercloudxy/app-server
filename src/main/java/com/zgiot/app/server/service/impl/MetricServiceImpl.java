@@ -2,6 +2,7 @@ package com.zgiot.app.server.service.impl;
 
 import com.zgiot.app.server.service.impl.mapper.TMLMapper;
 import com.zgiot.app.server.service.MetricService;
+import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.MetricModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,19 @@ public class MetricServiceImpl implements MetricService {
     @Override
     public Map<String, MetricModel> getMetricMap() {
         return metricCache;
+    }
+
+    @Override
+    public void validateMetric(String metricCode) {
+        if (metricCode == null) {
+            throw new SysException("metricCode is required.", SysException.EC_UNKNOWN);
+        }
+
+        MetricModel mm = this.getMetric(metricCode);
+        if (mm == null) {
+            throw new SysException("metricCode not found. (metricCode=`" + metricCode + "`)"
+                    , SysException.EC_UNKNOWN);
+        }
     }
 
     @PostConstruct
