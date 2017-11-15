@@ -20,9 +20,6 @@ public class FileServiceImpl implements FileService{
     @Value("${uploadFile.dir}")
     private String basePath;
 
-    @Value("${uploadFile.uri}")
-    private String catPath;
-
     @Autowired
     private FileMapper fileMapper;
 
@@ -56,7 +53,7 @@ public class FileServiceImpl implements FileService{
         // 相对路径
         String relatePath = currentDay + "/" + moduleName + "/" + fileTypePath;
         relatePath = relatePath + "/" + fileName;
-        String pcPath = basePath + relatePath;
+        String pcPath = basePath+ "/"  + relatePath;
 
         File file2 = new File(pcPath);
         if (!file2.getParentFile().exists()) {
@@ -68,7 +65,7 @@ public class FileServiceImpl implements FileService{
         FileModel attachment = new FileModel();
         attachment.setFileName(fileName);
         attachment.setFilePath(relatePath);
-        attachment.setAbsolutePath(catPath +"/"+ relatePath);
+        attachment.setAbsolutePath(relatePath);
         attachment.setFile(file2);
         attachment.setContentType(file.getContentType());
         attachment.setCreatUserId(userId);

@@ -25,6 +25,7 @@ public class CmdControlServiceImpl implements CmdControlService {
     private static final int RETURN_CODE_SUCCESS = 1;
     private static final int DEFAULT_SEND_DELAY_TIME = 0;
     private static final int SEND_PERIOD = 1000;
+    private static final int CLEAN_WAIT_PERIOD = 500;
     private static final int VALUE_TRUE = 1;
     private static final int VALUE_FALSE = 0;
     @Autowired
@@ -126,7 +127,7 @@ public class CmdControlServiceImpl implements CmdControlService {
      * @param dataModel 信号发送类（包括信号地址和发送值）
      * @param requestId 请求id
      */
-    private void sendfirst(DataModel dataModel, String requestId){
+     void sendfirst(DataModel dataModel, String requestId){
         try {
             sendCmd(dataModel, requestId);
         } catch (Exception e) {
@@ -141,7 +142,7 @@ public class CmdControlServiceImpl implements CmdControlService {
      * @param retryCount 重发次数
      * @param requestId 请求id
      */
-    private CmdSendResponseData sendSecond(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId, Integer cleanPeriod){
+    CmdSendResponseData sendSecond(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId, Integer cleanPeriod){
         CmdSendResponseData cmdSendResponseData = new CmdSendResponseData();
         final Integer realRetryCount = retryCount == null ? DEFAULT_RETRY_COUNT : retryCount;
         if (retryPeriod == null) {
@@ -150,9 +151,10 @@ public class CmdControlServiceImpl implements CmdControlService {
         Boolean state = false;
         for (int i = 1; i <= realRetryCount; i++) {
             try {
-                if (null != cleanPeriod) {
-                    Thread.sleep(cleanPeriod);
+                if (null == cleanPeriod) {
+                    cleanPeriod = CLEAN_WAIT_PERIOD;
                 }
+                Thread.sleep(cleanPeriod);
                 cmdSendResponseData = sendCmd(Collections.singletonList(dataModel), requestId);
                 state = true;
                 break;
