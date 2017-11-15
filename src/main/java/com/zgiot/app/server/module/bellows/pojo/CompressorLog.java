@@ -1,4 +1,4 @@
-package com.zgiot.app.server.module.bellows.compressor.pojo;
+package com.zgiot.app.server.module.bellows.pojo;
 
 import java.util.Date;
 

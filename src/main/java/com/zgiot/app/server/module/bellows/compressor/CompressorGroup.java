@@ -7,6 +7,7 @@ import com.zgiot.common.pojo.DataModelWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,17 +44,22 @@ public class CompressorGroup {
     /**
      * 运行中数量
      */
-    private int runningCount;
+    private volatile int runningCount;
 
     /**
      * 总数量
      */
-    private int totalCount;
+    private volatile int totalCount;
 
     /**
      * 故障数量
      */
-    private int errorCount;
+    private volatile int errorCount;
+
+    /**
+     * 错误列表
+     */
+    private volatile List<String> errors;
 
     public CompressorGroup(List<Compressor> compressors, String type, List<String> deviceThingCodes, CompressorManager manager) {
         this.compressors = compressors;
@@ -67,17 +73,23 @@ public class CompressorGroup {
      * @param dataService
      * @return
      */
-    public CompressorGroup refresh(DataService dataService) {
+    public synchronized CompressorGroup refresh(DataService dataService) {
         //数量刷新
         totalCount = compressors.size();
+        errors = new ArrayList<>();
         int runningCount = 0;
         int errorCount = 0;
 
         for (Compressor compressor : compressors) {
-            if (EnumCompressorState.ERROR.getState().equals(compressor.getState())) {
-                errorCount++;
-            } else if (EnumCompressorState.RUNNING.getState().equals(compressor.getState())) {
+            if (EnumCompressorState.RUNNING.getState().equals(compressor.getState())) {
                 runningCount++;
+            } else if (EnumCompressorState.ERROR.getState().equals(compressor.getState())) {
+                errorCount++;
+                //错误信息获取
+                compressor.refresh(dataService);
+                for (String error : compressor.getErrors()) {
+                    errors.add(compressor.getThingCode() + error);
+                }
             }
         }
 
@@ -101,6 +113,7 @@ public class CompressorGroup {
 
         return this;
     }
+
 
 
     public List<Compressor> getCompressors() {
@@ -141,5 +154,13 @@ public class CompressorGroup {
 
     public void setErrorCount(int errorCount) {
         this.errorCount = errorCount;
+    }
+
+    public List<String> getErrors() {
+        return errors;
+    }
+
+    public void setErrors(List<String> errors) {
+        this.errors = errors;
     }
 }

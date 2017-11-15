@@ -3,6 +3,8 @@ package com.zgiot.app.server.module.bellows.compressor;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorOperation;
 import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorState;
+import com.zgiot.app.server.module.bellows.enumeration.EnumHighCompressorFault;
+import com.zgiot.app.server.module.bellows.enumeration.EnumLowCompressorFault;
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.util.RequestIdUtil;
@@ -143,6 +145,11 @@ public class Compressor {
     private volatile String state;
 
     /**
+     * 错误信息
+     */
+    private volatile List<String> errors;
+
+    /**
      * 日志等待timer
      */
     private Map<Long, LogTimerTask> logTimerMap = new HashMap<>();
@@ -215,10 +222,11 @@ public class Compressor {
      * @param dataService   数据源
      * @return
      */
-    public Compressor refresh(DataService dataService) {
+    public synchronized Compressor refresh(DataService dataService) {
         if (logger.isDebugEnabled()) {
             logger.debug("Compressor: {} refresh.", thingCode);
         }
+        errors = new ArrayList<>();
         List<DataModelWrapper> dataList = dataService.findDataByThing(thingCode);
         if (dataList == null || dataList.isEmpty()) {
             logger.info("Compressor: {} refresh failed.Because data list is empty.");
@@ -228,7 +236,7 @@ public class Compressor {
         dataList.forEach((data) -> {
             String metricCode = data.getMetricCode();
             String value = data.getValue();
-            //组装属性（远程状态、启动状态和加载状态使用监听者，不在这里组装）
+            //组装属性（远程状态、故障状态、启动状态和加载状态使用监听者，不在这里组装）
             switch (metricCode) {
                 case CompressorMetricConstants.CURRENT:
                     this.setCurrent(Double.parseDouble(value));
@@ -249,8 +257,14 @@ public class Compressor {
                     this.setLoadTime(Integer.parseInt(value));
                     break;
                 default:
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("MetricCode: {} is unnecessary for {}.", metricCode, thingCode);
+                    if (EnumCompressorState.ERROR.getState().equals(state)) {
+                        if (TYPE_HIGH.equals(type) && EnumHighCompressorFault.metricCodes().contains(metricCode)) {
+                            EnumHighCompressorFault fault = EnumHighCompressorFault.getByMetricCode(metricCode);
+                            errors.add(fault.getInfo());
+                        } else if (TYPE_LOW.equals(type) && EnumLowCompressorFault.metricCodes().contains(metricCode)) {
+                            EnumLowCompressorFault fault = EnumLowCompressorFault.getByMetricCode(metricCode);
+                            errors.add(fault.getInfo());
+                        }
                     }
                     break;
             }
@@ -654,6 +668,13 @@ public class Compressor {
         this.state = state;
     }
 
+    public List<String> getErrors() {
+        return errors;
+    }
+
+    public void setErrors(List<String> errors) {
+        this.errors = errors;
+    }
 
     /**
      * 日志确认定时任务

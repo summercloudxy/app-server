@@ -1,7 +1,7 @@
 package com.zgiot.app.server.module.bellows.dao;
 
-import com.zgiot.app.server.module.bellows.compressor.pojo.CompressorLog;
-import com.zgiot.app.server.module.bellows.compressor.pojo.CompressorState;
+import com.zgiot.app.server.module.bellows.pojo.CompressorLog;
+import com.zgiot.app.server.module.bellows.pojo.CompressorState;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

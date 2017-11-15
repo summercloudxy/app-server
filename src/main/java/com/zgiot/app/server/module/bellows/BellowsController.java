@@ -3,14 +3,14 @@ package com.zgiot.app.server.module.bellows;
 import com.alibaba.fastjson.JSON;
 import com.zgiot.app.server.module.bellows.compressor.Compressor;
 import com.zgiot.app.server.module.bellows.compressor.CompressorManager;
-import com.zgiot.app.server.module.bellows.compressor.pojo.CompressorLog;
+import com.zgiot.app.server.module.bellows.pojo.BellowsIndex;
+import com.zgiot.app.server.module.bellows.pojo.CompressorLog;
 import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorOperation;
 import com.zgiot.common.constants.BellowsConstants;
 import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.restcontroller.ServerResponse;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
@@ -37,6 +37,49 @@ public class BellowsController {
 
     @Autowired
     private CompressorManager compressorManager;
+
+    /**
+     * 获取鼓风首页信息
+     * @param request
+     * @return
+     */
+    @GetMapping(value = "api/bellows")
+    public ResponseEntity<String> getBellowsIndex(HttpServletRequest request) {
+        String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
+        logger.info("RequestId: {} want to get bellows index.", requestId);
+
+        BellowsIndex index = new BellowsIndex();
+        index.setHigh(compressorManager.refreshCompressorGroup(Compressor.TYPE_HIGH, requestId));
+        index.setLow(compressorManager.refreshCompressorGroup(Compressor.TYPE_LOW, requestId));
+        index.setIntelligent(compressorManager.isIntelligent());
+
+        return new ResponseEntity<String>(ServerResponse.buildOkJson(index), HttpStatus.OK);
+    }
+
+    /**
+     * 获取空压机详情
+     * @param type
+     * @param request
+     * @return
+     */
+    @GetMapping(value = "api/bellows/compressor/{type}")
+    public ResponseEntity<String> getCompressors(@PathVariable String type, HttpServletRequest request) {
+        String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
+
+        if (!Compressor.TYPE_HIGH.equals(type) && !Compressor.TYPE_LOW.equals(type)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("RequestId: {} send a wrong state.", request);
+            }
+            String resJSON = JSON.toJSONString(new ServerResponse("Type must be high or low.Got type: " + type, SysException.EC_UNKNOWN, 0));
+            return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
+        }
+
+        logger.info("RequestId: {} want to get detail of compressor {}.", requestId, type);
+
+        List<Compressor> list = compressorManager.refreshCompressors(type, requestId);
+        return new ResponseEntity<String>(ServerResponse.buildOkJson(list), HttpStatus.OK);
+    }
+
 
     /**
      * 设置低压空压机智能模式

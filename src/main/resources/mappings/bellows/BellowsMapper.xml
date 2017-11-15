@@ -27,7 +27,7 @@
         WHERE id = #{log.id}
     </update>
 
-    <select id="getCompressorLog" resultType="com.zgiot.app.server.module.bellows.compressor.pojo.CompressorLog">
+    <select id="getCompressorLog" resultType="com.zgiot.app.server.module.bellows.pojo.CompressorLog">
         SELECT * FROM tb_bellows_compressor_log
         WHERE operate_time &gt;= #{startTime}
         AND operate_time &lt;= #{endTime}
@@ -46,7 +46,7 @@
     </insert>
 
 
-    <select id="getCompressorState" resultType="com.zgiot.app.server.module.bellows.compressor.pojo.CompressorState">
+    <select id="getCompressorState" resultType="com.zgiot.app.server.module.bellows.pojo.CompressorState">
         SELECT * FROM tb_bellows_compressor_state
         WHERE 1 = 1
         <if test="thingCodes != null">

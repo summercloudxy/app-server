@@ -1,8 +1,8 @@
 package com.zgiot.app.server.module.bellows.compressor;
 
 import com.zgiot.app.server.module.bellows.compressor.cache.CompressorCache;
-import com.zgiot.app.server.module.bellows.compressor.pojo.CompressorLog;
-import com.zgiot.app.server.module.bellows.compressor.pojo.CompressorState;
+import com.zgiot.app.server.module.bellows.pojo.CompressorLog;
+import com.zgiot.app.server.module.bellows.pojo.CompressorState;
 import com.zgiot.app.server.module.bellows.dao.BellowsMapper;
 import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorOperation;
 import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorState;
@@ -121,8 +121,6 @@ public class CompressorManager {
             low = new CompressorGroup(compressorCache.findByType(Compressor.TYPE_LOW), Compressor.TYPE_LOW, Arrays.asList(LOW_PRESSURE_ONE, LOW_PRESSURE_TWO), this);
         }
 
-
-
         //初始化空压机智能
         boolean intelligent = (bellowsMapper.selectParamValue(BellowsConstants.SYS, BellowsConstants.CP_INTELLIGENT) == 1);
         setIntelligent(intelligent);
@@ -233,9 +231,6 @@ public class CompressorManager {
             throw new SysException("空压机" + thingCode + "不存在", SysException.EC_UNKNOWN);
         }
 
-        //数据刷新
-        compressor.refresh(dataService);
-
         //判断是否是远程状态
         if (compressor.isRemote()) {
             logger.warn("Compressor: {} is local, cannot be operated remotely.RequestId: {}", thingCode, requestId);
@@ -304,6 +299,9 @@ public class CompressorManager {
      * @param requestId
      */
     private void saveFullLog(Compressor compressor, EnumCompressorOperation operation, String operationType, String requestId, String memo) {
+        //数据刷新
+        compressor.refresh(dataService);
+
         CompressorLog compressorLog = new CompressorLog();
         compressorLog.setOperation(operation.toString());
         compressorLog.setOperateTime(new Date());
@@ -502,6 +500,29 @@ public class CompressorManager {
             logger.warn("Compressor group type {} is wrong. RequestId: {}.", type, requestId);
             return null;
         }
+    }
+
+    /**
+     * 按分类刷新空压机
+     * @param type
+     * @param requestId
+     * @return
+     */
+    public List<Compressor> refreshCompressors(String type, String requestId) {
+        List<Compressor> list;
+        if (TYPE_HIGH.equals(type)) {
+            list = high.getCompressors();
+        } else if (TYPE_LOW.equals(type)) {
+            list = low.getCompressors();
+        } else {
+            logger.warn("Compressor group type {} is wrong. RequestId: {}.", type, requestId);
+            return new ArrayList<>();
+        }
+
+        for (Compressor compressor : list) {
+            compressor.refresh(dataService);
+        }
+        return list;
     }
 
 
