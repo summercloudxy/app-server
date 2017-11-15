@@ -3,6 +3,7 @@ package com.zgiot.app.server.config;
 import com.zgiot.app.server.dataprocessor.CompleterDataListener;
 import com.zgiot.app.server.dataprocessor.DataProcessor;
 import com.zgiot.app.server.dataprocessor.impl.CacheUpdater;
+import com.zgiot.app.server.module.alert.AlertHistoryJob;
 import com.zgiot.app.server.module.alert.AlertListener;
 import com.zgiot.app.server.module.alert.AlertParamJob;
 import com.zgiot.app.server.module.alert.handler.AlertParamHandler;
@@ -82,11 +83,14 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
                 || moduleListConfig.containModule(ModuleListConfig.MODULE_ALERT)) {
             processor.addListener(alertListener);
-            QuartzManager.addJob(ModuleListConfig.MODULE_ALERT, AlertParamJob.class, "0/10 * * * * ?", new JobDataMap() {
-                {
-                    put("handler", alertParamHandler);
-                }
-            });
+            QuartzManager.addJob("checkParam", ModuleListConfig.MODULE_ALERT, "checkParam",
+                    ModuleListConfig.MODULE_ALERT, AlertParamJob.class, "0/10 * * * * ?", new JobDataMap() {
+                        {
+                            put("handler", alertParamHandler);
+                        }
+                    });
+            QuartzManager.addJob("clearHistory", ModuleListConfig.MODULE_ALERT, "clearHistory",
+                    ModuleListConfig.MODULE_ALERT, AlertHistoryJob.class, "0 0 0 * * ?");
         }
 
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
