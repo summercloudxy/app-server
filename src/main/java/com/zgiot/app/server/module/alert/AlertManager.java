@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
  * Created by xiayun on 2017/9/25.
  */
 @Service
+@Transactional
 public class AlertManager {
     private Map<String, Map<String, AlertData>> alertDataMap = new ConcurrentHashMap<>();
     // private Set<AlertData> verifySet = new HashSet<>();
@@ -108,7 +110,8 @@ public class AlertManager {
             alertDataMetricMap.put(alertData.getMetricCode(), alertData);
             alertDataMap.put(alertData.getThingCode(), alertDataMetricMap);
         }
-        alertMapper.createAlertDate(alertData);
+        alertMapper.createAlertData(alertData);
+        alertMapper.createAlertDataBackup(alertData);
     }
 
     /**
@@ -158,7 +161,9 @@ public class AlertManager {
                 alertDataMetricMap.remove(alertData.getMetricCode());
             }
         }
-        alertMapper.releaseAlertDate(alertData);
+        alertMapper.releaseAlertData(alertData);
+        alertMapper.releaseAlertDataBackup(alertData);
+
         logger.debug("报警解除：thingCode {},metricCode {}", alertData.getThingCode(), alertData.getMetricCode());
     }
 
@@ -168,7 +173,8 @@ public class AlertManager {
      * @param alertData
      */
     public void updateAlert(AlertData alertData) {
-        alertMapper.updateAlertDate(alertData);
+        alertMapper.updateAlertData(alertData);
+        alertMapper.updateAlertDataBackup(alertData);
     }
 
     public Map<String, Map<String, List<AlertRule>>> getParamRuleMap() {
@@ -684,7 +690,7 @@ public class AlertManager {
             List<AlertData> alertDatas = alertRecord.getAlertDataList();
             for (AlertData alertData : alertDatas) {
                 transImageStrToList(alertData);
-                // countUnreadMessage(alertData);
+                 countUnreadMessage(alertData);
             }
         }
         // }
@@ -786,9 +792,11 @@ public class AlertManager {
     private void countUnreadMessage(AlertData alertData) {
         List<AlertMessage> alertMessages = alertData.getAlertMessageList();
         int messageUnreadCount = 0;
-        for (AlertMessage alertMessage : alertMessages) {
-            if (!alertMessage.getRead()) {
-                messageUnreadCount++;
+        if (alertMessages != null && alertMessages.size() != 0) {
+            for (AlertMessage alertMessage : alertMessages) {
+                if (!alertMessage.getRead()) {
+                    messageUnreadCount++;
+                }
             }
         }
         alertData.setMessageUnreadCount(messageUnreadCount);
