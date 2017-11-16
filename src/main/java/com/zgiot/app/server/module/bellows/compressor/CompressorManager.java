@@ -6,6 +6,7 @@ import com.zgiot.app.server.module.bellows.pojo.CompressorState;
 import com.zgiot.app.server.module.bellows.dao.BellowsMapper;
 import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorOperation;
 import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorState;
+import com.zgiot.app.server.module.bellows.pressure.PressureManager;
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.util.RequestIdUtil;
@@ -50,20 +51,6 @@ public class CompressorManager {
      */
     private static final String PRESSURE_THING_CODE = "SYS_SB";
 
-    /**
-     * 低压管道压力检测1
-     */
-    private static final String LOW_PRESSURE_ONE = "2333";
-    /**
-     * 低压管道压力检测2
-     */
-    private static final String LOW_PRESSURE_TWO = "2334";
-    /**
-     * 高压管道压力检测
-     */
-    private static final String HIGH_PRESSURE = "2335";
-
-
 
 
     @Autowired
@@ -74,6 +61,8 @@ public class CompressorManager {
     private BellowsMapper bellowsMapper;
     @Autowired
     private CmdControlService cmdControlService;
+    @Autowired
+    private PressureManager pressureManager;
 
     /**
      * 低压空压机组
@@ -113,8 +102,8 @@ public class CompressorManager {
             compressorCache.put("2531", new Compressor("2531", "2531", Compressor.TYPE_HIGH, 1, this).initState(dataService, cmdControlService));
             compressorCache.put("2532", new Compressor("2532", "2532", Compressor.TYPE_HIGH, 2, this).initState(dataService, cmdControlService));
 
-            high = new CompressorGroup(compressorCache.findByType(Compressor.TYPE_HIGH), Compressor.TYPE_HIGH, Arrays.asList(HIGH_PRESSURE));
-            low = new CompressorGroup(compressorCache.findByType(Compressor.TYPE_LOW), Compressor.TYPE_LOW, Arrays.asList(LOW_PRESSURE_ONE, LOW_PRESSURE_TWO));
+            high = new CompressorGroup(compressorCache.findByType(Compressor.TYPE_HIGH), Compressor.TYPE_HIGH, pressureManager);
+            low = new CompressorGroup(compressorCache.findByType(Compressor.TYPE_LOW), Compressor.TYPE_LOW, pressureManager);
         }
 
         //初始化空压机智能

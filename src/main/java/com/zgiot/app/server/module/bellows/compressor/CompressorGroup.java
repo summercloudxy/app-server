@@ -2,6 +2,7 @@ package com.zgiot.app.server.module.bellows.compressor;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorState;
+import com.zgiot.app.server.module.bellows.pressure.PressureManager;
 import com.zgiot.app.server.module.bellows.util.BellowsUtil;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.common.constants.BellowsConstants;
@@ -25,17 +26,15 @@ public class CompressorGroup {
     @JSONField(serialize = false)
     private final List<Compressor> compressors;
 
-    /**
-     * 压力检测设备列表
-     */
-    @JSONField(serialize = false)
-    private final List<String> deviceThingCodes;
 
     /**
      * 类型
      */
     @JSONField(serialize = false)
     private final String type;
+
+    @JSONField(serialize = false)
+    private final PressureManager pressureManager;
 
     /**
      * 管道压力
@@ -62,10 +61,10 @@ public class CompressorGroup {
      */
     private volatile List<String> errors;
 
-    public CompressorGroup(List<Compressor> compressors, String type, List<String> deviceThingCodes) {
+    public CompressorGroup(List<Compressor> compressors, String type, PressureManager pressureManager) {
         this.compressors = compressors;
         this.type = type;
-        this.deviceThingCodes = deviceThingCodes;
+        this.pressureManager = pressureManager;
     }
 
     /**
@@ -100,21 +99,25 @@ public class CompressorGroup {
         this.runningCount = runningCount;
         this.errorCount = errorCount;
 
-        //压力刷新
-        double totalPressure = 0.0;
-        int deviceCount = deviceThingCodes.size();
-        for (int i=0;i<deviceCount;i++) {
-            String thingCode = deviceThingCodes.get(i);
+        //管道压力刷新
+        refreshPressure(dataService, requestId);
 
-            Optional<String> data = BellowsUtil.getDataModelValue(dataService, thingCode, BellowsConstants.METRIC_PRESSURE);
-            if (data.isPresent()) {
-                totalPressure += Double.parseDouble(data.get());
-            } else {
-                pressure = 0.0;
-                return this;
-            }
+        return this;
+    }
+
+    /**
+     * 管道压力刷新
+     * @param dataService
+     * @param requestId
+     * @return
+     */
+    public CompressorGroup refreshPressure(DataService dataService, String requestId) {
+        //压力刷新
+        pressure = pressureManager.refreshPressure(type, dataService, requestId);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Compressor group {} refresh pressure {}. RequestId: {}.", type, pressure, requestId);
         }
-        pressure = totalPressure/deviceCount;
 
         return this;
     }
