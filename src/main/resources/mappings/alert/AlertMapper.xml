@@ -362,7 +362,7 @@
         </if>
         <if test="startTime != null">
             AND
-            ad.alert_datetime &gt; #{startTime}
+            ad.alert_datetime &gt;= #{startTime}
         </if>
         <if test="endTime != null">
             AND
@@ -386,7 +386,7 @@
 
     <update id="setRead" parameterType="java.lang.Integer">
         UPDATE tb_alert_message SET is_read = #{state} WHERE id IN
-        <foreach collection="list" item="item" open="(" close=")" separator=",">
+        <foreach collection="messageIds" item="item" open="(" close=")" separator=",">
             #{item}
         </foreach>
     </update>
@@ -424,7 +424,7 @@
         </if>
         <if test="startTime != null">
             AND
-            ad.alert_datetime BETWEEN #{startTime} AND #{endTime}
+            ad.alert_datetime &gt;= #{startTime} AND ad.alert_datetime &lt; #{endTime}
         </if>
         <if test="assetType != null">
             AND
@@ -508,7 +508,7 @@
             thing_code,
         </if>
         COUNT(alert_level) as sumNum FROM `tb_alert_data`
-        WHERE alert_datetime BETWEEN #{startTime} AND #{endTime}
+        WHERE alert_datetime &gt;= #{startTime} AND alert_datetime &lt; #{endTime}
         <if test="alertStage != null">
             <!--<if test="alertStage == 'UNRELEASE'">-->
                 <!--AND alert_stage != 'RELEASE'-->
@@ -533,7 +533,7 @@
             thing_code,
         </if>
         alert_level,count(1) as count FROM `tb_alert_data`
-        WHERE alert_datetime BETWEEN #{startTime} AND #{endTime}
+        WHERE alert_datetime &gt;= #{startTime} AND alert_datetime &lt; #{endTime}
         <if test="alertStage != null">
             AND alert_stage = #{alertStage}
         </if>
@@ -554,7 +554,7 @@
     <select id="getTypeStatisticsInfo" resultType="com.zgiot.app.server.module.alert.pojo.AlertStatisticsNum">
         select DATE_FORMAT(alert_datetime,'%Y%m%d') dayStr,count(alert_type) as sumNum from tb_alert_data
         WHERE alert_type = #{alertType}
-        and alert_datetime BETWEEN #{startTime} and #{endTime}
+        and alert_datetime &gt;= #{startTime} and  alert_datetime &lt; #{endTime}
         group by dayStr ORDER BY dayStr DESC ;
     </select>
 
@@ -567,7 +567,7 @@
         <trim prefix="and" prefixOverrides="where">
             <if test="startTime != null">
                 AND
-                alert_datetime BETWEEN #{startTime} and #{endTime}
+                alert_datetime &gt;= #{startTime} and alert_datetime &lt; #{endTime}
             </if>
             <if test="alertLevel != null">
                 and
@@ -592,7 +592,7 @@
         </if>
         <if test="startTime != null">
             AND
-            d.alert_datetime BETWEEN #{startTime} AND #{endTime}
+            d.alert_datetime &gt;= #{startTime} AND d.alert_datetime &lt; #{endTime}
         </if>
         <if test="assetType != null">
             AND

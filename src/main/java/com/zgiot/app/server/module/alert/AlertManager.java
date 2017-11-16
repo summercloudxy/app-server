@@ -47,6 +47,7 @@ public class AlertManager {
     private static final int SORT_TYPE_LEVEL_DESC = 2;
     private static final int SORT_TYPE_LEVEL_ASC = 3;
     private static final int READ_STATE = 1;
+    private static final int STATISTICS_TYPE_DEVICE = 1;
     @Autowired
     private AlertMapper alertMapper;
     @Autowired
@@ -655,9 +656,9 @@ public class AlertManager {
      * @param messageIds
      */
     public void setRead(List<Integer> messageIds) {
-        alertMapper.setRead(messageIds,READ_STATE);
+        alertMapper.setRead(messageIds, READ_STATE);
         messagingTemplate.convertAndSend(READ_STATE_URI, messageIds);
-        logger.debug("设置消息已读");
+        logger.debug("设置消息已读,消息id列表为：{}", messageIds);
 
     }
 
@@ -909,7 +910,7 @@ public class AlertManager {
         if (alertStage == null || AlertConstants.STAGE_UNRELEASE.equals(alertStage)) {
             excluStage = AlertConstants.STAGE_RELEASE;
         }
-        if (type == 1) {
+        if (type == STATISTICS_TYPE_DEVICE) {
             getThingStatisticsInfo(type, alertStage, startTime, endTime, alertStatisticsRsp, excluStage);
 
         } else {
@@ -920,13 +921,13 @@ public class AlertManager {
 
     /**
      * 获取不同报警阶段统计信息
+     * 
      * @param type
      * @param startTime
      * @param endTime
      * @param alertStatisticsRsp
      */
-    private void getStageStatisticsInfo(int type, Date startTime, Date endTime,
-            AlertStatisticsRsp alertStatisticsRsp) {
+    private void getStageStatisticsInfo(int type, Date startTime, Date endTime, AlertStatisticsRsp alertStatisticsRsp) {
         AlertStatisticsNum wholeStatisticsNum = getAlertStatisticsNum(type, null, null, startTime, endTime);
         AlertStatisticsNum releaseStatisticsNum =
                 getAlertStatisticsNum(type, AlertConstants.STAGE_RELEASE, null, startTime, endTime);
@@ -953,6 +954,7 @@ public class AlertManager {
 
     /**
      * 获取一个设备报警统计信息
+     * 
      * @param type
      * @param alertStage
      * @param startTime
@@ -983,28 +985,29 @@ public class AlertManager {
 
     /**
      * 按报警总数排序
+     * 
      * @param alertStatisticsNumMap
      * @return
      */
     private List<AlertStatisticsNum> sortAlertStatisticsNum(Map<String, AlertStatisticsNum> alertStatisticsNumMap) {
         List<AlertStatisticsNum> alertStatisticsNums = new ArrayList<>(alertStatisticsNumMap.values());
         alertStatisticsNums.sort((AlertStatisticsNum o1, AlertStatisticsNum o2) -> {
-                Collection<Integer> count1 = o1.getAlertLevelNums().values();
-                Integer sumNum1 = 0;
-                Integer sumNum2 = 0;
-                for (Integer i : count1) {
-                    sumNum1 += i;
-                }
-                o1.setSumNum(sumNum1);
-                Collection<Integer> count2 = o2.getAlertLevelNums().values();
-                for (Integer i : count2) {
-                    sumNum2 += i;
-                }
-                o2.setSumNum(sumNum2);
-                if (sumNum1.equals(sumNum2)) {
-                    return o1.getThingCode().compareTo(o2.getThingCode());
-                }
-                return sumNum2.compareTo(sumNum1);
+            Collection<Integer> count1 = o1.getAlertLevelNums().values();
+            Integer sumNum1 = 0;
+            Integer sumNum2 = 0;
+            for (Integer i : count1) {
+                sumNum1 += i;
+            }
+            o1.setSumNum(sumNum1);
+            Collection<Integer> count2 = o2.getAlertLevelNums().values();
+            for (Integer i : count2) {
+                sumNum2 += i;
+            }
+            o2.setSumNum(sumNum2);
+            if (sumNum1.equals(sumNum2)) {
+                return o1.getThingCode().compareTo(o2.getThingCode());
+            }
+            return sumNum2.compareTo(sumNum1);
         });
         return alertStatisticsNums;
     }
