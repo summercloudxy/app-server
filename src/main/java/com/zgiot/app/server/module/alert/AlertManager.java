@@ -545,7 +545,8 @@ public class AlertManager {
         dataModel.setValue(Boolean.TRUE.toString());
         CmdControlService.CmdSendResponseData resetSendResponseData = cmdControlService.sendCmd(dataModel, requestId);
         if (resetSendResponseData.getOkCount() <= 0) {
-            throw new SysException("下发复位信号失败，失败原因："+resetSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
+            throw new SysException("下发复位信号失败，失败原因：" + resetSendResponseData.getErrorMessage(),
+                    SysException.EC_CMD_FAILED);
         }
         Map<String, AlertData> metricAlertDataMap = alertDataMap.get(thingCode);
         if (metricAlertDataMap != null && metricAlertDataMap.containsKey(MetricCodes.WARNING)) {
@@ -553,7 +554,8 @@ public class AlertManager {
             CmdControlService.CmdSendResponseData alertConfirmSendResponseData =
                     cmdControlService.sendCmd(dataModel, requestId);
             if (alertConfirmSendResponseData.getOkCount() <= 0) {
-                throw new SysException("下发报警确认信号失败，失败原因："+alertConfirmSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
+                throw new SysException("下发报警确认信号失败，失败原因：" + alertConfirmSendResponseData.getErrorMessage(),
+                        SysException.EC_CMD_FAILED);
             }
         }
         logger.debug("报警设备{}进行复位操作", thingCode);
@@ -673,7 +675,7 @@ public class AlertManager {
     public List<AlertRecord> getAlertDataListGroupByThing(String stage, List<Integer> levels, List<Short> types,
             List<Integer> buildingIds, List<Integer> floors, List<Integer> systems, String assetType, String category,
             Integer sortType, Long duration, String thingCode, Integer page, Integer count, Date timeStamp) {
-        List<AlertRecord> result = new ArrayList<>();
+
         Date endTime = timeStamp;
         Date startTime = null;
         Integer offset = null;
@@ -683,31 +685,63 @@ public class AlertManager {
         if (page != null && count != null) {
             offset = page * count;
         }
-        List<AlertRecord> alertRecords = alertMapper.getAlertDataListGroupByThing(stage, levels, types, buildingIds,
-                floors, systems, assetType, category, sortType, startTime, endTime, thingCode, offset, count);
-        // if (thingCode != null) {
+        String excluStage = null;
+        if (stage == null) {
+            excluStage = AlertConstants.STAGE_RELEASE;
+        }
+        if (types != null) {
+            types.add(AlertConstants.TYPE_USER);
+        }
+        List<AlertRecord> alertRecords =
+                alertMapper.getAlertDataListGroupByThing(stage, excluStage, levels, types, buildingIds, floors, systems,
+                        assetType, category, sortType, startTime, endTime, thingCode, offset, count);
+        sortRecords(sortType, alertRecords);
+        if (page != null && count != null) {
+            List<AlertRecord> alertRecordsPaged = pagingRecords(page, count, alertRecords);
+            disposeImageAndMessage(stage, alertRecordsPaged);
+            return alertRecordsPaged;
+        }
+        disposeImageAndMessage(stage, alertRecords);
+        return alertRecords;
+    }
+
+    private void disposeImageAndMessage(String stage, List<AlertRecord> alertRecordsPaged) {
+        disposeImage(alertRecordsPaged);
+        if (!AlertConstants.STAGE_RELEASE.equals(stage)) {
+            getAlertMessage(alertRecordsPaged);
+        }
+    }
+
+    private List<AlertRecord> pagingRecords(Integer page, Integer count, List<AlertRecord> alertRecords) {
+        List<AlertRecord> result = new ArrayList<>();
+        if (page * count < alertRecords.size()) {
+            if ((page + 1) * count < alertRecords.size()) {
+                result = alertRecords.subList(page * count, (page + 1) * count);
+            } else {
+                result = alertRecords.subList(page * count, alertRecords.size());
+            }
+        }
+        return result;
+    }
+
+    private void disposeImage(List<AlertRecord> alertRecords) {
         for (AlertRecord alertRecord : alertRecords) {
             List<AlertData> alertDatas = alertRecord.getAlertDataList();
             for (AlertData alertData : alertDatas) {
                 transImageStrToList(alertData);
-                 countUnreadMessage(alertData);
+                // countUnreadMessage(alertData);
             }
         }
-        // }
+    }
 
-        sortRecords(sortType, alertRecords);
-        if (page != null && count != null) {
-            if (page * count < alertRecords.size()) {
-                if ((page + 1) * count < alertRecords.size()) {
-                    result = alertRecords.subList(page * count, (page + 1) * count);
-                } else {
-                    result = alertRecords.subList(page * count, alertRecords.size());
-                }
+    private void getAlertMessage(List<AlertRecord> alertRecords) {
+        for (AlertRecord alertRecord : alertRecords) {
+            List<AlertData> alertDataList = alertRecord.getAlertDataList();
+            for (AlertData alertData : alertDataList) {
+                List<AlertMessage> alertMessage = alertMapper.getAlertMessage(alertData.getId());
+                alertData.setAlertMessageList(alertMessage);
             }
-            return result;
         }
-
-        return alertRecords;
     }
 
     /**
@@ -870,17 +904,21 @@ public class AlertManager {
      */
     public AlertStatisticsRsp getStatisticsInfo(int type, String alertStage, Date startTime, Date endTime) {
         AlertStatisticsRsp alertStatisticsRsp = new AlertStatisticsRsp();
+        String excluStage = null;
+        if (alertStage == null || AlertConstants.STAGE_UNRELEASE.equals(alertStage)) {
+            excluStage = AlertConstants.STAGE_RELEASE;
+        }
         if (type == 1) {
             List<AlertStatisticsNum> alertStatisticsNums =
-                    alertMapper.getStatisticsInfo(type, alertStage, startTime, endTime);
+                    alertMapper.getStatisticsInfo(type, alertStage, excluStage, startTime, endTime);
             alertStatisticsRsp.setDetailStatisticsInfo(alertStatisticsNums);
         } else {
             AlertStatisticsNum wholeStatisticsNum =
-                    alertMapper.getStatisticsInfo(type, null, startTime, endTime).get(0);
-            AlertStatisticsNum releaseStatisticsNum =
-                    alertMapper.getStatisticsInfo(type, AlertConstants.STAGE_RELEASE, startTime, endTime).get(0);
+                    alertMapper.getStatisticsInfo(type, null, null, startTime, endTime).get(0);
+            AlertStatisticsNum releaseStatisticsNum = alertMapper
+                    .getStatisticsInfo(type, AlertConstants.STAGE_RELEASE, excluStage, startTime, endTime).get(0);
             AlertStatisticsNum unReleaseStatisticsNum =
-                    alertMapper.getStatisticsInfo(type, AlertConstants.STAGE_UNRELEASE, startTime, endTime).get(0);
+                    alertMapper.getStatisticsInfo(type, null, AlertConstants.STAGE_RELEASE, startTime, endTime).get(0);
             alertStatisticsRsp.setWholeStatisticsInfo(wholeStatisticsNum);
             alertStatisticsRsp.setReleaseStatisticsInfo(releaseStatisticsNum);
             alertStatisticsRsp.setUnReleaseStatisticsInfo(unReleaseStatisticsNum);
@@ -1007,6 +1045,10 @@ public class AlertManager {
         Date endTime = null;
         Date startTime = null;
         Integer offset = null;
+        String excluStage = null;
+        if (stage == null || AlertConstants.STAGE_UNRELEASE.equals(stage)) {
+            excluStage = AlertConstants.STAGE_RELEASE;
+        }
         if (duration != null) {
             endTime = new Date();
             startTime = new Date(endTime.getTime() - duration);
@@ -1014,8 +1056,8 @@ public class AlertManager {
         if (page != null && count != null) {
             offset = page * count;
         }
-        return alertMapper.getAlertDataList(stage, level, type, system, assetType, category, sortType, startTime,
-                endTime, thingCode, offset, count);
+        return alertMapper.getAlertDataList(stage, excluStage, level, type, system, assetType, category, sortType,
+                startTime, endTime, thingCode, offset, count);
     }
 
 }

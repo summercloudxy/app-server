@@ -43,14 +43,14 @@ public interface AlertMapper {
 
     void saveAlertShield(List<AlertMask> alertMasks);
 
-    List<AlertRecord> getAlertDataListGroupByThing(@Param("stage") String stage, @Param("levels") List<Integer> levels,
+    List<AlertRecord> getAlertDataListGroupByThing(@Param("stage") String stage,@Param("excluStage")String excluStage, @Param("levels") List<Integer> levels,
             @Param("types") List<Short> types, @Param("buildingIds") List<Integer> buildingIds,
             @Param("floors") List<Integer> floors, @Param("systems") List<Integer> systems,
             @Param("assetType") String assetType, @Param("category") String category,
             @Param("sortType") Integer sortType, @Param("startTime") Date startTime, @Param("endTime") Date endTime,
             @Param("thingCode") String thingCode, @Param("offset") Integer offset, @Param("count") Integer count);
 
-    List<AlertData> getAlertDataList(@Param("stage") String stage, @Param("level") Integer level,
+    List<AlertData> getAlertDataList(@Param("stage") String stage, @Param("excluStage")String excluStage,@Param("level") Integer level,
             @Param("type") Short type, @Param("system") Integer system,
             @Param("assetType") String assetType, @Param("category") String category,
             @Param("sortType") Integer sortType, @Param("startTime") Date startTime, @Param("endTime") Date endTime,
@@ -72,7 +72,7 @@ public interface AlertMapper {
      * @param endTime
      * @return
      */
-    List<AlertStatisticsNum> getStatisticsInfo(@Param("type") int type, @Param("alertStage") String alertStage,
+    List<AlertStatisticsNum> getStatisticsInfo(@Param("type") int type, @Param("alertStage") String alertStage,@Param("excluStage")String excluStage,
             @Param("startTime") Date startTime, @Param("endTime") Date endTime);
 
     /**
@@ -86,5 +86,5 @@ public interface AlertMapper {
 
     List<AlertRepairStatistics> getRepairStatisticsInfo(@Param("startTime")Date startTime,@Param("endTime")Date endTime,@Param("alertLevel")Short alertLevel);
 
-    void clearAlertDateHistory(@Param("timeStamp")Date timeStamp);
+    void clearAlertDateHistory(@Param("timeStamp")Date timeStamp,@Param("stage")String stage);
 }
