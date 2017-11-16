@@ -38,7 +38,7 @@ public enum EnumHighCompressorFault {
      * @return
      */
     public static Set<String> metricCodes() {
-        Set<String> result = new HashSet<>(13);
+        Set<String> result = new HashSet<>(EnumHighCompressorFault.values().length);
         for (EnumHighCompressorFault e : EnumHighCompressorFault.values()) {
             result.add(e.getMetricCode());
         }

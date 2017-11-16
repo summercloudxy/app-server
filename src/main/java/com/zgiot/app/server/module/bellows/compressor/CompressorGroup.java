@@ -5,7 +5,6 @@ import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorState;
 import com.zgiot.app.server.module.bellows.util.BellowsUtil;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.common.constants.BellowsConstants;
-import com.zgiot.common.pojo.DataModelWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,9 +30,6 @@ public class CompressorGroup {
      */
     @JSONField(serialize = false)
     private final List<String> deviceThingCodes;
-
-    @JSONField(serialize = false)
-    private final CompressorManager manager;
 
     /**
      * 类型
@@ -66,11 +62,10 @@ public class CompressorGroup {
      */
     private volatile List<String> errors;
 
-    public CompressorGroup(List<Compressor> compressors, String type, List<String> deviceThingCodes, CompressorManager manager) {
+    public CompressorGroup(List<Compressor> compressors, String type, List<String> deviceThingCodes) {
         this.compressors = compressors;
         this.type = type;
         this.deviceThingCodes = deviceThingCodes;
-        this.manager = manager;
     }
 
     /**
@@ -78,12 +73,16 @@ public class CompressorGroup {
      * @param dataService
      * @return
      */
-    public synchronized CompressorGroup refresh(DataService dataService) {
+    public synchronized CompressorGroup refresh(DataService dataService, String requestId) {
         //数量刷新
         totalCount = compressors.size();
         errors = new ArrayList<>();
         int runningCount = 0;
         int errorCount = 0;
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Compressor group {} refresh. RequestId: {}.", type, requestId);
+        }
 
         for (Compressor compressor : compressors) {
             if (EnumCompressorState.RUNNING.getState().equals(compressor.getState())) {

@@ -14,6 +14,10 @@ public class BellowsUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(BellowsUtil.class);
 
+    private BellowsUtil() {
+
+    }
+
     /**
      * 拉取dataModel的value值
      * @param dataService

@@ -113,8 +113,8 @@ public class CompressorManager {
             compressorCache.put("2531", new Compressor("2531", "2531", Compressor.TYPE_HIGH, 1, this).initState(dataService, cmdControlService));
             compressorCache.put("2532", new Compressor("2532", "2532", Compressor.TYPE_HIGH, 2, this).initState(dataService, cmdControlService));
 
-            high = new CompressorGroup(compressorCache.findByType(Compressor.TYPE_HIGH), Compressor.TYPE_HIGH, Arrays.asList(HIGH_PRESSURE), this);
-            low = new CompressorGroup(compressorCache.findByType(Compressor.TYPE_LOW), Compressor.TYPE_LOW, Arrays.asList(LOW_PRESSURE_ONE, LOW_PRESSURE_TWO), this);
+            high = new CompressorGroup(compressorCache.findByType(Compressor.TYPE_HIGH), Compressor.TYPE_HIGH, Arrays.asList(HIGH_PRESSURE));
+            low = new CompressorGroup(compressorCache.findByType(Compressor.TYPE_LOW), Compressor.TYPE_LOW, Arrays.asList(LOW_PRESSURE_ONE, LOW_PRESSURE_TWO));
         }
 
         //初始化空压机智能
@@ -489,9 +489,9 @@ public class CompressorManager {
      */
     public CompressorGroup refreshCompressorGroup(String type, String requestId) {
         if (Compressor.TYPE_HIGH.equals(type)) {
-            return high.refresh(dataService);
+            return high.refresh(dataService, requestId);
         } else if (Compressor.TYPE_LOW.equals(type)) {
-            return low.refresh(dataService);
+            return low.refresh(dataService, requestId);
         } else {
             logger.warn("Compressor group type {} is wrong. RequestId: {}.", type, requestId);
             return null;

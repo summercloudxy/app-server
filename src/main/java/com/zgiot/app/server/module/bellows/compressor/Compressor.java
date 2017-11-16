@@ -184,7 +184,7 @@ public class Compressor {
         boolean warn = Boolean.parseBoolean(warnData.orElse(BellowsConstants.FALSE));
 
         Optional<String> errorData = BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.ERROR);
-        boolean error = Boolean.parseBoolean(warnData.orElse(BellowsConstants.FALSE));
+        boolean error = Boolean.parseBoolean(errorData.orElse(BellowsConstants.FALSE));
 
         if (warn || error) {
             errorState = true;

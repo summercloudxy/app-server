@@ -1,7 +1,6 @@
 package com.zgiot.app.server.module.bellows.enumeration;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -37,7 +36,7 @@ public enum EnumLowCompressorFault {
      * @return
      */
     public static Set<String> metricCodes() {
-        Set<String> result = new HashSet<>(13);
+        Set<String> result = new HashSet<>(EnumLowCompressorFault.values().length);
         for (EnumLowCompressorFault e : EnumLowCompressorFault.values()) {
             result.add(e.getMetricCode());
         }
