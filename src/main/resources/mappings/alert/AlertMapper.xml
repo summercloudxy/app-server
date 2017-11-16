@@ -385,7 +385,7 @@
     </select>
 
     <update id="setRead" parameterType="java.lang.Integer">
-        UPDATE tb_alert_message SET is_read = 1 WHERE id IN
+        UPDATE tb_alert_message SET is_read = #{state} WHERE id IN
         <foreach collection="list" item="item" open="(" close=")" separator=",">
             #{item}
         </foreach>
@@ -507,8 +507,7 @@
         <if test="type == 1">
             thing_code,
         </if>
-        COUNT(alert_level) as sumNum,COUNT(alert_level=30 or null) as level30num, COUNT(alert_level=20 or null) as
-        level20num, COUNT(alert_level=10 or null) as level10num FROM `tb_alert_data`
+        COUNT(alert_level) as sumNum FROM `tb_alert_data`
         WHERE alert_datetime BETWEEN #{startTime} AND #{endTime}
         <if test="alertStage != null">
             <!--<if test="alertStage == 'UNRELEASE'">-->
@@ -527,6 +526,30 @@
         </if>
 
     </select>
+
+    <select id="getLevelStatisticsInfo" resultType="com.zgiot.app.server.module.alert.pojo.AlertLevelNum">
+        SELECT
+        <if test="type == 1">
+            thing_code,
+        </if>
+        alert_level,count(1) as count FROM `tb_alert_data`
+        WHERE alert_datetime BETWEEN #{startTime} AND #{endTime}
+        <if test="alertStage != null">
+            AND alert_stage = #{alertStage}
+        </if>
+        <!--</if>-->
+        <if test="excluStage != null">
+            AND  alert_stage != #{excluStage}
+        </if>
+        <if test="type == 1">
+            GROUP BY thing_code,alert_level
+        </if>
+        <if test="type == 0">
+            group by alert_level
+        </if>
+
+    </select>
+
 
     <select id="getTypeStatisticsInfo" resultType="com.zgiot.app.server.module.alert.pojo.AlertStatisticsNum">
         select DATE_FORMAT(alert_datetime,'%Y%m%d') dayStr,count(alert_type) as sumNum from tb_alert_data

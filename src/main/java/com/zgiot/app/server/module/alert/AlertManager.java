@@ -46,6 +46,7 @@ public class AlertManager {
     private static final int SORT_TYPE_TIME_ASC = 1;
     private static final int SORT_TYPE_LEVEL_DESC = 2;
     private static final int SORT_TYPE_LEVEL_ASC = 3;
+    private static final int READ_STATE = 1;
     @Autowired
     private AlertMapper alertMapper;
     @Autowired
@@ -654,7 +655,7 @@ public class AlertManager {
      * @param messageIds
      */
     public void setRead(List<Integer> messageIds) {
-        alertMapper.setRead(messageIds);
+        alertMapper.setRead(messageIds,READ_STATE);
         messagingTemplate.convertAndSend(READ_STATE_URI, messageIds);
         logger.debug("设置消息已读");
 
@@ -909,21 +910,103 @@ public class AlertManager {
             excluStage = AlertConstants.STAGE_RELEASE;
         }
         if (type == 1) {
-            List<AlertStatisticsNum> alertStatisticsNums =
-                    alertMapper.getStatisticsInfo(type, alertStage, excluStage, startTime, endTime);
-            alertStatisticsRsp.setDetailStatisticsInfo(alertStatisticsNums);
+            getThingStatisticsInfo(type, alertStage, startTime, endTime, alertStatisticsRsp, excluStage);
+
         } else {
-            AlertStatisticsNum wholeStatisticsNum =
-                    alertMapper.getStatisticsInfo(type, null, null, startTime, endTime).get(0);
-            AlertStatisticsNum releaseStatisticsNum = alertMapper
-                    .getStatisticsInfo(type, AlertConstants.STAGE_RELEASE, excluStage, startTime, endTime).get(0);
-            AlertStatisticsNum unReleaseStatisticsNum =
-                    alertMapper.getStatisticsInfo(type, null, AlertConstants.STAGE_RELEASE, startTime, endTime).get(0);
-            alertStatisticsRsp.setWholeStatisticsInfo(wholeStatisticsNum);
-            alertStatisticsRsp.setReleaseStatisticsInfo(releaseStatisticsNum);
-            alertStatisticsRsp.setUnReleaseStatisticsInfo(unReleaseStatisticsNum);
+            getStageStatisticsInfo(type, startTime, endTime, alertStatisticsRsp);
         }
         return alertStatisticsRsp;
+    }
+
+    /**
+     * 获取不同报警阶段统计信息
+     * @param type
+     * @param startTime
+     * @param endTime
+     * @param alertStatisticsRsp
+     */
+    private void getStageStatisticsInfo(int type, Date startTime, Date endTime,
+            AlertStatisticsRsp alertStatisticsRsp) {
+        AlertStatisticsNum wholeStatisticsNum = getAlertStatisticsNum(type, null, null, startTime, endTime);
+        AlertStatisticsNum releaseStatisticsNum =
+                getAlertStatisticsNum(type, AlertConstants.STAGE_RELEASE, null, startTime, endTime);
+        AlertStatisticsNum unReleaseStatisticsNum =
+                getAlertStatisticsNum(type, null, AlertConstants.STAGE_RELEASE, startTime, endTime);
+        alertStatisticsRsp.setWholeStatisticsInfo(wholeStatisticsNum);
+        alertStatisticsRsp.setReleaseStatisticsInfo(releaseStatisticsNum);
+        alertStatisticsRsp.setUnReleaseStatisticsInfo(unReleaseStatisticsNum);
+    }
+
+    private AlertStatisticsNum getAlertStatisticsNum(int type, String alertStage, String excluStage, Date startTime,
+            Date endTime) {
+        List<AlertLevelNum> alertLevelNumList =
+                alertMapper.getLevelStatisticsInfo(type, alertStage, excluStage, startTime, endTime);
+        Map<Integer, Integer> alertLevelMap = new HashMap<>();
+        for (AlertLevelNum alertLevelNum : alertLevelNumList) {
+            alertLevelMap.put(alertLevelNum.getAlertLevel(), alertLevelNum.getCount());
+        }
+        AlertStatisticsNum statisticsNum =
+                alertMapper.getStatisticsInfo(type, alertStage, excluStage, startTime, endTime).get(0);
+        statisticsNum.setAlertLevelNums(alertLevelMap);
+        return statisticsNum;
+    }
+
+    /**
+     * 获取一个设备报警统计信息
+     * @param type
+     * @param alertStage
+     * @param startTime
+     * @param endTime
+     * @param alertStatisticsRsp
+     * @param excluStage
+     */
+    private void getThingStatisticsInfo(int type, String alertStage, Date startTime, Date endTime,
+            AlertStatisticsRsp alertStatisticsRsp, String excluStage) {
+        Map<String, AlertStatisticsNum> alertStatisticsNumMap = new HashMap<>();
+        List<AlertLevelNum> levelStatisticsInfo =
+                alertMapper.getLevelStatisticsInfo(type, alertStage, excluStage, startTime, endTime);
+        for (AlertLevelNum alertLevelNum : levelStatisticsInfo) {
+            String thingCode = alertLevelNum.getThingCode();
+            AlertStatisticsNum alertStatisticsNum;
+            if (alertStatisticsNumMap.containsKey(thingCode)) {
+                alertStatisticsNum = alertStatisticsNumMap.get(thingCode);
+            } else {
+                alertStatisticsNum = new AlertStatisticsNum();
+                alertStatisticsNumMap.put(thingCode, alertStatisticsNum);
+                alertStatisticsNum.setThingCode(thingCode);
+            }
+            alertStatisticsNum.getAlertLevelNums().put(alertLevelNum.getAlertLevel(), alertLevelNum.getCount());
+        }
+        List<AlertStatisticsNum> alertStatisticsNums = sortAlertStatisticsNum(alertStatisticsNumMap);
+        alertStatisticsRsp.setDetailStatisticsInfo(alertStatisticsNums);
+    }
+
+    /**
+     * 按报警总数排序
+     * @param alertStatisticsNumMap
+     * @return
+     */
+    private List<AlertStatisticsNum> sortAlertStatisticsNum(Map<String, AlertStatisticsNum> alertStatisticsNumMap) {
+        List<AlertStatisticsNum> alertStatisticsNums = new ArrayList<>(alertStatisticsNumMap.values());
+        alertStatisticsNums.sort((AlertStatisticsNum o1, AlertStatisticsNum o2) -> {
+                Collection<Integer> count1 = o1.getAlertLevelNums().values();
+                Integer sumNum1 = 0;
+                Integer sumNum2 = 0;
+                for (Integer i : count1) {
+                    sumNum1 += i;
+                }
+                o1.setSumNum(sumNum1);
+                Collection<Integer> count2 = o2.getAlertLevelNums().values();
+                for (Integer i : count2) {
+                    sumNum2 += i;
+                }
+                o2.setSumNum(sumNum2);
+                if (sumNum1.equals(sumNum2)) {
+                    return o1.getThingCode().compareTo(o2.getThingCode());
+                }
+                return sumNum2.compareTo(sumNum1);
+        });
+        return alertStatisticsNums;
     }
 
     /**
