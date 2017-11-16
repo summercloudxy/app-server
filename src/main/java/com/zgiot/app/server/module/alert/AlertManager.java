@@ -658,7 +658,7 @@ public class AlertManager {
     public void setRead(List<Integer> messageIds) {
         alertMapper.setRead(messageIds, READ_STATE);
         messagingTemplate.convertAndSend(READ_STATE_URI, messageIds);
-        logger.debug("设置消息已读,消息id列表为：{}", messageIds);
+        logger.debug("报警消息变更为已读状态,消息id列表为：{}", messageIds);
 
     }
 
