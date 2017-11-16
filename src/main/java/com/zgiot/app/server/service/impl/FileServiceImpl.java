@@ -51,7 +51,7 @@ public class FileServiceImpl implements FileService{
         }
 
         // 相对路径
-        String relatePath = currentDay + "/" + moduleName + "/" + fileTypePath;
+        String relatePath = moduleName + "/" + currentDay + "/" + fileTypePath;
         relatePath = relatePath + "/" + fileName;
         String pcPath = basePath+ "/"  + relatePath;
 
