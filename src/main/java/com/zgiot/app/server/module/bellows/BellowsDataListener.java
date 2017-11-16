@@ -2,6 +2,7 @@ package com.zgiot.app.server.module.bellows;
 
 import com.zgiot.app.server.dataprocessor.DataListener;
 import com.zgiot.app.server.module.bellows.compressor.CompressorManager;
+import com.zgiot.common.constants.BellowsConstants;
 import com.zgiot.common.constants.CompressorMetricConstants;
 import com.zgiot.common.pojo.DataModel;
 import org.slf4j.Logger;
@@ -28,10 +29,12 @@ public class BellowsDataListener implements DataListener {
     private CompressorManager compressorManager;
 
     static {
-        compressorMetricCode.add(CompressorMetricConstants.PRESSURE_STATE);
+        compressorMetricCode.add(BellowsConstants.METRIC_PRESSURE_STATE);
+        compressorMetricCode.add(CompressorMetricConstants.WARN);
+        compressorMetricCode.add(CompressorMetricConstants.ERROR);
         compressorMetricCode.add(CompressorMetricConstants.RUN_STATE);
         compressorMetricCode.add(CompressorMetricConstants.LOAD_STATE);
-        compressorMetricCode.add(CompressorMetricConstants.REMOTE);
+        compressorMetricCode.add(CompressorMetricConstants.LOCAL);
     }
 
     @Override

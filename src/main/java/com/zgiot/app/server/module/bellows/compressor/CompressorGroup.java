@@ -1,8 +1,10 @@
 package com.zgiot.app.server.module.bellows.compressor;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorState;
+import com.zgiot.app.server.module.bellows.util.BellowsUtil;
 import com.zgiot.app.server.service.DataService;
-import com.zgiot.common.constants.CompressorMetricConstants;
+import com.zgiot.common.constants.BellowsConstants;
 import com.zgiot.common.pojo.DataModelWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,19 +23,22 @@ public class CompressorGroup {
     /**
      * 空压机列表
      */
+    @JSONField(serialize = false)
     private final List<Compressor> compressors;
 
     /**
      * 压力检测设备列表
      */
+    @JSONField(serialize = false)
     private final List<String> deviceThingCodes;
 
-
+    @JSONField(serialize = false)
     private final CompressorManager manager;
 
     /**
      * 类型
      */
+    @JSONField(serialize = false)
     private final String type;
 
     /**
@@ -100,14 +105,15 @@ public class CompressorGroup {
         double totalPressure = 0.0;
         int deviceCount = deviceThingCodes.size();
         for (int i=0;i<deviceCount;i++) {
-            Optional<DataModelWrapper> data = dataService.getData(deviceThingCodes.get(i), CompressorMetricConstants.PRESSURE);
-            if (!data.isPresent()) {
-                logger.warn("Pressure device {} return no data.", deviceThingCodes.get(i));
+            String thingCode = deviceThingCodes.get(i);
+
+            Optional<String> data = BellowsUtil.getDataModelValue(dataService, thingCode, BellowsConstants.METRIC_PRESSURE);
+            if (data.isPresent()) {
+                totalPressure += Double.parseDouble(data.get());
+            } else {
                 pressure = 0.0;
                 return this;
             }
-
-            totalPressure += Double.parseDouble(data.get().getValue());
         }
         pressure = totalPressure/deviceCount;
 

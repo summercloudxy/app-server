@@ -23,10 +23,6 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.*;
 
-import static com.zgiot.app.server.module.bellows.compressor.Compressor.TYPE_HIGH;
-import static com.zgiot.app.server.module.bellows.compressor.Compressor.TYPE_LOW;
-import static com.zgiot.app.server.module.bellows.compressor.Compressor.YES;
-
 /**
  * @author wangwei
  */
@@ -52,20 +48,20 @@ public class CompressorManager {
     /**
      * 压力状态监测设备号
      */
-    private static final String PRESSURE_THING_CODE = "test";   //TODO: 修改设备号
+    private static final String PRESSURE_THING_CODE = "SYS_SB";
 
     /**
      * 低压管道压力检测1
      */
-    private static final String LOW_PRESSURE_ONE = "low1";  //TODO: 修改设备号
+    private static final String LOW_PRESSURE_ONE = "2333";
     /**
      * 低压管道压力检测2
      */
-    private static final String LOW_PRESSURE_TWO = "low2"; //TODO: 修改设备号
+    private static final String LOW_PRESSURE_TWO = "2334";
     /**
      * 高压管道压力检测
      */
-    private static final String HIGH_PRESSURE = "high"; //TODO: 修改设备号
+    private static final String HIGH_PRESSURE = "2335";
 
 
 
@@ -98,7 +94,7 @@ public class CompressorManager {
     /**
      * 低压空压机压力状态
      */
-    private volatile Short pressureState;
+    private volatile double pressureState;
 
     /**
      * 智能压力控制timer
@@ -123,10 +119,11 @@ public class CompressorManager {
 
         //初始化空压机智能
         boolean intelligent = (bellowsMapper.selectParamValue(BellowsConstants.SYS, BellowsConstants.CP_INTELLIGENT) == 1);
-        setIntelligent(intelligent);
 
         //初始化低压空压机压力状态
         initPressureState();
+
+        setIntelligent(intelligent);
     }
 
 
@@ -171,7 +168,7 @@ public class CompressorManager {
                 }
                 compressor.onErrorStateChange(data.getValue(), requestId);
                 break;
-            case CompressorMetricConstants.REMOTE:
+            case CompressorMetricConstants.LOCAL:
                 compressor = getCompressorFromCache(data.getThingCode());
                 if (compressor == null) {
                     if (logger.isDebugEnabled()) {
@@ -179,16 +176,16 @@ public class CompressorManager {
                     }
                     return;
                 }
-                compressor.onRemoteChange(data.getValue(), requestId);
+                compressor.onLocalChange(data.getValue(), requestId, intelligent);
                 break;
-            case CompressorMetricConstants.PRESSURE_STATE:
+            case BellowsConstants.METRIC_PRESSURE_STATE:
                 if (!data.getThingCode().equals(PRESSURE_THING_CODE)) {
                     if (logger.isDebugEnabled()) {
                         logger.debug("Pressure device code {} is wrong.RequestId: {}.", data.getThingCode(), requestId);
                     }
                     return;
                 }
-                setPressureState(Short.parseShort(data.getValue()), requestId);
+                setPressureState(Double.parseDouble(data.getValue()), requestId);
                 break;
             default:
                 logger.warn("Got wrong metric code: {}.RequestId: {}.", metricCode, requestId);
@@ -204,14 +201,14 @@ public class CompressorManager {
      * @param requestId
      */
     public synchronized void changeLowCompressorIntelligent(int intelligent, String requestId) {
-        if (this.intelligent == (intelligent==YES)) {
+        if (this.intelligent == (intelligent==Compressor.YES)) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Low compressor intelligent is already {}. RequestId: {}", this.intelligent, requestId);
             }
             return;
         }
 
-        setIntelligent(intelligent == YES);
+        setIntelligent(intelligent == Compressor.YES);
 
         bellowsMapper.updateParamValue(BellowsConstants.SYS, BellowsConstants.CP_INTELLIGENT, (double)intelligent);
         logger.info("Low compressor intelligent has bean set {}.RequestId: {}", this.intelligent, requestId);
@@ -231,8 +228,7 @@ public class CompressorManager {
             throw new SysException("空压机" + thingCode + "不存在", SysException.EC_UNKNOWN);
         }
 
-        //判断是否是远程状态
-        if (compressor.isRemote()) {
+        if (compressor.isLocal()) {
             logger.warn("Compressor: {} is local, cannot be operated remotely.RequestId: {}", thingCode, requestId);
             String error = "空压机" + thingCode + "处于就地模式，无法进行远程操作";
             saveFullLog(compressor, operation, operationType, requestId, error);
@@ -492,9 +488,9 @@ public class CompressorManager {
      * @return
      */
     public CompressorGroup refreshCompressorGroup(String type, String requestId) {
-        if (TYPE_HIGH.equals(type)) {
+        if (Compressor.TYPE_HIGH.equals(type)) {
             return high.refresh(dataService);
-        } else if (TYPE_LOW.equals(type)) {
+        } else if (Compressor.TYPE_LOW.equals(type)) {
             return low.refresh(dataService);
         } else {
             logger.warn("Compressor group type {} is wrong. RequestId: {}.", type, requestId);
@@ -510,9 +506,9 @@ public class CompressorManager {
      */
     public List<Compressor> refreshCompressors(String type, String requestId) {
         List<Compressor> list;
-        if (TYPE_HIGH.equals(type)) {
+        if (Compressor.TYPE_HIGH.equals(type)) {
             list = high.getCompressors();
-        } else if (TYPE_LOW.equals(type)) {
+        } else if (Compressor.TYPE_LOW.equals(type)) {
             list = low.getCompressors();
         } else {
             logger.warn("Compressor group type {} is wrong. RequestId: {}.", type, requestId);
@@ -541,7 +537,7 @@ public class CompressorManager {
             turnOnStopTimers();
 
             //压力检测判断
-            onPressureStateChange();
+            onPressureStateChange(intelligent);
         } else {
             //手动模式下
             //关闭低压空压机的卸载关闭定时
@@ -554,38 +550,45 @@ public class CompressorManager {
     }
 
 
-    private void setPressureState(Short pressureState, String requestId) {
-        Short oldState = pressureState;
+    private void setPressureState(double pressureState, String requestId) {
+        double oldState = this.pressureState;
         this.pressureState = pressureState;
 
         if (logger.isDebugEnabled()) {
             logger.debug("Pressure state is now {}.RequestId: {}.", pressureState, requestId);
         }
 
-        if (intelligent && !pressureState.equals(oldState)) {
-            onPressureStateChange();
+        if (pressureState != oldState) {
+            //如果有压力计时器，则关闭
+            turnOffPressureTimer();
+
+            onPressureStateChange(intelligent);
         }
     }
 
     /**
      * 低压空压机压力状态变化
      */
-    private void onPressureStateChange() {
-        //如果有压力计时器，则关闭
-        turnOffPressureTimer();
+    public void onPressureStateChange(boolean intelligent) {
+        if (!intelligent) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Low pressure compressor intelligent is false, cannot handle pressure state change.");
+            }
+            return;
+        }
 
-        if (BellowsConstants.PRESSURE_NORMAL.equals(pressureState)) {
+        if (BellowsConstants.PRESSURE_NORMAL == pressureState) {
             //压力正常
             if (logger.isDebugEnabled()) {
                 logger.debug("Pressure state is changed to normal.");
             }
-        } else if (BellowsConstants.PRESSURE_HIGH.equals(pressureState)) {
+        } else if (BellowsConstants.PRESSURE_HIGH == pressureState) {
             //压力过高
             if (logger.isDebugEnabled()) {
                 logger.debug("Pressure state is changed to high.");
             }
             onPressureHigh();
-        } else if (BellowsConstants.PRESSURE_LOW.equals(pressureState)) {
+        } else if (BellowsConstants.PRESSURE_LOW == pressureState) {
             //压力过低
             if (logger.isDebugEnabled()) {
                 logger.debug("Pressure state is changed to low.");
@@ -613,9 +616,6 @@ public class CompressorManager {
      * 开启低压空压机的卸载关闭定时
      */
     private void turnOnStopTimers() {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Low press compressor intelligent is false, cannot turn on stop timers.");
-        }
         low.getCompressors().forEach(compressor -> {
             compressor.turnOnStopTimer();
         });
@@ -640,11 +640,18 @@ public class CompressorManager {
     private void initPressureState() {
         String requestId = RequestIdUtil.generateRequestId();
 
-        Optional<DataModelWrapper> data = dataService.getData(PRESSURE_THING_CODE, CompressorMetricConstants.PRESSURE_STATE);
+        Optional<DataModelWrapper> data = dataService.getData(PRESSURE_THING_CODE, BellowsConstants.METRIC_PRESSURE_STATE);
         if (data.isPresent()) {
-            setPressureState(Short.parseShort(data.get().getValue()), requestId);
+            setPressureState(Double.parseDouble(data.get().getValue()), requestId);
         } else {
-            //TODO: 调用cmdService接口取数据
+            DataModelWrapper wrapper = dataService.adhocLoadData(PRESSURE_THING_CODE, BellowsConstants.METRIC_PRESSURE_STATE);
+
+            if (wrapper == null) {
+                logger.error("Cannot connect data engine to get thingCode {}, metricCode {}.", PRESSURE_THING_CODE, BellowsConstants.METRIC_PRESSURE_STATE);
+                setPressureState(BellowsConstants.PRESSURE_NORMAL, requestId);
+            } else {
+                setPressureState(Double.parseDouble(wrapper.getValue()), requestId);
+            }
         }
     }
 
@@ -668,21 +675,13 @@ public class CompressorManager {
      * 压力过高
      */
     private void onPressureHigh() {
-        Compressor compressor = chooseLowCompressorToTurnOff();
-        if (compressor == null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("No compressor can be unloaded");
-            }
-        }
-
-        logger.info("Compressor {} will be unloaded because of high pressure.", compressor.getThingCode());
-
-        operateCompressor(compressor.getThingCode(), EnumCompressorOperation.UNLOAD, BellowsConstants.TYPE_AUTO, RequestIdUtil.generateRequestId());
         //添加压力检测计时器
         synchronized (pressureLock) {
             if (pressureTimer != null) {
-                pressureTimer.cancel();
-                pressureTimer = null;
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Pressure timer already exists.");
+                }
+                return;
             }
 
             pressureTimer = new Timer();
@@ -692,31 +691,37 @@ public class CompressorManager {
                     if (logger.isDebugEnabled()) {
                         logger.debug("In pressure high timer");
                     }
+                    turnOffPressureTimer();
 
                     onPressureHigh();
                 }
             }, PRESSURE_WAIT_TIME);
         }
+
+        //查找可关闭空压机
+        Compressor compressor = chooseLowCompressorToTurnOff();
+        if (compressor == null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("No compressor can be unloaded");
+            }
+            return;
+        }
+
+        logger.info("Compressor {} will be unloaded because of high pressure.", compressor.getThingCode());
+        operateCompressor(compressor.getThingCode(), EnumCompressorOperation.UNLOAD, BellowsConstants.TYPE_AUTO, RequestIdUtil.generateRequestId());
     }
 
     /**
      * 压力过低
      */
     private void onPressureLow() {
-        Compressor compressor = chooseLowCompressorToTurnOn();
-        if (compressor == null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("No compressor can be run");
-            }
-        }
-        logger.info("Compressor {} will be running because of low pressure.", compressor.getThingCode());
-
-        operateCompressor(compressor.getThingCode(), EnumCompressorOperation.UNLOAD, BellowsConstants.TYPE_AUTO, RequestIdUtil.generateRequestId());
         //添加压力检测计时器
         synchronized (pressureLock) {
             if (pressureTimer != null) {
-                pressureTimer.cancel();
-                pressureTimer = null;
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Pressure timer already exists.");
+                }
+                return;
             }
 
             pressureTimer = new Timer();
@@ -726,10 +731,26 @@ public class CompressorManager {
                     if (logger.isDebugEnabled()) {
                         logger.debug("In pressure low timer");
                     }
+                    turnOffPressureTimer();
 
                     onPressureLow();
                 }
             }, PRESSURE_WAIT_TIME);
+        }
+
+        //查找可开启空压机
+        Compressor compressor = chooseLowCompressorToTurnOn();
+        if (compressor == null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("No compressor can be run");
+            }
+            return;
+        }
+        logger.info("Compressor {} will be running because of low pressure.", compressor.getThingCode());
+        if (EnumCompressorState.STOPPED.getState().equals(compressor.getState())) {
+            operateCompressor(compressor.getThingCode(), EnumCompressorOperation.START, BellowsConstants.TYPE_AUTO, RequestIdUtil.generateRequestId());
+        } else if (EnumCompressorState.UNLOAD.getState().equals(compressor.getState())) {
+            operateCompressor(compressor.getThingCode(), EnumCompressorOperation.LOAD, BellowsConstants.TYPE_AUTO, RequestIdUtil.generateRequestId());
         }
     }
 
@@ -746,6 +767,13 @@ public class CompressorManager {
             } else {
                 result = compare(result, compressor, BellowsConstants.PRESSURE_HIGH);
             }
+        }
+
+        if (result.isLocal()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Compressor {} is local.No compressor is chose.", result.getThingCode());
+            }
+            return null;
         }
 
         if (!EnumCompressorState.RUNNING.getState().equals(result.getState())) {
@@ -772,6 +800,13 @@ public class CompressorManager {
             }
         }
 
+        if (result.isLocal()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Compressor {} is local.No compressor is chose.", result.getThingCode());
+            }
+            return null;
+        }
+
         if (EnumCompressorState.RUNNING.getState().equals(result.getState()) || EnumCompressorState.ERROR.getState().equals(result.getState())) {
             //选中的空压机是运行中或故障
             if (logger.isDebugEnabled()) {
@@ -789,7 +824,15 @@ public class CompressorManager {
      * @param state 压力状态
      * @return 选中的空压机
      */
-    private Compressor compare(Compressor c1, Compressor c2, Short state) {
+    private Compressor compare(Compressor c1, Compressor c2, double state) {
+        if (c1.isLocal()) {
+            return c2;
+        }
+        if (c2.isLocal()) {
+            return c1;
+        }
+
+
         //记录高压状态下是否选择第一个
         boolean highSelectFirst;
 
@@ -812,7 +855,7 @@ public class CompressorManager {
 
         Compressor result;
         //异或操作，不同返回true
-        if (highSelectFirst ^ (BellowsConstants.PRESSURE_HIGH.equals(state))) {
+        if (highSelectFirst ^ (BellowsConstants.PRESSURE_HIGH == state)) {
             result = c2;
         } else {
             result = c1;

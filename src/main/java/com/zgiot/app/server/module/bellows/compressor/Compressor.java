@@ -5,6 +5,7 @@ import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorOperation;
 import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorState;
 import com.zgiot.app.server.module.bellows.enumeration.EnumHighCompressorFault;
 import com.zgiot.app.server.module.bellows.enumeration.EnumLowCompressorFault;
+import com.zgiot.app.server.module.bellows.util.BellowsUtil;
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.util.RequestIdUtil;
@@ -83,6 +84,7 @@ public class Compressor {
     /**
      * 排序
      */
+    @JSONField(serialize = false)
     private final int sort;
 
 
@@ -90,23 +92,26 @@ public class Compressor {
     private final CompressorManager manager;
 
     /**
-     * 是否就地，1集控，0就地
+     * 是否就地，0集控，1就地
      */
-    private volatile boolean remote;
+    private volatile boolean local;
 
     /**
      * 加载状态
      */
+    @JSONField(serialize = false)
     private volatile boolean loadState;
 
     /**
      * 运行状态
      */
+    @JSONField(serialize = false)
     private volatile boolean runState;
 
     /**
      * 故障状态
      */
+    @JSONField(serialize = false)
     private volatile boolean errorState;
 
     /**
@@ -117,17 +122,22 @@ public class Compressor {
     /**
      * 排气温度
      */
-    private volatile double temperature;
+    private volatile int temperature;
 
     /**
      * 当前电流
      */
-    private volatile double current;
+    private volatile int current;
 
     /**
-     * 额定电流
+     * 油气桶温度
      */
-    private volatile double rateCurrent;
+    private volatile int oilTemperature;
+
+    /**
+     * 油气桶压力
+     */
+    private volatile double oilPressure;
 
     /**
      * 运行时间
@@ -152,7 +162,7 @@ public class Compressor {
     /**
      * 日志等待timer
      */
-    private Map<Long, LogTimerTask> logTimerMap = new HashMap<>();
+    private Map<Long, LogTimerTask> logTimerMap = new ConcurrentHashMap<>();
 
 
 
@@ -170,47 +180,32 @@ public class Compressor {
      */
     public Compressor initState(DataService dataService, CmdControlService cmdControlService) {
         //故障状态
-        Optional<DataModelWrapper> warnData = dataService.getData(thingCode, CompressorMetricConstants.WARN);
-        if (!warnData.isPresent()) {
-            //TODO: 调用cmdService接口取数据
-            return this;
-        }
-        boolean warn = Boolean.parseBoolean(warnData.get().getValue());
+        Optional<String> warnData = BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.WARN);
+        boolean warn = Boolean.parseBoolean(warnData.orElse(BellowsConstants.FALSE));
 
-        Optional<DataModelWrapper> errorData = dataService.getData(thingCode, CompressorMetricConstants.ERROR);
-        if (!errorData.isPresent()) {
-            //TODO: 调用cmdService接口取数据
-            return this;
-        }
-        boolean error = Boolean.parseBoolean(errorData.get().getValue());
-        if (warn == true || error == true) {
+        Optional<String> errorData = BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.ERROR);
+        boolean error = Boolean.parseBoolean(warnData.orElse(BellowsConstants.FALSE));
+
+        if (warn || error) {
             errorState = true;
+        } else {
+            errorState = false;
         }
 
 
         //运行状态
-        Optional<DataModelWrapper> runData = dataService.getData(thingCode, CompressorMetricConstants.RUN_STATE);
-        if (runData.isPresent()) {
-            runState = Boolean.parseBoolean(runData.get().getValue());
-        } else {
-            //TODO: 调用cmdService接口取数据
-        }
+        Optional<String> runData = BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.RUN_STATE);
+        runState = Boolean.parseBoolean(runData.orElse(BellowsConstants.FALSE));
+
 
         //加载状态
-        Optional<DataModelWrapper> loadData = dataService.getData(thingCode, CompressorMetricConstants.LOAD_STATE);
-        if (loadData.isPresent()) {
-            loadState = Boolean.parseBoolean(loadData.get().getValue());
-        } else {
-            //TODO: 调用cmdService接口取数据
-        }
+        Optional<String> loadData = BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.LOAD_STATE);
+        loadState = Boolean.parseBoolean(loadData.orElse(BellowsConstants.FALSE));
+
 
         //远程/就地状态
-        Optional<DataModelWrapper> remoteData = dataService.getData(thingCode, CompressorMetricConstants.REMOTE);
-        if (remoteData.isPresent()) {
-            remote = Boolean.parseBoolean(remoteData.get().getValue());
-        } else {
-            //TODO: 调用cmdService接口取数据
-        }
+        Optional<String> localData = BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.LOCAL);
+        local = Boolean.parseBoolean(localData.orElse(BellowsConstants.TRUE));
 
         confirmState();
 
@@ -227,48 +222,35 @@ public class Compressor {
             logger.debug("Compressor: {} refresh.", thingCode);
         }
         errors = new ArrayList<>();
-        List<DataModelWrapper> dataList = dataService.findDataByThing(thingCode);
-        if (dataList == null || dataList.isEmpty()) {
-            logger.info("Compressor: {} refresh failed.Because data list is empty.");
-            return this;
+
+        //组装属性（远程状态、故障状态、启动状态和加载状态使用监听者，不在这里组装）
+        this.setCurrent(Integer.parseInt(BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.CURRENT).orElse("0")));
+        this.setPressure(Double.parseDouble(BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.CURRENT).orElse("0"))/100);
+        this.setTemperature(Integer.parseInt(BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.TEMPERATURE).orElse("0")));
+        this.setRunTime(Integer.parseInt(BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.RUN_TIME).orElse("0")));
+        this.setLoadTime(Integer.parseInt(BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.LOAD_TIME).orElse("0")));
+        this.setOilPressure(Double.parseDouble(BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.OIL_PRESSURE).orElse("0"))/100);
+        this.setOilTemperature(Integer.parseInt(BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.OIL_TEMPERATURE).orElse("0")));
+
+        //错误信息组装
+        if (EnumCompressorState.ERROR.getState().equals(state)) {
+            if (TYPE_HIGH.equals(type)) {
+                for (EnumHighCompressorFault fault : EnumHighCompressorFault.values()) {
+                    boolean value = Boolean.parseBoolean(BellowsUtil.getDataModelValue(dataService, thingCode, fault.getMetricCode()).orElse(BellowsConstants.FALSE));
+                    if (value) {
+                        errors.add(fault.getInfo());
+                    }
+                }
+            } else {
+                for (EnumLowCompressorFault fault : EnumLowCompressorFault.values()) {
+                    boolean value = Boolean.parseBoolean(BellowsUtil.getDataModelValue(dataService, thingCode, fault.getMetricCode()).orElse(BellowsConstants.FALSE));
+                    if (value) {
+                        errors.add(fault.getInfo());
+                    }
+                }
+            }
         }
 
-        dataList.forEach((data) -> {
-            String metricCode = data.getMetricCode();
-            String value = data.getValue();
-            //组装属性（远程状态、故障状态、启动状态和加载状态使用监听者，不在这里组装）
-            switch (metricCode) {
-                case CompressorMetricConstants.CURRENT:
-                    this.setCurrent(Double.parseDouble(value));
-                    break;
-                case CompressorMetricConstants.RATE_CURRENT:
-                    this.setRateCurrent(Double.parseDouble(value));
-                    break;
-                case CompressorMetricConstants.PRESSURE:
-                    this.setPressure(Double.parseDouble(value));
-                    break;
-                case CompressorMetricConstants.TEMPERATURE:
-                    this.setTemperature(Double.parseDouble(value));
-                    break;
-                case CompressorMetricConstants.RUN_TIME:
-                    this.setRunTime(Integer.parseInt(value));
-                    break;
-                case CompressorMetricConstants.LOAD_TIME:
-                    this.setLoadTime(Integer.parseInt(value));
-                    break;
-                default:
-                    if (EnumCompressorState.ERROR.getState().equals(state)) {
-                        if (TYPE_HIGH.equals(type) && EnumHighCompressorFault.metricCodes().contains(metricCode)) {
-                            EnumHighCompressorFault fault = EnumHighCompressorFault.getByMetricCode(metricCode);
-                            errors.add(fault.getInfo());
-                        } else if (TYPE_LOW.equals(type) && EnumLowCompressorFault.metricCodes().contains(metricCode)) {
-                            EnumLowCompressorFault fault = EnumLowCompressorFault.getByMetricCode(metricCode);
-                            errors.add(fault.getInfo());
-                        }
-                    }
-                    break;
-            }
-        });
         return this;
     }
 
@@ -281,7 +263,7 @@ public class Compressor {
     public void addLogWaitTimer(Long logId, String requestId) {
         synchronized (logLock) {
             if (logger.isTraceEnabled()) {
-                logger.trace("Compressor {} add logWaitTimer.Log id: {}.", thingCode, logId);
+                logger.trace("Compressor {} add logWaitTimer.Log id: {}.RequestId: {}.", thingCode, logId, requestId);
             }
             LogTimerTask timerTask = new LogTimerTask(logId, requestId);
             logTimer.schedule(timerTask, LOG_WAIT_TIME);
@@ -314,6 +296,7 @@ public class Compressor {
      */
     public void onRunStateChange(String value, String requestId) {
         runState = Boolean.parseBoolean(value);
+
         if (logger.isDebugEnabled()) {
             logger.debug("Compressor: {} get run state signal: {}. RequestId: {}.", thingCode, runState, requestId);
         }
@@ -327,16 +310,21 @@ public class Compressor {
      */
     public void onLoadStateChange(String value, String requestId) {
         loadState = Boolean.parseBoolean(value);
+
         if (logger.isDebugEnabled()) {
             logger.debug("Compressor: {} get load state signal: {}.RequestId: {}", thingCode, runState, requestId);
         }
 
-        if (errorState == false && runState == true && loadState == true) {
+        if (!errorState && runState && loadState) {
             //收到加载信号，启动定时器，判断是否是保护模式
+            if (logger.isDebugEnabled()) {
+                logger.debug("Compressor {} check protect mode.RequestId: {}.", thingCode, requestId);
+            }
+
             synchronized (stateLock) {
                 if (stateTimer != null) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Compressor: {} state timer exist.", thingCode);
+                        logger.debug("Compressor: {} state timer exist.RequestId: {}.", thingCode, requestId);
                     }
                     return;
                 }
@@ -363,6 +351,7 @@ public class Compressor {
      */
     public void onErrorStateChange(String value, String requestId) {
         errorState = Boolean.parseBoolean(value);
+
         if (logger.isDebugEnabled()) {
             logger.debug("Compressor: {} get error state signal: {}.RequestId: {}", thingCode, runState, requestId);
         }
@@ -392,18 +381,22 @@ public class Compressor {
      * 远程、就地状态变化
      * @param value
      */
-    public void onRemoteChange(String value, String requestId) {
-        remote = Boolean.parseBoolean(value);
+    public void onLocalChange(String value, String requestId, boolean intelligent) {
+        local = Boolean.parseBoolean(value);
+
         if (logger.isDebugEnabled()) {
-            logger.debug("Compressor: {} get remote signal: {}.RequestId: {}.", thingCode, remote, requestId);
+            logger.debug("Compressor: {} get local signal: {}.RequestId: {}.", thingCode, local, requestId);
         }
 
-        if (remote == false) {
-            //就地状态删除stopTimer
+        if (local) {
             turnOffStopTimer();
-        } else if (manager.isIntelligent()){
-            //远程状态下设置stopTimer
+        } else if (intelligent) {
             turnOnStopTimer();
+
+            //检查压力变化
+            if (type.equals(TYPE_LOW)) {
+                manager.onPressureStateChange(manager.isIntelligent());
+            }
         }
     }
 
@@ -411,6 +404,7 @@ public class Compressor {
      * 开启stopTimer
      */
     public void turnOnStopTimer() {
+
         if (TYPE_HIGH.equals(type)) {
             if (logger.isDebugEnabled()) {
                 logger.debug("High press compressor {} cannot turn on stop timer.", thingCode);
@@ -418,7 +412,7 @@ public class Compressor {
             return;
         }
 
-        if (remote == false) {
+        if (local) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Compressor {} is local, cannot turn on stopTimer.", thingCode);
             }
@@ -479,10 +473,10 @@ public class Compressor {
     private synchronized void confirmState() {
         String oldState = state;
 
-        if (errorState == true) {
+        if (errorState) {
             state = EnumCompressorState.ERROR.getState();
-        } else if (runState == true) {
-            if (loadState == true) {
+        } else if (runState) {
+            if (loadState) {
                 state = EnumCompressorState.RUNNING.getState();
             } else {
                 state = EnumCompressorState.UNLOAD.getState();
@@ -497,7 +491,7 @@ public class Compressor {
 
 
         if (!state.equals(oldState)) {
-            onStateChange(state, oldState);
+            onStateChange(state, oldState, manager.isIntelligent());
         }
 
 
@@ -511,12 +505,12 @@ public class Compressor {
     /**
      * 状态变化
      */
-    private void onStateChange(String postState, String preState) {
+    private void onStateChange(String postState, String preState, boolean intelligent) {
         if (EnumCompressorState.UNLOAD.getState().equals(state)) {
             //卸载状态下开启stopTimer
-            if (!manager.isIntelligent()) {
+            if (!intelligent) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Low press intelligent is {},  cannot turn on stop timer.", manager.isIntelligent());
+                    logger.debug("Low press intelligent is {},  cannot turn on stop timer.", intelligent);
                 }
                 return;
             }
@@ -560,6 +554,7 @@ public class Compressor {
         }
     }
 
+
     public String getName() {
         return name;
     }
@@ -580,12 +575,12 @@ public class Compressor {
         return manager;
     }
 
-    public boolean isRemote() {
-        return remote;
+    public boolean isLocal() {
+        return local;
     }
 
-    public void setRemote(boolean remote) {
-        this.remote = remote;
+    public void setLocal(boolean local) {
+        this.local = local;
     }
 
     public boolean isLoadState() {
@@ -620,28 +615,36 @@ public class Compressor {
         this.pressure = pressure;
     }
 
-    public double getTemperature() {
+    public int getTemperature() {
         return temperature;
     }
 
-    public void setTemperature(double temperature) {
+    public void setTemperature(int temperature) {
         this.temperature = temperature;
     }
 
-    public double getCurrent() {
+    public int getCurrent() {
         return current;
     }
 
-    public void setCurrent(double current) {
+    public void setCurrent(int current) {
         this.current = current;
     }
 
-    public double getRateCurrent() {
-        return rateCurrent;
+    public int getOilTemperature() {
+        return oilTemperature;
     }
 
-    public void setRateCurrent(double rateCurrent) {
-        this.rateCurrent = rateCurrent;
+    public void setOilTemperature(int oilTemperature) {
+        this.oilTemperature = oilTemperature;
+    }
+
+    public double getOilPressure() {
+        return oilPressure;
+    }
+
+    public void setOilPressure(double oilPressure) {
+        this.oilPressure = oilPressure;
     }
 
     public int getRunTime() {
