@@ -6,12 +6,14 @@ FTP_FOLDER_DB=${FTP_FOLDER_DB:-'/xg_smartfactory2/component/db'}
 ### join all index into one
 ALL_INDEX=all_1510901510.index
 rm -f $ALL_INDEX
-cat *.index > $ALL_INDEX
-files=`cat $ALL_INDEX`
+indexes=`ls *.index`
+for i in  $indexes
+do
+  cat $i >> $ALL_INDEX
+  echo '' >> $ALL_INDEX
+done
 
-### init
-rm -rf ./target
-mkdir target
+files=`cat $ALL_INDEX`
 
 ### loop and down all
 for aFile in $files
@@ -28,7 +30,3 @@ bye
 EOF
 
 done
-
-### copy
-cp target/*.sql .
-rm -rf ./target
