@@ -1,11 +1,12 @@
 package com.zgiot.app.server.module.alert.pojo;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 public class AlertStatisticsNum {
     private String thingCode;
     private int sumNum;
-    private int level30Num;
-    private int level20Num;
-    private int level10Num;
+    private Map<Integer, Integer> alertLevelNums = new TreeMap<>();
     private String dayStr;
 
     public String getThingCode() {
@@ -24,28 +25,12 @@ public class AlertStatisticsNum {
         this.sumNum = sumNum;
     }
 
-    public int getLevel30Num() {
-        return level30Num;
+    public Map<Integer, Integer> getAlertLevelNums() {
+        return alertLevelNums;
     }
 
-    public void setLevel30Num(int level30Num) {
-        this.level30Num = level30Num;
-    }
-
-    public int getLevel20Num() {
-        return level20Num;
-    }
-
-    public void setLevel20Num(int level20Num) {
-        this.level20Num = level20Num;
-    }
-
-    public int getLevel10Num() {
-        return level10Num;
-    }
-
-    public void setLevel10Num(int level10Num) {
-        this.level10Num = level10Num;
+    public void setAlertLevelNums(Map<Integer, Integer> alertLevelNums) {
+        this.alertLevelNums = alertLevelNums;
     }
 
     public String getDayStr() {

@@ -8,4 +8,9 @@ public interface MetricService {
     MetricModel getMetric(String metricCode);
 
     Map<String, MetricModel> getMetricMap();
+
+    /**
+     * @throws com.zgiot.common.exceptions.SysException
+     */
+    void validateMetric(String metricCode);
 }

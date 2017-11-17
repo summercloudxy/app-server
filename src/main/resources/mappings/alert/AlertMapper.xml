@@ -282,9 +282,9 @@
             ,ABS(ad.release_time-ad.alert_datetime) as alertDuration
         </if>
         <!--<if test="thingCode != null"> -->
-            <if test="stage != 'RELEASE'">
-                ,am.id as message_id,am.user_id,am.time,am.info,am.alert_id,am.is_read,am.permission,am.type
-            </if>
+            <!--<if test="stage != 'RELEASE'">-->
+                <!--,am.id as message_id,am.user_id,am.time,am.info,am.alert_id,am.is_read,am.permission,am.type-->
+            <!--</if>-->
         <!--</if>-->
         <if test="stage == 'RELEASE'">
             ,rts.system_id
@@ -299,16 +299,16 @@
             </if>
         </if>
         <!--<if test="thingCode != null"> -->
-            <if test="stage != 'RELEASE'">
-                ,tb_alert_message am
-            </if>
+            <!--<if test="stage != 'RELEASE'">-->
+                <!--,tb_alert_message am-->
+            <!--</if>-->
         <!--</if>-->
         <trim prefix="where" prefixOverrides="AND">
         <!--<if test="thingCode != null"> -->
-                <if test="stage != 'RELEASE'">
-                    AND
-                    ad.id = am.alert_id
-                </if>
+                <!--<if test="stage != 'RELEASE'">-->
+                    <!--AND-->
+                    <!--ad.id = am.alert_id-->
+                <!--</if>-->
         <!--</if>-->
         <if test="thingCode == null">
             <if test="systems != null or stage == 'RELEASE'">
@@ -322,9 +322,9 @@
             AND
             ad.alert_stage = #{stage}
         </if>
-        <if test="stage == null">
+        <if test="excluStage != null">
             AND
-            ad.alert_stage != 'RELEASE'
+            ad.alert_stage != #{excluStage}
         </if>
         <if test="levels != null">
             AND
@@ -335,7 +335,7 @@
         </if>
         <if test="types != null">
             AND
-            <foreach collection="types" item="type" index="index" open="ad.alert_type in (3," close=")"
+            <foreach collection="types" item="type" index="index" open="ad.alert_type in (" close=")"
                      separator=",">
                 #{type}
             </foreach>
@@ -362,7 +362,7 @@
         </if>
         <if test="startTime != null">
             AND
-            ad.alert_datetime &gt; #{startTime}
+            ad.alert_datetime &gt;= #{startTime}
         </if>
         <if test="endTime != null">
             AND
@@ -385,8 +385,8 @@
     </select>
 
     <update id="setRead" parameterType="java.lang.Integer">
-        UPDATE tb_alert_message SET is_read = 1 WHERE id IN
-        <foreach collection="list" item="item" open="(" close=")" separator=",">
+        UPDATE tb_alert_message SET is_read = #{state} WHERE id IN
+        <foreach collection="messageIds" item="item" open="(" close=")" separator=",">
             #{item}
         </foreach>
     </update>
@@ -406,9 +406,9 @@
             AND
             ad.alert_stage = #{stage}
         </if>
-        <if test="stage == null">
+        <if test="excluStage != null">
             AND
-            ad.alert_stage != 'RELEASE'
+            ad.alert_stage != #{excluStage}
         </if>
         <if test="level != null">
             AND
@@ -424,7 +424,7 @@
         </if>
         <if test="startTime != null">
             AND
-            ad.alert_datetime BETWEEN #{startTime} AND #{endTime}
+            ad.alert_datetime &gt;= #{startTime} AND ad.alert_datetime &lt; #{endTime}
         </if>
         <if test="assetType != null">
             AND
@@ -507,16 +507,18 @@
         <if test="type == 1">
             thing_code,
         </if>
-        COUNT(alert_level) as sumNum,COUNT(alert_level=30 or null) as level30num, COUNT(alert_level=20 or null) as
-        level20num, COUNT(alert_level=10 or null) as level10num FROM `tb_alert_data`
-        WHERE alert_datetime BETWEEN #{startTime} AND #{endTime}
+        COUNT(alert_level) as sumNum FROM `tb_alert_data`
+        WHERE alert_datetime &gt;= #{startTime} AND alert_datetime &lt; #{endTime}
         <if test="alertStage != null">
-            <if test="alertStage == 'UNRELEASE'">
-                AND alert_stage != 'RELEASE'
-            </if>
-            <if test="alertStage != 'UNRELEASE'">
+            <!--<if test="alertStage == 'UNRELEASE'">-->
+                <!--AND alert_stage != 'RELEASE'-->
+            <!--</if>-->
+            <!--<if test="alertStage != 'UNRELEASE'">-->
                 AND alert_stage = #{alertStage}
-            </if>
+          </if>
+        <!--</if>-->
+        <if test="excluStage != null">
+            AND  alert_stage != #{excluStage}
         </if>
         <if test="type == 1">
             GROUP BY thing_code
@@ -525,10 +527,34 @@
 
     </select>
 
+    <select id="getLevelStatisticsInfo" resultType="com.zgiot.app.server.module.alert.pojo.AlertLevelNum">
+        SELECT
+        <if test="type == 1">
+            thing_code,
+        </if>
+        alert_level,count(1) as count FROM `tb_alert_data`
+        WHERE alert_datetime &gt;= #{startTime} AND alert_datetime &lt; #{endTime}
+        <if test="alertStage != null">
+            AND alert_stage = #{alertStage}
+        </if>
+        <!--</if>-->
+        <if test="excluStage != null">
+            AND  alert_stage != #{excluStage}
+        </if>
+        <if test="type == 1">
+            GROUP BY thing_code,alert_level
+        </if>
+        <if test="type == 0">
+            group by alert_level
+        </if>
+
+    </select>
+
+
     <select id="getTypeStatisticsInfo" resultType="com.zgiot.app.server.module.alert.pojo.AlertStatisticsNum">
         select DATE_FORMAT(alert_datetime,'%Y%m%d') dayStr,count(alert_type) as sumNum from tb_alert_data
         WHERE alert_type = #{alertType}
-        and alert_datetime BETWEEN #{startTime} and #{endTime}
+        and alert_datetime &gt;= #{startTime} and  alert_datetime &lt; #{endTime}
         group by dayStr ORDER BY dayStr DESC ;
     </select>
 
@@ -541,11 +567,11 @@
         <trim prefix="and" prefixOverrides="where">
             <if test="startTime != null">
                 AND
-                alert_datetime BETWEEN #{startTime} and #{endTime}
+                alert_datetime &gt;= #{startTime} and alert_datetime &lt; #{endTime}
             </if>
             <if test="alertLevel != null">
                 and
-                alert_level = alertLevel
+                alert_level = #{alertLevel}
             </if>
         </trim>
         GROUP BY thing_code
@@ -566,7 +592,7 @@
         </if>
         <if test="startTime != null">
             AND
-            d.alert_datetime BETWEEN #{startTime} AND #{endTime}
+            d.alert_datetime &gt;= #{startTime} AND d.alert_datetime &lt; #{endTime}
         </if>
         <if test="assetType != null">
             AND
@@ -594,7 +620,7 @@
     </select>
 
     <delete id="clearAlertDateHistory">
-        DELETE FROM tb_alert_data WHERE alert_datetime  &lt; #{timeStamp} AND  alert_stage = 'RELEASE';
+        DELETE FROM tb_alert_data WHERE alert_datetime  &lt; #{timeStamp} AND  alert_stage = #{stage};
     </delete>
 
 </mapper>
