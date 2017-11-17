@@ -24,7 +24,6 @@ open $FTP_SERVER
 user $FTP_USER  $FTP_PASS
 bin
 cd $FTP_FOLDER_DB
-ls
 get $aFile
 bye
 EOF
