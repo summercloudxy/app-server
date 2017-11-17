@@ -13,7 +13,7 @@ public class FilterPressPlateCountBean {
         /**
          *     //时间轴(第几板，开始时间)
          */
-        private Map<Integer,Date> timeLineMap = new HashMap<>();
+        private Map<String,Date> timeLineMap = new HashMap<>();
 
         public String getThingCode() {
             return thingCode;
@@ -23,7 +23,7 @@ public class FilterPressPlateCountBean {
             return startTime;
         }
 
-        public Map<Integer, Date> getTimeLineMap() {
+        public Map<String, Date> getTimeLineMap() {
             return timeLineMap;
         }
 
@@ -35,7 +35,7 @@ public class FilterPressPlateCountBean {
             this.startTime = startTime;
         }
 
-        public void setTimeLineMap(Map<Integer, Date> timeLineMap) {
+        public void setTimeLineMap(Map<String, Date> timeLineMap) {
             this.timeLineMap = timeLineMap;
         }
 }

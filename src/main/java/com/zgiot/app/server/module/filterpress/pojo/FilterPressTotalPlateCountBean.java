@@ -27,13 +27,13 @@ public class FilterPressTotalPlateCountBean {
     /**
      *     //时间轴(总板数,时间)
      */
-    private Map<Integer,Date> timeLineMap;
+    private Map<String,Date> timeLineMap;
 
     public int getPeriod() {
         return period;
     }
 
-    public boolean isDayShift() {
+    public boolean getIsDayShift() {
         return isDayShift;
     }
 
@@ -41,7 +41,7 @@ public class FilterPressTotalPlateCountBean {
         return ratedTotalPlateCount;
     }
 
-    public Map<Integer, Date> getTimeLineMap() {
+    public Map<String, Date> getTimeLineMap() {
         return timeLineMap;
     }
 
@@ -57,15 +57,15 @@ public class FilterPressTotalPlateCountBean {
         this.period = period;
     }
 
-    public void setDayShift(boolean dayShift) {
-        isDayShift = dayShift;
+    public void setIsDayShift(boolean isDayShift) {
+        isDayShift = isDayShift;
     }
 
     public void setRatedTotalPlateCount(Integer ratedTotalPlateCount) {
         this.ratedTotalPlateCount = ratedTotalPlateCount;
     }
 
-    public void setTimeLineMap(Map<Integer, Date> timeLineMap) {
+    public void setTimeLineMap(Map<String, Date> timeLineMap) {
         this.timeLineMap = timeLineMap;
     }
 }

@@ -8,10 +8,7 @@ import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.module.filterpress.filterPressService.FilterPressLogService;
 import com.zgiot.app.server.service.HistoryDataService;
 import com.zgiot.app.server.util.RequestIdUtil;
-import com.zgiot.common.constants.FilterPressConstants;
-import com.zgiot.common.constants.FilterPressMetricConstants;
-import com.zgiot.common.constants.GlobalConstants;
-import com.zgiot.common.constants.MetricCodes;
+import com.zgiot.common.constants.*;
 import com.zgiot.common.enums.MetricDataTypeEnum;
 import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.DataModel;
@@ -76,7 +73,8 @@ public class FilterPressManager {
 
     private Set<String> unconfirmedFeed = new ConcurrentSkipListSet<>();
 
-    private Set<String> unConfirmedUnload = new ConcurrentSkipListSet<>();
+    //private Set<String> unConfirmedUnload = new ConcurrentSkipListSet<>();
+    private List<String> unConfirmedUnload = Collections.synchronizedList(new ArrayList<>());
 
     private UnloadManager unloadManager = new UnloadManager();
 
@@ -157,19 +155,13 @@ public class FilterPressManager {
         if (FilterPressMetricConstants.T1_CHOOSE.equals(metricCode)
                 || FilterPressMetricConstants.T2_CHOOSE.equals(metricCode)
                 || FilterPressMetricConstants.T3_CHOOSE.equals(metricCode)) {
-            if (Boolean.TRUE.toString().equals(data.getValue())) {
-                switch (metricCode) {
-                    case FilterPressMetricConstants.T1_CHOOSE:
-                        getFilterPress(thingCode).setProducingTeam(1);
-                        break;
-                    case FilterPressMetricConstants.T2_CHOOSE:
-                        getFilterPress(thingCode).setProducingTeam(2);
-                        break;
-                    case FilterPressMetricConstants.T3_CHOOSE:
-                        getFilterPress(thingCode).setProducingTeam(3);
-                        break;
-                    default:
-                }
+            int teamChoose = Integer.valueOf(data.getValue());
+            if((FilterPressLogConstants.T1_CHOOSE_VALUE & teamChoose) != 0){
+                getFilterPress(thingCode).setProducingTeam(FilterPressLogConstants.TEAM1);
+            }else if((FilterPressLogConstants.T2_CHOOSE_VALUE & teamChoose) != 0){
+                getFilterPress(thingCode).setProducingTeam(FilterPressLogConstants.TEAM2);
+            }else if((FilterPressLogConstants.T3_CHOOSE_VALUE & teamChoose) != 0){
+                getFilterPress(thingCode).setProducingTeam(FilterPressLogConstants.TEAM3);
             }
         }
         if (FilterPressMetricConstants.T1_COUNT.equals(metricCode)
@@ -707,8 +699,16 @@ public class FilterPressManager {
         return unloadManager.getQueuePosition();
     }
 
-    public Set<String> getUnConfirmedUnload() {
+    public List<String> getUnConfirmedUnload() {
         return unConfirmedUnload;
+    }
+
+    public String getFirstUnConfirmedUnload() {
+        String thingCode = null;
+        if(unConfirmedUnload.size() > 0){
+            thingCode = unConfirmedUnload.get(0);
+        }
+        return thingCode;
     }
 
     public Map<String, FilterPressLogBean> getStatisticLogs() {
@@ -793,7 +793,9 @@ public class FilterPressManager {
                 logger.debug("{} unload, notifying user; confirmNeed: {}", filterPress,
                         filterPress.isUnloadConfirmNeed());
                 messagingTemplate.convertAndSend(UNLOAD_NOTICE_URI, filterPress.getCode());
-                unConfirmedUnload.add(filterPress.getCode());
+                if(!unConfirmedUnload.contains(filterPress.getCode())){
+                    unConfirmedUnload.add(filterPress.getCode());
+                }
             }
         }
 
