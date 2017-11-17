@@ -15,17 +15,25 @@ done
 
 files=`cat $ALL_INDEX`
 
-### loop and down all
+### loop and generate down cmd
+DOWN_CMD=download.cmdlist
+echo "open $FTP_SERVER" > $DOWN_CMD
+echo "user $FTP_USER  $FTP_PASS" >> $DOWN_CMD
+echo "bin" >> $DOWN_CMD
+echo "cd $FTP_FOLDER_DB" >> $DOWN_CMD
+
 for aFile in $files
 do
-echo "To ftp download: $aFile"
-ftp -ivn << EOF
-open $FTP_SERVER
-user $FTP_USER  $FTP_PASS
-bin
-cd $FTP_FOLDER_DB
-get $aFile
-bye
-EOF
-
+  echo "get $aFile"  >> $DOWN_CMD
+  echo '' >> $DOWN_CMD
 done
+echo "bye"  >> $DOWN_CMD
+
+ftp -ivn < $DOWN_CMD
+
+###
+mkdir dist
+mv *.sql dist
+rm -f *.*
+mv dist/* .
+rm -rf dist
