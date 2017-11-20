@@ -58,7 +58,7 @@ public class FilterPressTotalPlateCountBean {
     }
 
     public void setIsDayShift(boolean isDayShift) {
-        isDayShift = isDayShift;
+        this.isDayShift = isDayShift;
     }
 
     public void setRatedTotalPlateCount(Integer ratedTotalPlateCount) {
