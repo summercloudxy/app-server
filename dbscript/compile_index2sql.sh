@@ -34,8 +34,8 @@ echo "bye"  >> $DOWN_CMD
 ftp -ivn < $DOWN_CMD
 
 ###
-mkdir dist
-mv *.sql dist
-rm -f *.*
-mv dist/* .
-rm -rf dist
+#mkdir dist
+#mv *.sql dist
+#rm -f *.*
+#mv dist/* .
+#rm -rf dist
