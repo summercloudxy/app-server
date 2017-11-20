@@ -5,12 +5,10 @@ import com.zgiot.app.server.module.filterpress.pojo.FeedAsumConfirmBean;
 import com.zgiot.app.server.module.filterpress.pojo.FilterPressElectricity;
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.DataService;
+import com.zgiot.app.server.module.filterpress.filterPressService.FilterPressLogService;
 import com.zgiot.app.server.service.HistoryDataService;
 import com.zgiot.app.server.util.RequestIdUtil;
-import com.zgiot.common.constants.FilterPressConstants;
-import com.zgiot.common.constants.FilterPressMetricConstants;
-import com.zgiot.common.constants.GlobalConstants;
-import com.zgiot.common.constants.MetricCodes;
+import com.zgiot.common.constants.*;
 import com.zgiot.common.enums.MetricDataTypeEnum;
 import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.DataModel;
@@ -48,7 +46,7 @@ public class FilterPressManager {
     private static final Map<String,String> filterPressStage = new HashMap<>();
 
     @Autowired
-    private DataService dataService;
+    DataService dataService;
     @Autowired
     HistoryDataService historyDataService;
     @Autowired
@@ -57,6 +55,9 @@ public class FilterPressManager {
     private SimpMessagingTemplate messagingTemplate;
     @Autowired
     private FilterPressMapper filterPressMapper;
+
+    @Autowired
+    FilterPressLogService filterPressLogService;
 
     public UnloadManager getUnloadManager() {
         return unloadManager;
@@ -72,9 +73,12 @@ public class FilterPressManager {
 
     private Set<String> unconfirmedFeed = new ConcurrentSkipListSet<>();
 
-    private Set<String> unConfirmedUnload = new ConcurrentSkipListSet<>();
+    //private Set<String> unConfirmedUnload = new ConcurrentSkipListSet<>();
+    private List<String> unConfirmedUnload = Collections.synchronizedList(new ArrayList<>());
 
     private UnloadManager unloadManager = new UnloadManager();
+
+    Map<String,FilterPressLogBean> statisticLogs = new ConcurrentHashMap<>();
 
     static{
         filterPressStage.put(FilterPressMetricConstants.RO_LOOSE,"");
@@ -131,35 +135,33 @@ public class FilterPressManager {
         if(deviceHolder.containsKey(thingCode)){
             filterPress = deviceHolder.get(thingCode);
         }else if(filterPressPumpMapping.containsKey(thingCode)){
-           filterPress = deviceHolder.get(filterPressPumpMapping.get(thingCode));
+            filterPress = deviceHolder.get(filterPressPumpMapping.get(thingCode));
         }else{
             return;
             //throw new SysException("filterPress is null",SysException.EC_UNKOWN);
         }
+
+        if(!statisticLogs.containsKey(thingCode)){
+            statisticLogs.put(thingCode,new FilterPressLogBean());
+        }
         String metricCode = data.getMetricCode();
         filterPress.onDataSourceChange(metricCode, data.getValue());
-        if (filterPressStage.containsKey(metricCode)) {
+        if (deviceHolder.containsKey(thingCode) && filterPressStage.containsKey(metricCode)) {
             processStage(data);
         }
         if (FilterPressMetricConstants.FEED_ASUM.equals(metricCode)) {
             processFeedAssumption(data);
         }
-        if (FilterPressMetricConstants.T1_RCD.equals(metricCode)
-                || FilterPressMetricConstants.T2_RCD.equals(metricCode)
-                || FilterPressMetricConstants.T3_RCD.equals(metricCode)) {
-            if (Boolean.TRUE.toString().equals(data.getValue())) {
-                switch (metricCode) {
-                    case FilterPressMetricConstants.T1_RCD:
-                        getFilterPress(thingCode).setProducingTeam(1);
-                        break;
-                    case FilterPressMetricConstants.T2_RCD:
-                        getFilterPress(thingCode).setProducingTeam(2);
-                        break;
-                    case FilterPressMetricConstants.T3_RCD:
-                        getFilterPress(thingCode).setProducingTeam(3);
-                        break;
-                    default:
-                }
+        if (FilterPressMetricConstants.T1_CHOOSE.equals(metricCode)
+                || FilterPressMetricConstants.T2_CHOOSE.equals(metricCode)
+                || FilterPressMetricConstants.T3_CHOOSE.equals(metricCode)) {
+            int teamChoose = Integer.valueOf(data.getValue());
+            if((FilterPressLogConstants.T1_CHOOSE_VALUE & teamChoose) != 0){
+                getFilterPress(thingCode).setProducingTeam(FilterPressLogConstants.TEAM1);
+            }else if((FilterPressLogConstants.T2_CHOOSE_VALUE & teamChoose) != 0){
+                getFilterPress(thingCode).setProducingTeam(FilterPressLogConstants.TEAM2);
+            }else if((FilterPressLogConstants.T3_CHOOSE_VALUE & teamChoose) != 0){
+                getFilterPress(thingCode).setProducingTeam(FilterPressLogConstants.TEAM3);
             }
         }
         if (FilterPressMetricConstants.T1_COUNT.equals(metricCode)
@@ -246,7 +248,7 @@ public class FilterPressManager {
         Boolean isRunning = Boolean.FALSE;
         switch (metricCode) { // 回调各阶段
             case FilterPressMetricConstants.LOCAL:
-                if(!Boolean.parseBoolean(metricCodeValue)){
+                if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onLocal();
                 }
                 break;
@@ -254,18 +256,24 @@ public class FilterPressManager {
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onLoosen();
                     isRunning = Boolean.TRUE;
+                }else{
+                    filterPress.offLoosen();
                 }
                 break;
             case FilterPressMetricConstants.RO_TAKE:
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onTaken();
                     isRunning = Boolean.TRUE;
+                }else{
+                    filterPress.offTaken();
                 }
                 break;
             case FilterPressMetricConstants.RO_PULL:
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onPull();
                     isRunning = Boolean.TRUE;
+                }else{
+                    filterPress.offPull();
                 }
                 break;
             case FilterPressMetricConstants.RO_PRESS:
@@ -452,6 +460,7 @@ public class FilterPressManager {
                 current = Float.parseFloat(currentWrapper.get().getValue());
             }
             feedAsumConfirmBean.setFeedOverCurrent(current);
+            filterPress.setFeedPumpCurrent(current);
             messagingTemplate.convertAndSend(FEED_OVER_NOTICE_URI, feedAsumConfirmBean);
             unconfirmedFeed.add(filterPress.getCode());
         }
@@ -473,6 +482,19 @@ public class FilterPressManager {
         dataModel.setThingCode(filterPress.getCode());
         dataModel.setValue(Boolean.TRUE.toString());
         cmdControlService.sendPulseCmdBoolByShort(dataModel,null,null,RequestIdUtil.generateRequestId(),POSITION_FEED_OVER,CLAEN_PERIOD,IS_HOLDING_FEED_OVER);
+
+        filterPress.setFeedDuration(System.currentTimeMillis() - filterPress.getFeedStartTime());
+        List<String> feedPumpCodes = getKeyByValueFromMap(filterPressPumpMapping,filterPress.getCode());
+        String feedPumpCode = feedPumpCodes.get(0);
+        if(feedPumpCodes.size() == 0){
+            throw new SysException("feedPump thingCode is null",SysException.EC_UNKNOWN);
+        }
+        Optional<DataModelWrapper> currentWrapper = dataService.getData(feedPumpCode,FilterPressMetricConstants.FEED_PUMP_CURRENT);
+        Float current = new Float(0);
+        if(currentWrapper.isPresent()){
+            current = Float.parseFloat(currentWrapper.get().getValue());
+        }
+        filterPress.setFeedPumpCurrent(current);
     }
 
     /**
@@ -677,8 +699,20 @@ public class FilterPressManager {
         return unloadManager.getQueuePosition();
     }
 
-    public Set<String> getUnConfirmedUnload() {
+    public List<String> getUnConfirmedUnload() {
         return unConfirmedUnload;
+    }
+
+    public String getFirstUnConfirmedUnload() {
+        String thingCode = null;
+        if(unConfirmedUnload.size() > 0){
+            thingCode = unConfirmedUnload.get(0);
+        }
+        return thingCode;
+    }
+
+    public Map<String, FilterPressLogBean> getStatisticLogs() {
+        return statisticLogs;
     }
 
     // @Scheduled(cron="cnmt.FilterPressDeviceManager.clear")
@@ -759,7 +793,9 @@ public class FilterPressManager {
                 logger.debug("{} unload, notifying user; confirmNeed: {}", filterPress,
                         filterPress.isUnloadConfirmNeed());
                 messagingTemplate.convertAndSend(UNLOAD_NOTICE_URI, filterPress.getCode());
-                unConfirmedUnload.add(filterPress.getCode());
+                if(!unConfirmedUnload.contains(filterPress.getCode())){
+                    unConfirmedUnload.add(filterPress.getCode());
+                }
             }
         }
 
@@ -789,7 +825,7 @@ public class FilterPressManager {
         public synchronized void reSort(int position){
             for(String thingCode:queuePosition.keySet()){
                 if(queuePosition.get(thingCode) > position)
-                queuePosition.put(thingCode, queuePosition.get(thingCode) - 1);
+                    queuePosition.put(thingCode, queuePosition.get(thingCode) - 1);
             }
         }
     }
