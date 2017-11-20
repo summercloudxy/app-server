@@ -191,9 +191,11 @@ public class FilterPress {
         long unloadStartTime = 0;
         looseStartTime = System.currentTimeMillis();
         if(looseDuration > 0 && takenDuration > 0 && pullDuration > 0){
+            unloadDuration = 0;
             unloadDuration = looseDuration + takenDuration + pullDuration;
         }
         if(unloadTime  > 0){
+
             unloadStartTime = unloadTime;
         }
         unloadTime = System.currentTimeMillis();
@@ -294,6 +296,7 @@ public class FilterPress {
     public void offLoosen(){
         logger.trace("{} off loosen", code);
         looseEndTime = System.currentTimeMillis();
+        looseDuration = 0;
         looseDuration += looseEndTime - looseStartTime;
     }
 

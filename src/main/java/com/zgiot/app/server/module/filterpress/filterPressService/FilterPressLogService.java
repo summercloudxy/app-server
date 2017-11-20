@@ -16,6 +16,6 @@ public interface FilterPressLogService {
     public FilterPressPlateCountWrapper getPlateInfos();
     public FilterPressTotalPlateCountBean getTotalPlateInfos();
     public List<FilterPressHisPlateCountWrapper> getHisPlateInfos();
-    public int getPriorShiftTeam();
+    public Integer getPriorShiftTeam();
     public List<DataModel> getDataModelAllFilterPressByMetricCode(String metricCode);
 }

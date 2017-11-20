@@ -62,7 +62,7 @@ public interface FilterPressLogMapper {
      * @param endTime
      * @return
      */
-    int getPriorTeam(@Param("isDayShift") boolean isDayShift, @Param("startTime") String startTime, @Param("endTime") String endTime);
+    Integer getPriorTeam(@Param("isDayShift") boolean isDayShift, @Param("startTime") String startTime, @Param("endTime") String endTime);
 
 
     FilterPressRatedStartTimeBean getFilterPressRatedStartTime(@Param("thingCode") String thingCode,@Param("dayOrNightRatedTime") String dayOrNightRatedTime);

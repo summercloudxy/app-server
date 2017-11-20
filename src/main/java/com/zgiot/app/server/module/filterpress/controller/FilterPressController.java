@@ -21,6 +21,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  * Created by xiayun on 2017/9/12.
@@ -87,7 +89,10 @@ public class FilterPressController {
     @ApiOperation("给app端返回弹窗时未点击确定卸料的thingCodes")
     @RequestMapping(value = "api/filterPress/unload/unConfirmUnload", method = RequestMethod.GET)
     public ResponseEntity<String> unConfirmUnload() {
-        return new ResponseEntity<>(ServerResponse.buildOkJson(filterPressManager.getUnConfirmedUnload()),
+        String thingCode = filterPressManager.getFirstUnConfirmedUnload();
+        Set<String> thingCodeSet = new ConcurrentSkipListSet<>();
+        thingCodeSet.add(thingCode);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(thingCodeSet),
                 HttpStatus.OK);
     }
 

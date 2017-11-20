@@ -2,7 +2,6 @@ package com.zgiot.app.server.module.filterpress.controller;
 
 import com.zgiot.app.server.module.filterpress.FilterPressLogBean;
 import com.zgiot.app.server.module.filterpress.filterPressService.FilterPressLogService;
-import com.zgiot.app.server.module.filterpress.pojo.FilterPressHisPlateCountBean;
 import com.zgiot.app.server.module.filterpress.pojo.FilterPressHisPlateCountWrapper;
 import com.zgiot.app.server.module.filterpress.pojo.FilterPressPlateCountWrapper;
 import com.zgiot.app.server.module.filterpress.pojo.FilterPressTotalPlateCountBean;
@@ -14,13 +13,11 @@ import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.restcontroller.ServerResponse;
 import io.swagger.annotations.ApiOperation;
-import org.omg.CORBA.SystemException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import com.zgiot.app.server.module.filterpress.filterPressService.FilterPressLogService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -57,7 +54,7 @@ public class FilterPressLogController {
                 HttpStatus.OK);
     }
 
-    @ApiOperation("上一班历史压板信息查询")
+    @ApiOperation("历史压板信息查询")
     @GetMapping(value="api/filterPress/plate/queryHisPlateInfo")
     public ResponseEntity<String> queryHisPlateInfo(){
         List<FilterPressHisPlateCountWrapper> filterPressHisPlateCountWrapperList = filterPressLogService.getHisPlateInfos();
@@ -75,22 +72,26 @@ public class FilterPressLogController {
         boolean isHolding = Boolean.FALSE;
         switch(team){
             case FilterPressLogConstants.ONE_TEAM_RESET:
-                dataModelList = filterPressLogService.getDataModelAllFilterPressByMetricCode(FilterPressMetricConstants.T1_RCD);
-                position = FilterPressLogConstants.T1_RCD_POSITION;
+                dataModelList = filterPressLogService.getDataModelAllFilterPressByMetricCode(FilterPressMetricConstants.T1_CLR);
+                position = FilterPressLogConstants.T1_CLR_POSITION;
                 break;
             case FilterPressLogConstants.TWO_TEAM_RESET:
-                dataModelList = filterPressLogService.getDataModelAllFilterPressByMetricCode(FilterPressMetricConstants.T2_RCD);
-                position = FilterPressLogConstants.T2_RCD_POSITION;
+                dataModelList = filterPressLogService.getDataModelAllFilterPressByMetricCode(FilterPressMetricConstants.T2_CLR);
+                position = FilterPressLogConstants.T2_CLR_POSITION;
                 break;
             case FilterPressLogConstants.THREE_TEAM_RESET:
-                dataModelList = filterPressLogService.getDataModelAllFilterPressByMetricCode(FilterPressMetricConstants.T3_RCD);
-                position = FilterPressLogConstants.T3_RCD_POSITION;
+                dataModelList = filterPressLogService.getDataModelAllFilterPressByMetricCode(FilterPressMetricConstants.T3_CLR);
+                position = FilterPressLogConstants.T3_CLR_POSITION;
                 break;
             default:
         }
         for(DataModel dataModel:dataModelList){
-            //TODO TEST
-            cmdControlService.sendPulseCmdBoolByShort(dataModel,5000,3,requestId,position,500,isHolding);
+            try{
+                cmdControlService.sendPulseCmdBoolByShort(dataModel,5000,3,requestId,position,500,isHolding);
+            }catch (Exception e){
+                throw new SysException("filterPress:" + dataModel.getThingCode() + "team reset exception", SysException.EC_UNKNOWN);
+            }
+
         }
         return new ResponseEntity<>(
                 ServerResponse.buildOkJson(null)
@@ -98,7 +99,7 @@ public class FilterPressLogController {
     }
 
     @ApiOperation("队组选择")
-    @PostMapping(value="api/filterPress/plate/chooseTeam")
+    @PostMapping(value="api/filterPress/plate/chooseTeam/{team}")
     public ResponseEntity<String> chooseTeam( @PathVariable String team, HttpServletRequest request){
         List<DataModel> dataModelList = null;
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
@@ -124,7 +125,7 @@ public class FilterPressLogController {
             try{
                 cmdControlService.sendPulseCmdBoolByShort(dataModel,5000,3,requestId,position,cleanPeriod,isHolding);
             }catch(Exception e){
-                throw new SysException("filterPress:" + dataModel.getThingCode() + "sendPulseBoolByShort exception", SysException.EC_UNKNOWN);
+                throw new SysException("filterPress:" + dataModel.getThingCode() + "team choose exception", SysException.EC_UNKNOWN);
             }
         }
         return new ResponseEntity<>(
