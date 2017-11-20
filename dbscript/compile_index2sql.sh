@@ -26,7 +26,7 @@ echo "cd $FTP_FOLDER_DB" >> $DOWN_CMD
 # append cmd list
 for aFile in $files
 do
-  echo "get ${aFile}-${PROFILE}"  >> $DOWN_CMD
+  echo "get ${aFile}-${PROFILE}.sql"  >> $DOWN_CMD
   echo '' >> $DOWN_CMD
 done
 echo "bye"  >> $DOWN_CMD
