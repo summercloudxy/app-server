@@ -2,6 +2,7 @@ package com.zgiot.app.server.module.filterpress.impl;
 
 import com.zgiot.app.server.module.filterpress.FilterPressLogBean;
 import com.zgiot.app.server.module.filterpress.FilterPressLogUtil;
+import com.zgiot.app.server.module.filterpress.FilterPressManager;
 import com.zgiot.app.server.module.filterpress.dao.FilterPressLogMapper;
 import com.zgiot.app.server.module.filterpress.filterPressService.FilterPressLogService;
 import com.zgiot.app.server.module.filterpress.pojo.*;
@@ -24,6 +25,8 @@ public class FilterPressLogServiceImpl implements FilterPressLogService {
     private FilterPressLogMapper filterPressLogMapper;
     @Autowired
     private DataService dataService;
+    @Autowired
+    private FilterPressManager filterPressManager;
     @Override
     public void saveFilterPressLog(FilterPressLogBean filterPressLogBean) {
         filterPressLogMapper.insertFilterPressLog(filterPressLogBean);
@@ -117,11 +120,8 @@ public class FilterPressLogServiceImpl implements FilterPressLogService {
 
     private List<FilterPressPlateCountBean> createAllFilterPressPlateInfo(List<FilterPressPlateCountBean> filterPressPlateCountBeans,boolean isDayShift,int currentOrPrior){
         List<FilterPressPlateCountBean> filterPressPlateCountBeanList = new ArrayList<>();
-        for(int i =  0;i < FilterPressLogConstants.FILTER_PRESS_TOTAL_COUNT; i++){
-            String thingCode = String.valueOf(Integer.valueOf(FilterPressLogConstants.FILTERPRESS_2492) + i);
-            if(i == FilterPressLogConstants.FILTER_PRESS_TOTAL_COUNT - 1){
-                 thingCode = FilterPressLogConstants.FILTERPRESS_2496A;
-            }
+        Set<String> thingCodes = filterPressManager.getAllFilterPressCode();
+        for(String thingCode:thingCodes){
             boolean isFound = false;
             for(FilterPressPlateCountBean filterPressPlateCountBean:filterPressPlateCountBeans){
                 if(thingCode.equals(filterPressPlateCountBean.getThingCode())){
@@ -143,16 +143,9 @@ public class FilterPressLogServiceImpl implements FilterPressLogService {
 
     private int getTeamFromCache(){
         int team = 0;
-        String filterPressNum = null;
-        for(int i = 0; i < FilterPressLogConstants.FILTER_PRESS_TOTAL_COUNT ;i++){
-            if(i == FilterPressLogConstants.FILTER_PRESS_TOTAL_COUNT - 1){
-                filterPressNum = FilterPressLogConstants.FILTERPRESS_2496A;
-            }else{
-                int thingCode = Integer.valueOf(FilterPressLogConstants.FILTERPRESS_2492) + i;
-                filterPressNum = String.valueOf(thingCode);
-            }
-
-            team = getTeam(filterPressNum);
+        Set<String> thingCodes = filterPressManager.getAllFilterPressCode();
+        for(String thingCode:thingCodes){
+            team = getTeam(thingCode);
             if(team > 0){
                 break;
             }
@@ -411,13 +404,10 @@ public class FilterPressLogServiceImpl implements FilterPressLogService {
 
     public List<DataModel> getDataModelAllFilterPressByMetricCode(String metricCode){
         List<DataModel> dataModelList = new ArrayList<>();
-        for(int i = 0;i < FilterPressLogConstants.FILTER_PRESS_TOTAL_COUNT;i++){
+        Set<String> thingCodes = filterPressManager.getAllFilterPressCode();
+        for(String thingCode:thingCodes){
             DataModel dataModel = new DataModel();
-            if(i == FilterPressLogConstants.FILTER_PRESS_TOTAL_COUNT - 1 ){
-                dataModel.setThingCode(FilterPressLogConstants.FILTERPRESS_2496A);
-            }else{
-                dataModel.setThingCode(String.valueOf(Integer.valueOf(FilterPressLogConstants.FILTERPRESS_2492) + i));
-            }
+            dataModel.setThingCode(thingCode);
             dataModel.setMetricCode(metricCode);
             dataModel.setDataTimeStamp(new Date());
             dataModel.setMetricCategoryCode(FilterPressLogConstants.SIG);

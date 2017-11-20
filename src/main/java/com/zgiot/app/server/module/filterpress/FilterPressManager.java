@@ -715,6 +715,10 @@ public class FilterPressManager {
         return statisticLogs;
     }
 
+    public Set<String> getAllFilterPressCode(){
+        return deviceHolder.keySet();
+    }
+
     // @Scheduled(cron="cnmt.FilterPressDeviceManager.clear")
     // /**
     // * 手动弹出模式下，超过一段时间不操作后自动进行确认
