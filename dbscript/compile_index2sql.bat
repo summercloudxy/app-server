@@ -18,7 +18,6 @@ ftp -n -s:%ftp%
 echo open %ip%>%ftp%
 echo user %username% %password% >>%ftp% 
 echo cd %warDir% >>%ftp%
-echo ls %warDir% %fileAddress%%dir% >>%ftp%
 for /f "delims=" %%i in ('dir /b /s /a-d *.index') do (
 	for /f "delims=." %%j in (%%i) do (
 		findstr %%j%postfix% %dir% >nul &&(
