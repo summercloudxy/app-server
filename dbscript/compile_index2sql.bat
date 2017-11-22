@@ -7,12 +7,18 @@ set postfix=-dev.sql
 set fileAddress=%cd%\
 set ftp=ftp.txt  
 set dir=dir.txt
+:: 获取当前现有文件内容
 echo open %ip%>%ftp%
 echo user %username% %password% >>%ftp% 
 echo cd %warDir% >>%ftp%
 echo ls %warDir% %fileAddress%%dir% >>%ftp%
 echo bye >>%ftp%
 ftp -n -s:%ftp%
+:: 判断文件并下载
+echo open %ip%>%ftp%
+echo user %username% %password% >>%ftp% 
+echo cd %warDir% >>%ftp%
+echo ls %warDir% %fileAddress%%dir% >>%ftp%
 for /f "delims=" %%i in ('dir /b /s /a-d *.index') do (
 	for /f "delims=." %%j in (%%i) do (
 		findstr %%j%postfix% %dir% >nul &&(
@@ -24,5 +30,5 @@ for /f "delims=" %%i in ('dir /b /s /a-d *.index') do (
 		)
 	)
 )
-ftp -n -s:%ftp%
 echo bye >>%ftp%
+ftp -n -s:%ftp%
