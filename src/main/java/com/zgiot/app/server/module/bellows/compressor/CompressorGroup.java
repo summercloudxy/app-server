@@ -116,7 +116,7 @@ public class CompressorGroup {
         String requestId = RequestIdUtil.generateRequestId();
         setPressureState(Double.parseDouble(BellowsUtil.getDataModelValue(dataService, BellowsConstants.PRESSURE_THING_CODE, CompressorMetricConstants.PRESSURE_STATE).orElse(BellowsConstants.PRESSURE_NORMAL + "")), requestId);
 
-        int intelligent = bellowsMapper.selectParamValue(BellowsConstants.SYS, BellowsConstants.CP_INTELLIGENT).intValue();
+        boolean intelligent = bellowsMapper.selectParamValue(BellowsConstants.SYS, BellowsConstants.CP_INTELLIGENT) == BellowsConstants.YES;
 
         setIntelligent(intelligent, requestId);
 
@@ -128,7 +128,7 @@ public class CompressorGroup {
      * 智能化设置
      * @param intelligent
      */
-    public void setIntelligent(int intelligent, String requestId) {
+    public void setIntelligent(boolean intelligent, String requestId) {
         if (BellowsConstants.CP_TYPE_HIGH.equals(type)) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Only low compressor can be set intelligent. RequestId: {}.", requestId);
@@ -137,13 +137,18 @@ public class CompressorGroup {
         }
 
         Boolean old = this.intelligent;
-        this.intelligent = (intelligent == BellowsConstants.YES);
+        this.intelligent = intelligent;
         if (this.intelligent.equals(old)) {
             logger.info("Low compressor intelligent is already {}. RequestId: {}", intelligent, requestId);
             return;
         }
 
-        bellowsMapper.updateParamValue(BellowsConstants.SYS, BellowsConstants.CP_INTELLIGENT, (long)intelligent);
+        if (intelligent) {
+            bellowsMapper.updateParamValue(BellowsConstants.SYS, BellowsConstants.CP_INTELLIGENT, (long)BellowsConstants.YES);
+        } else {
+            bellowsMapper.updateParamValue(BellowsConstants.SYS, BellowsConstants.CP_INTELLIGENT, (long)BellowsConstants.NO);
+        }
+
         logger.info("Low compressor intelligent has bean set {}.RequestId: {}", intelligent, requestId);
 
         if (this.intelligent) {

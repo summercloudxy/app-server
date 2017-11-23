@@ -91,14 +91,15 @@ public class BellowsController {
     /**
      * 设置低压空压机智能模式
      * @param type  low/high
-     * @param state 0：手动，1：智能
+     * @param intelligent true智能 false手动
      * @param request
      * @return
      */
     @PostMapping(value = "api/bellows/compressor/{type}/intelligent")
-    public ResponseEntity<String> setLowCompressorIntelligent(@PathVariable("type") String type, Integer state, HttpServletRequest request) {
+    public ResponseEntity<String> setLowCompressorIntelligent(@PathVariable("type") String type, Boolean intelligent, HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
 
+        //param validate
         if (!BellowsConstants.CP_TYPE_LOW.equals(type)) {
             if (logger.isDebugEnabled()) {
                 logger.debug("RequestId: {} send a wrong type {}.", requestId, type);
@@ -109,14 +110,16 @@ public class BellowsController {
         }
 
 
-        //param validate
-        String resJSON = checkParam(STATE, state, requestId);
-        if (resJSON != null) {
+        if (intelligent == null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("RequestId: {} send a blank intelligent.", requestId);
+            }
+            String resJSON = JSON.toJSONString(new ServerResponse("Intelligent cannot be empty.", SysException.EC_UNKNOWN, 0));
             return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
         }
 
-        logger.info("RequestId: {} set {} press compressor intelligent state: {}", requestId, type, state);
-        compressorManager.changeGroupIntelligent(type, state, requestId);
+        logger.info("RequestId: {} set {} press compressor intelligent: {}", requestId, type, intelligent);
+        compressorManager.changeGroupIntelligent(type, intelligent, requestId);
 
         return new ResponseEntity<>(ServerResponse.buildOkJson(null),
                 HttpStatus.OK);
@@ -125,15 +128,20 @@ public class BellowsController {
     /**
      * 空压机手动启动/停止
      * @param thingCode 空压机设备号
-     * @param operation 1：运行，0：停止
+     * @param operation true运行 false停止
      * @return
      */
-    @PostMapping(value = "api/bellows/compressor/operation")
-    public ResponseEntity<String> operateCompressor(String thingCode, Integer operation, HttpServletRequest request) {
+    @PostMapping(value = "api/bellows/compressor/open")
+    public ResponseEntity<String> operateCompressor(String thingCode, Boolean operation, HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
 
         //param validate
-        String resJSON = checkParam(OPERATION, operation, requestId);
+        String resJSON = checkThingCode(thingCode, requestId);
+        if (resJSON != null) {
+            return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
+        }
+
+        resJSON = checkOperation(operation, requestId);
         if (resJSON != null) {
             return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
         }
@@ -141,7 +149,7 @@ public class BellowsController {
         logger.info("RequestId: {} operate compressor: {} to running: {}", requestId, thingCode, operation);
 
         EnumCompressorOperation opt;
-        if (BellowsConstants.YES == operation) {
+        if (operation) {
             opt = EnumCompressorOperation.START;
         } else {
             opt = EnumCompressorOperation.STOP;
@@ -311,15 +319,20 @@ public class BellowsController {
     /**
      * 阀门手动开/关
      * @param thingCode 阀门设备号
-     * @param operation 1：运行，0：停止
+     * @param operation true开 false关
      * @return
      */
-    @PostMapping(value = "api/bellows/valve/operation")
-    public ResponseEntity<String> operationValve(String thingCode, Integer operation, HttpServletRequest request) {
+    @PostMapping(value = "api/bellows/valve/open")
+    public ResponseEntity<String> operationValve(String thingCode, Boolean operation, HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
 
         //param validate
-        String resJSON = checkParam(OPERATION, operation, requestId);
+        String resJSON = checkThingCode(thingCode, requestId);
+        if (resJSON != null) {
+            return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
+        }
+
+        resJSON = checkOperation(operation, requestId);
         if (resJSON != null) {
             return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
         }
@@ -327,7 +340,7 @@ public class BellowsController {
         logger.info("RequestId: {} operate valve: {} to running: {}", requestId, thingCode, operation);
 
         EnumValveOperation opt;
-        if (BellowsConstants.YES == operation) {
+        if (operation) {
             opt = EnumValveOperation.OPEN;
         } else {
             opt = EnumValveOperation.CLOSE;
@@ -342,15 +355,15 @@ public class BellowsController {
 
     /**
      * 阀门手动批量开/关
-     * @param operation 1：运行，0：停止
+     * @param operation true开 false关
      * @return
      */
-    @PostMapping(value = "api/bellows/valve/operation/all")
-    public ResponseEntity<String> operationAllValve(Integer operation, HttpServletRequest request) {
+    @PostMapping(value = "api/bellows/valve/open/all")
+    public ResponseEntity<String> operationAllValve(Boolean operation, HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
 
         //param validate
-        String resJSON = checkParam(OPERATION, operation, requestId);
+        String resJSON = checkOperation(operation, requestId);
         if (resJSON != null) {
             return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
         }
@@ -358,7 +371,7 @@ public class BellowsController {
         logger.info("RequestId: {} operate valve: {} to running: {}", requestId, operation);
 
         EnumValveOperation opt;
-        if (BellowsConstants.YES == operation) {
+        if (operation) {
             opt = EnumValveOperation.OPEN;
         } else {
             opt = EnumValveOperation.CLOSE;
@@ -391,34 +404,36 @@ public class BellowsController {
 
 
     /**
-     * 判断智能设置state
-     * @param type  参数类型state/operation
-     * @param value
+     * 判断thingCode为空
+     * @param thingCode
      * @param requestId
      * @return 返回错误信息，Null为正确
      */
-    private String checkParam(String type, Integer value, String requestId) {
-        if (value == null) {
+    private String checkThingCode(String thingCode, String requestId) {
+        if (StringUtils.isEmpty(thingCode)) {
             if (logger.isDebugEnabled()) {
-                logger.debug("RequestId: {} send a bland request", requestId);
+                logger.debug("RequestId: {} send a blank thingCode.", requestId);
             }
-
-            ServerResponse res = new ServerResponse("Blank request.", SysException.EC_UNKNOWN, 0);
-            String resJSON = JSON.toJSONString(res);
-            return resJSON;
-        }
-
-        if (value != BellowsConstants.YES && value != BellowsConstants.NO) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("RequestId: {} send a wrong {}: {}", requestId, type, value);
-            }
-            ServerResponse res = new ServerResponse(type + " must be 1 or 0.Got " + type + ":" + value + ".", SysException.EC_UNKNOWN, 0);
-            String resJSON = JSON.toJSONString(res);
+            String resJSON = JSON.toJSONString(new ServerResponse("ThingCode cannot be empty.", SysException.EC_UNKNOWN, 0));
             return resJSON;
         }
         return null;
     }
 
-
-
+    /**
+     * 判断operation为空
+     * @param operation
+     * @param requestId
+     * @return 返回错误信息，Null为正确
+     */
+    private String checkOperation(Boolean operation, String requestId) {
+        if (operation == null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("RequestId: {} send a blank operation.", requestId);
+            }
+            String resJSON = JSON.toJSONString(new ServerResponse("Operation cannot be empty.", SysException.EC_UNKNOWN, 0));
+            return resJSON;
+        }
+        return null;
+    }
 }

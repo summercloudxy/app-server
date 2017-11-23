@@ -179,7 +179,7 @@ public class CompressorManager {
      * @param intelligent   0:否 1:是
      * @param requestId
      */
-    public synchronized void changeGroupIntelligent(String type, int intelligent, String requestId) {
+    public synchronized void changeGroupIntelligent(String type, boolean intelligent, String requestId) {
         if (BellowsConstants.CP_TYPE_LOW.equals(type)) {
             low.setIntelligent(intelligent, requestId);
         } else {
