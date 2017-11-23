@@ -85,13 +85,14 @@ public class FilterPressLogController {
                 break;
             default:
         }
-        for(DataModel dataModel:dataModelList){
-            try{
-                cmdControlService.sendPulseCmdBoolByShort(dataModel,5000,3,requestId,position,500,isHolding);
-            }catch (Exception e){
-                throw new SysException("filterPress:" + dataModel.getThingCode() + "team reset exception", SysException.EC_UNKNOWN);
+        if(team != 0){
+            for(DataModel dataModel:dataModelList){
+                try{
+                    cmdControlService.sendPulseCmdBoolByShort(dataModel,5000,3,requestId,position,500,isHolding);
+                }catch (Exception e){
+                    throw new SysException("filterPress:" + dataModel.getThingCode() + "team reset exception", SysException.EC_UNKNOWN);
+                }
             }
-
         }
         return new ResponseEntity<>(
                 ServerResponse.buildOkJson(null)

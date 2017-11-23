@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Component
@@ -27,6 +28,7 @@ public class FilterPressLogServiceImpl implements FilterPressLogService {
     private DataService dataService;
     @Autowired
     private FilterPressManager filterPressManager;
+
     @Override
     public void saveFilterPressLog(FilterPressLogBean filterPressLogBean) {
         filterPressLogMapper.insertFilterPressLog(filterPressLogBean);
@@ -36,7 +38,7 @@ public class FilterPressLogServiceImpl implements FilterPressLogService {
     public List<FilterPressLogBean> getLogByDate(String queryDate) {
         String startTime = queryDate + FilterPressLogConstants.NIGHT_SHIFT_ZERO_LINE;
         String endTime = queryDate + FilterPressLogConstants.NIGHT_SHIFT_MIDDLE_LINE;
-        return filterPressLogMapper.queryLogByDate(startTime,endTime);
+        return filterPressLogMapper.queryLogByDate(startTime, endTime);
     }
 
     @Override
@@ -47,34 +49,39 @@ public class FilterPressLogServiceImpl implements FilterPressLogService {
         logger.trace("上一队组：" + priorShiftTeam);
         logger.trace("缓存中队组：" + team);
         FilterPressPlateCountWrapper filterPressPlateCountWrapper = new FilterPressPlateCountWrapper();
-        Map<String,String> currentAndPriorDay =  FilterPressLogUtil.getCurrentDayAndNextOrPriorDay(FilterPressLogConstants.CURRENT_DAY_OFFSET,FilterPressLogConstants.DAY_DEC_ONE);
+        Map<String, String> currentAndPriorDay = FilterPressLogUtil.getCurrentDayAndNextOrPriorDay(FilterPressLogConstants.CURRENT_DAY_OFFSET, FilterPressLogConstants.DAY_DEC_ONE);
         String currentDay = currentAndPriorDay.get(FilterPressLogConstants.CURRENT_DAY);
         String priorDay = currentAndPriorDay.get(FilterPressLogConstants.NEXT_OR_PRIOR_DAY);
         String startTime = null;
         String endTime = null;
-        boolean isDayShift = FilterPressLogUtil.isDayShift(FilterPressLogConstants.DAY_SHIFT_START_TIME_SCOPE,FilterPressLogConstants.DAY_SHIFT_END_TIME_SCOPE);
+        boolean isDayShift = FilterPressLogUtil.isDayShift(FilterPressLogConstants.DAY_SHIFT_START_TIME_SCOPE, FilterPressLogConstants.DAY_SHIFT_END_TIME_SCOPE);
         int currentOrPrior = -1;
-        if(isDayShift){
-            if((team == priorShiftTeam)){
+        if (isDayShift) {
+            if ((team == priorShiftTeam)) {
                 startTime = priorDay.trim() + FilterPressLogConstants.DAY_SHIFT_END_LINE;
                 endTime = currentDay.trim() + FilterPressLogConstants.DAY_SHIFT_START_LINE;
                 filterPressPlateCountWrapper.setIsDayShift(FilterPressLogConstants.IS_DAY_SHIFT_NO);
                 isDayShift = (!isDayShift);
-                currentOrPrior = 1;
-            }else{
+                currentOrPrior = 1;//0:当天，1:前一天
+            } else {
                 startTime = currentDay.trim() + FilterPressLogConstants.DAY_SHIFT_START_LINE;
                 endTime = currentDay.trim() + FilterPressLogConstants.DAY_SHIFT_END_LINE;
                 filterPressPlateCountWrapper.setIsDayShift(FilterPressLogConstants.IS_DAY_SHIFT_OK);
                 currentOrPrior = 0;
             }
-        }else{
-            if(team == priorShiftTeam){
+        } else {
+            if (team == priorShiftTeam && FilterPressLogUtil.isPriorPartNightShift()) {
                 startTime = currentDay.trim() + FilterPressLogConstants.DAY_SHIFT_START_LINE;
                 endTime = currentDay.trim() + FilterPressLogConstants.DAY_SHIFT_END_LINE;
                 filterPressPlateCountWrapper.setIsDayShift(FilterPressLogConstants.IS_DAY_SHIFT_OK);
                 isDayShift = (!isDayShift);
-                currentOrPrior = 1;
-            }else{
+                currentOrPrior = 0;
+            } else if (FilterPressLogUtil.isPriorPartNightShift()) {
+                startTime = currentDay + FilterPressLogConstants.DAY_SHIFT_END_LINE;
+                endTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+                filterPressPlateCountWrapper.setIsDayShift(FilterPressLogConstants.IS_DAY_SHIFT_NO);
+                currentOrPrior = 0;
+            } else {
                 startTime = priorDay.trim() + FilterPressLogConstants.DAY_SHIFT_END_LINE;
                 endTime = currentDay.trim() + FilterPressLogConstants.DAY_SHIFT_START_LINE;
                 filterPressPlateCountWrapper.setIsDayShift(FilterPressLogConstants.IS_DAY_SHIFT_NO);
@@ -83,34 +90,30 @@ public class FilterPressLogServiceImpl implements FilterPressLogService {
         }
         logger.trace("查询压板信息开始时间：" + startTime + "   查询压板信息结束时间：" + endTime);
         logger.trace("查询压板信息是白班？" + isDayShift);
-        List<FilterPressSinglePlateCountBean> filterPressSinglePlateCountBeans = filterPressLogMapper.queryPlateInfos(isDayShift,startTime,endTime);
+        List<FilterPressSinglePlateCountBean> filterPressSinglePlateCountBeans = filterPressLogMapper.queryPlateInfos(isDayShift, startTime, endTime);
         List<FilterPressPlateCountBean> filterPressPlateCountBeanList = new ArrayList<>();
         FilterPressPlateCountBean filterPressPlateCountBean = null;
         FilterPressPlateAndTimeBean filterPressPlateAndTimeBean = null;
-        for(FilterPressSinglePlateCountBean bean:filterPressSinglePlateCountBeans){
-            if(filterPressPlateCountBeanList.size() == 0 && filterPressPlateCountBeanList.isEmpty()){
-                filterPressPlateCountBean = getFilterPressPlateCountBean(bean,isDayShift,currentOrPrior);
-                filterPressPlateCountBeanList.add(filterPressPlateCountBean);
-                continue;
-            }else{
-                boolean isPresent = true;
-                for(FilterPressPlateCountBean filterPressPlateCount:filterPressPlateCountBeanList){
-                    if(bean.getThingCode().equals(filterPressPlateCount.getThingCode())){
-                        filterPressPlateAndTimeBean = bean.getFilterPressPlateAndTimeBean();
-                        filterPressPlateCount.getTimeLineMap().put(String.valueOf(filterPressPlateAndTimeBean.getPlateCount()),filterPressPlateAndTimeBean.getTime());
-                        isPresent = true;
-                        break;
-                    }else{
-                        isPresent = false;
-                    }
-                }
-                if(!isPresent){
-                    filterPressPlateCountBean = getFilterPressPlateCountBean(bean,isDayShift,currentOrPrior);
-                    filterPressPlateCountBeanList.add(filterPressPlateCountBean);
+        filterPressPlateCountBean = getFilterPressPlateCountBean(filterPressSinglePlateCountBeans.remove(0), isDayShift, currentOrPrior);
+        filterPressPlateCountBeanList.add(filterPressPlateCountBean);
+        for (FilterPressSinglePlateCountBean bean : filterPressSinglePlateCountBeans) {
+            boolean isPresent = true;
+            for (FilterPressPlateCountBean filterPressPlateCount : filterPressPlateCountBeanList) {
+                if (bean.getThingCode().equals(filterPressPlateCount.getThingCode())) {
+                    filterPressPlateAndTimeBean = bean.getFilterPressPlateAndTimeBean();
+                    filterPressPlateCount.getTimeLineMap().put(String.valueOf(filterPressPlateAndTimeBean.getPlateCount()), filterPressPlateAndTimeBean.getTime());
+                    isPresent = true;
+                    break;
+                } else {
+                    isPresent = false;
                 }
             }
+            if (!isPresent) {
+                filterPressPlateCountBean = getFilterPressPlateCountBean(bean, isDayShift, currentOrPrior);
+                filterPressPlateCountBeanList.add(filterPressPlateCountBean);
+            }
         }
-        filterPressPlateCountBeanList = createAllFilterPressPlateInfo(filterPressPlateCountBeanList,isDayShift,currentOrPrior);
+        filterPressPlateCountBeanList = createAllFilterPressPlateInfo(filterPressPlateCountBeanList, isDayShift, currentOrPrior);
         filterPressPlateCountWrapper.setFilterPressPlateCountBeanList(filterPressPlateCountBeanList);
         filterPressPlateCountWrapper.setPeriod(FilterPressLogConstants.PERIOD_TWO);
         filterPressPlateCountWrapper.setRatedPlateCount(FilterPressLogConstants.RATE_PLATE_COUNT);
@@ -118,22 +121,22 @@ public class FilterPressLogServiceImpl implements FilterPressLogService {
         return filterPressPlateCountWrapper;
     }
 
-    private List<FilterPressPlateCountBean> createAllFilterPressPlateInfo(List<FilterPressPlateCountBean> filterPressPlateCountBeans,boolean isDayShift,int currentOrPrior){
+    private List<FilterPressPlateCountBean> createAllFilterPressPlateInfo(List<FilterPressPlateCountBean> filterPressPlateCountBeans, boolean isDayShift, int currentOrPrior) {
         List<FilterPressPlateCountBean> filterPressPlateCountBeanList = new ArrayList<>();
         Set<String> thingCodes = filterPressManager.getAllFilterPressCode();
-        for(String thingCode:thingCodes){
+        for (String thingCode : thingCodes) {
             boolean isFound = false;
-            for(FilterPressPlateCountBean filterPressPlateCountBean:filterPressPlateCountBeans){
-                if(thingCode.equals(filterPressPlateCountBean.getThingCode())){
+            for (FilterPressPlateCountBean filterPressPlateCountBean : filterPressPlateCountBeans) {
+                if (thingCode.equals(filterPressPlateCountBean.getThingCode())) {
                     isFound = true;
                     break;
                 }
             }
-            if(!isFound){
+            if (!isFound) {
                 FilterPressPlateCountBean filterPressPlateCountBean = new FilterPressPlateCountBean();
                 FilterPressSinglePlateCountBean filterPressSinglePlateCountBean = new FilterPressSinglePlateCountBean();
                 filterPressSinglePlateCountBean.setThingCode(thingCode);
-                filterPressPlateCountBean = getFilterPressPlateCountBean(filterPressSinglePlateCountBean,isDayShift,currentOrPrior);
+                filterPressPlateCountBean = getFilterPressPlateCountBean(filterPressSinglePlateCountBean, isDayShift, currentOrPrior);
                 filterPressPlateCountBeanList.add(filterPressPlateCountBean);
             }
         }
@@ -141,19 +144,19 @@ public class FilterPressLogServiceImpl implements FilterPressLogService {
         return filterPressPlateCountBeanList;
     }
 
-    private int getTeamFromCache(){
+    private int getTeamFromCache() {
         int team = 0;
         Set<String> thingCodes = filterPressManager.getAllFilterPressCode();
-        for(String thingCode:thingCodes){
+        for (String thingCode : thingCodes) {
             team = getTeam(thingCode);
-            if(team > 0){
+            if (team > 0) {
                 break;
             }
         }
-            return team;
+        return team;
     }
 
-    private int getTeam(String filterPressNum){
+    private int getTeam(String filterPressNum) {
         Optional<DataModelWrapper> team1Wrapper = null;
         Optional<DataModelWrapper> team2Wrapper = null;
         Optional<DataModelWrapper> team3Wrapper = null;
@@ -161,31 +164,31 @@ public class FilterPressLogServiceImpl implements FilterPressLogService {
         team1Wrapper = dataService.getData(filterPressNum, FilterPressMetricConstants.T1_CHOOSE);
         team2Wrapper = dataService.getData(filterPressNum, FilterPressMetricConstants.T2_CHOOSE);
         team3Wrapper = dataService.getData(filterPressNum, FilterPressMetricConstants.T3_CHOOSE);
-        if(team1Wrapper.isPresent() && (String.valueOf(FilterPressLogConstants.T1_CHOOSE_VALUE).equals(team1Wrapper.get().getPreValue()))){
+        if (team1Wrapper.isPresent() && (String.valueOf(FilterPressLogConstants.T1_CHOOSE_VALUE).equals(team1Wrapper.get().getPreValue()))) {
             return FilterPressLogConstants.TEAM1;
         }
-        if(team2Wrapper.isPresent() && (String.valueOf(FilterPressLogConstants.T2_CHOOSE_VALUE).equals(team2Wrapper.get().getPreValue()))){
+        if (team2Wrapper.isPresent() && (String.valueOf(FilterPressLogConstants.T2_CHOOSE_VALUE).equals(team2Wrapper.get().getPreValue()))) {
             return FilterPressLogConstants.TEAM2;
         }
-        if(team3Wrapper.isPresent() && (String.valueOf(FilterPressLogConstants.T3_CHOOSE_VALUE).equals(team3Wrapper.get().getPreValue()))){
+        if (team3Wrapper.isPresent() && (String.valueOf(FilterPressLogConstants.T3_CHOOSE_VALUE).equals(team3Wrapper.get().getPreValue()))) {
             return FilterPressLogConstants.TEAM3;
         }
         return 0;
     }
 
-    public FilterPressPlateCountBean getFilterPressPlateCountBean(FilterPressSinglePlateCountBean bean,boolean isDayShift,int currentOrPrior){
+    public FilterPressPlateCountBean getFilterPressPlateCountBean(FilterPressSinglePlateCountBean bean, boolean isDayShift, int currentOrPrior) {
         FilterPressPlateCountBean filterPressPlateCountBean = new FilterPressPlateCountBean();
         filterPressPlateCountBean.setThingCode(bean.getThingCode());
         String dayRatedStartTimeKey = isDayShift ? FilterPressLogConstants.RATED_START_TIME_DAY_OFFSET : FilterPressLogConstants.RATED_START_TIME_NIGHT_OFFSET;
-        Date date = getRatedStartTimeByThingCode(bean.getThingCode(),dayRatedStartTimeKey,currentOrPrior);
-        if(date != null){
+        Date date = getRatedStartTimeByThingCode(bean.getThingCode(), dayRatedStartTimeKey, currentOrPrior);
+        if (date != null) {
             filterPressPlateCountBean.setStartTime(date);
         }
         FilterPressPlateAndTimeBean filterPressPlateAndTimeBean = bean.getFilterPressPlateAndTimeBean();
-        if(filterPressPlateAndTimeBean == null){
+        if (filterPressPlateAndTimeBean == null) {
             filterPressPlateAndTimeBean = new FilterPressPlateAndTimeBean();
         }
-        filterPressPlateCountBean.getTimeLineMap().put(String.valueOf(filterPressPlateAndTimeBean.getPlateCount()),filterPressPlateAndTimeBean.getTime());
+        filterPressPlateCountBean.getTimeLineMap().put(String.valueOf(filterPressPlateAndTimeBean.getPlateCount()), filterPressPlateAndTimeBean.getTime());
         return filterPressPlateCountBean;
     }
 
@@ -196,32 +199,36 @@ public class FilterPressLogServiceImpl implements FilterPressLogService {
         int team = getTeamFromCache();
         logger.trace("上一队组：" + priorShiftTeam);
         logger.trace("缓存中队组：" + team);
-        Map<String,String> dateMap = FilterPressLogUtil.getCurrentDayAndNextOrPriorDay(FilterPressLogConstants.CURRENT_DAY_OFFSET,FilterPressLogConstants.DAY_DEC_ONE);
+        Map<String, String> dateMap = FilterPressLogUtil.getCurrentDayAndNextOrPriorDay(FilterPressLogConstants.CURRENT_DAY_OFFSET, FilterPressLogConstants.DAY_DEC_ONE);
         String currentDay = dateMap.get(FilterPressLogConstants.CURRENT_DAY);
         String priorDay = dateMap.get(FilterPressLogConstants.NEXT_OR_PRIOR_DAY);
         String startTime = null;
         String endTime = null;
-        boolean isDayShift = FilterPressLogUtil.isDayShift(FilterPressLogConstants.DAY_SHIFT_START_TIME_SCOPE,FilterPressLogConstants.DAY_SHIFT_END_TIME_SCOPE);
+        boolean isDayShift = FilterPressLogUtil.isDayShift(FilterPressLogConstants.DAY_SHIFT_START_TIME_SCOPE, FilterPressLogConstants.DAY_SHIFT_END_TIME_SCOPE);
         FilterPressTotalPlateCountBean filterPressTotalPlateCountBean = new FilterPressTotalPlateCountBean();
         List<FilterPressPlateAndTimeBean> filterPressPlateAndTimeBeans = null;
-        if(isDayShift){
-            if((team == priorShiftTeam)){
+        if (isDayShift) {
+            if (team == priorShiftTeam) {
                 startTime = priorDay.trim() + FilterPressLogConstants.DAY_SHIFT_END_LINE;
                 endTime = currentDay.trim() + FilterPressLogConstants.DAY_SHIFT_START_LINE;
                 filterPressTotalPlateCountBean.setIsDayShift(FilterPressLogConstants.IS_DAY_SHIFT_NO);
                 isDayShift = (!isDayShift);
-            }else{
+            } else {
                 startTime = currentDay.trim() + FilterPressLogConstants.DAY_SHIFT_START_LINE;
                 endTime = currentDay.trim() + FilterPressLogConstants.DAY_SHIFT_END_LINE;
                 filterPressTotalPlateCountBean.setIsDayShift(FilterPressLogConstants.IS_DAY_SHIFT_OK);
             }
-        }else{
-            if(team == priorShiftTeam){
+        } else {
+            if (team == priorShiftTeam && FilterPressLogUtil.isPriorPartNightShift()) {
                 startTime = currentDay.trim() + FilterPressLogConstants.DAY_SHIFT_START_LINE;
                 endTime = currentDay.trim() + FilterPressLogConstants.DAY_SHIFT_END_LINE;
                 filterPressTotalPlateCountBean.setIsDayShift(FilterPressLogConstants.IS_DAY_SHIFT_OK);
                 isDayShift = (!isDayShift);
-            }else{
+            } else if (FilterPressLogUtil.isPriorPartNightShift()) {
+                startTime = currentDay.trim() + FilterPressLogConstants.DAY_SHIFT_END_LINE;
+                endTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+                filterPressTotalPlateCountBean.setIsDayShift(FilterPressLogConstants.IS_DAY_SHIFT_NO);
+            } else {
                 startTime = priorDay.trim() + FilterPressLogConstants.DAY_SHIFT_END_LINE;
                 endTime = currentDay.trim() + FilterPressLogConstants.DAY_SHIFT_START_LINE;
                 filterPressTotalPlateCountBean.setIsDayShift(FilterPressLogConstants.IS_DAY_SHIFT_NO);
@@ -229,34 +236,34 @@ public class FilterPressLogServiceImpl implements FilterPressLogService {
         }
         logger.trace("查询压板总数开始时间：" + startTime + "   查询压板总数结束时间：" + endTime);
         logger.trace("查询压板总数是白班？" + isDayShift);
-        filterPressPlateAndTimeBeans = filterPressLogMapper.queryTotalPlateInfos(isDayShift,startTime,endTime);
+        filterPressPlateAndTimeBeans = filterPressLogMapper.queryTotalPlateInfos(isDayShift, startTime, endTime);
         filterPressPlateAndTimeBeans = resetTotalPlateCount(filterPressPlateAndTimeBeans);
         filterPressTotalPlateCountBean.setPeriod(FilterPressLogConstants.PERIOD_TWO);
         filterPressTotalPlateCountBean.setRatedTotalPlateCount(FilterPressLogConstants.RATE_PLATE_COUNT * FilterPressLogConstants.FILTER_PRESS_TOTAL_COUNT);
         FilterPressPlateAndTimeBean timeLine = null;
-        timeLine = (filterPressPlateAndTimeBeans.size() == 0) ? new FilterPressPlateAndTimeBean():getMaxTotalPlateCount(filterPressPlateAndTimeBeans);
-        Map<String,Date> totalPlateCountMap = new HashMap<>();
+        timeLine = getMaxTotalPlateCount(filterPressPlateAndTimeBeans);
+
+        Map<String, Date> totalPlateCountMap = new HashMap<>();
         int maxTotalPlateCount = timeLine.getPlateCount();
-        if(timeLine.getPlateCount() % FilterPressLogConstants.FILTER_PRESS_TOTAL_COUNT != 0){
-            totalPlateCountMap.put(String.valueOf(timeLine.getPlateCount()),timeLine.getTime());//最大总压板数和最大压板数对应的时间
-        }
-        for(int i = FilterPressLogConstants.FILTER_PRESS_TOTAL_COUNT,j = 1;i <= maxTotalPlateCount;i+=FilterPressLogConstants.FILTER_PRESS_TOTAL_COUNT,j++)
-            for(FilterPressPlateAndTimeBean filterPressPlateAndTimeBean:filterPressPlateAndTimeBeans)
-            {
+        totalPlateCountMap.put(String.valueOf(timeLine.getPlateCount()), timeLine.getTime());//最大总压板数和最大压板数对应的时间
+        for (int i = FilterPressLogConstants.FILTER_PRESS_TOTAL_COUNT, j = 1; i < maxTotalPlateCount; i += FilterPressLogConstants.FILTER_PRESS_TOTAL_COUNT, j++)
+            for (FilterPressPlateAndTimeBean filterPressPlateAndTimeBean : filterPressPlateAndTimeBeans) {
                 int totalPlateCount = filterPressPlateAndTimeBean.getPlateCount();
-                if((totalPlateCount / i == j) && (totalPlateCount % i == 0)){
-                    totalPlateCountMap.put(String.valueOf(totalPlateCount),filterPressPlateAndTimeBean.getTime());
+                if ((totalPlateCount / i == j) && (totalPlateCount % i == 0)) {
+                    totalPlateCountMap.put(String.valueOf(totalPlateCount), filterPressPlateAndTimeBean.getTime());
                     break;
                 }
             }
         filterPressTotalPlateCountBean.setTimeLineMap(totalPlateCountMap);
-        filterPressTotalPlateCountBean.setStartTime(new Date());
+        Date startDate = FilterPressLogUtil.getDateByString(startTime);
+        filterPressTotalPlateCountBean.setStartTime(startDate);
         return filterPressTotalPlateCountBean;
     }
 
-    private List<FilterPressPlateAndTimeBean> resetTotalPlateCount(List<FilterPressPlateAndTimeBean> filterPressPlateAndTimeBeans){
+
+    private List<FilterPressPlateAndTimeBean> resetTotalPlateCount(List<FilterPressPlateAndTimeBean> filterPressPlateAndTimeBeans) {
         int i = 0;
-        for(FilterPressPlateAndTimeBean filterPressPlateAndTimeBean:filterPressPlateAndTimeBeans){
+        for (FilterPressPlateAndTimeBean filterPressPlateAndTimeBean : filterPressPlateAndTimeBeans) {
             i++;
             filterPressPlateAndTimeBean.setPlateCount(i);
         }
@@ -273,98 +280,116 @@ public class FilterPressLogServiceImpl implements FilterPressLogService {
         int team = getTeamFromCache();
         logger.trace("上一队组：" + priorShiftTeam);
         logger.trace("缓存中队组：" + team);
-        Map<String,String> dateMap = null;
+        Map<String, String> dateMap = null;
         String currentDay = null;
         String priorDay = null;
         String startTime = null;
         String endTime = null;
-        boolean isDayShift = FilterPressLogUtil.isDayShift(FilterPressLogConstants.DAY_SHIFT_START_TIME_SCOPE,FilterPressLogConstants.DAY_SHIFT_END_TIME_SCOPE);
-        if(isDayShift){
-            for(int i = FilterPressLogConstants.HIS_PLATE_COUNT_DAY -1;i > 0;i--){
-                dateMap = FilterPressLogUtil.getCurrentDayAndNextOrPriorDay(FilterPressLogConstants.DAY_DEC_SIX +i-1,FilterPressLogConstants.DAY_DEC_SEVEN +(i-1));
+        boolean isDayShift = FilterPressLogUtil.isDayShift(FilterPressLogConstants.DAY_SHIFT_START_TIME_SCOPE, FilterPressLogConstants.DAY_SHIFT_END_TIME_SCOPE);
+        if (isDayShift) {
+            for (int i = FilterPressLogConstants.HIS_PLATE_COUNT_DAY - 1; i > 0; i--) {
+                dateMap = FilterPressLogUtil.getCurrentDayAndNextOrPriorDay(FilterPressLogConstants.DAY_DEC_SIX + i - 1, FilterPressLogConstants.DAY_DEC_SEVEN + (i - 1));
                 priorDay = dateMap.get(FilterPressLogConstants.NEXT_OR_PRIOR_DAY);
                 currentDay = dateMap.get(FilterPressLogConstants.CURRENT_DAY);
                 startTime = priorDay.trim() + FilterPressLogConstants.DAY_SHIFT_START_LINE;
                 endTime = currentDay.trim() + FilterPressLogConstants.DAY_SHIFT_START_LINE;
-                filterPressHisPlateCountBeans = filterPressLogMapper.queryHisPlateCount(startTime,endTime);
+                filterPressHisPlateCountBeans = filterPressLogMapper.queryHisPlateCount(startTime, endTime);
                 filterPressHisPlateCountWrapper = new FilterPressHisPlateCountWrapper();
                 filterPressHisPlateCountWrapper.setFilterPressHisPlateCountBeanList(filterPressHisPlateCountBeans);
                 filterPressHisPlateCountWrapper.setHisDate(priorDay);
                 filterPressHisPlateCountWrapperList.add(filterPressHisPlateCountWrapper);
             }
-            dateMap = FilterPressLogUtil.getCurrentDayAndNextOrPriorDay(FilterPressLogConstants.CURRENT_DAY_OFFSET,FilterPressLogConstants.DAY_DEC_ONE );
+            dateMap = FilterPressLogUtil.getCurrentDayAndNextOrPriorDay(FilterPressLogConstants.CURRENT_DAY_OFFSET, FilterPressLogConstants.DAY_DEC_ONE);
             priorDay = dateMap.get(FilterPressLogConstants.NEXT_OR_PRIOR_DAY);
             currentDay = dateMap.get(FilterPressLogConstants.CURRENT_DAY);
-            if((team == priorShiftTeam)){
+            if ((team == priorShiftTeam)) {
                 startTime = priorDay.trim() + FilterPressLogConstants.DAY_SHIFT_START_LINE;
                 endTime = priorDay.trim() + FilterPressLogConstants.DAY_SHIFT_END_LINE;
-            }else{
+            } else {
                 startTime = priorDay.trim() + FilterPressLogConstants.DAY_SHIFT_START_LINE;
                 endTime = currentDay.trim() + FilterPressLogConstants.DAY_SHIFT_START_LINE;
             }
-            filterPressHisPlateCountBeans = filterPressLogMapper.queryHisPlateCount(startTime,endTime);
+            filterPressHisPlateCountBeans = filterPressLogMapper.queryHisPlateCount(startTime, endTime);
             filterPressHisPlateCountWrapper = new FilterPressHisPlateCountWrapper();
             filterPressHisPlateCountWrapper.setFilterPressHisPlateCountBeanList(filterPressHisPlateCountBeans);
             filterPressHisPlateCountWrapper.setHisDate(priorDay);
             filterPressHisPlateCountWrapperList.add(filterPressHisPlateCountWrapper);
-        }else{
-            if(team == priorShiftTeam){
-                for(int i = FilterPressLogConstants.HIS_PLATE_COUNT_DAY;i > 0;i--){
-                    dateMap = FilterPressLogUtil.getCurrentDayAndNextOrPriorDay(FilterPressLogConstants.DAY_DEC_SEVEN +i,FilterPressLogConstants.DAY_DEC_SEVEN +(i-1));
+        } else {
+            if (team == priorShiftTeam) {
+                for (int i = FilterPressLogConstants.HIS_PLATE_COUNT_DAY; i > 0; i--) {
+                    dateMap = FilterPressLogUtil.getCurrentDayAndNextOrPriorDay(FilterPressLogConstants.DAY_DEC_SEVEN + i, FilterPressLogConstants.DAY_DEC_SEVEN + (i - 1));
                     priorDay = dateMap.get(FilterPressLogConstants.NEXT_OR_PRIOR_DAY);
                     currentDay = dateMap.get(FilterPressLogConstants.CURRENT_DAY);
                     startTime = priorDay.trim() + FilterPressLogConstants.DAY_SHIFT_START_LINE;
                     endTime = currentDay.trim() + FilterPressLogConstants.DAY_SHIFT_START_LINE;
-                    filterPressHisPlateCountBeans = filterPressLogMapper.queryHisPlateCount(startTime,endTime);
+                    filterPressHisPlateCountBeans = filterPressLogMapper.queryHisPlateCount(startTime, endTime);
                     filterPressHisPlateCountWrapper = new FilterPressHisPlateCountWrapper();
                     filterPressHisPlateCountWrapper.setFilterPressHisPlateCountBeanList(filterPressHisPlateCountBeans);
                     filterPressHisPlateCountWrapper.setHisDate(priorDay);
                     filterPressHisPlateCountWrapperList.add(filterPressHisPlateCountWrapper);
                 }
-            }else{
-                for(int i = FilterPressLogConstants.HIS_PLATE_COUNT_DAY - 1;i > 0;--i){
-                    dateMap = FilterPressLogUtil.getCurrentDayAndNextOrPriorDay(FilterPressLogConstants.DAY_DEC_SIX +i,FilterPressLogConstants.DAY_DEC_SIX +(i-1));
+            } else {
+                for (int i = FilterPressLogConstants.HIS_PLATE_COUNT_DAY - 1; i > 0; --i) {
+                    dateMap = FilterPressLogUtil.getCurrentDayAndNextOrPriorDay(FilterPressLogConstants.DAY_DEC_SIX + i -1, FilterPressLogConstants.DAY_DEC_SIX + (i - 2));
                     priorDay = dateMap.get(FilterPressLogConstants.NEXT_OR_PRIOR_DAY);
                     currentDay = dateMap.get(FilterPressLogConstants.CURRENT_DAY);
                     startTime = priorDay.trim() + FilterPressLogConstants.DAY_SHIFT_START_LINE;
                     endTime = currentDay.trim() + FilterPressLogConstants.DAY_SHIFT_START_LINE;
-                    filterPressHisPlateCountBeans = filterPressLogMapper.queryHisPlateCount(startTime,endTime);
+                    filterPressHisPlateCountBeans = filterPressLogMapper.queryHisPlateCount(startTime, endTime);
                     filterPressHisPlateCountWrapper = new FilterPressHisPlateCountWrapper();
                     filterPressHisPlateCountWrapper.setFilterPressHisPlateCountBeanList(filterPressHisPlateCountBeans);
                     filterPressHisPlateCountWrapper.setHisDate(priorDay);
                     filterPressHisPlateCountWrapperList.add(filterPressHisPlateCountWrapper);
                 }
-                dateMap = FilterPressLogUtil.getCurrentDayAndNextOrPriorDay(FilterPressLogConstants.CURRENT_DAY_OFFSET,FilterPressLogConstants.DAY_DEC_ONE);
-                currentDay = dateMap.get(FilterPressLogConstants.CURRENT_DAY);
-                startTime = currentDay.trim() + FilterPressLogConstants.DAY_SHIFT_START_LINE;
-                endTime = currentDay.trim() + FilterPressLogConstants.DAY_SHIFT_END_LINE;
-                filterPressHisPlateCountBeans = filterPressLogMapper.queryHisPlateCount(startTime,endTime);
+                filterPressHisPlateCountWrapper = new FilterPressHisPlateCountWrapper();
+                if (FilterPressLogUtil.isPriorPartNightShift()) {
+                    dateMap = FilterPressLogUtil.getCurrentDayAndNextOrPriorDay(FilterPressLogConstants.CURRENT_DAY_OFFSET, FilterPressLogConstants.DAY_DEC_ONE);
+                    currentDay = dateMap.get(FilterPressLogConstants.CURRENT_DAY);
+                    priorDay = dateMap.get(FilterPressLogConstants.NEXT_OR_PRIOR_DAY);
+                    startTime = priorDay.trim() + FilterPressLogConstants.DAY_SHIFT_START_LINE;
+                    endTime = currentDay.trim() + FilterPressLogConstants.DAY_SHIFT_START_LINE;
+                    filterPressHisPlateCountBeans = filterPressLogMapper.queryHisPlateCount(startTime, endTime);
+                    filterPressHisPlateCountWrapper.setFilterPressHisPlateCountBeanList(filterPressHisPlateCountBeans);
+                    filterPressHisPlateCountWrapper.setHisDate(priorDay);
+                    filterPressHisPlateCountWrapperList.add(filterPressHisPlateCountWrapper);
+                    startTime = currentDay.trim() + FilterPressLogConstants.DAY_SHIFT_START_LINE;
+                    endTime = currentDay.trim() + FilterPressLogConstants.DAY_SHIFT_END_LINE;
+                } else {
+                    dateMap = FilterPressLogUtil.getCurrentDayAndNextOrPriorDay(FilterPressLogConstants.CURRENT_DAY_OFFSET, FilterPressLogConstants.DAY_DEC_ONE);
+                    currentDay = dateMap.get(FilterPressLogConstants.CURRENT_DAY);
+                    priorDay = dateMap.get(FilterPressLogConstants.NEXT_OR_PRIOR_DAY);
+                    startTime = priorDay.trim() + FilterPressLogConstants.DAY_SHIFT_START_LINE;
+                    endTime = priorDay.trim() + FilterPressLogConstants.DAY_SHIFT_END_LINE;
+                    currentDay = priorDay;
+                }
+                filterPressHisPlateCountBeans = filterPressLogMapper.queryHisPlateCount(startTime, endTime);
                 filterPressHisPlateCountWrapper = new FilterPressHisPlateCountWrapper();
                 filterPressHisPlateCountWrapper.setFilterPressHisPlateCountBeanList(filterPressHisPlateCountBeans);
                 filterPressHisPlateCountWrapper.setHisDate(currentDay);
                 filterPressHisPlateCountWrapperList.add(filterPressHisPlateCountWrapper);
             }
+
         }
         logger.trace("查询历史压板信息开始时间：" + startTime + "   查询历史压板信息结束时间：" + endTime);
         logger.trace("查询历史压板信息是白班？" + isDayShift);
         return addToatalCount(filterPressHisPlateCountWrapperList);
     }
 
-    public List<FilterPressHisPlateCountWrapper> addToatalCount(List<FilterPressHisPlateCountWrapper> filterPressHisPlateCountWrappers){
+    public List<FilterPressHisPlateCountWrapper> addToatalCount(List<FilterPressHisPlateCountWrapper> filterPressHisPlateCountWrappers) {
         List<FilterPressHisPlateCountWrapper> filterPressHisPlateCountWrapperList = null;
-        if(filterPressHisPlateCountWrappers == null){
+        if (filterPressHisPlateCountWrappers == null) {
             return null;
         }
         int totalPlateCount = 0;
-        for(FilterPressHisPlateCountWrapper filterPressHisPlateCountWrapper:filterPressHisPlateCountWrappers){
+        for (FilterPressHisPlateCountWrapper filterPressHisPlateCountWrapper : filterPressHisPlateCountWrappers) {
             List<FilterPressHisPlateCountBean> filterPressHisPlateCountBeans = filterPressHisPlateCountWrapper.getFilterPressHisPlateCountBeanList();
-            if(filterPressHisPlateCountBeans.size() == 0){
+            if (filterPressHisPlateCountBeans.size() == 0) {
                 continue;
             }
-            for(FilterPressHisPlateCountBean filterPressHisPlateCountBean:filterPressHisPlateCountBeans){
+            for (FilterPressHisPlateCountBean filterPressHisPlateCountBean : filterPressHisPlateCountBeans) {
                 List<FilterPressTcAndMaxPlateCount> filterPressTcAndMaxPlateCountList = filterPressHisPlateCountBean.getFilterPressTcAndMaxPlateCountList();
                 totalPlateCount = 0;
-                for(FilterPressTcAndMaxPlateCount filterPressTcAndMaxPlateCount:filterPressTcAndMaxPlateCountList){
+                for (FilterPressTcAndMaxPlateCount filterPressTcAndMaxPlateCount : filterPressTcAndMaxPlateCountList) {
                     totalPlateCount += filterPressTcAndMaxPlateCount.getMaxPlateCount();
                 }
                 filterPressHisPlateCountBean.setUnloadTotalCount(totalPlateCount);
@@ -377,55 +402,56 @@ public class FilterPressLogServiceImpl implements FilterPressLogService {
     @Override
     public Integer getPriorShiftTeam() {
         logger.trace("获取上一班队组信息");
-        boolean isDayShift = FilterPressLogUtil.isDayShift(FilterPressLogConstants.DAY_SHIFT_START_TIME_SCOPE,FilterPressLogConstants.DAY_SHIFT_END_TIME_SCOPE);
-        Map<String,String> currentAndPrior = FilterPressLogUtil.getCurrentDayAndNextOrPriorDay(FilterPressLogConstants.CURRENT_DAY_OFFSET,FilterPressLogConstants.DAY_DEC_ONE);
+        boolean isDayShift = FilterPressLogUtil.isDayShift(FilterPressLogConstants.DAY_SHIFT_START_TIME_SCOPE, FilterPressLogConstants.DAY_SHIFT_END_TIME_SCOPE);
+        Map<String, String> currentAndPrior = FilterPressLogUtil.getCurrentDayAndNextOrPriorDay(FilterPressLogConstants.CURRENT_DAY_OFFSET, FilterPressLogConstants.DAY_DEC_ONE);
         String priorDay = currentAndPrior.get(FilterPressLogConstants.NEXT_OR_PRIOR_DAY);
         String currentDay = currentAndPrior.get(FilterPressLogConstants.CURRENT_DAY);
         Integer team = null;
         String startTime = null;
         String endTime = null;
-        if(isDayShift){
+        if (isDayShift) {
             startTime = priorDay + FilterPressLogConstants.DAY_SHIFT_END_LINE;
             endTime = currentDay + FilterPressLogConstants.DAY_SHIFT_START_LINE;
-        }else{
-            if(FilterPressLogUtil.isPriorPartNightShift()){
+        } else {
+            if (FilterPressLogUtil.isPriorPartNightShift()) {
                 startTime = currentDay + FilterPressLogConstants.DAY_SHIFT_START_LINE;
                 endTime = currentDay + FilterPressLogConstants.DAY_SHIFT_END_LINE;
-            }else{
+            } else {
                 startTime = priorDay + FilterPressLogConstants.DAY_SHIFT_START_LINE;
                 endTime = priorDay + FilterPressLogConstants.DAY_SHIFT_END_LINE;
             }
         }
         logger.trace("查询上一班队组开始时间：" + startTime + "   查询上一班队组结束时间：" + endTime);
         logger.trace("查询上一班队组是白班？" + isDayShift);
-        team = filterPressLogMapper.getPriorTeam(!isDayShift,startTime,endTime);
+        team = filterPressLogMapper.getPriorTeam(!isDayShift, startTime, endTime);
         return team == null ? 0 : team;
     }
 
-    public List<DataModel> getDataModelAllFilterPressByMetricCode(String metricCode){
+    public List<DataModel> getDataModelAllFilterPressByMetricCode(String metricCode) {
         List<DataModel> dataModelList = new ArrayList<>();
         Set<String> thingCodes = filterPressManager.getAllFilterPressCode();
-        for(String thingCode:thingCodes){
+        for (String thingCode : thingCodes) {
             DataModel dataModel = new DataModel();
             dataModel.setThingCode(thingCode);
             dataModel.setMetricCode(metricCode);
             dataModel.setDataTimeStamp(new Date());
-            dataModel.setMetricCategoryCode(FilterPressLogConstants.SIG);
             dataModel.setValue(Boolean.TRUE.toString());
             dataModelList.add(dataModel);
         }
         return dataModelList;
     }
 
-    public FilterPressPlateAndTimeBean getMaxTotalPlateCount(List<FilterPressPlateAndTimeBean> filterPressPlateAndTimeBeans){
+    public FilterPressPlateAndTimeBean getMaxTotalPlateCount(List<FilterPressPlateAndTimeBean> filterPressPlateAndTimeBeans) {
         FilterPressPlateAndTimeBean filterPressPlateAndTimeBean = new FilterPressPlateAndTimeBean();
         int maxTotalPlateCount = 0;
         Date date = null;
-        for(FilterPressPlateAndTimeBean bean:filterPressPlateAndTimeBeans){
-            int totalPlateCount = bean.getPlateCount();
-            if(totalPlateCount > maxTotalPlateCount){
-                maxTotalPlateCount = totalPlateCount;
-                date = bean.getTime();
+        if(filterPressPlateAndTimeBeans != null && filterPressPlateAndTimeBeans.size() > 0){
+            for (FilterPressPlateAndTimeBean bean : filterPressPlateAndTimeBeans) {
+                int totalPlateCount = bean.getPlateCount();
+                if (totalPlateCount > maxTotalPlateCount) {
+                    maxTotalPlateCount = totalPlateCount;
+                    date = bean.getTime();
+                }
             }
         }
         filterPressPlateAndTimeBean.setPlateCount(maxTotalPlateCount);
@@ -433,10 +459,10 @@ public class FilterPressLogServiceImpl implements FilterPressLogService {
         return filterPressPlateAndTimeBean;
     }
 
-    private Date getRatedStartTimeByThingCode(String thingCode,String dayOrNightRatedTime,int currentOrPrior){
-        FilterPressRatedStartTimeBean ratedStartTime = filterPressLogMapper.getFilterPressRatedStartTime(thingCode,dayOrNightRatedTime);
+    private Date getRatedStartTimeByThingCode(String thingCode, String dayOrNightRatedTime, int currentOrPrior) {
+        FilterPressRatedStartTimeBean ratedStartTime = filterPressLogMapper.getFilterPressRatedStartTime(thingCode, dayOrNightRatedTime);
         String offsetTime = ratedStartTime.getStartTimeOffset();
-        Date date = FilterPressLogUtil.getDayOrNightShiftRateStartTime(offsetTime,currentOrPrior);
+        Date date = FilterPressLogUtil.getDayOrNightShiftRateStartTime(offsetTime, currentOrPrior);
         return date;
     }
 }

@@ -1,8 +1,11 @@
 package com.zgiot.app.server.module.filterpress;
 
+import com.zgiot.app.server.module.filterpress.impl.FilterPressLogServiceImpl;
 import com.zgiot.common.constants.FilterPressLogConstants;
 import com.zgiot.common.exceptions.SysException;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -12,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FilterPressLogUtil {
+    private static final Logger logger = LoggerFactory.getLogger(FilterPressLogServiceImpl.class);
 
 
     public static synchronized boolean isDayShift(int start,int end){
@@ -66,9 +70,19 @@ public class FilterPressLogUtil {
                 isPriorOrNextPartNightShift = true;
             }
         }catch(ParseException e){
-            e.printStackTrace();
+            logger.trace("判断是否是前半夜接口解析时间异常");
         }
         return isPriorOrNextPartNightShift;
+    }
+
+    public static Date getDateByString(String date){
+        Date startDate = null;
+        try{
+            startDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(date);
+        }catch (ParseException e){
+            logger.trace("获取总压板信息接口解析时间异常");
+        }
+        return startDate;
     }
 
     public static Date getDayOrNightShiftRateStartTime(String attchTime,int currentOrPrior){
@@ -101,7 +115,7 @@ public class FilterPressLogUtil {
 
     public static boolean isFirstLooseEveryDay(long priorLooseTime,long currentLooseTime){
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String currentDayStartTime = simpleDateFormat.format(currentLooseTime) + FilterPressLogConstants.FILTERPRESS_2492_RATE_TIME;
+        String currentDayStartTime = simpleDateFormat.format(currentLooseTime) + FilterPressLogConstants.START_TIME_EVERY_DAY;
         simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         long currentDayStartTimeMills = 0;
         try{
