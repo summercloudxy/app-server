@@ -575,6 +575,7 @@ public class AlertManager {
         alertData.setVerifyTime(new Date());
         // updateAlert(alertData);
         // verifySet.add(alertData);
+        verifyDelayQueue.put(new VerifyDelayed(alertData, VERIFY_TO_UNTREATED_PERIOD));
         alertMapper.saveAlertMessage(alertMessage);
         messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
         logger.debug("推送报警消息，报警设备{}，报警内容{}，报警评级", alertData.getThingCode(), alertData.getMetricCode());
