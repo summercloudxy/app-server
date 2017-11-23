@@ -1,18 +1,22 @@
 package com.zgiot.app.server.module.bellows.compressor;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.zgiot.app.server.module.bellows.dao.BellowsMapper;
 import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorOperation;
 import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorState;
 import com.zgiot.app.server.module.bellows.enumeration.EnumHighCompressorFault;
 import com.zgiot.app.server.module.bellows.enumeration.EnumLowCompressorFault;
+import com.zgiot.app.server.module.bellows.pojo.CompressorLog;
+import com.zgiot.app.server.module.bellows.pojo.CompressorState;
+import com.zgiot.app.server.module.bellows.pressure.PressureManager;
 import com.zgiot.app.server.module.bellows.util.BellowsUtil;
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.util.RequestIdUtil;
 import com.zgiot.common.constants.BellowsConstants;
 import com.zgiot.common.constants.CompressorMetricConstants;
+import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.DataModel;
-import com.zgiot.common.pojo.DataModelWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,11 +30,10 @@ public class Compressor {
 
     private static final Logger logger = LoggerFactory.getLogger(Compressor.class);
 
-    public static final String TYPE_LOW = "low";
-    public static final String TYPE_HIGH = "high";
-
-    public static final int YES = 1;
-    public static final int NO = 0;
+    /**
+     * 脉冲指令清除时间
+     */
+    private static final int CLEAN_PERIOD = 500;
 
     /**
      * 加载状态判断等待时间
@@ -66,6 +69,16 @@ public class Compressor {
     private Object stateLock = new Object();
     private Object stopLock = new Object();
 
+
+    private final DataService dataService;
+
+    private final PressureManager pressureManager;
+
+    private final CmdControlService cmdControlService;
+
+    private final BellowsMapper bellowsMapper;
+
+
     /**
      * 名称
      */
@@ -88,8 +101,6 @@ public class Compressor {
     private final int sort;
 
 
-    @JSONField(serialize = false)
-    private final CompressorManager manager;
 
     /**
      * 是否就地，0集控，1就地
@@ -166,19 +177,22 @@ public class Compressor {
 
 
 
-    public Compressor(String name, String thingCode, String type, int sort, CompressorManager manager) {
+    public Compressor(String name, String thingCode, String type, int sort, DataService dataService, PressureManager pressureManager, CmdControlService cmdControlService, BellowsMapper bellowsMapper) {
         this.name = name;
         this.thingCode = thingCode;
         this.type = type;
         this.sort = sort;
-        this.manager = manager;
+        this.dataService = dataService;
+        this.pressureManager = pressureManager;
+        this.cmdControlService = cmdControlService;
+        this.bellowsMapper = bellowsMapper;
     }
 
     /**
      * 状态初始化
      * @return
      */
-    public Compressor initState(DataService dataService, CmdControlService cmdControlService) {
+    public Compressor initState() {
         //故障状态
         Optional<String> warnData = BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.WARN);
         boolean warn = Boolean.parseBoolean(warnData.orElse(BellowsConstants.FALSE));
@@ -207,7 +221,7 @@ public class Compressor {
         Optional<String> localData = BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.LOCAL);
         local = Boolean.parseBoolean(localData.orElse(BellowsConstants.TRUE));
 
-        confirmState();
+        confirmState(false);
 
         return this;
     }
@@ -234,7 +248,7 @@ public class Compressor {
 
         //错误信息组装
         if (EnumCompressorState.ERROR.getState().equals(state)) {
-            if (TYPE_HIGH.equals(type)) {
+            if (BellowsConstants.CP_TYPE_HIGH.equals(type)) {
                 for (EnumHighCompressorFault fault : EnumHighCompressorFault.values()) {
                     boolean value = Boolean.parseBoolean(BellowsUtil.getDataModelValue(dataService, thingCode, fault.getMetricCode()).orElse(BellowsConstants.FALSE));
                     if (value) {
@@ -294,22 +308,22 @@ public class Compressor {
      * 运行状态变化
      * @param value
      */
-    public void onRunStateChange(String value, String requestId) {
-        runState = Boolean.parseBoolean(value);
+    public void onRunStateChange(boolean value, String requestId, Boolean intelligent) {
+        runState = value;
 
         if (logger.isDebugEnabled()) {
             logger.debug("Compressor: {} get run state signal: {}. RequestId: {}.", thingCode, runState, requestId);
         }
 
-        confirmState();
+        confirmState(intelligent);
     }
 
     /**
      * 加载状态变化
      * @param value
      */
-    public void onLoadStateChange(String value, String requestId) {
-        loadState = Boolean.parseBoolean(value);
+    public void onLoadStateChange(boolean value, String requestId, Boolean intelligent) {
+        loadState = value;
 
         if (logger.isDebugEnabled()) {
             logger.debug("Compressor: {} get load state signal: {}.RequestId: {}", thingCode, runState, requestId);
@@ -335,12 +349,12 @@ public class Compressor {
                         if (logger.isTraceEnabled()) {
                             logger.trace("Compressor: {} in state timer.", thingCode);
                         }
-                        confirmState();
+                        confirmState(intelligent);
                     }
                 }, STATE_WAIT_TIME);
             }
         } else {
-            confirmState();
+            confirmState(intelligent);
         }
     }
 
@@ -349,14 +363,14 @@ public class Compressor {
      * @param value
      * @param requestId
      */
-    public void onErrorStateChange(String value, String requestId) {
-        errorState = Boolean.parseBoolean(value);
+    public void onErrorStateChange(boolean value, String requestId, Boolean intelligent) {
+        errorState = value;
 
         if (logger.isDebugEnabled()) {
             logger.debug("Compressor: {} get error state signal: {}.RequestId: {}", thingCode, runState, requestId);
         }
 
-        confirmState();
+        confirmState(intelligent);
     }
 
     /**
@@ -381,8 +395,8 @@ public class Compressor {
      * 远程、就地状态变化
      * @param value
      */
-    public void onLocalChange(String value, String requestId, boolean intelligent) {
-        local = Boolean.parseBoolean(value);
+    public void onLocalChange(boolean value, String requestId, Boolean intelligent) {
+        local = value;
 
         if (logger.isDebugEnabled()) {
             logger.debug("Compressor: {} get local signal: {}.RequestId: {}.", thingCode, local, requestId);
@@ -390,13 +404,8 @@ public class Compressor {
 
         if (local) {
             turnOffStopTimer();
-        } else if (intelligent) {
+        } else if (Boolean.TRUE.equals(intelligent)) {
             turnOnStopTimer();
-
-            //检查压力变化
-            if (type.equals(TYPE_LOW)) {
-                manager.onPressureStateChange(manager.isIntelligent());
-            }
         }
     }
 
@@ -404,17 +413,9 @@ public class Compressor {
      * 开启stopTimer
      */
     public void turnOnStopTimer() {
-
-        if (TYPE_HIGH.equals(type)) {
+        if (BellowsConstants.CP_TYPE_HIGH.equals(type)) {
             if (logger.isDebugEnabled()) {
                 logger.debug("High press compressor {} cannot turn on stop timer.", thingCode);
-            }
-            return;
-        }
-
-        if (local) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Compressor {} is local, cannot turn on stopTimer.", thingCode);
             }
             return;
         }
@@ -422,6 +423,13 @@ public class Compressor {
         if (!EnumCompressorState.UNLOAD.getState().equals(state)) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Compressor {} is not unload, cannot turn on stopTimer.", thingCode);
+            }
+            return;
+        }
+
+        if (local) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Compressor {} is local, cannot turn on stopTimer.", thingCode);
             }
             return;
         }
@@ -434,6 +442,10 @@ public class Compressor {
                 return;
             }
 
+            if (logger.isDebugEnabled()) {
+                logger.debug("Compressor {} turn on stopTimer.", thingCode);
+            }
+
             stopTimer = new Timer();
             stopTimer.schedule(new TimerTask() {
                 @Override
@@ -443,7 +455,12 @@ public class Compressor {
                     }
                     waitForStateConfirm();
                     if (EnumCompressorState.UNLOAD.getState().equals(state)) {
-                        manager.operateCompressor(thingCode, EnumCompressorOperation.STOP, BellowsConstants.TYPE_AUTO, RequestIdUtil.generateRequestId());
+                        logger.info("Compressor {} unload overtime, starting stop.", thingCode);
+                        try {
+                            operate(EnumCompressorOperation.STOP, BellowsConstants.TYPE_AUTO, RequestIdUtil.generateRequestId());
+                        } catch (SysException e) {
+                            logger.warn(e.getMessage());
+                        }
                     }
                     turnOffStopTimer();
                 }
@@ -470,7 +487,7 @@ public class Compressor {
     /**
      * 确认空压机状态
      */
-    private synchronized void confirmState() {
+    private synchronized void confirmState(Boolean intelligent) {
         String oldState = state;
 
         if (errorState) {
@@ -491,7 +508,7 @@ public class Compressor {
 
 
         if (!state.equals(oldState)) {
-            onStateChange(state, oldState, manager.isIntelligent());
+            onStateChange(state, oldState, intelligent);
         }
 
 
@@ -505,10 +522,13 @@ public class Compressor {
     /**
      * 状态变化
      */
-    private void onStateChange(String postState, String preState, boolean intelligent) {
-        if (EnumCompressorState.UNLOAD.getState().equals(state)) {
+    private void onStateChange(String postState, String preState, Boolean intelligent) {
+        //保存状态日志
+        saveCompressorState(postState, preState);
+
+        if (EnumCompressorState.UNLOAD.getState().equals(state) && BellowsConstants.CP_TYPE_LOW.equals(type)) {
             //卸载状态下开启stopTimer
-            if (!intelligent) {
+            if (!Boolean.TRUE.equals(intelligent)) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Low press intelligent is {},  cannot turn on stop timer.", intelligent);
                 }
@@ -519,9 +539,6 @@ public class Compressor {
             //其他状态下关闭stopTimer
             turnOffStopTimer();
         }
-
-        //保存状态日志
-        manager.saveCompressorState(thingCode, postState, preState);
     }
 
     /**
@@ -548,10 +565,170 @@ public class Compressor {
         synchronized (logLock) {
             if (!logTimerMap.isEmpty()) {
                 logTimerMap.forEach((logId, logTimerTask) ->{
-                    manager.updateLog(logId, thingCode, logTimerTask.requestId);
+                    updateLog(logId, logTimerTask.requestId);
                 });
             }
         }
+    }
+
+
+    /**
+     * 操作空压机
+     * @param operation 操作
+     * @param operationType 手动/自动
+     * @param requestId
+     */
+    public int operate(EnumCompressorOperation operation, String operationType, String requestId) {
+        if (local) {
+            logger.warn("Compressor: {} is local, cannot be operated remotely.RequestId: {}", thingCode, requestId);
+            String error = "空压机" + thingCode + "处于就地模式，无法进行远程操作";
+            saveFullLog(operation, operationType, requestId, error);
+            throw new SysException(error, SysException.EC_UNKNOWN);
+        }
+
+        //组装发送信号
+        DataModel signal = new DataModel();
+        signal.setThingCode(thingCode);
+        signal.setMetricCode(CompressorMetricConstants.CONTROL);
+        signal.setValue(operation.getValue());
+
+        boolean holding = operation.isHolding();
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("RequestId: {} send command: {} to compressor: {}.Operation type is {}", requestId, operation, thingCode, operationType);
+        }
+
+        int count = 0;
+        try {
+            count = cmdControlService.sendPulseCmdBoolByShort(signal, null, null, requestId, operation.getPosition(), CLEAN_PERIOD, holding);
+        } catch (SysException e) {
+            logger.warn(e.getMessage());
+            saveFullLog(operation, operationType, requestId, e.getMessage());
+            throw e;
+        }
+
+        //日志记录
+        saveLog(operation, operationType, requestId);
+
+        return count;
+    }
+
+
+    /**
+     * 保存空压机状态
+     * @param postState 修改后状态
+     * @param preState  修改前状态
+     */
+    public void saveCompressorState(String postState, String preState) {
+        CompressorState state = new CompressorState();
+        state.setPostState(postState);
+        if (preState == null) {
+            //没有修改前状态，从数据库里查询
+            List<CompressorState> list = bellowsMapper.getCompressorState(null, new Date(), Arrays.asList(thingCode),0, 1);
+            if (list == null || list.isEmpty()) {
+                preState = postState;
+            } else if (list.get(0).getPostState().equals(postState)){
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Compressor {} state {} is not changed.", thingCode, postState);
+                }
+                return;
+            } else {
+                preState = list.get(0).getPostState();
+            }
+        }
+        state.setPreState(preState);
+        state.setThingCode(thingCode);
+        state.setTime(new Date());
+
+        bellowsMapper.saveCompressorState(state);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Compressor {} save postState {}, preState {}, id {}.", thingCode, postState, preState, state.getId());
+        }
+    }
+
+
+    /**
+     * 保存日志，等待状态确认
+     * @param operation
+     * @param operationType
+     * @param requestId
+     */
+    private void saveLog(EnumCompressorOperation operation, String operationType, String requestId) {
+        CompressorLog compressorLog = new CompressorLog();
+        compressorLog.setOperation(operation.toString());
+        compressorLog.setOperateTime(new Date());
+        compressorLog.setRequestId(requestId);
+        compressorLog.setThingCode(thingCode);
+        compressorLog.setPreState(state);
+        compressorLog.setOperateType(operationType);
+        bellowsMapper.saveCompressorLog(compressorLog);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Compressor {} save operation log.RequestId: {}.LogId: {}.", thingCode, requestId, compressorLog.getId());
+        }
+
+        //添加日志确认timer
+        addLogWaitTimer(compressorLog.getId(), requestId);
+    }
+
+
+    /**
+     * 保存完整日志
+     * @param operation
+     * @param operationType
+     * @param requestId
+     * @param memo
+     */
+    private void saveFullLog(EnumCompressorOperation operation, String operationType, String requestId, String memo) {
+        //数据刷新
+        refresh(dataService);
+
+        CompressorLog compressorLog = new CompressorLog();
+        compressorLog.setOperation(operation.toString());
+        compressorLog.setOperateTime(new Date());
+        compressorLog.setRequestId(requestId);
+        compressorLog.setThingCode(thingCode);
+        compressorLog.setPreState(state);
+        compressorLog.setOperateType(operationType);
+        compressorLog.setPostState(state);
+        compressorLog.setConfirmTime(new Date());
+        compressorLog.setPressure(pressure);
+        compressorLog.setMemo(memo);
+
+
+        bellowsMapper.saveCompressorLog(compressorLog);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Compressor {} save full operation log.RequestId: {}.LogId: {}.", thingCode, requestId, compressorLog.getId());
+        }
+    }
+
+
+    /**
+     * 更新日志确认状态
+     * @param logId
+     * @param requestId
+     */
+    public void updateLog(Long logId, String requestId) {
+        //等待状态确认
+        waitForStateConfirm();
+
+        refresh(dataService);
+        CompressorLog compressorLog = new CompressorLog();
+        compressorLog.setId(logId);
+        compressorLog.setConfirmTime(new Date());
+        compressorLog.setPostState(state);
+        compressorLog.setPressure(pressure);
+
+        bellowsMapper.updateCompressorLog(compressorLog);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Compressor {} update log {}.RequestId: {}.", thingCode, logId, requestId);
+        }
+
+        //清除日志timerTask
+        removeLogWaitTimer(logId);
     }
 
 
@@ -569,10 +746,6 @@ public class Compressor {
 
     public int getSort() {
         return sort;
-    }
-
-    public CompressorManager getManager() {
-        return manager;
     }
 
     public boolean isLocal() {
@@ -693,7 +866,7 @@ public class Compressor {
 
         @Override
         public void run() {
-            manager.updateLog(id, thingCode, requestId);
+            updateLog(id, requestId);
         }
     }
 }

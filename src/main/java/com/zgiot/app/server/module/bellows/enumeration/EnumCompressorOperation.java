@@ -3,7 +3,7 @@ package com.zgiot.app.server.module.bellows.enumeration;
 /**
  * @author wangwei
  */
-public enum  EnumCompressorOperation {
+public enum EnumCompressorOperation {
 
     /**
      * 启动，脉冲
@@ -24,6 +24,9 @@ public enum  EnumCompressorOperation {
      * 卸载，非脉冲
      */
     UNLOAD(Boolean.TRUE.toString(), 3, true);
+
+
+
 
     private String value;
     private int position;

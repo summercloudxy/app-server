@@ -2,6 +2,8 @@ package com.zgiot.app.server.module.bellows.dao;
 
 import com.zgiot.app.server.module.bellows.pojo.CompressorLog;
 import com.zgiot.app.server.module.bellows.pojo.CompressorState;
+import com.zgiot.app.server.module.bellows.pojo.ValveLog;
+import com.zgiot.app.server.module.bellows.pojo.ValveTeam;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -20,7 +22,7 @@ public interface BellowsMapper {
      * @param paramName
      * @return
      */
-    Double selectParamValue(@Param("thingCode") String thingCode, @Param("paramName") String paramName);
+    Long selectParamValue(@Param("thingCode") String thingCode, @Param("paramName") String paramName);
 
     /**
      * 修改bellows配置
@@ -29,7 +31,7 @@ public interface BellowsMapper {
      * @param paramValue
      */
     void updateParamValue(@Param("thingCode") String thingCode, @Param("paramName") String paramName,
-                                @Param("paramValue") Double paramValue);
+                                @Param("paramValue") Long paramValue);
 
 
     /**
@@ -72,4 +74,87 @@ public interface BellowsMapper {
      */
     List<CompressorState> getCompressorState(@Param("startTime") Date startTime, @Param("endTime") Date endTime, @Param("thingCodes") List<String> thingCodes,
                                              @Param("offset") Integer offset, @Param("count") Integer count);
+
+    /**
+     * 批量插入阀门分组
+     * @param teams
+     */
+    void insertBatchValveTeam(@Param("teams") List<ValveTeam> teams);
+
+    /**
+     * 更新分组exec_time和status
+     * @param team
+     */
+    void updateValveTeam(@Param("team") ValveTeam team);
+
+    /**
+     * 更新某状态下的分组状态
+     * @param newStatus 新状态
+     * @param oldStatus 旧状态
+     */
+    void updateValveTeamByStatus(@Param("newStatus") String newStatus, @Param("oldStatus") String oldStatus);
+
+    /**
+     * 删除某状态的分组
+     * @param status
+     */
+    void deleteValveTeamByStatus(@Param("status") String status);
+
+
+    /**
+     * 获取状态下分组列表
+     * @param status
+     * @return
+     */
+    List<ValveTeam> getValveTeamByStatus(@Param("status") String status);
+
+    /**
+     * 获取将要执行的分组
+     * @param time
+     * @return
+     */
+    ValveTeam getValveTeamToExec(@Param("time") Date time);
+
+    /**
+     * 根据id获取阀门分组
+     * @param id
+     * @return
+     */
+    ValveTeam getValveTeamById(@Param("id") Long id);
+
+    /**
+     * 获取最大分组id
+     * @return
+     */
+    Long getMaxTeamId();
+
+    /**
+     * 根据分组类型计算组数
+     * @param type
+     * @return
+     */
+    Long countValveTeamByType(@Param("type") String type);
+
+
+    /**
+     * 保存阀门日志
+     * @param valveLog
+     */
+    void saveValveLog(@Param("log")ValveLog valveLog);
+
+    /**
+     * 更新阀门日志，确认状态
+     * @param valveLog
+     */
+    void updateValveLog(@Param("log") ValveLog valveLog);
+
+    /**
+     * 查询阀门操作日志
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @param offset    偏移量
+     * @param count 个数
+     * @return
+     */
+    List<ValveLog> getValveLog(@Param("startTime") Date startTime, @Param("endTime") Date endTime, @Param("offset") Integer offset, @Param("count") Integer count);
 }

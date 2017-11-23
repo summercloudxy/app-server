@@ -2,6 +2,7 @@ package com.zgiot.app.server.module.bellows.pressure;
 
 import com.zgiot.app.server.module.bellows.compressor.Compressor;
 import com.zgiot.app.server.service.DataService;
+import com.zgiot.common.constants.BellowsConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +41,8 @@ public class PressureManager {
     @PostConstruct
     public void init() {
         synchronized (this) {
-            map.put(Compressor.TYPE_HIGH, new DeviceGroup(Arrays.asList(HIGH_PRESSURE)));
-            map.put(Compressor.TYPE_LOW, new DeviceGroup(Arrays.asList(LOW_PRESSURE_ONE, LOW_PRESSURE_TWO)));
+            map.put(BellowsConstants.CP_TYPE_HIGH, new DeviceGroup(Arrays.asList(HIGH_PRESSURE)));
+            map.put(BellowsConstants.CP_TYPE_LOW, new DeviceGroup(Arrays.asList(LOW_PRESSURE_ONE, LOW_PRESSURE_TWO)));
         }
     }
 

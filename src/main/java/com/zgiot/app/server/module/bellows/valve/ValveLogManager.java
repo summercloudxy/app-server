@@ -1,0 +1,172 @@
+package com.zgiot.app.server.module.bellows.valve;
+
+import com.zgiot.app.server.module.bellows.dao.BellowsMapper;
+import com.zgiot.app.server.module.bellows.enumeration.EnumValveOperation;
+import com.zgiot.app.server.module.bellows.pojo.ValveLog;
+import com.zgiot.app.server.module.bellows.pressure.PressureManager;
+import com.zgiot.app.server.service.DataService;
+import com.zgiot.common.constants.BellowsConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * @author wangwei
+ */
+public class ValveLogManager {
+
+    private static final Logger logger = LoggerFactory.getLogger(ValveLogManager.class);
+
+    private final BellowsMapper bellowsMapper;
+    private final DataService dataService;
+    private final PressureManager pressureManager;
+
+    private Timer logTimer = new Timer();
+
+    /**
+     * 日志确认等待时间
+     */
+    private static final int LOG_WAIT_TIME = 8000;
+
+    /**
+     * 日志等待timer
+     */
+    private Map<Long, LogTimerTask> logTaskMap = new ConcurrentHashMap<>();
+
+    public ValveLogManager(BellowsMapper bellowsMapper, DataService dataService, PressureManager pressureManager) {
+        this.bellowsMapper = bellowsMapper;
+        this.dataService = dataService;
+        this.pressureManager = pressureManager;
+    }
+
+    /**
+     * 保存日志，等待状态确认
+     * @param valve
+     * @param operation
+     * @param operationType
+     * @param requestId
+     */
+    public void saveLog(Valve valve, EnumValveOperation operation, String operationType, String requestId) {
+        ValveLog valveLog = new ValveLog();
+        valveLog.setOperation(operation.toString());
+        valveLog.setOperateTime(new Date());
+        valveLog.setRequestId(requestId);
+        valveLog.setThingCode(valve.getThingCode());
+        valveLog.setPreState(valve.getState());
+        valveLog.setOperateType(operationType);
+        bellowsMapper.saveValveLog(valveLog);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Valve {} save operation log.RequestId: {}.LogId: {}.", valve.getThingCode(), requestId, valveLog.getId());
+        }
+
+        //添加日志确认timer
+        LogTimerTask task = new LogTimerTask(valveLog.getId(), valve, requestId);
+        logTimer.schedule(task, LOG_WAIT_TIME);
+        logTaskMap.put(valveLog.getId(), task);
+    }
+
+    /**
+     * 保存日志
+     * @param valve
+     * @param operation
+     * @param operationType
+     * @param requestId
+     * @param memo
+     */
+    public void saveFullLog(Valve valve, EnumValveOperation operation, String operationType, String requestId, String memo) {
+        ValveLog valveLog = new ValveLog();
+        valveLog.setOperation(operation.toString());
+        valveLog.setOperateTime(new Date());
+        valveLog.setRequestId(requestId);
+        valveLog.setThingCode(valve.getThingCode());
+        valveLog.setPreState(valve.getState());
+        valveLog.setOperateType(operationType);
+        valveLog.setPostState(valve.getState());
+        valveLog.setConfirmTime(new Date());
+        valveLog.setHighPressure(pressureManager.refreshPressure(BellowsConstants.CP_TYPE_HIGH, dataService, requestId));
+        valveLog.setLowPressure(pressureManager.refreshPressure(BellowsConstants.CP_TYPE_LOW, dataService, requestId));
+        valveLog.setMemo(memo);
+
+
+        bellowsMapper.saveValveLog(valveLog);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Compressor {} save full operation log.RequestId: {}.LogId: {}.", valveLog.getThingCode(), requestId, valveLog.getId());
+        }
+    }
+
+    /**
+     * 更新日志确认状态
+     * @param logId
+     * @param valve
+     * @param requestId
+     */
+    private void updateLog(Long logId, Valve valve, String requestId) {
+        valve.refresh(dataService);
+
+        ValveLog valveLog = new ValveLog();
+        valveLog.setId(logId);
+        valveLog.setConfirmTime(new Date());
+        valveLog.setPostState(valve.getState());
+        valveLog.setHighPressure(pressureManager.refreshPressure(BellowsConstants.CP_TYPE_HIGH, dataService, requestId));
+        valveLog.setLowPressure(pressureManager.refreshPressure(BellowsConstants.CP_TYPE_LOW, dataService, requestId));
+
+        bellowsMapper.updateValveLog(valveLog);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Compressor {} update log {}.RequestId: {}.", valve.getThingCode(), logId, requestId);
+        }
+
+        //清除日志timerTask
+        LogTimerTask task = logTaskMap.get(logId);
+        if (task != null) {
+            task.cancel();
+            logTaskMap.remove(logId);
+        }
+    }
+
+    /**
+     * 获取阀门操作日志
+     * @param startTime
+     * @param endTime
+     * @param page
+     * @param count
+     * @param requestId
+     * @return
+     */
+    public List<ValveLog> getValveLog(Date startTime, Date endTime, Integer page, Integer count, String requestId) {
+        Integer offset = null;
+        if (page != null && count != null) {
+            offset = page * count;
+        }
+
+        return bellowsMapper.getValveLog(startTime, endTime, offset, count);
+    }
+
+
+    /**
+     * 日志确认定时任务
+     */
+    private class LogTimerTask extends TimerTask {
+        Long id;    //日志id
+        Valve valve;    //阀门
+        String requestId;   //请求id
+
+        public LogTimerTask(Long id, Valve valve, String requestId) {
+            this.id = id;
+            this.valve = valve;
+            this.requestId = requestId;
+        }
+
+        @Override
+        public void run() {
+            if (logger.isDebugEnabled()) {
+                logger.debug("In valve log timer.LogId: {}. Valve: {}. RequestId: {}.", id, valve.getThingCode(), requestId);
+            }
+            updateLog(id, valve, requestId);
+        }
+    }
+}

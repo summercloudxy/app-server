@@ -2,10 +2,12 @@ package com.zgiot.app.server.module.bellows.valve.cache;
 
 
 import com.zgiot.app.server.module.bellows.valve.Valve;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Component
 public class ValveCacheImpl implements ValveCache {
 
     private Map<String, Valve> map = new ConcurrentHashMap<>(20);
@@ -22,15 +24,34 @@ public class ValveCacheImpl implements ValveCache {
         return sort(res);
     }
 
+
     @Override
-    public List<Valve> findByTeam(int teamId) {
-        List<Valve> res = new ArrayList<>(map.size());
+    public Set<String> findAllThingCode() {
+        return map.keySet();
+    }
+
+
+    @Override
+    public List<String> findThingCodeByTeam(Long teamId) {
+        List<String> res = new ArrayList<>(map.size());
         map.forEach((key, value) -> {
-            if (teamId == value.getTeamId()) {
+            if (teamId.equals(value.getTeamId())) {
+                res.add(value.getThingCode());
+            }
+        });
+        return res;
+    }
+
+
+    @Override
+    public List<Valve> findByTeam(Long teamId) {
+        List<Valve> res = new ArrayList<>(map.size());
+        map.forEach((key, value)->{
+            if (teamId.equals(value.getTeamId())) {
                 res.add(value);
             }
         });
-        return sort(res);
+        return res;
     }
 
     @Override

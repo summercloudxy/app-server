@@ -28,7 +28,7 @@ public class BellowsDataListener implements DataListener {
     private CompressorManager compressorManager;
 
     static {
-        compressorMetricCode.add(BellowsConstants.METRIC_PRESSURE_STATE);
+        compressorMetricCode.add(CompressorMetricConstants.PRESSURE_STATE);
         compressorMetricCode.add(CompressorMetricConstants.WARN);
         compressorMetricCode.add(CompressorMetricConstants.ERROR);
         compressorMetricCode.add(CompressorMetricConstants.RUN_STATE);

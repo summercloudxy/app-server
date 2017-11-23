@@ -1,133 +1,302 @@
 package com.zgiot.app.server.module.bellows.valve;
 
+import com.alibaba.fastjson.annotation.JSONField;
+import com.zgiot.app.server.module.bellows.dao.BellowsMapper;
+import com.zgiot.app.server.module.bellows.enumeration.EnumValveState;
+import com.zgiot.app.server.module.bellows.util.BellowsUtil;
+import com.zgiot.app.server.service.DataService;
+import com.zgiot.common.constants.BellowsConstants;
+import com.zgiot.common.constants.ValveMetricConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Date;
+
 /**
  * @author wangwei
  */
-public class Valve implements Cloneable {
+public class Valve {
 
-    private static final String PARAM_INTELLIGENT = "intelligent";
-
-    private static final String PARAM_TEAM_ID = "teamId";
+    private static final Logger logger = LoggerFactory.getLogger(Valve.class);
 
 
-    private String thingCode;
+    private final String thingCode;
 
-    private String name;    //显示名称
+    /**
+     * 显示名称
+     */
+    private final String name;
 
-    private int sort;   //排序
+    /**
+     * 排序
+     */
+    @JSONField(serialize = false)
+    private final int sort;
 
-    private int type;  //阀门分类
+    /**
+     * 分类
+     */
+    @JSONField(serialize = false)
+    private final String type;
 
-    private boolean intelligent;    //是否智能操作
+    /**
+     * 介质桶thingCode
+     */
+    @JSONField(serialize = false)
+    private final String bucketThingCode;
 
-    private Integer teamId; //分组号
+    /**
+     * 泵thingCode
+     */
+    @JSONField(serialize = false)
+    private final String pumpThingCode;
 
-    private int closed; //关到位
+    /**
+     * 是否智能操作
+     */
+    private volatile boolean intelligent;
 
-    private int open;   //开到位
+    /**
+     * 分组
+     */
+    @JSONField(serialize = false)
+    private volatile Long teamId;
 
-    private boolean bucketRunning;  //介质桶运行中
+    /**
+     * 关到位
+     */
+    @JSONField(serialize = false)
+    private volatile boolean closed;
 
-    private ValveManager valveManager;
+    /**
+     * 开到位
+     */
+    @JSONField(serialize = false)
+    private volatile boolean open;
+
+    /**
+     * 状态
+     */
+    private volatile String state;
+
+    /**
+     * 智能鼓风状态
+     */
+    private volatile String stage;
+
+    /**
+     * 本组执行时间
+     */
+    private volatile Date execTime;
 
 
-    public Valve() {
 
-    }
 
-    public Valve(String thingCode, int type, ValveManager valveManager) {
+    public Valve(String thingCode, String name, String type, int sort, String bucketThingCode, String pumpThingCode) {
         this.thingCode = thingCode;
+        this.name = name;
         this.type = type;
-        this.valveManager = valveManager;
+        this.sort = sort;
+        this.bucketThingCode = bucketThingCode;
+        this.pumpThingCode = pumpThingCode;
     }
+
+    /**
+     * 初始化
+     * @param mapper
+     * @return
+     */
+    public Valve init(BellowsMapper mapper) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Valve {} start to init.", thingCode);
+        }
+
+        teamId = mapper.selectParamValue(thingCode, BellowsConstants.VALVE_TEAM);
+
+
+        Long intelligent = mapper.selectParamValue(thingCode, BellowsConstants.VALVE_INTELLIGENT);
+        if (intelligent != null) {
+            this.intelligent = (intelligent.intValue() == BellowsConstants.YES);
+        }
+
+        stage = BellowsConstants.BLOW_STAGE_NONE;
+        execTime = null;
+
+        return this;
+    }
+
+
+    /**
+     * 修改智能状态
+     * @param intelligent
+     * @param bellowsMapper
+     * @param requestId
+     * @return true为修改成功，false为不需要修改
+     */
+    public boolean setIntelligent(boolean intelligent, BellowsMapper bellowsMapper, String requestId) {
+        if (intelligent == this.intelligent) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Valve {} intelligent is already {}. RequestId: {}.", thingCode, intelligent, requestId);
+            }
+            return false;
+        }
+        this.intelligent = intelligent;
+
+        long value = (long)BellowsConstants.NO;
+        if (intelligent) {
+            value = (long)BellowsConstants.YES;
+        }
+        bellowsMapper.updateParamValue(thingCode, BellowsConstants.VALVE_INTELLIGENT, value);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Valve {} intelligent is set {}. RequestId: {}.", thingCode, intelligent, requestId);
+        }
+
+        //设置teamId为null
+        setTeamId(null, bellowsMapper, requestId);
+
+        stage = BellowsConstants.BLOW_STAGE_NONE;
+        execTime = null;
+
+        return true;
+    }
+
+    /**
+     * 更新
+     * @param teamId
+     * @param bellowsMapper
+     * @param requestId
+     * @return true为修改成功，false为不需要修改
+     */
+    public boolean setTeamId(Long teamId, BellowsMapper bellowsMapper, String requestId) {
+        Long oldTeamId = this.teamId;
+        //需要更新
+        boolean needUpdate = true;
+
+        if (teamId == null) {
+            if (oldTeamId == null) {
+                needUpdate = false;
+            }
+        } else {
+            if (teamId.equals(oldTeamId)) {
+                needUpdate = false;
+            }
+        }
+
+        if (!needUpdate) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Valve {} team is already {}. RequestId: {}.", thingCode, teamId, requestId);
+            }
+            return false;
+        }
+
+        this.teamId = teamId;
+
+        bellowsMapper.updateParamValue(thingCode, BellowsConstants.VALVE_TEAM, teamId);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Valve {} team is set null. RequestId: {}.", thingCode, requestId);
+        }
+
+        return true;
+    }
+
+    /**
+     * 刷新阀门参数
+     * @param dataService
+     * @return
+     */
+    public synchronized Valve refresh(DataService dataService) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Valve {} refresh.", thingCode);
+        }
+        setOpen(Boolean.parseBoolean(BellowsUtil.getDataModelValue(dataService, thingCode, ValveMetricConstants.STATE_OPEN).orElse(BellowsConstants.FALSE)));
+        setClosed(Boolean.parseBoolean(BellowsUtil.getDataModelValue(dataService, thingCode, ValveMetricConstants.STATE_CLOSE).orElse(BellowsConstants.FALSE)));
+
+        setState(open, closed);
+        return this;
+    }
+
+    /**
+     * 更新状态
+     * @param open
+     * @param closed
+     */
+    private void setState(boolean open, boolean closed) {
+        if (open && !closed) {
+            this.state = EnumValveState.OPEN.getState();
+        } else if (!open && closed) {
+            this.state = EnumValveState.CLOSE.getState();
+        } else {
+            this.state = EnumValveState.UNKNOWN.getState();
+        }
+    }
+
 
     public String getThingCode() {
         return thingCode;
-    }
-
-    public void setThingCode(String thingCode) {
-        this.thingCode = thingCode;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public int getSort() {
         return sort;
     }
 
-    public void setSort(int sort) {
-        this.sort = sort;
-    }
-
-    public int getType() {
+    public String getType() {
         return type;
-    }
-
-    public void setType(int type) {
-        this.type = type;
     }
 
     public boolean isIntelligent() {
         return intelligent;
     }
 
-    public void setIntelligent(boolean intelligent) {
-        this.intelligent = intelligent;
-    }
-
-    public Integer getTeamId() {
+    public Long getTeamId() {
         return teamId;
     }
 
-    public void setTeamId(Integer teamId) {
-        this.teamId = teamId;
-    }
-
-    public int getClosed() {
+    public boolean isClosed() {
         return closed;
     }
 
-    public void setClosed(int closed) {
+    public void setClosed(boolean closed) {
         this.closed = closed;
     }
 
-    public int getOpen() {
+    public boolean isOpen() {
         return open;
     }
 
-    public void setOpen(int open) {
+    public void setOpen(boolean open) {
         this.open = open;
     }
 
-    public boolean isBucketRunning() {
-        return bucketRunning;
+    public String getState() {
+        return state;
     }
 
-    public void setBucketRunning(boolean bucketRunning) {
-        this.bucketRunning = bucketRunning;
+    public String getBucketThingCode() {
+        return bucketThingCode;
     }
 
-    public ValveManager getValveManager() {
-        return valveManager;
+    public String getPumpThingCode() {
+        return pumpThingCode;
     }
 
-    public void setValveManager(ValveManager valveManager) {
-        this.valveManager = valveManager;
+    public String getStage() {
+        return stage;
     }
 
-    @Override
-    public Valve clone() {
-        try {
-            return (Valve) super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
+    public void setStage(String stage) {
+        this.stage = stage;
     }
 
+    public Date getExecTime() {
+        return execTime;
+    }
+
+    public void setExecTime(Date execTime) {
+        this.execTime = execTime;
+    }
 }

@@ -3,6 +3,7 @@ package com.zgiot.app.server.module.bellows.valve.cache;
 import com.zgiot.app.server.module.bellows.valve.Valve;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author wangwei
@@ -15,7 +16,13 @@ public interface ValveCache {
     List<Valve> findAll();
 
 
-    List<Valve> findByTeam(int teamId);
+    Set<String> findAllThingCode();
+
+
+    List<String> findThingCodeByTeam(Long teamId);
+
+
+    List<Valve> findByTeam(Long teamId);
 
 
     void put(String thingCode, Valve valve);

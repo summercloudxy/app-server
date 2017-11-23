@@ -8,6 +8,7 @@ import com.zgiot.app.server.module.alert.AlertListener;
 import com.zgiot.app.server.module.alert.AlertParamJob;
 import com.zgiot.app.server.module.alert.handler.AlertParamHandler;
 import com.zgiot.app.server.module.bellows.BellowsDataListener;
+import com.zgiot.app.server.module.bellows.valve.ValveIntelligentJob;
 import com.zgiot.app.server.module.demo.DemoBusiness;
 import com.zgiot.app.server.module.demo.DemoDataCompleter;
 import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
@@ -96,6 +97,8 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
                 || moduleListConfig.containModule(ModuleListConfig.MODULE_BELLOWS)) {
             processor.addListener(bellowsDataListener);
+            QuartzManager.addJob("checkBlow", ModuleListConfig.MODULE_BELLOWS, "checkBlow",
+                    ModuleListConfig.MODULE_BELLOWS, ValveIntelligentJob.class, "0 * * * * ?");
         }
 
         if (false) {

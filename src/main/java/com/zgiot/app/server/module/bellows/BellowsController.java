@@ -1,11 +1,16 @@
 package com.zgiot.app.server.module.bellows;
 
 import com.alibaba.fastjson.JSON;
-import com.zgiot.app.server.module.bellows.compressor.Compressor;
+import com.zgiot.app.server.module.bellows.compressor.CompressorGroup;
 import com.zgiot.app.server.module.bellows.compressor.CompressorManager;
-import com.zgiot.app.server.module.bellows.pojo.BellowsIndex;
+import com.zgiot.app.server.module.bellows.enumeration.EnumValveOperation;
 import com.zgiot.app.server.module.bellows.pojo.CompressorLog;
 import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorOperation;
+import com.zgiot.app.server.module.bellows.pojo.ValveLog;
+import com.zgiot.app.server.module.bellows.pojo.ValveParam;
+import com.zgiot.app.server.module.bellows.pojo.ValveTimeAndTeam;
+import com.zgiot.app.server.module.bellows.valve.Valve;
+import com.zgiot.app.server.module.bellows.valve.ValveManager;
 import com.zgiot.common.constants.BellowsConstants;
 import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.exceptions.SysException;
@@ -17,10 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
@@ -38,26 +40,31 @@ public class BellowsController {
     @Autowired
     private CompressorManager compressorManager;
 
+    @Autowired
+    private ValveManager valveManager;
+
+
+    private static final String STATE = "state";
+    private static final String OPERATION = "operation";
+
     /**
-     * 获取鼓风首页信息
+     * 获取空压机压力
      * @param request
      * @return
      */
-    @GetMapping(value = "api/bellows")
-    public ResponseEntity<String> getBellowsIndex(HttpServletRequest request) {
+    @GetMapping(value = "api/bellows/pressure")
+    public ResponseEntity<String> getPressure(HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
-        logger.info("RequestId: {} want to get bellows index.", requestId);
 
-        BellowsIndex index = new BellowsIndex();
-        index.setHigh(compressorManager.refreshCompressorGroup(Compressor.TYPE_HIGH, requestId));
-        index.setLow(compressorManager.refreshCompressorGroup(Compressor.TYPE_LOW, requestId));
-        index.setIntelligent(compressorManager.isIntelligent());
+        logger.info("RequestId: {} query compressor pressure.", requestId);
+        Map<String, Double> res = compressorManager.getPressure(requestId);
 
-        return new ResponseEntity<String>(ServerResponse.buildOkJson(index), HttpStatus.OK);
+        return new ResponseEntity<String>(ServerResponse.buildOkJson(res), HttpStatus.OK);
     }
 
+
     /**
-     * 获取空压机详情
+     * 获取空压机组详情
      * @param type
      * @param request
      * @return
@@ -66,52 +73,50 @@ public class BellowsController {
     public ResponseEntity<String> getCompressors(@PathVariable String type, HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
 
-        if (!Compressor.TYPE_HIGH.equals(type) && !Compressor.TYPE_LOW.equals(type)) {
+        if (!BellowsConstants.CP_TYPE_HIGH.equals(type) && !BellowsConstants.CP_TYPE_LOW.equals(type)) {
             if (logger.isDebugEnabled()) {
-                logger.debug("RequestId: {} send a wrong state.", request);
+                logger.debug("RequestId: {} send a wrong type {}.", requestId, type);
             }
             String resJSON = JSON.toJSONString(new ServerResponse("Type must be high or low.Got type: " + type, SysException.EC_UNKNOWN, 0));
             return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
         }
 
-        logger.info("RequestId: {} want to get detail of compressor {}.", requestId, type);
+        logger.info("RequestId: {} query detail of compressor {}.", requestId, type);
 
-        List<Compressor> list = compressorManager.refreshCompressors(type, requestId);
-        return new ResponseEntity<String>(ServerResponse.buildOkJson(list), HttpStatus.OK);
+        CompressorGroup group = compressorManager.refreshGroup(type, requestId);
+        return new ResponseEntity<String>(ServerResponse.buildOkJson(group), HttpStatus.OK);
     }
 
 
     /**
      * 设置低压空压机智能模式
+     * @param type  low/high
      * @param state 0：手动，1：智能
      * @param request
      * @return
      */
-    @PostMapping(value = "api/bellows/compressor/intelligent")
-    public ResponseEntity<String> setLowCompressorIntelligent(Integer state, HttpServletRequest request) {
+    @PostMapping(value = "api/bellows/compressor/{type}/intelligent")
+    public ResponseEntity<String> setLowCompressorIntelligent(@PathVariable("type") String type, Integer state, HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
+
+        if (!BellowsConstants.CP_TYPE_LOW.equals(type)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("RequestId: {} send a wrong type {}.", requestId, type);
+            }
+
+            String resJSON = JSON.toJSONString(new ServerResponse("Type must be low.Got type: " + type, SysException.EC_UNKNOWN, 0));
+            return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
+        }
+
+
         //param validate
-        if (state == null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("RequestId: {} send a bland request", requestId);
-            }
-
-            ServerResponse res = new ServerResponse("Blank request.", SysException.EC_UNKNOWN, 0);
-            String resJSON = JSON.toJSONString(res);
+        String resJSON = checkParam(STATE, state, requestId);
+        if (resJSON != null) {
             return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
         }
 
-        if (state != Compressor.YES && state != Compressor.NO) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("RequestId: {} send a wrong state: {}", requestId, state);
-            }
-            ServerResponse res = new ServerResponse("State must be 1 or 0.Got state :" + state + ".", SysException.EC_UNKNOWN, 0);
-            String resJSON = JSON.toJSONString(res);
-            return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
-        }
-
-        logger.info("RequestId: {} set low press compressor intelligent state: {}", requestId, state);
-        compressorManager.changeLowCompressorIntelligent(state, requestId);
+        logger.info("RequestId: {} set {} press compressor intelligent state: {}", requestId, type, state);
+        compressorManager.changeGroupIntelligent(type, state, requestId);
 
         return new ResponseEntity<>(ServerResponse.buildOkJson(null),
                 HttpStatus.OK);
@@ -128,28 +133,15 @@ public class BellowsController {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
 
         //param validate
-        if (StringUtils.isEmpty(thingCode) || operation == null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("RequestId: {} send a wrong request.ThingCode:{}, operation: {}.", requestId, thingCode, operation);
-            }
-
-            ServerResponse res = new ServerResponse("Wrong request.Got thingCode:" + thingCode + ",operation:" + operation + ".", SysException.EC_UNKNOWN, 0);
-            String resJSON = JSON.toJSONString(res);
-            return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
-        }
-        if (operation != Compressor.YES && operation != Compressor.NO) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("RequestId: {} send a wrong operation: {}", requestId, operation);
-            }
-            ServerResponse res = new ServerResponse("Operation must be 1 or 0.Got operation :" + operation + ".", SysException.EC_UNKNOWN, 0);
-            String resJSON = JSON.toJSONString(res);
+        String resJSON = checkParam(OPERATION, operation, requestId);
+        if (resJSON != null) {
             return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
         }
 
         logger.info("RequestId: {} operate compressor: {} to running: {}", requestId, thingCode, operation);
 
         EnumCompressorOperation opt;
-        if (Compressor.YES == operation) {
+        if (BellowsConstants.YES == operation) {
             opt = EnumCompressorOperation.START;
         } else {
             opt = EnumCompressorOperation.STOP;
@@ -196,4 +188,237 @@ public class BellowsController {
         String json = ServerResponse.buildOkJson(result);
         return new ResponseEntity<String>(json, HttpStatus.OK);
     }
+
+
+    /**
+     * 查询阀门列表
+     * @param request
+     * @return
+     */
+    @GetMapping(value = "api/bellows/valve")
+    public ResponseEntity<String> getValveList(HttpServletRequest request) {
+        String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
+
+        logger.info("RequestId: {} query valve list.", requestId);
+        List<Valve> list = valveManager.refreshValves();
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(list),
+                HttpStatus.OK);
+    }
+
+
+    /**
+     * 查询阀门下次鼓风时间和分组数量
+     * @param request
+     * @return
+     */
+    @GetMapping(value = "api/bellows/valve/time")
+    public ResponseEntity<String> getValveTeamCountAndBlowTime(HttpServletRequest request) {
+        String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
+
+        logger.info("RequestId: {} query valve nextBlowTime and teamCount.", requestId);
+        ValveTimeAndTeam valveTimeAndTeam = new ValveTimeAndTeam(valveManager.getNextBlowTime(), valveManager.getLumpTeamCount(), valveManager.getSlackTeamCount());
+        return new ResponseEntity<String>(ServerResponse.buildOkJson(valveTimeAndTeam),
+                HttpStatus.OK);
+    }
+
+
+    /**
+     * 设置阀门智能模式
+     * @param thingCodes    智能阀门thingCode列表
+     * @param request
+     * @return
+     */
+    @PostMapping(value = "api/bellows/valve/intelligent")
+    public ResponseEntity<String> setValveIntelligent(String[] thingCodes, HttpServletRequest request) {
+        String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
+
+        logger.info("RequestId: {} set valve {} intelligent.", requestId, thingCodes);
+        valveManager.setValveIntelligentBatch(thingCodes, requestId);
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null),
+                HttpStatus.OK);
+    }
+
+    /**
+     * 请求阀门智能参数
+     * @param request
+     * @return
+     */
+    @GetMapping(value = "api/bellows/valve/param")
+    public ResponseEntity<String> getValveParam(HttpServletRequest request) {
+        String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
+
+        logger.info("RequestId: {} query valve param.", requestId);
+
+        ValveParam valveParam = new ValveParam(valveManager.getMaxCount(), valveManager.getRunTime(), valveManager.getWaitTime());
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(valveParam),
+                HttpStatus.OK);
+    }
+
+
+    /**
+     * 设置阀门智能参数
+     * @param requestData
+     * @param request
+     * @return
+     */
+    @PostMapping(value = "api/bellows/valve/param")
+    public ResponseEntity<String> setValveParam(@RequestBody String requestData, HttpServletRequest request) {
+        String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
+
+        if (StringUtils.isEmpty(requestData)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("RequestId: {} send a bland request", requestId);
+            }
+            ServerResponse res = new ServerResponse("Blank request", SysException.EC_UNKNOWN, 0);
+            return new ResponseEntity<>(JSON.toJSONString(res), HttpStatus.BAD_REQUEST);
+        }
+        ValveParam valveParam = JSON.parseObject(requestData, ValveParam.class);
+        if (valveParam.getMaxCount() == null || valveParam.getRunTime() == null || valveParam.getWaitTime() == null) {
+            ServerResponse res = new ServerResponse("Invalid request data.The incoming req body is: `" + requestData + "`", SysException.EC_UNKNOWN, 0);
+            return new ResponseEntity<String>(JSON.toJSONString(res), HttpStatus.BAD_REQUEST);
+        }
+
+        if(valveParam.getMaxCount() < 0) {
+            ServerResponse res = new ServerResponse("Valve max count must be greater than 0.", SysException.EC_UNKNOWN, 0);
+            String resJSON = JSON.toJSONString(res);
+            return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
+        }
+
+        if(valveParam.getRunTime() < 0) {
+            ServerResponse res = new ServerResponse("Valve run time must be greater than 0.", SysException.EC_UNKNOWN, 0);
+            String resJSON = JSON.toJSONString(res);
+            return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
+        }
+
+        if(valveParam.getWaitTime() < 0) {
+            ServerResponse res = new ServerResponse("Valve wait time must be greater than 0.", SysException.EC_UNKNOWN, 0);
+            String resJSON = JSON.toJSONString(res);
+            return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
+        }
+
+        logger.info("RequestId: {} set valve maxCount {}, runTime {}, waitTime {}.", requestId, valveParam.getMaxCount(), valveParam.getRunTime(), valveParam.getWaitTime());
+
+        valveManager.setValveParam(valveParam.getMaxCount(), valveParam.getRunTime(), valveParam.getWaitTime(), requestId);
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null),
+                HttpStatus.OK);
+    }
+
+
+    /**
+     * 阀门手动开/关
+     * @param thingCode 阀门设备号
+     * @param operation 1：运行，0：停止
+     * @return
+     */
+    @PostMapping(value = "api/bellows/valve/operation")
+    public ResponseEntity<String> operationValve(String thingCode, Integer operation, HttpServletRequest request) {
+        String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
+
+        //param validate
+        String resJSON = checkParam(OPERATION, operation, requestId);
+        if (resJSON != null) {
+            return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
+        }
+
+        logger.info("RequestId: {} operate valve: {} to running: {}", requestId, thingCode, operation);
+
+        EnumValveOperation opt;
+        if (BellowsConstants.YES == operation) {
+            opt = EnumValveOperation.OPEN;
+        } else {
+            opt = EnumValveOperation.CLOSE;
+        }
+
+        int count = valveManager.operateValve(thingCode, opt, BellowsConstants.TYPE_MANUAL, requestId);
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(count),
+                HttpStatus.OK);
+    }
+
+
+    /**
+     * 阀门手动批量开/关
+     * @param operation 1：运行，0：停止
+     * @return
+     */
+    @PostMapping(value = "api/bellows/valve/operation/all")
+    public ResponseEntity<String> operationAllValve(Integer operation, HttpServletRequest request) {
+        String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
+
+        //param validate
+        String resJSON = checkParam(OPERATION, operation, requestId);
+        if (resJSON != null) {
+            return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
+        }
+
+        logger.info("RequestId: {} operate valve: {} to running: {}", requestId, operation);
+
+        EnumValveOperation opt;
+        if (BellowsConstants.YES == operation) {
+            opt = EnumValveOperation.OPEN;
+        } else {
+            opt = EnumValveOperation.CLOSE;
+        }
+
+        int count = valveManager.operateValveAll(opt, BellowsConstants.TYPE_MANUAL, requestId);
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(count),
+                HttpStatus.OK);
+    }
+
+
+    /**
+     * 获取阀门日志
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @param page  页数（从0开始）
+     * @param count 每页个数
+     * @return
+     */
+    @GetMapping(value = "api/bellows/valve/log")
+    public ResponseEntity<String> getValveLog(@RequestParam Date startTime, @RequestParam Date endTime, @RequestParam(required = false) Integer page,
+                                                   @RequestParam(required = false) Integer count, HttpServletRequest request) {
+        String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
+        logger.info("RequestId {} query valve log, startTime: {}, endTime: {}, page: {}, count: {}.", requestId, startTime, endTime, page, count);
+
+        List<ValveLog> result = valveManager.getValveLog(startTime, endTime, page, count, requestId);
+        return new ResponseEntity<String>(ServerResponse.buildOkJson(result), HttpStatus.OK);
+    }
+
+
+    /**
+     * 判断智能设置state
+     * @param type  参数类型state/operation
+     * @param value
+     * @param requestId
+     * @return 返回错误信息，Null为正确
+     */
+    private String checkParam(String type, Integer value, String requestId) {
+        if (value == null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("RequestId: {} send a bland request", requestId);
+            }
+
+            ServerResponse res = new ServerResponse("Blank request.", SysException.EC_UNKNOWN, 0);
+            String resJSON = JSON.toJSONString(res);
+            return resJSON;
+        }
+
+        if (value != BellowsConstants.YES && value != BellowsConstants.NO) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("RequestId: {} send a wrong {}: {}", requestId, type, value);
+            }
+            ServerResponse res = new ServerResponse(type + " must be 1 or 0.Got " + type + ":" + value + ".", SysException.EC_UNKNOWN, 0);
+            String resJSON = JSON.toJSONString(res);
+            return resJSON;
+        }
+        return null;
+    }
+
+
+
 }
