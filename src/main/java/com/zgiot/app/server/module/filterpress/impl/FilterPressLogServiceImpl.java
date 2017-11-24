@@ -94,7 +94,7 @@ public class FilterPressLogServiceImpl implements FilterPressLogService {
         List<FilterPressPlateCountBean> filterPressPlateCountBeanList = new ArrayList<>();
         FilterPressPlateCountBean filterPressPlateCountBean = null;
         FilterPressPlateAndTimeBean filterPressPlateAndTimeBean = null;
-        filterPressPlateCountBean = getFilterPressPlateCountBean(filterPressSinglePlateCountBeans.remove(0), isDayShift, currentOrPrior);
+        filterPressPlateCountBean = getFirstFilterPressPlateCountBean(filterPressSinglePlateCountBeans, isDayShift, currentOrPrior);
         filterPressPlateCountBeanList.add(filterPressPlateCountBean);
         for (FilterPressSinglePlateCountBean bean : filterPressSinglePlateCountBeans) {
             boolean isPresent = true;
@@ -121,15 +121,24 @@ public class FilterPressLogServiceImpl implements FilterPressLogService {
         return filterPressPlateCountWrapper;
     }
 
+    private FilterPressPlateCountBean getFirstFilterPressPlateCountBean(List<FilterPressSinglePlateCountBean> filterPressPlateCountBeans,boolean isDayShift,int currentOrPrior){
+        if(filterPressPlateCountBeans == null || (filterPressPlateCountBeans.size() == 0)){
+            return null;
+        }
+        return getFilterPressPlateCountBean(filterPressPlateCountBeans.remove(0), isDayShift, currentOrPrior);
+    }
+
     private List<FilterPressPlateCountBean> createAllFilterPressPlateInfo(List<FilterPressPlateCountBean> filterPressPlateCountBeans, boolean isDayShift, int currentOrPrior) {
         List<FilterPressPlateCountBean> filterPressPlateCountBeanList = new ArrayList<>();
         Set<String> thingCodes = filterPressManager.getAllFilterPressCode();
         for (String thingCode : thingCodes) {
             boolean isFound = false;
-            for (FilterPressPlateCountBean filterPressPlateCountBean : filterPressPlateCountBeans) {
-                if (thingCode.equals(filterPressPlateCountBean.getThingCode())) {
-                    isFound = true;
-                    break;
+            if(filterPressPlateCountBeans.size() > 0 && filterPressPlateCountBeans.get(0) != null){
+                for (FilterPressPlateCountBean filterPressPlateCountBean : filterPressPlateCountBeans) {
+                    if (thingCode.equals(filterPressPlateCountBean.getThingCode())) {
+                        isFound = true;
+                        break;
+                    }
                 }
             }
             if (!isFound) {
