@@ -1,6 +1,7 @@
 package com.zgiot.app.server.module.bellows.compressor;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.zgiot.app.server.module.bellows.dao.BellowsMapper;
 import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorOperation;
 import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorState;
@@ -77,6 +78,7 @@ public class CompressorGroup {
     /**
      * 智能状态（低压空压机有效）
      */
+    @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue)
     private volatile Boolean intelligent;
 
     /**

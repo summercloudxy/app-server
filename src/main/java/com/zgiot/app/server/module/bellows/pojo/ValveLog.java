@@ -1,5 +1,8 @@
 package com.zgiot.app.server.module.bellows.pojo;
 
+import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.serializer.SerializerFeature;
+
 import java.util.Date;
 
 /**
@@ -10,6 +13,7 @@ public class ValveLog {
     /**
      * id
      */
+    @JSONField(serialize = false)
     private Long id;
 
     /**
@@ -40,11 +44,13 @@ public class ValveLog {
     /**
      * 操作后确认状态
      */
+    @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue)
     private String postState;
 
     /**
      * 确认时间
      */
+    @JSONField(serialize = false)
     private Date confirmTime;
 
     /**
@@ -60,11 +66,13 @@ public class ValveLog {
     /**
      * 请求id
      */
+    @JSONField(serialize = false)
     private String requestId;
 
     /**
      * 备注
      */
+    @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue)
     private String memo;
 
     public Long getId() {

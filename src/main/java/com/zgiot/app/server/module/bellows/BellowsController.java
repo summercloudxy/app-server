@@ -25,6 +25,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -131,17 +132,12 @@ public class BellowsController {
      * @param operation true运行 false停止
      * @return
      */
-    @PostMapping(value = "api/bellows/compressor/open")
-    public ResponseEntity<String> operateCompressor(String thingCode, Boolean operation, HttpServletRequest request) {
+    @PostMapping(value = "api/bellows/compressor/{thingCode}/open")
+    public ResponseEntity<String> operateCompressor(@PathVariable("thingCode")String thingCode, Boolean operation, HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
 
         //param validate
-        String resJSON = checkThingCode(thingCode, requestId);
-        if (resJSON != null) {
-            return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
-        }
-
-        resJSON = checkOperation(operation, requestId);
+        String resJSON = checkOperation(operation, requestId);
         if (resJSON != null) {
             return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
         }
@@ -233,13 +229,20 @@ public class BellowsController {
 
     /**
      * 设置阀门智能模式
-     * @param thingCodes    智能阀门thingCode列表
+     * @param requestParam    智能阀门thingCode列表
      * @param request
      * @return
      */
     @PostMapping(value = "api/bellows/valve/intelligent")
-    public ResponseEntity<String> setValveIntelligent(String[] thingCodes, HttpServletRequest request) {
+    public ResponseEntity<String> setValveIntelligent(@RequestBody  String requestParam, HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
+
+        List<String> thingCodes;
+        if (StringUtils.isEmpty(requestId)) {
+            thingCodes = new ArrayList<>();
+        } else {
+            thingCodes = JSON.parseArray(requestParam, String.class);
+        }
 
         logger.info("RequestId: {} set valve {} intelligent.", requestId, thingCodes);
         valveManager.setValveIntelligentBatch(thingCodes, requestId);
@@ -322,17 +325,12 @@ public class BellowsController {
      * @param operation true开 false关
      * @return
      */
-    @PostMapping(value = "api/bellows/valve/open")
-    public ResponseEntity<String> operationValve(String thingCode, Boolean operation, HttpServletRequest request) {
+    @PostMapping(value = "api/bellows/valve/{thingCode}/open")
+    public ResponseEntity<String> operationValve(@PathVariable("thingCode")String thingCode, Boolean operation, HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
 
         //param validate
-        String resJSON = checkThingCode(thingCode, requestId);
-        if (resJSON != null) {
-            return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
-        }
-
-        resJSON = checkOperation(operation, requestId);
+        String resJSON = checkOperation(operation, requestId);
         if (resJSON != null) {
             return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
         }
@@ -402,23 +400,6 @@ public class BellowsController {
         return new ResponseEntity<String>(ServerResponse.buildOkJson(result), HttpStatus.OK);
     }
 
-
-    /**
-     * 判断thingCode为空
-     * @param thingCode
-     * @param requestId
-     * @return 返回错误信息，Null为正确
-     */
-    private String checkThingCode(String thingCode, String requestId) {
-        if (StringUtils.isEmpty(thingCode)) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("RequestId: {} send a blank thingCode.", requestId);
-            }
-            String resJSON = JSON.toJSONString(new ServerResponse("ThingCode cannot be empty.", SysException.EC_UNKNOWN, 0));
-            return resJSON;
-        }
-        return null;
-    }
 
     /**
      * 判断operation为空

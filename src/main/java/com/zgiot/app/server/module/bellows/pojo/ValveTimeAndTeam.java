@@ -1,12 +1,16 @@
 package com.zgiot.app.server.module.bellows.pojo;
 
 
+import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.serializer.SerializerFeature;
+
 /**
  * @author wangwei
  */
 public class ValveTimeAndTeam {
 
-    private long nextBlowTime;
+    @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue)
+    private Long nextBlowTime;
 
     private int lumpCount;
 

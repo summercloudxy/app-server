@@ -1,6 +1,7 @@
 package com.zgiot.app.server.module.bellows.valve;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.zgiot.app.server.module.bellows.dao.BellowsMapper;
 import com.zgiot.app.server.module.bellows.enumeration.EnumValveState;
 import com.zgiot.app.server.module.bellows.util.BellowsUtil;
@@ -87,6 +88,7 @@ public class Valve {
     /**
      * 本组执行时间
      */
+    @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue)
     private volatile Date execTime;
 
 

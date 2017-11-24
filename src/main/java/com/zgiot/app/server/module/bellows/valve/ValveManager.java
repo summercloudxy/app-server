@@ -356,15 +356,15 @@ public class ValveManager {
      * @param thingCodes    智能状态thingCode
      * @param requestId
      */
-    public synchronized void setValveIntelligentBatch(String[] thingCodes, String requestId) {
+    public synchronized void setValveIntelligentBatch(List<String> thingCodes, String requestId) {
         List<String> intelligentCodes;
-        if (thingCodes == null || thingCodes.length == 0) {
+        if (thingCodes == null || thingCodes.isEmpty()) {
             //所有阀门都是手动模式
             intelligentCodes = new ArrayList<>();
             //下次智能鼓风时间为null
             setNextBlowTime(null, requestId);
         } else {
-            intelligentCodes = Arrays.asList(thingCodes);
+            intelligentCodes = thingCodes;
         }
 
         Set<String> all = valveCache.findAllThingCode();

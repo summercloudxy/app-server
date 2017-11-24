@@ -139,7 +139,7 @@
         WHERE id = #{log.id}
     </update>
 
-    <select id="getValveLog" resultType="com.zgiot.app.server.module.bellows.pojo.CompressorLog">
+    <select id="getValveLog" resultType="com.zgiot.app.server.module.bellows.pojo.ValveLog">
         SELECT * FROM tb_bellows_valve_log
         WHERE operate_time &gt;= #{startTime}
         AND operate_time &lt;= #{endTime}
