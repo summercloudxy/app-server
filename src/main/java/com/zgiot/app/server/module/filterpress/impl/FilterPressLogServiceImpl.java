@@ -129,6 +129,9 @@ public class FilterPressLogServiceImpl implements FilterPressLogService {
     }
 
     private List<FilterPressPlateCountBean> createAllFilterPressPlateInfo(List<FilterPressPlateCountBean> filterPressPlateCountBeans, boolean isDayShift, int currentOrPrior) {
+       if(filterPressPlateCountBeans.contains(null)){
+           filterPressPlateCountBeans.remove(null);
+       }
         List<FilterPressPlateCountBean> filterPressPlateCountBeanList = new ArrayList<>();
         Set<String> thingCodes = filterPressManager.getAllFilterPressCode();
         for (String thingCode : thingCodes) {
