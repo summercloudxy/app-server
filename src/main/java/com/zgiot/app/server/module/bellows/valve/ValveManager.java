@@ -264,6 +264,13 @@ public class ValveManager {
                 }
             }
 
+            List<ValveTeam> executedTeams = bellowsMapper.getValveTeamByStatus(BellowsConstants.VALVE_STATUS_EXECUTED);
+            if (CollectionUtils.isEmpty(executedTeams)) {
+                for (int i=0,length=executedTeams.size();i<length;i++) {
+                    setValveStageAndExecTime(executedTeams.get(i).getId(), BellowsConstants.BLOW_STAGE_WAIT, null);
+                }
+            }
+
             if (runTime == 0 || maxCount == 0) {
                 //不需要下次鼓风
                 nextBlowTime = null;
@@ -833,7 +840,7 @@ public class ValveManager {
         team.setExecTime(null);
         bellowsMapper.updateValveTeam(team);
 
-        setValveStageAndExecTime(team.getId(), BellowsConstants.BLOW_STAGE_NONE, null);
+        setValveStageAndExecTime(team.getId(), BellowsConstants.BLOW_STAGE_WAIT, null);
 
         if (team.getNextId() == null) {
             //没有下一组，重新开始计算
