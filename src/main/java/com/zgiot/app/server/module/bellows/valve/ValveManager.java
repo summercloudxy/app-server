@@ -521,18 +521,6 @@ public class ValveManager {
         //刷新状态
         valve.refresh(dataService);
 
-        //阀门状态判断
-        if (!validateValveState(valve, operation, dataService)) {
-            logger.info("Valve {} is already {}. RequestId: {}.", thingCode, operation.toString(), requestId);
-            String error;
-            if (operation.equals(EnumValveOperation.OPEN)) {
-                error = valve.getName() + "已处于开启状态";
-            } else {
-                error = valve.getName() + "已处于关闭状态";
-            }
-            valveLogManager.saveFullLog(valve, operation, operationType, requestId, error);
-            throw new SysException(error, SysException.EC_UNKNOWN);
-        }
 
         //介质桶状态判断
         if (!validateBucket(valve, dataService, speedLimit)) {
@@ -570,25 +558,6 @@ public class ValveManager {
         return responseData.getOkCount();
     }
 
-    /**
-     * 验证阀门状态
-     * @param valve
-     * @param operation
-     * @param dataService
-     * @return
-     */
-    private boolean validateValveState(Valve valve, EnumValveOperation operation, DataService dataService) {
-        valve.refresh(dataService);
-
-        //异或操作，不同返回true
-        if (EnumValveOperation.OPEN.equals(operation) && EnumValveState.OPEN.getState().equals(valve.getState())) {
-            return false;
-        } else if (EnumValveOperation.CLOSE.equals(operation) && EnumValveState.CLOSE.getState().equals(valve.getState())) {
-            return false;
-        } else {
-            return true;
-        }
-    }
 
     /**
      * 验证介质桶状态
@@ -662,10 +631,6 @@ public class ValveManager {
         int okCount = 0;
         List<Valve> valves = valveCache.findAll();
         for (Valve valve : valves) {
-            if (!validateValveState(valve, operation, dataService)) {
-                //操作与阀门状态相同，不进行操作
-                continue;
-            }
             int count = 0;
             try {
                 count = operateValve(valve.getThingCode(), operation, operationType, requestId);
