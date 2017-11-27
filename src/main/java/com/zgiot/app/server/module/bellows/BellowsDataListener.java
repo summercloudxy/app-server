@@ -28,7 +28,6 @@ public class BellowsDataListener implements DataListener {
     private CompressorManager compressorManager;
 
     static {
-        compressorMetricCode.add(CompressorMetricConstants.PRESSURE_STATE);
         compressorMetricCode.add(CompressorMetricConstants.WARN);
         compressorMetricCode.add(CompressorMetricConstants.ERROR);
         compressorMetricCode.add(CompressorMetricConstants.RUN_STATE);
@@ -41,10 +40,15 @@ public class BellowsDataListener implements DataListener {
         if (logger.isTraceEnabled()) {
             logger.trace("received data from data engine: {}", dataModel);
         }
-        if (compressorMetricCode.contains(dataModel.getMetricCode())) {
+        //检查thingCode是否存在
+        String thingCode = dataModel.getThingCode();
+        String metricCode = dataModel.getMetricCode();
+        if (BellowsConstants.PRESSURE_THING_CODE.equals(thingCode) && CompressorMetricConstants.PRESSURE_STATE.equals(metricCode)) {
+            //压力状态变化
+            handleCompressorPressureState(dataModel);
+        } else if (compressorManager.containCompressor(thingCode) && compressorMetricCode.contains(metricCode)) {
+            //空压机状态变化
             handleCompressorData(dataModel);
-        } else if (valveMetricCode.contains(dataModel.getMetricCode())) {
-            handleValveData(dataModel);
         }
     }
 
@@ -58,8 +62,7 @@ public class BellowsDataListener implements DataListener {
         compressorManager.onDataSourceChange(dataModel);
     }
 
-
-    private void handleValveData(DataModel dataModel) {
-
+    private void handleCompressorPressureState(DataModel dataModel) {
+        compressorManager.onPressureStateChange(dataModel);
     }
 }

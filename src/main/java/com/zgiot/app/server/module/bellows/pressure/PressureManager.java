@@ -21,28 +21,22 @@ public class PressureManager {
 
     private static final Logger logger = LoggerFactory.getLogger(PressureManager.class);
 
-    /**
-     * 低压管道压力检测1
-     */
-    private static final String LOW_PRESSURE_ONE = "2333";
-    /**
-     * 低压管道压力检测2
-     */
-    private static final String LOW_PRESSURE_TWO = "2334";
-    /**
-     * 高压管道压力检测
-     */
-    private static final String HIGH_PRESSURE = "2335";
-
 
     private Map<String, DeviceGroup> map = new HashMap<>();
+
+
+    private volatile boolean initial;
 
 
     @PostConstruct
     public void init() {
         synchronized (this) {
-            map.put(BellowsConstants.CP_TYPE_HIGH, new DeviceGroup(Arrays.asList(HIGH_PRESSURE)));
-            map.put(BellowsConstants.CP_TYPE_LOW, new DeviceGroup(Arrays.asList(LOW_PRESSURE_ONE, LOW_PRESSURE_TWO)));
+            if (initial) {
+                return;
+            }
+            map.put(BellowsConstants.CP_TYPE_HIGH, new DeviceGroup(Arrays.asList("2335")));
+            map.put(BellowsConstants.CP_TYPE_LOW, new DeviceGroup(Arrays.asList("2333", "2334")));
+            initial = true;
         }
     }
 
@@ -53,7 +47,12 @@ public class PressureManager {
      */
     public double refreshPressure(String type, DataService dataService, String requestId) {
         synchronized (this) {
-
+            if (!initial) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Pressure manager is not initial, start to init.");
+                }
+                init();
+            }
         }
         DeviceGroup group = map.get(type);
         if (type == null) {

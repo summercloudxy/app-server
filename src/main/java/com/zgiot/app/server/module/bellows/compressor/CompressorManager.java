@@ -34,6 +34,8 @@ public class CompressorManager {
 
     private Object cacheLock = new Object();
 
+    private volatile boolean initial = false;
+
 
     @Autowired
     private CompressorCache compressorCache;
@@ -62,6 +64,10 @@ public class CompressorManager {
     public void init() {
         //初始化空压机缓存
         synchronized (cacheLock) {
+            if (initial) {
+                return;
+            }
+
             compressorCache.put("2510",
                     new Compressor("2510", "2510", BellowsConstants.CP_TYPE_LOW, 0, dataService, pressureManager, cmdControlService, bellowsMapper)
                             .initState());
@@ -83,6 +89,8 @@ public class CompressorManager {
 
             high = new CompressorGroup(compressorCache.findByType(BellowsConstants.CP_TYPE_HIGH), BellowsConstants.CP_TYPE_HIGH, pressureManager, dataService, bellowsMapper).init();
             low = new CompressorGroup(compressorCache.findByType(BellowsConstants.CP_TYPE_LOW), BellowsConstants.CP_TYPE_LOW, pressureManager, dataService, bellowsMapper).init();
+
+            initial = true;
         }
     }
 
@@ -107,69 +115,40 @@ public class CompressorManager {
         }
 
         String metricCode = data.getMetricCode();
-        Compressor compressor;
-        CompressorGroup group;
+        Compressor compressor = getCompressorFromCache(data.getThingCode());
+        CompressorGroup group = getGroupByType(compressor.getType());
 
         switch (metricCode) {
             case CompressorMetricConstants.RUN_STATE:
-                compressor = getCompressorFromCache(data.getThingCode());
-                if (compressor == null) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Compressor {} not found.RequestId: {}.", data.getThingCode(), requestId);
-                    }
-                    return;
-                }
-                group = getGroupByType(compressor.getType());
                 group.onRunStateChange(compressor, data.getValue(), requestId);
                 break;
             case CompressorMetricConstants.LOAD_STATE:
-                compressor = getCompressorFromCache(data.getThingCode());
-                if (compressor == null) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Compressor {} not found.RequestId: {}.", data.getThingCode(), requestId);
-                    }
-                    return;
-                }
-                group = getGroupByType(compressor.getType());
                 group.onLoadStateChange(compressor, data.getValue(), requestId);
                 break;
             case CompressorMetricConstants.WARN:
             case CompressorMetricConstants.ERROR:
-                compressor = getCompressorFromCache(data.getThingCode());
-                if (compressor == null) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Compressor {} not found.RequestId: {}.", data.getThingCode(), requestId);
-                    }
-                    return;
-                }
-                group = getGroupByType(compressor.getType());
                 group.onErrorStateChange(compressor, data.getValue(), requestId);
                 break;
             case CompressorMetricConstants.LOCAL:
-                compressor = getCompressorFromCache(data.getThingCode());
-                if (compressor == null) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Compressor {} not found.RequestId: {}.", data.getThingCode(), requestId);
-                    }
-                    return;
-                }
-                group = getGroupByType(compressor.getType());
                 group.onLocalChange(compressor, data.getValue(), requestId);
-                break;
-            case CompressorMetricConstants.PRESSURE_STATE:
-                if (!data.getThingCode().equals(BellowsConstants.PRESSURE_THING_CODE)) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Pressure device code {} is wrong.RequestId: {}.", data.getThingCode(), requestId);
-                    }
-                    return;
-                }
-                low.setPressureState(Double.parseDouble(data.getValue()), requestId);
                 break;
             default:
                 logger.warn("Got wrong metric code: {}.RequestId: {}.", metricCode, requestId);
         }
     }
 
+    /**
+     * 压力状态变化
+     * @param data
+     */
+    public void onPressureStateChange(DataModel data) {
+        String requestId = RequestIdUtil.generateRequestId();
+        if (logger.isTraceEnabled()) {
+            logger.trace("Got data: {}.RequestId: {}.", data, requestId);
+        }
+
+        low.setPressureState(Double.parseDouble(data.getValue()), requestId);
+    }
 
 
 
@@ -340,12 +319,35 @@ public class CompressorManager {
      * @return
      */
     private Compressor getCompressorFromCache(String thingCode) {
-        synchronized (cacheLock) {
-            //等待空压机缓存初始化
-        }
+        checkInit();
+
         Compressor compressor = compressorCache.findByThingCode(thingCode);
         return compressor;
     }
 
+    /**
+     * 检测thingCode是否存在
+     * @param thingCode
+     * @return
+     */
+    public boolean containCompressor(String thingCode) {
+        checkInit();
 
+        if (compressorCache.findByThingCode(thingCode) == null) {
+            return false;
+        }
+        return true;
+    }
+
+    private void checkInit() {
+        synchronized (cacheLock) {
+            //等待空压机缓存初始化
+            if (!initial) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Compressor manager is not initial, start to init.");
+                }
+                init();
+            }
+        }
+    }
 }

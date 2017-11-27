@@ -104,6 +104,8 @@ public class ValveManager {
     private volatile int slackTeamCount;
 
 
+    private volatile boolean initial = false;
+
 
     @PostConstruct
     public void init() {
@@ -112,6 +114,10 @@ public class ValveManager {
         }
         //缓存初始化
         synchronized (cacheLock) {
+            if (initial) {
+                return;
+            }
+
             int sort = 0;
 
             valveCache.put("2321.GF-1",
@@ -144,6 +150,8 @@ public class ValveManager {
                     new Valve("2382.GF-1", "再混2382.GF1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2382", "2385").init(bellowsMapper));
             valveCache.put("2414.GF-1",
                     new Valve("2414.GF-1", "再合2414.GF1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2414", "2417").init(bellowsMapper));
+
+            initial = true;
         }
 
         if (logger.isTraceEnabled()) {
@@ -1035,7 +1043,13 @@ public class ValveManager {
      */
     private Valve getValveFromCache(String thingCode) {
         synchronized (cacheLock) {
-            //等待空压机缓存初始化
+            //等待阀门缓存初始化
+            if (!initial) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Valve manager is not initial, start to init.");
+                }
+                init();
+            }
         }
         Valve valve = valveCache.findByThingCode(thingCode);
         return valve;

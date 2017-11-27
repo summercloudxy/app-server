@@ -693,7 +693,7 @@ public class Compressor {
         compressorLog.setOperateType(operationType);
         compressorLog.setPostState(state);
         compressorLog.setConfirmTime(new Date());
-        compressorLog.setPressure(pressure);
+        compressorLog.setPressure(pressureManager.refreshPressure(type, dataService, requestId));
         compressorLog.setMemo(memo);
 
 
@@ -719,7 +719,7 @@ public class Compressor {
         compressorLog.setId(logId);
         compressorLog.setConfirmTime(new Date());
         compressorLog.setPostState(state);
-        compressorLog.setPressure(pressure);
+        compressorLog.setPressure(pressureManager.refreshPressure(type, dataService, requestId));
 
         bellowsMapper.updateCompressorLog(compressorLog);
 
