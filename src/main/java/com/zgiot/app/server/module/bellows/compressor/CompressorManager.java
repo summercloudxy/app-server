@@ -227,7 +227,7 @@ public class CompressorManager {
         //数据库查询
         List<CompressorState> list = bellowsMapper.getCompressorState(startTime, endTime, thingCodes, null, null);
 
-        if (list != null && !list.isEmpty()) {
+        if (!CollectionUtils.isEmpty(list)) {
             //遍历compressorStateList
             for (CompressorState state : list) {
                 String thingCode = state.getThingCode();
@@ -269,7 +269,7 @@ public class CompressorManager {
                 }
 
                 List<CompressorState> lastState = bellowsMapper.getCompressorState(null, startTime, Arrays.asList(thingCode), 0, 1);
-                if (lastState != null && !lastState.isEmpty()) {
+                if (!CollectionUtils.isEmpty(lastState)) {
                     result.get(thingCode).put(lastState.get(0).getPostState(), endTime.getTime() - startTime.getTime());
                 } else {
                     if (logger.isDebugEnabled()) {

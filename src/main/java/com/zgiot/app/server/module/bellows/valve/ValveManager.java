@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
@@ -222,9 +223,9 @@ public class ValveManager {
     private void initNextBlowTimeAndStage() {
         List<ValveTeam> runningTeams = bellowsMapper.getValveTeamByStatus(BellowsConstants.VALVE_STATUS_RUNNING);
         List<ValveTeam> waitTeams = bellowsMapper.getValveTeamByStatus(BellowsConstants.VALVE_STATUS_WAIT);
-        if (runningTeams == null || runningTeams.isEmpty()) {
+        if (CollectionUtils.isEmpty(runningTeams)) {
             //没有正在鼓风的
-            if (waitTeams == null || waitTeams.isEmpty()) {
+            if (CollectionUtils.isEmpty(waitTeams)) {
                 //不处于智能鼓风状态
                 stage = BellowsConstants.BLOW_STAGE_NONE;
                 nextBlowTime = null;
@@ -366,7 +367,7 @@ public class ValveManager {
      */
     public synchronized void setValveIntelligentBatch(List<String> thingCodes, String requestId) {
         List<String> intelligentCodes;
-        if (thingCodes == null || thingCodes.isEmpty()) {
+        if (CollectionUtils.isEmpty(thingCodes)) {
             //所有阀门都是手动模式
             intelligentCodes = new ArrayList<>();
             //下次智能鼓风时间为null
@@ -621,7 +622,7 @@ public class ValveManager {
      * @return
      */
     public synchronized int operateValveBatch(List<String> thingCodes, EnumValveOperation operation, String operationType, String requestId) {
-        if (thingCodes == null || thingCodes.isEmpty()) {
+        if (CollectionUtils.isEmpty(thingCodes)) {
             logger.warn("Valve thing code list is empty. RequestId: {}.", requestId);
             return 0;
         }
@@ -728,7 +729,7 @@ public class ValveManager {
         maxTeamId = teamResult.getMaxTeamId();
 
         List<ValveTeam> teams = teamResult.getTeams();
-        if (teams == null || teams.isEmpty()) {
+        if (CollectionUtils.isEmpty(teams)) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Valve team list is empty, cannot start loop. RequestId: {}.", requestId);
             }
@@ -777,7 +778,7 @@ public class ValveManager {
 
         //修改执行时间
         List<ValveTeam> teams = bellowsMapper.getValveTeamByStatus(BellowsConstants.VALVE_STATUS_WAIT);
-        if (teams == null || teams.isEmpty()) {
+        if (CollectionUtils.isEmpty(teams)) {
             logger.warn("Old valve loop is empty. RequestId: {}.", requestId);
             return;
         }

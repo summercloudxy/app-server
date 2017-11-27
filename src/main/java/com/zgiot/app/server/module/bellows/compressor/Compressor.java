@@ -19,6 +19,7 @@ import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.DataModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -625,7 +626,7 @@ public class Compressor {
         if (preState == null) {
             //没有修改前状态，从数据库里查询
             List<CompressorState> list = bellowsMapper.getCompressorState(null, new Date(), Arrays.asList(thingCode),0, 1);
-            if (list == null || list.isEmpty()) {
+            if (CollectionUtils.isEmpty(list)) {
                 preState = postState;
             } else if (list.get(0).getPostState().equals(postState)){
                 if (logger.isDebugEnabled()) {
