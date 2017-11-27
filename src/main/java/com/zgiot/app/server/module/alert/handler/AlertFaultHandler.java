@@ -63,7 +63,7 @@ public class AlertFaultHandler implements AlertHandler {
         Short level;
         if (metricCodeSet.contains(MetricCodes.STATE)) {
             try {
-                Thread.sleep(10);
+                Thread.sleep(100);
             } catch (Exception e) {
                 logger.debug("thread is interrupted");
             }
