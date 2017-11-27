@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
@@ -297,6 +298,25 @@ public class CompressorManager {
             logger.warn("Compressor group type {} is wrong. RequestId: {}.", type, requestId);
             return null;
         }
+    }
+
+    /**
+     * 获取空压机错误列表
+     * @param requestId
+     * @return
+     */
+    public List<String> getErrors(String requestId) {
+        List<String> res = new ArrayList<>();
+        high.refresh(dataService, requestId);
+        if (!CollectionUtils.isEmpty(high.getErrors())) {
+            res.addAll(high.getErrors());
+        }
+
+        low.refresh(dataService, requestId);
+        if (!CollectionUtils.isEmpty(low.getErrors())) {
+            res.addAll(low.getErrors());
+        }
+        return res;
     }
 
     /**

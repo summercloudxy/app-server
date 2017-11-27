@@ -193,6 +193,20 @@ public class BellowsController {
         return new ResponseEntity<String>(json, HttpStatus.OK);
     }
 
+    /**
+     * 获取空压机错误列表
+     * @param request
+     * @return
+     */
+    @GetMapping(value = "api/bellows/compressor/error")
+    public ResponseEntity<String> getCompressorError(HttpServletRequest request) {
+        String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
+        logger.info("RequestId {} query compressor error list.", requestId);
+
+        List<String> errorList = compressorManager.getErrors(requestId);
+        return new ResponseEntity<String>(ServerResponse.buildOkJson(errorList), HttpStatus.OK);
+    }
+
 
     /**
      * 查询阀门列表
