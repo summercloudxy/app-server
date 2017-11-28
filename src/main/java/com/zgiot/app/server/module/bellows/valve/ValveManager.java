@@ -54,6 +54,11 @@ public class ValveManager {
     private Object cacheLock = new Object();
 
     /**
+     * 日志确认等待时间
+     */
+    private static final int LOG_WAIT_TIME = 3000;
+
+    /**
      * 泵频率限制
      */
     private double speedLimit;
@@ -122,35 +127,35 @@ public class ValveManager {
             int sort = 0;
 
             valveCache.put("2321.GF-1",
-                    new Valve("2321.GF-1", "块合2321.GF1", BellowsConstants.VALVE_TYPE_LUMP, sort++, "2321", "2322").init(bellowsMapper));
+                    new Valve("2321.GF-1", "块合2321.GF-1", BellowsConstants.VALVE_TYPE_LUMP, sort++, "2321", "2322").init(bellowsMapper));
             valveCache.put("2321.GF-2",
-                    new Valve("2321.GF-2", "块合2321.GF2", BellowsConstants.VALVE_TYPE_LUMP, sort++, "2321", "2323").init(bellowsMapper));
+                    new Valve("2321.GF-2", "块合2321.GF-2", BellowsConstants.VALVE_TYPE_LUMP, sort++, "2321", "2323").init(bellowsMapper));
 
             valveCache.put("2333.GF-1",
-                    new Valve("2333.GF-1", "主混2333.GF1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2333", "2336").init(bellowsMapper));
+                    new Valve("2333.GF-1", "主混2333.GF-1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2333", "2336").init(bellowsMapper));
             valveCache.put("2358.GF-1",
-                    new Valve("2358.GF-1", "主合2358.GF1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2358", "2361").init(bellowsMapper));
+                    new Valve("2358.GF-1", "主合2358.GF-1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2358", "2361").init(bellowsMapper));
             valveCache.put("2334.GF-1",
-                    new Valve("2334.GF-1", "主混2334.GF1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2334", "2337").init(bellowsMapper));
+                    new Valve("2334.GF-1", "主混2334.GF-1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2334", "2337").init(bellowsMapper));
             valveCache.put("2359.GF-1",
-                    new Valve("2359.GF-1", "主合2359.GF1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2359", "2362").init(bellowsMapper));
+                    new Valve("2359.GF-1", "主合2359.GF-1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2359", "2362").init(bellowsMapper));
             valveCache.put("2335.GF-1",
-                    new Valve("2335.GF-1", "主混2335.GF1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2335", "2338").init(bellowsMapper));
+                    new Valve("2335.GF-1", "主混2335.GF-1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2335", "2338").init(bellowsMapper));
             valveCache.put("2360.GF-1",
-                    new Valve("2360.GF-1", "主合2360.GF1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2360", "2360").init(bellowsMapper));
+                    new Valve("2360.GF-1", "主合2360.GF-1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2360", "2360").init(bellowsMapper));
 
             valveCache.put("2380.GF-1",
-                    new Valve("2380.GF-1", "再混2380.GF1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2380", "2383").init(bellowsMapper));
+                    new Valve("2380.GF-1", "再混2380.GF-1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2380", "2383").init(bellowsMapper));
             valveCache.put("2412.GF-1",
-                    new Valve("2412.GF-1", "再合2412.GF1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2412", "2415").init(bellowsMapper));
+                    new Valve("2412.GF-1", "再合2412.GF-1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2412", "2415").init(bellowsMapper));
             valveCache.put("2381.GF-1",
-                    new Valve("2381.GF-1", "再混2381.GF1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2381", "2384").init(bellowsMapper));
+                    new Valve("2381.GF-1", "再混2381.GF-1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2381", "2384").init(bellowsMapper));
             valveCache.put("2413.GF-1",
-                    new Valve("2413.GF-1", "再合2413.GF1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2413", "2416").init(bellowsMapper));
+                    new Valve("2413.GF-1", "再合2413.GF-1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2413", "2416").init(bellowsMapper));
             valveCache.put("2382.GF-1",
-                    new Valve("2382.GF-1", "再混2382.GF1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2382", "2385").init(bellowsMapper));
+                    new Valve("2382.GF-1", "再混2382.GF-1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2382", "2385").init(bellowsMapper));
             valveCache.put("2414.GF-1",
-                    new Valve("2414.GF-1", "再合2414.GF1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2414", "2417").init(bellowsMapper));
+                    new Valve("2414.GF-1", "再合2414.GF-1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2414", "2417").init(bellowsMapper));
 
             initial = true;
         }
@@ -267,7 +272,7 @@ public class ValveManager {
             List<ValveTeam> executedTeams = bellowsMapper.getValveTeamByStatus(BellowsConstants.VALVE_STATUS_EXECUTED);
             if (CollectionUtils.isEmpty(executedTeams)) {
                 for (int i=0,length=executedTeams.size();i<length;i++) {
-                    setValveStageAndExecTime(executedTeams.get(i).getId(), BellowsConstants.BLOW_STAGE_WAIT, null);
+                    setValveStageAndExecTime(executedTeams.get(i).getId(), BellowsConstants.BLOW_STATE_FINISH, null);
                 }
             }
 
@@ -339,7 +344,7 @@ public class ValveManager {
     /**
      * 判断执行时间是否已超过
      * @param execTime
-     * @return
+     * @return 较新的时间
      */
     private Date checkExecOutTime(Date execTime) {
         Date now = new Date();
@@ -508,32 +513,32 @@ public class ValveManager {
      * @param thingCode
      * @param operation
      * @param operationType
+     * @param synchronous 是否同步等待
      * @param requestId
      * @return
      */
-    public int operateValve(String thingCode, EnumValveOperation operation, String operationType, String requestId) {
+    public Valve operateValve(String thingCode, EnumValveOperation operation, String operationType, boolean synchronous, String requestId) {
         Valve valve = getValveFromCache(thingCode);
         if (valve == null) {
             logger.warn("Valve: {} not found. RequestId: {}", thingCode, requestId);
             throw new SysException("阀门" + thingCode + "不存在", SysException.EC_UNKNOWN);
         }
 
-        if (valve.isIntelligent() && BellowsConstants.TYPE_MANUAL.equals(operationType)) {
-            logger.info("Valve {} in intelligent mode, cannot be operated manually.", thingCode, requestId);
-            String error = "智能模式下无法手动操作";
-            valveLogManager.saveFullLog(valve, operation, operationType, requestId, error);
-            throw new SysException(error, SysException.EC_UNKNOWN);
-        }
-
         //刷新状态
         valve.refresh(dataService);
 
+        if (valve.isIntelligent() && BellowsConstants.TYPE_MANUAL.equals(operationType)) {
+            logger.info("Valve {} in intelligent mode, cannot be operated manually.", thingCode, requestId);
+            String error = "智能模式下无法手动操作";
+            valveLogManager.saveLog(valve, operation, operationType, 0, error, requestId);
+            throw new SysException(error, SysException.EC_UNKNOWN);
+        }
 
         //介质桶状态判断
         if (!validateBucket(valve, dataService, speedLimit)) {
             logger.info("Valve {} bucket state is open. RequestId: {}.", thingCode, requestId);
             String error = valve.getName() + "介质桶处于开启状态，无法操作";
-            valveLogManager.saveFullLog(valve, operation, operationType, requestId, error);
+            valveLogManager.saveLog(valve, operation, operationType, 0, error, requestId);
             throw new SysException(error, SysException.EC_UNKNOWN);
         }
 
@@ -555,14 +560,26 @@ public class ValveManager {
             }
         } catch (SysException e) {
             logger.warn(e.getMessage());
-            valveLogManager.saveFullLog(valve, operation, operationType, requestId, e.getMessage());
+            valveLogManager.saveLog(valve, operation, operationType, 0, e.getMessage(), requestId);
             throw e;
         }
 
         //保存日志
-        valveLogManager.saveLog(valve, operation, operationType, requestId);
+        if (synchronous) {
+            //同步等待
+            Long logId = valveLogManager.saveLog(valve, operation, operationType, 0, null, requestId);
+            try {
+                Thread.sleep(LOG_WAIT_TIME);
+            } catch (InterruptedException e) {
+                logger.warn(e.getMessage());
+            }
+            valveLogManager.updateLog(logId, valve, requestId);
+        } else {
+            //异步使用timer
+            valveLogManager.saveLog(valve, operation, operationType, LOG_WAIT_TIME, null, requestId);
+        }
 
-        return responseData.getOkCount();
+        return valve;
     }
 
 
@@ -597,29 +614,25 @@ public class ValveManager {
      * @param requestId
      * @return
      */
-    public synchronized int operateValveBatch(List<String> thingCodes, EnumValveOperation operation, String operationType, String requestId) {
+    public synchronized void operateValveBatch(List<String> thingCodes, EnumValveOperation operation, String operationType, String requestId) {
         if (CollectionUtils.isEmpty(thingCodes)) {
             logger.warn("Valve thing code list is empty. RequestId: {}.", requestId);
-            return 0;
+            return;
         }
 
         if (logger.isDebugEnabled()) {
             logger.debug("RequestId: {} send command: {} to valve: {}.Operation type is {}", requestId, operation, thingCodes, operationType);
         }
 
-        int okCount = 0;
         for (String thingCode : thingCodes) {
-            int count = 0;
             try {
-                count = operateValve(thingCode, operation, operationType, requestId);
+                operateValve(thingCode, operation, operationType, false, requestId);
             } catch (SysException e) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Valve {} operate fail. RequestId: {}.", thingCode, requestId);
                 }
             }
-            okCount += count;
         }
-        return okCount;
     }
 
 
@@ -628,27 +641,38 @@ public class ValveManager {
      * @param operation
      * @param operationType
      * @param requestId
-     * @return
+     * @return 阀门列表
      */
-    public synchronized int operateValveAll(EnumValveOperation operation, String operationType, String requestId) {
+    public synchronized List<Valve> operateValveAll(EnumValveOperation operation, String operationType, String requestId) {
         if (logger.isDebugEnabled()) {
             logger.debug("RequestId: {} send command: {} to all valves.Operation type is {}", requestId, operation, operationType);
         }
 
-        int okCount = 0;
         List<Valve> valves = valveCache.findAll();
         for (Valve valve : valves) {
-            int count = 0;
+            if (valve.isIntelligent()) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Valve {} is intelligent. RequestId: {}.", valve.getThingCode(), requestId);
+                }
+                continue;
+            }
             try {
-                count = operateValve(valve.getThingCode(), operation, operationType, requestId);
+                operateValve(valve.getThingCode(), operation, operationType, false, requestId);
             } catch (SysException e) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Valve {} operate fail. RequestId: {}.", valve.getThingCode(), requestId);
                 }
             }
-            okCount += count;
         }
-        return okCount;
+
+        //等待状态更新
+        try {
+            Thread.sleep(LOG_WAIT_TIME);
+        } catch (InterruptedException e) {
+            logger.warn(e.getMessage());
+        }
+
+        return refreshValves();
     }
 
 
@@ -840,7 +864,7 @@ public class ValveManager {
         team.setExecTime(null);
         bellowsMapper.updateValveTeam(team);
 
-        setValveStageAndExecTime(team.getId(), BellowsConstants.BLOW_STAGE_WAIT, null);
+        setValveStageAndExecTime(team.getId(), BellowsConstants.BLOW_STATE_FINISH, null);
 
         if (team.getNextId() == null) {
             //没有下一组，重新开始计算

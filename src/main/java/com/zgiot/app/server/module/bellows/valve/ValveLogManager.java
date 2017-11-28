@@ -25,10 +25,6 @@ public class ValveLogManager {
 
     private Timer logTimer = new Timer();
 
-    /**
-     * 日志确认等待时间
-     */
-    private static final int LOG_WAIT_TIME = 8000;
 
     /**
      * 日志等待timer
@@ -46,37 +42,11 @@ public class ValveLogManager {
      * @param valve
      * @param operation
      * @param operationType
+     * @param timeout 日志确认时间（毫秒），0为不需要确认
      * @param requestId
+     * @return logId
      */
-    public void saveLog(Valve valve, EnumValveOperation operation, String operationType, String requestId) {
-        ValveLog valveLog = new ValveLog();
-        valveLog.setOperation(operation.toString());
-        valveLog.setOperateTime(new Date());
-        valveLog.setRequestId(requestId);
-        valveLog.setThingCode(valve.getThingCode());
-        valveLog.setPreState(valve.getState());
-        valveLog.setOperateType(operationType);
-        bellowsMapper.saveValveLog(valveLog);
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("Valve {} save operation log.RequestId: {}.LogId: {}.", valve.getThingCode(), requestId, valveLog.getId());
-        }
-
-        //添加日志确认timer
-        LogTimerTask task = new LogTimerTask(valveLog.getId(), valve, requestId);
-        logTimer.schedule(task, LOG_WAIT_TIME);
-        logTaskMap.put(valveLog.getId(), task);
-    }
-
-    /**
-     * 保存日志
-     * @param valve
-     * @param operation
-     * @param operationType
-     * @param requestId
-     * @param memo
-     */
-    public void saveFullLog(Valve valve, EnumValveOperation operation, String operationType, String requestId, String memo) {
+    public Long saveLog(Valve valve, EnumValveOperation operation, String operationType, int timeout, String memo, String requestId) {
         ValveLog valveLog = new ValveLog();
         valveLog.setOperation(operation.toString());
         valveLog.setOperateTime(new Date());
@@ -90,13 +60,26 @@ public class ValveLogManager {
         valveLog.setLowPressure(pressureManager.refreshPressure(BellowsConstants.CP_TYPE_LOW, dataService, requestId));
         valveLog.setMemo(memo);
 
-
         bellowsMapper.saveValveLog(valveLog);
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Compressor {} save full operation log.RequestId: {}.LogId: {}.", valveLog.getThingCode(), requestId, valveLog.getId());
+            logger.debug("Valve {} save operation log.RequestId: {}.LogId: {}.", valve.getThingCode(), requestId, valveLog.getId());
         }
+
+        //添加日志确认timer
+        if (timeout > 0) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Valve log start timer. RequestId: {}.", requestId);
+            }
+
+            LogTimerTask task = new LogTimerTask(valveLog.getId(), valve, requestId);
+            logTimer.schedule(task, timeout);
+            logTaskMap.put(valveLog.getId(), task);
+        }
+
+        return valveLog.getId();
     }
+
 
     /**
      * 更新日志确认状态
@@ -104,7 +87,7 @@ public class ValveLogManager {
      * @param valve
      * @param requestId
      */
-    private void updateLog(Long logId, Valve valve, String requestId) {
+    public void updateLog(Long logId, Valve valve, String requestId) {
         valve.refresh(dataService);
 
         ValveLog valveLog = new ValveLog();

@@ -358,9 +358,9 @@ public class BellowsController {
             opt = EnumValveOperation.CLOSE;
         }
 
-        int count = valveManager.operateValve(thingCode, opt, BellowsConstants.TYPE_MANUAL, requestId);
+        Valve valve = valveManager.operateValve(thingCode, opt, BellowsConstants.TYPE_MANUAL, true, requestId);
 
-        return new ResponseEntity<>(ServerResponse.buildOkJson(count),
+        return new ResponseEntity<>(ServerResponse.buildOkJson(valve),
                 HttpStatus.OK);
     }
 
@@ -389,9 +389,9 @@ public class BellowsController {
             opt = EnumValveOperation.CLOSE;
         }
 
-        int count = valveManager.operateValveAll(opt, BellowsConstants.TYPE_MANUAL, requestId);
+        List<Valve> res = valveManager.operateValveAll(opt, BellowsConstants.TYPE_MANUAL, requestId);
 
-        return new ResponseEntity<>(ServerResponse.buildOkJson(count),
+        return new ResponseEntity<>(ServerResponse.buildOkJson(res),
                 HttpStatus.OK);
     }
 
