@@ -5,6 +5,7 @@ import com.zgiot.app.server.module.alert.handler.AlertFaultHandler;
 import com.zgiot.app.server.module.alert.handler.AlertParamHandler;
 import com.zgiot.app.server.module.alert.handler.AlertProtectHandler;
 import com.zgiot.common.constants.AlertConstants;
+import com.zgiot.common.constants.MetricCodes;
 import com.zgiot.common.pojo.DataModel;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,9 @@ public class AlertListener implements DataListener {
                     break;
             }
 
+        }
+        if (MetricCodes.STATE.equals(dataModel.getMetricCode())) {
+            faultHandler.checkCache(dataModel);
         }
 
     }

@@ -3,9 +3,11 @@ package com.zgiot.app.server.config;
 import com.zgiot.app.server.dataprocessor.CompleterDataListener;
 import com.zgiot.app.server.dataprocessor.DataProcessor;
 import com.zgiot.app.server.dataprocessor.impl.CacheUpdater;
+import com.zgiot.app.server.module.alert.AlertFaultJob;
 import com.zgiot.app.server.module.alert.AlertHistoryJob;
 import com.zgiot.app.server.module.alert.AlertListener;
 import com.zgiot.app.server.module.alert.AlertParamJob;
+import com.zgiot.app.server.module.alert.handler.AlertFaultHandler;
 import com.zgiot.app.server.module.alert.handler.AlertParamHandler;
 import com.zgiot.app.server.module.demo.DemoBusiness;
 import com.zgiot.app.server.module.demo.DemoDataCompleter;
@@ -40,11 +42,15 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
     @Autowired
     private AlertListener alertListener;
     @Autowired
-    ModuleListConfig moduleListConfig;
+    private ModuleListConfig moduleListConfig;
     @Autowired
-    AlertParamHandler alertParamHandler;
+    private AlertParamHandler alertParamHandler;
     @Autowired
-    HistoryDataPersistDaemon historyDataPersistDaemon;
+    private AlertFaultHandler alertFaultHandler;
+    @Autowired
+    private HistoryDataPersistDaemon historyDataPersistDaemon;
+
+    private static final int FAULT_SCAN_RATE = 20;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -86,6 +92,12 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
                     });
             QuartzManager.addJob("clearHistory", ModuleListConfig.MODULE_ALERT, "clearHistory",
                     ModuleListConfig.MODULE_ALERT, AlertHistoryJob.class, "0 0 0 * * ?");
+            QuartzManager.addJobWithInterval("checkFault", ModuleListConfig.MODULE_ALERT, "checkFault",
+                    ModuleListConfig.MODULE_ALERT, AlertFaultJob.class, FAULT_SCAN_RATE, new JobDataMap() {
+                        {
+                            put("handler", alertFaultHandler);
+                        }
+                    });
         }
 
         if (false) {
