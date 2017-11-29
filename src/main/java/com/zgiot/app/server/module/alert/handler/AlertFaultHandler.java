@@ -123,7 +123,7 @@ public class AlertFaultHandler implements AlertHandler {
     private Short getLevelWithOutState(String thingCode) {
         Set<String> metricCodeSet = thingService.findMetricsOfThing(thingCode);
         if (!metricCodeSet.contains(MetricCodes.STATE)) {
-            return AlertConstants.LEVEL_10;
+            return AlertConstants.LEVEL_20;
         }
         return null;
     }
