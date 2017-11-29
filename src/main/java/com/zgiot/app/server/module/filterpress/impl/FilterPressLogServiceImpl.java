@@ -182,16 +182,16 @@ public class FilterPressLogServiceImpl implements FilterPressLogService {
         Optional<DataModelWrapper> team2Wrapper = null;
         Optional<DataModelWrapper> team3Wrapper = null;
 
-        team1Wrapper = dataService.getData(filterPressNum, FilterPressMetricConstants.T1_CHOOSE);
-        team2Wrapper = dataService.getData(filterPressNum, FilterPressMetricConstants.T2_CHOOSE);
-        team3Wrapper = dataService.getData(filterPressNum, FilterPressMetricConstants.T3_CHOOSE);
-        if (team1Wrapper.isPresent() && (String.valueOf(FilterPressLogConstants.T1_CHOOSE_VALUE).equals(team1Wrapper.get().getPreValue()))) {
+        team1Wrapper = dataService.getData(filterPressNum, FilterPressMetricConstants.T1_RCD);
+        team2Wrapper = dataService.getData(filterPressNum, FilterPressMetricConstants.T2_RCD);
+        team3Wrapper = dataService.getData(filterPressNum, FilterPressMetricConstants.T3_RCD);
+        if (team1Wrapper.isPresent() && (Boolean.TRUE.toString().equals(team1Wrapper.get().getValue()))) {
             return FilterPressLogConstants.TEAM1;
         }
-        if (team2Wrapper.isPresent() && (String.valueOf(FilterPressLogConstants.T2_CHOOSE_VALUE).equals(team2Wrapper.get().getPreValue()))) {
+        if (team2Wrapper.isPresent() && (Boolean.TRUE.toString().equals(team2Wrapper.get().getValue()))) {
             return FilterPressLogConstants.TEAM2;
         }
-        if (team3Wrapper.isPresent() && (String.valueOf(FilterPressLogConstants.T3_CHOOSE_VALUE).equals(team3Wrapper.get().getPreValue()))) {
+        if (team3Wrapper.isPresent() && (Boolean.TRUE.toString().equals(team3Wrapper.get().getValue()))) {
             return FilterPressLogConstants.TEAM3;
         }
         return 0;
