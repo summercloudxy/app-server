@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationContext;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.TriggerBuilder.newTrigger;
+import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 
 /**
  * Quartz调度管理器
@@ -16,9 +17,9 @@ import static org.quartz.TriggerBuilder.newTrigger;
  */
 public class QuartzManager {
 
-
     /**
      * 添加一个定时任务
+     * 
      * @param jobName
      * @param jobGroup
      * @param triggerName
@@ -45,12 +46,33 @@ public class QuartzManager {
         }
     }
 
-    public static void addJob(String jobName, String jobGroup, String triggerName, String triggerGroup,
-                              @SuppressWarnings("rawtypes") Class cls, String cronExpression,JobDataMap jobDataMap) {
+    public static void addJobWithInterval(String jobName, String jobGroup, String triggerName, String triggerGroup,
+            Class cls, Integer interval, JobDataMap jobDataMap) {
         try {
             ApplicationContext context = ApplicationContextListener.getApplicationContext();
             StdScheduler scheduler = (StdScheduler) context.getBean("quartzScheduler");
             JobDetail jobDetail = newJob().setJobData(jobDataMap).withIdentity(JobKey.jobKey(jobName, jobGroup)).ofType(cls).build();
+            // 触发器
+            SimpleTrigger trigger = newTrigger().withIdentity(TriggerKey.triggerKey(triggerName, triggerGroup))
+                    .withSchedule(simpleSchedule().withIntervalInMilliseconds(interval).repeatForever()).build();
+            scheduler.scheduleJob(jobDetail, trigger);
+            // 启动
+            if (!scheduler.isShutdown()) {
+                scheduler.start();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public static void addJob(String jobName, String jobGroup, String triggerName, String triggerGroup,
+            @SuppressWarnings("rawtypes") Class cls, String cronExpression, JobDataMap jobDataMap) {
+        try {
+            ApplicationContext context = ApplicationContextListener.getApplicationContext();
+            StdScheduler scheduler = (StdScheduler) context.getBean("quartzScheduler");
+            JobDetail jobDetail =
+                    newJob().setJobData(jobDataMap).withIdentity(JobKey.jobKey(jobName, jobGroup)).ofType(cls).build();
             // 触发器
             CronTrigger trigger = newTrigger().withIdentity(TriggerKey.triggerKey(triggerName, triggerGroup))
                     .withSchedule(cronSchedule(cronExpression)).build();
@@ -63,8 +85,6 @@ public class QuartzManager {
             throw new RuntimeException(e);
         }
     }
-
-
 
     /**
      * 添加定时任务
@@ -83,13 +103,14 @@ public class QuartzManager {
         addJob(jobName, null, jobName, null, jobClass, time);
     }
 
-
-    public static void addJob(String jobName, @SuppressWarnings("rawtypes") Class jobClass, String time,JobDataMap jobDataMap) {
-        addJob(jobName, null, jobName, null, jobClass, time,jobDataMap);
+    public static void addJob(String jobName, @SuppressWarnings("rawtypes") Class jobClass, String time,
+            JobDataMap jobDataMap) {
+        addJob(jobName, null, jobName, null, jobClass, time, jobDataMap);
     }
 
     /**
      * 修改一个任务的触发时间
+     * 
      * @param jobName
      * @param time
      */
@@ -116,6 +137,7 @@ public class QuartzManager {
 
     /**
      * 修改一个任务的触发时间
+     * 
      * @param triggerName
      * @param triggerGroupName
      * @param time
@@ -143,6 +165,7 @@ public class QuartzManager {
 
     /**
      * 移除一个任务
+     * 
      * @param jobName
      */
     public static void removeJob(String jobName) {
@@ -157,9 +180,9 @@ public class QuartzManager {
         }
     }
 
-
     /**
      * 移除一个任务
+     * 
      * @param jobName
      * @param jobGroupName
      * @param triggerName
@@ -179,6 +202,7 @@ public class QuartzManager {
 
     /**
      * 启动所有定时任务
+     * 
      * @param sched
      */
     public static void startJobs(Scheduler sched) {
@@ -191,6 +215,7 @@ public class QuartzManager {
 
     /**
      * 关闭所有定时任务
+     * 
      * @param sched
      */
     public static void shutdownJobs(Scheduler sched) {
