@@ -152,16 +152,22 @@ public class FilterPressManager {
         if (FilterPressMetricConstants.FEED_ASUM.equals(metricCode)) {
             processFeedAssumption(data);
         }
-        if (FilterPressMetricConstants.T1_CHOOSE.equals(metricCode)
-                || FilterPressMetricConstants.T2_CHOOSE.equals(metricCode)
-                || FilterPressMetricConstants.T3_CHOOSE.equals(metricCode)) {
-            int teamChoose = Integer.valueOf(data.getValue());
-            if((FilterPressLogConstants.T1_CHOOSE_VALUE & teamChoose) != 0){
-                getFilterPress(thingCode).setProducingTeam(FilterPressLogConstants.TEAM1);
-            }else if((FilterPressLogConstants.T2_CHOOSE_VALUE & teamChoose) != 0){
-                getFilterPress(thingCode).setProducingTeam(FilterPressLogConstants.TEAM2);
-            }else if((FilterPressLogConstants.T3_CHOOSE_VALUE & teamChoose) != 0){
-                getFilterPress(thingCode).setProducingTeam(FilterPressLogConstants.TEAM3);
+        if (FilterPressMetricConstants.T1_RCD.equals(metricCode)
+                || FilterPressMetricConstants.T2_RCD.equals(metricCode)
+                || FilterPressMetricConstants.T3_RCD.equals(metricCode)) {
+            if (Boolean.TRUE.toString().equals(data.getValue())) {
+                switch (metricCode) {
+                    case FilterPressMetricConstants.T1_RCD:
+                        getFilterPress(thingCode).setProducingTeam(FilterPressLogConstants.TEAM1);
+                        break;
+                    case FilterPressMetricConstants.T2_RCD:
+                        getFilterPress(thingCode).setProducingTeam(FilterPressLogConstants.TEAM2);
+                        break;
+                    case FilterPressMetricConstants.T3_RCD:
+                        getFilterPress(thingCode).setProducingTeam(FilterPressLogConstants.TEAM3);
+                        break;
+                    default:
+                }
             }
         }
         if (FilterPressMetricConstants.T1_COUNT.equals(metricCode)
