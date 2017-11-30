@@ -1,6 +1,5 @@
 package com.zgiot.app.server.module.alert.handler;
 
-import com.sun.org.apache.regexp.internal.RE;
 import com.zgiot.app.server.module.alert.AlertManager;
 import com.zgiot.app.server.module.alert.pojo.AlertData;
 import com.zgiot.app.server.service.DataService;
@@ -14,10 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import sun.awt.windows.WToolkit;
 
-import java.lang.reflect.MalformedParameterizedTypeException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
