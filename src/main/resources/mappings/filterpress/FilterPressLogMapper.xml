@@ -10,12 +10,13 @@
         <result column="unload_duration" property="unloadDuration"/>
         <result column="feed_state" property="feedState"/>
         <result column="unload_state" property="unloadState"/>
-        <result column="statistic_log_plate_count" property="statisticLogPlateCount"/>
-        <result column="statistic_log_total_plate_count" property="statisticLogTotalPlateCount"/>
+        <result column="plate_count" property="plateCount"/>
+        <result column="total_plate_count" property="totalPlateCount"/>
         <result column="waiting_time" property="waitDuration"/>
         <result column="proceeding_time" property="proceedingDuration"/>
         <result column="save_time" property="saveTime"/>
         <result column="is_day_shift" property="isDayShift"/>
+        <result column="plate_start_time" property="plateStartTime"/>
     </resultMap>
 
     <resultMap id="filterPressPlateInfo" type="com.zgiot.app.server.module.filterpress.pojo.FilterPressSinglePlateCountBean">
@@ -46,14 +47,14 @@
     </resultMap>
 
     <insert id="insertFilterPressLog" parameterType="com.zgiot.app.server.module.filterpress.FilterPressLogBean">
-        insert into tb_filterpress_log(thing_code,feed_start_time,feed_duration,feed_current,unload_start_time,unload_duration,feed_state,plate_count,statistic_log_plate_count,waiting_time,proceeding_time,team,save_time,unload_state,total_plate_count,statistic_log_total_plate_count,plate_start_time,is_day_shift,period) value(#{thingCode},#{feedStartTime},#{feedDuration},#{feedCurrent},#{unloadTime},#{unloadDuration},#{feedState},#{plateCount},#{statisticLogPlateCount},#{waitDuration},#{proceedingDuration},#{team},#{saveTime},#{unloadState},#{totalPlateCount},#{statisticLogTotalPlateCount},#{plateStartTime},#{isDayShift},#{period})
+        insert into tb_filterpress_log(thing_code,feed_start_time,feed_duration,feed_current,unload_start_time,unload_duration,feed_state,plate_count,waiting_time,proceeding_time,team,save_time,unload_state,total_plate_count,plate_start_time,is_day_shift,period) value(#{thingCode},#{feedStartTime},#{feedDuration},#{feedCurrent},#{unloadTime},#{unloadDuration},#{feedState},#{plateCount},#{waitDuration},#{proceedingDuration},#{team},#{saveTime},#{unloadState},#{totalPlateCount},#{plateStartTime},#{isDayShift},#{period})
     </insert>
 
     <select id="queryLogByDate" resultMap="filterPressLog">
         SELECT thing_code,feed_start_time,feed_duration,feed_current,
                 unload_start_time,unload_duration,feed_state,unload_state,
-                statistic_log_plate_count,statistic_log_total_plate_count,
-                waiting_time,proceeding_time,save_time,is_day_shift
+                plate_count,total_plate_count,
+                waiting_time,proceeding_time,save_time,is_day_shift,plate_start_time
                 FROM `tb_filterpress_log`
                 where save_time>str_to_date(#{startTime},'%Y-%m-%d %H:%i:%s')
                 and save_time &lt;str_to_date(#{endTime},'%Y-%m-%d %H:%i:%s')
