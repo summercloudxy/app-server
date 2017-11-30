@@ -15,8 +15,6 @@ public class FilterPressLogBean {
     private boolean unloadState;
     private int plateCount;
     private int totalPlateCount;
-    private int statisticLogPlateCount;
-    private int statisticLogTotalPlateCount;
     private long waitDuration;
     private long proceedingDuration;
     private int team;
@@ -65,14 +63,6 @@ public class FilterPressLogBean {
         return totalPlateCount;
     }
 
-    public int getStatisticLogPlateCount() {
-        return statisticLogPlateCount;
-    }
-
-    public int getStatisticLogTotalPlateCount() {
-        return statisticLogTotalPlateCount;
-    }
-
     public long getWaitDuration() {
         return waitDuration;
     }
@@ -91,10 +81,6 @@ public class FilterPressLogBean {
 
     public Date getPlateStartTime() {
         return plateStartTime;
-    }
-
-    public boolean isDayShift() {
-        return isDayShift;
     }
 
     public int getPeriod() {
@@ -141,14 +127,6 @@ public class FilterPressLogBean {
         this.totalPlateCount = totalPlateCount;
     }
 
-    public void setStatisticLogPlateCount(int statisticLogPlateCount) {
-        this.statisticLogPlateCount = statisticLogPlateCount;
-    }
-
-    public void setStatisticLogTotalPlateCount(int statisticLogTotalPlateCount) {
-        this.statisticLogTotalPlateCount = statisticLogTotalPlateCount;
-    }
-
     public void setWaitDuration(long waitDuration) {
         this.waitDuration = waitDuration;
     }
@@ -167,6 +145,10 @@ public class FilterPressLogBean {
 
     public void setPlateStartTime(Date plateStartTime) {
         this.plateStartTime = plateStartTime;
+    }
+
+    public boolean isDayShift() {
+        return isDayShift;
     }
 
     public void setDayShift(boolean dayShift) {
@@ -199,8 +181,6 @@ public class FilterPressLogBean {
         unloadState = false;
         plateCount = 0;
         totalPlateCount = 0;
-        statisticLogPlateCount = 0;
-        statisticLogTotalPlateCount = 0;
         waitDuration = 0;
         proceedingDuration = 0;
         team =  0;
