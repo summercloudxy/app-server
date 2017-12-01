@@ -94,6 +94,9 @@ public class FilterPressManager {
         filterPressStage.put(FilterPressMetricConstants.RO_HOLD_PRESS,"");
         filterPressStage.put(FilterPressMetricConstants.RO_CYCLE,"");
         filterPressStage.put(FilterPressMetricConstants.LOCAL,"");
+        filterPressStage.put(FilterPressMetricConstants.T1_COUNT,"");
+        filterPressStage.put(FilterPressMetricConstants.T2_COUNT,"");
+        filterPressStage.put(FilterPressMetricConstants.T3_COUNT,"");
     }
 
     @PostConstruct
@@ -152,38 +155,27 @@ public class FilterPressManager {
         if (FilterPressMetricConstants.FEED_ASUM.equals(metricCode)) {
             processFeedAssumption(data);
         }
-        if (FilterPressMetricConstants.T1_CHOOSE.equals(metricCode)
-                || FilterPressMetricConstants.T2_CHOOSE.equals(metricCode)
-                || FilterPressMetricConstants.T3_CHOOSE.equals(metricCode)) {
-            int teamChoose = Integer.valueOf(data.getValue());
-            if((FilterPressLogConstants.T1_CHOOSE_VALUE & teamChoose) != 0){
-                getFilterPress(thingCode).setProducingTeam(FilterPressLogConstants.TEAM1);
-            }else if((FilterPressLogConstants.T2_CHOOSE_VALUE & teamChoose) != 0){
-                getFilterPress(thingCode).setProducingTeam(FilterPressLogConstants.TEAM2);
-            }else if((FilterPressLogConstants.T3_CHOOSE_VALUE & teamChoose) != 0){
-                getFilterPress(thingCode).setProducingTeam(FilterPressLogConstants.TEAM3);
+        if (FilterPressMetricConstants.T1_RCD.equals(metricCode)
+                || FilterPressMetricConstants.T2_RCD.equals(metricCode)
+                || FilterPressMetricConstants.T3_RCD.equals(metricCode)) {
+            if (Boolean.TRUE.toString().equals(data.getValue())) {
+                switch (metricCode) {
+                    case FilterPressMetricConstants.T1_RCD:
+                        getFilterPress(thingCode).setProducingTeam(FilterPressLogConstants.TEAM1);
+                        break;
+                    case FilterPressMetricConstants.T2_RCD:
+                        getFilterPress(thingCode).setProducingTeam(FilterPressLogConstants.TEAM2);
+                        break;
+                    case FilterPressMetricConstants.T3_RCD:
+                        getFilterPress(thingCode).setProducingTeam(FilterPressLogConstants.TEAM3);
+                        break;
+                    default:
+                }
             }
-        }
-        if (FilterPressMetricConstants.T1_COUNT.equals(metricCode)
-                || FilterPressMetricConstants.T2_COUNT.equals(metricCode)
-                || FilterPressMetricConstants.T3_COUNT.equals(metricCode)) {
-            switch (metricCode) {
-                case FilterPressMetricConstants.T1_COUNT:
-                    getFilterPress(thingCode).updatePlateCount(1, Integer.valueOf(data.getValue()));
-                    break;
-                case FilterPressMetricConstants.T2_COUNT:
-                    getFilterPress(thingCode).updatePlateCount(2, Integer.valueOf(data.getValue()));
-                    break;
-                case FilterPressMetricConstants.T3_COUNT:
-                    getFilterPress(thingCode).updatePlateCount(3, Integer.valueOf(data.getValue()));
-                    break;
-                default:
-            }
-            calculatePlateAndSave();
         }
     }
 
-    private void calculatePlateAndSave() {
+    public void calculatePlateAndSave() {
         int total = 0;
         for (Map.Entry<String, FilterPress> entry : deviceHolder.entrySet()) {
             String code = entry.getKey();
@@ -247,6 +239,21 @@ public class FilterPressManager {
         FilterPress filterPress = getFilterPress(thingCode);
         Boolean isRunning = Boolean.FALSE;
         switch (metricCode) { // 回调各阶段
+            case FilterPressMetricConstants.T1_COUNT:
+                if(Integer.valueOf(metricCodeValue) > 0){
+                    filterPress.teamCount(FilterPressMetricConstants.T1_COUNT,metricCodeValue);
+                }
+                break;
+            case FilterPressMetricConstants.T2_COUNT:
+                if(Integer.valueOf(metricCodeValue) > 0){
+                    filterPress.teamCount(FilterPressMetricConstants.T2_COUNT,metricCodeValue);
+                }
+                break;
+            case FilterPressMetricConstants.T3_COUNT:
+                if(Integer.valueOf(metricCodeValue) > 0){
+                    filterPress.teamCount(FilterPressMetricConstants.T3_COUNT,metricCodeValue);
+                }
+                break;
             case FilterPressMetricConstants.LOCAL:
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onLocal();
