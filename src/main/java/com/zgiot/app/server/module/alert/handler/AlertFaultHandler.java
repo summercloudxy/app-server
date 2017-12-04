@@ -71,6 +71,9 @@ public class AlertFaultHandler implements AlertHandler {
             if (dataModels != null && dataModels.size() != 0) {
                 for (DataModel dataModel : dataModels) {
                     Short alertLevel = getAlertLevel(stateModel.getPreValue());
+                    logger.debug("设备{}生成{}等级为{}的报警，状态点于故障点之后返回，设备状态当前值为：{}，上一状态值为：{},状态点时间戳为{},故障点时间戳为{}",
+                            dataModel.getThingCode(), dataModel.getMetricCode(), alertLevel, stateModel.getValue(),
+                            stateModel.getPreValue(), stateModel.getDataTimeStamp(), dataModel.getDataTimeStamp());
                     generateFaultAlert(dataModel, alertLevel);
                 }
                 dataModels.clear();
@@ -84,12 +87,16 @@ public class AlertFaultHandler implements AlertHandler {
             List<DataModel> faultModels = entry.getValue();
             if (faultModels != null && faultModels.size() != 0) {
                 for (DataModel dataModel : faultModels) {
-                    if (Math.abs(System.currentTimeMillis() - dataModel.getDataTimeStamp().getTime()) >= WAIT_TIME) {
+                    long currentTimeMillis = System.currentTimeMillis();
+                    if (Math.abs(currentTimeMillis - dataModel.getDataTimeStamp().getTime()) >= WAIT_TIME) {
                         faultModels.remove(dataModel);
                         Short alertLevel = getAlertLevelWithState(dataModel, false);
                         if (alertLevel == null) {
                             alertLevel = AlertConstants.LEVEL_30;
                         }
+                        logger.debug("设备{}生成{}等级为{}报警，超过等待时间未获取到设备状态信号点，当前时间戳为{}，故障点时间戳为{}", dataModel.getThingCode(),
+                                dataModel.getMetricCode(), alertLevel, currentTimeMillis,
+                                dataModel.getDataTimeStamp().getTime());
                         generateFaultAlert(dataModel, alertLevel);
                     }
                 }
@@ -102,7 +109,7 @@ public class AlertFaultHandler implements AlertHandler {
                 metricService.getMetric(dataModel.getMetricCode()).getMetricName(), AlertConstants.SOURCE_SYSTEM,
                 AlertConstants.REPORTER_SYSTEM);
         alertManager.generateAlert(alertData);
-        logger.debug("生成一条故障类报警，thing:{},metric:{}", dataModel.getThingCode(), dataModel.getMetricCode());
+        logger.debug("生成一条故障类报警，thing:{},metric:{},等级：{}", dataModel.getThingCode(), dataModel.getMetricCode(), level);
     }
 
     public void putCache(DataModel dataModel) {
@@ -132,9 +139,15 @@ public class AlertFaultHandler implements AlertHandler {
                 long stateTime = dataModelWrapper.getDataTimeStamp().getTime();
                 long faultTime = dataModel.getDataTimeStamp().getTime();
                 if (Math.abs(faultTime - stateTime) <= WAIT_TIME) {
+                    logger.debug("设备{}状态点于故障点之前返回，计算设备报警等级，设备状态当前值为{}，上一状态值为{}，设备状态时间戳为{}，故障点时间戳为{}",
+                            dataModel.getThingCode(), dataModelWrapper.getValue(), dataModelWrapper.getPreValue(),
+                            stateTime, faultTime);
                     return getAlertLevel(preState);
                 }
             } else {
+                logger.debug("超过等待时间未获取到设备{}状态信号点，计算设备报警等级，设备状态当前值为{}，上一状态值为{},设备状态时间戳为{}", dataModel.getThingCode(),
+                        dataModelWrapper.getValue(), dataModelWrapper.getPreValue(),
+                        dataModelWrapper.getDataTimeStamp());
                 return getAlertLevel(preState);
             }
         }
