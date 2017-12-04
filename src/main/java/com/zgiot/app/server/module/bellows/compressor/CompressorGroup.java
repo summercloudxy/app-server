@@ -4,7 +4,6 @@ import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.zgiot.app.server.module.bellows.dao.BellowsMapper;
 import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorOperation;
-import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorState;
 import com.zgiot.app.server.module.bellows.pressure.PressureManager;
 import com.zgiot.app.server.module.bellows.util.BellowsUtil;
 import com.zgiot.app.server.service.DataService;
@@ -92,10 +91,6 @@ public class CompressorGroup {
      */
     private volatile Timer pressureTimer;
 
-    /**
-     * 错误列表
-     */
-    private volatile List<String> errors;
 
     public CompressorGroup(List<Compressor> compressors, String type, PressureManager pressureManager, DataService dataService, BellowsMapper bellowsMapper) {
         this.compressors = compressors;
@@ -214,7 +209,7 @@ public class CompressorGroup {
     }
 
     /**
-     * 错误状态变化
+     * 重故障状态变化
      * @param compressor
      * @param value
      * @param requestId
@@ -223,6 +218,18 @@ public class CompressorGroup {
         boolean errorState = Boolean.parseBoolean(value);
         compressor.onErrorStateChange(errorState, requestId, intelligent);
     }
+
+    /**
+     * 轻故障状态变化
+     * @param compressor
+     * @param value
+     * @param requestId
+     */
+    public void onWarnStateChange(Compressor compressor, String value, String requestId) {
+        boolean warnState = Boolean.parseBoolean(value);
+        compressor.onWarnStateChange(warnState, requestId, intelligent);
+    }
+
 
     /**
      * 远程/就地状态变化
@@ -249,7 +256,6 @@ public class CompressorGroup {
     public synchronized CompressorGroup refresh(DataService dataService, String requestId) {
         //数量刷新
         totalCount = compressors.size();
-        errors = new ArrayList<>();
         int runningCount = 0;
         int errorCount = 0;
 
@@ -260,14 +266,10 @@ public class CompressorGroup {
         for (Compressor compressor : compressors) {
             compressor.refresh(dataService);
 
-            if (EnumCompressorState.RUNNING.getState().equals(compressor.getState())) {
+            if (!compressor.isError() && !compressor.isWarn() && compressor.isRunning() && compressor.isLoading()) {
                 runningCount++;
-            } else if (EnumCompressorState.ERROR.getState().equals(compressor.getState())) {
+            } else if (compressor.isError() || compressor.isWarn()) {
                 errorCount++;
-                //错误信息获取
-                for (String error : compressor.getErrors()) {
-                    errors.add(compressor.getThingCode() + error);
-                }
             }
         }
 
@@ -446,13 +448,13 @@ public class CompressorGroup {
             return;
         }
         logger.info("Compressor {} will be running because of low pressure.", compressor.getThingCode());
-        if (EnumCompressorState.STOPPED.getState().equals(compressor.getState())) {
+        if (!compressor.isRunning()) {
             try {
                 compressor.operate(EnumCompressorOperation.START, BellowsConstants.TYPE_AUTO, RequestIdUtil.generateRequestId());
             } catch (SysException e) {
                 logger.warn(e.getMessage());
             }
-        } else if (EnumCompressorState.UNLOAD.getState().equals(compressor.getState())) {
+        } else if (!compressor.isLoading()) {
             try {
                 compressor.operate(EnumCompressorOperation.LOAD, BellowsConstants.TYPE_AUTO, RequestIdUtil.generateRequestId());
             } catch (SysException e) {
@@ -482,7 +484,7 @@ public class CompressorGroup {
             return null;
         }
 
-        if (!EnumCompressorState.RUNNING.getState().equals(result.getState())) {
+        if (!result.isRunning() || !result.isLoading()) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Compressor {} state is {}.No compressor is chose.", result.getThingCode(), result.getState());
             }
@@ -512,7 +514,7 @@ public class CompressorGroup {
             return null;
         }
 
-        if (EnumCompressorState.RUNNING.getState().equals(result.getState()) || EnumCompressorState.ERROR.getState().equals(result.getState())) {
+        if (result.isError() || (result.isRunning() && result.isLoading())) {
             //选中的空压机是运行中或故障
             if (logger.isDebugEnabled()) {
                 logger.debug("Compressor {} state is {}.No compressor is chose.", result.getThingCode(), result.getState());
@@ -530,10 +532,10 @@ public class CompressorGroup {
      * @return 选中的空压机
      */
     private Compressor compare(Compressor c1, Compressor c2, double state) {
-        if (c1.isLocal()) {
+        if (c1.isLocal() || c1.isError()) {
             return c2;
         }
-        if (c2.isLocal()) {
+        if (c2.isLocal() || c2.isError()) {
             return c1;
         }
 
@@ -541,12 +543,13 @@ public class CompressorGroup {
         //记录高压状态下是否选择第一个
         boolean highSelectFirst;
 
-        int sort1 = EnumCompressorState.getByState(c1.getState()).getSort();
-        int sort2 = EnumCompressorState.getByState(c2.getState()).getSort();
-
-        if (sort1 > sort2) {
+        if (c1.isRunning() && !c2.isRunning()) {
             highSelectFirst = true;
-        } else if (sort2 > sort1) {
+        } else if (!c1.isRunning() && c2.isRunning()) {
+            highSelectFirst = false;
+        } else if (c1.isLoading() && !c2.isLoading()) {
+            highSelectFirst = true;
+        } else if (!c1.isLoading() && c2.isLoading()) {
             highSelectFirst = false;
         } else if (c1.getLoadTime() > c2.getLoadTime()) {
             highSelectFirst = true;
@@ -613,14 +616,6 @@ public class CompressorGroup {
 
     public void setErrorCount(int errorCount) {
         this.errorCount = errorCount;
-    }
-
-    public List<String> getErrors() {
-        return errors;
-    }
-
-    public void setErrors(List<String> errors) {
-        this.errors = errors;
     }
 
     public Boolean getIntelligent() {

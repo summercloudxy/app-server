@@ -5,9 +5,7 @@ import com.zgiot.app.server.module.bellows.pojo.CompressorLog;
 import com.zgiot.app.server.module.bellows.pojo.CompressorState;
 import com.zgiot.app.server.module.bellows.dao.BellowsMapper;
 import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorOperation;
-import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorState;
 import com.zgiot.app.server.module.bellows.pressure.PressureManager;
-import com.zgiot.app.server.module.bellows.util.BellowsUtil;
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.util.RequestIdUtil;
@@ -127,6 +125,8 @@ public class CompressorManager {
                 group.onLoadStateChange(compressor, data.getValue(), requestId);
                 break;
             case CompressorMetricConstants.WARN:
+                group.onWarnStateChange(compressor, data.getValue(), requestId);
+                break;
             case CompressorMetricConstants.ERROR:
                 group.onErrorStateChange(compressor, data.getValue(), requestId);
                 break;
@@ -300,24 +300,6 @@ public class CompressorManager {
         }
     }
 
-    /**
-     * 获取空压机错误列表
-     * @param requestId
-     * @return
-     */
-    public List<String> getErrors(String requestId) {
-        List<String> res = new ArrayList<>();
-        high.refresh(dataService, requestId);
-        if (!CollectionUtils.isEmpty(high.getErrors())) {
-            res.addAll(high.getErrors());
-        }
-
-        low.refresh(dataService, requestId);
-        if (!CollectionUtils.isEmpty(low.getErrors())) {
-            res.addAll(low.getErrors());
-        }
-        return res;
-    }
 
     /**
      * 获取空压机压力

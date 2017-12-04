@@ -37,7 +37,6 @@ public class Valve {
     /**
      * 分类
      */
-    @JSONField(serialize = false)
     private final String type;
 
     /**
@@ -89,7 +88,7 @@ public class Valve {
      * 本组执行时间
      */
     @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue)
-    private volatile Date execTime;
+    private volatile Long execTime;
 
 
 
@@ -294,11 +293,11 @@ public class Valve {
         this.stage = stage;
     }
 
-    public Date getExecTime() {
+    public Long getExecTime() {
         return execTime;
     }
 
-    public void setExecTime(Date execTime) {
+    public void setExecTime(Long execTime) {
         this.execTime = execTime;
     }
 }

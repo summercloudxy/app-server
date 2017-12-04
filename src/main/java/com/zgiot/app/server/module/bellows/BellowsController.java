@@ -25,10 +25,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author wangwei
@@ -194,7 +191,7 @@ public class BellowsController {
     }
 
     /**
-     * 获取空压机错误列表
+     * 获取空压机错误数量
      * @param request
      * @return
      */
@@ -203,8 +200,11 @@ public class BellowsController {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
         logger.info("RequestId {} query compressor error list.", requestId);
 
-        List<String> errorList = compressorManager.getErrors(requestId);
-        return new ResponseEntity<String>(ServerResponse.buildOkJson(errorList), HttpStatus.OK);
+        Map<String, Integer> errorMap = new HashMap<>();
+        errorMap.put(BellowsConstants.CP_TYPE_HIGH, compressorManager.refreshGroup(BellowsConstants.CP_TYPE_HIGH, requestId).getErrorCount());
+        errorMap.put(BellowsConstants.CP_TYPE_LOW, compressorManager.refreshGroup(BellowsConstants.CP_TYPE_LOW, requestId).getErrorCount());
+
+        return new ResponseEntity<String>(ServerResponse.buildOkJson(errorMap), HttpStatus.OK);
     }
 
 
@@ -306,20 +306,20 @@ public class BellowsController {
             return new ResponseEntity<String>(JSON.toJSONString(res), HttpStatus.BAD_REQUEST);
         }
 
-        if(valveParam.getMaxCount() < 0) {
-            ServerResponse res = new ServerResponse("Valve max count must be greater than 0.", SysException.EC_UNKNOWN, 0);
+        if(valveParam.getMaxCount() < 1 || valveParam.getMaxCount() > 12) {
+            ServerResponse res = new ServerResponse("Valve max count must be greater than 0 and less than 13.", SysException.EC_UNKNOWN, 0);
             String resJSON = JSON.toJSONString(res);
             return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
         }
 
-        if(valveParam.getRunTime() < 0) {
-            ServerResponse res = new ServerResponse("Valve run time must be greater than 0.", SysException.EC_UNKNOWN, 0);
+        if(valveParam.getRunTime() < 1 || valveParam.getWaitTime() > 60) {
+            ServerResponse res = new ServerResponse("Valve run time must be greater than 0 and less than 61.", SysException.EC_UNKNOWN, 0);
             String resJSON = JSON.toJSONString(res);
             return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
         }
 
-        if(valveParam.getWaitTime() < 0) {
-            ServerResponse res = new ServerResponse("Valve wait time must be greater than 0.", SysException.EC_UNKNOWN, 0);
+        if(valveParam.getWaitTime() < 1 || valveParam.getWaitTime() > 180) {
+            ServerResponse res = new ServerResponse("Valve wait time must be greater than 0 and less than 181.", SysException.EC_UNKNOWN, 0);
             String resJSON = JSON.toJSONString(res);
             return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
         }
@@ -358,9 +358,10 @@ public class BellowsController {
             opt = EnumValveOperation.CLOSE;
         }
 
-        Valve valve = valveManager.operateValve(thingCode, opt, BellowsConstants.TYPE_MANUAL, true, requestId);
+        valveManager.operateValve(thingCode, opt, BellowsConstants.TYPE_MANUAL, true, requestId);
 
-        return new ResponseEntity<>(ServerResponse.buildOkJson(valve),
+        //返回所有阀门列表
+        return new ResponseEntity<>(ServerResponse.buildOkJson(valveManager.refreshValves()),
                 HttpStatus.OK);
     }
 
@@ -389,9 +390,9 @@ public class BellowsController {
             opt = EnumValveOperation.CLOSE;
         }
 
-        List<Valve> res = valveManager.operateValveAll(opt, BellowsConstants.TYPE_MANUAL, requestId);
+        valveManager.operateValveAll(opt, BellowsConstants.TYPE_MANUAL, requestId);
 
-        return new ResponseEntity<>(ServerResponse.buildOkJson(res),
+        return new ResponseEntity<>(ServerResponse.buildOkJson(valveManager.refreshValves()),
                 HttpStatus.OK);
     }
 

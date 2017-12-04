@@ -337,7 +337,11 @@ public class ValveManager {
         List<Valve> valves = valveCache.findByTeam(teamId);
         for (Valve valve : valves) {
             valve.setStage(stage);
-            valve.setExecTime(execTime);
+            if (execTime == null) {
+                valve.setExecTime(null);
+            } else {
+                valve.setExecTime(execTime.getTime() - new Date().getTime());
+            }
         }
     }
 
@@ -409,6 +413,14 @@ public class ValveManager {
      * @param requestId
      */
     public synchronized void setValveParam(int maxCount, int runTime, int waitTime, String requestId) {
+        //距离下次鼓风10秒内不允许设置
+        if (nextBlowTime != null) {
+            Long now = new Date().getTime();
+            if (nextBlowTime - now <= 10 * DateUtils.MILLIS_PER_SECOND) {
+                throw new SysException("距离下次鼓风不足10秒，您的设置无效", SysException.EC_UNKNOWN);
+            }
+        }
+
         boolean maxCountChanged = setMaxCount(maxCount, requestId);
         boolean runTimeChanged = setRunTime(runTime, requestId);
         boolean waitTimeChanged = setWaitTime(waitTime, requestId);
@@ -643,7 +655,7 @@ public class ValveManager {
      * @param requestId
      * @return 阀门列表
      */
-    public synchronized List<Valve> operateValveAll(EnumValveOperation operation, String operationType, String requestId) {
+    public synchronized void operateValveAll(EnumValveOperation operation, String operationType, String requestId) {
         if (logger.isDebugEnabled()) {
             logger.debug("RequestId: {} send command: {} to all valves.Operation type is {}", requestId, operation, operationType);
         }
@@ -671,8 +683,6 @@ public class ValveManager {
         } catch (InterruptedException e) {
             logger.warn(e.getMessage());
         }
-
-        return refreshValves();
     }
 
 
@@ -710,6 +720,7 @@ public class ValveManager {
             List<Valve> valves = valveCache.findAll();
             for (Valve valve : valves) {
                 valve.setTeamId(null, bellowsMapper, requestId);
+                valve.setStage(BellowsConstants.BLOW_STAGE_NONE);
             }
 
             if (logger.isDebugEnabled()) {
@@ -987,7 +998,7 @@ public class ValveManager {
             } else {
                 //末煤
                 if (lumpTeam && !thingCodes.isEmpty()) {
-                    //上一组是块煤
+                    //上一组是块煤，将块煤分组保存
                     maxTeamId++;
                     ValveTeam team = new ValveTeam(maxTeamId, maxTeamId+1, BellowsConstants.VALVE_STATUS_WAIT, null, runTime, BellowsConstants.VALVE_TEAM_LUMP, thingCodes);
                     teams.add(team);
@@ -1030,6 +1041,24 @@ public class ValveManager {
         result.setMaxTeamId(maxTeamId);
         result.setTeams(teams);
         return result;
+    }
+
+    /**
+     * 计算总分组数
+     * @param lumpCount 块煤阀门智能数量
+     * @param slackCount    末煤阀门智能数量
+     * @param maxItem   每组最大个数
+     * @return
+     */
+    private int countTeam(int lumpCount, int slackCount, int maxItem) {
+        if (maxItem == 0) {
+            return 0;
+        }
+
+        int res = 0;
+        res += lumpCount / maxItem + (lumpCount % maxItem == 0 ? 0 : 1);
+        res += slackCount / maxItem + (slackCount % maxItem == 0 ? 0 : 1);
+        return res;
     }
 
 
