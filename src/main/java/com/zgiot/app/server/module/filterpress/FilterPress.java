@@ -81,9 +81,9 @@ public class FilterPress {
     private volatile boolean unloadConfirmNeed;
 
     /**
-     * 卸料时刻
+     * T_COUNT变化时间，用于说明压板数变化，如本台压滤机本队压板数增加1
      */
-    private volatile long unloadTime = 0;
+    private volatile long plateCountChangeTime = 0;
     /**
      * 卸料时长
      */
@@ -181,33 +181,39 @@ public class FilterPress {
             FilterPressLogBean filterPressLogBean = manager.getStatisticLogs().get(this.code);
             filterPressLogBean.clear();
             filterPressLogBean.setThingCode(this.code);
-            if (unloadDuration > 0) {
+            if (looseDuration > 0 && takenDuration > 0 && pullDuration > 0) {
+                unloadDuration = looseDuration + takenDuration + pullDuration;
                 filterPressLogBean.setUnloadDuration(unloadDuration);
+                logger.info("unloadDuration:" + unloadDuration);
                 looseDuration = 0;
                 takenDuration = 0;
                 pullDuration = 0;
-                logger.info("unloadDuration:" + unloadDuration);
+                unloadDuration = 0;
             }
-            if (feedStartTime > 0 && feedDuration > 0) {
-                filterPressLogBean.setFeedStartTime(parseDate(feedStartTime));
-                filterPressLogBean.setFeedDuration(feedDuration);
-                logger.info("feedStartTime:" + feedStartTime);
-                logger.info("feedDuration:" + feedDuration);
-                feedStartTime = 0;
-                feedDuration = 0;
-            }
+
+            filterPressLogBean.setFeedStartTime(parseDate(feedStartTime));
+            filterPressLogBean.setFeedDuration(feedDuration);
+            logger.info("feedStartTime:" + feedStartTime);
+            logger.info("feedDuration:" + feedDuration);
+
             if (feedPumpCurrent > 0) {
                 filterPressLogBean.setFeedCurrent(feedPumpCurrent);
                 logger.info("feedPumpCurrent:" + feedPumpCurrent);
-                feedPumpCurrent = 0;
             }
 
-            //保存上一次卸料时刻
-            if(unloadTime == 0){
-                unloadTime = System.currentTimeMillis();
+            //保存上一次压板计数变化开始时间
+            if(plateCountChangeTime == 0){
+                plateCountChangeTime = System.currentTimeMillis();
             }
-            filterPressLogBean.setUnloadTime(parseDate(unloadTime));
-            logger.info("unloadTime:" + unloadTime);
+            long waitingTime = 0;
+            if(looseStartTime > 0){
+                filterPressLogBean.setUnloadTime(parseDate(looseStartTime));
+                waitingTime = looseStartTime - waitDuration;
+            }else{
+                filterPressLogBean.setUnloadTime(parseDate(System.currentTimeMillis()));
+                waitingTime = System.currentTimeMillis() - waitDuration;
+            }
+            logger.info("unloadTime:" + looseStartTime);
 
             if (producingTeam != null && producingTeam > 0) {
                 filterPressLogBean.setTeam(producingTeam);
@@ -226,12 +232,11 @@ public class FilterPress {
 //                filterPressLogBean.setProceedingDuration(Long.parseLong(proceedingTime));
 //                logger.info("proceedingDuration:" + Long.parseLong(proceedingTime));
 //            }
-            long proceedingTime = System.currentTimeMillis() - unloadTime;
+            long proceedingTime = System.currentTimeMillis() - plateCountChangeTime;
             if(proceedingTime > 0){
                 filterPressLogBean.setProceedingDuration(proceedingTime);
                 logger.info("proceedingDuration:" + proceedingTime);
             }
-            long waitingTime = System.currentTimeMillis() - waitDuration;
             if (waitingTime > 0) {
                 filterPressLogBean.setWaitDuration(waitingTime);
                 logger.info("waitingTime:" + waitingTime);
@@ -241,8 +246,8 @@ public class FilterPress {
             filterPressLogBean.setFeedState(feedIntelligent ? FilterPressLogConstants.FEED_INTELLIGENT : FilterPressLogConstants.FEED_AUTO);
             filterPressLogBean.setUnloadState(unloadIntelligent ? FilterPressLogConstants.UNLOAD_INTELLIGENT : FilterPressLogConstants.UNLOAD_AUTO);
 
-            filterPressLogBean.setPlateStartTime(parseDate(unloadTime));
-            unloadTime = System.currentTimeMillis();
+            filterPressLogBean.setPlateStartTime(parseDate(plateCountChangeTime));
+            plateCountChangeTime = System.currentTimeMillis();
 
             if (FilterPressLogUtil.isDayShift(FilterPressLogConstants.DAY_SHIFT_START_TIME_SCOPE, FilterPressLogConstants.DAY_SHIFT_END_TIME_SCOPE)) {
                 filterPressLogBean.setDayShift(FilterPressLogConstants.IS_DAY_SHIFT_OK);
@@ -276,14 +281,6 @@ public class FilterPress {
     public void onLoosen() {
         logger.trace("{} on loosen", code);
         looseStartTime = System.currentTimeMillis();
-        if (looseDuration > 0 && takenDuration > 0 && pullDuration > 0) {
-            unloadDuration = 0;
-            unloadDuration = looseDuration + takenDuration + pullDuration;
-            looseDuration = 0;
-            takenDuration = 0;
-            pullDuration = 0;
-        }
-
         this.startUnload();
         int position = -1;
         if (manager != null && (!manager.getUnloadSequence().isEmpty())
@@ -332,6 +329,25 @@ public class FilterPress {
         pullDuration += pullEndTime - pullStartTime;
     }
 
+    public void offFeed(){
+        this.feedOverTime = System.currentTimeMillis();
+        if(feedStartTime == 0){
+            this.feedStartTime = System.currentTimeMillis();
+        }
+        feedDuration = feedOverTime - feedStartTime;
+        List<String> feedPumpCodes = manager.getKeyByValueFromMap(manager.getFilterPressPumpMapping(),this.getCode());
+        String feedPumpCode = feedPumpCodes.get(0);
+        if(feedPumpCodes.size() == 0){
+            throw new SysException("feedPump thingCode is null",SysException.EC_UNKNOWN);
+        }
+        Optional<DataModelWrapper> currentWrapper = manager.dataService.getData(feedPumpCode,FilterPressMetricConstants.FEED_PUMP_CURRENT);
+        Float current = new Float(0);
+        if(currentWrapper.isPresent()){
+            current = Float.parseFloat(currentWrapper.get().getValue());
+        }
+        this.setFeedPumpCurrent(current);
+    }
+
     public void onTaken() {
         takenStartTime = System.currentTimeMillis();
         logger.trace("{} on taken", code);
@@ -378,8 +394,6 @@ public class FilterPress {
 
     public void onAssumeFeedOver() {
         logger.trace("{} assume to be feed over", code);
-        this.feedOverTime = System.currentTimeMillis();
-        feedDuration = feedOverTime - feedStartTime;
         if (feedIntelligent) {
             manager.execFeedOver(this);
             logger.debug("{} executed feed over, intelligent:{}", code, feedIntelligent);
@@ -409,10 +423,6 @@ public class FilterPress {
 
     public String getCode() {
         return code;
-    }
-
-    public void setFeedOverTime(Long feedOverTime) {
-        this.feedOverTime = feedOverTime;
     }
 
     public Long getFeedDuration() {
@@ -475,9 +485,6 @@ public class FilterPress {
         return unloadConfirmNeed;
     }
 
-    public long getUnloadTime() {
-        return unloadTime;
-    }
 
     public long getUnloadDuration() {
         return unloadDuration;
@@ -503,8 +510,12 @@ public class FilterPress {
         return pullDuration;
     }
 
-    public void setUnloadTime(long unloadTime) {
-        this.unloadTime = unloadTime;
+    public long getPlateCountChangeTime() {
+        return plateCountChangeTime;
+    }
+
+    public void setPlateCountChangeTime(long plateCountChangeTime) {
+        this.plateCountChangeTime = plateCountChangeTime;
     }
 
     public void setUnloadDuration(long unloadDuration) {
@@ -557,10 +568,6 @@ public class FilterPress {
 
     public int getStatisticLogplateCount() {
         return statisticLogplateCount;
-    }
-
-    public void setFeedStartTime(long feedStartTime) {
-        this.feedStartTime = feedStartTime;
     }
 
     public void setFeedOverTime(long feedOverTime) {

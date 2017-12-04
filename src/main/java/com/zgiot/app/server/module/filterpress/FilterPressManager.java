@@ -287,6 +287,8 @@ public class FilterPressManager {
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onFeed();
                     isRunning = Boolean.TRUE;
+                }else{
+                    filterPress.offFeed();
                 }
                 break;
             case FilterPressMetricConstants.RO_FEED_OVER:
@@ -467,7 +469,7 @@ public class FilterPressManager {
         }
     }
 
-    private List<String> getKeyByValueFromMap(Map<String,String> map,String value){
+    public List<String> getKeyByValueFromMap(Map<String,String> map,String value){
         List<String> keys = new ArrayList<>();
         for(String key:map.keySet()){
             if(map.get(key).equals(value)){
@@ -484,7 +486,7 @@ public class FilterPressManager {
         dataModel.setValue(Boolean.TRUE.toString());
         cmdControlService.sendPulseCmdBoolByShort(dataModel,null,null,RequestIdUtil.generateRequestId(),POSITION_FEED_OVER,CLAEN_PERIOD,IS_HOLDING_FEED_OVER);
 
-        filterPress.setFeedDuration(System.currentTimeMillis() - filterPress.getFeedStartTime());
+        //filterPress.setFeedDuration(System.currentTimeMillis() - filterPress.getFeedStartTime());
         List<String> feedPumpCodes = getKeyByValueFromMap(filterPressPumpMapping,filterPress.getCode());
         String feedPumpCode = feedPumpCodes.get(0);
         if(feedPumpCodes.size() == 0){
@@ -718,6 +720,10 @@ public class FilterPressManager {
 
     public Set<String> getAllFilterPressCode(){
         return deviceHolder.keySet();
+    }
+
+    public Map<String, String> getFilterPressPumpMapping() {
+        return filterPressPumpMapping;
     }
 
     // @Scheduled(cron="cnmt.FilterPressDeviceManager.clear")
