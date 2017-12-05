@@ -205,6 +205,7 @@ public class FilterPress {
             if(plateCountChangeTime == 0){
                 plateCountChangeTime = System.currentTimeMillis();
             }
+            long proceedingTime = System.currentTimeMillis() - plateCountChangeTime;
             long waitingTime = 0;
             if(looseStartTime > 0){
                 filterPressLogBean.setUnloadTime(parseDate(looseStartTime));
@@ -227,12 +228,7 @@ public class FilterPress {
                 logger.info("totalPlateCount:" + totalPlateCount);
             }
             filterPressLogBean.setSaveTime(parseDate(System.currentTimeMillis()));
-//            String proceedingTime = getPRCTimeFromCacheByMetric(FilterPressMetricConstants.PRC_TIMER);
-//            if (!StringUtils.isBlank(proceedingTime)) {
-//                filterPressLogBean.setProceedingDuration(Long.parseLong(proceedingTime));
-//                logger.info("proceedingDuration:" + Long.parseLong(proceedingTime));
-//            }
-            long proceedingTime = System.currentTimeMillis() - plateCountChangeTime;
+
             if(proceedingTime > 0){
                 filterPressLogBean.setProceedingDuration(proceedingTime);
                 logger.info("proceedingDuration:" + proceedingTime);
@@ -256,6 +252,9 @@ public class FilterPress {
             }
 
             filterPressLogBean.setPeriod(FilterPressLogConstants.PERIOD_TWO);
+            if((feedDuration == 0) && (unloadDuration == 0) && (proceedingTime == 0)){
+                return;
+            }
             manager.filterPressLogService.saveFilterPressLog(filterPressLogBean);
         }
     }
