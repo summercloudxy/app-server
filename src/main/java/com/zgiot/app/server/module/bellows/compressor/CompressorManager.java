@@ -190,17 +190,12 @@ public class CompressorManager {
      * 分页获取空压机日志
      * @param startTime
      * @param endTime
-     * @param page
+     * @param lastId 上次查询的最后一个id（null为首次查询）
      * @param count
      * @return
      */
-    public List<CompressorLog> getCompressorLog(Date startTime, Date endTime, Integer page, Integer count, String requestId) {
-        Integer offset = null;
-        if (page != null && count != null) {
-            offset = page * count;
-        }
-
-        return bellowsMapper.getCompressorLog(startTime, endTime, offset, count);
+    public List<CompressorLog> getCompressorLog(Date startTime, Date endTime, Long lastId, Integer count, String requestId) {
+        return bellowsMapper.getCompressorLog(startTime, endTime, lastId, count);
     }
 
 

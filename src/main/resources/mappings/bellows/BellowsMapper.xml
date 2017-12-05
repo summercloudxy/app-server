@@ -31,9 +31,12 @@
         SELECT * FROM tb_bellows_compressor_log
         WHERE operate_time &gt;= #{startTime}
         AND operate_time &lt;= #{endTime}
-        ORDER BY operate_time DESC
-        <if test="offset != null">
-            LIMIT #{offset},#{count}
+        <if test="lastId != null">
+            AND id &lt; #{lastId}
+        </if>
+        ORDER BY operate_time DESC, id DESC
+        <if test="count != null">
+            LIMIT 0,#{count}
         </if>
     </select>
 
@@ -128,9 +131,10 @@
 
     <insert id="saveValveLog" useGeneratedKeys="true" keyProperty="log.id">
         INSERT INTO tb_bellows_valve_log
-        (thing_code, operation, operate_type, operate_time, pre_state, request_id, memo, post_state, confirm_time, high_pressure, low_pressure)
+        (thing_code, name, operation, operate_type, operate_time, pre_state, request_id, memo, post_state, confirm_time, high_pressure, low_pressure, team_id)
         VALUES
-        (#{log.thingCode}, #{log.operation}, #{log.operateType}, #{log.operateTime}, #{log.preState}, #{log.requestId}, #{log.memo}, #{log.postState}, #{log.confirmTime}, #{log.highPressure}, #{log.lowPressure})
+        (#{log.thingCode}, #{log.name}, #{log.operation}, #{log.operateType}, #{log.operateTime}, #{log.preState}, #{log.requestId}, #{log.memo},
+        #{log.postState}, #{log.confirmTime}, #{log.highPressure}, #{log.lowPressure}, #{log.teamId})
     </insert>
 
     <update id="updateValveLog">
@@ -143,9 +147,12 @@
         SELECT * FROM tb_bellows_valve_log
         WHERE operate_time &gt;= #{startTime}
         AND operate_time &lt;= #{endTime}
-        ORDER BY operate_time DESC
-        <if test="offset != null">
-            LIMIT #{offset},#{count}
+        <if test="lastId != null">
+            AND id &lt; #{lastId}
+        </if>
+        ORDER BY operate_time DESC, id DESC
+        <if test="count != null">
+            LIMIT 0,#{count}
         </if>
     </select>
 </mapper>

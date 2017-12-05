@@ -13,13 +13,17 @@ public class ValveLog {
     /**
      * id
      */
-    @JSONField(serialize = false)
     private Long id;
 
     /**
      * 设备号
      */
     private String thingCode;
+
+    /**
+     * 设备名称
+     */
+    private String name;
 
     /**
      * 操作
@@ -70,6 +74,11 @@ public class ValveLog {
     private String requestId;
 
     /**
+     * 分组号
+     */
+    private Long teamId;
+
+    /**
      * 备注
      */
     @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue)
@@ -89,6 +98,14 @@ public class ValveLog {
 
     public void setThingCode(String thingCode) {
         this.thingCode = thingCode;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getOperation() {
@@ -169,5 +186,13 @@ public class ValveLog {
 
     public void setMemo(String memo) {
         this.memo = memo;
+    }
+
+    public Long getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(Long teamId) {
+        this.teamId = teamId;
     }
 }

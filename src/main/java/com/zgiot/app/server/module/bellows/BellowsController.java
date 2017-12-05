@@ -159,17 +159,17 @@ public class BellowsController {
      * 获取空压机日志
      * @param startTime 开始时间
      * @param endTime   结束时间
-     * @param page  页数（从0开始）
+     * @param lastId  上次查询的最后一个id（null为首次查询）
      * @param count 每页个数
      * @return
      */
     @GetMapping(value = "api/bellows/compressor/log")
-    public ResponseEntity<String> getCompressorLog(@RequestParam Date startTime, @RequestParam Date endTime, @RequestParam(required = false) Integer page,
+    public ResponseEntity<String> getCompressorLog(@RequestParam Date startTime, @RequestParam Date endTime, @RequestParam(required = false) Long lastId,
                                                    @RequestParam(required = false) Integer count, HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
-        logger.info("RequestId {} query compressor log, startTime: {}, endTime: {}, page: {}, count: {}.", requestId, startTime, endTime, page, count);
+        logger.info("RequestId {} query compressor log, startTime: {}, endTime: {}, lastId: {}, count: {}.", requestId, startTime, endTime, lastId, count);
 
-        List<CompressorLog> result = compressorManager.getCompressorLog(startTime, endTime, page, count, requestId);
+        List<CompressorLog> result = compressorManager.getCompressorLog(startTime, endTime, lastId, count, requestId);
         return new ResponseEntity<String>(ServerResponse.buildOkJson(result), HttpStatus.OK);
     }
 
@@ -401,17 +401,17 @@ public class BellowsController {
      * 获取阀门日志
      * @param startTime 开始时间
      * @param endTime   结束时间
-     * @param page  页数（从0开始）
+     * @param lastId  上次查询的最后一个id（null为首次查询）
      * @param count 每页个数
      * @return
      */
     @GetMapping(value = "api/bellows/valve/log")
-    public ResponseEntity<String> getValveLog(@RequestParam Date startTime, @RequestParam Date endTime, @RequestParam(required = false) Integer page,
+    public ResponseEntity<String> getValveLog(@RequestParam Date startTime, @RequestParam Date endTime, @RequestParam(required = false) Long lastId,
                                                    @RequestParam(required = false) Integer count, HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
-        logger.info("RequestId {} query valve log, startTime: {}, endTime: {}, page: {}, count: {}.", requestId, startTime, endTime, page, count);
+        logger.info("RequestId {} query valve log, startTime: {}, endTime: {}, lastId: {}, count: {}.", requestId, startTime, endTime, lastId, count);
 
-        List<ValveLog> result = valveManager.getValveLog(startTime, endTime, page, count, requestId);
+        List<ValveLog> result = valveManager.getValveLog(startTime, endTime, lastId, count, requestId);
         return new ResponseEntity<String>(ServerResponse.buildOkJson(result), HttpStatus.OK);
     }
 

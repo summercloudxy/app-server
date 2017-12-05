@@ -1085,13 +1085,13 @@ public class ValveManager {
      * 获取阀门日志
      * @param startTime
      * @param endTime
-     * @param page
+     * @param lastId    上次查询的最后一个id（null为首次查询）
      * @param count
      * @param requestId
      * @return
      */
-    public List<ValveLog> getValveLog(Date startTime, Date endTime, Integer page, Integer count, String requestId) {
-        return valveLogManager.getValveLog(startTime, endTime, page, count, requestId);
+    public List<ValveLog> getValveLog(Date startTime, Date endTime, Long lastId, Integer count, String requestId) {
+        return valveLogManager.getValveLog(startTime, endTime, lastId, count, requestId);
     }
 
     public Long getNextBlowTime() {

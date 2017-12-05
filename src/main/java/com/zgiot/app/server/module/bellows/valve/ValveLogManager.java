@@ -59,6 +59,8 @@ public class ValveLogManager {
         valveLog.setHighPressure(pressureManager.refreshPressure(BellowsConstants.CP_TYPE_HIGH, dataService, requestId));
         valveLog.setLowPressure(pressureManager.refreshPressure(BellowsConstants.CP_TYPE_LOW, dataService, requestId));
         valveLog.setMemo(memo);
+        valveLog.setTeamId(valve.getTeamId());
+        valveLog.setName(valve.getName());
 
         bellowsMapper.saveValveLog(valveLog);
 
@@ -115,18 +117,13 @@ public class ValveLogManager {
      * 获取阀门操作日志
      * @param startTime
      * @param endTime
-     * @param page
+     * @param lastId    上次查询的最后一个id（null为首次查询）
      * @param count
      * @param requestId
      * @return
      */
-    public List<ValveLog> getValveLog(Date startTime, Date endTime, Integer page, Integer count, String requestId) {
-        Integer offset = null;
-        if (page != null && count != null) {
-            offset = page * count;
-        }
-
-        return bellowsMapper.getValveLog(startTime, endTime, offset, count);
+    public List<ValveLog> getValveLog(Date startTime, Date endTime, Long lastId, Integer count, String requestId) {
+        return bellowsMapper.getValveLog(startTime, endTime, lastId, count);
     }
 
 

@@ -13,7 +13,6 @@ public class CompressorLog {
     /**
      * id
      */
-    @JSONField(serialize = false)
     private Long id;
 
     /**

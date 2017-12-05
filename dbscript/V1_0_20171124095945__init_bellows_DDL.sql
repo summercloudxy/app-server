@@ -22,9 +22,9 @@ CREATE TABLE `tb_bellows_compressor_log` (
 CREATE TABLE `tb_bellows_compressor_state` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `thing_code` varchar(30) DEFAULT NULL COMMENT '设备号',
-  `post_state` varchar(10) DEFAULT NULL COMMENT '修改后状态',
+  `post_state` varchar(20) DEFAULT NULL COMMENT '修改后状态',
   `time` datetime DEFAULT NULL COMMENT '创建时间',
-  `pre_state` varchar(10) DEFAULT NULL COMMENT '修改前状态',
+  `pre_state` varchar(20) DEFAULT NULL COMMENT '修改前状态',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=utf8;
 

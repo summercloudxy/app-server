@@ -50,11 +50,11 @@ public interface BellowsMapper {
      * 查询空压机操作日志
      * @param startTime 开始时间
      * @param endTime   结束时间
-     * @param offset    偏移量
+     * @param lastId    上次查询的最后一个id（null为首次查询）
      * @param count 个数
      * @return
      */
-    List<CompressorLog> getCompressorLog(@Param("startTime") Date startTime, @Param("endTime") Date endTime, @Param("offset") Integer offset, @Param("count") Integer count);
+    List<CompressorLog> getCompressorLog(@Param("startTime") Date startTime, @Param("endTime") Date endTime, @Param("lastId") Long lastId, @Param("count") Integer count);
 
 
     /**
@@ -152,9 +152,9 @@ public interface BellowsMapper {
      * 查询阀门操作日志
      * @param startTime 开始时间
      * @param endTime   结束时间
-     * @param offset    偏移量
+     * @param lastId    上次查询的最后一个id（null为首次查询）
      * @param count 个数
      * @return
      */
-    List<ValveLog> getValveLog(@Param("startTime") Date startTime, @Param("endTime") Date endTime, @Param("offset") Integer offset, @Param("count") Integer count);
+    List<ValveLog> getValveLog(@Param("startTime") Date startTime, @Param("endTime") Date endTime, @Param("lastId") Long lastId, @Param("count") Integer count);
 }
