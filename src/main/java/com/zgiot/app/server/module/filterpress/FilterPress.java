@@ -573,10 +573,6 @@ public class FilterPress {
         this.feedOverTime = feedOverTime;
     }
 
-    public void setFeedDuration(long feedDuration) {
-        this.feedDuration = feedDuration;
-    }
-
     public void setOnCycleTime(long onCycleTime) {
         this.onCycleTime = onCycleTime;
     }
