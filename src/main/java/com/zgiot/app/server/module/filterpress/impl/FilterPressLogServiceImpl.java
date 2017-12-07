@@ -459,4 +459,52 @@ public class FilterPressLogServiceImpl implements FilterPressLogService {
         Date date = FilterPressLogUtil.getDayOrNightShiftRateStartTime(offsetTime, currentOrPrior);
         return date;
     }
+
+    @Override
+    public List<ManualResetBean> getResetInfo() {
+        List<ManualResetBean> manualResetBeans = new ArrayList<>();
+        ManualResetBean manualResetBean = null;
+        DataModel dataModel = null;
+        Set<String> thingCodes = filterPressManager.getAllFilterPressCode();
+        for (String thingCode : thingCodes) {
+            Optional<DataModelWrapper> team1Wrapper = null;
+            Optional<DataModelWrapper> team2Wrapper = null;
+            Optional<DataModelWrapper> team3Wrapper = null;
+
+            team1Wrapper = dataService.getData(thingCode, FilterPressMetricConstants.T1_COUNT);
+            team2Wrapper = dataService.getData(thingCode, FilterPressMetricConstants.T2_COUNT);
+            team3Wrapper = dataService.getData(thingCode, FilterPressMetricConstants.T3_COUNT);
+            if (team1Wrapper.isPresent() && Integer.valueOf(team1Wrapper.get().getValue()) > 0) {
+                manualResetBean = new ManualResetBean();
+                manualResetBean.setPosition(FilterPressLogConstants.T1_CLR_POSITION);
+                dataModel = createDataModule(thingCode,FilterPressMetricConstants.T1_CLR);
+                manualResetBean.setDataModel(dataModel);
+                manualResetBeans.add(manualResetBean);
+            }
+            if (team2Wrapper.isPresent() && Integer.valueOf(team2Wrapper.get().getValue()) > 0) {
+                manualResetBean = new ManualResetBean();
+                manualResetBean.setPosition(FilterPressLogConstants.T2_CLR_POSITION);
+                dataModel = createDataModule(thingCode,FilterPressMetricConstants.T2_CLR);
+                manualResetBean.setDataModel(dataModel);
+                manualResetBeans.add(manualResetBean);
+            }
+            if (team3Wrapper.isPresent() && Integer.valueOf(team3Wrapper.get().getValue()) > 0) {
+                manualResetBean = new ManualResetBean();
+                manualResetBean.setPosition(FilterPressLogConstants.T3_CLR_POSITION);
+                dataModel = createDataModule(thingCode,FilterPressMetricConstants.T3_CLR);
+                manualResetBean.setDataModel(dataModel);
+                manualResetBeans.add(manualResetBean);
+            }
+        }
+        return manualResetBeans;
+    }
+
+    DataModel createDataModule(String thingCode,String metriCode){
+        DataModel dataModel = new DataModel();
+        dataModel.setThingCode(thingCode);
+        dataModel.setMetricCode(metriCode);
+        dataModel.setDataTimeStamp(new Date());
+        dataModel.setValue(Boolean.TRUE.toString());
+        return dataModel;
+    }
 }
