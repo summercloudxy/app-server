@@ -404,14 +404,14 @@ public class FilterPressLogServiceImpl implements FilterPressLogService {
         String startTime = null;
         String endTime = null;
         if (isDayShift) {
-            startTime = priorDay + FilterPressLogConstants.DAY_SHIFT_END_LINE;
+            startTime = priorDay + FilterPressLogConstants.PRIOR_TEAM_DAY_SHIFT_END_LINE;
             endTime = currentDay + FilterPressLogConstants.DAY_SHIFT_START_LINE;
         } else {
             if (FilterPressLogUtil.isPriorPartNightShift()) {
-                startTime = currentDay + FilterPressLogConstants.DAY_SHIFT_START_LINE;
+                startTime = currentDay + FilterPressLogConstants.PRIOR_TEAM_DAY_SHIFT_START_LINE;
                 endTime = currentDay + FilterPressLogConstants.DAY_SHIFT_END_LINE;
             } else {
-                startTime = priorDay + FilterPressLogConstants.DAY_SHIFT_START_LINE;
+                startTime = priorDay + FilterPressLogConstants.PRIOR_TEAM_DAY_SHIFT_START_LINE;
                 endTime = priorDay + FilterPressLogConstants.DAY_SHIFT_END_LINE;
             }
         }

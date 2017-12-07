@@ -117,7 +117,7 @@ public class FilterPressLogController {
                 position = FilterPressLogConstants.T2_CHOOSE_POSITION;
                 break;
             case FilterPressLogConstants.THREE_TEAM_RESET:
-                dataModelList = filterPressLogService.getDataModelAllFilterPressByMetricCode(FilterPressMetricConstants.T2_CHOOSE);
+                dataModelList = filterPressLogService.getDataModelAllFilterPressByMetricCode(FilterPressMetricConstants.T3_CHOOSE);
                 position = FilterPressLogConstants.T3_CHOOSE_POSITION;
                 break;
             default:
