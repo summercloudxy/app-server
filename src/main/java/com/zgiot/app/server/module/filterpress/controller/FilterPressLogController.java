@@ -10,7 +10,6 @@ import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.common.constants.FilterPressLogConstants;
 import com.zgiot.common.constants.FilterPressMetricConstants;
 import com.zgiot.common.constants.GlobalConstants;
-import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.restcontroller.ServerResponse;
 import io.swagger.annotations.ApiOperation;
@@ -84,7 +83,8 @@ public class FilterPressLogController {
                     cmdControlService.sendPulseCmdBoolByShort(dataModel,5000,3,requestId,position,500,isHolding);
                     logger.info("filterPress:" + dataModel.getThingCode() + " team:" + dataModel.getMetricCode() + "successfully reset");
                 }catch (Exception e){
-                    throw new SysException("filterPress:" + dataModel.getThingCode() + "team reset exception", SysException.EC_UNKNOWN);
+                    logger.info("filterPress:" + dataModel.getThingCode() + "team reset exception");
+                    continue;
                 }
             }
         }
@@ -116,9 +116,15 @@ public class FilterPressLogController {
                 break;
             default:
         }
+        final int pos = position;
         for(DataModel dataModel:dataModelList){
             try{
-                cmdControlService.sendPulseCmdBoolByShort(dataModel,5000,3,requestId,position,cleanPeriod,isHolding);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        cmdControlService.sendPulseCmdBoolByShort(dataModel,5000,3,requestId,pos,cleanPeriod,isHolding);
+                    }
+                }).start();
             }catch(Exception e){
                 logger.info("filterPress:" + dataModel.getThingCode() + "team choose exception");
                 continue;
