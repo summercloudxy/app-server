@@ -61,8 +61,16 @@
         <if test="startTime != null">
           AND time &gt;= #{startTime}
         </if>
-        AND time &lt;= #{endTime}
-        ORDER BY time DESC
+        <if test="endTime != null">
+            AND time &lt;= #{endTime}
+        </if>
+        <if test="isAsc">
+            ORDER BY time ASC, id ASC
+        </if>
+        <if test="!isAsc">
+            ORDER BY time DESC, id DESC
+        </if>
+
         <if test="offset != null">
             LIMIT #{offset},#{count}
         </if>

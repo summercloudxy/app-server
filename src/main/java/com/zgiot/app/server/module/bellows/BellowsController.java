@@ -4,11 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.zgiot.app.server.module.bellows.compressor.CompressorGroup;
 import com.zgiot.app.server.module.bellows.compressor.CompressorManager;
 import com.zgiot.app.server.module.bellows.enumeration.EnumValveOperation;
-import com.zgiot.app.server.module.bellows.pojo.CompressorLog;
+import com.zgiot.app.server.module.bellows.pojo.*;
 import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorOperation;
-import com.zgiot.app.server.module.bellows.pojo.ValveLog;
-import com.zgiot.app.server.module.bellows.pojo.ValveParam;
-import com.zgiot.app.server.module.bellows.pojo.ValveTimeAndTeam;
 import com.zgiot.app.server.module.bellows.valve.Valve;
 import com.zgiot.app.server.module.bellows.valve.ValveManager;
 import com.zgiot.common.constants.BellowsConstants;
@@ -31,6 +28,7 @@ import java.util.*;
  * @author wangwei
  */
 @Controller
+@RequestMapping(value = "api/v1/bellows")
 public class BellowsController {
 
     private static final Logger logger = LoggerFactory.getLogger(BellowsController.class);
@@ -50,7 +48,7 @@ public class BellowsController {
      * @param request
      * @return
      */
-    @GetMapping(value = "api/bellows/pressure")
+    @GetMapping(value = "/pressure")
     public ResponseEntity<String> getPressure(HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
 
@@ -67,7 +65,7 @@ public class BellowsController {
      * @param request
      * @return
      */
-    @GetMapping(value = "api/bellows/compressor/{type}")
+    @GetMapping(value = "/compressor/{type}")
     public ResponseEntity<String> getCompressors(@PathVariable String type, HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
 
@@ -93,7 +91,7 @@ public class BellowsController {
      * @param request
      * @return
      */
-    @PostMapping(value = "api/bellows/compressor/{type}/intelligent")
+    @PostMapping(value = "/compressor/{type}/intelligent")
     public ResponseEntity<String> setLowCompressorIntelligent(@PathVariable("type") String type, Boolean intelligent, HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
 
@@ -129,7 +127,7 @@ public class BellowsController {
      * @param operation true运行 false停止
      * @return
      */
-    @PostMapping(value = "api/bellows/compressor/{thingCode}/open")
+    @PostMapping(value = "/compressor/{thingCode}/open")
     public ResponseEntity<String> operateCompressor(@PathVariable("thingCode")String thingCode, Boolean operation, HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
 
@@ -163,7 +161,7 @@ public class BellowsController {
      * @param count 每页个数
      * @return
      */
-    @GetMapping(value = "api/bellows/compressor/log")
+    @GetMapping(value = "/compressor/log")
     public ResponseEntity<String> getCompressorLog(@RequestParam Date startTime, @RequestParam Date endTime, @RequestParam(required = false) Long lastId,
                                                    @RequestParam(required = false) Integer count, HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
@@ -180,7 +178,7 @@ public class BellowsController {
      * @param request
      * @return
      */
-    @GetMapping(value = "api/bellows/compressor/state")
+    @GetMapping(value = "/compressor/state")
     public ResponseEntity<String> analyseCompressorState(@RequestParam Date startTime, @RequestParam Date endTime, HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
         logger.info("RequestId {} query compressor state analysis, startTime: {}, endTime: {}.", requestId, startTime, endTime);
@@ -191,11 +189,28 @@ public class BellowsController {
     }
 
     /**
+     * 获取空压机状态时间线
+     * @param startTime
+     * @param endTime
+     * @param request
+     * @return
+     */
+    @GetMapping(value = "/compressor/timeline")
+    public ResponseEntity<String> getCompressorTimeline(@RequestParam Date startTime, @RequestParam Date endTime, HttpServletRequest request) {
+        String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
+        logger.info("RequestId {} query compressor state timeline, startTime: {}, endTime: {}.", requestId, startTime, endTime);
+
+        Map<String, List<Map<String, Long>>> result = compressorManager.getCompressorTimeline(startTime, endTime, requestId);
+        String json = ServerResponse.buildOkJson(result);
+        return new ResponseEntity<String>(json, HttpStatus.OK);
+    }
+
+    /**
      * 获取空压机错误数量
      * @param request
      * @return
      */
-    @GetMapping(value = "api/bellows/compressor/error")
+    @GetMapping(value = "/compressor/error")
     public ResponseEntity<String> getCompressorError(HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
         logger.info("RequestId {} query compressor error list.", requestId);
@@ -213,7 +228,7 @@ public class BellowsController {
      * @param request
      * @return
      */
-    @GetMapping(value = "api/bellows/valve")
+    @GetMapping(value = "/valve")
     public ResponseEntity<String> getValveList(HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
 
@@ -230,7 +245,7 @@ public class BellowsController {
      * @param request
      * @return
      */
-    @GetMapping(value = "api/bellows/valve/time")
+    @GetMapping(value = "/valve/time")
     public ResponseEntity<String> getValveTeamCountAndBlowTime(HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
 
@@ -247,7 +262,7 @@ public class BellowsController {
      * @param request
      * @return
      */
-    @PostMapping(value = "api/bellows/valve/intelligent")
+    @PostMapping(value = "/valve/intelligent")
     public ResponseEntity<String> setValveIntelligent(@RequestBody  String requestParam, HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
 
@@ -270,7 +285,7 @@ public class BellowsController {
      * @param request
      * @return
      */
-    @GetMapping(value = "api/bellows/valve/param")
+    @GetMapping(value = "/valve/param")
     public ResponseEntity<String> getValveParam(HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
 
@@ -289,7 +304,7 @@ public class BellowsController {
      * @param request
      * @return
      */
-    @PostMapping(value = "api/bellows/valve/param")
+    @PostMapping(value = "/valve/param")
     public ResponseEntity<String> setValveParam(@RequestBody String requestData, HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
 
@@ -339,7 +354,7 @@ public class BellowsController {
      * @param operation true开 false关
      * @return
      */
-    @PostMapping(value = "api/bellows/valve/{thingCode}/open")
+    @PostMapping(value = "/valve/{thingCode}/open")
     public ResponseEntity<String> operationValve(@PathVariable("thingCode")String thingCode, Boolean operation, HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
 
@@ -371,7 +386,7 @@ public class BellowsController {
      * @param operation true开 false关
      * @return
      */
-    @PostMapping(value = "api/bellows/valve/open/all")
+    @PostMapping(value = "/valve/open/all")
     public ResponseEntity<String> operationAllValve(Boolean operation, HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
 
@@ -405,7 +420,7 @@ public class BellowsController {
      * @param count 每页个数
      * @return
      */
-    @GetMapping(value = "api/bellows/valve/log")
+    @GetMapping(value = "/valve/log")
     public ResponseEntity<String> getValveLog(@RequestParam Date startTime, @RequestParam Date endTime, @RequestParam(required = false) Long lastId,
                                                    @RequestParam(required = false) Integer count, HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);

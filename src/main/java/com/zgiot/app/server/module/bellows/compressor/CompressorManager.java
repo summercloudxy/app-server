@@ -200,6 +200,55 @@ public class CompressorManager {
 
 
     /**
+     * 获取时间范围内空压机状态列表（如果不存在，再去寻找之后一条或之前一条）
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @param thingCodes    thingCode列表
+     * @param requestId
+     * @return
+     */
+    private Map<String, List<CompressorState>> getCompressorState(Date startTime, Date endTime, List<String> thingCodes, String requestId) {
+        Map<String, List<CompressorState>> result = new HashMap<>(thingCodes.size());
+        for (String thingCode : thingCodes) {
+            result.put(thingCode, new ArrayList<>());
+        }
+
+        //获取所有时间段内状态
+        List<CompressorState> allList = bellowsMapper.getCompressorState(startTime, endTime, thingCodes, true,null, null);
+
+        if (!CollectionUtils.isEmpty(allList)) {
+            for (CompressorState state : allList) {
+                List<CompressorState> list = result.get(state.getThingCode());
+                list.add(state);
+            }
+        }
+
+        result.forEach((thingCode, list) -> {
+            if (list.isEmpty()) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Compressor {} cannot get state in startTime {}, endTime {}.RequestId: {}.", thingCode, startTime, endTime, requestId);
+                }
+
+                //查找后一条记录
+                List<CompressorState> postState = bellowsMapper.getCompressorState(endTime, null, Arrays.asList(thingCode), true, 0 ,1);
+                if (!CollectionUtils.isEmpty(postState)) {
+                    list.add(postState.get(0));
+                } else {
+                    //查找前一条记录
+                    List<CompressorState> preState = bellowsMapper.getCompressorState(null, startTime, Arrays.asList(thingCode), false, 0, 1);
+                    if (!CollectionUtils.isEmpty(preState)) {
+                        list.add(preState.get(0));
+                    }
+                }
+            }
+        });
+
+        return result;
+    }
+
+
+
+    /**
      * 分析低压空压机状态
      * @param startTime
      * @param endTime
@@ -207,68 +256,146 @@ public class CompressorManager {
      */
     public Map<String, Map<String, Long>> analyseCompressorState(Date startTime, Date endTime, String requestId) {
         //保存结果
-        Map<String, Map<String, Long>> result = new HashMap<>(3);
+        Map<String, Map<String, Long>> result = new HashMap<>(low.getCompressors().size());
 
         //记录thingCode对应上一条state
-        Map<String, CompressorState> thingCodeStateMap = new HashMap<>(3);
+        Map<String, CompressorState> lastStateMap = new HashMap<>(low.getCompressors().size());
 
-        List<String> thingCodes = new ArrayList<>(3);
+        List<String> thingCodes = new ArrayList<>(low.getCompressors().size());
         for (Compressor compressor : low.getCompressors()) {
             thingCodes.add(compressor.getThingCode());
-            result.put(compressor.getThingCode(), new HashMap<>(4));
-            thingCodeStateMap.put(compressor.getThingCode(), null);
+            result.put(compressor.getThingCode(), new HashMap<>());
+            lastStateMap.put(compressor.getThingCode(), null);
         }
 
         //数据库查询
-        List<CompressorState> list = bellowsMapper.getCompressorState(startTime, endTime, thingCodes, null, null);
+        Map<String, List<CompressorState>> map = getCompressorState(startTime, endTime, thingCodes, requestId);
 
-        if (!CollectionUtils.isEmpty(list)) {
-            //遍历compressorStateList
-            for (CompressorState state : list) {
-                String thingCode = state.getThingCode();
-                CompressorState lastState = thingCodeStateMap.get(thingCode);
-                Map<String, Long> stateMap = result.get(thingCode);
-                long add;
-                if (lastState == null) {
-                    add = endTime.getTime() - state.getTime().getTime();
-                } else {
-                    add = lastState.getTime().getTime() - state.getTime().getTime();
-                }
-                Long time = stateMap.get(state.getPostState());
-                if (time == null) {
-                    time = add;
-                } else {
-                    time += add;
-                }
-                stateMap.put(state.getPostState(), time);
-
-                thingCodeStateMap.put(thingCode, state);
+        map.forEach((thingCode, list)-> {
+            if (list.isEmpty()) {
+                return;
             }
+
+            Map<String, Long> stateMap = result.get(thingCode);
+            //遍历state
+            for (int i = 0, length = list.size(); i < length; i++) {
+                CompressorState state = list.get(i);
+
+                if (state.getTime().before(startTime)) {
+                    //状态在时间段之前，时间段内没有值
+                    stateMap.put(state.getPostState(), endTime.getTime() - startTime.getTime());
+                } else if (state.getTime().after(endTime)) {
+                    //状态在时间段之后，时间段内没有值
+                    stateMap.put(state.getPreState(), endTime.getTime() - startTime.getTime());
+                } else {
+                    //保存的上次状态
+                    CompressorState lastState = lastStateMap.get(thingCode);
+                    //计算状态时长
+                    long duration;
+                    if (lastState == null) {
+                        duration = state.getTime().getTime() - startTime.getTime();
+                    } else {
+                        duration = state.getTime().getTime() - lastState.getTime().getTime();
+                    }
+
+                    //保存该状态总时长
+                    Long time = stateMap.get(state.getPreState());
+                    if (time == null) {
+                        time = duration;
+                    } else {
+                        time += duration;
+                    }
+                    stateMap.put(state.getPreState(), time);
+
+                    if (i == length - 1) {
+                        //最后一条记录，保存postState时长
+                        time = stateMap.get(state.getPostState());
+                        duration = endTime.getTime() - state.getTime().getTime();
+                        if (time == null) {
+                            time = duration;
+                        } else {
+                            time += duration;
+                        }
+                        stateMap.put(state.getPostState(), time);
+                    } else {
+                        //保存此次状态
+                        lastStateMap.put(thingCode, state);
+                    }
+                }
+            }
+        });
+
+        return result;
+    }
+
+    /**
+     * 获取空压机状态时间线
+     * @param startTime
+     * @param endTime
+     * @param requestId
+     * @return
+     */
+    public Map<String, List<Map<String, Long>>> getCompressorTimeline(Date startTime, Date endTime, String requestId) {
+        //保存结果
+        Map<String, List<Map<String, Long>>> result = new HashMap<>(low.getCompressors().size());
+
+        //记录thingCode对应上一条state
+        Map<String, CompressorState> lastStateMap = new HashMap<>(low.getCompressors().size());
+
+        List<String> thingCodes = new ArrayList<>(low.getCompressors().size());
+        for (Compressor compressor : low.getCompressors()) {
+            thingCodes.add(compressor.getThingCode());
+            result.put(compressor.getThingCode(), new ArrayList<>());
+            lastStateMap.put(compressor.getThingCode(), null);
         }
 
+        //数据库查询
+        Map<String, List<CompressorState>> map = getCompressorState(startTime, endTime, thingCodes, requestId);
 
-        thingCodeStateMap.forEach((thingCode, state) -> {
-            if (state != null) {
-                long add = state.getTime().getTime() - startTime.getTime();
-                Long time = result.get(thingCode).get(state.getPreState());
-                if (time == null) {
-                    time = add;
-                } else {
-                    time += add;
-                }
-                result.get(thingCode).put(state.getPreState(), time);
-            } else {
-                //未查询到该thingCode数据，再次查询上一条数据
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Compressor {} cannot found state log in startTime {} , endTime{}.RequestId: {}.", thingCode, startTime, endTime, requestId);
-                }
+        map.forEach((thingCode, list)-> {
+            if (list.isEmpty()) {
+                return;
+            }
 
-                List<CompressorState> lastState = bellowsMapper.getCompressorState(null, startTime, Arrays.asList(thingCode), 0, 1);
-                if (!CollectionUtils.isEmpty(lastState)) {
-                    result.get(thingCode).put(lastState.get(0).getPostState(), endTime.getTime() - startTime.getTime());
+            List<Map<String, Long>> timelineList = result.get(thingCode);
+            //遍历state
+            for (int i = 0, length = list.size(); i < length; i++) {
+                CompressorState state = list.get(i);
+
+                if (state.getTime().before(startTime)) {
+                    //状态在时间段之前，时间段内没有值
+                    Map<String, Long> timeline = new HashMap<>(1);
+                    timeline.put(state.getPostState(), endTime.getTime() - startTime.getTime());
+                    timelineList.add(timeline);
+                } else if (state.getTime().after(endTime)) {
+                    //状态在时间段之后，时间段内没有值
+                    Map<String, Long> timeline = new HashMap<>(1);
+                    timeline.put(state.getPreState(), endTime.getTime() - startTime.getTime());
+                    timelineList.add(timeline);
                 } else {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Compressor {} found no state log.RequestId: {}.", thingCode, requestId);
+                    //保存的上次状态
+                    CompressorState lastState = lastStateMap.get(thingCode);
+                    //计算状态时长
+                    long duration;
+                    if (lastState == null) {
+                        duration = state.getTime().getTime() - startTime.getTime();
+                    } else {
+                        duration = state.getTime().getTime() - lastState.getTime().getTime();
+                    }
+
+                    //保存该状态总时长
+                    Map<String, Long> timeline = new HashMap<>(1);
+                    timeline.put(state.getPreState(), duration);
+                    timelineList.add(timeline);
+
+                    if (i == length - 1) {
+                        //最后一条记录，保存postState时长
+                        timeline = new HashMap<>(1);
+                        timeline.put(state.getPostState(), endTime.getTime() - state.getTime().getTime());
+                        timelineList.add(timeline);
+                    } else {
+                        //保存此次状态
+                        lastStateMap.put(thingCode, state);
                     }
                 }
             }

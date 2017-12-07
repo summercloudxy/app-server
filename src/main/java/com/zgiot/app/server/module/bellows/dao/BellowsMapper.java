@@ -68,11 +68,12 @@ public interface BellowsMapper {
      * @param startTime 开始时间
      * @param endTime   结束时间
      * @param thingCodes    查询thingCode列表
+     * @param isAsc 是否顺序排序
      * @param offset    偏移量
      * @param count 个数
      * @return
      */
-    List<CompressorState> getCompressorState(@Param("startTime") Date startTime, @Param("endTime") Date endTime, @Param("thingCodes") List<String> thingCodes,
+    List<CompressorState> getCompressorState(@Param("startTime") Date startTime, @Param("endTime") Date endTime, @Param("thingCodes") List<String> thingCodes, @Param("isAsc") Boolean isAsc,
                                              @Param("offset") Integer offset, @Param("count") Integer count);
 
     /**

@@ -715,7 +715,7 @@ public class Compressor {
         state.setPostState(postState);
         if (preState == null) {
             //没有修改前状态，从数据库里查询
-            List<CompressorState> list = bellowsMapper.getCompressorState(null, new Date(), Arrays.asList(thingCode),0, 1);
+            List<CompressorState> list = bellowsMapper.getCompressorState(null, new Date(), Arrays.asList(thingCode), false, 0, 1);
             if (CollectionUtils.isEmpty(list)) {
                 preState = postState;
             } else if (list.get(0).getPostState().equals(postState)){
