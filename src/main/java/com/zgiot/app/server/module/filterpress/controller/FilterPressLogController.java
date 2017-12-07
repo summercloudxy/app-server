@@ -120,7 +120,8 @@ public class FilterPressLogController {
             try{
                 cmdControlService.sendPulseCmdBoolByShort(dataModel,5000,3,requestId,position,cleanPeriod,isHolding);
             }catch(Exception e){
-                throw new SysException("filterPress:" + dataModel.getThingCode() + "team choose exception", SysException.EC_UNKNOWN);
+                logger.info("filterPress:" + dataModel.getThingCode() + "team choose exception");
+                continue;
             }
         }
         return new ResponseEntity<>(
