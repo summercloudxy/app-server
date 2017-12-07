@@ -5,6 +5,7 @@ import com.zgiot.app.server.module.filterpress.filterPressService.FilterPressLog
 import com.zgiot.app.server.module.filterpress.pojo.FilterPressHisPlateCountWrapper;
 import com.zgiot.app.server.module.filterpress.pojo.FilterPressPlateCountWrapper;
 import com.zgiot.app.server.module.filterpress.pojo.FilterPressTotalPlateCountBean;
+import com.zgiot.app.server.module.filterpress.pojo.ManualResetBean;
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.common.constants.FilterPressLogConstants;
 import com.zgiot.common.constants.FilterPressMetricConstants;
@@ -13,11 +14,15 @@ import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.restcontroller.ServerResponse;
 import io.swagger.annotations.ApiOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -29,6 +34,8 @@ public class FilterPressLogController {
     private FilterPressLogService filterPressLogService;
     @Autowired
     private CmdControlService cmdControlService;
+
+    private static final Logger logger = LoggerFactory.getLogger(FilterPressLogController.class);
 
     @ApiOperation("日志查询，按照日期、设备编号、状态模式查询")
     @GetMapping(value="api/filterPress/log/queryLogByDate/{date}")
@@ -65,30 +72,17 @@ public class FilterPressLogController {
     @ApiOperation("人工清零")
     @PostMapping(value="api/filterPress/plate/manualReset")
     public ResponseEntity<String> manualReset( HttpServletRequest request){
-        int team = filterPressLogService.getPriorShiftTeam();
-        List<DataModel> dataModelList = null;
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
-        int position = -1;
         boolean isHolding = Boolean.FALSE;
-        switch(team){
-            case FilterPressLogConstants.ONE_TEAM_RESET:
-                dataModelList = filterPressLogService.getDataModelAllFilterPressByMetricCode(FilterPressMetricConstants.T1_CLR);
-                position = FilterPressLogConstants.T1_CLR_POSITION;
-                break;
-            case FilterPressLogConstants.TWO_TEAM_RESET:
-                dataModelList = filterPressLogService.getDataModelAllFilterPressByMetricCode(FilterPressMetricConstants.T2_CLR);
-                position = FilterPressLogConstants.T2_CLR_POSITION;
-                break;
-            case FilterPressLogConstants.THREE_TEAM_RESET:
-                dataModelList = filterPressLogService.getDataModelAllFilterPressByMetricCode(FilterPressMetricConstants.T3_CLR);
-                position = FilterPressLogConstants.T3_CLR_POSITION;
-                break;
-            default:
-        }
-        if(team != 0){
-            for(DataModel dataModel:dataModelList){
+        List<ManualResetBean> manualResetBeans =  filterPressLogService.getResetInfo();
+        DataModel dataModel = null;
+        if((manualResetBeans != null) && (manualResetBeans.size() > 0)){
+            for(ManualResetBean manualResetBean:manualResetBeans){
                 try{
+                    int position = manualResetBean.getPosition();
+                    dataModel = manualResetBean.getDataModel();
                     cmdControlService.sendPulseCmdBoolByShort(dataModel,5000,3,requestId,position,500,isHolding);
+                    logger.info("filterPress:" + dataModel.getThingCode() + " team:" + dataModel.getMetricCode() + "successfully reset");
                 }catch (Exception e){
                     throw new SysException("filterPress:" + dataModel.getThingCode() + "team reset exception", SysException.EC_UNKNOWN);
                 }
@@ -117,7 +111,7 @@ public class FilterPressLogController {
                 position = FilterPressLogConstants.T2_CHOOSE_POSITION;
                 break;
             case FilterPressLogConstants.THREE_TEAM_RESET:
-                dataModelList = filterPressLogService.getDataModelAllFilterPressByMetricCode(FilterPressMetricConstants.T2_CHOOSE);
+                dataModelList = filterPressLogService.getDataModelAllFilterPressByMetricCode(FilterPressMetricConstants.T3_CHOOSE);
                 position = FilterPressLogConstants.T3_CHOOSE_POSITION;
                 break;
             default:
