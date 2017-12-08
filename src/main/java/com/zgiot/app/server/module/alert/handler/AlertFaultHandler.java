@@ -13,8 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by xiayun on 2017/9/26.
@@ -34,6 +35,9 @@ public class AlertFaultHandler implements AlertHandler {
     private static final String DISABLE_VALUE = Boolean.FALSE.toString();
     private static final String STATE_RUN = "2";
     private static final String STATE_STOP = "1";
+    private static final String STATE_FAULT = "4";
+    private Map<String, List<DataModel>> preFaultAlertCache = new ConcurrentHashMap<>();
+    private static final int WAIT_TIME = 1000;
 
     @Override
     public void check(DataModel dataModel) {
@@ -41,13 +45,15 @@ public class AlertFaultHandler implements AlertHandler {
         String metricCode = dataModel.getMetricCode();
         AlertData alertData = alertManager.getAlertDataByThingAndMetricCode(thingCode, metricCode);
         if (ENABLE_VALUE.equalsIgnoreCase(dataModel.getValue()) && alertData == null) {
-            Set<String> metricCodeSet = thingService.findMetricsOfThing(thingCode);
-            Short level = getAlertLevel(thingCode, metricCodeSet);
-            alertData = new AlertData(dataModel, AlertConstants.TYPE_FAULT, level,
-                    metricService.getMetric(dataModel.getMetricCode()).getMetricName(), AlertConstants.SOURCE_SYSTEM,
-                    AlertConstants.REPORTER_SYSTEM);
-            alertManager.generateAlert(alertData);
-            logger.debug("生成一条故障类报警，thing:{},metric:{}", thingCode, metricCode);
+            Short level = getLevelWithOutState(thingCode);
+            if (level == null) {
+                level = getAlertLevelWithState(dataModel, true);
+            }
+            if (level == null) {
+                putCache(dataModel);
+            } else {
+                generateFaultAlert(dataModel, level);
+            }
         } else if (DISABLE_VALUE.equalsIgnoreCase(dataModel.getValue()) && alertData != null) {
             alertData.setRecovery(true);
             logger.debug("报警恢复，thing:{},metric:{}", thingCode, metricCode);
@@ -59,29 +65,104 @@ public class AlertFaultHandler implements AlertHandler {
         }
     }
 
-    private Short getAlertLevel(String thingCode, Set<String> metricCodeSet) {
-        Short level;
-        if (metricCodeSet.contains(MetricCodes.STATE)) {
-            try {
-                Thread.sleep(10);
-            } catch (Exception e) {
-                logger.debug("thread is interrupted");
+    public void checkCache(DataModel stateModel) {
+        if (preFaultAlertCache.containsKey(stateModel.getThingCode())) {
+            List<DataModel> dataModels = preFaultAlertCache.get(stateModel.getThingCode());
+            if (dataModels != null && dataModels.size() != 0) {
+                for (DataModel dataModel : dataModels) {
+                    Short alertLevel = getAlertLevel(stateModel.getPreValue());
+                    logger.debug("设备{}生成{}等级为{}的报警，状态点于故障点之后返回，设备状态当前值为：{}，上一状态值为：{},状态点时间戳为{},故障点时间戳为{}",
+                            dataModel.getThingCode(), dataModel.getMetricCode(), alertLevel, stateModel.getValue(),
+                            stateModel.getPreValue(), stateModel.getDataTimeStamp(), dataModel.getDataTimeStamp());
+                    generateFaultAlert(dataModel, alertLevel);
+                }
+                dataModels.clear();
             }
-            if (dataService.getData(thingCode, MetricCodes.STATE).isPresent()) {
-                DataModelWrapper dataModelWrapper = dataService.getData(thingCode, MetricCodes.STATE).get();
-                String preState = dataModelWrapper.getPreValue();
-                if (STATE_RUN.equals(preState)) {
-                    level = AlertConstants.LEVEL_30;
-                } else if (STATE_STOP.equals(preState)) {
-                    level = AlertConstants.LEVEL_20;
-                } else {
-                    level = AlertConstants.LEVEL_30;
+        }
+
+    }
+
+    public void updateCache() {
+        for (Map.Entry<String, List<DataModel>> entry : preFaultAlertCache.entrySet()) {
+            List<DataModel> faultModels = entry.getValue();
+            if (faultModels != null && faultModels.size() != 0) {
+                for (DataModel dataModel : faultModels) {
+                    long currentTimeMillis = System.currentTimeMillis();
+                    if (Math.abs(currentTimeMillis - dataModel.getDataTimeStamp().getTime()) >= WAIT_TIME) {
+                        faultModels.remove(dataModel);
+                        Short alertLevel = getAlertLevelWithState(dataModel, false);
+                        if (alertLevel == null) {
+                            alertLevel = AlertConstants.LEVEL_30;
+                        }
+                        logger.debug("设备{}生成{}等级为{}报警，超过等待时间未获取到设备状态信号点，当前时间戳为{}，故障点时间戳为{}", dataModel.getThingCode(),
+                                dataModel.getMetricCode(), alertLevel, currentTimeMillis,
+                                dataModel.getDataTimeStamp().getTime());
+                        generateFaultAlert(dataModel, alertLevel);
+                    }
+                }
+            }
+        }
+    }
+
+    private void generateFaultAlert(DataModel dataModel, Short level) {
+        AlertData alertData = new AlertData(dataModel, AlertConstants.TYPE_FAULT, level,
+                metricService.getMetric(dataModel.getMetricCode()).getMetricName(), AlertConstants.SOURCE_SYSTEM,
+                AlertConstants.REPORTER_SYSTEM);
+        alertManager.generateAlert(alertData);
+        logger.debug("生成一条故障类报警，thing:{},metric:{},等级：{}", dataModel.getThingCode(), dataModel.getMetricCode(), level);
+    }
+
+    public void putCache(DataModel dataModel) {
+        List<DataModel> faultModels;
+        if (preFaultAlertCache.containsKey(dataModel.getThingCode())) {
+            faultModels = preFaultAlertCache.get(dataModel.getThingCode());
+        } else {
+            faultModels = new CopyOnWriteArrayList<>();
+            preFaultAlertCache.put(dataModel.getThingCode(), faultModels);
+        }
+        faultModels.add(dataModel);
+    }
+
+    private Short getLevelWithOutState(String thingCode) {
+        Set<String> metricCodeSet = thingService.findMetricsOfThing(thingCode);
+        if (!metricCodeSet.contains(MetricCodes.STATE)) {
+            return AlertConstants.LEVEL_20;
+        }
+        return null;
+    }
+
+    private Short getAlertLevelWithState(DataModel dataModel, Boolean checkInterval) {
+        if (dataService.getData(dataModel.getThingCode(), MetricCodes.STATE).isPresent()) {
+            DataModelWrapper dataModelWrapper = dataService.getData(dataModel.getThingCode(), MetricCodes.STATE).get();
+            String preState = dataModelWrapper.getPreValue();
+            if (checkInterval) {
+                long stateTime = dataModelWrapper.getDataTimeStamp().getTime();
+                long faultTime = dataModel.getDataTimeStamp().getTime();
+                if (Math.abs(faultTime - stateTime) <= WAIT_TIME) {
+                    logger.debug("设备{}状态点于故障点之前返回，计算设备报警等级，设备状态当前值为{}，上一状态值为{}，设备状态时间戳为{}，故障点时间戳为{}",
+                            dataModel.getThingCode(), dataModelWrapper.getValue(), dataModelWrapper.getPreValue(),
+                            stateTime, faultTime);
+                    return getAlertLevel(preState);
                 }
             } else {
-                level = AlertConstants.LEVEL_30;
+                logger.debug("超过等待时间未获取到设备{}状态信号点，计算设备报警等级，设备状态当前值为{}，上一状态值为{},设备状态时间戳为{}", dataModel.getThingCode(),
+                        dataModelWrapper.getValue(), dataModelWrapper.getPreValue(),
+                        dataModelWrapper.getDataTimeStamp());
+                return getAlertLevel(preState);
             }
+        }
+        return null;
+
+    }
+
+    private Short getAlertLevel(String preState) {
+        Short level;
+        if (STATE_RUN.equals(preState)) {
+            level = AlertConstants.LEVEL_30;
+        } else if (STATE_STOP.equals(preState)) {
+            level = AlertConstants.LEVEL_20;
         } else {
-            level = AlertConstants.LEVEL_10;
+            level = AlertConstants.LEVEL_30;
         }
         return level;
     }

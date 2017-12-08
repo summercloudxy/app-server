@@ -1,4 +1,4 @@
-package com.zgiot.app.server;
+package com.zgiot.app.server.config;
 
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;

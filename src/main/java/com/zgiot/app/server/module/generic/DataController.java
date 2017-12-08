@@ -4,10 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.service.MetricService;
 import com.zgiot.app.server.service.ThingService;
-import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.DataModelWrapper;
-import com.zgiot.common.pojo.MetricModel;
-import com.zgiot.common.pojo.ThingModel;
 import com.zgiot.common.restcontroller.ServerResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -65,6 +62,14 @@ public class DataController {
 
         return new ResponseEntity<>(
                 JSON.toJSONString(ServerResponse.buildOK(dw))
+                , HttpStatus.OK);
+    }
+
+    @GetMapping("/stats/counters")
+    public ResponseEntity<String> counterStats() {
+        Map counterMap = dataService.getAccessCounterMap();
+        return new ResponseEntity<>(
+                JSON.toJSONString(ServerResponse.buildOK(counterMap))
                 , HttpStatus.OK);
     }
 

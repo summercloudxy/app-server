@@ -81,9 +81,9 @@ public class FilterPress {
     private volatile boolean unloadConfirmNeed;
 
     /**
-     * 卸料时刻
+     * T_COUNT变化时间，用于说明压板数变化，如本台压滤机本队压板数增加1
      */
-    private volatile long unloadTime;
+    private volatile long plateCountChangeTime = 0;
     /**
      * 卸料时长
      */
@@ -99,45 +99,44 @@ public class FilterPress {
     /**
      * 松开时长
      */
-    private volatile  long looseDuration;
+    private volatile long looseDuration;
     /**
      * 松开开始时间
      */
-    private volatile  long looseStartTime;
+    private volatile long looseStartTime;
     /**
      * 松开结束时间
      */
-    private volatile  long looseEndTime;
+    private volatile long looseEndTime;
     /**
      * 取板时长
      */
-    private volatile  long takenDuration;
+    private volatile long takenDuration;
     /**
      * 取板开始时间
      */
-    private volatile  long takenStartTime;
+    private volatile long takenStartTime;
     /**
      * 取板结束时间
      */
-    private volatile  long takenEndTime;
+    private volatile long takenEndTime;
     /**
      * 拉板时长
      */
-    private volatile  long pullDuration;
+    private volatile long pullDuration;
     /**
      * 拉板开始时间
      */
-    private volatile  long pullStartTime;
+    private volatile long pullStartTime;
     /**
      * 拉板结束时间
      */
-    private volatile  long pullEndTime;
+    private volatile long pullEndTime;
     /**
      * 统计每台压滤机第几板，用于日志保存和查询
      * 每天0点置0
      */
-    private volatile  int statisticLogplateCount;
-
+    private volatile int statisticLogplateCount;
 
 
     public FilterPress(String code, FilterPressManager manager) {
@@ -167,149 +166,185 @@ public class FilterPress {
         logger.trace("{} got faults", code);
     }
 
-    public void onLocal(){
-        logger.trace("{} on local", code);
-        int position = -1;
-        if(manager != null && (!manager.getUnloadSequence().isEmpty()) && (!StringUtils.isBlank(getCode()))){
-            position = manager.getUnloadSequence().get(this.getCode());
+    public void teamCount(String metricCode, String metricCodeValue) {
+        if(Integer.valueOf(metricCodeValue) == 0){
+            savePlateInfo(metricCode,metricCodeValue);
+            return;
         }
-        manager.getUnloadManager().getQueue().remove(this);
-        manager.getUnloadSequence().remove(this.getCode());
-        try{
-            manager.getUnConfirmedUnload().remove(this.getCode());
-        }catch (NullPointerException e){
-            throw new SysException("未确定卸料set中不存在这台压滤机thingCode",SysException.EC_UNKNOWN);
-        }
-        if(position > 0){
-            manager.getUnloadManager().reSort(position);
-        }
-    }
-
-    public void onLoosen() {
-        logger.trace("{} on loosen", code);
-
-        long unloadStartTime = 0;
-        looseStartTime = System.currentTimeMillis();
-        if(looseDuration > 0 && takenDuration > 0 && pullDuration > 0){
-            unloadDuration = 0;
-            unloadDuration = looseDuration + takenDuration + pullDuration;
-        }
-        if(unloadTime  > 0){
-
-            unloadStartTime = unloadTime;
-        }
-        unloadTime = System.currentTimeMillis();
-
-        this.startUnload();
-        int position = -1;
-        if(manager != null && (!manager.getUnloadSequence().isEmpty())
-                && (!StringUtils.isBlank(getCode()))
-                && manager.getUnloadSequence().containsKey(this.getCode())){
-            position = manager.getUnloadSequence().get(this.getCode());
-        }
-        manager.getUnloadManager().getQueue().remove(this);
-        manager.getUnloadSequence().remove(this.getCode());
-        try{
-            manager.getUnConfirmedUnload().remove(this.getCode());
-        }catch (NullPointerException e){
-           throw new SysException("未确定卸料set中不存在这台压滤机thingCode",SysException.EC_UNKNOWN);
-        }
-        if(position > 0){
-            manager.getUnloadManager().reSort(position);
-        }
-
+        savePlateInfo(metricCode,metricCodeValue);
         /**
          * 日志操作
+         * 此时认为是松开时刻
          */
-        if(manager.getStatisticLogs().containsKey(this.code)){
+
+        if (manager.getStatisticLogs().containsKey(this.code)) {
             FilterPressLogBean filterPressLogBean = manager.getStatisticLogs().get(this.code);
             filterPressLogBean.clear();
             filterPressLogBean.setThingCode(this.code);
-            if(unloadDuration > 0){
+            if (looseDuration > 0 && takenDuration > 0 && pullDuration > 0) {
+                unloadDuration = looseDuration + takenDuration + pullDuration;
                 filterPressLogBean.setUnloadDuration(unloadDuration);
-                looseDuration  = 0;
+                logger.info("unloadDuration:" + unloadDuration);
+                looseDuration = 0;
                 takenDuration = 0;
                 pullDuration = 0;
+                unloadDuration = 0;
             }
-            if(feedStartTime > 0 && feedDuration > 0){
-                filterPressLogBean.setFeedStartTime(parseDate(feedStartTime));
-                filterPressLogBean.setFeedDuration(feedDuration);
-                feedStartTime = 0;
-                feedDuration = 0;
-            }
-            if(feedPumpCurrent > 0 ){
+
+            filterPressLogBean.setFeedStartTime(parseDate(feedStartTime));
+            filterPressLogBean.setFeedDuration(feedDuration);
+            logger.info("feedStartTime:" + feedStartTime);
+            logger.info("feedDuration:" + feedDuration);
+
+            if (feedPumpCurrent > 0) {
                 filterPressLogBean.setFeedCurrent(feedPumpCurrent);
-                feedPumpCurrent = 0;
+                logger.info("feedPumpCurrent:" + feedPumpCurrent);
             }
-            if(unloadStartTime > 0){
-                filterPressLogBean.setUnloadTime(parseDate(unloadStartTime));
+
+            //保存上一次压板计数变化开始时间
+            if(plateCountChangeTime == 0){
+                plateCountChangeTime = System.currentTimeMillis();
             }
-            if(producingTeam != null && producingTeam > 0){
+            long proceedingTime = System.currentTimeMillis() - plateCountChangeTime;
+            long waitingTime = 0;
+            if(looseStartTime > 0){
+                filterPressLogBean.setUnloadTime(parseDate(looseStartTime));
+                waitingTime = looseStartTime - waitDuration;
+            }else{
+                filterPressLogBean.setUnloadTime(parseDate(System.currentTimeMillis()));
+                waitingTime = System.currentTimeMillis() - waitDuration;
+            }
+            logger.info("unloadTime:" + looseStartTime);
+
+            if (producingTeam != null && producingTeam > 0) {
                 filterPressLogBean.setTeam(producingTeam);
                 int plateCount = this.plateCount.get(producingTeam);
-                if(plateCount > 0){
+                if (plateCount > 0) {
                     filterPressLogBean.setPlateCount(plateCount);
                 }
-                filterPressLogBean.setTotalPlateCount(getAllFilterPressTotalPlateCount(Boolean.FALSE));
+                int totalPlateCount = getAllFilterPressTotalPlateCount(this.getCode());
+                filterPressLogBean.setTotalPlateCount(totalPlateCount);
+                logger.info("plateCount:" + plateCount);
+                logger.info("totalPlateCount:" + totalPlateCount);
             }
             filterPressLogBean.setSaveTime(parseDate(System.currentTimeMillis()));
-            String proceedingTime = getValueFromCacheByMetric(FilterPressMetricConstants.PRC_TIMER);
-            if(!StringUtils.isBlank(proceedingTime)){
-                filterPressLogBean.setProceedingDuration(Long.parseLong(proceedingTime));
+
+            if(proceedingTime > 0){
+                filterPressLogBean.setProceedingDuration(proceedingTime);
+                logger.info("proceedingDuration:" + proceedingTime);
             }
-//            if(unloadTime - unloadStartTime > 0){
-//                filterPressLogBean.setProceedingDuration(unloadTime - unloadStartTime);
-//            }
-            long waitingTime = System.currentTimeMillis() - waitDuration;
-            if(waitingTime > 0){
+            if (waitingTime > 0) {
                 filterPressLogBean.setWaitDuration(waitingTime);
+                logger.info("waitingTime:" + waitingTime);
                 waitDuration = 0;
             }
 
             filterPressLogBean.setFeedState(feedIntelligent ? FilterPressLogConstants.FEED_INTELLIGENT : FilterPressLogConstants.FEED_AUTO);
             filterPressLogBean.setUnloadState(unloadIntelligent ? FilterPressLogConstants.UNLOAD_INTELLIGENT : FilterPressLogConstants.UNLOAD_AUTO);
 
-            filterPressLogBean.setPlateStartTime(parseDate(unloadStartTime));
+            filterPressLogBean.setPlateStartTime(parseDate(plateCountChangeTime));
+            plateCountChangeTime = System.currentTimeMillis();
 
-            if(FilterPressLogUtil.isDayShift(FilterPressLogConstants.DAY_SHIFT_START_TIME_SCOPE,FilterPressLogConstants.DAY_SHIFT_END_TIME_SCOPE) ){
+            if (FilterPressLogUtil.isDayShift(FilterPressLogConstants.DAY_SHIFT_START_TIME_SCOPE, FilterPressLogConstants.DAY_SHIFT_END_TIME_SCOPE)) {
                 filterPressLogBean.setDayShift(FilterPressLogConstants.IS_DAY_SHIFT_OK);
-            }else{
+            } else {
                 filterPressLogBean.setDayShift(FilterPressLogConstants.IS_DAY_SHIFT_NO);
             }
 
             filterPressLogBean.setPeriod(FilterPressLogConstants.PERIOD_TWO);
-
-            if(!filterPressLogBean.isEmpty()){
-                if(FilterPressLogUtil.isFirstLooseEveryDay(unloadStartTime,unloadTime)){
-                    statisticLogplateCount = 0;
-                }
-                statisticLogplateCount ++;
-                filterPressLogBean.setStatisticLogPlateCount(statisticLogplateCount);
-                filterPressLogBean.setStatisticLogTotalPlateCount(getAllFilterPressTotalPlateCount(Boolean.TRUE));
-                manager.filterPressLogService.saveFilterPressLog(filterPressLogBean);
-            }else{
-                logger.info("server is reset or filterPress first link server");
+            if((feedDuration == 0) && (unloadDuration == 0) && (proceedingTime == 0)){
+                return;
             }
+            manager.filterPressLogService.saveFilterPressLog(filterPressLogBean);
         }
     }
 
-    public void offLoosen(){
-        logger.trace("{} off loosen", code);
-        looseEndTime = System.currentTimeMillis();
-        looseDuration = 0;
-        looseDuration += looseEndTime - looseStartTime;
+    public void onLocal() {
+        logger.trace("{} on local", code);
+        int position = -1;
+        if (manager != null && (!manager.getUnloadSequence().isEmpty()) && (!StringUtils.isBlank(getCode()))) {
+            position = manager.getUnloadSequence().get(this.getCode());
+        }
+        manager.getUnloadManager().getQueue().remove(this);
+        manager.getUnloadSequence().remove(this.getCode());
+        try {
+            manager.getUnConfirmedUnload().remove(this.getCode());
+        } catch (NullPointerException e) {
+            throw new SysException("未确定卸料set中不存在这台压滤机thingCode", SysException.EC_UNKNOWN);
+        }
+        if (position > 0) {
+            manager.getUnloadManager().reSort(position);
+        }
     }
 
-    public void offTaken(){
+    public void onLoosen() {
+        logger.trace("{} on loosen", code);
+        looseStartTime = System.currentTimeMillis();
+        this.startUnload();
+        int position = -1;
+        if (manager != null && (!manager.getUnloadSequence().isEmpty())
+                && (!StringUtils.isBlank(getCode()))
+                && manager.getUnloadSequence().containsKey(this.getCode())) {
+            position = manager.getUnloadSequence().get(this.getCode());
+        }
+        manager.getUnloadManager().getQueue().remove(this);
+        manager.getUnloadSequence().remove(this.getCode());
+        try {
+            manager.getUnConfirmedUnload().remove(this.getCode());
+        } catch (NullPointerException e) {
+            throw new SysException("未确定卸料set中不存在这台压滤机thingCode", SysException.EC_UNKNOWN);
+        }
+        if (position > 0) {
+            manager.getUnloadManager().reSort(position);
+        }
+    }
+
+    public void offLoosen() {
+        logger.trace("{} off loosen", code);
+        looseEndTime = System.currentTimeMillis();
+        logger.info("looseStartTime", looseStartTime);
+        if(looseStartTime == 0){
+            looseStartTime = System.currentTimeMillis();
+        }
+        looseDuration = 0;
+        looseDuration = looseEndTime - looseStartTime;
+    }
+
+    public void offTaken() {
         takenEndTime = System.currentTimeMillis();
+        logger.info("takenEndTime", takenEndTime);
+        if(takenStartTime == 0){
+            takenStartTime = System.currentTimeMillis();
+        }
         takenDuration += takenEndTime - takenStartTime;
     }
 
-    public void offPull(){
+    public void offPull() {
         pullEndTime = System.currentTimeMillis();
+        logger.info("pullStartTime", pullStartTime);
+        if(pullStartTime == 0){
+            pullStartTime = System.currentTimeMillis();
+        }
         pullDuration += pullEndTime - pullStartTime;
+    }
 
-
+    public void offFeed(){
+        this.feedOverTime = System.currentTimeMillis();
+        if(feedStartTime == 0){
+            this.feedStartTime = System.currentTimeMillis();
+        }
+        feedDuration = feedOverTime - feedStartTime;
+        List<String> feedPumpCodes = manager.getKeyByValueFromMap(manager.getFilterPressPumpMapping(),this.getCode());
+        String feedPumpCode = feedPumpCodes.get(0);
+        if(feedPumpCodes.size() == 0){
+            throw new SysException("feedPump thingCode is null",SysException.EC_UNKNOWN);
+        }
+        Optional<DataModelWrapper> currentWrapper = manager.dataService.getData(feedPumpCode,FilterPressMetricConstants.FEED_PUMP_CURRENT);
+        Float current = new Float(0);
+        if(currentWrapper.isPresent()){
+            current = Float.parseFloat(currentWrapper.get().getValue());
+        }
+        this.setFeedPumpCurrent(current);
     }
 
     public void onTaken() {
@@ -338,8 +373,6 @@ public class FilterPress {
 
     public void onFeedOver() {
         logger.trace("{} on feed over", code);
-        feedOverTime = System.currentTimeMillis();
-        feedDuration  = feedOverTime - feedStartTime;
     }
 
     public void onBlow() {
@@ -360,8 +393,6 @@ public class FilterPress {
 
     public void onAssumeFeedOver() {
         logger.trace("{} assume to be feed over", code);
-        this.feedOverTime = System.currentTimeMillis();
-//        feedDuration = feedOverTime - feedStartTime;
         if (feedIntelligent) {
             manager.execFeedOver(this);
             logger.debug("{} executed feed over, intelligent:{}", code, feedIntelligent);
@@ -391,10 +422,6 @@ public class FilterPress {
 
     public String getCode() {
         return code;
-    }
-
-    public void setFeedOverTime(Long feedOverTime) {
-        this.feedOverTime = feedOverTime;
     }
 
     public Long getFeedDuration() {
@@ -457,9 +484,6 @@ public class FilterPress {
         return unloadConfirmNeed;
     }
 
-    public long getUnloadTime() {
-        return unloadTime;
-    }
 
     public long getUnloadDuration() {
         return unloadDuration;
@@ -485,8 +509,12 @@ public class FilterPress {
         return pullDuration;
     }
 
-    public void setUnloadTime(long unloadTime) {
-        this.unloadTime = unloadTime;
+    public long getPlateCountChangeTime() {
+        return plateCountChangeTime;
+    }
+
+    public void setPlateCountChangeTime(long plateCountChangeTime) {
+        this.plateCountChangeTime = plateCountChangeTime;
     }
 
     public void setUnloadDuration(long unloadDuration) {
@@ -541,16 +569,8 @@ public class FilterPress {
         return statisticLogplateCount;
     }
 
-    public void setFeedStartTime(long feedStartTime) {
-        this.feedStartTime = feedStartTime;
-    }
-
     public void setFeedOverTime(long feedOverTime) {
         this.feedOverTime = feedOverTime;
-    }
-
-    public void setFeedDuration(long feedDuration) {
-        this.feedDuration = feedDuration;
     }
 
     public void setOnCycleTime(long onCycleTime) {
@@ -591,46 +611,70 @@ public class FilterPress {
 
     public int getPlateCount() {
         logger.info("producingTeam:" + producingTeam);
-        if(producingTeam == null){
+        if (producingTeam == null) {
             return 0;
         }
         logger.info("plateCount:" + plateCount);
         return plateCount.get(producingTeam);
     }
 
-    public Date parseDate(long timeStamp){
+    public Date parseDate(long timeStamp) {
         SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String dateStr = dateformat.format(timeStamp);
         Date date = null;
-        try{
+        try {
             date = dateformat.parse(dateStr);
-        }catch(ParseException e){
+        } catch (ParseException e) {
             e.printStackTrace();
         }
         return date;
     }
 
-    public String getValueFromCacheByMetric(String metricCode){
-        Optional<DataModelWrapper> wrapper = manager.dataService.getData(this.getCode(),metricCode);
-        if(wrapper.isPresent()){
-           return wrapper.get().getValue();
+    public String getPRCTimeFromCacheByMetric(String metricCode) {
+        Optional<DataModelWrapper> wrapper = manager.dataService.getData(this.getCode(), metricCode);
+        if (wrapper.isPresent()) {
+            String preValue = wrapper.get().getPreValue();
+            String value = wrapper.get().getValue();
+            if(Long.parseLong(value) < Long.parseLong(preValue)){
+                return preValue;
+            }else{
+               return value;
+            }
         }
         return null;
     }
 
-    private int getAllFilterPressTotalPlateCount(boolean isLogPlateCount){
-        Map<String,FilterPressLogBean> filterPressLogBeanMap = manager.getStatisticLogs();
-        int totalPlateCount = 0;
-        if(!filterPressLogBeanMap.isEmpty()){
-            for(String thingCode:filterPressLogBeanMap.keySet()){
-                if(isLogPlateCount){
-                    totalPlateCount += filterPressLogBeanMap.get(thingCode).getStatisticLogPlateCount();
-                }else{
-                    totalPlateCount += filterPressLogBeanMap.get(thingCode).getPlateCount();
-                }
-            }
+    private int getAllFilterPressTotalPlateCount(String thingCode) {
+        String totalPlateCount = null;
+        Optional<DataModelWrapper> wrapper = manager.dataService.getData(thingCode, FilterPressMetricConstants.PLATE_TTL);
+        if (wrapper.isPresent()) {
+            totalPlateCount = wrapper.get().getValue();
         }
-        return totalPlateCount;
+        if(!StringUtils.isBlank(totalPlateCount)){
+            return Integer.valueOf(totalPlateCount);
+        }else{
+            return 0;
+        }
+    }
+
+    private void savePlateInfo(String metricCode, String metricCodeValue){
+        if (FilterPressMetricConstants.T1_COUNT.equals(metricCode)
+                || FilterPressMetricConstants.T2_COUNT.equals(metricCode)
+                || FilterPressMetricConstants.T3_COUNT.equals(metricCode)) {
+            switch (metricCode) {
+                case FilterPressMetricConstants.T1_COUNT:
+                    this.updatePlateCount(FilterPressLogConstants.TEAM1, Integer.valueOf(metricCodeValue));
+                    break;
+                case FilterPressMetricConstants.T2_COUNT:
+                    this.updatePlateCount(FilterPressLogConstants.TEAM2, Integer.valueOf(metricCodeValue));
+                    break;
+                case FilterPressMetricConstants.T3_COUNT:
+                    this.updatePlateCount(FilterPressLogConstants.TEAM3, Integer.valueOf(metricCodeValue));
+                    break;
+                default:
+            }
+            manager.calculatePlateAndSave();
+        }
     }
 
     class UnloadManager {
