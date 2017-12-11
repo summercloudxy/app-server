@@ -73,7 +73,7 @@ public class AlertFaultHandler implements AlertHandler {
                     Short alertLevel = getAlertLevel(stateModel.getPreValue());
                     logger.debug("设备{}生成{}等级为{}的报警，状态点于故障点之后返回，设备状态当前值为：{}，上一状态值为：{},状态点时间戳为{},故障点时间戳为{}",
                             dataModel.getThingCode(), dataModel.getMetricCode(), alertLevel, stateModel.getValue(),
-                            stateModel.getPreValue(), stateModel.getDataTimeStamp(), dataModel.getDataTimeStamp());
+                            stateModel.getPreValue(), stateModel.getDataTimeStamp().getTime(), dataModel.getDataTimeStamp().getTime());
                     generateFaultAlert(dataModel, alertLevel);
                 }
                 dataModels.clear();
@@ -147,7 +147,7 @@ public class AlertFaultHandler implements AlertHandler {
             } else {
                 logger.debug("超过等待时间未获取到设备{}状态信号点，计算设备报警等级，设备状态当前值为{}，上一状态值为{},设备状态时间戳为{}", dataModel.getThingCode(),
                         dataModelWrapper.getValue(), dataModelWrapper.getPreValue(),
-                        dataModelWrapper.getDataTimeStamp());
+                        dataModelWrapper.getDataTimeStamp().getTime());
                 return getAlertLevel(preState);
             }
         }

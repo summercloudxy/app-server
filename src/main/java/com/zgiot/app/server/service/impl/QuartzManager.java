@@ -47,7 +47,7 @@ public class QuartzManager {
     }
 
     public static void addJobWithInterval(String jobName, String jobGroup, String triggerName, String triggerGroup,
-            Class cls, Integer interval, JobDataMap jobDataMap) {
+            Class cls, long interval, JobDataMap jobDataMap) {
         try {
             ApplicationContext context = ApplicationContextListener.getApplicationContext();
             StdScheduler scheduler = (StdScheduler) context.getBean("quartzScheduler");
