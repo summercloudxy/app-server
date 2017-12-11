@@ -244,7 +244,7 @@ public class Compressor {
 
         //组装属性（远程状态、故障状态、启动状态和加载状态使用监听者，不在这里组装）
         this.setCurrent(Integer.parseInt(BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.CURRENT).orElse("0")));
-        this.setPressure(Double.parseDouble(BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.CURRENT).orElse("0"))/100);
+        this.setPressure(Double.parseDouble(BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.PRESSURE).orElse("0"))/100);
         this.setTemperature(Integer.parseInt(BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.TEMPERATURE).orElse("0")));
         this.setRunTime(Integer.parseInt(BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.RUN_TIME).orElse("0")));
         this.setLoadTime(Integer.parseInt(BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.LOAD_TIME).orElse("0")));
