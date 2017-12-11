@@ -1,0 +1,1 @@
+ALTER  TABLE  `tb_alert_data_backup` MODIFY metric_code VARCHAR(30);
