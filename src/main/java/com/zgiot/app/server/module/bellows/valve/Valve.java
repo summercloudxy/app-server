@@ -294,7 +294,12 @@ public class Valve {
     }
 
     public Long getExecTime() {
-        return execTime;
+        if (execTime == null) {
+            return null;
+        }
+        //返回前端倒计时毫秒数
+        long countDown = execTime - new Date().getTime();
+        return countDown < 0 ? 0 : countDown;
     }
 
     public void setExecTime(Long execTime) {

@@ -75,6 +75,11 @@ public class ValveManager {
     private volatile Long nextBlowTime;
 
     /**
+     * 本轮鼓风结束时间
+     */
+    private volatile Long endBlowTime;
+
+    /**
      * 每组最大个数
      */
     private volatile int maxCount;
@@ -234,13 +239,16 @@ public class ValveManager {
                 //不处于智能鼓风状态
                 stage = BellowsConstants.BLOW_STAGE_NONE;
                 nextBlowTime = null;
+                endBlowTime = null;
             } else {
                 //处于鼓风前等待阶段
                 stage = BellowsConstants.BLOW_STAGE_WAIT;
 
                 //判断将要鼓风时间是否超时
-                Date execTime = checkExecOutTime(waitTeams.get(0).getExecTime());
+                ValveTeam firstWaitTeam = waitTeams.get(0);
+                Date execTime = checkExecOutTime(firstWaitTeam.getExecTime());
                 nextBlowTime = execTime.getTime();
+                endBlowTime = execTime.getTime() + waitTeams.size() * firstWaitTeam.getDuration();
 
                 //设置每组阀门的状态
                 for (int i=0,length=waitTeams.size();i<length;i++) {
@@ -270,40 +278,26 @@ public class ValveManager {
             }
 
             List<ValveTeam> executedTeams = bellowsMapper.getValveTeamByStatus(BellowsConstants.VALVE_STATUS_EXECUTED);
-            if (CollectionUtils.isEmpty(executedTeams)) {
+            if (!CollectionUtils.isEmpty(executedTeams)) {
                 for (int i=0,length=executedTeams.size();i<length;i++) {
                     setValveStageAndExecTime(executedTeams.get(i).getId(), BellowsConstants.BLOW_STATE_FINISH, null);
                 }
             }
 
-            if (runTime == 0 || maxCount == 0) {
+            //计算本轮鼓风结束时间
+            long endBlowTime = execTime.getTime();
+            if (waitTeams != null) {
+                endBlowTime += runningTeam.getDuration()*waitTeams.size()*DateUtils.MILLIS_PER_MINUTE;
+            }
+            this.endBlowTime = endBlowTime;
+
+
+            if (!checkValveParam() || !checkValveIntelligent()) {
                 //不需要下次鼓风
                 nextBlowTime = null;
             } else {
-                //判断是否有阀门处于智能状态
-                boolean needNextBlow = false;
-                List<Valve> valves = valveCache.findAll();
-                for (Valve valve : valves) {
-                    if (valve.isIntelligent()) {
-                        needNextBlow = true;
-                        break;
-                    }
-                }
-                if (!needNextBlow) {
-                    nextBlowTime = null;
-                } else {
-                    //计算鼓风前等待时间
-                    long nextBlowTime = waitTime*DateUtils.MILLIS_PER_MINUTE;
-                    //判断当前正在鼓风组是否超时
-                    nextBlowTime += execTime.getTime();
-
-                    //计算等待组的总时间
-                    if (waitTeams != null) {
-                        nextBlowTime += runningTeam.getDuration()*waitTeams.size()*DateUtils.MILLIS_PER_MINUTE;
-                    }
-
-                    this.nextBlowTime = nextBlowTime;
-                }
+                //计算鼓风前等待时间
+                nextBlowTime = endBlowTime + waitTime*DateUtils.MILLIS_PER_MINUTE;
             }
         }
 
@@ -340,7 +334,7 @@ public class ValveManager {
             if (execTime == null) {
                 valve.setExecTime(null);
             } else {
-                valve.setExecTime(execTime.getTime() - new Date().getTime());
+                valve.setExecTime(execTime.getTime());
             }
         }
     }
@@ -357,6 +351,31 @@ public class ValveManager {
         } else {
             return DateUtils.ceiling(now, Calendar.MINUTE);
         }
+    }
+
+    /**
+     * 判断阀门参数设置
+     * @return
+     */
+    private boolean checkValveParam() {
+        if (runTime == 0 || waitTime == 0 || maxCount == 0) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 判断是否有智能阀门
+     * @return
+     */
+    private boolean checkValveIntelligent() {
+        List<Valve> valves = valveCache.findAll();
+        for (Valve valve : valves) {
+            if (valve.isIntelligent()) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
@@ -386,8 +405,6 @@ public class ValveManager {
         if (CollectionUtils.isEmpty(thingCodes)) {
             //所有阀门都是手动模式
             intelligentCodes = new ArrayList<>();
-            //下次智能鼓风时间为null
-            setNextBlowTime(null, requestId);
         } else {
             intelligentCodes = thingCodes;
         }
@@ -455,10 +472,6 @@ public class ValveManager {
         if (logger.isDebugEnabled()) {
             logger.debug("Valve max count is set to {}. RequestId: {}.", maxCount, requestId);
         }
-
-        if (maxCount == 0) {
-            setNextBlowTime(null, requestId);
-        }
         return true;
     }
 
@@ -482,13 +495,6 @@ public class ValveManager {
         if (logger.isDebugEnabled()) {
             logger.debug("Valve wait time is set to {}. RequestId: {}.", waitTime, requestId);
         }
-
-        if (BellowsConstants.BLOW_STAGE_RUN.equals(stage)) {
-            //处在鼓风中状态，需要修改下次鼓风时间
-            int interval = waitTime - old;
-            setNextBlowTime(nextBlowTime + interval * DateUtils.MILLIS_PER_MINUTE, requestId);
-        }
-
         return true;
     }
 
@@ -511,10 +517,6 @@ public class ValveManager {
         bellowsMapper.updateParamValue(BellowsConstants.SYS, BellowsConstants.VALVE_RUN_MINUTE, (long)runTime);
         if (logger.isDebugEnabled()) {
             logger.debug("Valve run time is set to {}. RequestId: {}.", runTime, requestId);
-        }
-
-        if (runTime == 0) {
-            setNextBlowTime(null, requestId);
         }
         return true;
     }
@@ -709,11 +711,12 @@ public class ValveManager {
         //将之前的分组删除
         bellowsMapper.deleteValveTeamByStatus(BellowsConstants.VALVE_STATUS_EXECUTED);
 
-        //检查参数
-        if (runTime == 0 || maxCount == 0) {
+        //检查是否要开启新一轮
+        if (!checkValveParam() || !checkValveIntelligent()) {
             lumpTeamCount = 0;
             slackTeamCount = 0;
             stage = BellowsConstants.BLOW_STAGE_NONE;
+            endBlowTime = null;
             setNextBlowTime(null, requestId);
 
             //清除阀门分组状态
@@ -724,7 +727,7 @@ public class ValveManager {
             }
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Valve intelligent runtime or maxItemCount is 0, cannot start loop. RequestId: {}.", requestId);
+                logger.debug("Valve cannot start loop. RequestId: {}.", requestId);
             }
             return;
         }
@@ -749,12 +752,23 @@ public class ValveManager {
         //设置执行时间
         for (int i=0,length=teams.size();i<length;i++) {
             ValveTeam team = teams.get(i);
+
+            //更新阀门teamId
+            List<String> thingCodes = team.getValveThingCodes();
+            for (String thingCode : thingCodes) {
+                Valve valve = getValveFromCache(thingCode);
+                valve.setTeamId(team.getId(), bellowsMapper, requestId);
+            }
+
             if (i == 0) {
                 Date execTime = DateUtils.truncate(new Date(new Date().getTime() + waitTime*DateUtils.MILLIS_PER_MINUTE), Calendar.MINUTE);
                 team.setExecTime(execTime);
                 setNextBlowTime(execTime.getTime(), requestId);
 
                 setValveStageAndExecTime(team.getId(), BellowsConstants.BLOW_STAGE_WAIT, execTime);
+
+                //计算本轮结束时间
+                endBlowTime = execTime.getTime() + length * team.getDuration() * DateUtils.MILLIS_PER_MINUTE;
             } else {
                 setValveStageAndExecTime(team.getId(), BellowsConstants.BLOW_STAGE_WAIT, null);
             }
@@ -762,15 +776,6 @@ public class ValveManager {
 
 
         bellowsMapper.insertBatchValveTeam(teamResult.getTeams());
-
-        //更新阀门teamId
-        for (ValveTeam team : teams) {
-            List<String> thingCodes = team.getValveThingCodes();
-            for (String thingCode : thingCodes) {
-                Valve valve = getValveFromCache(thingCode);
-                valve.setTeamId(team.getId(), bellowsMapper, requestId);
-            }
-        }
     }
 
     /**
@@ -799,6 +804,9 @@ public class ValveManager {
                 bellowsMapper.updateValveTeam(team);
 
                 setValveStageAndExecTime(team.getId(), BellowsConstants.BLOW_STAGE_WAIT, execTime);
+
+                //计算本轮结束时间
+                endBlowTime = execTime.getTime() + length * team.getDuration() * DateUtils.MILLIS_PER_MINUTE;
             } else {
                 setValveStageAndExecTime(team.getId(), BellowsConstants.BLOW_STAGE_WAIT, null);
             }
@@ -929,6 +937,17 @@ public class ValveManager {
      * @param requestId
      */
     private void onChanged(boolean changed, String requestId) {
+        if (changed && BellowsConstants.BLOW_STAGE_RUN.equals(stage)) {
+            if (!checkValveParam() || !checkValveIntelligent()) {
+                //在鼓风阶段，没有下轮鼓风
+                setNextBlowTime(null, requestId);
+            } else {
+                //在鼓风阶段，重新计算下轮鼓风时间
+                setNextBlowTime(endBlowTime + waitTime*DateUtils.MILLIS_PER_MINUTE, requestId);
+            }
+        }
+
+
         if (changed == this.changed) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Valve changed is already {}. RequestId: {}.", changed, requestId);
@@ -942,7 +961,7 @@ public class ValveManager {
             return;
         }
 
-
+        //将修改状态保存数据库
         this.changed = changed;
         long value = (long)BellowsConstants.NO;
         if (changed) {
