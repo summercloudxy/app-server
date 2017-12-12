@@ -53,9 +53,11 @@ public class BellowsController {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
 
         logger.info("RequestId: {} query compressor pressure.", requestId);
-        Map<String, Double> res = compressorManager.getPressure(requestId);
+        Pressure pressure = new Pressure();
+        pressure.setHigh(compressorManager.refreshPressure(BellowsConstants.CP_TYPE_HIGH, requestId));
+        pressure.setLow(compressorManager.refreshPressure(BellowsConstants.CP_TYPE_LOW, requestId));
 
-        return new ResponseEntity<String>(ServerResponse.buildOkJson(res), HttpStatus.OK);
+        return new ResponseEntity<String>(ServerResponse.buildOkJson(pressure), HttpStatus.OK);
     }
 
 
@@ -327,7 +329,7 @@ public class BellowsController {
             return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
         }
 
-        if(valveParam.getRunTime() < 1 || valveParam.getWaitTime() > 60) {
+        if(valveParam.getRunTime() < 1 || valveParam.getRunTime() > 60) {
             ServerResponse res = new ServerResponse("Valve run time must be greater than 0 and less than 61.", SysException.EC_UNKNOWN, 0);
             String resJSON = JSON.toJSONString(res);
             return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);

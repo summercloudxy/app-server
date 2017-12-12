@@ -2,6 +2,7 @@ package com.zgiot.app.server.module.bellows.pojo;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.zgiot.app.server.module.bellows.util.DoubleSerializer;
 
 import java.util.Date;
 
@@ -55,7 +56,7 @@ public class CompressorLog {
     /**
      * 确认时压力
      */
-    @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue)
+    @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue, serializeUsing = DoubleSerializer.class)
     private Double pressure;
 
     /**

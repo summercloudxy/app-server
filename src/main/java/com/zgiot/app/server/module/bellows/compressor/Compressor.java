@@ -9,6 +9,7 @@ import com.zgiot.app.server.module.bellows.pojo.CompressorLog;
 import com.zgiot.app.server.module.bellows.pojo.CompressorState;
 import com.zgiot.app.server.module.bellows.pressure.PressureManager;
 import com.zgiot.app.server.module.bellows.util.BellowsUtil;
+import com.zgiot.app.server.module.bellows.util.DoubleSerializer;
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.util.RequestIdUtil;
@@ -135,6 +136,7 @@ public class Compressor {
     /**
      * 排气压力
      */
+    @JSONField(serializeUsing = DoubleSerializer.class)
     private volatile double pressure;
 
     /**
@@ -155,6 +157,7 @@ public class Compressor {
     /**
      * 油气桶压力
      */
+    @JSONField(serializeUsing = DoubleSerializer.class)
     private volatile double oilPressure;
 
     /**
