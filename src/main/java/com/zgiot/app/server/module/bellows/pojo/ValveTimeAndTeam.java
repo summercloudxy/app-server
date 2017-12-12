@@ -20,7 +20,8 @@ public class ValveTimeAndTeam {
 
     public ValveTimeAndTeam(Long nextBlowTime, int lumpCount, int slackCount) {
         if (nextBlowTime != null) {
-            this.nextBlowTime = nextBlowTime - new Date().getTime();
+            Long countDown = nextBlowTime - new Date().getTime();
+            this.nextBlowTime = countDown < 0 ? 0 : countDown;
         } else {
             this.nextBlowTime = null;
         }
