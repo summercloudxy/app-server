@@ -21,7 +21,7 @@ public class DoubleSerializer implements ObjectSerializer {
             return;
         }
         if (type.getTypeName().toLowerCase().equals(double.class.getName())) {
-            double d = new BigDecimal((double)o).setScale(2, BigDecimal.ROUND_CEILING).doubleValue();
+            double d = new BigDecimal((double)o).setScale(2, BigDecimal.ROUND_HALF_DOWN).doubleValue();
             jsonSerializer.write(d);
         } else {
             jsonSerializer.write(o);
