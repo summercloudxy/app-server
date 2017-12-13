@@ -425,15 +425,12 @@ public class CompressorManager {
 
     /**
      * 获取空压机压力
+     * @param type 类型(low/high)
      * @param requestId
      * @return
      */
-    public Map<String, Double> getPressure(String requestId) {
-        Map<String, Double> res = new HashMap<>();
-        res.put(BellowsConstants.CP_TYPE_LOW, pressureManager.refreshPressure(BellowsConstants.CP_TYPE_LOW, dataService, requestId));
-        res.put(BellowsConstants.CP_TYPE_HIGH, pressureManager.refreshPressure(BellowsConstants.CP_TYPE_HIGH, dataService, requestId));
-
-        return res;
+    public Double refreshPressure(String type, String requestId) {
+        return pressureManager.refreshPressure(type, dataService, requestId);
     }
 
 

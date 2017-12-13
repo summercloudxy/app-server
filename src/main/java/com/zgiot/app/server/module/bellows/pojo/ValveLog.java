@@ -2,6 +2,7 @@ package com.zgiot.app.server.module.bellows.pojo;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.zgiot.app.server.module.bellows.util.DoubleSerializer;
 
 import java.util.Date;
 
@@ -60,11 +61,13 @@ public class ValveLog {
     /**
      * 确认时高压
      */
+    @JSONField(serializeUsing = DoubleSerializer.class)
     private Double highPressure;
 
     /**
      * 确认时低压
      */
+    @JSONField(serializeUsing = DoubleSerializer.class)
     private Double lowPressure;
 
     /**

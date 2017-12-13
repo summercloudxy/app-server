@@ -6,6 +6,7 @@ import com.zgiot.app.server.module.bellows.dao.BellowsMapper;
 import com.zgiot.app.server.module.bellows.enumeration.EnumCompressorOperation;
 import com.zgiot.app.server.module.bellows.pressure.PressureManager;
 import com.zgiot.app.server.module.bellows.util.BellowsUtil;
+import com.zgiot.app.server.module.bellows.util.DoubleSerializer;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.util.RequestIdUtil;
 import com.zgiot.common.constants.BellowsConstants;
@@ -57,6 +58,7 @@ public class CompressorGroup {
     /**
      * 管道压力
      */
+    @JSONField(serializeUsing = DoubleSerializer.class)
     private volatile double pressure;
 
     /**
