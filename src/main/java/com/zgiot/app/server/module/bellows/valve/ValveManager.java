@@ -301,9 +301,9 @@ public class ValveManager {
             }
         }
 
-        if (logger.isTraceEnabled()) {
-            logger.trace("Valve team next blow time is {}.", nextBlowTime);
-            logger.trace("Valve blow stage is {}.", stage);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Valve team next blow time is {}.", nextBlowTime);
+            logger.debug("Valve blow stage is {}.", stage);
         }
     }
 
@@ -862,7 +862,7 @@ public class ValveManager {
 
         //修改下次鼓风时间
         int teamCount = lumpTeamCount + slackTeamCount;
-        long nextTimeStamp = DateUtils.truncate(new Date(), Calendar.MINUTE).getTime() + teamCount * runTime * DateUtils.MILLIS_PER_MINUTE + waitTime * DateUtils.MILLIS_PER_MINUTE;
+        long nextTimeStamp = DateUtils.truncate(new Date(), Calendar.MINUTE).getTime() + teamCount * team.getDuration() * DateUtils.MILLIS_PER_MINUTE + waitTime * DateUtils.MILLIS_PER_MINUTE;
         setNextBlowTime(nextTimeStamp, requestId);
     }
 
