@@ -268,9 +268,11 @@ public class CompressorGroup {
         for (Compressor compressor : compressors) {
             compressor.refresh(dataService);
 
-            if (!compressor.isError() && !compressor.isWarn() && compressor.isRunning() && compressor.isLoading()) {
+            if (!compressor.isError() && !compressor.isWarn() && compressor.isRunning()) {
+                //运行中数量
                 runningCount++;
             } else if (compressor.isError() || compressor.isWarn()) {
+                //故障数量
                 errorCount++;
             }
         }
