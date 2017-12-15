@@ -21,6 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
@@ -405,6 +407,7 @@ public class ValveManager {
      * @param thingCodes    智能状态thingCode
      * @param requestId
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public synchronized void setValveIntelligentBatch(List<String> thingCodes, String requestId) {
         List<String> intelligentCodes;
         if (CollectionUtils.isEmpty(thingCodes)) {
@@ -434,6 +437,7 @@ public class ValveManager {
      * @param waitTime  等待时间
      * @param requestId
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public synchronized void setValveParam(int maxCount, int runTime, int waitTime, String requestId) {
         //距离下次鼓风10秒内不允许设置
         if (nextBlowTime != null) {
@@ -823,6 +827,7 @@ public class ValveManager {
     /**
      * 检查循环（定时任务）
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public synchronized void checkLoop() {
         String requestId = RequestIdUtil.generateRequestId();
         if (logger.isDebugEnabled()) {
