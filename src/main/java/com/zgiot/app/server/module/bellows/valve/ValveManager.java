@@ -59,6 +59,11 @@ public class ValveManager {
     private static final int LOG_WAIT_TIME = 3000;
 
     /**
+     * 介质桶开
+     */
+    private static final int BUCKET_OPEN = 2;
+
+    /**
      * 泵频率限制
      */
     private double speedLimit;
@@ -147,7 +152,7 @@ public class ValveManager {
             valveCache.put("2335.GF-1",
                     new Valve("2335.GF-1", "主混2335.GF-1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2335", "2338").init(bellowsMapper));
             valveCache.put("2360.GF-1",
-                    new Valve("2360.GF-1", "主合2360.GF-1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2360", "2360").init(bellowsMapper));
+                    new Valve("2360.GF-1", "主合2360.GF-1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2360", "2363").init(bellowsMapper));
 
             valveCache.put("2380.GF-1",
                     new Valve("2380.GF-1", "再混2380.GF-1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2380", "2383").init(bellowsMapper));
@@ -603,8 +608,8 @@ public class ValveManager {
      */
     private boolean validateBucket(Valve valve, DataService dataService, double speedLimit) {
         String bucketThingCode = valve.getBucketThingCode();
-        boolean bucketOpen = Boolean.parseBoolean(BellowsUtil.getDataModelValue(dataService, bucketThingCode, ValveMetricConstants.BUCKET_STATE).orElse(BellowsConstants.FALSE));
-        if (bucketOpen) {
+        Integer bucketState = Integer.parseInt(BellowsUtil.getDataModelValue(dataService, bucketThingCode, ValveMetricConstants.BUCKET_STATE).orElse("0"));
+        if (bucketState == BUCKET_OPEN) {
             if (BellowsConstants.VALVE_TYPE_LUMP.equals(valve.getType())) {
                 //块煤系统，只判断介质桶开关
                 return false;

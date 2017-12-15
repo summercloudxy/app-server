@@ -135,6 +135,14 @@ public class CompressorGroup {
             return;
         }
 
+        if (intelligent && checkAllLocal()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("All compressors is local, cannot be set intelligent. RequestId: {}.", requestId);
+            }
+            throw new SysException("所有空压机处于就地状态，不能设置为智能", SysException.EC_UNKNOWN);
+        }
+
+
         Boolean old = this.intelligent;
         this.intelligent = intelligent;
         if (this.intelligent.equals(old)) {
@@ -243,10 +251,28 @@ public class CompressorGroup {
         boolean local = Boolean.parseBoolean(value);
         compressor.onLocalChange(local, requestId, intelligent);
 
-        if (!local && BellowsConstants.CP_TYPE_LOW.equals(type)) {
-            //低压空压机开启远程状态，检测是否需要智能开/关
-            onPressureStateChange();
+        //如果所有空压机都是就地状态，将智能设为手动
+        if (local && BellowsConstants.CP_TYPE_LOW.equals(type)) {
+            if (checkAllLocal()) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("All compressor is local.RequestId: {}.", requestId);
+                }
+                setIntelligent(false, requestId);
+            }
         }
+    }
+
+    /**
+     * 检查所有空压机是否都是就地状态
+     * @return
+     */
+    private boolean checkAllLocal() {
+        for (Compressor compressor : compressors) {
+            if (!compressor.isLocal()) {
+                return false;
+            }
+        }
+        return true;
     }
 
 
@@ -268,9 +294,11 @@ public class CompressorGroup {
         for (Compressor compressor : compressors) {
             compressor.refresh(dataService);
 
-            if (!compressor.isError() && !compressor.isWarn() && compressor.isRunning() && compressor.isLoading()) {
+            if (!compressor.isError() && !compressor.isWarn() && compressor.isRunning()) {
+                //运行中数量
                 runningCount++;
             } else if (compressor.isError() || compressor.isWarn()) {
+                //故障数量
                 errorCount++;
             }
         }
