@@ -43,6 +43,11 @@ public class BellowsController {
     private static final String STATE = "state";
     private static final String OPERATION = "operation";
 
+    private static final int MIN_VALVE_PARAM = 1;
+    private static final int MAX_VALVE_MAX_COUNT = 12;
+    private static final int MAX_VALVE_RUN_TIME = 60;
+    private static final int MAX_VALVE_WAIT_TIME =180;
+
     /**
      * 获取空压机压力
      * @param request
@@ -318,28 +323,14 @@ public class BellowsController {
             return new ResponseEntity<>(JSON.toJSONString(res), HttpStatus.BAD_REQUEST);
         }
         ValveParam valveParam = JSON.parseObject(requestData, ValveParam.class);
-        if (valveParam.getMaxCount() == null || valveParam.getRunTime() == null || valveParam.getWaitTime() == null) {
-            ServerResponse res = new ServerResponse("Invalid request data.The incoming req body is: `" + requestData + "`", SysException.EC_UNKNOWN, 0);
-            return new ResponseEntity<String>(JSON.toJSONString(res), HttpStatus.BAD_REQUEST);
+        if (!validateValveParam(valveParam)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("RequestId: {} send a bad request, requestData is {}.", requestId, requestData);
+            }
+            ServerResponse res = new ServerResponse("设置参数错误", SysException.EC_UNKNOWN, 0);
+            return new ResponseEntity<>(JSON.toJSONString(res), HttpStatus.BAD_REQUEST);
         }
 
-        if(valveParam.getMaxCount() < 1 || valveParam.getMaxCount() > 12) {
-            ServerResponse res = new ServerResponse("Valve max count must be greater than 0 and less than 13.", SysException.EC_UNKNOWN, 0);
-            String resJSON = JSON.toJSONString(res);
-            return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
-        }
-
-        if(valveParam.getRunTime() < 1 || valveParam.getRunTime() > 60) {
-            ServerResponse res = new ServerResponse("Valve run time must be greater than 0 and less than 61.", SysException.EC_UNKNOWN, 0);
-            String resJSON = JSON.toJSONString(res);
-            return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
-        }
-
-        if(valveParam.getWaitTime() < 1 || valveParam.getWaitTime() > 180) {
-            ServerResponse res = new ServerResponse("Valve wait time must be greater than 0 and less than 181.", SysException.EC_UNKNOWN, 0);
-            String resJSON = JSON.toJSONString(res);
-            return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);
-        }
 
         logger.info("RequestId: {} set valve maxCount {}, runTime {}, waitTime {}.", requestId, valveParam.getMaxCount(), valveParam.getRunTime(), valveParam.getWaitTime());
 
@@ -347,6 +338,30 @@ public class BellowsController {
 
         return new ResponseEntity<>(ServerResponse.buildOkJson(null),
                 HttpStatus.OK);
+    }
+
+    /**
+     * 校验ValveParam参数
+     * @param valveParam
+     * @return
+     */
+    private boolean validateValveParam(ValveParam valveParam) {
+        if (valveParam.getMaxCount() == null || valveParam.getRunTime() == null || valveParam.getWaitTime() == null) {
+            return false;
+        }
+
+        if(valveParam.getMaxCount() < MIN_VALVE_PARAM || valveParam.getMaxCount() > MAX_VALVE_MAX_COUNT) {
+            return false;
+        }
+
+        if(valveParam.getRunTime() < MIN_VALVE_PARAM || valveParam.getRunTime() > MAX_VALVE_RUN_TIME) {
+            return false;
+        }
+
+        if(valveParam.getWaitTime() < MIN_VALVE_PARAM || valveParam.getWaitTime() > MAX_VALVE_WAIT_TIME) {
+            return false;
+        }
+        return true;
     }
 
 
