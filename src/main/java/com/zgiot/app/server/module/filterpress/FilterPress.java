@@ -138,6 +138,17 @@ public class FilterPress {
      */
     private volatile int statisticLogplateCount;
 
+    private volatile  boolean isFilterPressUnloading = false;
+
+    private volatile  AtomicInteger filterPressTakeAndPullCount = new AtomicInteger(0);
+
+    public boolean isFilterPressUnloading() {
+        return isFilterPressUnloading;
+    }
+
+    public void setFilterPressUnloading(boolean filterPressUnloading) {
+        isFilterPressUnloading = filterPressUnloading;
+    }
 
     public FilterPress(String code, FilterPressManager manager) {
         this.code = code;
@@ -279,6 +290,7 @@ public class FilterPress {
 
     public void onLoosen() {
         logger.trace("{} on loosen", code);
+        isFilterPressUnloading = true;
         looseStartTime = System.currentTimeMillis();
         this.startUnload();
         int position = -1;
@@ -360,9 +372,15 @@ public class FilterPress {
     }
 
     public void onPress() {
-        logger.trace("{} on press", code);
+        logger.debug("{} on press", code);
+        logger.debug("take and pull count:", filterPressTakeAndPullCount.get());
         //压紧后通知下一台
-        unloadManager.notifyNext();
+        if((manager.getUnloadManager().getUnloadingCount(code) < manager.getMaxUnloadParallel()) && (filterPressTakeAndPullCount.get() < 16)){
+            unloadManager.notifyNext();
+            logger.debug("notify next filterpress unload cause by press!");
+            logger.debug("press state unloading filterpress count:" + manager.getUnloadManager().getUnloadingCount(code));
+        }
+        filterPressTakeAndPullCount.set(0);
         unloadManager.stopUnload();
     }
 
@@ -638,7 +656,7 @@ public class FilterPress {
             if(Long.parseLong(value) < Long.parseLong(preValue)){
                 return preValue;
             }else{
-               return value;
+                return value;
             }
         }
         return null;
@@ -782,11 +800,17 @@ public class FilterPress {
         }
 
         private void checkUnloadExchange() {
+            isFilterPressUnloading = true;
+            filterPressTakeAndPullCount.getAndIncrement();
             if (takeAndPullCount.incrementAndGet() >= UNLOAD_EXCHANGE_COUNT && isUnloading) {
                 logger.debug("{} take and pull enough", code);
                 cancelTimer();
-                notifyNext();
+                logger.debug("take and pull state unloading filterpress count:" + manager.getUnloadManager().getUnloadingCount(code));
+                if(manager.getUnloadManager().getUnloadingCount(code) < manager.getMaxUnloadParallel()){
+                    notifyNext();
+                }
                 takeAndPullCount.set(0);
+                isFilterPressUnloading = false;
             }
         }
     }
