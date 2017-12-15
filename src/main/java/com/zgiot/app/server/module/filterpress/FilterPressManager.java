@@ -743,6 +743,7 @@ public class FilterPressManager {
     class UnloadManager {
         private AtomicInteger unloading = new AtomicInteger(0);
         private volatile int maxUnloadParallel = 1;
+        private volatile int unloadingCount = 0;
         BlockingQueue<FilterPress> queue = new PriorityBlockingQueue<>(INIT_CAPACITY, (f1, f2) -> {
             int result;
             if (f1.getOnCycleTime() < f2.getOnCycleTime()) {
@@ -838,6 +839,21 @@ public class FilterPressManager {
                 if(queuePosition.get(thingCode) > position)
                     queuePosition.put(thingCode, queuePosition.get(thingCode) - 1);
             }
+        }
+
+        /**
+         * 获取所有正在卸料压滤机数量，正在卸料指压滤机处于松开状态或者取板拉板次数小于16次,
+         * 排除参数中的压滤机，因为在调用这个接口时是本台压滤机状态处于压紧状态或取板拉板次数大于16次
+         */
+
+        public synchronized int getUnloadingCount(String thingCode){
+            int unloadingCount = 0;
+            for(FilterPress filterPress:deviceHolder.values()){
+                if(filterPress.isFilterPressUnloading() && (!filterPress.getCode().equals(thingCode))){
+                    unloadingCount++;
+                }
+            }
+            return unloadingCount;
         }
     }
 }
