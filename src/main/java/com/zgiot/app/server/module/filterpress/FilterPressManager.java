@@ -787,13 +787,14 @@ public class FilterPressManager {
          * 若存在可以卸料的压滤机，则按照最大同时卸料数量进行卸料调度
          */
         private synchronized void unloadNextIfPossible() {
-            for (int i = unloading.get(); i < maxUnloadParallel; i++) {
+            logger.debug("正在卸料台数：" + unloading.get());
+            int unloadingCount = unloading.get();
+            if(unloadingCount < maxUnloadParallel) {
                 FilterPress candidate = queue.peek();
-                if (candidate == null) {
-                    break;
+                if (candidate != null) {
+                    execUnload(candidate);
+                    unloading.getAndIncrement();
                 }
-                execUnload(candidate);
-                unloading.getAndIncrement();
             }
         }
 
