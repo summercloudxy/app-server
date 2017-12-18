@@ -59,7 +59,6 @@ public class CompressorManager {
 
 
 
-    @PostConstruct
     public void init() {
         //初始化空压机缓存
         synchronized (cacheLock) {

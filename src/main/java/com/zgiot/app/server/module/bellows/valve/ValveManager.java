@@ -125,7 +125,6 @@ public class ValveManager {
     private volatile boolean initial = false;
 
 
-    @PostConstruct
     public void init() {
         if (logger.isTraceEnabled()) {
             logger.trace("Valve cache start to init.");
