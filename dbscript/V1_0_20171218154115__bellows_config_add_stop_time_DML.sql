@@ -1,0 +1,1 @@
+INSERT INTO `tb_bellows_config` VALUES ('35', 'SYS', 'CP_STOP', '30');

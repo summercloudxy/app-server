@@ -17,6 +17,7 @@ import com.zgiot.common.constants.BellowsConstants;
 import com.zgiot.common.constants.CompressorMetricConstants;
 import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.DataModel;
+import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -39,17 +40,17 @@ public class Compressor {
     /**
      * 加载状态判断等待时间
      */
-    private static final int STATE_WAIT_TIME = 8000;
+    private static final long STATE_WAIT_TIME = 8000L;
 
     /**
      * 日志确认等待时间
      */
-    private static final int LOG_WAIT_TIME = 8000;
+    private static final long LOG_WAIT_TIME = 8000L;
 
     /**
-     * 卸载状态停止等待时间
+     * 卸载状态停止等待时间（分钟）
      */
-    private static final int STOP_WAIT_TIME = 30 * 60 * 1000;
+    private static final long STOP_WAIT_TIME = 30;
 
     /**
      * 油气桶压力限制
@@ -485,6 +486,13 @@ public class Compressor {
             }
 
             stopTimer = new Timer();
+            //获取卸载-停止定时时间
+            Long stopWaitTime = bellowsMapper.selectParamValue(BellowsConstants.SYS, BellowsConstants.CP_STOP_WAIT_TIME);
+            if (stopWaitTime == null) {
+                stopWaitTime = STOP_WAIT_TIME;
+            }
+            stopWaitTime *= DateUtils.MILLIS_PER_MINUTE;
+
             stopTimer.schedule(new TimerTask() {
                 @Override
                 public void run() {
@@ -503,7 +511,7 @@ public class Compressor {
                     }
                     turnOffStopTimer();
                 }
-            }, STOP_WAIT_TIME);
+            }, stopWaitTime);
         }
     }
 
