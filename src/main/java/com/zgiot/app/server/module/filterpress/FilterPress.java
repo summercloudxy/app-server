@@ -374,6 +374,7 @@ public class FilterPress {
     public void onPress() {
         logger.debug("{} on press", code);
         logger.debug("take and pull count:", filterPressTakeAndPullCount.get());
+        isFilterPressUnloading = false;
         //压紧后通知下一台
         if((manager.getUnloadManager().getUnloadingCount(code) < manager.getMaxUnloadParallel()) && (filterPressTakeAndPullCount.get() < 16)){
             unloadManager.notifyNext();
