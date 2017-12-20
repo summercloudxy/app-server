@@ -118,7 +118,7 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
             compressorManager.init();
             processor.addListener(bellowsDataListener);
             QuartzManager.addJob("checkBlow", ModuleListConfig.MODULE_BELLOWS, "checkBlow",
-                    ModuleListConfig.MODULE_BELLOWS, ValveIntelligentJob.class, "0 * * * * ?");
+                    ModuleListConfig.MODULE_BELLOWS, ValveIntelligentJob.class, "2 * * * * ?");
         }
 
         if (false) {

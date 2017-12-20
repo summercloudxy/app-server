@@ -20,6 +20,11 @@ public class Valve {
 
     private static final Logger logger = LoggerFactory.getLogger(Valve.class);
 
+    /**
+     * 介质桶开
+     */
+    private static final int BUCKET_OPEN = 2;
+
 
     private final String thingCode;
 
@@ -90,6 +95,23 @@ public class Valve {
     @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue)
     private volatile Long execTime;
 
+    /**
+     * 介质桶状态
+     */
+    @JSONField(serialize = false)
+    private volatile int bucketState;
+
+    /**
+     * 泵频率
+     */
+    @JSONField(serialize = false)
+    private volatile double pumpSpeed;
+
+    /**
+     * 泵频率过高
+     */
+    @JSONField(serialize = false)
+    private volatile boolean pumpSpeedHigh;
 
 
 
@@ -122,6 +144,8 @@ public class Valve {
 
         stage = BellowsConstants.BLOW_STAGE_NONE;
         execTime = null;
+
+
 
         return this;
     }
@@ -232,6 +256,25 @@ public class Valve {
         }
     }
 
+    /**
+     * 验证介质桶状态
+     * @return
+     */
+    public boolean validateBucket() {
+        if (bucketState == BUCKET_OPEN) {
+            if (BellowsConstants.VALVE_TYPE_LUMP.equals(type)) {
+                //块煤系统，只判断介质桶开关
+                return false;
+            } else {
+                //末煤系统，判断泵频率
+                if (pumpSpeedHigh) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
 
     public String getThingCode() {
         return thingCode;
@@ -286,6 +329,10 @@ public class Valve {
     }
 
     public String getStage() {
+        //判断介质桶和泵频率
+        if (!validateBucket()) {
+            return BellowsConstants.BLOW_STAGE_NONE;
+        }
         return stage;
     }
 
@@ -304,5 +351,29 @@ public class Valve {
 
     public void setExecTime(Long execTime) {
         this.execTime = execTime;
+    }
+
+    public int getBucketState() {
+        return bucketState;
+    }
+
+    public void setBucketState(int bucketState) {
+        this.bucketState = bucketState;
+    }
+
+    public double getPumpSpeed() {
+        return pumpSpeed;
+    }
+
+    public void setPumpSpeed(double pumpSpeed) {
+        this.pumpSpeed = pumpSpeed;
+    }
+
+    public boolean isPumpSpeedHigh() {
+        return pumpSpeedHigh;
+    }
+
+    public void setPumpSpeedHigh(boolean pumpSpeedHigh) {
+        this.pumpSpeedHigh = pumpSpeedHigh;
     }
 }
