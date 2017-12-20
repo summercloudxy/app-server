@@ -53,10 +53,10 @@ public class BellowsDataListener implements DataListener {
         } else if (compressorManager.containCompressor(thingCode) && compressorMetricCode.contains(metricCode)) {
             //空压机状态变化
             handleCompressorData(dataModel);
-        } else if (ValveMetricConstants.BUCKET_STATE.equals(metricCode) && valveManager.containBucketThingCode(thingCode)) {
+        } else if (ValveMetricConstants.BUCKET_STATE.equals(metricCode) && valveManager.getValveByBucketThingCode(thingCode) != null) {
             //阀门介质桶状态变化
             handleBucketStateChange(dataModel);
-        } else if (ValveMetricConstants.PUMP_SPEED.equals(metricCode) && valveManager.containPumpThingCode(thingCode)) {
+        } else if (ValveMetricConstants.PUMP_SPEED.equals(metricCode) && valveManager.getValveByPumpThingCode(thingCode) != null) {
             //阀门泵频率变化
             handlePumpSpeedChange(dataModel);
         }
