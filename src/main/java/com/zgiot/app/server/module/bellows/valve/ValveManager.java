@@ -61,11 +61,6 @@ public class ValveManager {
     private static final int LOG_WAIT_TIME = 3000;
 
     /**
-     * 介质桶开
-     */
-    private static final int BUCKET_OPEN = 2;
-
-    /**
      * 泵频率限制
      */
     private double speedLimit;
@@ -135,38 +130,41 @@ public class ValveManager {
                 return;
             }
 
+            //泵频率限制
+            speedLimit = bellowsMapper.selectParamValue(BellowsConstants.SYS, BellowsConstants.VALVE_SPEED_LIMIT);
+
             int sort = 0;
 
-            valveCache.put("2321.GF-1",
-                    new Valve("2321.GF-1", "块合2321.GF-1", BellowsConstants.VALVE_TYPE_LUMP, sort++, "2321", "2322").init(bellowsMapper));
-            valveCache.put("2321.GF-2",
-                    new Valve("2321.GF-2", "块合2321.GF-2", BellowsConstants.VALVE_TYPE_LUMP, sort++, "2321", "2323").init(bellowsMapper));
+            valveCache.put("2321.GF-1", initBucketAndPump(
+                    new Valve("2321.GF-1", "块合2321.GF-1", BellowsConstants.VALVE_TYPE_LUMP, sort++, "2321", "2322").init(bellowsMapper)));
+            valveCache.put("2321.GF-2", initBucketAndPump(
+                    new Valve("2321.GF-2", "块合2321.GF-2", BellowsConstants.VALVE_TYPE_LUMP, sort++, "2321", "2323").init(bellowsMapper)));
 
-            valveCache.put("2333.GF-1",
-                    new Valve("2333.GF-1", "主混2333.GF-1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2333", "2336").init(bellowsMapper));
-            valveCache.put("2358.GF-1",
-                    new Valve("2358.GF-1", "主合2358.GF-1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2358", "2361").init(bellowsMapper));
-            valveCache.put("2334.GF-1",
-                    new Valve("2334.GF-1", "主混2334.GF-1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2334", "2337").init(bellowsMapper));
-            valveCache.put("2359.GF-1",
-                    new Valve("2359.GF-1", "主合2359.GF-1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2359", "2362").init(bellowsMapper));
-            valveCache.put("2335.GF-1",
-                    new Valve("2335.GF-1", "主混2335.GF-1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2335", "2338").init(bellowsMapper));
-            valveCache.put("2360.GF-1",
-                    new Valve("2360.GF-1", "主合2360.GF-1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2360", "2363").init(bellowsMapper));
+            valveCache.put("2333.GF-1", initBucketAndPump(
+                    new Valve("2333.GF-1", "主混2333.GF-1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2333", "2336").init(bellowsMapper)));
+            valveCache.put("2358.GF-1", initBucketAndPump(
+                    new Valve("2358.GF-1", "主合2358.GF-1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2358", "2361").init(bellowsMapper)));
+            valveCache.put("2334.GF-1", initBucketAndPump(
+                    new Valve("2334.GF-1", "主混2334.GF-1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2334", "2337").init(bellowsMapper)));
+            valveCache.put("2359.GF-1", initBucketAndPump(
+                    new Valve("2359.GF-1", "主合2359.GF-1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2359", "2362").init(bellowsMapper)));
+            valveCache.put("2335.GF-1", initBucketAndPump(
+                    new Valve("2335.GF-1", "主混2335.GF-1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2335", "2338").init(bellowsMapper)));
+            valveCache.put("2360.GF-1", initBucketAndPump(
+                    new Valve("2360.GF-1", "主合2360.GF-1", BellowsConstants.VALVE_TYPE_MAIN_WASH, sort++, "2360", "2363").init(bellowsMapper)));
 
-            valveCache.put("2380.GF-1",
-                    new Valve("2380.GF-1", "再混2380.GF-1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2380", "2383").init(bellowsMapper));
-            valveCache.put("2412.GF-1",
-                    new Valve("2412.GF-1", "再合2412.GF-1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2412", "2415").init(bellowsMapper));
-            valveCache.put("2381.GF-1",
-                    new Valve("2381.GF-1", "再混2381.GF-1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2381", "2384").init(bellowsMapper));
-            valveCache.put("2413.GF-1",
-                    new Valve("2413.GF-1", "再合2413.GF-1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2413", "2416").init(bellowsMapper));
-            valveCache.put("2382.GF-1",
-                    new Valve("2382.GF-1", "再混2382.GF-1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2382", "2385").init(bellowsMapper));
-            valveCache.put("2414.GF-1",
-                    new Valve("2414.GF-1", "再合2414.GF-1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2414", "2417").init(bellowsMapper));
+            valveCache.put("2380.GF-1", initBucketAndPump(
+                    new Valve("2380.GF-1", "再混2380.GF-1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2380", "2383").init(bellowsMapper)));
+            valveCache.put("2412.GF-1", initBucketAndPump(
+                    new Valve("2412.GF-1", "再合2412.GF-1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2412", "2415").init(bellowsMapper)));
+            valveCache.put("2381.GF-1", initBucketAndPump(
+                    new Valve("2381.GF-1", "再混2381.GF-1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2381", "2384").init(bellowsMapper)));
+            valveCache.put("2413.GF-1", initBucketAndPump(
+                    new Valve("2413.GF-1", "再合2413.GF-1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2413", "2416").init(bellowsMapper)));
+            valveCache.put("2382.GF-1", initBucketAndPump(
+                    new Valve("2382.GF-1", "再混2382.GF-1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2382", "2385").init(bellowsMapper)));
+            valveCache.put("2414.GF-1", initBucketAndPump(
+                    new Valve("2414.GF-1", "再合2414.GF-1", BellowsConstants.VALVE_TYPE_REWASH, sort++, "2414", "2417").init(bellowsMapper)));
 
             initial = true;
         }
@@ -186,12 +184,29 @@ public class ValveManager {
     }
 
     /**
+     * 初始化介质桶状态和泵状态
+     * @param valve
+     * @return
+     */
+    private Valve initBucketAndPump(Valve valve) {
+        //介质桶、泵状态
+        int bucketState = Integer.parseInt(BellowsUtil.getDataModelValue(dataService, valve.getBucketThingCode(), ValveMetricConstants.BUCKET_STATE).orElse("0"));
+        double pumpSpeed = Double.parseDouble(BellowsUtil.getDataModelValue(dataService, valve.getPumpThingCode(), ValveMetricConstants.PUMP_SPEED).orElse("0"));
+        boolean pumpSpeedHigh = false;
+        if (pumpSpeed > speedLimit) {
+            pumpSpeedHigh = true;
+        }
+
+        valve.setBucketState(bucketState);
+        valve.setPumpSpeed(pumpSpeed);
+        valve.setPumpSpeedHigh(pumpSpeedHigh);
+        return valve;
+    }
+
+    /**
      * 初始化鼓风参数
      */
     private void initValveParam() {
-        //泵频率限制
-        speedLimit = bellowsMapper.selectParamValue(BellowsConstants.SYS, BellowsConstants.VALVE_SPEED_LIMIT);
-
         //计算分组数量
         lumpTeamCount = bellowsMapper.countValveTeamByType(BellowsConstants.VALVE_TEAM_LUMP).intValue();
         if (logger.isTraceEnabled()) {
@@ -311,6 +326,59 @@ public class ValveManager {
             logger.debug("Valve team next blow time is {}.", nextBlowTime);
             logger.debug("Valve blow stage is {}.", stage);
         }
+    }
+
+    /**
+     * 是否包含泵thingCode
+     * @param pumpThingCode
+     * @return
+     */
+    public boolean containPumpThingCode(String pumpThingCode) {
+        for (Valve valve : valveCache.findAll()) {
+            if (valve.getPumpThingCode().equals(pumpThingCode)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 是否包含介质桶thingCode
+     * @param bucketThingCode
+     * @return
+     */
+    public boolean containBucketThingCode(String bucketThingCode) {
+        for (Valve valve : valveCache.findAll()) {
+            if (valve.getBucketThingCode().equals(bucketThingCode)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 处理泵频率变化
+     * @param dataModel
+     */
+    public void handlePumpSpeedChange(DataModel dataModel) {
+        Valve valve = valveCache.findByThingCode(dataModel.getThingCode());
+        double pumpSpeed = Double.parseDouble(dataModel.getValue());
+        valve.setPumpSpeed(pumpSpeed);
+
+        boolean pumpSpeedHigh = false;
+        if (pumpSpeed > speedLimit) {
+            pumpSpeedHigh = true;
+        }
+        valve.setPumpSpeedHigh(pumpSpeedHigh);
+    }
+
+    /**
+     * 处理桶状态变化
+     * @param dataModel
+     */
+    public void handleBucketStateChange(DataModel dataModel) {
+        Valve valve = valveCache.findByThingCode(dataModel.getThingCode());
+        valve.setBucketState(Integer.parseInt(dataModel.getValue()));
     }
 
 
@@ -557,7 +625,7 @@ public class ValveManager {
         }
 
         //介质桶状态判断
-        if (!validateBucket(valve, dataService, speedLimit)) {
+        if (!valve.validateBucket()) {
             logger.info("Valve {} bucket state is open. RequestId: {}.", thingCode, requestId);
             String error = valve.getName() + "介质桶处于开启状态，无法操作";
             valveLogManager.saveLog(valve, operation, operationType, 0, error, requestId);
@@ -604,29 +672,6 @@ public class ValveManager {
         return valve;
     }
 
-
-    /**
-     * 验证介质桶状态
-     * @return
-     */
-    private boolean validateBucket(Valve valve, DataService dataService, double speedLimit) {
-        String bucketThingCode = valve.getBucketThingCode();
-        Integer bucketState = Integer.parseInt(BellowsUtil.getDataModelValue(dataService, bucketThingCode, ValveMetricConstants.BUCKET_STATE).orElse("0"));
-        if (bucketState == BUCKET_OPEN) {
-            if (BellowsConstants.VALVE_TYPE_LUMP.equals(valve.getType())) {
-                //块煤系统，只判断介质桶开关
-                return false;
-            } else {
-                //末煤系统，判断泵频率
-                String pumpThingCode = valve.getPumpThingCode();
-                double pumpSpeed = Double.parseDouble(BellowsUtil.getDataModelValue(dataService, pumpThingCode, ValveMetricConstants.PUMP_SPEED).orElse("0"));
-                if (pumpSpeed > speedLimit) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
 
     /**
      * 批量操作阀门

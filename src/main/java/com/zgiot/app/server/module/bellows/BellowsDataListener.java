@@ -2,8 +2,10 @@ package com.zgiot.app.server.module.bellows;
 
 import com.zgiot.app.server.dataprocessor.DataListener;
 import com.zgiot.app.server.module.bellows.compressor.CompressorManager;
+import com.zgiot.app.server.module.bellows.valve.ValveManager;
 import com.zgiot.common.constants.BellowsConstants;
 import com.zgiot.common.constants.CompressorMetricConstants;
+import com.zgiot.common.constants.ValveMetricConstants;
 import com.zgiot.common.pojo.DataModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,10 +24,12 @@ public class BellowsDataListener implements DataListener {
     private static final Logger logger = LoggerFactory.getLogger(BellowsDataListener.class);
 
     private static Set<String> compressorMetricCode = new HashSet<>();
-    private static Set<String> valveMetricCode = new HashSet<>();
 
     @Autowired
     private CompressorManager compressorManager;
+
+    @Autowired
+    private ValveManager valveManager;
 
     static {
         compressorMetricCode.add(CompressorMetricConstants.WARN);
@@ -49,6 +53,12 @@ public class BellowsDataListener implements DataListener {
         } else if (compressorManager.containCompressor(thingCode) && compressorMetricCode.contains(metricCode)) {
             //空压机状态变化
             handleCompressorData(dataModel);
+        } else if (ValveMetricConstants.BUCKET_STATE.equals(metricCode) && valveManager.containBucketThingCode(thingCode)) {
+            //阀门介质桶状态变化
+            handleBucketStateChange(dataModel);
+        } else if (ValveMetricConstants.PUMP_SPEED.equals(metricCode) && valveManager.containPumpThingCode(thingCode)) {
+            //阀门泵频率变化
+            handlePumpSpeedChange(dataModel);
         }
     }
 
@@ -64,5 +74,13 @@ public class BellowsDataListener implements DataListener {
 
     private void handleCompressorPressureState(DataModel dataModel) {
         compressorManager.onPressureStateChange(dataModel);
+    }
+
+    private void handleBucketStateChange(DataModel dataModel) {
+        valveManager.handleBucketStateChange(dataModel);
+    }
+
+    private void handlePumpSpeedChange(DataModel dataModel) {
+        valveManager.handlePumpSpeedChange(dataModel);
     }
 }
