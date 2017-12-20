@@ -108,7 +108,7 @@ public class FilterPressLogUtil {
             simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             date = simpleDateFormat.parse(currentDay);
         }catch(ParseException e){
-            e.printStackTrace();
+            logger.debug("date parse exception in FilterPressLogUtil.getDayOrNightShiftRateStartTime()");
         }
         return date;
     }

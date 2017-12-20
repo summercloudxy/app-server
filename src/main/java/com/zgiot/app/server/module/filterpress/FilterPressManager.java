@@ -375,7 +375,7 @@ public class FilterPressManager {
         Boolean isRunningFromCache = isRunningFromCache(thingCode);
         if (Boolean.valueOf(fault.getValue())) {
             state = GlobalConstants.STATE_FAULT;
-        } else if (Boolean.FALSE.toString().equals(isRunning) && (!isRunningFromCache)) {
+        } else if ((!isRunning) && (!isRunningFromCache)) {
             state = GlobalConstants.STATE_STOPPED;
         } else {
             state = GlobalConstants.STATE_RUNNING;
