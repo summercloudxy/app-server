@@ -191,7 +191,11 @@ public class ValveManager {
     private Valve initBucketAndPump(Valve valve) {
         //介质桶、泵状态
         int bucketState = Integer.parseInt(BellowsUtil.getDataModelValue(dataService, valve.getBucketThingCode(), ValveMetricConstants.BUCKET_STATE).orElse("0"));
-        double pumpSpeed = Double.parseDouble(BellowsUtil.getDataModelValue(dataService, valve.getPumpThingCode(), ValveMetricConstants.PUMP_SPEED).orElse("0"));
+        double pumpSpeed = 0;
+        if (!valve.getType().equals(BellowsConstants.VALVE_TYPE_LUMP)) {
+            pumpSpeed = Double.parseDouble(BellowsUtil.getDataModelValue(dataService, valve.getPumpThingCode(), ValveMetricConstants.PUMP_SPEED).orElse("0"));
+        }
+
         boolean pumpSpeedHigh = false;
         if (pumpSpeed > speedLimit) {
             pumpSpeedHigh = true;
@@ -331,29 +335,29 @@ public class ValveManager {
     /**
      * 是否包含泵thingCode
      * @param pumpThingCode
-     * @return
+     * @return 不包含返回null
      */
-    public boolean containPumpThingCode(String pumpThingCode) {
+    public Valve getValveByPumpThingCode(String pumpThingCode) {
         for (Valve valve : valveCache.findAll()) {
             if (valve.getPumpThingCode().equals(pumpThingCode)) {
-                return true;
+                return valve;
             }
         }
-        return false;
+        return null;
     }
 
     /**
      * 是否包含介质桶thingCode
      * @param bucketThingCode
-     * @return
+     * @return 不包含返回null
      */
-    public boolean containBucketThingCode(String bucketThingCode) {
+    public Valve getValveByBucketThingCode(String bucketThingCode) {
         for (Valve valve : valveCache.findAll()) {
             if (valve.getBucketThingCode().equals(bucketThingCode)) {
-                return true;
+                return valve;
             }
         }
-        return false;
+        return null;
     }
 
     /**
@@ -361,7 +365,7 @@ public class ValveManager {
      * @param dataModel
      */
     public void handlePumpSpeedChange(DataModel dataModel) {
-        Valve valve = valveCache.findByThingCode(dataModel.getThingCode());
+        Valve valve = getValveByPumpThingCode(dataModel.getThingCode());
         double pumpSpeed = Double.parseDouble(dataModel.getValue());
         valve.setPumpSpeed(pumpSpeed);
 
@@ -377,7 +381,7 @@ public class ValveManager {
      * @param dataModel
      */
     public void handleBucketStateChange(DataModel dataModel) {
-        Valve valve = valveCache.findByThingCode(dataModel.getThingCode());
+        Valve valve = getValveByBucketThingCode(dataModel.getThingCode());
         valve.setBucketState(Integer.parseInt(dataModel.getValue()));
     }
 
