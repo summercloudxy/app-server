@@ -143,7 +143,8 @@ public class Compressor {
     /**
      * 排气温度
      */
-    private volatile int temperature;
+    @JSONField(serializeUsing = DoubleSerializer.class)
+    private volatile double temperature;
 
     /**
      * 当前电流
@@ -249,7 +250,12 @@ public class Compressor {
         //组装属性（远程状态、故障状态、启动状态和加载状态使用监听者，不在这里组装）
         this.setCurrent(Integer.parseInt(BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.CURRENT).orElse("0")));
         this.setPressure(Double.parseDouble(BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.PRESSURE).orElse("0"))/100);
-        this.setTemperature(Integer.parseInt(BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.TEMPERATURE).orElse("0")));
+        if (BellowsConstants.CP_TYPE_HIGH.equals(type)) {
+            this.setTemperature(Double.parseDouble(BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.TEMPERATURE).orElse("0")));
+        } else {
+            this.setTemperature(Double.parseDouble(BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.TEMPERATURE).orElse("0"))/10);
+        }
+
         this.setRunTime(Integer.parseInt(BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.RUN_TIME).orElse("0")));
         this.setLoadTime(Integer.parseInt(BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.LOAD_TIME).orElse("0")));
         this.setOilPressure(Double.parseDouble(BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.OIL_PRESSURE).orElse("0"))/100);
@@ -898,11 +904,11 @@ public class Compressor {
         this.pressure = pressure;
     }
 
-    public int getTemperature() {
+    public double getTemperature() {
         return temperature;
     }
 
-    public void setTemperature(int temperature) {
+    public void setTemperature(double temperature) {
         this.temperature = temperature;
     }
 
