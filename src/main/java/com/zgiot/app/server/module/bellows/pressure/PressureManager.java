@@ -34,8 +34,9 @@ public class PressureManager {
             if (initial) {
                 return;
             }
-            map.put(BellowsConstants.CP_TYPE_HIGH, new DeviceGroup(Arrays.asList("2335")));
-            map.put(BellowsConstants.CP_TYPE_LOW, new DeviceGroup(Arrays.asList("2333", "2334")));
+            map.put(BellowsConstants.CP_TYPE_HIGH, new DeviceGroup(Arrays.asList("2334")));
+            //低压2335已坏，只取2333的值
+            map.put(BellowsConstants.CP_TYPE_LOW, new DeviceGroup(Arrays.asList("2333")));
             initial = true;
         }
     }

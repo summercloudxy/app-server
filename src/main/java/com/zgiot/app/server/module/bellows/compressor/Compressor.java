@@ -499,25 +499,27 @@ public class Compressor {
             }
             stopWaitTime *= DateUtils.MILLIS_PER_MINUTE;
 
-            stopTimer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    if (logger.isTraceEnabled()) {
-                        logger.trace("Compressor {} in stopTimer.", thingCode);
-                    }
-                    waitForStateConfirm();
-                    if (!error && running && !loading) {
-                        logger.info("Compressor {} unload overtime, starting stop.", thingCode);
-                        String requestId = RequestIdUtil.generateRequestId();
-                        try {
-                            operate(EnumCompressorOperation.STOP, BellowsConstants.TYPE_AUTO, requestId);
-                        } catch (SysException e) {
-                            logger.warn("{}. RequestId: {}.", e.getMessage(), requestId);
+            if (stopWaitTime > 0) {
+                stopTimer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        if (logger.isTraceEnabled()) {
+                            logger.trace("Compressor {} in stopTimer.", thingCode);
                         }
+                        waitForStateConfirm();
+                        if (!error && running && !loading) {
+                            logger.info("Compressor {} unload overtime, starting stop.", thingCode);
+                            String requestId = RequestIdUtil.generateRequestId();
+                            try {
+                                operate(EnumCompressorOperation.STOP, BellowsConstants.TYPE_AUTO, requestId);
+                            } catch (SysException e) {
+                                logger.warn("{}. RequestId: {}.", e.getMessage(), requestId);
+                            }
+                        }
+                        turnOffStopTimer();
                     }
-                    turnOffStopTimer();
-                }
-            }, stopWaitTime);
+                }, stopWaitTime);
+            }
         }
     }
 
