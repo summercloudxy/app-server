@@ -278,6 +278,7 @@ public class FilterPress {
         }
         manager.getUnloadManager().getQueue().remove(this);
         manager.getUnloadSequence().remove(this.getCode());
+        logger.debug("local remove unloadSequence,filterpress:" + this.getCode());
         try {
             manager.getUnConfirmedUnload().remove(this.getCode());
         } catch (NullPointerException e) {
@@ -285,6 +286,7 @@ public class FilterPress {
         }
         if (position > 0) {
             manager.getUnloadManager().reSort(position);
+            logger.debug("local resort");
         }
     }
 
@@ -301,6 +303,7 @@ public class FilterPress {
         }
         manager.getUnloadManager().getQueue().remove(this);
         manager.getUnloadSequence().remove(this.getCode());
+        logger.debug("loose remove unloadSequence,filterpress:" + this.getCode());
         try {
             manager.getUnConfirmedUnload().remove(this.getCode());
         } catch (NullPointerException e) {
@@ -308,6 +311,7 @@ public class FilterPress {
         }
         if (position > 0) {
             manager.getUnloadManager().reSort(position);
+            logger.debug("loose resort");
         }
     }
 
@@ -378,8 +382,10 @@ public class FilterPress {
         //压紧后通知下一台
         if((manager.getUnloadManager().getUnloadingCount(code) < manager.getMaxUnloadParallel()) && (filterPressTakeAndPullCount.get() < 16)){
             unloadManager.notifyNext();
-            logger.debug("notify next filterpress unload cause by press!");
-            logger.debug("press state unloading filterpress count:" + manager.getUnloadManager().getUnloadingCount(code));
+            if(logger.isDebugEnabled()){
+                logger.debug("notify next filterpress unload cause by press!");
+                logger.debug("press state unloading filterpress count:" + manager.getUnloadManager().getUnloadingCount(code));
+            }
         }
         filterPressTakeAndPullCount.set(0);
         unloadManager.stopUnload();
@@ -644,7 +650,7 @@ public class FilterPress {
         try {
             date = dateformat.parse(dateStr);
         } catch (ParseException e) {
-            e.printStackTrace();
+            logger.debug("date parse exception in filterPress.parseDate()");
         }
         return date;
     }
@@ -804,9 +810,11 @@ public class FilterPress {
             isFilterPressUnloading = true;
             filterPressTakeAndPullCount.getAndIncrement();
             if (takeAndPullCount.incrementAndGet() >= UNLOAD_EXCHANGE_COUNT && isUnloading) {
-                logger.debug("{} take and pull enough", code);
                 cancelTimer();
-                logger.debug("take and pull state unloading filterpress count:" + manager.getUnloadManager().getUnloadingCount(code));
+                if(logger.isDebugEnabled()){
+                    logger.debug("{} take and pull enough", code);
+                    logger.debug("take and pull state unloading filterpress count:" + manager.getUnloadManager().getUnloadingCount(code));
+                }
                 if(manager.getUnloadManager().getUnloadingCount(code) < manager.getMaxUnloadParallel()){
                     notifyNext();
                 }
