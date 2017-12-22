@@ -298,7 +298,8 @@ public class CompressorGroup {
             if (compressor.isRunning()) {
                 //运行中数量
                 runningCount++;
-            } else if (compressor.isError() || compressor.isWarn()) {
+            }
+            if (compressor.isError() || compressor.isWarn()) {
                 //故障数量
                 errorCount++;
             }
