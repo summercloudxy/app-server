@@ -278,6 +278,7 @@ public class FilterPress {
         }
         manager.getUnloadManager().getQueue().remove(this);
         manager.getUnloadSequence().remove(this.getCode());
+        logger.debug("local remove unloadSequence,filterpress:" + this.getCode());
         try {
             manager.getUnConfirmedUnload().remove(this.getCode());
         } catch (NullPointerException e) {
@@ -285,6 +286,7 @@ public class FilterPress {
         }
         if (position > 0) {
             manager.getUnloadManager().reSort(position);
+            logger.debug("local resort");
         }
     }
 
@@ -301,6 +303,7 @@ public class FilterPress {
         }
         manager.getUnloadManager().getQueue().remove(this);
         manager.getUnloadSequence().remove(this.getCode());
+        logger.debug("loose remove unloadSequence,filterpress:" + this.getCode());
         try {
             manager.getUnConfirmedUnload().remove(this.getCode());
         } catch (NullPointerException e) {
@@ -308,6 +311,7 @@ public class FilterPress {
         }
         if (position > 0) {
             manager.getUnloadManager().reSort(position);
+            logger.debug("loose resort");
         }
     }
 
