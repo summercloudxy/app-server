@@ -12,6 +12,7 @@ import com.zgiot.app.server.util.RequestIdUtil;
 import com.zgiot.common.constants.BellowsConstants;
 import com.zgiot.common.constants.CompressorMetricConstants;
 import com.zgiot.common.exceptions.SysException;
+import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +35,7 @@ public class CompressorGroup {
     /**
      * 智能压力控制等待时间
      */
-    private static final int PRESSURE_WAIT_TIME = 60000;
+    private static final long PRESSURE_WAIT_TIME = 60;
 
 
     /**
@@ -294,7 +295,7 @@ public class CompressorGroup {
         for (Compressor compressor : compressors) {
             compressor.refresh(dataService);
 
-            if (!compressor.isError() && !compressor.isWarn() && compressor.isRunning()) {
+            if (compressor.isRunning()) {
                 //运行中数量
                 runningCount++;
             } else if (compressor.isError() || compressor.isWarn()) {
@@ -403,27 +404,32 @@ public class CompressorGroup {
      */
     private void onPressureHigh() {
         //添加压力检测计时器
-        synchronized (pressureLock) {
-            if (pressureTimer != null) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Pressure timer already exists.");
-                }
-                return;
-            }
+        long pressureWaitTime = getPressureWaitTime();
 
-            pressureTimer = new Timer();
-            pressureTimer.schedule(new TimerTask() {
-                @Override
-                public void run() {
+        if (pressureWaitTime > 0) {
+            synchronized (pressureLock) {
+                if (pressureTimer != null) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("In pressure high timer");
+                        logger.debug("Pressure timer already exists.");
                     }
-                    turnOffPressureTimer();
-
-                    onPressureHigh();
+                    return;
                 }
-            }, PRESSURE_WAIT_TIME);
+
+                pressureTimer = new Timer();
+                pressureTimer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("In pressure high timer");
+                        }
+                        turnOffPressureTimer();
+
+                        onPressureHigh();
+                    }
+                }, pressureWaitTime);
+            }
         }
+
 
         //查找可关闭空压机
         Compressor compressor = chooseCompressorToTurnOff();
@@ -447,27 +453,32 @@ public class CompressorGroup {
      */
     private void onPressureLow() {
         //添加压力检测计时器
-        synchronized (pressureLock) {
-            if (pressureTimer != null) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Pressure timer already exists.");
-                }
-                return;
-            }
+        long pressureWaitTime = getPressureWaitTime();
 
-            pressureTimer = new Timer();
-            pressureTimer.schedule(new TimerTask() {
-                @Override
-                public void run() {
+        if (pressureWaitTime > 0) {
+            synchronized (pressureLock) {
+                if (pressureTimer != null) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("In pressure low timer");
+                        logger.debug("Pressure timer already exists.");
                     }
-                    turnOffPressureTimer();
-
-                    onPressureLow();
+                    return;
                 }
-            }, PRESSURE_WAIT_TIME);
+
+                pressureTimer = new Timer();
+                pressureTimer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("In pressure low timer");
+                        }
+                        turnOffPressureTimer();
+
+                        onPressureLow();
+                    }
+                }, pressureWaitTime);
+            }
         }
+
 
         //查找可开启空压机
         Compressor compressor = chooseCompressorToTurnOn();
@@ -491,6 +502,18 @@ public class CompressorGroup {
                 logger.warn(e.getMessage());
             }
         }
+    }
+
+    /**
+     * 获取压力检测计时器倒计时时间（单位：毫秒）
+     * @return
+     */
+    private long getPressureWaitTime() {
+        Long pressureWaitTime = bellowsMapper.selectParamValue(BellowsConstants.SYS, BellowsConstants.CP_PRESSURE_WAIT);
+        if (pressureWaitTime == null) {
+            pressureWaitTime = PRESSURE_WAIT_TIME;
+        }
+        return pressureWaitTime* DateUtils.MILLIS_PER_SECOND;
     }
 
     /**
