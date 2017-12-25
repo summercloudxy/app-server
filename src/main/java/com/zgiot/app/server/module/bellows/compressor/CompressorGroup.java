@@ -586,26 +586,20 @@ public class CompressorGroup {
      * @return 选中的空压机
      */
     private Compressor compare(Compressor c1, Compressor c2, double state) {
-        if (c1.isLocal() || c1.isError()) {
+        int factor1 = compressorFactor(c1, state);
+        int factor2 = compressorFactor(c2, state);
+
+        if (factor1 > factor2) {
+            return c1;
+        } else if (factor2 > factor1) {
             return c2;
         }
-        if (c2.isLocal() || c2.isError()) {
-            return c1;
-        }
 
+        //因子相等
 
         //记录高压状态下是否选择第一个
         boolean highSelectFirst;
-
-        if (c1.isRunning() && !c2.isRunning()) {
-            highSelectFirst = true;
-        } else if (!c1.isRunning() && c2.isRunning()) {
-            highSelectFirst = false;
-        } else if (c1.isLoading() && !c2.isLoading()) {
-            highSelectFirst = true;
-        } else if (!c1.isLoading() && c2.isLoading()) {
-            highSelectFirst = false;
-        } else if (c1.getLoadTime() > c2.getLoadTime()) {
+        if (c1.getLoadTime() > c2.getLoadTime()) {
             highSelectFirst = true;
         } else if (c1.getLoadTime() < c2.getLoadTime()) {
             highSelectFirst = false;
@@ -630,6 +624,37 @@ public class CompressorGroup {
         return result;
     }
 
+    /**
+     * 高压、低压情况下，空压机的因子，因子值大的优先操作
+     * @param compressor
+     * @param state
+     * @return
+     */
+    private int compressorFactor(Compressor compressor, double state) {
+        if (compressor.isLocal() || compressor.isError()) {
+            return -1;
+        }
+
+        if (BellowsConstants.PRESSURE_HIGH == state) {
+            //高压选择关闭设备
+            if (compressor.isRunning() && compressor.isLoading()) {
+                return 1;
+            } else {
+                return -1;
+            }
+        } else {
+            //低压选择开启设备
+            if (compressor.isRunning()) {
+                if (compressor.isLoading()) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            } else {
+                return 0;
+            }
+        }
+    }
 
 
     public List<Compressor> getCompressors() {
