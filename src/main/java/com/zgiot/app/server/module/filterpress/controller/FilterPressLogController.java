@@ -117,17 +117,19 @@ public class FilterPressLogController {
             default:
         }
         final int pos = position;
-        for(DataModel dataModel:dataModelList){
-            try{
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        cmdControlService.sendPulseCmdBoolByShort(dataModel,5000,3,requestId,pos,cleanPeriod,isHolding);
-                    }
-                }).start();
-            }catch(Exception e){
-                logger.info("filterPress:" + dataModel.getThingCode() + "team choose exception");
-                continue;
+        if(dataModelList != null && (dataModelList.size() > 0)){
+            for(DataModel dataModel:dataModelList){
+                try{
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            cmdControlService.sendPulseCmdBoolByShort(dataModel,5000,3,requestId,pos,cleanPeriod,isHolding);
+                        }
+                    }).start();
+                }catch(Exception e){
+                    logger.info("filterPress:" + dataModel.getThingCode() + "team choose exception");
+                    continue;
+                }
             }
         }
         return new ResponseEntity<>(
