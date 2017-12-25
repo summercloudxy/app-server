@@ -375,7 +375,7 @@ public class FilterPressManager {
         Boolean isRunningFromCache = isRunningFromCache(thingCode);
         if (Boolean.valueOf(fault.getValue())) {
             state = GlobalConstants.STATE_FAULT;
-        } else if ((!isRunning) && (!isRunningFromCache)) {
+        } else if (!isRunningFromCache) {
             state = GlobalConstants.STATE_STOPPED;
         } else {
             state = GlobalConstants.STATE_RUNNING;
@@ -383,11 +383,11 @@ public class FilterPressManager {
         return state;
     }
 
-    private boolean isRunningFromCache(String thingCode){
+    private synchronized boolean isRunningFromCache(String thingCode){
         Boolean isRunning = Boolean.FALSE;
         Optional<DataModelWrapper> data = null;
-        for(String value:filterPressStage.values()){
-            data = dataService.getData(thingCode,value);
+        for(String key:filterPressStage.keySet()){
+            data = dataService.getData(thingCode,key);
             if(data != null && data.isPresent() && Boolean.parseBoolean(data.get().getValue())){
                 isRunning = Boolean.TRUE;
                 break;
