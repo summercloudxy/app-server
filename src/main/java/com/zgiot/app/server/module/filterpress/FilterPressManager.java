@@ -355,8 +355,10 @@ public class FilterPressManager {
         short state;
         DataModelWrapper fault = dataService.getData(thingCode, FilterPressMetricConstants.FAULT)
                 .orElse(new DataModelWrapper(new DataModel(null, thingCode, null, FilterPressMetricConstants.FAULT, Boolean.FALSE.toString(), new Date())));
-        data.setMetricCode(FilterPressMetricConstants.STAGE);
-        String readValue = cmdControlService.getDataSync(data);
+        DataModel dataModel = new DataModel();
+        dataModel.setThingCode(data.getThingCode());
+        dataModel.setMetricCode(FilterPressMetricConstants.STAGE);
+        String readValue = cmdControlService.getDataSync(dataModel);
         if (Boolean.valueOf(fault.getValue())) {
             state = GlobalConstants.STATE_FAULT;
         } else if (Short.valueOf(readValue) == 0) {
