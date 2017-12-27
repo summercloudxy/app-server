@@ -197,6 +197,7 @@ public class CmdControlServiceImpl implements CmdControlService {
      * @param dataModel
      * @return
      */
+    @Override
     public String getDataSync(DataModel dataModel){
         ServerResponse response = null;
         try {

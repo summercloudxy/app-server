@@ -63,8 +63,6 @@ public class FilterPressManager {
     @Autowired
     FilterPressLogService filterPressLogService;
 
-    @Autowired
-    private DataEngineTemplate dataEngineTemplate;
 
     public UnloadManager getUnloadManager() {
         return unloadManager;
@@ -318,7 +316,7 @@ public class FilterPressManager {
             default:
         }
         // calculate the state value and call the specific method of filter press
-        short stateValue = calculateState(thingCode);
+        short stateValue = calculateState(thingCode,data);
         Optional<DataModelWrapper> stateData = dataService.getData(thingCode, MetricCodes.STATE);
         if (!stateData.isPresent()) {
             saveState(data, thingCode, stateValue);
@@ -353,17 +351,12 @@ public class FilterPressManager {
      * @param thingCode
      * @return
      */
-    private short calculateState(String thingCode) {
+    private short calculateState(String thingCode,DataModel data) {
         short state;
         DataModelWrapper fault = dataService.getData(thingCode, FilterPressMetricConstants.FAULT)
                 .orElse(new DataModelWrapper(new DataModel(null, thingCode, null, FilterPressMetricConstants.FAULT, Boolean.FALSE.toString(), new Date())));
-        Map<String, String> uriVariables = new HashMap<>();
-        uriVariables.put("thingCode", thingCode);
-        uriVariables.put("metricCode", FilterPressMetricConstants.STAGE);
-        String readDataModelByString = dataEngineTemplate.getForObject(DataEngineTemplate.URI_DATA_SYNC + "/" + thingCode + "/" + FilterPressMetricConstants.STAGE
-                , String.class, uriVariables);
-        ServerResponse response = JSON.parseObject(readDataModelByString, ServerResponse.class );
-        String readValue = (String) response.getObj();
+        data.setMetricCode(FilterPressMetricConstants.STAGE);
+        String readValue = cmdControlService.getDataSync(data);
         if (Boolean.valueOf(fault.getValue())) {
             state = GlobalConstants.STATE_FAULT;
         } else if (Short.valueOf(readValue) == 0) {
