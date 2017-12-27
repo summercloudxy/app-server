@@ -1,5 +1,6 @@
 package com.zgiot.app.server.module.filterpress;
 
+import com.alibaba.fastjson.JSON;
 import com.zgiot.app.server.module.filterpress.dao.FilterPressMapper;
 import com.zgiot.app.server.module.filterpress.pojo.FeedAsumConfirmBean;
 import com.zgiot.app.server.module.filterpress.pojo.FilterPressElectricity;
@@ -7,6 +8,7 @@ import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.module.filterpress.filterPressService.FilterPressLogService;
 import com.zgiot.app.server.service.HistoryDataService;
+import com.zgiot.app.server.service.impl.DataEngineTemplate;
 import com.zgiot.app.server.util.RequestIdUtil;
 import com.zgiot.common.constants.*;
 import com.zgiot.common.enums.MetricDataTypeEnum;
@@ -14,6 +16,8 @@ import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
 import com.zgiot.common.pojo.MetricModel;
+import com.zgiot.common.restcontroller.ServerResponse;
+import javafx.beans.binding.IntegerBinding;
 import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +62,7 @@ public class FilterPressManager {
 
     @Autowired
     FilterPressLogService filterPressLogService;
+
 
     public UnloadManager getUnloadManager() {
         return unloadManager;
@@ -237,7 +242,6 @@ public class FilterPressManager {
         String metricCodeValue = data.getValue();
         String metricCode = data.getMetricCode();
         FilterPress filterPress = getFilterPress(thingCode);
-        Boolean isRunning = Boolean.FALSE;
         switch (metricCode) { // 回调各阶段
             case FilterPressMetricConstants.T1_COUNT:
                 filterPress.teamCount(FilterPressMetricConstants.T1_COUNT,metricCodeValue);
@@ -256,7 +260,6 @@ public class FilterPressManager {
             case FilterPressMetricConstants.RO_LOOSE:
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onLoosen();
-                    isRunning = Boolean.TRUE;
                 }else{
                     filterPress.offLoosen();
                 }
@@ -264,7 +267,6 @@ public class FilterPressManager {
             case FilterPressMetricConstants.RO_TAKE:
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onTaken();
-                    isRunning = Boolean.TRUE;
                 }else{
                     filterPress.offTaken();
                 }
@@ -272,7 +274,6 @@ public class FilterPressManager {
             case FilterPressMetricConstants.RO_PULL:
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onPull();
-                    isRunning = Boolean.TRUE;
                 }else{
                     filterPress.offPull();
                 }
@@ -280,13 +281,11 @@ public class FilterPressManager {
             case FilterPressMetricConstants.RO_PRESS:
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onPress();
-                    isRunning = Boolean.TRUE;
                 }
                 break;
             case FilterPressMetricConstants.RO_FEEDING:
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onFeed();
-                    isRunning = Boolean.TRUE;
                 }else{
                     filterPress.offFeed();
                 }
@@ -294,45 +293,30 @@ public class FilterPressManager {
             case FilterPressMetricConstants.RO_FEED_OVER:
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onFeedOver();
-                    isRunning = Boolean.TRUE;
                 }
                 break;
             case FilterPressMetricConstants.RO_BLOW:
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onBlow();
-                    isRunning = Boolean.TRUE;
                 }
                 break;
             case FilterPressMetricConstants.RO_HOLD_PRESS:
-                if(Boolean.parseBoolean(metricCodeValue)){
-                    isRunning = Boolean.TRUE;
-                }
                 break;
             case FilterPressMetricConstants.RO_SQUEEZE_OVER:
-                if(Boolean.parseBoolean(metricCodeValue)){
-                    isRunning = Boolean.TRUE;
-                }
                 break;
             case FilterPressMetricConstants.RO_SQUEEZE:
-                if(Boolean.parseBoolean(metricCodeValue)){
-                    isRunning = Boolean.TRUE;
-                }
                 break;
             case FilterPressMetricConstants.RO_EMPTYING:
-                if(Boolean.parseBoolean(metricCodeValue)){
-                    isRunning = Boolean.TRUE;
-                }
                 break;
             case FilterPressMetricConstants.RO_CYCLE:
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onCycle();
-                    isRunning = Boolean.TRUE;
                 }
                 break;
             default:
         }
         // calculate the state value and call the specific method of filter press
-        short stateValue = calculateState(thingCode, isRunning);
+        short stateValue = calculateState(thingCode,data);
         Optional<DataModelWrapper> stateData = dataService.getData(thingCode, MetricCodes.STATE);
         if (!stateData.isPresent()) {
             saveState(data, thingCode, stateValue);
@@ -365,17 +349,17 @@ public class FilterPressManager {
      * calculate the state(running/stopped/fault) of specific thing
      *
      * @param thingCode
-     * @param isRunning
      * @return
      */
-    private short calculateState(String thingCode, Boolean isRunning) {
+    private short calculateState(String thingCode,DataModel data) {
         short state;
         DataModelWrapper fault = dataService.getData(thingCode, FilterPressMetricConstants.FAULT)
                 .orElse(new DataModelWrapper(new DataModel(null, thingCode, null, FilterPressMetricConstants.FAULT, Boolean.FALSE.toString(), new Date())));
-        Boolean isRunningFromCache = isRunningFromCache(thingCode);
+        data.setMetricCode(FilterPressMetricConstants.STAGE);
+        String readValue = cmdControlService.getDataSync(data);
         if (Boolean.valueOf(fault.getValue())) {
             state = GlobalConstants.STATE_FAULT;
-        } else if (!isRunningFromCache) {
+        } else if (Short.valueOf(readValue) == 0) {
             state = GlobalConstants.STATE_STOPPED;
         } else {
             state = GlobalConstants.STATE_RUNNING;
@@ -385,13 +369,9 @@ public class FilterPressManager {
 
     private synchronized boolean isRunningFromCache(String thingCode){
         Boolean isRunning = Boolean.FALSE;
-        Optional<DataModelWrapper> data = null;
-        for(String key:filterPressStage.keySet()){
-            data = dataService.getData(thingCode,key);
-            if(data != null && data.isPresent() && Boolean.parseBoolean(data.get().getValue())){
-                isRunning = Boolean.TRUE;
-                break;
-            }
+        Optional<DataModelWrapper> data = dataService.getData(thingCode,FilterPressMetricConstants.STAGE);
+        if(data != null && data.isPresent() && Integer.valueOf(data.get().getValue()) > 0){
+            isRunning = Boolean.TRUE;
         }
         return isRunning;
     }
