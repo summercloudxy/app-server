@@ -44,7 +44,9 @@ public class FilterPressManager {
 
     private static final int POSITION_FEED_OVER = 5;
     private static final int POSITION_RUN = 1;
-    private static final int CLAEN_PERIOD = 0;
+    private static final int CLAEN_PERIOD = 500;
+    private static final int RETRY_PERIOD = 5000;
+    private static final int RETRY_COUNT = 3;
     private static final boolean IS_HOLDING_FEED_OVER = false;
     private static final boolean IS_HOLDING_RUN = false;
     private static final Map<String,String> filterPressStage = new HashMap<>();
@@ -468,7 +470,7 @@ public class FilterPressManager {
         dataModel.setMetricCode(FilterPressMetricConstants.FEED_OVER);
         dataModel.setThingCode(filterPress.getCode());
         dataModel.setValue(Boolean.TRUE.toString());
-        cmdControlService.sendPulseCmdBoolByShort(dataModel,null,null,RequestIdUtil.generateRequestId(),POSITION_FEED_OVER,CLAEN_PERIOD,IS_HOLDING_FEED_OVER);
+        cmdControlService.sendPulseCmdBoolByShort(dataModel,RETRY_PERIOD,RETRY_COUNT,RequestIdUtil.generateRequestId(),POSITION_FEED_OVER,CLAEN_PERIOD,IS_HOLDING_FEED_OVER);
 
         //filterPress.setFeedDuration(System.currentTimeMillis() - filterPress.getFeedStartTime());
         List<String> feedPumpCodes = getKeyByValueFromMap(filterPressPumpMapping,filterPress.getCode());
@@ -812,7 +814,7 @@ public class FilterPressManager {
             cmd.setThingCode(filterPress.getCode());
             cmd.setMetricCode(FilterPressMetricConstants.RUN);
             cmd.setValue(Boolean.TRUE.toString());
-            cmdControlService.sendPulseCmdBoolByShort(cmd,null,null,RequestIdUtil.generateRequestId(),POSITION_RUN,CLAEN_PERIOD,IS_HOLDING_RUN);
+            cmdControlService.sendPulseCmdBoolByShort(cmd,RETRY_PERIOD,RETRY_COUNT,RequestIdUtil.generateRequestId(),POSITION_RUN,CLAEN_PERIOD,IS_HOLDING_RUN);
         }
 
         /**
