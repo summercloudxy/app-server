@@ -15,6 +15,7 @@ import com.zgiot.app.server.module.bellows.valve.ValveIntelligentJob;
 import com.zgiot.app.server.module.bellows.valve.ValveManager;
 import com.zgiot.app.server.module.demo.DemoBusiness;
 import com.zgiot.app.server.module.demo.DemoDataCompleter;
+import com.zgiot.app.server.module.densitycontrol.DensityControlListener;
 import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
 import com.zgiot.app.server.service.impl.HistoryDataPersistDaemon;
 import com.zgiot.app.server.service.impl.QuartzManager;
@@ -59,6 +60,8 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
     private AlertFaultHandler alertFaultHandler;
     @Autowired
     private HistoryDataPersistDaemon historyDataPersistDaemon;
+    @Autowired
+    private DensityControlListener densityControlListener;
 
     private static final int FAULT_SCAN_RATE = 20;
 
@@ -91,6 +94,11 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
                 || moduleListConfig.containModule(ModuleListConfig.MODULE_FILTERPRESS)) {
             processor.addListener(filterPressListener);
+        }
+
+        if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
+                || moduleListConfig.containModule(ModuleListConfig.MODULE_DENSITY_CONTROL)) {
+            processor.addListener(densityControlListener);
         }
 
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)

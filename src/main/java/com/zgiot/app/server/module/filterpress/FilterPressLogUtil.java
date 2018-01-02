@@ -31,10 +31,7 @@ public class FilterPressLogUtil {
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
         long endTime = calendar.getTimeInMillis();
-        if(System.currentTimeMillis() > startTime && System.currentTimeMillis() < endTime){
-            return true;
-        }
-        return false;
+        return System.currentTimeMillis() > startTime && System.currentTimeMillis() < endTime;
     }
 
     public static Map<String,String> getCurrentDayAndNextOrPriorDay(int currentOffset,int nextOrPriorOffset){
@@ -64,11 +61,7 @@ public class FilterPressLogUtil {
         boolean isPriorOrNextPartNightShift = false;
         try{
             Date nightShiftTime = simpleDateFormat.parse(nightShiftline);
-            if(date.getTime() < nightShiftTime.getTime()){
-                isPriorOrNextPartNightShift = false;
-            }else{
-                isPriorOrNextPartNightShift = true;
-            }
+            isPriorOrNextPartNightShift = date.getTime() >= nightShiftTime.getTime();
         }catch(ParseException e){
             logger.trace("判断是否是前半夜接口解析时间异常");
         }
@@ -123,9 +116,6 @@ public class FilterPressLogUtil {
         }catch(ParseException e){
             throw new SysException("simpleDateFormat parse exception",SysException.EC_UNKNOWN);
         }
-        if(priorLooseTime < currentDayStartTimeMills){
-            return true;
-        }
-        return false;
+        return priorLooseTime < currentDayStartTimeMills;
     }
 }

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.densitycontrol.mapper.DensityControlMapper">
+
+
+    <select id="getNotifyIntervalByNotifyType" resultType="com.zgiot.app.server.module.densitycontrol.pojo.NotifyInterval">
+        SELECT * FROM tb_density_control_interval
+    </select>
+
+    <select id="getMonitoredThingMap" resultType="com.zgiot.app.server.module.densitycontrol.pojo.MonitoredThing">
+        SELECT * FROM tb_density_control_thing_list
+    </select>
+    <select id="getNotifyInfo" resultType="com.zgiot.app.server.module.densitycontrol.pojo.NotifyThingMetricInfo">
+        SELECT * FROM tb_density_control_notify_info
+    </select>
+
+</mapper>
