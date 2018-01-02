@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CancelNotifyHandler implements DensityControlHandler {
-    private static final Logger logger = LoggerFactory.getLogger(CancelNotifyHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(CancelNotifyHandler.class);
 
     @Override
     public void dispose(MonitoringParam monitoringParam) {

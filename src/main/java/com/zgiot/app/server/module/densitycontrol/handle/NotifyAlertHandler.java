@@ -19,7 +19,7 @@ public class NotifyAlertHandler implements DensityControlHandler {
     @Autowired
     private DensityControlMapper densityControlMapper;
     private Map<String, NotifyInterval> notifyInterval;
-    private static final Logger logger = LoggerFactory.getLogger(NotifyAlertHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(NotifyAlertHandler.class);
 
     @PostConstruct
     private void init() {

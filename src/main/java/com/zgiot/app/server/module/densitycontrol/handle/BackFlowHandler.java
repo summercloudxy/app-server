@@ -6,7 +6,6 @@ import com.zgiot.app.server.module.densitycontrol.mapper.DensityControlMapper;
 import com.zgiot.app.server.module.densitycontrol.pojo.MonitoringParam;
 import com.zgiot.app.server.module.densitycontrol.pojo.NotifyInterval;
 import com.zgiot.app.server.service.impl.QuartzManager;
-import org.quartz.JobDataMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,7 @@ public class BackFlowHandler implements DensityControlHandler {
     @Autowired
     private DensityControlMapper densityControlMapper;
     private Map<String, NotifyInterval> notifyIntervalMap;
-    private static final Logger logger = LoggerFactory.getLogger(BackFlowHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(BackFlowHandler.class);
 
     @PostConstruct
     private void init() {

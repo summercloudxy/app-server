@@ -98,36 +98,29 @@ public class DensityControlManager {
         NotifyThingMetricInfo notifyThingMetricInfo = notifyThingMetricInfoMap.get(thingCode);
         MonitoringParam monitoringParam = new MonitoringParam();
         monitoringParam.setThingCode(thingCode);
-        if (notifyThingMetricInfo.getValveOpeningThingCode() != null) {
-            if (dataService
-                    .getData(notifyThingMetricInfo.getValveOpeningThingCode(), MetricCodes.PROPORTIONAL_VALVE_OPENING)
-                    .isPresent()) {
-                DataModelWrapper valveOpening =
-                        dataService.getData(notifyThingMetricInfo.getValveOpeningThingCode(), MetricCodes.PROPORTIONAL_VALVE_OPENING).get();
-                monitoringParam.setCurrentValveOpening(Double.valueOf(valveOpening.getValue()));
-            }
+        if (notifyThingMetricInfo.getValveOpeningThingCode() != null && dataService
+                .getData(notifyThingMetricInfo.getValveOpeningThingCode(), MetricCodes.PROPORTIONAL_VALVE_OPENING)
+                .isPresent()) {
+            DataModelWrapper valveOpening =
+                    dataService.getData(notifyThingMetricInfo.getValveOpeningThingCode(), MetricCodes.PROPORTIONAL_VALVE_OPENING).get();
+            monitoringParam.setCurrentValveOpening(Double.valueOf(valveOpening.getValue()));
         }
-        if (notifyThingMetricInfo.getDensityThingCode() != null) {
-            if (dataService.getData(notifyThingMetricInfo.getDensityThingCode(), MetricCodes.CURRENT_DENSITY)
-                    .isPresent()) {
-                DataModelWrapper density =
-                        dataService.getData(notifyThingMetricInfo.getDensityThingCode(), MetricCodes.CURRENT_DENSITY).get();
-                monitoringParam.setCurrentDensity(Double.valueOf(density.getValue()));
-            }
+        if (notifyThingMetricInfo.getDensityThingCode() != null && dataService.getData(notifyThingMetricInfo.getDensityThingCode(), MetricCodes.CURRENT_DENSITY)
+                .isPresent()) {
+            DataModelWrapper density =
+                    dataService.getData(notifyThingMetricInfo.getDensityThingCode(), MetricCodes.CURRENT_DENSITY).get();
+            monitoringParam.setCurrentDensity(Double.valueOf(density.getValue()));
         }
-        if (notifyThingMetricInfo.getLevelThingCode() != null) {
-            if (dataService.getData(notifyThingMetricInfo.getLevelThingCode(), MetricCodes.CURRENT_LEVEL_M)
-                    .isPresent()) {
-                DataModelWrapper level =
-                        dataService.getData(notifyThingMetricInfo.getLevelThingCode(), MetricCodes.CURRENT_LEVEL_M).get();
-                monitoringParam.setCurrentFuelLevel(Double.valueOf(level.getValue()));
-            }
+        if (notifyThingMetricInfo.getLevelThingCode() != null && dataService.getData(notifyThingMetricInfo.getLevelThingCode(), MetricCodes.CURRENT_LEVEL_M)
+                .isPresent()) {
+            DataModelWrapper level =
+                    dataService.getData(notifyThingMetricInfo.getLevelThingCode(), MetricCodes.CURRENT_LEVEL_M).get();
+            monitoringParam.setCurrentFuelLevel(Double.valueOf(level.getValue()));
         }
         return monitoringParam;
     }
 
     public String getControlStage(DataModel dataModel) {
-        String thingCode = dataModel.getThingCode();
         String metricCode = dataModel.getMetricCode();
         int densityStage = 0;
         int levelStage = 0;
@@ -152,13 +145,12 @@ public class DensityControlManager {
             }
         }
 
-        String stage = String.valueOf(densityStage) + levelStage + valveOpeningStage;
-        return stage;
+        return String.valueOf(densityStage) + levelStage + valveOpeningStage;
     }
 
     /**
      * 处理控制逻辑中的状态点
-     * 
+     *
      * @param dataModel
      */
     private void disposeState(DataModel dataModel) {
@@ -187,7 +179,7 @@ public class DensityControlManager {
 
     /**
      * 处理密度
-     * 
+     *
      * @param dataModel
      * @return
      */
@@ -214,7 +206,7 @@ public class DensityControlManager {
 
     /**
      * 计算当前密度所处阶段
-     * 
+     *
      * @param monitoringParam
      * @return
      */
@@ -241,7 +233,7 @@ public class DensityControlManager {
 
     /**
      * 处理开度
-     * 
+     *
      * @param dataModel
      * @return
      */
@@ -271,7 +263,7 @@ public class DensityControlManager {
 
     /**
      * 计算当前开度所处阶段
-     * 
+     *
      * @param monitoringParam
      * @return
      */
@@ -302,7 +294,7 @@ public class DensityControlManager {
 
     /**
      * 处理液位
-     * 
+     *
      * @param dataModel
      * @return
      */
@@ -332,7 +324,7 @@ public class DensityControlManager {
 
     /**
      * 获取一个设备的智能控制相关状态及参数值
-     * 
+     *
      * @param thingCode
      * @return
      */
@@ -350,7 +342,7 @@ public class DensityControlManager {
 
     /**
      * 计算当前液位所处阶段
-     * 
+     *
      * @param monitoringParam
      * @return
      */
@@ -378,7 +370,7 @@ public class DensityControlManager {
 
     /**
      * 所处的智能控制状态是否发生改变
-     * 
+     *
      * @param thingCode
      * @param stage
      * @return
@@ -400,7 +392,7 @@ public class DensityControlManager {
 
     /**
      * 目前的状态应该进行的智能操作
-     * 
+     *
      * @param thingCode
      * @param stage
      */
@@ -415,7 +407,7 @@ public class DensityControlManager {
 
     /**
      * 屏蔽掉无用的状态点
-     * 
+     *
      * @param currentStage
      * @param maskIndex
      * @return
@@ -428,13 +420,13 @@ public class DensityControlManager {
 
     public List<MonitoringParam> getNotifyInfo(String thingCode) {
         List<MonitoringParam> monitoringParamList = new ArrayList<>();
-        checkNotifyExist(DensityControlManager.NOTIFY_TYPE_ADDING_MEDIUM,thingCode,monitoringParamList);
-        checkNotifyExist(DensityControlManager.NOTIFY_TYPE_ALERT,thingCode,monitoringParamList);
-        checkNotifyExist(DensityControlManager.NOTIFY_TYPE_BACK_FLOW,thingCode,monitoringParamList);
+        checkNotifyExist(DensityControlManager.NOTIFY_TYPE_ADDING_MEDIUM, thingCode, monitoringParamList);
+        checkNotifyExist(DensityControlManager.NOTIFY_TYPE_ALERT, thingCode, monitoringParamList);
+        checkNotifyExist(DensityControlManager.NOTIFY_TYPE_BACK_FLOW, thingCode, monitoringParamList);
         return monitoringParamList;
     }
 
-    private void checkNotifyExist(String module,String thingCode,List<MonitoringParam> monitoringParamList){
+    private void checkNotifyExist(String module, String thingCode, List<MonitoringParam> monitoringParamList) {
         if (QuartzManager.checkExists(module, thingCode)) {
             MonitoringParam monitoringParam = getMonitoringParam(thingCode);
             monitoringParam.setCurrentStage(module);

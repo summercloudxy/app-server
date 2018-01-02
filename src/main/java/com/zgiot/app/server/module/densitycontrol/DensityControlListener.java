@@ -3,9 +3,7 @@ package com.zgiot.app.server.module.densitycontrol;
 import com.zgiot.app.server.dataprocessor.DataListener;
 import com.zgiot.app.server.module.densitycontrol.handle.AddingMediumHandler;
 import com.zgiot.app.server.module.densitycontrol.handle.BackFlowHandler;
-import com.zgiot.app.server.module.densitycontrol.handle.CancelNotifyHandler;
 import com.zgiot.app.server.module.densitycontrol.handle.NotifyAlertHandler;
-import com.zgiot.app.server.module.densitycontrol.mapper.DensityControlMapper;
 import com.zgiot.app.server.module.densitycontrol.pojo.MonitoringParam;
 import com.zgiot.common.constants.MetricCodes;
 import com.zgiot.common.pojo.DataModel;
@@ -25,12 +23,12 @@ public class DensityControlListener implements DataListener {
     private BackFlowHandler backFlowHandler;
     @Autowired
     private NotifyAlertHandler notifyAlertHandler;
-    @Autowired
-    private CancelNotifyHandler cancelNotifyHandler;
-    @Autowired
-    private DensityControlMapper densityControlMapper;
+//    @Autowired
+//    private CancelNotifyHandler cancelNotifyHandler;
+//    @Autowired
+//    private DensityControlMapper densityControlMapper;
 
-    private static final Logger logger = LoggerFactory.getLogger(DensityControlListener.class);
+    private final Logger logger = LoggerFactory.getLogger(DensityControlListener.class);
     // private int maskIndex = 0;
     // private Map<String, MonitoredThing> monitoredThingMap;
 

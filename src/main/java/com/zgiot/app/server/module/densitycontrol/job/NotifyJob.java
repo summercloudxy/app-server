@@ -18,7 +18,7 @@ public class NotifyJob implements Job {
     private String noticeUri = "/topic/densityControl/notify";
 
     @Override
-    public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+    public void execute(JobExecutionContext jobExecutionContext){
         ApplicationContext context = ApplicationContextListener.getApplicationContext();
         SimpMessagingTemplate messagingTemplate = (SimpMessagingTemplate) context.getBean("brokerMessagingTemplate");
         JobKey key = jobExecutionContext.getJobDetail().getKey();
