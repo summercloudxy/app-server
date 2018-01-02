@@ -1,10 +1,7 @@
 package com.zgiot.app.server.module.generic;
 
 import com.zgiot.app.server.service.ThingService;
-import com.zgiot.common.pojo.BuildingModel;
-import com.zgiot.common.pojo.SystemModel;
-import com.zgiot.common.pojo.ThingModel;
-import com.zgiot.common.pojo.ThingPropertyModel;
+import com.zgiot.common.pojo.*;
 import com.zgiot.common.restcontroller.ServerResponse;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,15 +52,10 @@ public class ThingController {
 
     public static final String THING_CATEGORY_CODE = "thingCategoryCode";
 
-
-
-
-    @GetMapping(value="/{thingCode}")
+    @GetMapping(value = "/{thingCode}")
     public ResponseEntity<String> getThing(@PathVariable String thingCode) {
         ThingModel tm = thingService.getThing(thingCode);
-        return new ResponseEntity<>(
-                ServerResponse.buildOkJson(tm)
-                , HttpStatus.OK);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(tm), HttpStatus.OK);
     }
 
     @GetMapping("/properties/{thingCode}")
@@ -81,14 +73,12 @@ public class ThingController {
             baseThingMap.put(THING_NAME, thingModel.getThingName());
             baseThingMap.put(THING_SHORT_NAME, thingModel.getShortName());
             baseThingMap.put(THING_CODE, thingModel.getThingCode());
-            parsePropertiesByType(thingPropertyModels,propMap,disPropMap);
+            parsePropertiesByType(thingPropertyModels, propMap, disPropMap);
             thingPropMap.put(BASE, baseThingMap);
             thingPropMap.put(PROP, propMap);
             thingPropMap.put(DIS_PROP, disPropMap);
         }
-        return new ResponseEntity<>(
-                ServerResponse.buildOkJson(thingPropMap)
-                , HttpStatus.OK);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(thingPropMap), HttpStatus.OK);
     }
 
     @GetMapping("")
@@ -110,22 +100,22 @@ public class ThingController {
                 base.put(THING_NAME, baseProperty.getThingName());
                 base.put(THING_SHORT_NAME, baseProperty.getShortName());
                 base.put(THING_CODE, baseProperty.getThingCode());
-                String[] propType = new String[]{ThingPropertyModel.PROP_TYPE_PROP, ThingPropertyModel.PROP_TYPE_DISP_PROP};
+                String[] propType =
+                        new String[]{ThingPropertyModel.PROP_TYPE_PROP, ThingPropertyModel.PROP_TYPE_DISP_PROP};
                 thingPropertyModels = thingService.findThingProperties(baseProperty.getThingCode(), propType);
-                parsePropertiesByType(thingPropertyModels,prop,disProp);
+                parsePropertiesByType(thingPropertyModels, prop, disProp);
                 thingMap.put(BASE, base);
                 thingMap.put(PROP, prop);
                 thingMap.put(DIS_PROP, disProp);
                 things.add(thingMap);
             }
         }
-        return new ResponseEntity<>(
-                ServerResponse.buildOkJson(things)
-                , HttpStatus.OK);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(things), HttpStatus.OK);
     }
 
-    private void parsePropertiesByType(List<ThingPropertyModel> base,Map<String,String> propMap,Map<String,String> dispPropMap){
-        if ( base.size() > 0) {
+    private void parsePropertiesByType(List<ThingPropertyModel> base, Map<String, String> propMap,
+            Map<String, String> dispPropMap) {
+        if (base.size() > 0) {
             for (ThingPropertyModel model : base) {
                 if (model.getPropType().equals(ThingPropertyModel.PROP_TYPE_PROP)) {
                     propMap.put(model.getPropKey(), model.getPropValue());
@@ -146,6 +136,39 @@ public class ThingController {
     public ResponseEntity<String> findAllSystem() {
         List<SystemModel> systemModels = thingService.findAllSystem();
         return new ResponseEntity<>(ServerResponse.buildOkJson(systemModels), HttpStatus.OK);
+    }
+
+    @GetMapping("/category/asset")
+    public ResponseEntity<String> getCategoryListByAssetType(String assetType) {
+        List<CategoryModel> result = thingService.getCategoryListByAssetType(assetType);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(result), HttpStatus.OK);
+    }
+
+    @GetMapping("/category")
+    public ResponseEntity<String> getCategoryList() {
+        List<CategoryModel> result = thingService.getCategoryList();
+        return new ResponseEntity<>(ServerResponse.buildOkJson(result), HttpStatus.OK);
+    }
+
+    @GetMapping("/metricType/assetAndCategory")
+    public ResponseEntity<String> getMetricTypeByAssetAndCategory(String assetType, String category, String thingCode) {
+        List<CategoryModel> result = thingService.getMetricTypeByAssetAndCategory(assetType, category, thingCode);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(result), HttpStatus.OK);
+    }
+
+    @GetMapping("/metric/assetAndCategory")
+    public ResponseEntity<String> getMetricByAssetAndCategory(String assetType, String category, String thingCode,
+            String metricType) {
+        List<MetricModel> result = thingService.getMetricByAssetAndCategory(assetType, category, thingCode, metricType);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(result), HttpStatus.OK);
+    }
+
+    @GetMapping("/thing/assetAndCategory")
+    public ResponseEntity<String> getThingCodeByAssetAndCategory(String assetType, String category, String metricCode,
+            String metricType) {
+        List<ThingModel> result =
+                thingService.getThingCodeByAssetAndCategory(assetType, category, metricCode, metricType);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(result), HttpStatus.OK);
     }
 
 }

@@ -6,3 +6,4 @@ package com.zgiot.app.server.module.filterpress;
 public interface WebSocketDemo {
     void notice(String uri, Object object);
 }
+                                                  

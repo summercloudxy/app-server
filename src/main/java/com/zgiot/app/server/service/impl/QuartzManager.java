@@ -51,10 +51,37 @@ public class QuartzManager {
         try {
             ApplicationContext context = ApplicationContextListener.getApplicationContext();
             StdScheduler scheduler = (StdScheduler) context.getBean("quartzScheduler");
-            JobDetail jobDetail = newJob().setJobData(jobDataMap).withIdentity(JobKey.jobKey(jobName, jobGroup)).ofType(cls).build();
+            JobDetail jobDetail =
+                    newJob().setJobData(jobDataMap).withIdentity(JobKey.jobKey(jobName, jobGroup)).ofType(cls).build();
             // 触发器
             SimpleTrigger trigger = newTrigger().withIdentity(TriggerKey.triggerKey(triggerName, triggerGroup))
                     .withSchedule(simpleSchedule().withIntervalInMilliseconds(interval).repeatForever()).build();
+            scheduler.scheduleJob(jobDetail, trigger);
+            // 启动
+            if (!scheduler.isShutdown()) {
+                scheduler.start();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public static void addJobWithMinutes(String jobName, String jobGroup, String triggerName, String triggerGroup,
+            Class cls, int interval, JobDataMap jobDataMap) {
+        try {
+            ApplicationContext context = ApplicationContextListener.getApplicationContext();
+            StdScheduler scheduler = (StdScheduler) context.getBean("quartzScheduler");
+            JobDetail jobDetail;
+            if (jobDataMap != null) {
+                jobDetail = newJob().setJobData(jobDataMap).withIdentity(JobKey.jobKey(jobName, jobGroup)).ofType(cls)
+                        .build();
+            } else {
+                jobDetail = newJob().withIdentity(JobKey.jobKey(jobName, jobGroup)).ofType(cls).build();
+            }
+            // 触发器
+            SimpleTrigger trigger = newTrigger().withIdentity(TriggerKey.triggerKey(triggerName, triggerGroup))
+                    .withSchedule(simpleSchedule().withIntervalInMinutes(interval).repeatForever()).build();
             scheduler.scheduleJob(jobDetail, trigger);
             // 启动
             if (!scheduler.isShutdown()) {
@@ -226,5 +253,30 @@ public class QuartzManager {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static boolean checkExists(String jobName, String jobGroup) {
+        boolean exists;
+        try {
+            ApplicationContext context = ApplicationContextListener.getApplicationContext();
+            StdScheduler scheduler = (StdScheduler) context.getBean("quartzScheduler");
+            exists = scheduler.checkExists(new JobKey(jobName, jobGroup));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return exists;
+    }
+
+    public static JobDataMap getJobDataMap(String jobName, String jobGroup) {
+        JobDataMap jobDataMap;
+        try {
+            ApplicationContext context = ApplicationContextListener.getApplicationContext();
+            StdScheduler scheduler = (StdScheduler) context.getBean("quartzScheduler");
+            jobDataMap = scheduler.getJobDetail(JobKey.jobKey(jobName, jobGroup)).getJobDataMap();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return jobDataMap;
+
     }
 }

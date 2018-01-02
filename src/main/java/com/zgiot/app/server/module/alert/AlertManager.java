@@ -8,6 +8,7 @@ import com.zgiot.common.constants.AlertConstants;
 import com.zgiot.common.constants.MetricCodes;
 import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.DataModel;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,7 @@ import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.DelayQueue;
 import java.util.stream.Collectors;
 
@@ -31,8 +33,8 @@ import java.util.stream.Collectors;
 public class AlertManager {
     private Map<String, Map<String, AlertData>> alertDataMap = new ConcurrentHashMap<>();
     // private Set<AlertData> verifySet = new HashSet<>();
-    private Map<String, Map<String, List<AlertRule>>> paramRuleMap;
-    private Map<String, Map<String, AlertRule>> protectRuleMap;
+    private Map<String, Map<String, List<AlertRule>>> paramRuleMap = new ConcurrentHashMap<>();
+    private Map<String, Map<String, AlertRule>> protectRuleMap = new ConcurrentHashMap<>();
     private Map<String, Short> metricAlertTypeMap = new HashMap<>();
     private Map<String, Map<String, AlertData>> alertParamDataMap = new ConcurrentHashMap<>();
     private DelayQueue<VerifyDelayed> verifyDelayQueue = new DelayQueue<>();
@@ -61,8 +63,8 @@ public class AlertManager {
     @PostConstruct
     void init() {
         initMetricAlertType();
-        updateParamRuleMap();
-        updateProtectRuleMap();
+        initParamRuleMap();
+        initProtectRuleMap();
         initAlertDataMap();
         Thread thread = new Thread(() -> {
             while (true) {
@@ -188,62 +190,199 @@ public class AlertManager {
     }
 
     /**
-     * 更新参数类报警规则
+     * 更新报警规则
+     * 
+     * @param alertRules
      */
-    public void updateParamRuleMap() {
-        List<AlertRule> wholeAlertRuleList = alertMapper.getWholeAlertRuleList(AlertConstants.TYPE_PARAM);
-        paramRuleMap = new ConcurrentHashMap<>();
-        for (AlertRule alertRule : wholeAlertRuleList) {
-            Map<String, List<AlertRule>> metricAlertRuleMap;
-            if (paramRuleMap.containsKey(alertRule.getThingCode())) {
-                metricAlertRuleMap = paramRuleMap.get(alertRule.getThingCode());
-                if (!metricAlertRuleMap.containsKey(alertRule.getMetricCode())) {
-                    metricAlertRuleMap.put(alertRule.getMetricCode(), new ArrayList<>());
+    public List<AlertRule> updateRule(List<AlertRule> alertRules, int type) {
+        for (AlertRule alertRule : alertRules) {
+            if (alertRule.getId() != null) {
+                alertMapper.updateAlertRule(alertRule);
+                if (alertRule.getEnable()) {
+                    if (type == AlertConstants.TYPE_PARAM) {
+                        updateParamRule(alertRule);
+                    } else {
+                        updateProtectRule(alertRule);
+                    }
+                } else {
+                    if (type == AlertConstants.TYPE_PARAM) {
+                        removeParamRule(alertRule.getId());
+                    } else {
+                        removeProtectRule(alertRule.getId());
+                    }
                 }
             } else {
-                metricAlertRuleMap = new HashMap<>();
-                paramRuleMap.put(alertRule.getThingCode(), metricAlertRuleMap);
-                metricAlertRuleMap.put(alertRule.getMetricCode(), new ArrayList<>());
+                alertMapper.insertAlertRule(alertRule);
+                if (alertRule.getEnable()) {
+                    if (type == AlertConstants.TYPE_PARAM) {
+                        insertParamRule(alertRule);
+                    } else {
+                        insertProtectRule(alertRule);
+                    }
+                }
             }
-            List<AlertRule> alertRules = metricAlertRuleMap.get(alertRule.getMetricCode());
-            alertRules.add(alertRule);
+        }
+        return alertRules;
+
+    }
+
+    public void deleteRule(List<Long> ids, int type) {
+        alertMapper.deleteAlertRules(ids);
+        for (Long id : ids) {
+            if (type == AlertConstants.TYPE_PARAM) {
+                removeParamRule(id);
+            } else {
+                removeProtectRule(id);
+            }
+        }
+
+    }
+
+    private void removeProtectRule(Long id) {
+        outer: for (Map.Entry<String, Map<String, AlertRule>> entry : protectRuleMap.entrySet()) {
+            Map<String, AlertRule> metricRuleMap = entry.getValue();
+            for (Map.Entry<String, AlertRule> innerEntry : metricRuleMap.entrySet()) {
+                AlertRule alertRule = innerEntry.getValue();
+                String metricCode = innerEntry.getKey();
+                if (alertRule.getId().equals(id)) {
+                    metricRuleMap.remove(metricCode);
+                    break outer;
+                }
+            }
+        }
+
+    }
+
+    private void removeParamRule(Long id) {
+        outer: for (Map.Entry<String, Map<String, List<AlertRule>>> entry : paramRuleMap.entrySet()) {
+            Map<String, List<AlertRule>> metricRuleMap = entry.getValue();
+            for (Map.Entry<String, List<AlertRule>> innerEntry : metricRuleMap.entrySet()) {
+                List<AlertRule> alertRules = innerEntry.getValue();
+                for (AlertRule alertRule : alertRules) {
+                    if (alertRule.getId().equals(id)) {
+                        alertRules.remove(alertRule);
+                        break outer;
+                    }
+                }
+            }
+        }
+    }
+
+    private void updateParamRule(AlertRule alertRule) {
+        for (Map.Entry<String, Map<String, List<AlertRule>>> entry : paramRuleMap.entrySet()) {
+            Map<String, List<AlertRule>> metricRuleMap = entry.getValue();
+            outer: for (Map.Entry<String, List<AlertRule>> innerEntry : metricRuleMap.entrySet()) {
+                List<AlertRule> alertRules = innerEntry.getValue();
+                for (AlertRule existAlertRule : alertRules) {
+                    if (existAlertRule.getId().equals(alertRule.getId())) {
+                        alertRules.remove(existAlertRule);
+                        alertRules.add(alertRule);
+                        break outer;
+                    }
+                }
+            }
+        }
+    }
+
+    private void updateProtectRule(AlertRule alertRule) {
+        for (Map.Entry<String, Map<String, AlertRule>> entry : protectRuleMap.entrySet()) {
+            Map<String, AlertRule> metricRuleMap = entry.getValue();
+            for (Map.Entry<String, AlertRule> innerEntry : metricRuleMap.entrySet()) {
+                AlertRule existAlertRule = innerEntry.getValue();
+                String metricCode = innerEntry.getKey();
+                if (existAlertRule.getId().equals(alertRule.getId())) {
+                    metricRuleMap.put(metricCode, alertRule);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void insertParamRule(AlertRule alertRule) {
+        Map<String, List<AlertRule>> metricAlertRuleMap;
+        if (paramRuleMap.containsKey(alertRule.getThingCode())) {
+            metricAlertRuleMap = paramRuleMap.get(alertRule.getThingCode());
+            if (!metricAlertRuleMap.containsKey(alertRule.getMetricCode())) {
+                metricAlertRuleMap.put(alertRule.getMetricCode(), new CopyOnWriteArrayList<>());
+            }
+        } else {
+            metricAlertRuleMap = new ConcurrentHashMap<>();
+            paramRuleMap.put(alertRule.getThingCode(), metricAlertRuleMap);
+            metricAlertRuleMap.put(alertRule.getMetricCode(), new CopyOnWriteArrayList<>());
+        }
+        List<AlertRule> alertRules = metricAlertRuleMap.get(alertRule.getMetricCode());
+        alertRules.add(alertRule);
+    }
+
+    private void insertProtectRule(AlertRule alertRule) {
+        Map<String, AlertRule> metricAlertRuleMap;
+        if (protectRuleMap.containsKey(alertRule.getThingCode())) {
+            metricAlertRuleMap = protectRuleMap.get(alertRule.getThingCode());
+        } else {
+            metricAlertRuleMap = new ConcurrentHashMap<>();
+            protectRuleMap.put(alertRule.getThingCode(), metricAlertRuleMap);
+        }
+        metricAlertRuleMap.put(alertRule.getMetricCode(), alertRule);
+    }
+
+    /**
+     * 初始化参数类报警规则
+     */
+    public void initParamRuleMap() {
+        List<AlertRule> wholeAlertRuleList = alertMapper.getWholeAlertRuleList(AlertConstants.TYPE_PARAM);
+        for (AlertRule alertRule : wholeAlertRuleList) {
+            insertParamRule(alertRule);
         }
     }
 
     /**
-     * 更新保护类报警规则
+     * 初始化保护类报警规则
      */
-    public void updateProtectRuleMap() {
+    public void initProtectRuleMap() {
         List<AlertRule> wholeAlertRuleList = alertMapper.getWholeAlertRuleList(AlertConstants.TYPE_PROTECT);
-        protectRuleMap = new ConcurrentHashMap<>();
         for (AlertRule alertRule : wholeAlertRuleList) {
-            Map<String, AlertRule> metricAlertRuleMap;
-            if (protectRuleMap.containsKey(alertRule.getThingCode())) {
-                metricAlertRuleMap = protectRuleMap.get(alertRule.getThingCode());
-            } else {
-                metricAlertRuleMap = new HashMap<>();
-                protectRuleMap.put(alertRule.getThingCode(), metricAlertRuleMap);
-            }
-            metricAlertRuleMap.put(alertRule.getMetricCode(), alertRule);
+            insertProtectRule(alertRule);
         }
     }
 
     /**
      * 获取报警规则
      * 
-     * @param alertType
-     * @param assetType
-     * @param category
-     * @param system
-     * @param metricType
-     * @param thingCode
-     * @param enable
+     * @param filterCondition
+     *            筛选条件
      * @return
      */
-    public List<AlertRule> getAlertRuleList(int alertType, Integer assetType, String category, String system,
-            String metricType, String thingCode, Boolean enable, Integer level, String metricCode, Integer buildingId) {
-        return alertMapper.getAlertRuleList(alertType, assetType, category, system, metricType, thingCode, enable,
-                level, metricCode, buildingId);
+    public AlertRuleRsp getParamAlertRuleList(FilterCondition filterCondition) {
+        Integer pageCount = null;
+        if (filterCondition.getCount() != null) {
+            Integer paramAlertConfSize = alertMapper.getParamAlertConfSize(filterCondition);
+            pageCount = (int) Math.ceil((double) paramAlertConfSize / filterCondition.getCount());
+        }
+        if (filterCondition.getPage() != null && filterCondition.getCount() != null) {
+            filterCondition.setOffset(filterCondition.getPage() * filterCondition.getCount());
+        }
+        List<ThingAlertRule> paramAlertConfList = alertMapper.getParamAlertConfList(filterCondition);
+        for (ThingAlertRule thingAlertRule : paramAlertConfList) {
+            String thingCode = thingAlertRule.getThingCode();
+            String metricCode = thingAlertRule.getMetricCode();
+            List<AlertRule> alertRuleList = alertMapper.getAlertRuleList(thingCode, metricCode, filterCondition);
+            thingAlertRule.setAlertRules(alertRuleList);
+        }
+        AlertRuleRsp alertRuleRsp = new AlertRuleRsp(paramAlertConfList);
+        alertRuleRsp.setPageCount(pageCount);
+        return alertRuleRsp;
+    }
+
+    public AlertRuleRsp getProtAlertRuleList(FilterCondition filterCondition) {
+        if (filterCondition.getPage() != null && filterCondition.getCount() != null) {
+            filterCondition.setOffset(filterCondition.getPage() * filterCondition.getCount());
+        }
+        List<ThingAlertRule> protAlertRuleList = alertMapper.getProtAlertRuleList(filterCondition);
+        Integer protAlertRuleCount = alertMapper.getProtAlertRuleCount(filterCondition);
+        AlertRuleRsp alertRuleRsp = new AlertRuleRsp(protAlertRuleList);
+        alertRuleRsp.setPageCount(protAlertRuleCount);
+        return alertRuleRsp;
+
     }
 
     /**
@@ -743,6 +882,7 @@ public class AlertManager {
             for (AlertData alertData : alertDataList) {
                 List<AlertMessage> alertMessage = alertMapper.getAlertMessage(alertData.getId());
                 alertData.setAlertMessageList(alertMessage);
+
             }
         }
     }
@@ -1145,6 +1285,74 @@ public class AlertManager {
         }
         return alertMapper.getAlertDataList(stage, excluStage, level, type, system, assetType, category, sortType,
                 startTime, endTime, thingCode, offset, count);
+    }
+
+    /**
+     * 获取每个设备最高的报警等级
+     * 
+     * @param thingCodeList
+     * @return
+     */
+    public Map<String, Short> getSeriousAlertLevel(List<String> thingCodeList) {
+        Map<String, Short> levelMap = new HashMap<>();
+        for (String thingCode : thingCodeList) {
+            short level = 0;
+            if (alertDataMap.containsKey(thingCode)) {
+                Map<String, AlertData> metricAlertDataMap = alertDataMap.get(thingCode);
+                for (Map.Entry<String, AlertData> alertDataEntry : metricAlertDataMap.entrySet()) {
+                    AlertData value = alertDataEntry.getValue();
+                    if (AlertConstants.STAGE_UNTREATED.equals(value.getAlertStage())) {
+                        Short alertLevel = value.getAlertLevel();
+                        if (alertLevel != null && alertLevel > level) {
+                            level = alertLevel;
+                        }
+                    }
+                }
+            }
+            levelMap.put(thingCode, level);
+        }
+        return levelMap;
+    }
+
+    /**
+     * 设置参数类报警规则的设备、信号可设置范围
+     * 
+     * @param alertRules
+     */
+    public List<AlertRule> setParamConfigurationList(List<AlertRule> alertRules) {
+        Set<String> inputAlertRulesCode = alertRules.stream()
+                .map((AlertRule alertRule) -> alertRule.getThingCode() + "-" + alertRule.getMetricCode())
+                .collect(Collectors.toSet());
+        List<AlertRule> paramConfigurationList = alertMapper.getParamConfigurationList();
+        Set<String> existAlertRulesCode = paramConfigurationList.stream()
+                .map((AlertRule alertRule) -> alertRule.getThingCode() + "-" + alertRule.getMetricCode())
+                .collect(Collectors.toSet());
+        Collection<String> duplicateCodes = CollectionUtils.intersection(inputAlertRulesCode, existAlertRulesCode);
+        Collection<String> addCodes = CollectionUtils.subtract(inputAlertRulesCode, existAlertRulesCode);
+        List<AlertRule> addList = codesToAlertRule(addCodes);
+        List<AlertRule> duplicateList = codesToAlertRule(duplicateCodes);
+        if(addList.size()>0) {
+            alertMapper.setParamConfigurationList(addList);
+        }
+        return duplicateList;
+    }
+
+    private List<AlertRule> codesToAlertRule(Collection<String> codeCollection) {
+        return codeCollection.stream().map((String code) -> {
+            AlertRule alertRule = new AlertRule();
+            String[] codes = code.split("-");
+            alertRule.setThingCode(codes[0]);
+            alertRule.setMetricCode(codes[1]);
+            return alertRule;
+        }).collect(Collectors.toList());
+    }
+
+    public AlertRule getParamThreshold(String thingCode, String metricCode) {
+        return alertMapper.getParamThreshold(thingCode, metricCode);
+    }
+
+    public void setParamThreshlold(AlertRule alertRule) {
+        alertMapper.setParamThreshold(alertRule);
     }
 
 }

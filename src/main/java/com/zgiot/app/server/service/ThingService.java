@@ -1,9 +1,6 @@
 package com.zgiot.app.server.service;
 
-import com.zgiot.common.pojo.BuildingModel;
-import com.zgiot.common.pojo.SystemModel;
-import com.zgiot.common.pojo.ThingModel;
-import com.zgiot.common.pojo.ThingPropertyModel;
+import com.zgiot.common.pojo.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,31 +11,29 @@ public interface ThingService {
     /**
      * @param thingCode
      * @return ThingModel
-     * 根据thingCode获取thing基本信息
+     *         根据thingCode获取thing基本信息
      */
-    public ThingModel getThing(String thingCode);
-
+    ThingModel getThing(String thingCode);
 
     /**
      * @return List<ThingModel>
-     * 获取所有thing基本信息
+     *         获取所有thing基本信息
      */
-    public List<ThingModel> findAllThing();
+    List<ThingModel> findAllThing();
 
     /**
      * @return List<ThingPropertyModel>
-     * 获取所有properties
+     *         获取所有properties
      */
-    public List<ThingPropertyModel> findThingProperties();
-
+    List<ThingPropertyModel> findThingProperties();
 
     /**
      * @param thingCode
      * @param propType
      * @return List<ThingPropertyModel>
-     * 根据thingCode获取propType类型为PROP和DISP_PROP的所有properties
+     *         根据thingCode获取propType类型为PROP和DISP_PROP的所有properties
      */
-    public List<ThingPropertyModel> findThingProperties(String thingCode, String[] propType);
+    List<ThingPropertyModel> findThingProperties(String thingCode, String[] propType);
 
     /**
      * 获取thing下所有的metric
@@ -48,19 +43,31 @@ public interface ThingService {
      */
     Set<String> findMetricsOfThing(String thingCode);
 
-
     /**
      * 获取所有建筑信息
+     * 
      * @return
      */
     List<BuildingModel> findAllBuilding();
 
     /**
      * 获取所有系统信息
+     * 
      * @return
      */
     List<SystemModel> findAllSystem();
 
     void validateThing(String thingCode);
-}
 
+    List<CategoryModel> getCategoryListByAssetType(String assetType);
+
+    List<CategoryModel> getCategoryList();
+
+    List<CategoryModel> getMetricTypeByAssetAndCategory(String assetType, String category, String thingCode);
+
+    List<MetricModel> getMetricByAssetAndCategory(String assetType, String category, String thingCode,
+            String metricType);
+
+    List<ThingModel> getThingCodeByAssetAndCategory(String assetType, String category, String metricCode,
+            String metricType);
+}

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.service.impl.mapper.TMLMapper">
+
+    <select id="getMetricTypeByAssetAndCategory" resultType="com.zgiot.common.pojo.CategoryModel">
+        SELECT
+        DISTINCT(m.metric_type2_code) as code,mt.metrictype_name as categoryName
+        FROM
+        tb_thing t,
+        rel_thing_metric_label tml,
+        tb_metric m,
+        tb_metrictype mt
+        WHERE
+        t.thing_code = tml.thing_code
+        AND tml.metric_code = m.metric_code
+        <if test="assetType != null">
+            and t.thing_type1_code = #{assetType}
+        </if>
+        <if test="category != null">
+            AND t.thing_type2_code = #{category}
+        </if>
+        <if test="thingCode != null">
+            and t.thing_code = #{thingCode}
+        </if>
+        and m.metric_type2_code = mt.metrictype_code
+    </select>
+
+    <select id="getMetricByAssetAndCategory" resultType="com.zgiot.common.pojo.MetricModel">
+        SELECT
+        DISTINCT (m.metric_code),metric_name
+        FROM
+        tb_thing t,
+        rel_thing_metric_label tml,
+        tb_metric m
+        WHERE
+        t.thing_code = tml.thing_code
+        AND tml.metric_code = m.metric_code
+        AND m.metric_type1_code = #{metricClass}
+        <if test="assetType != null">
+            and t.thing_type1_code = #{assetType}
+        </if>
+        <if test="category != null">
+            AND t.thing_type2_code = #{category}
+        </if>
+        <if test="thingCode != null">
+            and t.thing_code = #{thingCode}
+        </if>
+        <if test="metricType != null">
+            and metric_type2_code = #{metricType}
+        </if>
+    </select>
+
+    <select id="getThingCodeByAssetAndCategory" resultType="com.zgiot.common.pojo.ThingModel">
+        SELECT
+        DISTINCT(t.thing_code),t.thing_name
+        FROM
+        tb_thing t,
+        rel_thing_metric_label tml,
+        tb_metric m
+        WHERE
+        t.thing_code = tml.thing_code
+        AND tml.metric_code = m.metric_code
+
+        <if test="assetType != null">
+            and t.thing_type1_code = #{assetType}
+        </if>
+        <if test="category != null">
+            AND t.thing_type2_code = #{category}
+        </if>
+        <if test="metricType != null">
+            and metric_type2_code = #{metricType}
+        </if>
+
+    </select>
+</mapper>
+ 

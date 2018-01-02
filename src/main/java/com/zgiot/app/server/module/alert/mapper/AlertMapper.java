@@ -24,10 +24,15 @@ public interface AlertMapper {
 
     void releaseAlertDataBackup(AlertData alertData);
 
-    List<AlertRule> getAlertRuleList(@Param("alertType") int alertType, @Param("assetType") Integer assetType,
-            @Param("category") String category, @Param("system") String system, @Param("metricType") String metricType,
-            @Param("thingCode") String thingCode, @Param("enable") Boolean enable, @Param("level") Integer level,
-            @Param("metricCode") String metricCode, @Param("buildingId") Integer buildingId);
+    List<ThingAlertRule> getProtAlertRuleList(@Param("filter") FilterCondition filterCondition);
+
+    Integer getProtAlertRuleCount(@Param("filter") FilterCondition filterCondition);
+
+    List<ThingAlertRule> getParamAlertConfList(@Param("filter") FilterCondition filterCondition);
+
+    List<AlertRule> getAlertRuleList(@Param("thingCode")String thingCode,@Param("metricCode")String metricCode,@Param("filter")FilterCondition filterCondition);
+
+    Integer getParamAlertConfSize(@Param("filter") FilterCondition filterCondition);
 
     List<AlertRule> getWholeAlertRuleList(@Param("alertType") int alertType);
 
@@ -59,11 +64,11 @@ public interface AlertMapper {
 
     List<AlertMask> getAlertShieldInfo(String thingCode, String metricCode, Date startTime, Date endTime);
 
-    void insertAlertRule(List<AlertRule> alertRules);
+    void insertAlertRules(List<AlertRule> alertRules);
 
-    void updateAlertRule(List<AlertRule> alertRules);
+    void updateAlertRules(List<AlertRule> alertRules);
 
-    void deleteAlertRule(List<AlertRule> alertRules);
+    void deleteAlertRules(List<Long> alertRules);
 
     /**
      * 获取报警数量统计信息
@@ -97,4 +102,16 @@ public interface AlertMapper {
             @Param("endTime") Date endTime, @Param("alertLevel") Short alertLevel);
 
     void clearAlertDateHistory(@Param("timeStamp") Date timeStamp, @Param("stage") String stage);
+
+    void updateAlertRule(@Param("alertRule")AlertRule alertRule);
+
+    void insertAlertRule(@Param("alertRule")AlertRule alertRule);
+
+    void setParamConfigurationList(@Param("list")List<AlertRule> list);
+
+    List<AlertRule> getParamConfigurationList();
+
+    AlertRule getParamThreshold(@Param("thingCode")String thingCode, @Param("metricCode")String metricCode);
+
+    void setParamThreshold(@Param("alertRule")AlertRule alertRule);
 }

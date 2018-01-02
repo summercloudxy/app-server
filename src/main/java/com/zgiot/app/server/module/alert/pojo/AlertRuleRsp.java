@@ -3,22 +3,29 @@ package com.zgiot.app.server.module.alert.pojo;
 import java.util.List;
 
 public class AlertRuleRsp {
-    private String thingCode;
-    private List<AlertRule> alertRules;
+    private Integer pageCount;
+    private List<ThingAlertRule> thingAlertRules;
 
-    public String getThingCode() {
-        return thingCode;
+    public Integer getPageCount() {
+        return pageCount;
     }
 
-    public void setThingCode(String thingCode) {
-        this.thingCode = thingCode;
+    public void setPageCount(Integer pageCount) {
+        this.pageCount = pageCount;
     }
 
-    public List<AlertRule> getAlertRules() {
-        return alertRules;
+    public List<ThingAlertRule> getThingAlertRules() {
+        return thingAlertRules;
     }
 
-    public void setAlertRules(List<AlertRule> alertRules) {
-        this.alertRules = alertRules;
+    public void setThingAlertRules(List<ThingAlertRule> thingAlertRules) {
+        this.thingAlertRules = thingAlertRules;
+    }
+
+    public AlertRuleRsp(List<ThingAlertRule> thingAlertRules) {
+        this.thingAlertRules = thingAlertRules;
+    }
+
+    public AlertRuleRsp() {
     }
 }
