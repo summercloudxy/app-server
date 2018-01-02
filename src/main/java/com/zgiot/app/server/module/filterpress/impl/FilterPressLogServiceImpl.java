@@ -404,14 +404,14 @@ public class FilterPressLogServiceImpl implements FilterPressLogService {
         String startTime = null;
         String endTime = null;
         if (isDayShift) {
-            startTime = priorDay + FilterPressLogConstants.DAY_SHIFT_END_LINE;
+            startTime = priorDay + FilterPressLogConstants.PRIOR_TEAM_DAY_SHIFT_END_LINE;
             endTime = currentDay + FilterPressLogConstants.DAY_SHIFT_START_LINE;
         } else {
             if (FilterPressLogUtil.isPriorPartNightShift()) {
-                startTime = currentDay + FilterPressLogConstants.DAY_SHIFT_START_LINE;
+                startTime = currentDay + FilterPressLogConstants.PRIOR_TEAM_DAY_SHIFT_START_LINE;
                 endTime = currentDay + FilterPressLogConstants.DAY_SHIFT_END_LINE;
             } else {
-                startTime = priorDay + FilterPressLogConstants.DAY_SHIFT_START_LINE;
+                startTime = priorDay + FilterPressLogConstants.PRIOR_TEAM_DAY_SHIFT_START_LINE;
                 endTime = priorDay + FilterPressLogConstants.DAY_SHIFT_END_LINE;
             }
         }
@@ -458,5 +458,53 @@ public class FilterPressLogServiceImpl implements FilterPressLogService {
         String offsetTime = ratedStartTime.getStartTimeOffset();
         Date date = FilterPressLogUtil.getDayOrNightShiftRateStartTime(offsetTime, currentOrPrior);
         return date;
+    }
+
+    @Override
+    public List<ManualResetBean> getResetInfo() {
+        List<ManualResetBean> manualResetBeans = new ArrayList<>();
+        ManualResetBean manualResetBean = null;
+        DataModel dataModel = null;
+        Set<String> thingCodes = filterPressManager.getAllFilterPressCode();
+        for (String thingCode : thingCodes) {
+            Optional<DataModelWrapper> team1Wrapper = null;
+            Optional<DataModelWrapper> team2Wrapper = null;
+            Optional<DataModelWrapper> team3Wrapper = null;
+
+            team1Wrapper = dataService.getData(thingCode, FilterPressMetricConstants.T1_COUNT);
+            team2Wrapper = dataService.getData(thingCode, FilterPressMetricConstants.T2_COUNT);
+            team3Wrapper = dataService.getData(thingCode, FilterPressMetricConstants.T3_COUNT);
+            if (team1Wrapper.isPresent() && Integer.valueOf(team1Wrapper.get().getValue()) > 0) {
+                manualResetBean = new ManualResetBean();
+                manualResetBean.setPosition(FilterPressLogConstants.T1_CLR_POSITION);
+                dataModel = createDataModule(thingCode,FilterPressMetricConstants.T1_CLR);
+                manualResetBean.setDataModel(dataModel);
+                manualResetBeans.add(manualResetBean);
+            }
+            if (team2Wrapper.isPresent() && Integer.valueOf(team2Wrapper.get().getValue()) > 0) {
+                manualResetBean = new ManualResetBean();
+                manualResetBean.setPosition(FilterPressLogConstants.T2_CLR_POSITION);
+                dataModel = createDataModule(thingCode,FilterPressMetricConstants.T2_CLR);
+                manualResetBean.setDataModel(dataModel);
+                manualResetBeans.add(manualResetBean);
+            }
+            if (team3Wrapper.isPresent() && Integer.valueOf(team3Wrapper.get().getValue()) > 0) {
+                manualResetBean = new ManualResetBean();
+                manualResetBean.setPosition(FilterPressLogConstants.T3_CLR_POSITION);
+                dataModel = createDataModule(thingCode,FilterPressMetricConstants.T3_CLR);
+                manualResetBean.setDataModel(dataModel);
+                manualResetBeans.add(manualResetBean);
+            }
+        }
+        return manualResetBeans;
+    }
+
+    DataModel createDataModule(String thingCode,String metriCode){
+        DataModel dataModel = new DataModel();
+        dataModel.setThingCode(thingCode);
+        dataModel.setMetricCode(metriCode);
+        dataModel.setDataTimeStamp(new Date());
+        dataModel.setValue(Boolean.TRUE.toString());
+        return dataModel;
     }
 }

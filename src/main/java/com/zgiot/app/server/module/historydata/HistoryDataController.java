@@ -9,6 +9,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,7 +36,7 @@ public class HistoryDataController {
 
         List<DataModel> modelList = JSON.parseArray(requestData, DataModel.class);
         //check modelList
-        if (modelList == null || modelList.isEmpty()) {
+        if (CollectionUtils.isEmpty(modelList)) {
             ServerResponse res = new ServerResponse("Empty list.The incoming req body is: `" + requestData + "`", SysException.EC_UNKNOWN, 0);
             String resJSON = JSON.toJSONString(res);
             return new ResponseEntity<>(resJSON, HttpStatus.BAD_REQUEST);

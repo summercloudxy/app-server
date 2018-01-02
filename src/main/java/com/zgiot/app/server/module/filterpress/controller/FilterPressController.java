@@ -91,7 +91,9 @@ public class FilterPressController {
     public ResponseEntity<String> unConfirmUnload() {
         String thingCode = filterPressManager.getFirstUnConfirmedUnload();
         Set<String> thingCodeSet = new ConcurrentSkipListSet<>();
-        thingCodeSet.add(thingCode);
+        if(!StringUtils.isBlank(thingCode)){
+            thingCodeSet.add(thingCode);
+        }
         return new ResponseEntity<>(ServerResponse.buildOkJson(thingCodeSet),
                 HttpStatus.OK);
     }

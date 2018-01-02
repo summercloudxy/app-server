@@ -66,4 +66,11 @@ public interface CmdControlService {
 
     }
 
+    /**
+     *
+     * @param dataModel
+     * @return
+     */
+    String getDataSync(DataModel dataModel);
+
 }

@@ -1,5 +1,6 @@
 package com.zgiot.app.server.module.filterpress;
 
+import com.alibaba.fastjson.JSON;
 import com.zgiot.app.server.module.filterpress.dao.FilterPressMapper;
 import com.zgiot.app.server.module.filterpress.pojo.FeedAsumConfirmBean;
 import com.zgiot.app.server.module.filterpress.pojo.FilterPressElectricity;
@@ -7,6 +8,7 @@ import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.module.filterpress.filterPressService.FilterPressLogService;
 import com.zgiot.app.server.service.HistoryDataService;
+import com.zgiot.app.server.service.impl.DataEngineTemplate;
 import com.zgiot.app.server.util.RequestIdUtil;
 import com.zgiot.common.constants.*;
 import com.zgiot.common.enums.MetricDataTypeEnum;
@@ -14,6 +16,8 @@ import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
 import com.zgiot.common.pojo.MetricModel;
+import com.zgiot.common.restcontroller.ServerResponse;
+import javafx.beans.binding.IntegerBinding;
 import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +44,9 @@ public class FilterPressManager {
 
     private static final int POSITION_FEED_OVER = 5;
     private static final int POSITION_RUN = 1;
-    private static final int CLAEN_PERIOD = 0;
+    private static final int CLAEN_PERIOD = 500;
+    private static final int RETRY_PERIOD = 5000;
+    private static final int RETRY_COUNT = 3;
     private static final boolean IS_HOLDING_FEED_OVER = false;
     private static final boolean IS_HOLDING_RUN = false;
     private static final Map<String,String> filterPressStage = new HashMap<>();
@@ -58,6 +64,7 @@ public class FilterPressManager {
 
     @Autowired
     FilterPressLogService filterPressLogService;
+
 
     public UnloadManager getUnloadManager() {
         return unloadManager;
@@ -237,7 +244,6 @@ public class FilterPressManager {
         String metricCodeValue = data.getValue();
         String metricCode = data.getMetricCode();
         FilterPress filterPress = getFilterPress(thingCode);
-        Boolean isRunning = Boolean.FALSE;
         switch (metricCode) { // 回调各阶段
             case FilterPressMetricConstants.T1_COUNT:
                 filterPress.teamCount(FilterPressMetricConstants.T1_COUNT,metricCodeValue);
@@ -256,7 +262,6 @@ public class FilterPressManager {
             case FilterPressMetricConstants.RO_LOOSE:
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onLoosen();
-                    isRunning = Boolean.TRUE;
                 }else{
                     filterPress.offLoosen();
                 }
@@ -264,7 +269,6 @@ public class FilterPressManager {
             case FilterPressMetricConstants.RO_TAKE:
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onTaken();
-                    isRunning = Boolean.TRUE;
                 }else{
                     filterPress.offTaken();
                 }
@@ -272,7 +276,6 @@ public class FilterPressManager {
             case FilterPressMetricConstants.RO_PULL:
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onPull();
-                    isRunning = Boolean.TRUE;
                 }else{
                     filterPress.offPull();
                 }
@@ -280,57 +283,42 @@ public class FilterPressManager {
             case FilterPressMetricConstants.RO_PRESS:
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onPress();
-                    isRunning = Boolean.TRUE;
                 }
                 break;
             case FilterPressMetricConstants.RO_FEEDING:
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onFeed();
-                    isRunning = Boolean.TRUE;
+                }else{
+                    filterPress.offFeed();
                 }
                 break;
             case FilterPressMetricConstants.RO_FEED_OVER:
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onFeedOver();
-                    isRunning = Boolean.TRUE;
                 }
                 break;
             case FilterPressMetricConstants.RO_BLOW:
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onBlow();
-                    isRunning = Boolean.TRUE;
                 }
                 break;
             case FilterPressMetricConstants.RO_HOLD_PRESS:
-                if(Boolean.parseBoolean(metricCodeValue)){
-                    isRunning = Boolean.TRUE;
-                }
                 break;
             case FilterPressMetricConstants.RO_SQUEEZE_OVER:
-                if(Boolean.parseBoolean(metricCodeValue)){
-                    isRunning = Boolean.TRUE;
-                }
                 break;
             case FilterPressMetricConstants.RO_SQUEEZE:
-                if(Boolean.parseBoolean(metricCodeValue)){
-                    isRunning = Boolean.TRUE;
-                }
                 break;
             case FilterPressMetricConstants.RO_EMPTYING:
-                if(Boolean.parseBoolean(metricCodeValue)){
-                    isRunning = Boolean.TRUE;
-                }
                 break;
             case FilterPressMetricConstants.RO_CYCLE:
                 if(Boolean.parseBoolean(metricCodeValue)){
                     filterPress.onCycle();
-                    isRunning = Boolean.TRUE;
                 }
                 break;
             default:
         }
         // calculate the state value and call the specific method of filter press
-        short stateValue = calculateState(thingCode, isRunning);
+        short stateValue = calculateState(thingCode,data);
         Optional<DataModelWrapper> stateData = dataService.getData(thingCode, MetricCodes.STATE);
         if (!stateData.isPresent()) {
             saveState(data, thingCode, stateValue);
@@ -363,17 +351,19 @@ public class FilterPressManager {
      * calculate the state(running/stopped/fault) of specific thing
      *
      * @param thingCode
-     * @param isRunning
      * @return
      */
-    private short calculateState(String thingCode, Boolean isRunning) {
+    private short calculateState(String thingCode,DataModel data) {
         short state;
         DataModelWrapper fault = dataService.getData(thingCode, FilterPressMetricConstants.FAULT)
                 .orElse(new DataModelWrapper(new DataModel(null, thingCode, null, FilterPressMetricConstants.FAULT, Boolean.FALSE.toString(), new Date())));
-        Boolean isRunningFromCache = isRunningFromCache(thingCode);
+        DataModel dataModel = new DataModel();
+        dataModel.setThingCode(data.getThingCode());
+        dataModel.setMetricCode(FilterPressMetricConstants.STAGE);
+        String readValue = cmdControlService.getDataSync(dataModel);
         if (Boolean.valueOf(fault.getValue())) {
             state = GlobalConstants.STATE_FAULT;
-        } else if (Boolean.FALSE.toString().equals(isRunning) && (!isRunningFromCache)) {
+        } else if (Short.valueOf(readValue) == 0) {
             state = GlobalConstants.STATE_STOPPED;
         } else {
             state = GlobalConstants.STATE_RUNNING;
@@ -381,15 +371,11 @@ public class FilterPressManager {
         return state;
     }
 
-    private boolean isRunningFromCache(String thingCode){
+    private synchronized boolean isRunningFromCache(String thingCode){
         Boolean isRunning = Boolean.FALSE;
-        Optional<DataModelWrapper> data = null;
-        for(String value:filterPressStage.values()){
-            data = dataService.getData(thingCode,value);
-            if(data != null && data.isPresent() && Boolean.parseBoolean(data.get().getValue())){
-                isRunning = Boolean.TRUE;
-                break;
-            }
+        Optional<DataModelWrapper> data = dataService.getData(thingCode,FilterPressMetricConstants.STAGE);
+        if(data != null && data.isPresent() && Integer.valueOf(data.get().getValue()) > 0){
+            isRunning = Boolean.TRUE;
         }
         return isRunning;
     }
@@ -429,6 +415,7 @@ public class FilterPressManager {
             int position = getUnloadSequence().get(thingCode);
             unloadManager.queue.remove(deviceHolder.get(thingCode));
             unloadManager.queuePosition.remove(thingCode);
+            logger.debug("manual model remove filterpress:" + thingCode);
             try{
                 unConfirmedUnload.remove(thingCode);
             }catch (NullPointerException e){
@@ -436,6 +423,7 @@ public class FilterPressManager {
             }
             if(position > 0){
                 unloadManager.reSort(position);
+                logger.debug("manual model resort");
             }
         }
     }
@@ -449,7 +437,7 @@ public class FilterPressManager {
             logger.debug("{} feed over,notifying user; confirmNeed: {}", filterPress, filterPress.isFeedConfirmNeed());
             FeedAsumConfirmBean feedAsumConfirmBean = new FeedAsumConfirmBean();
             feedAsumConfirmBean.setDeviceCode(filterPress.getCode());
-            feedAsumConfirmBean.setFeedOverDuration(filterPress.getFeedOverTime() - filterPress.getFeedStartTime());
+            feedAsumConfirmBean.setFeedOverDuration(System.currentTimeMillis() - filterPress.getFeedStartTime());
             List<String> feedPumpCodes = getKeyByValueFromMap(filterPressPumpMapping,filterPress.getCode());
             String feedPumpCode = feedPumpCodes.get(0);
             if(feedPumpCodes.size() == 0){
@@ -467,7 +455,7 @@ public class FilterPressManager {
         }
     }
 
-    private List<String> getKeyByValueFromMap(Map<String,String> map,String value){
+    public List<String> getKeyByValueFromMap(Map<String,String> map,String value){
         List<String> keys = new ArrayList<>();
         for(String key:map.keySet()){
             if(map.get(key).equals(value)){
@@ -482,9 +470,9 @@ public class FilterPressManager {
         dataModel.setMetricCode(FilterPressMetricConstants.FEED_OVER);
         dataModel.setThingCode(filterPress.getCode());
         dataModel.setValue(Boolean.TRUE.toString());
-        cmdControlService.sendPulseCmdBoolByShort(dataModel,null,null,RequestIdUtil.generateRequestId(),POSITION_FEED_OVER,CLAEN_PERIOD,IS_HOLDING_FEED_OVER);
+        cmdControlService.sendPulseCmdBoolByShort(dataModel,RETRY_PERIOD,RETRY_COUNT,RequestIdUtil.generateRequestId(),POSITION_FEED_OVER,CLAEN_PERIOD,IS_HOLDING_FEED_OVER);
 
-        filterPress.setFeedDuration(System.currentTimeMillis() - filterPress.getFeedStartTime());
+        //filterPress.setFeedDuration(System.currentTimeMillis() - filterPress.getFeedStartTime());
         List<String> feedPumpCodes = getKeyByValueFromMap(filterPressPumpMapping,filterPress.getCode());
         String feedPumpCode = feedPumpCodes.get(0);
         if(feedPumpCodes.size() == 0){
@@ -720,6 +708,10 @@ public class FilterPressManager {
         return deviceHolder.keySet();
     }
 
+    public Map<String, String> getFilterPressPumpMapping() {
+        return filterPressPumpMapping;
+    }
+
     // @Scheduled(cron="cnmt.FilterPressDeviceManager.clear")
     // /**
     // * 手动弹出模式下，超过一段时间不操作后自动进行确认
@@ -737,6 +729,7 @@ public class FilterPressManager {
     class UnloadManager {
         private AtomicInteger unloading = new AtomicInteger(0);
         private volatile int maxUnloadParallel = 1;
+        private volatile int unloadingCount = 0;
         BlockingQueue<FilterPress> queue = new PriorityBlockingQueue<>(INIT_CAPACITY, (f1, f2) -> {
             int result;
             if (f1.getOnCycleTime() < f2.getOnCycleTime()) {
@@ -767,6 +760,9 @@ public class FilterPressManager {
          */
         synchronized  void enqueue(FilterPress filterPress) {
             queuePosition.put(filterPress.getCode(), queuePosition.size() + 1);
+            if(logger.isDebugEnabled()){
+                logger.debug("filterPress:" + filterPress.getCode() + " enqueue,position:" + (queuePosition.size() + 1));
+            }
             queue.add(filterPress);
             unloadNextIfPossible();
         }
@@ -780,13 +776,14 @@ public class FilterPressManager {
          * 若存在可以卸料的压滤机，则按照最大同时卸料数量进行卸料调度
          */
         private synchronized void unloadNextIfPossible() {
-            for (int i = unloading.get(); i < maxUnloadParallel; i++) {
+            logger.debug("正在卸料台数：" + unloading.get());
+            int unloadingCount = unloading.get();
+            if(unloadingCount < maxUnloadParallel) {
                 FilterPress candidate = queue.peek();
-                if (candidate == null) {
-                    break;
+                if (candidate != null) {
+                    execUnload(candidate);
+                    unloading.getAndIncrement();
                 }
-                execUnload(candidate);
-                unloading.getAndIncrement();
             }
         }
 
@@ -817,7 +814,7 @@ public class FilterPressManager {
             cmd.setThingCode(filterPress.getCode());
             cmd.setMetricCode(FilterPressMetricConstants.RUN);
             cmd.setValue(Boolean.TRUE.toString());
-            cmdControlService.sendPulseCmdBoolByShort(cmd,null,null,RequestIdUtil.generateRequestId(),POSITION_RUN,CLAEN_PERIOD,IS_HOLDING_RUN);
+            cmdControlService.sendPulseCmdBoolByShort(cmd,RETRY_PERIOD,RETRY_COUNT,RequestIdUtil.generateRequestId(),POSITION_RUN,CLAEN_PERIOD,IS_HOLDING_RUN);
         }
 
         /**
@@ -828,10 +825,27 @@ public class FilterPressManager {
         }
 
         public synchronized void reSort(int position){
+            logger.debug("resort.position:" + position);
             for(String thingCode:queuePosition.keySet()){
                 if(queuePosition.get(thingCode) > position)
                     queuePosition.put(thingCode, queuePosition.get(thingCode) - 1);
+                    logger.debug("resort filterpress:" + thingCode + " and afterresortposition:" + (queuePosition.get(thingCode) - 1));
             }
+        }
+
+        /**
+         * 获取所有正在卸料压滤机数量，正在卸料指压滤机处于松开状态或者取板拉板次数小于16次,
+         * 排除参数中的压滤机，因为在调用这个接口时是本台压滤机状态处于压紧状态或取板拉板次数大于16次
+         */
+
+        public synchronized int getUnloadingCount(String thingCode){
+            int unloadingCount = 0;
+            for(FilterPress filterPress:deviceHolder.values()){
+                if(filterPress.isFilterPressUnloading() && (!filterPress.getCode().equals(thingCode))){
+                    unloadingCount++;
+                }
+            }
+            return unloadingCount;
         }
     }
 }

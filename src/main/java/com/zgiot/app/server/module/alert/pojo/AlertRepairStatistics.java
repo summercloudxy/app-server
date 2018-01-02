@@ -4,3 +4,4 @@ public class AlertRepairStatistics {
     private String thingCode;
     private Long repairDuration;
 }
+                                                  
