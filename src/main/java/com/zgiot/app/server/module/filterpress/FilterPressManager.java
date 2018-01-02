@@ -240,19 +240,13 @@ public class FilterPressManager {
         Boolean isRunning = Boolean.FALSE;
         switch (metricCode) { // 回调各阶段
             case FilterPressMetricConstants.T1_COUNT:
-                if(Integer.valueOf(metricCodeValue) > 0){
-                    filterPress.teamCount(FilterPressMetricConstants.T1_COUNT,metricCodeValue);
-                }
+                filterPress.teamCount(FilterPressMetricConstants.T1_COUNT,metricCodeValue);
                 break;
             case FilterPressMetricConstants.T2_COUNT:
-                if(Integer.valueOf(metricCodeValue) > 0){
-                    filterPress.teamCount(FilterPressMetricConstants.T2_COUNT,metricCodeValue);
-                }
+                filterPress.teamCount(FilterPressMetricConstants.T2_COUNT,metricCodeValue);
                 break;
             case FilterPressMetricConstants.T3_COUNT:
-                if(Integer.valueOf(metricCodeValue) > 0){
-                    filterPress.teamCount(FilterPressMetricConstants.T3_COUNT,metricCodeValue);
-                }
+                filterPress.teamCount(FilterPressMetricConstants.T3_COUNT,metricCodeValue);
                 break;
             case FilterPressMetricConstants.LOCAL:
                 if(Boolean.parseBoolean(metricCodeValue)){

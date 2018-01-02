@@ -68,4 +68,12 @@ public class DataController {
                 , HttpStatus.OK);
     }
 
+    @GetMapping("/stats/counters")
+    public ResponseEntity<String> counterStats() {
+        Map counterMap = dataService.getAccessCounterMap();
+        return new ResponseEntity<>(
+                JSON.toJSONString(ServerResponse.buildOK(counterMap))
+                , HttpStatus.OK);
+    }
+
 }
