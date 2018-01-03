@@ -815,11 +815,11 @@ public class FilterPress {
                     logger.debug("{} take and pull enough", code);
                     logger.debug("take and pull state unloading filterpress count:" + manager.getUnloadManager().getUnloadingCount(code));
                 }
+                isFilterPressUnloading = false;
                 if(manager.getUnloadManager().getUnloadingCount(code) < manager.getMaxUnloadParallel()){
                     notifyNext();
                 }
                 takeAndPullCount.set(0);
-                isFilterPressUnloading = false;
             }
         }
     }

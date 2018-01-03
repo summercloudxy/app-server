@@ -18,6 +18,7 @@ import com.zgiot.common.pojo.DataModelWrapper;
 import com.zgiot.common.pojo.MetricModel;
 import com.zgiot.common.restcontroller.ServerResponse;
 import javafx.beans.binding.IntegerBinding;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -776,8 +777,9 @@ public class FilterPressManager {
          * 若存在可以卸料的压滤机，则按照最大同时卸料数量进行卸料调度
          */
         private synchronized void unloadNextIfPossible() {
-            logger.debug("正在卸料台数：" + unloading.get());
-            int unloadingCount = unloading.get();
+            //int unloadingCount = unloading.get();
+            int unloadingCount = getUnloadingCount(null);
+            logger.debug("正在卸料台数：" + unloadingCount);
             if(unloadingCount < maxUnloadParallel) {
                 FilterPress candidate = queue.peek();
                 if (candidate != null) {
@@ -841,8 +843,14 @@ public class FilterPressManager {
         public synchronized int getUnloadingCount(String thingCode){
             int unloadingCount = 0;
             for(FilterPress filterPress:deviceHolder.values()){
-                if(filterPress.isFilterPressUnloading() && (!filterPress.getCode().equals(thingCode))){
-                    unloadingCount++;
+                if(StringUtils.isBlank(thingCode)){
+                    if(filterPress.isFilterPressUnloading()) {
+                        unloadingCount++;
+                    }
+                }else{
+                    if(filterPress.isFilterPressUnloading() && (!filterPress.getCode().equals(thingCode))){
+                        unloadingCount++;
+                    }
                 }
             }
             return unloadingCount;
