@@ -116,11 +116,35 @@ public class CompressorGroup {
         String requestId = RequestIdUtil.generateRequestId();
         setPressureState(Double.parseDouble(BellowsUtil.getDataModelValue(dataService, BellowsConstants.PRESSURE_THING_CODE, CompressorMetricConstants.PRESSURE_STATE).orElse(BellowsConstants.PRESSURE_NORMAL + "")), requestId);
 
-        boolean intelligent = bellowsMapper.selectParamValue(BellowsConstants.SYS, BellowsConstants.CP_INTELLIGENT) == BellowsConstants.YES;
-
-        setIntelligent(intelligent, requestId);
+        initIntelligent(requestId);
 
         return this;
+    }
+
+    /**
+     * 初始化智能状态
+     * @param requestId
+     */
+    private void initIntelligent(String requestId) {
+        if (BellowsConstants.CP_TYPE_HIGH.equals(type)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Only low compressor can be set intelligent. RequestId: {}.", requestId);
+            }
+            return;
+        }
+        boolean intelligent = bellowsMapper.selectParamValue(BellowsConstants.SYS, BellowsConstants.CP_INTELLIGENT) == BellowsConstants.YES;
+
+        if (intelligent && checkAllLocal()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("All compressors is local, cannot be set intelligent. RequestId: {}.", requestId);
+            }
+            intelligent = false;
+            bellowsMapper.updateParamValue(BellowsConstants.SYS, BellowsConstants.CP_INTELLIGENT, (long)BellowsConstants.NO);
+        }
+
+        this.intelligent = intelligent;
+
+        execByIntelligent(this.intelligent);
     }
 
 
@@ -159,7 +183,12 @@ public class CompressorGroup {
 
         logger.info("Low compressor intelligent has bean set {}.RequestId: {}", intelligent, requestId);
 
-        if (this.intelligent) {
+        execByIntelligent(this.intelligent);
+    }
+
+
+    private void execByIntelligent(boolean intelligent) {
+        if (intelligent) {
             //开启低压空压机的卸载关闭定时
             turnOnStopTimers();
 
