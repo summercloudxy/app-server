@@ -182,11 +182,7 @@ public class CmdControlServiceImpl implements CmdControlService {
      boolean getBit(int value, int position, int compareValue){
         boolean flag = false;
         for(int i=1;i<= position;i++){
-            if(value %2 == compareValue){
-                flag = true;
-            }else{
-                flag = false;
-            }
+            flag = value % 2 == compareValue;
             value = value/2;
         }
         return flag;
@@ -197,6 +193,7 @@ public class CmdControlServiceImpl implements CmdControlService {
      * @param dataModel
      * @return
      */
+    @Override
     public String getDataSync(DataModel dataModel){
         ServerResponse response = null;
         try {

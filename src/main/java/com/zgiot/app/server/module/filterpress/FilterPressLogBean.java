@@ -160,15 +160,11 @@ public class FilterPressLogBean {
     }
 
     public boolean isEmpty(){
-        if(!StringUtils.isBlank(thingCode)
-                && feedDuration > 0 && (feedStartTime != null)
-                && unloadDuration > 0 && (unloadTime != null)
-                && waitDuration > 0 && (saveTime != null)
-                &&  feedCurrent > 0 )
-        {
-           return false;
-        }
-        return true;
+        return StringUtils.isBlank(thingCode)
+                || feedDuration <= 0 || (feedStartTime == null)
+                || unloadDuration <= 0 || (unloadTime == null)
+                || waitDuration <= 0 || (saveTime == null)
+                || !(feedCurrent > 0);
     }
     public void clear(){
         thingCode = null;

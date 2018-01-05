@@ -4,10 +4,11 @@ public class AlertRule {
     private Long id;
     private String thingCode;
     private String metricCode;
-    private String ruleType;
+    private Short ruleType;
     private Short alertLevel;
     private Double lowerLimit;
     private Double upperLimit;
+    private Boolean enable;
 
     public Long getId() {
         return id;
@@ -33,11 +34,11 @@ public class AlertRule {
         this.metricCode = metricCode;
     }
 
-    public String getRuleType() {
+    public Short getRuleType() {
         return ruleType;
     }
 
-    public void setRuleType(String ruleType) {
+    public void setRuleType(Short ruleType) {
         this.ruleType = ruleType;
     }
 
@@ -64,4 +65,14 @@ public class AlertRule {
     public void setUpperLimit(Double upperLimit) {
         this.upperLimit = upperLimit;
     }
+
+    public Boolean getEnable() {
+        return enable;
+    }
+
+    public void setEnable(Boolean enable) {
+        this.enable = enable;
+    }
+
+
 }

@@ -152,7 +152,7 @@ public class FilterPressController {
                     }else if(CLEAN_PERIOD.equals(key)){
                         cleanPeriod = Integer.valueOf(map.get(key));
                     }else if(IS_HOLDING.equals(key)){
-                        isHolding = (map.get(key).equals(IS_HOLDING_OK) ? true : false);
+                        isHolding = (map.get(key).equals(IS_HOLDING_OK));
                     }
                 }
             }

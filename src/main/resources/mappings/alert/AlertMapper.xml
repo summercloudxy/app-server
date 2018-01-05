@@ -86,189 +86,489 @@
         <result property="maskInfo" column="mask_info"/>
     </resultMap>
 
+    <resultMap id="thingAlertRuleMap" type="com.zgiot.app.server.module.alert.pojo.ThingAlertRule">
+        <result property="thingCode" column="thing_code"/>
+        <result property="thingName" column="thing_name"/>
+        <result property="metricCode" column="metric_code"/>
+        <result property="metricName" column="metric_name"/>
+        <result property="systemId" column="system_id"/>
+        <result property="assetType" column="assetType"/>
+        <result property="category" column="category"/>
+        <result property="buildingId" column="building_id"/>
+        <result property="metricType" column="metricType"/>
+        <collection property="alertRules" resultMap="alertRuleMap"/>
+    </resultMap>
+
+    <resultMap id="alertRuleMap" type="com.zgiot.app.server.module.alert.pojo.AlertRule">
+        <result property="id" column="id"/>
+        <result property="ruleType" column="rule_type"/>
+        <result property="alertLevel" column="alert_level"/>
+        <result property="lowerLimit" column="lower_limit"/>
+        <result property="upperLimit" column="upper_limit"/>
+        <result property="enable" column="enable"/>
+    </resultMap>
+
+
+    <select id="getProtAlertRuleList" resultMap="thingAlertRuleMap">
+        SELECT
+        tml.thing_code,tml.metric_code,m.metric_type1_code as
+        ruleType,r.id,r.alert_level,r.lower_limit,r.upper_limit,r.enable,s.system_id,t.thing_type1_code
+        as assetType,t.thing_type2_code as category,p.building_id,m.metric_name,t.thing_name
+        FROM
+        rel_thing_metric_label tml
+        INNER JOIN tb_metric m ON tml.metric_code = m.metric_code AND m.metric_type1_code = #{filter.alertType}
+        INNER JOIN tb_thing t on tml.thing_code = t.thing_code
+        INNER JOIN rel_thing_system s ON tml.thing_code = s.thing_code
+        INNER JOIN tb_thing_position p ON tml.thing_code = p.thing_code
+        LEFT JOIN tb_alert_rule r on tml.thing_code = r.thing_code AND tml.metric_code = r.metric_code
+        <trim prefixOverrides="AND" prefix="WHERE">
+            <if test="filter.assetType != null">
+                AND
+                t.thing_type1_code = #{filter.assetType}
+            </if>
+            <if test="filter.category != null">
+                AND
+                t.thing_type2_code = #{filter.category}
+            </if>
+            <if test="filter.system != null">
+                AND
+                s.system_id = #{filter.system}
+            </if>
+            <if test="filter.metricType != null">
+                AND
+                m.metric_type2_code = #{filter.metricType}
+            </if>
+            <if test="filter.metricCode != null">
+                AND
+                tml.metric_code= #{filter.metricCode}
+            </if>
+            <if test="filter.thingCode != null">
+                AND
+                tml.thing_code = #{filter.thingCode}
+            </if>
+            <if test="filter.buildingId != null">
+                AND
+                p.building_id = #{filter.buildingId}
+            </if>
+            <if test="filter.level != null">
+                AND
+                r.alert_level = #{filter.level}
+            </if>
+            <if test="filter.enable == true">
+                AND
+                r.enable = TRUE
+            </if>
+        </trim>
+        <if test="filter.sortType == 2">
+            ORDER BY thing_code ASC,metric_name ASC
+        </if>
+        <if test="filter.sortType == 3">
+            order BY metric_name ASC ,category asc,thing_code asc
+        </if>
+        <if test="filter.sortType == 4">
+            ORDER BY category ASC,metric_name asc,thing_code asc
+        </if>
+        <if test="filter.offset != null">
+            limit #{filter.offset},#{filter.count}
+        </if>
+
+    </select>
+
+    <select id="getProtAlertRuleCount" resultType="java.lang.Integer">
+        SELECT
+        count(*)
+        FROM
+        rel_thing_metric_label tml
+        INNER JOIN tb_metric m ON tml.metric_code = m.metric_code AND m.metric_type1_code = #{filter.alertType}
+        INNER JOIN tb_thing t on tml.thing_code = t.thing_code
+        INNER JOIN rel_thing_system s ON tml.thing_code = s.thing_code
+        INNER JOIN tb_thing_position p ON tml.thing_code = p.thing_code
+        LEFT JOIN tb_alert_rule r on tml.thing_code = r.thing_code AND tml.metric_code = r.metric_code
+        <trim prefixOverrides="AND" prefix="WHERE">
+            <if test="filter.assetType != null">
+                AND
+                t.thing_type1_code = #{filter.assetType}
+            </if>
+            <if test="filter.category != null">
+                AND
+                t.thing_type2_code = #{filter.category}
+            </if>
+            <if test="filter.system != null">
+                AND
+                s.system_id = #{filter.system}
+            </if>
+            <if test="filter.metricType != null">
+                AND
+                m.metric_type2_code = #{filter.metricType}
+            </if>
+            <if test="filter.metricCode != null">
+                AND
+                tml.metric_code= #{filter.metricCode}
+            </if>
+            <if test="filter.thingCode != null">
+                AND
+                tml.thing_code = #{filter.thingCode}
+            </if>
+            <if test="filter.buildingId != null">
+                AND
+                p.building_id = #{filter.buildingId}
+            </if>
+            <if test="filter.level != null">
+                AND
+                r.alert_level = #{filter.level}
+            </if>
+            <if test="filter.enable == true">
+                AND
+                r.enable = TRUE
+            </if>
+        </trim>
+        <if test="filter.sortType == 2">
+            ORDER BY thing_code ASC,metric_name ASC
+        </if>
+        <if test="filter.sortType == 3">
+            order BY metric_name ASC ,category asc,thing_code asc
+        </if>
+        <if test="filter.sortType == 4">
+            ORDER BY category ASC,metric_name asc,thing_code asc
+        </if>
+        <if test="filter.offset != null">
+            limit #{filter.offset},#{filter.count}
+        </if>
+
+    </select>
+
+
+    <select id="getParamAlertConfList" resultMap="thingAlertRuleMap">
+        SELECT
+        c.thing_code,c.metric_code,m.metric_type2_code as
+        metricType,
+        <!-- r.id,r.alert_level,r.lower_limit,r.upper_limit,r.enable, -->
+        s.system_id,t.thing_type1_code
+        as assetType,t.thing_type2_code as category,m.metric_name,t.thing_name
+        FROM
+        tb_alert_param_configuration_list c
+        INNER JOIN tb_metric m ON c.metric_code = m.metric_code
+        INNER JOIN tb_thing t on c.thing_code = t.thing_code
+        INNER JOIN rel_thing_system s ON c.thing_code = s.thing_code
+        <!-- LEFT JOIN tb_alert_rule r on c.thing_code = r.thing_code -->
+        <!--AND c.metric_code = r.metric_code-->
+        <trim prefixOverrides="AND" prefix="WHERE">
+            <if test="filter.assetType != null">
+                AND
+                t.thing_type1_code = #{filter.assetType}
+            </if>
+            <if test="filter.category != null">
+                AND
+                t.thing_type2_code = #{filter.category}
+            </if>
+            <if test="filter.system != null">
+                AND
+                s.system_id = #{filter.system}
+            </if>
+            <if test="filter.metricType != null">
+                AND
+                m.metric_type2_code = #{filter.metricType}
+            </if>
+            <if test="filter.metricCode != null">
+                AND
+                c.metric_code= #{filter.metricCode}
+            </if>
+            <if test="filter.thingCode != null">
+                AND
+                c.thing_code = #{filter.thingCode}
+            </if>
+            <!--<if test="filter.buildingId != null">-->
+            <!--AND-->
+            <!--p.building_id = #{filter.buildingId}-->
+            <!--</if>-->
+            <!--<if test="filter.level != null">-->
+            <!--AND-->
+            <!--r.alert_level = #{filter.level}-->
+            <!--</if>-->
+            <!--<if test="filter.enable == true">-->
+            <!--AND-->
+            <!--r.enable = TRUE-->
+            <!--</if>-->
+        </trim>
+        <if test="filter.sortType == 2">
+            ORDER BY thing_code ASC,metric_name ASC
+        </if>
+        <if test="filter.sortType == 3">
+            order BY metric_name ASC ,category asc,thing_code asc
+        </if>
+        <if test="filter.sortType == 4">
+            ORDER BY category ASC,metric_name asc,thing_code asc
+        </if>
+        <if test="filter.offset != null">
+            limit #{filter.offset},#{filter.count}
+        </if>
+    </select>
+
+    <select id="getParamAlertConfSize" resultType="java.lang.Integer">
+        SELECT
+        count(*)
+        FROM
+        tb_alert_param_configuration_list c
+        INNER JOIN tb_metric m ON c.metric_code = m.metric_code
+        INNER JOIN tb_thing t on c.thing_code = t.thing_code
+        INNER JOIN rel_thing_system s ON c.thing_code = s.thing_code
+        <trim prefixOverrides="AND" prefix="WHERE">
+            <if test="filter.assetType != null">
+                AND
+                t.thing_type1_code = #{filter.assetType}
+            </if>
+            <if test="filter.category != null">
+                AND
+                t.thing_type2_code = #{filter.category}
+            </if>
+            <if test="filter.system != null">
+                AND
+                s.system_id = #{filter.system}
+            </if>
+            <if test="filter.metricType != null">
+                AND
+                m.metric_type2_code = #{filter.metricType}
+            </if>
+            <if test="filter.metricCode != null">
+                AND
+                c.metric_code= #{filter.metricCode}
+            </if>
+            <if test="filter.thingCode != null">
+                AND
+                c.thing_code = #{filter.thingCode}
+            </if>
+        </trim>
+
+    </select>
+
     <select id="getAlertRuleList" resultType="com.zgiot.app.server.module.alert.pojo.AlertRule">
-        SELECT id,thing_code,metric_code,rule_type,alert_level,lower_limit,upper_limit
+        SELECT
+        id,
+        thing_code,
+        metric_code,
+        rule_type,
+        alert_level,
+        lower_limit,
+        upper_limit
         FROM
         tb_alert_rule
         WHERE
-        rule_type = #{alertType}
-        <if test="assetType != null">
+        thing_code = #{thingCode}
+        AND metric_code = #{metricCode}
+        <if test="filter.level != null">
             AND
-            asset_type = #{assetType}
+            alert_level = #{filter.level}
         </if>
-        <if test="category != null">
-            AND
-            category = #{category}
-        </if>
-        <if test="system != null">
-            AND
-            system = #{system}
-        </if>
-        <if test="metricType != null">
-            AND
-            metric_type = #{metricType}
-        </if>
-        <if test="metricCode != null">
-            AND
-            metric_code = #{metricCode}
-        </if>
-        <if test="thingCode != null">
-            AND
-            thingCode = #{thingCode}
-        </if>
-        <if test="buildingId != null">
-            AND
-            buildingId = #{buildingId}
-        </if>
-        <if test="level != null">
-            AND
-            level = #{level}
-        </if>
-        <if test="enable == true">
+        <if test="filter.enable == true">
             AND
             enable = TRUE
         </if>
-        <if test="sortType == 2">
-            ORDER BY thing_code ASC
-        </if>
-        <if test="sortType == 3">
-            order BY metric_name ASC
-        </if>
-        <if test="sortType == 4">
-            ORDER BY category ASC
-        </if>
-
     </select>
 
     <select id="getWholeAlertRuleList" resultType="com.zgiot.app.server.module.alert.pojo.AlertRule">
-        SELECT id,thing_code,metric_code,rule_type,alert_level,lower_limit,upper_limit
+        SELECT
+            id,
+            thing_code,
+            metric_code,
+            rule_type,
+            alert_level,
+            lower_limit,
+            upper_limit,
+            enable
         FROM
-        tb_alert_rule
+            tb_alert_rule
         WHERE
-        rule_type = #{alertType}
-        and enable = true
+            rule_type = #{alertType}
+            AND enable = TRUE
     </select>
 
     <select id="getCurrentAlertData" resultMap="alertDataMap">
-        SELECT id,thing_code,metric_code,alert_source,alert_type,alert_level,alert_datetime,alert_info,reporter,alert_stage,is_repair,repair_confirm_user,repair_start_time,repair_end_time,is_manual_intervention,feedback_image,feedback_video,scene_confirm_state,scene_confirm_time,scene_confirm_user,is_recovery,param_value,param_lower,param_upper,last_update_time,verify_time,post_worker,release_time FROM tb_alert_data WHERE alert_stage != 'RELEASE'
+        SELECT
+            id,
+            thing_code,
+            metric_code,
+            alert_source,
+            alert_type,
+            alert_level,
+            alert_datetime,
+            alert_info,
+            reporter,
+            alert_stage,
+            is_repair,
+            repair_confirm_user,
+            repair_start_time,
+            repair_end_time,
+            is_manual_intervention,
+            feedback_image,
+            feedback_video,
+            scene_confirm_state,
+            scene_confirm_time,
+            scene_confirm_user,
+            is_recovery,
+            param_value,
+            param_lower,
+            param_upper,
+            last_update_time,
+            verify_time,
+            post_worker,
+            release_time
+        FROM tb_alert_data
+        WHERE alert_stage != 'RELEASE'
     </select>
 
     <select id="getMetricAlertType" resultType="com.zgiot.app.server.module.alert.pojo.MetricAlertType">
-        SELECT metric_code,alert_type FROM rel_metric_alert_type WHERE 1=1
+        SELECT
+            metric_code,
+            alert_type
+        FROM rel_metric_alert_type
+        WHERE 1 = 1
     </select>
 
     <insert id="createAlertData" keyColumn="id" keyProperty="id" useGeneratedKeys="true"
             parameterType="com.zgiot.app.server.module.alert.pojo.AlertData">
-        INSERT INTO tb_alert_data(thing_code,metric_code,alert_source,alert_type,alert_level,alert_datetime,alert_info,reporter,alert_stage,is_repair,repair_confirm_user,repair_start_time,repair_end_time,is_manual_intervention,feedback_image,feedback_video,scene_confirm_state,scene_confirm_time,scene_confirm_user,is_recovery,param_value,param_lower,param_upper,last_update_time,verify_time,post_worker,dispatcher,release_time) VALUES (#{thingCode},#{metricCode},#{alertSource},#{alertType},#{alertLevel},#{alertDateTime},#{alertInfo},#{reporter},#{alertStage},#{repair},#{repairConfirmUser},#{repairStartTime},#{repairEndTime},#{manualIntervention},#{feedBackImage},#{feedBackVideo},#{sceneConfirmState},#{sceneConfirmTime},#{sceneConfirmUser},#{recovery},#{paramValue},#{paramLower},#{paramUpper},#{lastUpdateTime},#{verifyTime},#{postWorker},#{dispatcher},#{releaseTime})
+        INSERT INTO tb_alert_data (thing_code, metric_code, alert_source, alert_type, alert_level, alert_datetime, alert_info, reporter, alert_stage, is_repair, repair_confirm_user, repair_start_time, repair_end_time, is_manual_intervention, feedback_image, feedback_video, scene_confirm_state, scene_confirm_time, scene_confirm_user, is_recovery, param_value, param_lower, param_upper, last_update_time, verify_time, post_worker, dispatcher, release_time)
+        VALUES
+            (#{thingCode}, #{metricCode}, #{alertSource}, #{alertType}, #{alertLevel}, #{alertDateTime}, #{alertInfo},
+                           #{reporter}, #{alertStage}, #{repair}, #{repairConfirmUser}, #{repairStartTime},
+                                                                                        #{repairEndTime},
+                                                                                        #{manualIntervention},
+                                                                                        #{feedBackImage},
+                                                                                        #{feedBackVideo},
+                                                                                        #{sceneConfirmState},
+                                                                                        #{sceneConfirmTime},
+                                                                                        #{sceneConfirmUser},
+                                                                                        #{recovery}, #{paramValue},
+             #{paramLower}, #{paramUpper}, #{lastUpdateTime}, #{verifyTime}, #{postWorker}, #{dispatcher},
+             #{releaseTime})
     </insert>
 
     <insert id="createAlertDataBackup"
             parameterType="com.zgiot.app.server.module.alert.pojo.AlertData">
-        INSERT INTO tb_alert_data_backup(id,thing_code,metric_code,alert_source,alert_type,alert_level,alert_datetime,alert_info,reporter,alert_stage,is_repair,repair_confirm_user,repair_start_time,repair_end_time,is_manual_intervention,feedback_image,feedback_video,scene_confirm_state,scene_confirm_time,scene_confirm_user,is_recovery,param_value,param_lower,param_upper,last_update_time,verify_time,post_worker,dispatcher,release_time) VALUES (#{id},#{thingCode},#{metricCode},#{alertSource},#{alertType},#{alertLevel},#{alertDateTime},#{alertInfo},#{reporter},#{alertStage},#{repair},#{repairConfirmUser},#{repairStartTime},#{repairEndTime},#{manualIntervention},#{feedBackImage},#{feedBackVideo},#{sceneConfirmState},#{sceneConfirmTime},#{sceneConfirmUser},#{recovery},#{paramValue},#{paramLower},#{paramUpper},#{lastUpdateTime},#{verifyTime},#{postWorker},#{dispatcher},#{releaseTime})
+        INSERT INTO tb_alert_data_backup (id, thing_code, metric_code, alert_source, alert_type, alert_level, alert_datetime, alert_info, reporter, alert_stage, is_repair, repair_confirm_user, repair_start_time, repair_end_time, is_manual_intervention, feedback_image, feedback_video, scene_confirm_state, scene_confirm_time, scene_confirm_user, is_recovery, param_value, param_lower, param_upper, last_update_time, verify_time, post_worker, dispatcher, release_time)
+        VALUES (#{id}, #{thingCode}, #{metricCode}, #{alertSource}, #{alertType}, #{alertLevel}, #{alertDateTime},
+                       #{alertInfo}, #{reporter}, #{alertStage}, #{repair}, #{repairConfirmUser}, #{repairStartTime},
+                                                                            #{repairEndTime}, #{manualIntervention},
+                                                                            #{feedBackImage}, #{feedBackVideo},
+                                                                            #{sceneConfirmState}, #{sceneConfirmTime},
+                                                                            #{sceneConfirmUser}, #{recovery},
+                #{paramValue}, #{paramLower}, #{paramUpper}, #{lastUpdateTime}, #{verifyTime}, #{postWorker},
+                #{dispatcher}, #{releaseTime})
     </insert>
 
     <update id="updateAlertData">
         UPDATE tb_alert_data
         SET
-        thing_code =#{thingCode},
-        metric_code = #{metricCode},
-        alert_source = #{alertSource},
-        alert_type = #{alertType},
-        alert_level = #{alertLevel},
-        alert_datetime = #{alertDateTime},
-        alert_info = #{alertInfo},
-        reporter = #{reporter},
-        alert_stage = #{alertStage},
-        is_repair = #{repair},
-        repair_confirm_user = #{repairConfirmUser},
-        repair_start_time = #{repairStartTime},
-        repair_end_time = #{repairEndTime},
-        is_manual_intervention = #{manualIntervention},
-        feedback_image = #{feedBackImage},
-        feedback_video = #{feedBackVideo},
-        scene_confirm_state = #{sceneConfirmState},
-        scene_confirm_time = #{sceneConfirmTime},
-        scene_confirm_user = #{sceneConfirmUser},
-        is_recovery = #{recovery},
-        param_value = #{paramValue},
-        param_lower = #{paramLower},
-        param_upper = #{paramUpper},
-        last_update_time = #{lastUpdateTime},
-        verify_time = #{verifyTime},
-        post_worker = #{postWorker},
-        dispatcher = #{dispatcher},
-        release_time = #{releaseTime}
+            thing_code             = #{thingCode},
+            metric_code            = #{metricCode},
+            alert_source           = #{alertSource},
+            alert_type             = #{alertType},
+            alert_level            = #{alertLevel},
+            alert_datetime         = #{alertDateTime},
+            alert_info             = #{alertInfo},
+            reporter               = #{reporter},
+            alert_stage            = #{alertStage},
+            is_repair              = #{repair},
+            repair_confirm_user    = #{repairConfirmUser},
+            repair_start_time      = #{repairStartTime},
+            repair_end_time        = #{repairEndTime},
+            is_manual_intervention = #{manualIntervention},
+            feedback_image         = #{feedBackImage},
+            feedback_video         = #{feedBackVideo},
+            scene_confirm_state    = #{sceneConfirmState},
+            scene_confirm_time     = #{sceneConfirmTime},
+            scene_confirm_user     = #{sceneConfirmUser},
+            is_recovery            = #{recovery},
+            param_value            = #{paramValue},
+            param_lower            = #{paramLower},
+            param_upper            = #{paramUpper},
+            last_update_time       = #{lastUpdateTime},
+            verify_time            = #{verifyTime},
+            post_worker            = #{postWorker},
+            dispatcher             = #{dispatcher},
+            release_time           = #{releaseTime}
         WHERE id = #{id}
     </update>
 
     <update id="updateAlertDataBackup">
         UPDATE tb_alert_data_backup
         SET
-        thing_code =#{thingCode},
-        metric_code = #{metricCode},
-        alert_source = #{alertSource},
-        alert_type = #{alertType},
-        alert_level = #{alertLevel},
-        alert_datetime = #{alertDateTime},
-        alert_info = #{alertInfo},
-        reporter = #{reporter},
-        alert_stage = #{alertStage},
-        is_repair = #{repair},
-        repair_confirm_user = #{repairConfirmUser},
-        repair_start_time = #{repairStartTime},
-        repair_end_time = #{repairEndTime},
-        is_manual_intervention = #{manualIntervention},
-        feedback_image = #{feedBackImage},
-        feedback_video = #{feedBackVideo},
-        scene_confirm_state = #{sceneConfirmState},
-        scene_confirm_time = #{sceneConfirmTime},
-        scene_confirm_user = #{sceneConfirmUser},
-        is_recovery = #{recovery},
-        param_value = #{paramValue},
-        param_lower = #{paramLower},
-        param_upper = #{paramUpper},
-        last_update_time = #{lastUpdateTime},
-        verify_time = #{verifyTime},
-        post_worker = #{postWorker},
-        dispatcher = #{dispatcher},
-        release_time = #{releaseTime}
+            thing_code             = #{thingCode},
+            metric_code            = #{metricCode},
+            alert_source           = #{alertSource},
+            alert_type             = #{alertType},
+            alert_level            = #{alertLevel},
+            alert_datetime         = #{alertDateTime},
+            alert_info             = #{alertInfo},
+            reporter               = #{reporter},
+            alert_stage            = #{alertStage},
+            is_repair              = #{repair},
+            repair_confirm_user    = #{repairConfirmUser},
+            repair_start_time      = #{repairStartTime},
+            repair_end_time        = #{repairEndTime},
+            is_manual_intervention = #{manualIntervention},
+            feedback_image         = #{feedBackImage},
+            feedback_video         = #{feedBackVideo},
+            scene_confirm_state    = #{sceneConfirmState},
+            scene_confirm_time     = #{sceneConfirmTime},
+            scene_confirm_user     = #{sceneConfirmUser},
+            is_recovery            = #{recovery},
+            param_value            = #{paramValue},
+            param_lower            = #{paramLower},
+            param_upper            = #{paramUpper},
+            last_update_time       = #{lastUpdateTime},
+            verify_time            = #{verifyTime},
+            post_worker            = #{postWorker},
+            dispatcher             = #{dispatcher},
+            release_time           = #{releaseTime}
         WHERE id = #{id}
     </update>
 
     <update id="releaseAlertData">
         UPDATE tb_alert_data
         SET
-        alert_stage = #{alertStage},
-        scene_confirm_state = #{sceneConfirmState},
-        scene_confirm_time = #{sceneConfirmTime},
-        scene_confirm_user = #{sceneConfirmUser},
-        is_recovery = #{recovery},
-        post_worker = #{postWorker},
-        dispatcher = #{dispatcher},
-        release_time = #{releaseTime}
+            alert_stage         = #{alertStage},
+            scene_confirm_state = #{sceneConfirmState},
+            scene_confirm_time  = #{sceneConfirmTime},
+            scene_confirm_user  = #{sceneConfirmUser},
+            is_recovery         = #{recovery},
+            post_worker         = #{postWorker},
+            dispatcher          = #{dispatcher},
+            release_time        = #{releaseTime}
         WHERE id = #{id}
     </update>
 
     <update id="releaseAlertDataBackup">
         UPDATE tb_alert_data_backup
         SET
-        alert_stage = #{alertStage},
-        scene_confirm_state = #{sceneConfirmState},
-        scene_confirm_time = #{sceneConfirmTime},
-        scene_confirm_user = #{sceneConfirmUser},
-        is_recovery = #{recovery},
-        post_worker = #{postWorker},
-        dispatcher = #{dispatcher},
-        release_time = #{releaseTime}
+            alert_stage         = #{alertStage},
+            scene_confirm_state = #{sceneConfirmState},
+            scene_confirm_time  = #{sceneConfirmTime},
+            scene_confirm_user  = #{sceneConfirmUser},
+            is_recovery         = #{recovery},
+            post_worker         = #{postWorker},
+            dispatcher          = #{dispatcher},
+            release_time        = #{releaseTime}
         WHERE id = #{id}
     </update>
 
     <insert id="saveAlertMessage" keyProperty="id" keyColumn="id" useGeneratedKeys="true">
-        INSERT INTO tb_alert_message(info,type,alert_id,time,is_read,user_id,permission) VALUES (#{info},#{type},#{alertId},#{time},#{isRead},#{userId},#{permission})
+        INSERT INTO tb_alert_message (info, type, alert_id, time, is_read, user_id, permission)
+        VALUES (#{info}, #{type}, #{alertId}, #{time}, #{isRead}, #{userId}, #{permission})
     </insert>
 
     <select id="getAlertMessage" resultType="com.zgiot.app.server.module.alert.pojo.AlertMessage">
-        SELECT id,info,type,alert_id,time,is_read,user_id,permission FROM tb_alert_message WHERE alert_id = #{alertId} ORDER BY time
+        SELECT
+            id,
+            info,
+            type,
+            alert_id,
+            time,
+            is_read,
+            user_id,
+            permission
+        FROM tb_alert_message
+        WHERE alert_id = #{alertId}
+        ORDER BY time
     </select>
 
     <select id="getAlertDataListGroupByThing" resultMap="alertRecordMap">
@@ -282,9 +582,9 @@
             ,ABS(ad.release_time-ad.alert_datetime) as alertDuration
         </if>
         <!--<if test="thingCode != null"> -->
-            <!--<if test="stage != 'RELEASE'">-->
-                <!--,am.id as message_id,am.user_id,am.time,am.info,am.alert_id,am.is_read,am.permission,am.type-->
-            <!--</if>-->
+        <!--<if test="stage != 'RELEASE'">-->
+        <!--,am.id as message_id,am.user_id,am.time,am.info,am.alert_id,am.is_read,am.permission,am.type-->
+        <!--</if>-->
         <!--</if>-->
         <if test="stage == 'RELEASE'">
             ,rts.system_id
@@ -299,88 +599,88 @@
             </if>
         </if>
         <!--<if test="thingCode != null"> -->
-            <!--<if test="stage != 'RELEASE'">-->
-                <!--,tb_alert_message am-->
-            <!--</if>-->
+        <!--<if test="stage != 'RELEASE'">-->
+        <!--,tb_alert_message am-->
+        <!--</if>-->
         <!--</if>-->
         <trim prefix="where" prefixOverrides="AND">
-        <!--<if test="thingCode != null"> -->
-                <!--<if test="stage != 'RELEASE'">-->
-                    <!--AND-->
-                    <!--ad.id = am.alert_id-->
-                <!--</if>-->
-        <!--</if>-->
+            <!--<if test="thingCode != null"> -->
+            <!--<if test="stage != 'RELEASE'">-->
+            <!--AND-->
+            <!--ad.id = am.alert_id-->
+            <!--</if>-->
+            <!--</if>-->
+            <if test="thingCode == null">
+                <if test="systems != null or stage == 'RELEASE'">
+                    AND ad.thing_code = rts.thing_code
+                </if>
+                <if test="buildingIds != null or floors != null">
+                    AND ad.thing_code = ttp.thing_code
+                </if>
+            </if>
+            <if test="stage !=null">
+                AND
+                ad.alert_stage = #{stage}
+            </if>
+            <if test="excluStage != null">
+                AND
+                ad.alert_stage != #{excluStage}
+            </if>
+            <if test="levels != null">
+                AND
+                <foreach collection="levels" item="level" index="index" open="ad.alert_level in (" close=")"
+                         separator=",">
+                    #{level}
+                </foreach>
+            </if>
+            <if test="types != null">
+                AND
+                <foreach collection="types" item="type" index="index" open="ad.alert_type in (" close=")"
+                         separator=",">
+                    #{type}
+                </foreach>
+            </if>
+            <if test="buildingIds != null">
+                AND
+                <foreach collection="buildingIds" item="buildingId" index="index" open="ttp.building_id in (" close=")"
+                         separator=",">
+                    #{buildingId}
+                </foreach>
+            </if>
+            <if test="floors != null">
+                AND
+                <foreach collection="floors" item="floor" index="index" open="ttp.floor in (" close=")" separator=",">
+                    #{floor}
+                </foreach>
+            </if>
+            <if test="systems != null">
+                AND
+                <foreach collection="systems" item="system" index="index" open="rts.system_id in (" close=")"
+                         separator=",">
+                    #{system}
+                </foreach>
+            </if>
+            <if test="startTime != null">
+                AND
+                ad.alert_datetime &gt;= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND
+                ad.alert_datetime &lt;= #{endTime}
+            </if>
+            <if test="thingCode != null">
+                AND
+                ad.thing_code = #{thingCode}
+            </if>
+        </trim>
         <if test="thingCode == null">
-            <if test="systems != null or stage == 'RELEASE'">
-                AND ad.thing_code = rts.thing_code
-            </if>
-            <if test="buildingIds != null or floors != null">
-                AND ad.thing_code = ttp.thing_code
-            </if>
-        </if>
-        <if test="stage !=null">
-            AND
-            ad.alert_stage = #{stage}
-        </if>
-        <if test="excluStage != null">
-            AND
-            ad.alert_stage != #{excluStage}
-        </if>
-        <if test="levels != null">
-            AND
-            <foreach collection="levels" item="level" index="index" open="ad.alert_level in (" close=")"
-                     separator=",">
-                #{level}
-            </foreach>
-        </if>
-        <if test="types != null">
-            AND
-            <foreach collection="types" item="type" index="index" open="ad.alert_type in (" close=")"
-                     separator=",">
-                #{type}
-            </foreach>
-        </if>
-        <if test="buildingIds != null">
-            AND
-            <foreach collection="buildingIds" item="buildingId" index="index" open="ttp.building_id in (" close=")"
-                     separator=",">
-                #{buildingId}
-            </foreach>
-        </if>
-        <if test="floors != null">
-            AND
-            <foreach collection="floors" item="floor" index="index" open="ttp.floor in (" close=")" separator=",">
-                #{floor}
-            </foreach>
-        </if>
-        <if test="systems != null">
-            AND
-            <foreach collection="systems" item="system" index="index" open="rts.system_id in (" close=")"
-                     separator=",">
-                #{system}
-            </foreach>
-        </if>
-        <if test="startTime != null">
-            AND
-            ad.alert_datetime &gt;= #{startTime}
-        </if>
-        <if test="endTime != null">
-            AND
-            ad.alert_datetime &lt;= #{endTime}
+            ORDER BY ad.alert_level is not null,ad.alert_level desc,ad.alert_datetime desc
         </if>
         <if test="thingCode != null">
-            AND
-            ad.thing_code = #{thingCode}
+            ORDER BY ad.alert_level is not null,ad.alert_datetime DESC
         </if>
-    </trim>
-    <if test="thingCode == null">
-        ORDER BY ad.alert_level is not null,ad.alert_level desc,ad.alert_datetime desc
-    </if>
-    <if test="thingCode != null">
-        ORDER BY ad.alert_level is not null,ad.alert_datetime DESC
-    </if>
-    <!--<if test="offset != null">-->
-            <!--limit #{offset},#{count}-->
+        <!--<if test="offset != null">-->
+        <!--limit #{offset},#{count}-->
         <!--</if>-->
     </select>
 
@@ -474,10 +774,22 @@
     </insert>
 
     <select id="getAlertShieldInfo" resultType="com.zgiot.app.server.module.alert.pojo.AlertMask">
-        SELECT d.thing_code,d.metric_code,d.alert_type,s.mask_id,m.info,s."time",s.user_id,s.param_upper,s.param_lower,s.param_value FROM tb_alert_data d, tb_alert_mask s, tb_fix_message m WHERE  s.mask_id = m.id
+        SELECT
+            d.thing_code,
+            d.metric_code,
+            d.alert_type,
+            s.mask_id,
+            m.info,
+            s."time",
+            s.user_id,
+            s.param_upper,
+            s.param_lower,
+            s.param_value
+        FROM tb_alert_data d, tb_alert_mask s, tb_fix_message m
+        WHERE s.mask_id = m.id
     </select>
 
-    <insert id="insertAlertRule" useGeneratedKeys="true" keyProperty="id" keyColumn="id"
+    <insert id="insertAlertRules" useGeneratedKeys="true" keyProperty="id" keyColumn="id"
             parameterType="com.zgiot.app.server.module.alert.pojo.AlertRule">
         INSERT INTO tb_alert_rule(id,thing_code,metric_code,rule_type,alert_level,lower_limit,upper_limit) VALUES
         <foreach collection="list" item="item" separator=",">
@@ -485,7 +797,7 @@
         </foreach>
     </insert>
 
-    <update id="updateAlertRule" parameterType="com.zgiot.app.server.module.alert.pojo.AlertRule">
+    <update id="updateAlertRules" parameterType="com.zgiot.app.server.module.alert.pojo.AlertRule">
         <foreach collection="list" item="item" separator=";">
             UPDATE tb_alert_rule SET thing_code = #{item.thingCode},metric_code=
             #{item.metricCode},rule_type=#{item.ruleType},alert_level=#{item.alertLevel},lower_limit=#{item.lowerLimit},upper_limit=#{item.upperLimit}
@@ -493,10 +805,10 @@
         </foreach>
     </update>
 
-    <delete id="deleteAlertRule">
+    <delete id="deleteAlertRules">
         DELETE FROM tb_alert_rule WHERE id in (
         <foreach collection="list" item="item" separator=",">
-            #{item.id}
+            #{item}
         </foreach>
         )
     </delete>
@@ -511,14 +823,14 @@
         WHERE alert_datetime &gt;= #{startTime} AND alert_datetime &lt; #{endTime}
         <if test="alertStage != null">
             <!--<if test="alertStage == 'UNRELEASE'">-->
-                <!--AND alert_stage != 'RELEASE'-->
+            <!--AND alert_stage != 'RELEASE'-->
             <!--</if>-->
             <!--<if test="alertStage != 'UNRELEASE'">-->
-                AND alert_stage = #{alertStage}
-          </if>
+            AND alert_stage = #{alertStage}
+        </if>
         <!--</if>-->
         <if test="excluStage != null">
-            AND  alert_stage != #{excluStage}
+            AND alert_stage != #{excluStage}
         </if>
         <if test="type == 1">
             GROUP BY thing_code
@@ -539,7 +851,7 @@
         </if>
         <!--</if>-->
         <if test="excluStage != null">
-            AND  alert_stage != #{excluStage}
+            AND alert_stage != #{excluStage}
         </if>
         <if test="type == 1">
             GROUP BY thing_code,alert_level
@@ -552,10 +864,14 @@
 
 
     <select id="getTypeStatisticsInfo" resultType="com.zgiot.app.server.module.alert.pojo.AlertStatisticsNum">
-        select DATE_FORMAT(alert_datetime,'%Y%m%d') dayStr,count(alert_type) as sumNum from tb_alert_data
+        SELECT
+            DATE_FORMAT(alert_datetime, '%Y%m%d') dayStr,
+            count(alert_type) AS                  sumNum
+        FROM tb_alert_data
         WHERE alert_type = #{alertType}
-        and alert_datetime &gt;= #{startTime} and  alert_datetime &lt; #{endTime}
-        group by dayStr ORDER BY dayStr DESC ;
+              AND alert_datetime &gt;= #{startTime} AND alert_datetime &lt; #{endTime}
+        GROUP BY dayStr
+        ORDER BY dayStr DESC;
     </select>
 
 
@@ -620,7 +936,46 @@
     </select>
 
     <delete id="clearAlertDateHistory">
-        DELETE FROM tb_alert_data WHERE alert_datetime  &lt; #{timeStamp} AND  alert_stage = #{stage};
+        DELETE FROM tb_alert_data
+        WHERE alert_datetime &lt; #{timeStamp} AND alert_stage = #{stage};
     </delete>
+
+    <update id="updateAlertRule" parameterType="com.zgiot.app.server.module.alert.pojo.AlertRule">
+        UPDATE tb_alert_rule
+        SET alert_level = #{alertRule.alertLevel},lower_limit = #{alertRule.lowerLimit},upper_limit = #{alertRule.upperLimit},
+                          enable = #{alertRule.enable}
+        WHERE id = #{alertRule.id};
+    </update>
+
+    <insert id="insertAlertRule" parameterType="com.zgiot.app.server.module.alert.pojo.AlertRule" useGeneratedKeys="true" keyColumn="id" keyProperty="alertRule.id">
+        INSERT INTO tb_alert_rule (thing_code, metric_code, rule_type, alert_level, lower_limit, upper_limit, enable)
+        VALUES
+            (#{alertRule.thingCode}, #{alertRule.metricCode}, #{alertRule.ruleType}, #{alertRule.alertLevel}, #{alertRule.lowerLimit}, #{alertRule.upperLimit}, #{alertRule.enable})
+    </insert>
+
+    <insert id="setParamConfigurationList" parameterType="com.zgiot.app.server.module.alert.pojo.AlertRule">
+        INSERT INTO tb_alert_param_configuration_list (thing_code, metric_code) VALUES
+        <foreach collection="list" item="item" open="(" separator="),(" close=")">
+            #{item.thingCode},#{item.metricCode}
+        </foreach>
+    </insert>
+
+    <select id="getParamConfigurationList" resultType="com.zgiot.app.server.module.alert.pojo.AlertRule">
+        SELECT thing_code, metric_code FROM tb_alert_param_configuration_list
+    </select>
+
+    <select id="getParamthreshold" resultType="com.zgiot.app.server.module.alert.pojo.AlertRule">
+        SELECT
+            lower_limit,
+            upper_limit
+        FROM tb_param_range
+        WHERE thing_code = #{thingCode} AND metric_code = #{metricCode}
+    </select>
+
+    <update id="setParamthreshold" parameterType="com.zgiot.app.server.module.alert.pojo.AlertRule">
+        UPDATE tb_param_range
+        SET lower_limit = #{lowerLimit} , upper_limit = #{upperLimit}
+        WHERE thing_code = #{thingCode} AND metric_code = #{metricCode}
+    </update>
 
 </mapper>
