@@ -813,7 +813,9 @@ public class FilterPress {
             dataModel.setThingCode(code);
             dataModel.setMetricCode(FilterPressMetricConstants.RO_PRESS);
             String readValue = manager.cmdControlService.getDataSync(dataModel);
-            logger.trace("read press state  durationTime:" + (System.currentTimeMillis() - startGetValueTime) + " ms");
+            if(logger.isTraceEnabled()){
+                logger.trace("read press state  durationTime:{} ms", (System.currentTimeMillis() - startGetValueTime));
+            }
             if (!Boolean.valueOf(readValue)) {
                 isFilterPressUnloading = true;
             }
