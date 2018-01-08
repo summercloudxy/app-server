@@ -81,6 +81,22 @@ public class ThingController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(thingPropMap), HttpStatus.OK);
     }
 
+    @GetMapping("/base")
+    public ResponseEntity<String> findAllBaseThing(){
+        Map<String, String> base = null;
+        List<ThingModel> baseThings = thingService.findAllThing();
+        List<Map<String, String>> things = new ArrayList<>();
+        if (baseThings.size() > 0) {
+            for (ThingModel baseProperty : baseThings) {
+                base.put(THING_NAME, baseProperty.getThingName());
+                base.put(THING_CODE, baseProperty.getThingCode());
+                things.add(base);
+            }
+        }
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(things), HttpStatus.OK);
+    }
+
     @GetMapping("")
     public ResponseEntity<String> findAllThing() {
         List<ThingModel> baseThings = thingService.findAllThing();
