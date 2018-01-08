@@ -808,12 +808,12 @@ public class FilterPress {
         }
 
         private void checkUnloadExchange() {
-            logger.trace("read press state start time:" + System.currentTimeMillis());
+            long startGetValueTime = System.currentTimeMillis();
             DataModel dataModel = new DataModel();
             dataModel.setThingCode(code);
             dataModel.setMetricCode(FilterPressMetricConstants.RO_PRESS);
             String readValue = manager.cmdControlService.getDataSync(dataModel);
-            logger.trace("read press state end time:" + System.currentTimeMillis());
+            logger.trace("read press state  durationTime:" + (System.currentTimeMillis() - startGetValueTime) + " ms");
             if (!Boolean.valueOf(readValue)) {
                 isFilterPressUnloading = true;
             }
