@@ -4,6 +4,7 @@ package com.zgiot.app.server.module.filterpress;
 import com.zgiot.common.constants.FilterPressLogConstants;
 import com.zgiot.common.constants.FilterPressMetricConstants;
 import com.zgiot.common.exceptions.SysException;
+import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -807,19 +808,28 @@ public class FilterPress {
         }
 
         private void checkUnloadExchange() {
-            isFilterPressUnloading = true;
+            logger.trace("read press state start time:" + System.currentTimeMillis());
+            DataModel dataModel = new DataModel();
+            dataModel.setThingCode(code);
+            dataModel.setMetricCode(FilterPressMetricConstants.RO_PRESS);
+            String readValue = manager.cmdControlService.getDataSync(dataModel);
+            logger.trace("read press state end time:" + System.currentTimeMillis());
+            if (!Boolean.valueOf(readValue)) {
+                isFilterPressUnloading = true;
+            }
             filterPressTakeAndPullCount.getAndIncrement();
-            if (takeAndPullCount.incrementAndGet() >= UNLOAD_EXCHANGE_COUNT && isUnloading) {
-                cancelTimer();
-                if(logger.isDebugEnabled()){
-                    logger.debug("{} take and pull enough", code);
-                    logger.debug("take and pull state unloading filterpress count:" + manager.getUnloadManager().getUnloadingCount(code));
-                }
-                isFilterPressUnloading = false;
-                if(manager.getUnloadManager().getUnloadingCount(code) < manager.getMaxUnloadParallel()){
-                    notifyNext();
-                }
-                takeAndPullCount.set(0);
+            if (filterPressTakeAndPullCount.incrementAndGet() >= UNLOAD_EXCHANGE_COUNT && isFilterPressUnloading) {
+                    cancelTimer();
+                    if(logger.isDebugEnabled()){
+                        logger.debug("{} take and pull enough", code);
+                        logger.debug("take and pull state unloading filterpress count:" + manager.getUnloadManager().getUnloadingCount(code));
+                    }
+                    isFilterPressUnloading = false;
+                    if(manager.getUnloadManager().getUnloadingCount(code) < manager.getMaxUnloadParallel()){
+                        notifyNext();
+                    }
+                    takeAndPullCount.set(0);
+                    filterPressTakeAndPullCount.set(0);
             }
         }
     }
