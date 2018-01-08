@@ -57,7 +57,7 @@ public class FilterPressManager {
     @Autowired
     HistoryDataService historyDataService;
     @Autowired
-    private CmdControlService cmdControlService;
+    CmdControlService cmdControlService;
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
     @Autowired
