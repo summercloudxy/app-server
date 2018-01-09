@@ -12,10 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/thing")
@@ -83,7 +80,7 @@ public class ThingController {
 
     @GetMapping("/base")
     public ResponseEntity<String> findAllBaseThing(){
-        Map<String, String> base = null;
+        Map<String, String> base = new HashMap<>();
         List<ThingModel> baseThings = thingService.findAllThing();
         List<Map<String, String>> things = new ArrayList<>();
         if (baseThings.size() > 0) {
