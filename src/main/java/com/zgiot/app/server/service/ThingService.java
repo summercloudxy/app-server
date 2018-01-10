@@ -59,15 +59,21 @@ public interface ThingService {
 
     void validateThing(String thingCode);
 
+    // TODO Refactoring
+    @Deprecated
     List<CategoryModel> getCategoryListByAssetType(String assetType);
 
+    @Deprecated
     List<CategoryModel> getCategoryList();
 
+    @Deprecated
     List<CategoryModel> getMetricTypeByAssetAndCategory(String assetType, String category, String thingCode);
 
+    @Deprecated
     List<MetricModel> getMetricByAssetAndCategory(String assetType, String category, String thingCode,
             String metricType);
 
+    @Deprecated
     List<ThingModel> getThingCodeByAssetAndCategory(String assetType, String category, String metricCode,
             String metricType);
 }
