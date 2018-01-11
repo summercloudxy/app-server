@@ -14,6 +14,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -277,7 +278,8 @@ public class FilterPress {
         if (manager != null && (!manager.getUnloadSequence().isEmpty()) && (!StringUtils.isBlank(getCode()))) {
             position = manager.getUnloadSequence().get(this.getCode());
         }
-        manager.getUnloadManager().getQueue().remove(this);
+        //manager.getUnloadManager().getQueue().remove(this);
+        removeFilterPress(manager.getUnloadManager().getQueue(),this);
         manager.getUnloadSequence().remove(this.getCode());
         logger.debug("local remove unloadSequence,filterpress:" + this.getCode());
         try {
@@ -302,7 +304,8 @@ public class FilterPress {
                 && manager.getUnloadSequence().containsKey(this.getCode())) {
             position = manager.getUnloadSequence().get(this.getCode());
         }
-        manager.getUnloadManager().getQueue().remove(this);
+        //manager.getUnloadManager().getQueue().remove(this);
+        removeFilterPress(manager.getUnloadManager().getQueue(),this);
         manager.printQueueData(manager.getUnloadManager().getQueue());
         manager.getUnloadSequence().remove(this.getCode());
         logger.debug("loose remove unloadSequence,filterpress:" + this.getCode());
@@ -704,6 +707,15 @@ public class FilterPress {
                 default:
             }
             manager.calculatePlateAndSave();
+        }
+    }
+
+    private void removeFilterPress(BlockingQueue<FilterPress> queue,FilterPress filterPress){
+        Iterator<FilterPress> iterator = queue.iterator();
+        while(iterator.hasNext()){
+            if(filterPress.getCode().equals(iterator.next().code)){
+                queue.remove(filterPress);
+            }
         }
     }
 
