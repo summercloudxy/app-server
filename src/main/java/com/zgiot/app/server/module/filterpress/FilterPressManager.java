@@ -713,6 +713,15 @@ public class FilterPressManager {
         return filterPressPumpMapping;
     }
 
+    public void printQueueData(BlockingQueue<FilterPress> queue){
+        Iterator<FilterPress> iterator = queue.iterator();
+        while(iterator.hasNext()){
+            if(logger.isDebugEnabled()){
+                logger.debug("filterpress:{} in queue",iterator.next().getCode());
+            }
+        }
+    }
+
     // @Scheduled(cron="cnmt.FilterPressDeviceManager.clear")
     // /**
     // * 手动弹出模式下，超过一段时间不操作后自动进行确认
@@ -765,6 +774,7 @@ public class FilterPressManager {
                 logger.debug("filterPress:" + filterPress.getCode() + " enqueue,position:" + (queuePosition.size() + 1));
             }
             queue.add(filterPress);
+            printQueueData(queue);
             unloadNextIfPossible();
         }
 

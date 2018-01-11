@@ -303,6 +303,7 @@ public class FilterPress {
             position = manager.getUnloadSequence().get(this.getCode());
         }
         manager.getUnloadManager().getQueue().remove(this);
+        manager.printQueueData(manager.getUnloadManager().getQueue());
         manager.getUnloadSequence().remove(this.getCode());
         logger.debug("loose remove unloadSequence,filterpress:" + this.getCode());
         try {
