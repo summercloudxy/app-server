@@ -773,9 +773,11 @@ public class FilterPressManager {
             if(logger.isDebugEnabled()){
                 logger.debug("filterPress:" + filterPress.getCode() + " enqueue,position:" + (queuePosition.size() + 1));
             }
-            queue.add(filterPress);
-            printQueueData(queue);
-            unloadNextIfPossible();
+            if(!queue.contains(filterPress)){
+                queue.add(filterPress);
+                printQueueData(queue);
+                unloadNextIfPossible();
+            }
         }
 
         private synchronized void unloadNext() {
