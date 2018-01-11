@@ -303,6 +303,7 @@ public class FilterPress {
             position = manager.getUnloadSequence().get(this.getCode());
         }
         manager.getUnloadManager().getQueue().remove(this);
+        manager.printQueueData(manager.getUnloadManager().getQueue());
         manager.getUnloadSequence().remove(this.getCode());
         logger.debug("loose remove unloadSequence,filterpress:" + this.getCode());
         try {
@@ -816,11 +817,12 @@ public class FilterPress {
             if(logger.isTraceEnabled()){
                 logger.trace("read press state  durationTime:{} ms", (System.currentTimeMillis() - startGetValueTime));
             }
-            if (!Boolean.valueOf(readValue)) {
+            int pullAndTakeCount = filterPressTakeAndPullCount.incrementAndGet();
+            if ((!Boolean.valueOf(readValue)) && (pullAndTakeCount < UNLOAD_EXCHANGE_COUNT)){
                 isFilterPressUnloading = true;
             }
-            filterPressTakeAndPullCount.getAndIncrement();
-            if (filterPressTakeAndPullCount.incrementAndGet() >= UNLOAD_EXCHANGE_COUNT && isFilterPressUnloading) {
+
+            if (pullAndTakeCount == UNLOAD_EXCHANGE_COUNT ) {
                     cancelTimer();
                     if(logger.isDebugEnabled()){
                         logger.debug("{} take and pull enough", code);
@@ -831,7 +833,7 @@ public class FilterPress {
                         notifyNext();
                     }
                     takeAndPullCount.set(0);
-                    filterPressTakeAndPullCount.set(0);
+                    //filterPressTakeAndPullCount.set(0);
             }
         }
     }
