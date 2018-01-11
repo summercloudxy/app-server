@@ -307,6 +307,9 @@ public class FilterPress {
         manager.getUnloadSequence().remove(this.getCode());
         logger.debug("loose remove unloadSequence,filterpress:" + this.getCode());
         try {
+            HashSet unConfirm = new HashSet(manager.getUnConfirmedUnload());
+            manager.getUnConfirmedUnload().clear();
+            manager.getUnConfirmedUnload().addAll(unConfirm);
             manager.getUnConfirmedUnload().remove(this.getCode());
         } catch (NullPointerException e) {
             throw new SysException("未确定卸料set中不存在这台压滤机thingCode", SysException.EC_UNKNOWN);
