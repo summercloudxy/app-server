@@ -4,12 +4,14 @@ import com.zgiot.app.server.module.thingtag.dao.ThingTagGroupMapper;
 import com.zgiot.app.server.module.thingtag.pojo.ThingTagGroup;
 import com.zgiot.app.server.service.ThingTagGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
- * Created by chenting on 2018/1/12.
+ * Created by wangfan on 2018/1/9.
  */
+@Service
 public class ThingTagGroupServiceImpl implements ThingTagGroupService{
 
     @Autowired

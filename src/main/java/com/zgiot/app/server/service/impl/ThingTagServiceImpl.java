@@ -4,14 +4,14 @@ import com.zgiot.app.server.module.thingtag.dao.ThingTagMapper;
 import com.zgiot.app.server.module.thingtag.pojo.ThingTag;
 import com.zgiot.app.server.service.ThingTagService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
  * Created by wangfan on 2018/1/9.
  */
-@Component
+@Service
 public class ThingTagServiceImpl implements ThingTagService {
 
     private static String CODE_PATH_CUT_OFF_RULE = "/";

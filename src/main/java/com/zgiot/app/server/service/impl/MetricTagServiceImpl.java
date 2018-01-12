@@ -4,14 +4,14 @@ import com.zgiot.app.server.module.metrictag.dao.MetricTagMapper;
 import com.zgiot.app.server.module.metrictag.pojo.MetricTag;
 import com.zgiot.app.server.service.MetricTagService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
  * Created by wangfan on 2018/1/9.
  */
-@Component
+@Service
 public class MetricTagServiceImpl implements MetricTagService {
 
     private static String CODE_PATH_CUT_OFF_RULE = "/";
