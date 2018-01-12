@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.metrictag.dao.MetricTagMapper">
+    <resultMap id="metricTag" type="com.zgiot.app.server.module.metrictag.pojo.MetricTag">
+        <result column="id"  property="metricTagId"/>
+        <result column="code" property="code"/>
+        <result column="tag_name" property="tagName"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="code_path" property="codePath"/>
+        <result column="metric_tag_group_id" property="metricTagGroupId"/>
+        <result column="create_date" property="createDate"/>
+    </resultMap>
+
+    <select id="getMetricTag" resultMap="metricTag">
+        SELECT
+        id,
+        `code`,
+        tag_name,
+        parent_id,
+        code_path,
+        metric_tag_group_id,
+        create_date
+        FROM
+        tb_metric_tag
+        WHERE
+        1 = 1
+        <if test="metricTagId != null">
+            AND id = #{metricTagId}
+        </if>
+        <if test="code != null">
+            AND code = #{code}
+        </if>
+        <if test="tagName != null">
+            AND tag_name = #{tagName}
+        </if>
+        <if test="parentId != null">
+            AND parent_id = #{parentId}
+        </if>
+        <if test="codePath != null">
+            AND code_path = #{codePath}
+        </if>
+        <if test="codePathLike != null">
+            AND code_path like CONCAT(#{codePathLike},'%')
+        </if>
+        <if test="metricTagGroupId != null">
+            AND metric_tag_group_id = #{metricTagGroupId}
+        </if>
+        <if test="createDate != null">
+            AND create_date = #{createDate}
+        </if>
+    </select>
+
+    <insert id="addMetricTag" parameterType="com.zgiot.app.server.module.metrictag.pojo.MetricTag">
+        INSERT INTO tb_thing_tag
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="code != null">
+                code,
+            </if>
+            <if test="tagName != null">
+                tag_name,
+            </if>
+            <if test="parentId != null">
+                parent_id,
+            </if>
+            <if test="codePath != null">
+                code_path,
+            </if>
+            <if test="metricTagGroupId != null">
+                metric_tag_group_id,
+            </if>
+            <if test="createDate != null">
+                create_date,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="code != null">
+                #{code},
+            </if>
+            <if test="tagName != null">
+                #{tagName},
+            </if>
+            <if test="parentId != null">
+                #{parentId},
+            </if>
+            <if test="codePath != null">
+                #{codePath},
+            </if>
+            <if test="metricTagGroupId != null">
+                #{metricTagGroupId},
+            </if>
+            <if test="createDate != null">
+                #{createDate},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateMetricTag" parameterType="com.zgiot.app.server.module.metrictag.pojo.MetricTag">
+        update tb_thing_tag
+        <trim prefix="set" suffixOverrides=",">
+            <if test="code != null">
+                code =#{code},
+            </if>
+            <if test="tagName != null">
+                tag_name =#{tagName},
+            </if>
+            <if test="parentId != null">
+                parent_id =#{parentId},
+            </if>
+            <if test="codePath != null">
+                code_path =#{codePath},
+            </if>
+            <if test="codePathLike != null">
+                code_path like 'codePathLike%',
+            </if>
+            <if test="metricTagGroupId != null">
+                metric_tag_group_id =#{metricTagGroupId},
+            </if>
+            <if test="createDate != null">
+                create_date =#{createDate},
+            </if>
+        </trim>
+        where id = #{metricTagId}
+    </update>
+
+    <delete id="deleteMetricTag" parameterType="com.zgiot.app.server.module.metrictag.pojo.MetricTag">
+        DELETE FROM tb_thing_tag
+        WHERE
+        id = #{metricTagId}
+    </delete>
+</mapper>
