@@ -11,14 +11,14 @@ public class AlertMask {
   private Double paramValue;
   private Double paramLower;
   private Double paramUpper;
-  private String maskInfo;
+  private String info;
 
-  public String getMaskInfo() {
-    return maskInfo;
+  public String getInfo() {
+    return info;
   }
 
-  public void setMaskInfo(String maskInfo) {
-    this.maskInfo = maskInfo;
+  public void setInfo(String info) {
+    this.info = info;
   }
 
   public Integer getId() {

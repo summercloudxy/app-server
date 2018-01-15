@@ -1,5 +1,6 @@
 package com.zgiot.app.server.config;
 
+import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.restcontroller.AccessLogInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -9,8 +10,6 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Configuration
@@ -36,14 +35,13 @@ public class WebConfig extends WebMvcConfigurerAdapter {
         return new Converter<String, Date>() {
             @Override
             public Date convert(String source) {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmSS");
-                Date date = null;
                 try {
-                    date = sdf.parse(source);
-                } catch (ParseException e) {
-                    e.printStackTrace();
+                    //进行日期转换
+                    return new Date(Long.parseLong(source));
+
+                } catch (Exception e) {
+                    throw new SysException("日期转换出错",SysException.EC_UNKNOWN);
                 }
-                return date;
             }
         };
     }

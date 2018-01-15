@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -81,7 +82,7 @@ public class AlertController {
     @ApiOperation("下发报警指令")
     @PostMapping(value = "cmd")
     public ResponseEntity<String> sendAlertCmd(@RequestParam String thingCode, @RequestParam String metricCode,
-            @RequestBody AlertMessage alertMessage, HttpServletRequest request) throws Exception {
+            @RequestBody AlertMessage alertMessage, HttpServletRequest request)  {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
         Integer messageId = alertManager.sendAlertCmd(thingCode, metricCode, alertMessage, requestId);
         return new ResponseEntity<>(ServerResponse.buildOkJson(messageId), HttpStatus.OK);
@@ -107,16 +108,23 @@ public class AlertController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(alertRecordRsp), HttpStatus.OK);
     }
 
+//    @ApiOperation("获取报警记录")
+//    @GetMapping(value = "record")
+//    public ResponseEntity<String> getAlertRecord(@RequestParam(required = false) String stage,
+//            @RequestParam(required = false) Integer level, @RequestParam(required = false) Short type,
+//            @RequestParam(required = false) Integer system, @RequestParam(required = false) String assetType,
+//            @RequestParam(required = false) String category, @RequestParam(required = false) Integer sortType,
+//            @RequestParam(required = false) Long duration, @RequestParam(required = false) String thingCode,
+//            @RequestParam(required = false) Integer page, @RequestParam(required = false) Integer count) {
+//        List<AlertData> alertDataList = alertManager.getAlertDataList(stage, level, type, system, assetType, category,
+//                sortType, duration, thingCode, page, count);
+//        return new ResponseEntity<>(ServerResponse.buildOkJson(alertDataList), HttpStatus.OK);
+//    }
+
     @ApiOperation("获取报警记录")
-    @GetMapping(value = "record")
-    public ResponseEntity<String> getAlertRecord(@RequestParam(required = false) String stage,
-            @RequestParam(required = false) Integer level, @RequestParam(required = false) Short type,
-            @RequestParam(required = false) Integer system, @RequestParam(required = false) String assetType,
-            @RequestParam(required = false) String category, @RequestParam(required = false) Integer sortType,
-            @RequestParam(required = false) Long duration, @RequestParam(required = false) String thingCode,
-            @RequestParam(required = false) Integer page, @RequestParam(required = false) Integer count) {
-        List<AlertData> alertDataList = alertManager.getAlertDataList(stage, level, type, system, assetType, category,
-                sortType, duration, thingCode, page, count);
+    @PostMapping(value = "record")
+    public ResponseEntity<String> getAlertRecord(@RequestBody FilterCondition filterCondition){
+        AlertRecord alertDataList = alertManager.getAlertDataList(filterCondition);
         return new ResponseEntity<>(ServerResponse.buildOkJson(alertDataList), HttpStatus.OK);
     }
 
@@ -150,8 +158,8 @@ public class AlertController {
         try {
             FileModel attach = fileService.uploadFile(files, files.getOriginalFilename(), MODULE_NAME, type, userId);
             url = attach.getAbsolutePath();
-        } catch (Exception e) {
-            throw new SysException("file upload fail", SysException.EC_UNKNOWN);
+        } catch (IOException e) {
+            throw new SysException("file upload fail,"+e.getMessage(), SysException.EC_UNKNOWN);
         }
 
         alertManager.feedback(thingCode, metricCode, url, type);
@@ -193,7 +201,7 @@ public class AlertController {
         if (existedUri != null) {
             for (String uri : existedUri) {
                 stringBuilder.append(uri);
-                stringBuilder.append(";");
+                stringBuilder.append(';');
             }
             result.addAll(existedUri);
         }
@@ -204,8 +212,8 @@ public class AlertController {
                 String url = attach.getAbsolutePath();
                 stringBuilder.append(url);
                 result.add(url);
-            } catch (Exception e) {
-                throw new SysException("file upload fail", SysException.EC_UNKNOWN);
+            } catch (IOException e) {
+                throw new SysException("file upload fail,"+e.getMessage(), SysException.EC_UNKNOWN);
             }
         }
         alertManager.feedback(thingCode, metricCode, stringBuilder.toString(), FileService.IMAGE);
@@ -261,6 +269,19 @@ public class AlertController {
     public ResponseEntity<String> setParamThreshold(@RequestBody AlertRule alertRule) {
         alertManager.setParamThreshlold(alertRule);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+
+    @PostMapping(value = "mask/statistics")
+    public ResponseEntity<String> getMaskStatisticInfo(@RequestBody FilterCondition filterCondition){
+        AlertMaskRsp maskStatisticInfo = alertManager.getMaskStatisticInfo(filterCondition);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(maskStatisticInfo), HttpStatus.OK);
+    }
+
+    @PostMapping(value = "mask/detail")
+    public  ResponseEntity<String> getDetailMaskInfo(@RequestBody FilterCondition filterCondition){
+        List<AlertMaskInfo> detailMaskInfo = alertManager.getDetailMaskInfo(filterCondition);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(detailMaskInfo), HttpStatus.OK);
     }
 
 }

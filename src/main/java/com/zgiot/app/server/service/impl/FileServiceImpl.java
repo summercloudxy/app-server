@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -34,7 +35,7 @@ public class FileServiceImpl implements FileService{
      * @throws Exception Attachment
      */
     @Transactional(readOnly = false, rollbackFor = { Exception.class })
-    public FileModel uploadFile(MultipartFile file, String fileName, String moduleName, Integer fileType, String userId) throws Exception {
+    public FileModel uploadFile(MultipartFile file, String fileName, String moduleName, Integer fileType, String userId) throws IOException {
         Date date = new Date();
         String currentDay = new SimpleDateFormat("yyyyMMdd").format(date);
         String fileTypePath ;

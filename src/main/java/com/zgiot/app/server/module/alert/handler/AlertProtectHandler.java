@@ -24,7 +24,7 @@ public class AlertProtectHandler implements AlertHandler {
     private MetricService metricService;
     private static final String ENABLE_VALUE = Boolean.TRUE.toString();
     private static final String DISABLE_VALUE = Boolean.FALSE.toString();
-    private static final Logger logger = LoggerFactory.getLogger(AlertProtectHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(AlertProtectHandler.class);
 
     @Override
     public void check(DataModel dataModel) {
@@ -33,10 +33,8 @@ public class AlertProtectHandler implements AlertHandler {
         Map<String, Map<String, AlertRule>> alertRuleMap = alertManager.getProtectRuleMap();
         AlertData alertData = alertManager.getAlertDataByThingAndMetricCode(thingCode, metricCode);
         AlertRule alertRule = null;
-        if (alertRuleMap.containsKey(thingCode)) {
-            if (alertRuleMap.get(thingCode).containsKey(metricCode)) {
+        if (alertRuleMap.containsKey(thingCode)&&alertRuleMap.get(thingCode).containsKey(metricCode)) {
                 alertRule = alertRuleMap.get(thingCode).get(metricCode);
-            }
         }
         if (alertRule == null) {
             return;
@@ -49,10 +47,10 @@ public class AlertProtectHandler implements AlertHandler {
             logger.debug("生成一条保护类报警，thing:{},metric:{}", thingCode, metricCode);
         } else if (DISABLE_VALUE.equalsIgnoreCase(dataModel.getValue()) && alertData != null) {
             alertData.setRecovery(true);
-            if (!alertData.isManualIntervention()) {
-                alertManager.releaseAlert(alertData);
-            } else {
+            if (alertData.isManualIntervention()) {
                 alertManager.updateAlert(alertData);
+            } else {
+                alertManager.releaseAlert(alertData);
             }
         }
 

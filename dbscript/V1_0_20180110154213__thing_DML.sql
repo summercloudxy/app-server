@@ -1,0 +1,1 @@
+UPDATE tb_category SET category_name="设备" where code="DEV"                                                  

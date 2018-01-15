@@ -6,9 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AlertParamJob implements Job {
-    Logger logger = LoggerFactory.getLogger(AlertParamJob.class);
+    private final Logger logger = LoggerFactory.getLogger(AlertParamJob.class);
     @Override
-    public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+    public void execute(JobExecutionContext jobExecutionContext) {
 
         JobDetail jobDetail = jobExecutionContext.getJobDetail();
         logger.debug("执行参数类报警检查定时任务");
