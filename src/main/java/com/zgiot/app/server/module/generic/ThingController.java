@@ -9,10 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/thing")
@@ -76,6 +73,22 @@ public class ThingController {
             thingPropMap.put(DIS_PROP, disPropMap);
         }
         return new ResponseEntity<>(ServerResponse.buildOkJson(thingPropMap), HttpStatus.OK);
+    }
+
+    @GetMapping("/base")
+    public ResponseEntity<String> findAllBaseThing(){
+        List<ThingModel> baseThings = thingService.findAllThing();
+        List<Map<String, String>> things = new ArrayList<>();
+        if (baseThings.size() > 0) {
+            for (ThingModel baseProperty : baseThings) {
+                Map<String, String> base = new HashMap<>();
+                base.put(THING_NAME, baseProperty.getThingName());
+                base.put(THING_CODE, baseProperty.getThingCode());
+                things.add(base);
+            }
+        }
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(things), HttpStatus.OK);
     }
 
     @GetMapping("")

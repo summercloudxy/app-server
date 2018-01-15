@@ -18,6 +18,7 @@ import com.zgiot.common.pojo.DataModelWrapper;
 import com.zgiot.common.pojo.MetricModel;
 import com.zgiot.common.restcontroller.ServerResponse;
 import javafx.beans.binding.IntegerBinding;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,7 @@ public class FilterPressManager {
     @Autowired
     HistoryDataService historyDataService;
     @Autowired
-    private CmdControlService cmdControlService;
+    CmdControlService cmdControlService;
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
     @Autowired
@@ -712,6 +713,15 @@ public class FilterPressManager {
         return filterPressPumpMapping;
     }
 
+    public void printQueueData(BlockingQueue<FilterPress> queue){
+        Iterator<FilterPress> iterator = queue.iterator();
+        while(iterator.hasNext()){
+            if(logger.isDebugEnabled()){
+                logger.debug("filterpress:{} in queue",iterator.next().getCode());
+            }
+        }
+    }
+
     // @Scheduled(cron="cnmt.FilterPressDeviceManager.clear")
     // /**
     // * 手动弹出模式下，超过一段时间不操作后自动进行确认
@@ -763,8 +773,11 @@ public class FilterPressManager {
             if(logger.isDebugEnabled()){
                 logger.debug("filterPress:" + filterPress.getCode() + " enqueue,position:" + (queuePosition.size() + 1));
             }
-            queue.add(filterPress);
-            unloadNextIfPossible();
+            if(!queue.contains(filterPress)){
+                queue.add(filterPress);
+                printQueueData(queue);
+                unloadNextIfPossible();
+            }
         }
 
         private synchronized void unloadNext() {
@@ -776,8 +789,9 @@ public class FilterPressManager {
          * 若存在可以卸料的压滤机，则按照最大同时卸料数量进行卸料调度
          */
         private synchronized void unloadNextIfPossible() {
-            logger.debug("正在卸料台数：" + unloading.get());
-            int unloadingCount = unloading.get();
+            //int unloadingCount = unloading.get();
+            int unloadingCount = getUnloadingCount(null);
+            logger.debug("正在卸料台数：" + unloadingCount);
             if(unloadingCount < maxUnloadParallel) {
                 FilterPress candidate = queue.peek();
                 if (candidate != null) {
@@ -841,8 +855,14 @@ public class FilterPressManager {
         public synchronized int getUnloadingCount(String thingCode){
             int unloadingCount = 0;
             for(FilterPress filterPress:deviceHolder.values()){
-                if(filterPress.isFilterPressUnloading() && (!filterPress.getCode().equals(thingCode))){
-                    unloadingCount++;
+                if(StringUtils.isBlank(thingCode)){
+                    if(filterPress.isFilterPressUnloading()) {
+                        unloadingCount++;
+                    }
+                }else{
+                    if(filterPress.isFilterPressUnloading() && (!filterPress.getCode().equals(thingCode))){
+                        unloadingCount++;
+                    }
                 }
             }
             return unloadingCount;
