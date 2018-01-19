@@ -149,7 +149,7 @@ public class ThingController {
     }
 
     @GetMapping("/category/asset")
-    public ResponseEntity<String> getCategoryListByAssetType(@RequestParam(required = false) String assetType) {
+    public ResponseEntity<String> getCategoryListByAssetType(@RequestParam String assetType) {
         List<CategoryModel> result = thingService.getCategoryListByAssetType(assetType);
         return new ResponseEntity<>(ServerResponse.buildOkJson(result), HttpStatus.OK);
     }

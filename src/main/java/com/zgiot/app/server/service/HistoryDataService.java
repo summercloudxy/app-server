@@ -13,6 +13,10 @@ public interface HistoryDataService {
     Logger fulldataLogger = LoggerFactory.getLogger(
             HistoryDataService.class.getPackage().getName() + ".FullHistData");
 
+    String QUERY_TIME_TYPE_BEFORE = "TIME_TYPE_BEFORE";
+    String QUERY_TIME_TYPE_AFTER = "TIME_TYPE_AFTER";
+    String QUERY_TIME_TYPE_NEAR = "TIME_TYPE_NEAR";
+
     /**
      * @see
      */
@@ -76,5 +80,24 @@ public interface HistoryDataService {
      * @param dm
      */
     void asyncSmartAddData(DataModel dm);
+
+    /**
+     * find the history data which is the closest to queryTime
+     * @param thingCodes
+     * @param metricCodes
+     * @param queryTime
+     * @return
+     */
+    DataModel findClosestHistoryData(List<String> thingCodes, List<String> metricCodes, Date queryTime);
+
+    /**
+     * find the last history data which is before queryTime or the first history data which is after queryTime()
+     * @param thingCodes
+     * @param metricCodes
+     * @param queryTime
+     * @param queryType
+     * @return
+     */
+    DataModel findClosestHistoryDataInDuration(List<String> thingCodes, List<String> metricCodes, Date queryTime, String queryType);
 
 }

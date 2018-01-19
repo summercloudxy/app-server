@@ -68,8 +68,7 @@ public class HistoryDataController {
             // all data in time range
             result = historyDataService.findMultiThingsHistoryDataOfMetric(historyDataDto.getThingCodes(), metricCode, historyDataDto.getStartTime(), historyDataDto.getEndTime());
         }
-
-
         return new ResponseEntity<>(ServerResponse.buildOkJson(result), HttpStatus.OK);
     }
+
 }

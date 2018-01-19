@@ -80,8 +80,12 @@ public class DataServiceImpl implements DataService {
             toUpdate = true;
         } else {
             oldValue = old.getValue();
-            if (newData.getDataTimeStamp().getTime() > old.getDataTimeStamp().getTime()) {
-                toUpdate = true;
+            try {
+                if (newData.getDataTimeStamp().getTime() > old.getDataTimeStamp().getTime()) {
+                    toUpdate = true;
+                }
+            }catch (Exception e){
+                e.printStackTrace();
             }
         }
 

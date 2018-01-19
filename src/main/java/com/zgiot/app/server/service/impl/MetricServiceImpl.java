@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class MetricServiceImpl implements MetricService {
     private final ConcurrentHashMap<String, MetricModel> metricCache = new ConcurrentHashMap<>(5000);
+    private final ConcurrentHashMap<String, String> metricTypeNameCache = new ConcurrentHashMap<>(100);
     @Autowired
     private TMLMapper tmlMapper;
 
@@ -27,6 +28,9 @@ public class MetricServiceImpl implements MetricService {
     public Map<String, MetricModel> getMetricMap() {
         return metricCache;
     }
+
+    @Override
+    public String getMetricTypeName(String typeCode){ return metricTypeNameCache.get(typeCode); }
 
     @Override
     public void validateMetric(String metricCode) {
@@ -46,6 +50,10 @@ public class MetricServiceImpl implements MetricService {
         List<MetricModel> allMetrics = tmlMapper.findAllMetrics();
         for (MetricModel metric : allMetrics) {
             metricCache.put(metric.getMetricCode(), metric);
+        }
+        List<MetricModel> allMetricTypes = tmlMapper.findAllMetricTypes();
+        for (MetricModel metricModel:allMetricTypes){
+            metricTypeNameCache.put(metricModel.getMetricCode(),metricModel.getMetricName());
         }
     }
 }

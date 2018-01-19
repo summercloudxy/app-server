@@ -57,6 +57,10 @@ public interface ThingService {
      */
     List<SystemModel> findAllSystem();
 
+    SystemModel findSystemById(Integer id);
+
+    CategoryModel findCategoryByCode(String categoryCode);
+
     void validateThing(String thingCode);
 
     // TODO Refactoring

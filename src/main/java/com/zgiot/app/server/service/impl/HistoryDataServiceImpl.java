@@ -40,6 +40,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
     private static final String KEY_SIZE = "size";
     private static final String KEY_TIMESTAMP = "timestamp";
 
+
     @Autowired
     private MongoDatabase database;
     private MongoCollection<Document> collection;
@@ -161,7 +162,6 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
             Bson criteria = and(gte(DataModel.DATA_TIMESTAMP, startTime), lt(DataModel.DATA_TIMESTAMP, endTime), eq(DataModel.METRIC_CODE, metricCode), in(DataModel.THING_CODE, thingCodes));
             iterable = collection.find(criteria).sort(Sorts.descending(DataModel.DATA_TIMESTAMP));
         }
-
 
 
         Map<String, Map<String, Object>> map = new HashMap<>(thingCodes.size());    //store dataModel array, timestamp and unset size
@@ -309,6 +309,70 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
         }
     }
 
+
+    public DataModel findClosestHistoryDataInDuration(List<String> thingCodes, List<String> metricCodes, Date queryTime, String queryType) {
+        if (!checkEnabled()) {
+            return null;
+        }
+        Bson criteria;
+        Bson sortBson;
+        // for end date
+        if (queryTime == null) {
+            throw new IllegalArgumentException("query time required.");
+        }
+        if (QUERY_TIME_TYPE_BEFORE.equals(queryType)) {
+            criteria = and(lte(DataModel.DATA_TIMESTAMP, queryTime.getTime()));
+            sortBson = Sorts.descending(DataModel.DATA_TIMESTAMP);
+        } else {
+            criteria = and(gte(DataModel.DATA_TIMESTAMP, queryTime.getTime()));
+            sortBson = Sorts.ascending(DataModel.DATA_TIMESTAMP);
+        }
+        // for tc
+        if (thingCodes != null && thingCodes.size() > 0) {
+            criteria = and(criteria, in(DataModel.THING_CODE, thingCodes));
+        }
+        // for mc
+        if (metricCodes != null && metricCodes.size() > 0) {
+            criteria = and(criteria, in(DataModel.METRIC_CODE, metricCodes));
+        }
+        List<DataModel> result = new LinkedList<>();
+        if (collection != null) {
+            collection.find(criteria)
+                    .sort(sortBson)
+                    .limit(1).forEach((Block<Document>) document -> {
+                DataModel model = new DataModel();
+                model.setThingCode(document.getString(DataModel.THING_CODE));
+                model.setMetricCode(document.getString(DataModel.METRIC_CODE));
+                model.setValue(document.getString(DataModel.VALUE));
+                model.setDataTimeStamp(new Date(document.getLong(DataModel.DATA_TIMESTAMP)));
+                result.add(model);
+            });
+        } else {
+            logger.warn("mongo disabled");
+        }
+        if(result.size()!=0) {
+            return result.get(0);
+        }
+        return null;
+    }
+
+    public DataModel findClosestHistoryData(List<String> thingCodes, List<String> metricCodes, Date queryTime) {
+        DataModel closestHistoryDataBeforeTime = findClosestHistoryDataInDuration(thingCodes, metricCodes, queryTime, QUERY_TIME_TYPE_BEFORE);
+        DataModel closestHistoryDataAfterTime = findClosestHistoryDataInDuration(thingCodes, metricCodes, queryTime, QUERY_TIME_TYPE_AFTER);
+        if (closestHistoryDataAfterTime != null && closestHistoryDataBeforeTime != null) {
+            if ((closestHistoryDataAfterTime.getDataTimeStamp().getTime() - queryTime.getTime()) > (queryTime.getTime() - closestHistoryDataBeforeTime.getDataTimeStamp().getTime())) {
+                return closestHistoryDataBeforeTime;
+            } else {
+                return closestHistoryDataAfterTime;
+            }
+        }else if(closestHistoryDataAfterTime != null){
+            return closestHistoryDataAfterTime;
+        }else if(closestHistoryDataBeforeTime != null){
+            return closestHistoryDataBeforeTime;
+        }else {
+            return null;
+        }
+    }
 
     @Override
     public int insertBatch(List<DataModel> modelList) {

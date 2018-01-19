@@ -3,11 +3,16 @@ package com.zgiot.app.server.module.alert;
 import com.zgiot.app.server.module.alert.mapper.AlertMapper;
 import com.zgiot.app.server.module.alert.pojo.*;
 import com.zgiot.app.server.service.CmdControlService;
+import com.zgiot.app.server.service.MetricService;
+import com.zgiot.app.server.service.ThingService;
 import com.zgiot.app.server.service.impl.FileServiceImpl;
 import com.zgiot.common.constants.AlertConstants;
 import com.zgiot.common.constants.MetricCodes;
 import com.zgiot.common.exceptions.SysException;
+import com.zgiot.common.pojo.CategoryModel;
 import com.zgiot.common.pojo.DataModel;
+import com.zgiot.common.pojo.MetricModel;
+import com.zgiot.common.pojo.SystemModel;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -56,6 +61,10 @@ public class AlertManager {
     private SimpMessagingTemplate messagingTemplate;
     @Autowired
     private CmdControlService cmdControlService;
+    @Autowired
+    private MetricService metricService;
+    @Autowired
+    private ThingService thingService;
     private static final Logger logger = LoggerFactory.getLogger(AlertManager.class);
     private static final int SORT_DESC = 0;
     private static final int SORT_ASC = 1;
@@ -372,6 +381,7 @@ public class AlertManager {
             String metricCode = thingAlertRule.getMetricCode();
             List<AlertRule> alertRuleList = alertMapper.getAlertRuleList(thingCode, metricCode, filterCondition);
             thingAlertRule.setAlertRules(alertRuleList);
+            getMetricAndSystemName(thingAlertRule);
         }
         AlertRuleRsp alertRuleRsp = new AlertRuleRsp(paramAlertConfList);
         alertRuleRsp.setPageCount(pageCount);
@@ -390,10 +400,25 @@ public class AlertManager {
             }
         }
         List<ThingAlertRule> protAlertRuleList = alertMapper.getProtAlertRuleList(filterCondition);
+        for(ThingAlertRule alertRule:protAlertRuleList){
+            getMetricAndSystemName(alertRule);
+        }
         AlertRuleRsp alertRuleRsp = new AlertRuleRsp(protAlertRuleList);
         alertRuleRsp.setPageCount(pageCount);
         return alertRuleRsp;
 
+    }
+
+    private void getMetricAndSystemName(ThingAlertRule alertRule) {
+        alertRule.setMetricTypeName(metricService.getMetricTypeName(alertRule.getMetricType()));
+        SystemModel systemModel = thingService.findSystemById(alertRule.getSystemId());
+        if (systemModel != null) {
+            alertRule.setSystemName(systemModel.getSystemName());
+        }
+        CategoryModel categoryModel = thingService.findCategoryByCode(alertRule.getCategory());
+        if (categoryModel != null) {
+            alertRule.setCategoryName(categoryModel.getCategoryName());
+        }
     }
 
     /**

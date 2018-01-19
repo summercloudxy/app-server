@@ -13,6 +13,7 @@ import com.zgiot.app.server.module.bellows.BellowsDataListener;
 import com.zgiot.app.server.module.bellows.compressor.CompressorManager;
 import com.zgiot.app.server.module.bellows.valve.ValveIntelligentJob;
 import com.zgiot.app.server.module.bellows.valve.ValveManager;
+import com.zgiot.app.server.module.coalanalysis.listener.CoalAnalysisListener;
 import com.zgiot.app.server.module.demo.DemoBusiness;
 import com.zgiot.app.server.module.demo.DemoDataCompleter;
 import com.zgiot.app.server.module.densitycontrol.DensityControlListener;
@@ -62,6 +63,8 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
     private HistoryDataPersistDaemon historyDataPersistDaemon;
     @Autowired
     private DensityControlListener densityControlListener;
+    @Autowired
+    private CoalAnalysisListener coalAnalysisListener;
 
     private static final int FAULT_SCAN_RATE = 20;
 
@@ -121,6 +124,11 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
         }
 
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
+                || moduleListConfig.containModule(ModuleListConfig.MODULE_COAL_ANALYSIS)) {
+            processor.addListener(coalAnalysisListener);
+        }
+
+        if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
                 || moduleListConfig.containModule(ModuleListConfig.MODULE_BELLOWS)) {
             valveManager.init();
             compressorManager.init();
@@ -128,6 +136,7 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
             QuartzManager.addJob("checkBlow", ModuleListConfig.MODULE_BELLOWS, "checkBlow",
                     ModuleListConfig.MODULE_BELLOWS, ValveIntelligentJob.class, "2 * * * * ?");
         }
+
 
         if (false) {
             processor.addListener(demoBusiness);

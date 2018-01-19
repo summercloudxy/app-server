@@ -8,10 +8,13 @@ public class ThingAlertRule {
     private String metricCode;
     private String metricName;
     private Integer systemId;
+    private String systemName;
     private String assetType;
     private String category;
+    private String categoryName;
     private Integer buildingId;
     private String metricType;
+    private String metricTypeName;
     private List<AlertRule> alertRules;
 
     public String getMetricName() {
@@ -92,5 +95,29 @@ public class ThingAlertRule {
 
     public void setBuildingId(Integer buildingId) {
         this.buildingId = buildingId;
+    }
+
+    public String getSystemName() {
+        return systemName;
+    }
+
+    public void setSystemName(String systemName) {
+        this.systemName = systemName;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
+
+    public String getMetricTypeName() {
+        return metricTypeName;
+    }
+
+    public void setMetricTypeName(String metricTypeName) {
+        this.metricTypeName = metricTypeName;
     }
 }
