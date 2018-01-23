@@ -12,11 +12,19 @@ import java.util.List;
 public interface ThingTagGroupService {
 
     /**
+     * 获取ThingTag信息
+     * @param thingTagGroupId
+     * @param thingTagCode
+     * @return
+     */
+    ThingTagGroup getThingTagGroup(Integer thingTagGroupId, String thingTagCode);
+
+    /**
      * 获取ThingTagGroup信息
      * @param thingTagGroup
      * @return
      */
-    List<ThingTagGroup> getThingTagGroup(ThingTagGroup thingTagGroup);
+    List<ThingTagGroup> findThingTagGroup(ThingTagGroup thingTagGroup);
 
     /**
      * 新增ThingTagGroup信息

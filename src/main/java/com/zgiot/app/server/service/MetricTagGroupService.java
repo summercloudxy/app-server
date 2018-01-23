@@ -13,10 +13,18 @@ public interface MetricTagGroupService {
 
     /**
      * 获取MetricTag信息
+     * @param metricTagGroupId
+     * @param metricTagCode
+     * @return
+     */
+    MetricTagGroup getMetricTagGroup(Integer metricTagGroupId, String metricTagCode);
+
+    /**
+     * 获取MetricTag信息
      * @param metricTagGroup
      * @return
      */
-    List<MetricTagGroup> getMetricTagGroup(MetricTagGroup metricTagGroup);
+    List<MetricTagGroup> findMetricTagGroup(MetricTagGroup metricTagGroup);
 
     /**
      * 新增MetricTagGroup信息

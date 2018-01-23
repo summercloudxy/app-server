@@ -18,7 +18,19 @@ public class ThingTagGroupServiceImpl implements ThingTagGroupService{
     ThingTagGroupMapper thingTagGroupMapper;
 
     @Override
-    public List<ThingTagGroup> getThingTagGroup(ThingTagGroup thingTagGroup) {
+    public ThingTagGroup getThingTagGroup(Integer thingTagGroupId, String thingTagCode){
+        ThingTagGroup thingTagGroup = new ThingTagGroup();
+        thingTagGroup.setThingTagGroupId(thingTagGroupId);
+        thingTagGroup.setCode(thingTagCode);
+        List<ThingTagGroup> thingTagGroups = thingTagGroupMapper.getThingTagGroup(thingTagGroup);
+        if(null == thingTagGroups){
+            return null;
+        }
+        return thingTagGroups.get(0);
+    }
+
+    @Override
+    public List<ThingTagGroup> findThingTagGroup(ThingTagGroup thingTagGroup) {
         List<ThingTagGroup> thingTagGroups = thingTagGroupMapper.getThingTagGroup(thingTagGroup);
         return thingTagGroups;
     }

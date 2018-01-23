@@ -32,7 +32,7 @@ public class MetricTagGroupController {
             return new ResponseEntity<>(ServerResponse.buildOkJson(ValidateParamUtil.getBindingResultError(bindingResult)),
                     HttpStatus.BAD_REQUEST);
         }
-        List<MetricTagGroup> metricTagGroups = metricTagGroupService.getMetricTagGroup(metricTagGroup);
+        List<MetricTagGroup> metricTagGroups = metricTagGroupService.findMetricTagGroup(metricTagGroup);
         return new ResponseEntity<>(ServerResponse.buildOkJson(metricTagGroups), HttpStatus.OK);
     }
 
@@ -65,7 +65,7 @@ public class MetricTagGroupController {
             return new ResponseEntity<>(ServerResponse.buildOkJson(ValidateParamUtil.getBindingResultError(bindingResult)),
                     HttpStatus.BAD_REQUEST);
         }
-        metricTagGroupService.getMetricTagGroup(metricTagGroup);
+        metricTagGroupService.findMetricTagGroup(metricTagGroup);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 }

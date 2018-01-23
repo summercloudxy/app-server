@@ -8,45 +8,51 @@
         <result column="parent_id" property="parentId"/>
         <result column="code_path" property="codePath"/>
         <result column="thing_tag_group_id" property="thingTagGroupId"/>
+        <result column="thing_tag_group_code" property="thingTagGroupCode"/>
         <result column="create_date" property="createDate"/>
     </resultMap>
 
     <select id="getThingTag" resultMap="thingTag">
         SELECT
-            id,
-            `code`,
-            tag_name,
-            parent_id,
-            code_path,
-            thing_tag_group_id,
-            create_date
+        ttt.id,
+        ttt.`code`,
+        ttt.tag_name,
+        ttt.parent_id,
+        ttt.code_path,
+        ttt.thing_tag_group_id,
+        tttg.`code` AS thing_tag_group_code,
+        ttt.create_date
         FROM
-            tb_thing_tag
+        tb_thing_tag AS ttt
+        INNER JOIN tb_thing_tag_group AS tttg ON ttt.thing_tag_group_id = tttg.id
+        <if test="thingTagGroupCode != null">
+            AND tttg.code= #{thingTagGroupCode}
+        </if>
         WHERE
-          1 = 1
+        1 = 1
         <if test="thingTagId != null">
-        AND id = #{thingTagId}
+        AND ttt.id = #{thingTagId}
         </if>
         <if test="code != null">
-        AND code = #{code}
+        AND ttt.code = #{code}
         </if>
         <if test="tagName != null">
-        AND tag_name = #{tagName}
+        AND ttt.tag_name = #{tagName}
         </if>
         <if test="parentId != null">
-        AND parent_id = #{parentId}
+        AND ttt.parent_id = #{parentId}
         </if>
         <if test="codePath != null">
-        AND code_path = #{codePath}
+        AND ttt.code_path = #{codePath}
         </if>
         <if test="codePathLike != null">
-            AND code_path like CONCAT(#{codePathLike},'%')
+        AND ttt.code_path like CONCAT(#{codePathLike},'%')
         </if>
         <if test="thingTagGroupId != null">
-        AND thing_tag_group_id = #{thingTagGroupId}
+        AND ttt.thing_tag_group_id = #{thingTagGroupId}
         </if>
         <if test="createDate != null">
-        AND create_date = #{createDate}
+        AND ttt.create_date = #{createDate}
         </if>
     </select>
 
@@ -116,7 +122,7 @@
                 thing_tag_group_id =#{thingTagGroupId},
             </if>
             <if test="createDate != null">
-                create_date =#{createDate},
+                create_date =#{createDate}
             </if>
         </trim>
         where id = #{thingTagId}

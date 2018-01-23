@@ -1,9 +1,7 @@
 package com.zgiot.app.server.service;
 
 import com.zgiot.app.server.module.thingtag.pojo.ThingTag;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.BindingResult;
 
 import java.util.List;
 
@@ -15,10 +13,18 @@ public interface ThingTagService {
 
     /**
      * 获取ThingTag信息
+     * @param thingTagId
+     * @param thingTagCode
+     * @return
+     */
+    ThingTag getThingTag(Integer thingTagId, String thingTagCode);
+
+    /**
+     * 获取ThingTag信息
      * @param thingTag
      * @return
      */
-    List<ThingTag> getThingTag(ThingTag thingTag);
+    List<ThingTag> findThingTag(ThingTag thingTag);
 
     /**
      * 新增ThingTag信息

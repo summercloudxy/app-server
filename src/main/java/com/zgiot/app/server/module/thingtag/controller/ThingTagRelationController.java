@@ -1,12 +1,13 @@
 package com.zgiot.app.server.module.thingtag.controller;
 
-import com.zgiot.app.server.module.thingtag.pojo.ThingTag;
+import com.zgiot.app.server.module.thingtag.pojo.ThingTagRelation;
 import com.zgiot.app.server.module.util.ValidateParamUtil;
 import com.zgiot.app.server.module.util.validate.AddValidate;
 import com.zgiot.app.server.module.util.validate.DeleteValidate;
 import com.zgiot.app.server.module.util.validate.GetValidate;
 import com.zgiot.app.server.module.util.validate.UpdateValidate;
-import com.zgiot.app.server.service.ThingTagService;
+import com.zgiot.app.server.service.ThingTagGroupService;
+import com.zgiot.app.server.service.ThingTagRelationService;
 import com.zgiot.common.restcontroller.ServerResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,51 +25,52 @@ import java.util.List;
  * Created by wangfan on 2018/1/8.
  */
 @Controller
-public class ThingTagController {
+public class ThingTagRelationController {
+
     @Autowired
-    private ThingTagService thingTagService;
+    private ThingTagRelationService thingTagRelationService;
     
-    @RequestMapping(value = "/thingTag", method = RequestMethod.GET)
-    public ResponseEntity<String> getThingTag(
-            @RequestBody @Validated(value = GetValidate.class) ThingTag thingTag, BindingResult bindingResult){
+    @RequestMapping(value = "/thingTagRelation", method = RequestMethod.GET)
+    public ResponseEntity<String> getThingTagRelation(
+            @RequestBody @Validated(value = GetValidate.class) ThingTagRelation thingTagRelation, BindingResult bindingResult){
         if(bindingResult.hasErrors()){
             return new ResponseEntity<>(ServerResponse.buildOkJson(ValidateParamUtil.getBindingResultError(bindingResult)),
                     HttpStatus.BAD_REQUEST);
         }
-        List<ThingTag> thingTagLists = thingTagService.findThingTag(thingTag);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(thingTagLists), HttpStatus.OK);
+        List<ThingTagRelation> thingTagRelationLists = thingTagRelationService.findThingTagRelation(thingTagRelation);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(thingTagRelationLists), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/thingTag", method = RequestMethod.POST)
-    public ResponseEntity<String> addThingTag(
-            @RequestBody @Validated(value = AddValidate.class) ThingTag thingTag, BindingResult bindingResult){
+    @RequestMapping(value = "/thingTagRelation", method = RequestMethod.POST)
+    public ResponseEntity<String> addThingTagRelation(
+            @RequestBody @Validated(value = AddValidate.class) ThingTagRelation thingTagRelation, BindingResult bindingResult){
         if(bindingResult.hasErrors()){
             return new ResponseEntity<>(ServerResponse.buildOkJson(ValidateParamUtil.getBindingResultError(bindingResult)),
                     HttpStatus.BAD_REQUEST);
         }
-        thingTagService.addThingTag(thingTag);
+        thingTagRelationService.addThingTagRelation(thingTagRelation);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/thingTag", method = RequestMethod.PUT)
-    public ResponseEntity<String> updateThingTag(
-            @RequestBody @Validated(value = UpdateValidate.class) ThingTag thingTag, BindingResult bindingResult){
+    @RequestMapping(value = "/thingTagRelation", method = RequestMethod.PUT)
+    public ResponseEntity<String> updateThingTagRelation(
+            @RequestBody @Validated(value = UpdateValidate.class) ThingTagRelation thingTagRelation, BindingResult bindingResult){
         if(bindingResult.hasErrors()){
             return new ResponseEntity<>(ServerResponse.buildOkJson(ValidateParamUtil.getBindingResultError(bindingResult)),
                     HttpStatus.BAD_REQUEST);
         }
-        thingTagService.updateThingTag(thingTag);
+        thingTagRelationService.updateThingTagRelation(thingTagRelation);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/thingTag", method = RequestMethod.DELETE)
-    public ResponseEntity<String> deleteThingTag(
-            @RequestBody @Validated(value = DeleteValidate.class) ThingTag thingTag, BindingResult bindingResult) {
+    @RequestMapping(value = "/thingTagRelation", method = RequestMethod.DELETE)
+    public ResponseEntity<String> deleteThingTagRelation(
+            @RequestBody @Validated(value = DeleteValidate.class) ThingTagRelation thingTagRelation, BindingResult bindingResult) {
         if(bindingResult.hasErrors()){
             return new ResponseEntity<>(ServerResponse.buildOkJson(ValidateParamUtil.getBindingResultError(bindingResult)),
                     HttpStatus.BAD_REQUEST);
         }
-        thingTagService.deleteThingTag(thingTag);
+        thingTagRelationService.deleteThingTagRelation(thingTagRelation);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 }

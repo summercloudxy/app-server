@@ -1,8 +1,8 @@
 package com.zgiot.app.server.module.metrictag.controller;
 
-import com.zgiot.app.server.module.metrictag.pojo.MetricTag;
+import com.zgiot.app.server.module.metrictag.pojo.MetricTagRelation;
 import com.zgiot.app.server.module.util.ValidateParamUtil;
-import com.zgiot.app.server.service.MetricTagService;
+import com.zgiot.app.server.service.MetricTagRelationService;
 import com.zgiot.common.restcontroller.ServerResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,52 +20,52 @@ import java.util.List;
  * Created by wangfan on 2018/1/8.
  */
 @Controller
-public class MetricTagController{
+public class MetricTagRelationController {
 
     @Autowired
-    private MetricTagService metricTagService;
+    private MetricTagRelationService metricTagRelationService;
 
-    @RequestMapping(value = "/metricTag", method = RequestMethod.GET)
-    public ResponseEntity<String> getMetricTag(
-            @RequestBody @Validated() MetricTag metricTag, BindingResult bindingResult){
+    @RequestMapping(value = "/metricTagRelation", method = RequestMethod.GET)
+    public ResponseEntity<String> getMetricTagRelation(
+            @RequestBody @Validated() MetricTagRelation metricTagRelation, BindingResult bindingResult){
         if(bindingResult.hasErrors()){
             return new ResponseEntity<>(ServerResponse.buildOkJson(ValidateParamUtil.getBindingResultError(bindingResult)),
                     HttpStatus.BAD_REQUEST);
         }
-        List<MetricTag> metricTags = metricTagService.findMetricTag(metricTag);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(metricTags), HttpStatus.OK);
+        List<MetricTagRelation> metricTagRelations = metricTagRelationService.findMetricTagRelation(metricTagRelation);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(metricTagRelations), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/metricTag", method = RequestMethod.POST)
-    public ResponseEntity<String> addMetricTag(
-            @RequestBody @Validated() MetricTag metricTag, BindingResult bindingResult){
+    @RequestMapping(value = "/metricTagRelation", method = RequestMethod.POST)
+    public ResponseEntity<String> addMetricTagRelation(
+            @RequestBody @Validated() MetricTagRelation metricTagRelation, BindingResult bindingResult){
         if(bindingResult.hasErrors()){
             return new ResponseEntity<>(ServerResponse.buildOkJson(ValidateParamUtil.getBindingResultError(bindingResult)),
                     HttpStatus.BAD_REQUEST);
         }
-        metricTagService.addMetricTag(metricTag);
+        metricTagRelationService.addMetricTagRelation(metricTagRelation);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/metricTag", method = RequestMethod.PUT)
-    public ResponseEntity<String> updateMetricTag(
-            @RequestBody @Validated() MetricTag metricTag, BindingResult bindingResult){
+    @RequestMapping(value = "/metricTagRelation", method = RequestMethod.PUT)
+    public ResponseEntity<String> updateMetricTagRelation(
+            @RequestBody @Validated() MetricTagRelation metricTagRelation, BindingResult bindingResult){
         if(bindingResult.hasErrors()){
             return new ResponseEntity<>(ServerResponse.buildOkJson(ValidateParamUtil.getBindingResultError(bindingResult)),
                     HttpStatus.BAD_REQUEST);
         }
-        metricTagService.updateMetricTag(metricTag);
+        metricTagRelationService.updateMetricTagRelation(metricTagRelation);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/metricTag", method = RequestMethod.DELETE)
-    public ResponseEntity<String> deleteMetricTag(
-            @RequestBody @Validated() MetricTag metricTag, BindingResult bindingResult) {
+    @RequestMapping(value = "/metricTagRelation", method = RequestMethod.DELETE)
+    public ResponseEntity<String> deleteMetricTagRelation(
+            @RequestBody @Validated() MetricTagRelation metricTagRelation, BindingResult bindingResult) {
         if(bindingResult.hasErrors()){
             return new ResponseEntity<>(ServerResponse.buildOkJson(ValidateParamUtil.getBindingResultError(bindingResult)),
                     HttpStatus.BAD_REQUEST);
         }
-        metricTagService.findMetricTag(metricTag);
+        metricTagRelationService.findMetricTagRelation(metricTagRelation);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 }

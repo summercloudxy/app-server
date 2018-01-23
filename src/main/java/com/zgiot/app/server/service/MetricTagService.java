@@ -10,13 +10,21 @@ import java.util.List;
  */
 @Service
 public interface MetricTagService {
-    
+
+    /**
+     * 获取MetricTag信息
+     * @param metricTagId
+     * @param metricTagCode
+     * @return
+     */
+    MetricTag getMetricTag(Integer metricTagId, String metricTagCode);
+
     /**
      * 获取MetricTag信息
      * @param metricTag
      * @return
      */
-    List<MetricTag> getMetricTag(MetricTag metricTag);
+    List<MetricTag> findMetricTag(MetricTag metricTag);
 
     /**
      * 新增MetricTag信息

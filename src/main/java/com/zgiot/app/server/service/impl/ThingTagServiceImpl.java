@@ -18,8 +18,21 @@ public class ThingTagServiceImpl implements ThingTagService {
 
     @Autowired
     ThingTagMapper thingTagMapper;
+
     @Override
-    public List<ThingTag> getThingTag(ThingTag thingTag) {
+    public ThingTag getThingTag(Integer thingTagId, String thingTagCode){
+        ThingTag thingTag = new ThingTag();
+        thingTag.setThingTagGroupId(thingTagId);
+        thingTag.setCode(thingTagCode);
+        List<ThingTag> thingTags = thingTagMapper.getThingTag(thingTag);
+        if(null == thingTags){
+            return null;
+        }
+        return thingTags.get(0);
+    }
+
+    @Override
+    public List<ThingTag> findThingTag(ThingTag thingTag) {
         List<ThingTag> thingTags = thingTagMapper.getThingTag(thingTag);
         return thingTags;
     }

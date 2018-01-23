@@ -18,8 +18,21 @@ public class MetricTagServiceImpl implements MetricTagService {
 
     @Autowired
     MetricTagMapper metricTagMapper;
+
     @Override
-    public List<MetricTag> getMetricTag(MetricTag metricTag) {
+    public MetricTag getMetricTag(Integer metricTagId, String metricTagCode){
+        MetricTag metricTag = new MetricTag();
+        metricTag.setMetricTagGroupId(metricTagId);
+        metricTag.setCode(metricTagCode);
+        List<MetricTag> metricTags = metricTagMapper.getMetricTag(metricTag);
+        if(null == metricTags){
+            return null;
+        }
+        return metricTags.get(0);
+    }
+
+    @Override
+    public List<MetricTag> findMetricTag(MetricTag metricTag) {
         List<MetricTag> MetricTags = metricTagMapper.getMetricTag(metricTag);
         return MetricTags;
     }

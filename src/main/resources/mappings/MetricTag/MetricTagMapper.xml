@@ -8,50 +8,57 @@
         <result column="parent_id" property="parentId"/>
         <result column="code_path" property="codePath"/>
         <result column="metric_tag_group_id" property="metricTagGroupId"/>
+        <result column="metric_tag_group_code" property="metricTagGroupCode"/>
         <result column="create_date" property="createDate"/>
     </resultMap>
 
     <select id="getMetricTag" resultMap="metricTag">
         SELECT
-        id,
-        `code`,
-        tag_name,
-        parent_id,
-        code_path,
-        metric_tag_group_id,
-        create_date
+        tmt.id,
+        tmt.`code`,
+        tmt.tag_name,
+        tmt.parent_id,
+        tmtg.`code`,
+        tmt.code_path,
+        tmt.metric_tag_group_id,
+        tmtg.`code` AS metric_tag_group_code,
+        tmt.create_date
         FROM
-        tb_metric_tag
+        tb_metric_tag AS tmt
+        INNER JOIN tb_metric_tag_group AS tmtg ON tmt.metric_tag_group_id = tmtg.id
+        <if test="metricTagGroupCode != null">
+            AND tttg.code= #{metricTagGroupCode}
+        </if>
         WHERE
         1 = 1
         <if test="metricTagId != null">
-            AND id = #{metricTagId}
+            AND tmt.id = #{metricTagId}
         </if>
         <if test="code != null">
-            AND code = #{code}
+            AND tmt.code = #{code}
         </if>
         <if test="tagName != null">
-            AND tag_name = #{tagName}
+            AND tmt.tag_name = #{tagName}
         </if>
         <if test="parentId != null">
-            AND parent_id = #{parentId}
+            AND tmt.parent_id = #{parentId}
         </if>
         <if test="codePath != null">
-            AND code_path = #{codePath}
+            AND tmt.code_path = #{codePath}
         </if>
         <if test="codePathLike != null">
-            AND code_path like CONCAT(#{codePathLike},'%')
+            AND tmt.code_path like CONCAT(#{codePathLike},'%')
         </if>
         <if test="metricTagGroupId != null">
-            AND metric_tag_group_id = #{metricTagGroupId}
+            AND tmt.metric_tag_group_id = #{metricTagGroupId}
         </if>
         <if test="createDate != null">
-            AND create_date = #{createDate}
+            AND tmt.create_date = #{createDate}
         </if>
     </select>
 
     <insert id="addMetricTag" parameterType="com.zgiot.app.server.module.metrictag.pojo.MetricTag">
-        INSERT INTO tb_thing_tag
+        INSERT INTO tb_metric_tag
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="code != null">
                 code,
@@ -95,7 +102,7 @@
     </insert>
 
     <update id="updateMetricTag" parameterType="com.zgiot.app.server.module.metrictag.pojo.MetricTag">
-        update tb_thing_tag
+        update tb_metric_tag
         <trim prefix="set" suffixOverrides=",">
             <if test="code != null">
                 code =#{code},
@@ -116,14 +123,14 @@
                 metric_tag_group_id =#{metricTagGroupId},
             </if>
             <if test="createDate != null">
-                create_date =#{createDate},
+                create_date =#{createDate}
             </if>
         </trim>
         where id = #{metricTagId}
     </update>
 
     <delete id="deleteMetricTag" parameterType="com.zgiot.app.server.module.metrictag.pojo.MetricTag">
-        DELETE FROM tb_thing_tag
+        DELETE FROM tb_metric_tag
         WHERE
         id = #{metricTagId}
     </delete>

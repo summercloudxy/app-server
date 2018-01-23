@@ -15,7 +15,7 @@ public class MetricTag {
     /**
      * 主键
      */
-    @NotNull(message = "主键(thingTagId)不能为空", groups = {UpdateValidate.class, DeleteValidate.class})
+    @NotNull(message = "主键(metricTagId)不能为空", groups = {UpdateValidate.class, DeleteValidate.class})
     private Integer metricTagId;
 
     /**
@@ -46,9 +46,14 @@ public class MetricTag {
     private String codePathLike;
 
     /**
-     * 所属标签大类
+     * 所属标签大类主键
      */
     private Integer metricTagGroupId;
+
+    /**
+     * 所属标签大类code
+     */
+    private String metricTagGroupCode;
 
     /**
      * 创建时间
@@ -114,6 +119,14 @@ public class MetricTag {
 
     public void setMetricTagGroupId(Integer metricTagGroupId) {
         this.metricTagGroupId = metricTagGroupId;
+    }
+
+    public String getMetricTagGroupCode() {
+        return metricTagGroupCode;
+    }
+
+    public void setMetricTagGroupCode(String metricTagGroupCode) {
+        this.metricTagGroupCode = metricTagGroupCode;
     }
 
     public Date getCreateDate() {

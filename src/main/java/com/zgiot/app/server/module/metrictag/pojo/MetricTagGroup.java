@@ -15,8 +15,8 @@ public class MetricTagGroup {
     /**
      * 主键
      */
-    @NotNull(message = "主键(thingTagGroupId)不能为空", groups = {UpdateValidate.class, DeleteValidate.class})
-    private Integer thingTagGroupId;
+    @NotNull(message = "主键(metricTagGroupId)不能为空", groups = {UpdateValidate.class, DeleteValidate.class})
+    private Integer metricTagGroupId;
 
     /**
      * code编号
@@ -35,12 +35,12 @@ public class MetricTagGroup {
      */
     private Date createDate;
 
-    public Integer getThingTagGroupId() {
-        return thingTagGroupId;
+    public Integer getMetricTagGroupId() {
+        return metricTagGroupId;
     }
 
-    public void setThingTagGroupId(Integer thingTagGroupId) {
-        this.thingTagGroupId = thingTagGroupId;
+    public void setMetricTagGroupId(Integer metricTagGroupId) {
+        this.metricTagGroupId = metricTagGroupId;
     }
 
     public String getCode() {

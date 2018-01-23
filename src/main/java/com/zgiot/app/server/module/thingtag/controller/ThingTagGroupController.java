@@ -37,7 +37,7 @@ public class ThingTagGroupController {
             return new ResponseEntity<>(ServerResponse.buildOkJson(ValidateParamUtil.getBindingResultError(bindingResult)),
                     HttpStatus.BAD_REQUEST);
         }
-        List<ThingTagGroup> thingTagGroupLists = thingTagGroupService.getThingTagGroup(thingTagGroup);
+        List<ThingTagGroup> thingTagGroupLists = thingTagGroupService.findThingTagGroup(thingTagGroup);
         return new ResponseEntity<>(ServerResponse.buildOkJson(thingTagGroupLists), HttpStatus.OK);
     }
 

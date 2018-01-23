@@ -18,23 +18,35 @@ public class MetricTagGroupServiceImpl implements MetricTagGroupService {
     MetricTagGroupMapper metricTagGroupMapper;
 
     @Override
-    public List<MetricTagGroup> getMetricTagGroup(MetricTagGroup metricTagGroup) {
+    public MetricTagGroup getMetricTagGroup(Integer metricTagGroupId, String metricTagCode){
+        MetricTagGroup metricTagGroup = new MetricTagGroup();
+        metricTagGroup.setMetricTagGroupId(metricTagGroupId);
+        metricTagGroup.setCode(metricTagCode);
         List<MetricTagGroup> metricTagGroups = metricTagGroupMapper.getMetricTagGroup(metricTagGroup);
-        return metricTagGroups;
+        if(null == metricTagGroups){
+            return null;
+        }
+        return metricTagGroups.get(0);
     }
 
     @Override
-    public void addMetricTagGroup(MetricTagGroup metricTagGroup) {
+    public List<MetricTagGroup> findMetricTagGroup(MetricTagGroup metricTagGroup){
+        return metricTagGroupMapper.getMetricTagGroup(metricTagGroup);
+    }
+
+    @Override
+    public void addMetricTagGroup(MetricTagGroup metricTagGroup){
         metricTagGroupMapper.addMetricTagGroup(metricTagGroup);
     }
 
     @Override
-    public void updateMetricTagGroup(MetricTagGroup metricTagGroup) {
+    public void updateMetricTagGroup(MetricTagGroup metricTagGroup){
+        metricTagGroup.setCode(null);
         metricTagGroupMapper.updateMetricTagGroup(metricTagGroup);
     }
 
     @Override
-    public void deleteMetricTagGroup(MetricTagGroup metricTagGroup) {
+    public void deleteMetricTagGroup(MetricTagGroup metricTagGroup){
         metricTagGroupMapper.deleteMetricTagGroup(metricTagGroup);
     }
 }

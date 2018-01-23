@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.metricTagRelation.dao.MetricTagRelationMapper">
+    <resultMap id="metricTagRelation" type="com.zgiot.app.server.module.metrictag.pojo.MetricTagRelation">
+        <result column="id"  property="metricTagRelationId"/>
+        <result column="metric_code" property="metricCode"/>
+        <result column="metric_tag_code" property="metricTagCode"/>
+        <result column="create_date" property="createDate"/>
+    </resultMap>
+
+    <select id="getMetricTagRelation" resultMap="metricTagRelation">
+        SELECT
+        id,
+        metric_code,
+        metric_tag_code,
+        create_date
+        FROM
+        rel_metrictag_metric
+        WHERE
+        1 = 1
+        <if test="metricTagRelationId != null">
+            AND id = #{metricTagRelationId}
+        </if>
+        <if test="metricCode != null">
+            AND metric_code = #{metricCode}
+        </if>
+        <if test="metricTagCode != null">
+            AND metric_tag_code = #{metricTagCode}
+        </if>
+        <if test="createDate != null">
+            AND create_date = #{createDate}
+        </if>
+    </select>
+
+    <insert id="addMetricTagRelation" parameterType="com.zgiot.app.server.module.metrictag.pojo.MetricTagRelation">
+        INSERT INTO rel_metrictag_metric
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="metricCode != null">
+                metric_code,
+            </if>
+            <if test="metricTagCode != null">
+                metric_tag_code,
+            </if>
+            <if test="parentId != null">
+                create_date,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="metricCode != null">
+                #{metricCode},
+            </if>
+            <if test="metricTagCode != null">
+                #{metricTagCode},
+            </if>
+            <if test="createDate != null">
+                #{createDate},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateMetricTagRelation" parameterType="com.zgiot.app.server.module.metrictag.pojo.MetricTagRelation">
+        update rel_metrictag_metric
+        <trim prefix="set" suffixOverrides=",">
+            <if test="metricCode != null">
+                metric_code =#{metricCode},
+            </if>
+            <if test="metricTagCode != null">
+                metric_tag_code =#{metricTagCode},
+            </if>
+            <if test="createDate != null">
+                create_date =#{createDate}
+            </if>
+        </trim>
+        where id = #{metricTagRelationId}
+    </update>
+
+    <delete id="deleteMetricTagRelation" parameterType="com.zgiot.app.server.module.metrictag.pojo.MetricTagRelation">
+        DELETE FROM rel_metrictag_metric
+        WHERE
+        id = #{metricTagRelationId}
+    </delete>
+</mapper>

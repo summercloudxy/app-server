@@ -51,10 +51,14 @@ public class ThingTag {
     private Integer thingTagGroupId;
 
     /**
+     * 根据标签组code
+     */
+    private String thingTagGroupCode;
+
+    /**
      * 创建时间
      */
     private Date createDate;
-
 
     public Integer getThingTagId() {
         return thingTagId;
@@ -110,6 +114,14 @@ public class ThingTag {
 
     public void setThingTagGroupId(Integer thingTagGroupId) {
         this.thingTagGroupId = thingTagGroupId;
+    }
+
+    public String getThingTagGroupCode() {
+        return thingTagGroupCode;
+    }
+
+    public void setThingTagGroupCode(String thingTagGroupCode) {
+        this.thingTagGroupCode = thingTagGroupCode;
     }
 
     public Date getCreateDate() {
