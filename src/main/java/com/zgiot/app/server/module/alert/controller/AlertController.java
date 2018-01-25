@@ -37,12 +37,10 @@ public class AlertController {
 
     private static final String MODULE_NAME = "alert";
 
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(AlertController.class);
 
     @ApiOperation("获取参数类报警规则")
     @PostMapping(value = "rule/param/show")
     public ResponseEntity<String> getParamRule(@RequestBody FilterCondition filterCondition) {
-        logger.info("调用" + new Date());
         AlertRuleRsp alertRules = alertManager.getParamAlertRuleList(filterCondition);
         return new ResponseEntity<>(ServerResponse.buildOkJson(alertRules), HttpStatus.OK);
     }
