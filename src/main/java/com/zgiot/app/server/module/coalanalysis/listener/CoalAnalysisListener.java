@@ -7,11 +7,9 @@ import com.zgiot.app.server.module.coalanalysis.mapper.CoalAnalysisMapper;
 import com.zgiot.app.server.module.coalanalysis.pojo.DensityAndFlowInfo;
 import com.zgiot.app.server.module.coalanalysis.pojo.DensityAndFlowValue;
 import com.zgiot.app.server.service.HistoryDataService;
-import com.zgiot.common.constants.MetricCodes;
+import com.zgiot.common.constants.CoalAnalysisConstants;
 import com.zgiot.common.pojo.CoalAnalysisRecord;
 import com.zgiot.common.pojo.DataModel;
-import com.zgiot.common.pojo.ThingModel;
-import io.netty.util.internal.shaded.org.jctools.queues.MpmcArrayQueue;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -32,10 +30,12 @@ public class CoalAnalysisListener implements DataListener {
     private CoalAnalysisMapper coalAnalysisMapper;
     @Autowired
     private HistoryDataService historyDataService;
-    //outerkey: target  innerkey: system
+    /**
+     * outerkey: target  innerkey: system
+     */
     private Map<String, Map<Integer, DensityAndFlowInfo>> densityThingMap = new HashMap<>(10);
-    private Map<String, Map<Integer, DensityAndFlowInfo>> flowThingMap = new HashMap<>(10);
-    private static final String STATE_RUN = "2";
+//    private Map<String, Map<Integer, DensityAndFlowInfo>> flowThingMap = new HashMap<>(10);
+//    private static final String STATE_RUN = "2";
 
     @PostConstruct
     private void init() {
@@ -55,7 +55,7 @@ public class CoalAnalysisListener implements DataListener {
 
     @Override
     public void onDataChange(DataModel dataModel) {
-        if ("coalanalysis".equals(dataModel.getThingCode())) {
+        if (CoalAnalysisConstants.COAL_ANALYSIS.equals(dataModel.getThingCode())) {
             String value = dataModel.getValue();
             CoalAnalysisRecord record = JSON.parseObject(value, CoalAnalysisRecord.class);
             Integer existRecordId = coalAnalysisMapper.getExistRecordId(record);
@@ -96,30 +96,9 @@ public class CoalAnalysisListener implements DataListener {
                 if (densityData == null && flowData == null) {
                     continue;
                 }
-                DensityAndFlowValue densityAndFlowValue = new DensityAndFlowValue();
-                densityAndFlowValue.setThingCode(runThingCode);
-                densityAndFlowValue.setAnalysisId(record.getId());
-//                if (densityData != null && !StringUtils.isBlank(densityData.getValue())) {
-//                    if (densityAndFlowInfo.getRunDensityThreshold() != null && Double.valueOf(densityData.getValue()) < densityAndFlowInfo.getRunDensityThreshold()) {
-//                        continue;
-//                    }
-//                    densityAndFlowValue.setDensity(Double.valueOf(densityData.getValue()));
-//                }
-                if (densityAndFlowInfo.getRunDensityThreshold() != null) {
-                    if (densityData == null || StringUtils.isBlank(densityData.getValue()) || Double.valueOf(densityData.getValue()) < densityAndFlowInfo.getRunDensityThreshold()) {
-                        continue;
-                    }
-                }
-                if (densityAndFlowInfo.getRunFlowThreshold() != null) {
-                    if (flowData == null || StringUtils.isBlank(flowData.getValue()) || Double.valueOf(flowData.getValue()) < densityAndFlowInfo.getRunFlowThreshold()) {
-                        continue;
-                    }
-                }
-                if (densityData != null && !StringUtils.isBlank(densityData.getValue())) {
-                    densityAndFlowValue.setDensity(Double.valueOf(densityData.getValue()));
-                }
-                if (flowData != null && !StringUtils.isBlank(flowData.getValue())) {
-                    densityAndFlowValue.setFlow(Double.valueOf(flowData.getValue()));
+                DensityAndFlowValue densityAndFlowValue = getRunDensityAndFlowValue(densityAndFlowInfo, densityData, flowData);
+                if (densityAndFlowValue == null) {
+                    continue;
                 }
 //                if (flowData != null && !StringUtils.isBlank(flowData.getValue())) {
 //                    if (densityAndFlowInfo.getRunFlowThreshold() != null && Double.valueOf(flowData.getValue()) < densityAndFlowInfo.getRunFlowThreshold()) {
@@ -127,10 +106,45 @@ public class CoalAnalysisListener implements DataListener {
 //                    }
 //                    densityAndFlowValue.setFlow(Double.valueOf(flowData.getValue()));
 //                }
+                densityAndFlowValue.setThingCode(runThingCode);
+                densityAndFlowValue.setAnalysisId(record.getId());
                 densityAndFlowValues.add(densityAndFlowValue);
             }
         }
         return densityAndFlowValues;
+    }
+
+    private DensityAndFlowValue getRunDensityAndFlowValue(DensityAndFlowInfo densityAndFlowInfo, DataModel densityData, DataModel flowData) {
+        DensityAndFlowValue densityAndFlowValue = new DensityAndFlowValue();
+
+//                if (densityData != null && !StringUtils.isBlank(densityData.getValue())) {
+//                    if (densityAndFlowInfo.getRunDensityThreshold() != null && Double.valueOf(densityData.getValue()) < densityAndFlowInfo.getRunDensityThreshold()) {
+//                        continue;
+//                    }
+//                    densityAndFlowValue.setDensity(Double.valueOf(densityData.getValue()));
+//                }
+        if (!isRunState(densityAndFlowInfo, densityData, flowData)) {
+            return null;
+        }
+        if (densityData != null && !StringUtils.isBlank(densityData.getValue())) {
+            densityAndFlowValue.setDensity(Double.valueOf(densityData.getValue()));
+        }
+        if (flowData != null && !StringUtils.isBlank(flowData.getValue())) {
+            densityAndFlowValue.setFlow(Double.valueOf(flowData.getValue()));
+        }
+        return densityAndFlowValue;
+    }
+
+    private boolean isRunState(DensityAndFlowInfo densityAndFlowInfo, DataModel densityData, DataModel flowData) {
+        if (densityAndFlowInfo.getRunDensityThreshold() != null &&
+                (densityData == null || StringUtils.isBlank(densityData.getValue()) || Double.valueOf(densityData.getValue()) < densityAndFlowInfo.getRunDensityThreshold())) {
+            return false;
+        }
+        if (densityAndFlowInfo.getRunFlowThreshold() != null &&
+                (flowData == null || StringUtils.isBlank(flowData.getValue()) || Double.valueOf(flowData.getValue()) < densityAndFlowInfo.getRunFlowThreshold())) {
+            return false;
+        }
+        return true;
     }
 
     private void disposeDensityAndFlow(List<DensityAndFlowValue> densityAndFlowValues, CoalAnalysisRecord record) {

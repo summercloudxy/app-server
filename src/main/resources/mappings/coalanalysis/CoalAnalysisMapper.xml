@@ -28,7 +28,7 @@
     </update>
 
     <insert id="insertRecord" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
-        insert tb_coal_analysis (target,sample,time,aad,mt,stad,qnetar) values (#{target},#{sample},#{time},#{aad},#{mt},#{stad},#{qnetar})
+        insert tb_coal_analysis (target,sample,time,system,aad,mt,stad,qnetar) values (#{target},#{sample},#{time},#{system},#{aad},#{mt},#{stad},#{qnetar})
     </insert>
 
     <update id="updateRecordDensityAndFlow">

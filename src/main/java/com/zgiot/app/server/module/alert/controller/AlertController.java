@@ -9,6 +9,7 @@ import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.FileModel;
 import com.zgiot.common.restcontroller.ServerResponse;
 import io.swagger.annotations.ApiOperation;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Created by xiayun on 2017/9/26.
@@ -35,9 +37,12 @@ public class AlertController {
 
     private static final String MODULE_NAME = "alert";
 
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(AlertController.class);
+
     @ApiOperation("获取参数类报警规则")
     @PostMapping(value = "rule/param/show")
     public ResponseEntity<String> getParamRule(@RequestBody FilterCondition filterCondition) {
+        logger.info("调用" + new Date());
         AlertRuleRsp alertRules = alertManager.getParamAlertRuleList(filterCondition);
         return new ResponseEntity<>(ServerResponse.buildOkJson(alertRules), HttpStatus.OK);
     }
@@ -83,7 +88,7 @@ public class AlertController {
     @ApiOperation("下发报警指令")
     @PostMapping(value = "cmd")
     public ResponseEntity<String> sendAlertCmd(@RequestParam String thingCode, @RequestParam String metricCode,
-            @RequestBody AlertMessage alertMessage, HttpServletRequest request)  {
+                                               @RequestBody AlertMessage alertMessage, HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
         Integer messageId = alertManager.sendAlertCmd(thingCode, metricCode, alertMessage, requestId);
         return new ResponseEntity<>(ServerResponse.buildOkJson(messageId), HttpStatus.OK);
@@ -92,13 +97,13 @@ public class AlertController {
     @ApiOperation("获取报警记录,按设备分组")
     @GetMapping(value = "record/group")
     public ResponseEntity<String> getAlertRecordGroupByThing(@RequestParam(required = false) String stage,
-            @RequestParam(required = false) List<Integer> levels, @RequestParam(required = false) List<Short> types,
-            @RequestParam(required = false) List<Integer> buildingIds,
-            @RequestParam(required = false) List<Integer> floors, @RequestParam(required = false) List<Integer> systems,
-            @RequestParam(required = false) String assetType, @RequestParam(required = false) String category,
-            @RequestParam(required = false) Integer sortType, @RequestParam(required = false) Long duration,
-            @RequestParam(required = false) String thingCode, @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer count, @RequestParam(required = false) Date timeStamp) {
+                                                             @RequestParam(required = false) List<Integer> levels, @RequestParam(required = false) List<Short> types,
+                                                             @RequestParam(required = false) List<Integer> buildingIds,
+                                                             @RequestParam(required = false) List<Integer> floors, @RequestParam(required = false) List<Integer> systems,
+                                                             @RequestParam(required = false) String assetType, @RequestParam(required = false) String category,
+                                                             @RequestParam(required = false) Integer sortType, @RequestParam(required = false) Long duration,
+                                                             @RequestParam(required = false) String thingCode, @RequestParam(required = false) Integer page,
+                                                             @RequestParam(required = false) Integer count, @RequestParam(required = false) Date timeStamp) {
         if (timeStamp == null) {
             timeStamp = new Date();
         }
@@ -124,7 +129,7 @@ public class AlertController {
 
     @ApiOperation("获取报警记录")
     @PostMapping(value = "record")
-    public ResponseEntity<String> getAlertRecord(@RequestBody FilterCondition filterCondition){
+    public ResponseEntity<String> getAlertRecord(@RequestBody FilterCondition filterCondition) {
         AlertRecord alertDataList = alertManager.getAlertDataList(filterCondition);
         return new ResponseEntity<>(ServerResponse.buildOkJson(alertDataList), HttpStatus.OK);
     }
@@ -132,7 +137,7 @@ public class AlertController {
     @ApiOperation("人为生成报警")
     @PostMapping(value = "generate")
     public ResponseEntity<String> generateManuAlert(@RequestParam String thingCode, @RequestParam String info,
-            @RequestParam String userId, @RequestParam String permission) {
+                                                    @RequestParam String userId, @RequestParam String permission) {
         alertManager.generateManuAlert(thingCode, info, userId, permission);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -154,13 +159,13 @@ public class AlertController {
     @ApiOperation("反馈图片和视频信息")
     @PostMapping(value = "feedback")
     public ResponseEntity<String> feedbackImageAndVideo(@RequestParam String thingCode, @RequestParam String metricCode,
-            @RequestBody MultipartFile files, @RequestParam String userId, @RequestParam int type) {
+                                                        @RequestBody MultipartFile files, @RequestParam String userId, @RequestParam int type) {
         String url;
         try {
             FileModel attach = fileService.uploadFile(files, files.getOriginalFilename(), MODULE_NAME, type, userId);
             url = attach.getAbsolutePath();
         } catch (IOException e) {
-            throw new SysException("file upload fail,"+e.getMessage(), SysException.EC_UNKNOWN);
+            throw new SysException("file upload fail," + e.getMessage(), SysException.EC_UNKNOWN);
         }
 
         alertManager.feedback(thingCode, metricCode, url, type);
@@ -170,8 +175,8 @@ public class AlertController {
     @ApiOperation("获取统计数量信息")
     @GetMapping(value = "statistics")
     public ResponseEntity<String> getStatisticsInfo(@RequestParam int type,
-            @RequestParam(required = false) String alertStage, @RequestParam Date startTime,
-            @RequestParam Date endTime) {
+                                                    @RequestParam(required = false) String alertStage, @RequestParam Date startTime,
+                                                    @RequestParam Date endTime) {
         AlertStatisticsRsp statisticsInfo = alertManager.getStatisticsInfo(type, alertStage, startTime, endTime);
         return new ResponseEntity<>(ServerResponse.buildOkJson(statisticsInfo), HttpStatus.OK);
     }
@@ -186,7 +191,7 @@ public class AlertController {
     @ApiOperation("获取统计维修信息")
     @GetMapping(value = "statistics/repair")
     public ResponseEntity<String> getRepairStatisticsInfo(@RequestParam Date startTime, @RequestParam Date endTime,
-            @RequestParam(required = false) Short alertLevel) {
+                                                          @RequestParam(required = false) Short alertLevel) {
         List<AlertRepairStatistics> repairStatisticsInfo =
                 alertManager.getRepairStatisticsInfo(startTime, endTime, alertLevel);
         return new ResponseEntity<>(ServerResponse.buildOkJson(repairStatisticsInfo), HttpStatus.OK);
@@ -195,8 +200,8 @@ public class AlertController {
     @ApiOperation("反馈图片信息")
     @PostMapping(value = "feedback/image")
     public ResponseEntity<String> feedBackImage(@RequestParam String thingCode, @RequestParam String metricCode,
-            @RequestParam(required = false) List<String> existedUri, @RequestParam(required = false) MultipartFile file,
-            @RequestParam String userId) {
+                                                @RequestParam(required = false) List<String> existedUri, @RequestParam(required = false) MultipartFile file,
+                                                @RequestParam String userId) {
         StringBuilder stringBuilder = new StringBuilder();
         List<String> result = new ArrayList<>();
         if (existedUri != null) {
@@ -214,7 +219,7 @@ public class AlertController {
                 stringBuilder.append(url);
                 result.add(url);
             } catch (IOException e) {
-                throw new SysException("file upload fail,"+e.getMessage(), SysException.EC_UNKNOWN);
+                throw new SysException("file upload fail," + e.getMessage(), SysException.EC_UNKNOWN);
             }
         }
         alertManager.feedback(thingCode, metricCode, stringBuilder.toString(), FileService.IMAGE);
@@ -231,7 +236,7 @@ public class AlertController {
     @ApiOperation("申请复位")
     @PostMapping(value = "reset/req")
     public ResponseEntity<String> requestReset(@RequestParam String thingCode, @RequestParam String userId,
-            @RequestParam String permission) {
+                                               @RequestParam String permission) {
         alertManager.requestReset(thingCode, userId, permission);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -274,13 +279,13 @@ public class AlertController {
 
 
     @PostMapping(value = "mask/statistics")
-    public ResponseEntity<String> getMaskStatisticInfo(@RequestBody FilterCondition filterCondition){
+    public ResponseEntity<String> getMaskStatisticInfo(@RequestBody FilterCondition filterCondition) {
         AlertMaskRsp maskStatisticInfo = alertManager.getMaskStatisticInfo(filterCondition);
         return new ResponseEntity<>(ServerResponse.buildOkJson(maskStatisticInfo), HttpStatus.OK);
     }
 
     @PostMapping(value = "mask/detail")
-    public  ResponseEntity<String> getDetailMaskInfo(@RequestBody FilterCondition filterCondition){
+    public ResponseEntity<String> getDetailMaskInfo(@RequestBody FilterCondition filterCondition) {
         List<AlertMaskInfo> detailMaskInfo = alertManager.getDetailMaskInfo(filterCondition);
         return new ResponseEntity<>(ServerResponse.buildOkJson(detailMaskInfo), HttpStatus.OK);
     }
