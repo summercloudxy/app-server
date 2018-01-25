@@ -56,12 +56,16 @@ public class CoalAnalysisListener implements DataListener {
     @Override
     public void onDataChange(DataModel dataModel) {
         if (CoalAnalysisConstants.COAL_ANALYSIS.equals(dataModel.getThingCode())) {
+
             String value = dataModel.getValue();
             CoalAnalysisRecord record = JSON.parseObject(value, CoalAnalysisRecord.class);
+            logger.debug("接收到煤质化验数据：化验项目{}，化验样本{}，化验时间{}，灰分{}，水份{}，硫份{}，发热量{}", record.getTarget(), record.getSample(), record.getTime(), record.getAad(), record.getMt(), record.getStad(), record.getQnetar());
             Integer existRecordId = coalAnalysisMapper.getExistRecordId(record);
             if (existRecordId != null) {
+                logger.debug("该化验数据已经存在，进行更新");
                 coalAnalysisMapper.updateRecord(record, existRecordId);
             } else {
+                logger.debug("新增一条化验数据");
                 coalAnalysisMapper.insertRecord(record);
                 List<DensityAndFlowValue> densityAndFlowValues = getDensityAndFlowValues(dataModel, record);
                 if (!CollectionUtils.isEmpty(densityAndFlowValues)) {
@@ -83,6 +87,7 @@ public class CoalAnalysisListener implements DataListener {
 //                    runThingCodes.add(thingState.getThingCode());
 //                }
 //            }
+            logger.debug("开始计算id为{}的煤质化验数据对应的分选密度/顶水流量，设备列表为：{}",record.getId(),thingCodes);
             densityAndFlowValues = new ArrayList<>();
             for (String runThingCode : thingCodes) {
                 DataModel densityData = null;
@@ -94,10 +99,12 @@ public class CoalAnalysisListener implements DataListener {
                     flowData = historyDataService.findClosestHistoryData(Lists.newArrayList(runThingCode), Lists.newArrayList(densityAndFlowInfo.getFlowCode()), record.getTime());
                 }
                 if (densityData == null && flowData == null) {
+                    logger.debug("获取不到设备{}上的分选密度/顶水流量数据",runThingCode);
                     continue;
                 }
                 DensityAndFlowValue densityAndFlowValue = getRunDensityAndFlowValue(densityAndFlowInfo, densityData, flowData);
                 if (densityAndFlowValue == null) {
+                    logger.debug("根据计算，设备{}未处于运行状态，不采集其分选密度/顶水流量数据",runThingCode);
                     continue;
                 }
 //                if (flowData != null && !StringUtils.isBlank(flowData.getValue())) {
