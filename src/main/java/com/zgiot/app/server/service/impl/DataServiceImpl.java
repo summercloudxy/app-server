@@ -46,8 +46,12 @@ public class DataServiceImpl implements DataService {
     private DataModelWrapper internalGetData(String thing, String metric, boolean toCount) {
         synchronized (this.readLock) {
             DataModelWrapper data = dataCache.getValue(thing, metric);
-            if (toCount && data != null) {
-                this.dataAccessCounter.readUp(data.getThingCode(), data.getMetricCode());
+            if(data != null){
+                if(toCount){
+                    this.dataAccessCounter.readUp(data.getThingCode(), data.getMetricCode());
+                }else if(data.isEmpty()){
+                    return null;
+                }
             }
             return data;
         }
