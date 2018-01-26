@@ -132,8 +132,9 @@ public class AlertFaultHandler implements AlertHandler {
     }
 
     private Short getAlertLevelWithState(DataModel dataModel, Boolean checkInterval) {
-        if (dataService.getData(dataModel.getThingCode(), MetricCodes.STATE).isPresent()) {
-            DataModelWrapper dataModelWrapper = dataService.getData(dataModel.getThingCode(), MetricCodes.STATE).get();
+        Optional<DataModelWrapper> stateData = dataService.getData(dataModel.getThingCode(), MetricCodes.STATE);
+        if (stateData.isPresent()) {
+            DataModelWrapper dataModelWrapper = stateData.get();
             String preState = dataModelWrapper.getPreValue();
             if (checkInterval) {
                 long stateTime = dataModelWrapper.getDataTimeStamp().getTime();

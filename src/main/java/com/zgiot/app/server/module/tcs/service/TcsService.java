@@ -12,6 +12,7 @@ import com.zgiot.common.constants.CoalAnalysisConstants;
 import com.zgiot.common.constants.MetricCodes;
 import com.zgiot.common.pojo.CoalAnalysisRecord;
 import com.zgiot.common.pojo.DataModel;
+import com.zgiot.common.pojo.DataModelWrapper;
 import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -308,8 +309,9 @@ public class TcsService {
 
         //入料流量大于10，则认为该桶处于运行状态
         for (String thingCode : FEED_BARREL_CODE) {
-            if (dataService.getData(thingCode, MetricCodes.FL).isPresent()) {
-                Double flow = Double.valueOf(dataService.getData(thingCode, MetricCodes.FL).get().getValue());
+            Optional<DataModelWrapper> flowData = dataService.getData(thingCode, MetricCodes.FL);
+            if (flowData.isPresent()) {
+                Double flow = Double.valueOf(flowData.get().getValue());
                 if (flow > RUN_FLOW_THRESHOLD) {
                     currentCount++;
                 }
@@ -322,15 +324,18 @@ public class TcsService {
     }
 
     private Double getSumValue(Double value, String metricCode, String thingCode) {
-        if (dataService.getData(thingCode, metricCode).isPresent()) {
-            value += Double.valueOf(dataService.getData(thingCode, metricCode).get().getValue());
+        Optional<DataModelWrapper> data = dataService.getData(thingCode, metricCode);
+        if (data.isPresent()) {
+            value += Double.valueOf(data.get().getValue());
         }
         return value;
     }
 
     private Double getSumAsh(Double ash, String thingCode) {
-        if (dataService.getData(thingCode, MetricCodes.COAL_CAP).isPresent() && dataService.getData(thingCode, MetricCodes.ASH).isPresent()) {
-            ash += Double.valueOf(dataService.getData(thingCode, MetricCodes.COAL_CAP).get().getValue()) * Double.valueOf(dataService.getData(thingCode, MetricCodes.ASH).get().getValue());
+        Optional<DataModelWrapper> coalCapData = dataService.getData(thingCode, MetricCodes.COAL_CAP);
+        Optional<DataModelWrapper> ashData = dataService.getData(thingCode, MetricCodes.ASH);
+        if (coalCapData.isPresent() && ashData.isPresent()) {
+            ash += Double.valueOf(coalCapData.get().getValue()) * Double.valueOf(ashData.get().getValue());
         }
         return ash;
     }

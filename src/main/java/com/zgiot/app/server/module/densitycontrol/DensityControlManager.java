@@ -13,10 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class DensityControlManager {
@@ -98,23 +95,19 @@ public class DensityControlManager {
         NotifyThingMetricInfo notifyThingMetricInfo = notifyThingMetricInfoMap.get(thingCode);
         MonitoringParam monitoringParam = new MonitoringParam();
         monitoringParam.setThingCode(thingCode);
-        if (notifyThingMetricInfo.getValveOpeningThingCode() != null && dataService
-                .getData(notifyThingMetricInfo.getValveOpeningThingCode(), MetricCodes.PROPORTIONAL_VALVE_OPENING)
-                .isPresent()) {
-            DataModelWrapper valveOpening =
-                    dataService.getData(notifyThingMetricInfo.getValveOpeningThingCode(), MetricCodes.PROPORTIONAL_VALVE_OPENING).get();
+        Optional<DataModelWrapper> valveData = dataService.getData(notifyThingMetricInfo.getValveOpeningThingCode(), MetricCodes.PROPORTIONAL_VALVE_OPENING);
+        if (notifyThingMetricInfo.getValveOpeningThingCode() != null && valveData.isPresent()) {
+            DataModelWrapper valveOpening = valveData.get();
             monitoringParam.setCurrentValveOpening(Double.valueOf(valveOpening.getValue()));
         }
-        if (notifyThingMetricInfo.getDensityThingCode() != null && dataService.getData(notifyThingMetricInfo.getDensityThingCode(), MetricCodes.CURRENT_DENSITY)
-                .isPresent()) {
-            DataModelWrapper density =
-                    dataService.getData(notifyThingMetricInfo.getDensityThingCode(), MetricCodes.CURRENT_DENSITY).get();
+        Optional<DataModelWrapper> densityData = dataService.getData(notifyThingMetricInfo.getDensityThingCode(), MetricCodes.CURRENT_DENSITY);
+        if (notifyThingMetricInfo.getDensityThingCode() != null && densityData.isPresent()) {
+            DataModelWrapper density = densityData.get();
             monitoringParam.setCurrentDensity(Double.valueOf(density.getValue()));
         }
-        if (notifyThingMetricInfo.getLevelThingCode() != null && dataService.getData(notifyThingMetricInfo.getLevelThingCode(), MetricCodes.CURRENT_LEVEL_M)
-                .isPresent()) {
-            DataModelWrapper level =
-                    dataService.getData(notifyThingMetricInfo.getLevelThingCode(), MetricCodes.CURRENT_LEVEL_M).get();
+        Optional<DataModelWrapper> levelData = dataService.getData(notifyThingMetricInfo.getLevelThingCode(), MetricCodes.CURRENT_LEVEL_M);
+        if (notifyThingMetricInfo.getLevelThingCode() != null && levelData.isPresent()) {
+            DataModelWrapper level = levelData.get();
             monitoringParam.setCurrentFuelLevel(Double.valueOf(level.getValue()));
         }
         return monitoringParam;
