@@ -1078,6 +1078,9 @@
 
     <select id="getParamThreshold" resultType="com.zgiot.app.server.module.alert.pojo.AlertRule">
         SELECT
+        id,
+        thing_code,
+        metric_code,
         lower_limit,
         upper_limit
         FROM tb_param_range
@@ -1089,5 +1092,9 @@
         SET lower_limit = #{lowerLimit} , upper_limit = #{upperLimit}
         WHERE thing_code = #{thingCode} AND metric_code = #{metricCode}
     </update>
+
+    <insert id="insertParamThreshold" parameterType="com.zgiot.app.server.module.alert.pojo.AlertRule">
+        INSERT INTO tb_param_range (thing_code,metric_code,lower_limit,upper_limit) VALUES (#{thingCode},#{metricCode},#{lowerLimit},#{upperLimit})
+    </insert>
 
 </mapper>

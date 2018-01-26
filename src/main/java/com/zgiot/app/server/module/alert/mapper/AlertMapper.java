@@ -118,5 +118,7 @@ public interface AlertMapper {
 
     AlertRule getParamThreshold(@Param("thingCode") String thingCode, @Param("metricCode") String metricCode);
 
+    void insertParamThreshold(AlertRule alertRule);
+
     void setParamThreshold(AlertRule alertRule);
 }

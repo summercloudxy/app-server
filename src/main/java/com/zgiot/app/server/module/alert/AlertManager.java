@@ -1399,7 +1399,12 @@ public class AlertManager {
     }
 
     public void setParamThreshlold(AlertRule alertRule) {
-        alertMapper.setParamThreshold(alertRule);
+        AlertRule paramThreshold = getParamThreshold(alertRule.getThingCode(), alertRule.getMetricCode());
+        if (paramThreshold == null || paramThreshold.getId()==null){
+            alertMapper.insertParamThreshold(alertRule);
+        }else {
+            alertMapper.setParamThreshold(alertRule);
+        }
     }
 
 
