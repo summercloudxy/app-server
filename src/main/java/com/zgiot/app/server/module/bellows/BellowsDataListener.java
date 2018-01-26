@@ -44,6 +44,9 @@ public class BellowsDataListener implements DataListener {
         if (logger.isTraceEnabled()) {
             logger.trace("received data from data engine: {}", dataModel);
         }
+        compressorManager.checkInit();
+        valveManager.checkInit();
+
         //检查thingCode是否存在
         String thingCode = dataModel.getThingCode();
         String metricCode = dataModel.getMetricCode();
