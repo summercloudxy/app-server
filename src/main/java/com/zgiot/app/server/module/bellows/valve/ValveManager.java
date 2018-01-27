@@ -1145,6 +1145,13 @@ public class ValveManager {
      * @return
      */
     private Valve getValveFromCache(String thingCode) {
+        checkInit();
+        Valve valve = valveCache.findByThingCode(thingCode);
+        return valve;
+    }
+
+
+    public void checkInit() {
         synchronized (cacheLock) {
             //等待阀门缓存初始化
             if (!initial) {
@@ -1154,8 +1161,6 @@ public class ValveManager {
                 init();
             }
         }
-        Valve valve = valveCache.findByThingCode(thingCode);
-        return valve;
     }
 
     /**

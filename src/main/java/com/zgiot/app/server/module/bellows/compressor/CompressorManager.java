@@ -459,7 +459,7 @@ public class CompressorManager {
         return true;
     }
 
-    private void checkInit() {
+    public void checkInit() {
         synchronized (cacheLock) {
             //等待空压机缓存初始化
             if (!initial) {
