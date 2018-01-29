@@ -8,7 +8,7 @@
         <result column="create_date" property="createDate"/>
     </resultMap>
 
-    <select id="getMetricTagRelation" resultMap="metricTagRelation">
+    <select id="findMetricTagRelation" resultMap="metricTagRelation">
         SELECT
         id,
         metric_code,

@@ -9,7 +9,7 @@
         <result column="create_date" property="createDate"/>
     </resultMap>
 
-    <select id="getThingTagGroup" resultMap="thingTagGroup">
+    <select id="findThingTagGroup" resultMap="thingTagGroup">
         SELECT
         id,
         code,

@@ -12,7 +12,7 @@ import java.util.List;
 @Mapper
 public interface ThingTagGroupMapper {
 
-    List<ThingTagGroup> getThingTagGroup(ThingTagGroup thingTagGroup);
+    List<ThingTagGroup> findThingTagGroup(ThingTagGroup thingTagGroup);
 
     void addThingTagGroup(ThingTagGroup thingTagGroup);
 

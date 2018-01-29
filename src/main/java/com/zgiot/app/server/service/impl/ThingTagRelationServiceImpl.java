@@ -6,6 +6,7 @@ import com.zgiot.app.server.service.ThingTagRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -21,8 +22,8 @@ public class ThingTagRelationServiceImpl implements ThingTagRelationService {
     public ThingTagRelation getThingTagRelation(Integer thingTagRelationId){
         ThingTagRelation thingTagRelation = new ThingTagRelation();
         thingTagRelation.setThingTagRelationId(thingTagRelationId);
-        List<ThingTagRelation> thingTagRelations = thingTagRelationMapper.getThingTagRelation(thingTagRelation);
-        if(null == thingTagRelations){
+        List<ThingTagRelation> thingTagRelations = thingTagRelationMapper.findThingTagRelation(thingTagRelation);
+        if(thingTagRelations.isEmpty()){
             return null;
         }
         return thingTagRelations.get(0);
@@ -30,12 +31,13 @@ public class ThingTagRelationServiceImpl implements ThingTagRelationService {
 
     @Override
     public List<ThingTagRelation> findThingTagRelation(ThingTagRelation thingTagRelation) {
-        List<ThingTagRelation> thingTagRelations = thingTagRelationMapper.getThingTagRelation(thingTagRelation);
+        List<ThingTagRelation> thingTagRelations = thingTagRelationMapper.findThingTagRelation(thingTagRelation);
         return thingTagRelations;
     }
 
     @Override
     public void addThingTagRelation(ThingTagRelation thingTagRelation) {
+        thingTagRelation.setCreateDate(new Date());
         thingTagRelationMapper.addThingTagRelation(thingTagRelation);
     }
 

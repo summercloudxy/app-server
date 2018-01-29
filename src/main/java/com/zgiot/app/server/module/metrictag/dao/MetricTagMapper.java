@@ -11,7 +11,7 @@ import java.util.List;
 @Mapper
 public interface MetricTagMapper {
 
-    List<MetricTag> getMetricTag(MetricTag metricTag);
+    List<MetricTag> findMetricTag(MetricTag metricTag);
 
     void addMetricTag(MetricTag metricTag);
 

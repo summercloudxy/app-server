@@ -6,6 +6,7 @@ import com.zgiot.app.server.service.MetricTagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -24,8 +25,8 @@ public class MetricTagServiceImpl implements MetricTagService {
         MetricTag metricTag = new MetricTag();
         metricTag.setMetricTagGroupId(metricTagId);
         metricTag.setCode(metricTagCode);
-        List<MetricTag> metricTags = metricTagMapper.getMetricTag(metricTag);
-        if(null == metricTags){
+        List<MetricTag> metricTags = metricTagMapper.findMetricTag(metricTag);
+        if(metricTags.isEmpty()){
             return null;
         }
         return metricTags.get(0);
@@ -33,25 +34,26 @@ public class MetricTagServiceImpl implements MetricTagService {
 
     @Override
     public List<MetricTag> findMetricTag(MetricTag metricTag) {
-        List<MetricTag> MetricTags = metricTagMapper.getMetricTag(metricTag);
+        List<MetricTag> MetricTags = metricTagMapper.findMetricTag(metricTag);
         return MetricTags;
     }
 
     @Override
-    public void addMetricTag(MetricTag MetricTag) {
-        MetricTag.setCodePath(getCodePath(MetricTag.getParentId()));
-        metricTagMapper.addMetricTag(MetricTag);
+    public void addMetricTag(MetricTag metricTag) {
+        metricTag.setCodePath(getCodePath(metricTag.getParentId()));
+        metricTag.setCreateDate(new Date());
+        metricTagMapper.addMetricTag(metricTag);
     }
 
     @Override
-    public void updateMetricTag(MetricTag MetricTag){
+    public void updateMetricTag(MetricTag metricTag){
 
         // 不允许修改code
-        MetricTag.setCode(null);
-        metricTagMapper.updateMetricTag(MetricTag);
+        metricTag.setCode(null);
+        metricTagMapper.updateMetricTag(metricTag);
         // 修改整体路径
-        if(null != MetricTag.getParentId()){
-            updateCodePath(MetricTag);
+        if(null != metricTag.getParentId()){
+            updateCodePath(metricTag);
         }
     }
 
@@ -69,10 +71,10 @@ public class MetricTagServiceImpl implements MetricTagService {
         // 获取所有待修改codePath的数据
         MetricTag metricTagSelect = new MetricTag();
         metricTagSelect.setMetricTagId(metricTag.getMetricTagId());
-        MetricTag MetricTagBefore = metricTagMapper.getMetricTag(metricTagSelect).get(0);
+        MetricTag MetricTagBefore = metricTagMapper.findMetricTag(metricTagSelect).get(0);
         metricTagSelect = new MetricTag();
         metricTagSelect.setCodePathLike(MetricTagBefore.getCodePath());
-        List<MetricTag> updateMetricTagLists = metricTagMapper.getMetricTag(metricTagSelect);
+        List<MetricTag> updateMetricTagLists = metricTagMapper.findMetricTag(metricTagSelect);
 
         // 获取替换成codePath
         String codePathReplace = getCodePath(metricTag.getParentId());
@@ -96,7 +98,7 @@ public class MetricTagServiceImpl implements MetricTagService {
         }
         MetricTag tagParent = new MetricTag();
         tagParent.setMetricTagId(parentId);
-        tagParent = metricTagMapper.getMetricTag(tagParent).get(0);
+        tagParent = metricTagMapper.findMetricTag(tagParent).get(0);
         StringBuffer codePath = new StringBuffer();
         codePath.append(tagParent.getCodePath())
                 .append(tagParent.getCode())

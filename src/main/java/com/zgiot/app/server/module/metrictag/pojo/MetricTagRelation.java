@@ -3,6 +3,7 @@ package com.zgiot.app.server.module.metrictag.pojo;
 import com.zgiot.app.server.module.util.validate.AddValidate;
 import com.zgiot.app.server.module.util.validate.DeleteValidate;
 import com.zgiot.app.server.module.util.validate.UpdateValidate;
+import org.hibernate.validator.constraints.NotBlank;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -18,8 +19,10 @@ public class MetricTagRelation {
     @NotNull(message = "主键(metricTagRelationId)不能为空", groups = {UpdateValidate.class, DeleteValidate.class})
     private Integer metricTagRelationId;
 
+    @NotBlank(message = "信号类型(metricCode)不能为空", groups = {AddValidate.class})
     private String metricCode;
 
+    @NotBlank(message = "信号标签(metricTagCode)不能为空", groups = {AddValidate.class})
     private String metricTagCode;
 
     private Date createDate;

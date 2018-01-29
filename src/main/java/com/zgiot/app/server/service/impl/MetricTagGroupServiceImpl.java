@@ -6,6 +6,7 @@ import com.zgiot.app.server.service.MetricTagGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -22,8 +23,8 @@ public class MetricTagGroupServiceImpl implements MetricTagGroupService {
         MetricTagGroup metricTagGroup = new MetricTagGroup();
         metricTagGroup.setMetricTagGroupId(metricTagGroupId);
         metricTagGroup.setCode(metricTagCode);
-        List<MetricTagGroup> metricTagGroups = metricTagGroupMapper.getMetricTagGroup(metricTagGroup);
-        if(null == metricTagGroups){
+        List<MetricTagGroup> metricTagGroups = metricTagGroupMapper.findMetricTagGroup(metricTagGroup);
+        if(metricTagGroups.isEmpty()){
             return null;
         }
         return metricTagGroups.get(0);
@@ -31,11 +32,12 @@ public class MetricTagGroupServiceImpl implements MetricTagGroupService {
 
     @Override
     public List<MetricTagGroup> findMetricTagGroup(MetricTagGroup metricTagGroup){
-        return metricTagGroupMapper.getMetricTagGroup(metricTagGroup);
+        return metricTagGroupMapper.findMetricTagGroup(metricTagGroup);
     }
 
     @Override
     public void addMetricTagGroup(MetricTagGroup metricTagGroup){
+        metricTagGroup.setCreateDate(new Date());
         metricTagGroupMapper.addMetricTagGroup(metricTagGroup);
     }
 

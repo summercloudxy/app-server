@@ -8,7 +8,7 @@
         <result column="create_date" property="createDate"/>
     </resultMap>
 
-    <select id="getThingTagRelation" resultMap="thingTagRelation">
+    <select id="findThingTagRelation" resultMap="thingTagRelation">
         SELECT
         id,
         thing_code,

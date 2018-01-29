@@ -3,6 +3,7 @@ package com.zgiot.app.server.module.metrictag.pojo;
 import com.zgiot.app.server.module.util.validate.AddValidate;
 import com.zgiot.app.server.module.util.validate.DeleteValidate;
 import com.zgiot.app.server.module.util.validate.UpdateValidate;
+import org.hibernate.validator.constraints.NotBlank;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -21,13 +22,13 @@ public class MetricTag {
     /**
      * code编号
      */
-    @NotNull(message = "code编号(code)不能为空", groups = {AddValidate.class})
+    @NotBlank(message = "code编号(code)不能为空", groups = {AddValidate.class})
     private String code;
 
     /**
      * 标签名称
      */
-    @NotNull(message = "标签名称(tagName)不能为空", groups = {AddValidate.class})
+    @NotBlank(message = "标签名称(tagName)不能为空", groups = {AddValidate.class})
     private String tagName;
 
     /**
@@ -48,6 +49,7 @@ public class MetricTag {
     /**
      * 所属标签大类主键
      */
+    @NotNull(message = "所属标签大类编号(metricTagGroupId)不能为空", groups = {AddValidate.class})
     private Integer metricTagGroupId;
 
     /**

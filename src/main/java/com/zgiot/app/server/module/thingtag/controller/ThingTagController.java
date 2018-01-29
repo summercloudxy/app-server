@@ -14,22 +14,25 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
  * Created by wangfan on 2018/1/8.
  */
 @Controller
+@RequestMapping("/thingTags")
 public class ThingTagController {
     @Autowired
     private ThingTagService thingTagService;
     
-    @RequestMapping(value = "/thingTag", method = RequestMethod.GET)
-    public ResponseEntity<String> getThingTag(
+    @RequestMapping(method = RequestMethod.GET)
+    public ResponseEntity<String> findThingTag(
             @RequestBody @Validated(value = GetValidate.class) ThingTag thingTag, BindingResult bindingResult){
         if(bindingResult.hasErrors()){
             return new ResponseEntity<>(ServerResponse.buildOkJson(ValidateParamUtil.getBindingResultError(bindingResult)),
@@ -39,7 +42,14 @@ public class ThingTagController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(thingTagLists), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/thingTag", method = RequestMethod.POST)
+    @RequestMapping(value = "/{thingTagId}/{thingTagCode}", method = RequestMethod.GET)
+    public ResponseEntity<String> getThingTag(
+            @PathVariable("thingTagId") Integer thingTagId, @PathVariable("thingTagCode") String thingTagCode){
+        ThingTag thingTag = thingTagService.getThingTag(thingTagId, thingTagCode);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(thingTag), HttpStatus.OK);
+    }
+
+    @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<String> addThingTag(
             @RequestBody @Validated(value = AddValidate.class) ThingTag thingTag, BindingResult bindingResult){
         if(bindingResult.hasErrors()){
@@ -50,7 +60,7 @@ public class ThingTagController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/thingTag", method = RequestMethod.PUT)
+    @RequestMapping(method = RequestMethod.PUT)
     public ResponseEntity<String> updateThingTag(
             @RequestBody @Validated(value = UpdateValidate.class) ThingTag thingTag, BindingResult bindingResult){
         if(bindingResult.hasErrors()){
@@ -61,7 +71,7 @@ public class ThingTagController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/thingTag", method = RequestMethod.DELETE)
+    @RequestMapping(method = RequestMethod.DELETE)
     public ResponseEntity<String> deleteThingTag(
             @RequestBody @Validated(value = DeleteValidate.class) ThingTag thingTag, BindingResult bindingResult) {
         if(bindingResult.hasErrors()){

@@ -11,7 +11,7 @@ import java.util.List;
 @Mapper
 public interface ThingTagMapper {
 
-    List<ThingTag> getThingTag(ThingTag thingTag);
+    List<ThingTag> findThingTag(ThingTag thingTag);
 
     void addThingTag(ThingTag thingTag);
 

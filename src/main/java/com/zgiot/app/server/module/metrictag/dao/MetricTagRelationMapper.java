@@ -11,7 +11,7 @@ import java.util.List;
 @Mapper
 public interface MetricTagRelationMapper {
 
-    List<MetricTagRelation> getMetricTagRelation(MetricTagRelation metricTagRelation);
+    List<MetricTagRelation> findMetricTagRelation(MetricTagRelation metricTagRelation);
 
     void addMetricTagRelation(MetricTagRelation metricTagRelation);
 

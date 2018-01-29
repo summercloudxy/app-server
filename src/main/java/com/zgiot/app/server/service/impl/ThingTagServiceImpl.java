@@ -24,8 +24,8 @@ public class ThingTagServiceImpl implements ThingTagService {
         ThingTag thingTag = new ThingTag();
         thingTag.setThingTagGroupId(thingTagId);
         thingTag.setCode(thingTagCode);
-        List<ThingTag> thingTags = thingTagMapper.getThingTag(thingTag);
-        if(null == thingTags){
+        List<ThingTag> thingTags = thingTagMapper.findThingTag(thingTag);
+        if(thingTags.isEmpty()){
             return null;
         }
         return thingTags.get(0);
@@ -33,7 +33,7 @@ public class ThingTagServiceImpl implements ThingTagService {
 
     @Override
     public List<ThingTag> findThingTag(ThingTag thingTag) {
-        List<ThingTag> thingTags = thingTagMapper.getThingTag(thingTag);
+        List<ThingTag> thingTags = thingTagMapper.findThingTag(thingTag);
         return thingTags;
     }
 
@@ -69,10 +69,10 @@ public class ThingTagServiceImpl implements ThingTagService {
         // 获取所有待修改codePath的数据
         ThingTag thingTagSelect = new ThingTag();
         thingTagSelect.setThingTagId(thingTag.getThingTagId());
-        ThingTag thingTagBefore = thingTagMapper.getThingTag(thingTagSelect).get(0);
+        ThingTag thingTagBefore = thingTagMapper.findThingTag(thingTagSelect).get(0);
         thingTagSelect = new ThingTag();
         thingTagSelect.setCodePathLike(thingTagBefore.getCodePath());
-        List<ThingTag> updateThingTagLists = thingTagMapper.getThingTag(thingTagSelect);
+        List<ThingTag> updateThingTagLists = thingTagMapper.findThingTag(thingTagSelect);
 
         // 获取替换成codePath
         String codePathReplace = getCodePath(thingTag.getParentId());
@@ -96,7 +96,7 @@ public class ThingTagServiceImpl implements ThingTagService {
         }
         ThingTag tagParent = new ThingTag();
         tagParent.setThingTagId(parentId);
-        tagParent = thingTagMapper.getThingTag(tagParent).get(0);
+        tagParent = thingTagMapper.findThingTag(tagParent).get(0);
         StringBuffer codePath = new StringBuffer();
         codePath.append(tagParent.getCodePath())
                 .append(tagParent.getCode())

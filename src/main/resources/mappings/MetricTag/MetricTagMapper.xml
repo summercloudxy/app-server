@@ -12,7 +12,7 @@
         <result column="create_date" property="createDate"/>
     </resultMap>
 
-    <select id="getMetricTag" resultMap="metricTag">
+    <select id="findMetricTag" resultMap="metricTag">
         SELECT
         tmt.id,
         tmt.`code`,

@@ -6,6 +6,7 @@ import com.zgiot.app.server.service.ThingTagGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -22,8 +23,8 @@ public class ThingTagGroupServiceImpl implements ThingTagGroupService{
         ThingTagGroup thingTagGroup = new ThingTagGroup();
         thingTagGroup.setThingTagGroupId(thingTagGroupId);
         thingTagGroup.setCode(thingTagCode);
-        List<ThingTagGroup> thingTagGroups = thingTagGroupMapper.getThingTagGroup(thingTagGroup);
-        if(null == thingTagGroups){
+        List<ThingTagGroup> thingTagGroups = thingTagGroupMapper.findThingTagGroup(thingTagGroup);
+        if(thingTagGroups.isEmpty()){
             return null;
         }
         return thingTagGroups.get(0);
@@ -31,12 +32,13 @@ public class ThingTagGroupServiceImpl implements ThingTagGroupService{
 
     @Override
     public List<ThingTagGroup> findThingTagGroup(ThingTagGroup thingTagGroup) {
-        List<ThingTagGroup> thingTagGroups = thingTagGroupMapper.getThingTagGroup(thingTagGroup);
+        List<ThingTagGroup> thingTagGroups = thingTagGroupMapper.findThingTagGroup(thingTagGroup);
         return thingTagGroups;
     }
 
     @Override
     public void addThingTagGroup(ThingTagGroup thingTagGroup) {
+        thingTagGroup.setCreateDate(new Date());
         thingTagGroupMapper.addThingTagGroup(thingTagGroup);
     }
 

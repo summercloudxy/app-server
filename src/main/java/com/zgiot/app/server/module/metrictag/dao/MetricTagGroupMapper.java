@@ -12,7 +12,7 @@ import java.util.List;
 @Mapper
 public interface MetricTagGroupMapper {
 
-    List<MetricTagGroup> getMetricTagGroup(MetricTagGroup metricTagGroup);
+    List<MetricTagGroup> findMetricTagGroup(MetricTagGroup metricTagGroup);
 
     void addMetricTagGroup(MetricTagGroup metricTagGroup);
 

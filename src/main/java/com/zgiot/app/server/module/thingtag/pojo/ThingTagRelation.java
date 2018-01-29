@@ -3,6 +3,7 @@ package com.zgiot.app.server.module.thingtag.pojo;
 import com.zgiot.app.server.module.util.validate.AddValidate;
 import com.zgiot.app.server.module.util.validate.DeleteValidate;
 import com.zgiot.app.server.module.util.validate.UpdateValidate;
+import org.hibernate.validator.constraints.NotBlank;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -18,8 +19,10 @@ public class ThingTagRelation {
     @NotNull(message = "主键(thingTagRelationId)不能为空", groups = {UpdateValidate.class, DeleteValidate.class})
     private Integer thingTagRelationId;
 
+    @NotBlank(message = "设备编号(thingCode)不能为空", groups = {AddValidate.class})
     private String thingCode;
 
+    @NotBlank(message = "设备编号标签(thingTagCode)不能为空", groups = {AddValidate.class})
     private String thingTagCode;
 
     private Date createDate;
