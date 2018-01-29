@@ -1,0 +1,1 @@
+UPDATE `tb_density_control_interval` SET `interval`='15' ;
