@@ -15,7 +15,7 @@ import java.util.List;
 @Service
 public class MetricTagServiceImpl implements MetricTagService {
 
-    private static String CODE_PATH_CUT_OFF_RULE = "/";
+    private static final String CODE_PATH_CUT_OFF_RULE = "/";
 
     @Autowired
     MetricTagMapper metricTagMapper;
@@ -34,8 +34,7 @@ public class MetricTagServiceImpl implements MetricTagService {
 
     @Override
     public List<MetricTag> findMetricTag(MetricTag metricTag) {
-        List<MetricTag> MetricTags = metricTagMapper.findMetricTag(metricTag);
-        return MetricTags;
+        return metricTagMapper.findMetricTag(metricTag);
     }
 
     @Override
@@ -58,8 +57,8 @@ public class MetricTagServiceImpl implements MetricTagService {
     }
 
     @Override
-    public void deleteMetricTag(MetricTag MetricTag) {
-        metricTagMapper.deleteMetricTag(MetricTag);
+    public void deleteMetricTag(MetricTag metricTag) {
+        metricTagMapper.deleteMetricTag(metricTag);
     }
 
     /**
@@ -71,9 +70,9 @@ public class MetricTagServiceImpl implements MetricTagService {
         // 获取所有待修改codePath的数据
         MetricTag metricTagSelect = new MetricTag();
         metricTagSelect.setMetricTagId(metricTag.getMetricTagId());
-        MetricTag MetricTagBefore = metricTagMapper.findMetricTag(metricTagSelect).get(0);
+        MetricTag metricTagBefore = metricTagMapper.findMetricTag(metricTagSelect).get(0);
         metricTagSelect = new MetricTag();
-        metricTagSelect.setCodePathLike(MetricTagBefore.getCodePath());
+        metricTagSelect.setCodePathLike(metricTagBefore.getCodePath());
         List<MetricTag> updateMetricTagLists = metricTagMapper.findMetricTag(metricTagSelect);
 
         // 获取替换成codePath
@@ -82,7 +81,7 @@ public class MetricTagServiceImpl implements MetricTagService {
         // 批量替换所有codePath
         for(MetricTag updateMetricTag:updateMetricTagLists){
             updateMetricTag.setCodePath(
-                    updateMetricTag.getCodePath().replaceAll(MetricTagBefore.getCodePath(),codePathReplace));
+                    updateMetricTag.getCodePath().replaceAll(metricTagBefore.getCodePath(),codePathReplace));
             metricTagMapper.updateMetricTag(updateMetricTag);
         }
     }

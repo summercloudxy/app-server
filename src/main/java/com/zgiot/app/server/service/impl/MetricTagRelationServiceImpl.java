@@ -33,8 +33,7 @@ public class MetricTagRelationServiceImpl implements MetricTagRelationService {
 
     @Override
     public List<MetricTagRelation> findMetricTagRelation(MetricTagRelation metricTagRelation) {
-        List<MetricTagRelation> metricTagRelations = metricTagRelationMapper.findMetricTagRelation(metricTagRelation);
-        return metricTagRelations;
+        return metricTagRelationMapper.findMetricTagRelation(metricTagRelation);
     }
 
     @Override

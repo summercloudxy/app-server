@@ -1,13 +1,11 @@
 package com.zgiot.app.server.module.thingtag.controller;
 
-import com.zgiot.app.server.module.thingtag.pojo.ThingTagGroup;
 import com.zgiot.app.server.module.thingtag.pojo.ThingTagRelation;
 import com.zgiot.app.server.module.util.ValidateParamUtil;
 import com.zgiot.app.server.module.util.validate.AddValidate;
 import com.zgiot.app.server.module.util.validate.DeleteValidate;
 import com.zgiot.app.server.module.util.validate.GetValidate;
 import com.zgiot.app.server.module.util.validate.UpdateValidate;
-import com.zgiot.app.server.service.ThingTagGroupService;
 import com.zgiot.app.server.service.ThingTagRelationService;
 import com.zgiot.common.restcontroller.ServerResponse;
 import org.springframework.beans.factory.annotation.Autowired;

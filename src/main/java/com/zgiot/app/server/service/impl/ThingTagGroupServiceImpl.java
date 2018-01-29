@@ -32,8 +32,7 @@ public class ThingTagGroupServiceImpl implements ThingTagGroupService{
 
     @Override
     public List<ThingTagGroup> findThingTagGroup(ThingTagGroup thingTagGroup) {
-        List<ThingTagGroup> thingTagGroups = thingTagGroupMapper.findThingTagGroup(thingTagGroup);
-        return thingTagGroups;
+        return thingTagGroupMapper.findThingTagGroup(thingTagGroup);
     }
 
     @Override

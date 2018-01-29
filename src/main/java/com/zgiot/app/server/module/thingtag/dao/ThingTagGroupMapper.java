@@ -1,6 +1,5 @@
 package com.zgiot.app.server.module.thingtag.dao;
 
-import com.zgiot.app.server.module.thingtag.pojo.ThingTag;
 import com.zgiot.app.server.module.thingtag.pojo.ThingTagGroup;
 import org.apache.ibatis.annotations.Mapper;
 

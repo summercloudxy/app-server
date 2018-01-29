@@ -1,7 +1,7 @@
 package com.zgiot.app.server.module.metrictag.controller;
 
-import com.zgiot.app.server.module.metrictag.pojo.*;
-import com.zgiot.app.server.module.thingtag.pojo.ThingTag;
+import com.zgiot.app.server.module.metrictag.pojo.MetricTag;
+import com.zgiot.app.server.module.metrictag.pojo.MetricTagGroup;
 import com.zgiot.app.server.module.util.ValidateParamUtil;
 import com.zgiot.app.server.module.util.validate.AddValidate;
 import com.zgiot.app.server.module.util.validate.DeleteValidate;

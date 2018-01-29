@@ -14,7 +14,7 @@ import java.util.List;
 @Service
 public class ThingTagServiceImpl implements ThingTagService {
 
-    private static String CODE_PATH_CUT_OFF_RULE = "/";
+    private static final String CODE_PATH_CUT_OFF_RULE = "/";
 
     @Autowired
     ThingTagMapper thingTagMapper;
@@ -33,8 +33,7 @@ public class ThingTagServiceImpl implements ThingTagService {
 
     @Override
     public List<ThingTag> findThingTag(ThingTag thingTag) {
-        List<ThingTag> thingTags = thingTagMapper.findThingTag(thingTag);
-        return thingTags;
+        return thingTagMapper.findThingTag(thingTag);
     }
 
     @Override

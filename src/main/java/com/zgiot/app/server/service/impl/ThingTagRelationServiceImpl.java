@@ -31,8 +31,7 @@ public class ThingTagRelationServiceImpl implements ThingTagRelationService {
 
     @Override
     public List<ThingTagRelation> findThingTagRelation(ThingTagRelation thingTagRelation) {
-        List<ThingTagRelation> thingTagRelations = thingTagRelationMapper.findThingTagRelation(thingTagRelation);
-        return thingTagRelations;
+        return thingTagRelationMapper.findThingTagRelation(thingTagRelation);
     }
 
     @Override
