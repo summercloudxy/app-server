@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.thingtag.dao.">
+    <resultMap id="thingTagRelation" type="com.zgiot.app.server.module.thingtag.pojo.ThingTagRelation">
+        <result column="id"  property="thingTagRelationId"/>
+        <result column="thing_code" property="thingCode"/>
+        <result column="thing_tag_code" property="thingTagCode"/>
+        <result column="create_date" property="createDate"/>
+    </resultMap>
+
+    <select id="findThingTagRelation" resultMap="thingTagRelation">
+        SELECT
+        id,
+        thing_code,
+        thing_tag_code,
+        create_date
+        FROM
+        rel_thingtag_thing
+        WHERE
+        1 = 1
+        <if test="thingTagRelationId != null">
+            AND id = #{thingTagRelationId}
+        </if>
+        <if test="thingCode != null">
+            AND thing_code = #{thingCode}
+        </if>
+        <if test="thingTagCode != null">
+            AND thing_tag_code = #{thingTagCode}
+        </if>
+        <if test="createDate != null">
+            AND create_date = #{createDate}
+        </if>
+    </select>
+
+    <insert id="addThingTagRelation" parameterType="com.zgiot.app.server.module.thingtag.pojo.ThingTagRelation">
+        INSERT INTO rel_thingtag_thing
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="thingCode != null">
+                thing_code,
+            </if>
+            <if test="thingTagCode != null">
+                thing_tag_code,
+            </if>
+            <if test="parentId != null">
+                create_date,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="thingCode != null">
+                #{thingCode},
+            </if>
+            <if test="thingTagCode != null">
+                #{thingTagCode},
+            </if>
+            <if test="createDate != null">
+                #{createDate},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateThingTagRelation" parameterType="com.zgiot.app.server.module.thingtag.pojo.ThingTagRelation">
+        update rel_thingtag_thing
+        <trim prefix="set" suffixOverrides=",">
+            <if test="thingCode != null">
+                thing_code =#{thingCode},
+            </if>
+            <if test="thingTagCode != null">
+                thing_tag_code =#{thingTagCode},
+            </if>
+            <if test="createDate != null">
+                create_date =#{createDate}
+            </if>
+        </trim>
+        where id = #{thingTagRelationId}
+    </update>
+
+    <delete id="deleteThingTagRelation" parameterType="com.zgiot.app.server.module.thingtag.pojo.ThingTagRelation">
+        DELETE FROM rel_thingtag_thing
+        WHERE
+        id = #{thingTagRelationId}
+    </delete>
+</mapper>

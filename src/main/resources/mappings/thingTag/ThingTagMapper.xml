@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.thingtag.dao.ThingTagMapper">
+    <resultMap id="thingTag" type="com.zgiot.app.server.module.thingtag.pojo.ThingTag">
+        <result column="id"  property="thingTagId"/>
+        <result column="code" property="code"/>
+        <result column="tag_name" property="tagName"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="code_path" property="codePath"/>
+        <result column="thing_tag_group_id" property="thingTagGroupId"/>
+        <result column="thing_tag_group_code" property="thingTagGroupCode"/>
+        <result column="create_date" property="createDate"/>
+    </resultMap>
+
+    <select id="findThingTag" resultMap="thingTag">
+        SELECT
+        ttt.id,
+        ttt.`code`,
+        ttt.tag_name,
+        ttt.parent_id,
+        ttt.code_path,
+        ttt.thing_tag_group_id,
+        tttg.`code` AS thing_tag_group_code,
+        ttt.create_date
+        FROM
+        tb_thing_tag AS ttt
+        INNER JOIN tb_thing_tag_group AS tttg ON ttt.thing_tag_group_id = tttg.id
+        <if test="thingTagGroupCode != null">
+            AND tttg.code= #{thingTagGroupCode}
+        </if>
+        WHERE
+        1 = 1
+        <if test="thingTagId != null">
+        AND ttt.id = #{thingTagId}
+        </if>
+        <if test="code != null">
+        AND ttt.code = #{code}
+        </if>
+        <if test="tagName != null">
+        AND ttt.tag_name = #{tagName}
+        </if>
+        <if test="parentId != null">
+        AND ttt.parent_id = #{parentId}
+        </if>
+        <if test="codePath != null">
+        AND ttt.code_path = #{codePath}
+        </if>
+        <if test="codePathLike != null">
+        AND ttt.code_path like CONCAT(#{codePathLike},'%')
+        </if>
+        <if test="thingTagGroupId != null">
+        AND ttt.thing_tag_group_id = #{thingTagGroupId}
+        </if>
+        <if test="createDate != null">
+        AND ttt.create_date = #{createDate}
+        </if>
+    </select>
+
+    <insert id="addThingTag" parameterType="com.zgiot.app.server.module.thingtag.pojo.ThingTag">
+        INSERT INTO tb_thing_tag
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="code != null">
+                code,
+            </if>
+            <if test="tagName != null">
+                tag_name,
+            </if>
+            <if test="parentId != null">
+                parent_id,
+            </if>
+            <if test="codePath != null">
+                code_path,
+            </if>
+            <if test="thingTagGroupId != null">
+                thing_tag_group_id,
+            </if>
+            <if test="createDate != null">
+                create_date,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="code != null">
+                #{code},
+            </if>
+            <if test="tagName != null">
+                #{tagName},
+            </if>
+            <if test="parentId != null">
+                #{parentId},
+            </if>
+            <if test="codePath != null">
+                #{codePath},
+            </if>
+            <if test="thingTagGroupId != null">
+                #{thingTagGroupId},
+            </if>
+            <if test="createDate != null">
+                #{createDate},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateThingTag" parameterType="com.zgiot.app.server.module.thingtag.pojo.ThingTag">
+        update tb_thing_tag
+        <trim prefix="set" suffixOverrides=",">
+            <if test="code != null">
+                code =#{code},
+            </if>
+            <if test="tagName != null">
+                tag_name =#{tagName},
+            </if>
+            <if test="parentId != null">
+                parent_id =#{parentId},
+            </if>
+            <if test="codePath != null">
+                code_path =#{codePath},
+            </if>
+            <if test="codePathLike != null">
+                code_path like 'codePathLike%',
+            </if>
+            <if test="thingTagGroupId != null">
+                thing_tag_group_id =#{thingTagGroupId},
+            </if>
+            <if test="createDate != null">
+                create_date =#{createDate}
+            </if>
+        </trim>
+        where id = #{thingTagId}
+    </update>
+
+    <delete id="deleteThingTag" parameterType="com.zgiot.app.server.module.thingtag.pojo.ThingTag">
+    DELETE FROM tb_thing_tag
+    WHERE
+    id = #{thingTagId}
+    </delete>
+</mapper>

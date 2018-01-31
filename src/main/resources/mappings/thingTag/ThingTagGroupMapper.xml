@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.thingtag.dao.ThingTagGroupMapper">
+
+    <resultMap id="thingTagGroup" type="com.zgiot.app.server.module.thingtag.pojo.ThingTagGroup">
+        <result column="id"  property="thingTagGroupId"/>
+        <result column="code" property="code"/>
+        <result column="tag_group_name" property="tagGroupName"/>
+        <result column="create_date" property="createDate"/>
+    </resultMap>
+
+    <select id="findThingTagGroup" resultMap="thingTagGroup">
+        SELECT
+        id,
+        code,
+        tag_group_name,
+        create_date
+        FROM
+        tb_thing_tag_group
+        WHERE
+        1 = 1
+        <if test="thingTagGroupId != null">
+            id = #{thingTagGroupId}
+        </if>
+        <if test="code != null">
+            code = #{code}
+        </if>
+        <if test="tagGroupName != null">
+            tag_group_name = #{tagGroupName}
+        </if>
+        <if test="createDate != null">
+            create_date = #{createDate}
+        </if>
+    </select>
+
+    <insert id="addThingTagGroup" parameterType="com.zgiot.app.server.module.thingtag.pojo.ThingTagGroup">
+        INSERT INTO tb_thing_tag_group
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="code != null">
+                code,
+            </if>
+            <if test="tagGroupName != null">
+                tag_group_name,
+            </if>
+            <if test="createDate != null">
+                create_date,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="code != null">
+                #{code},
+            </if>
+            <if test="tagGroupName != null">
+                #{tagGroupName},
+            </if>
+            <if test="createDate != null">
+                #{createDate},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateThingTagGroup" parameterType="com.zgiot.app.server.module.thingtag.pojo.ThingTagGroup">
+        update tb_thing_tag_group
+        <trim prefix="set" suffixOverrides=",">
+            <if test="code != null">
+                code = #{code},
+            </if>
+            <if test="tagGroupName != null">
+                tag_group_name = #{tagGroupName}
+            </if>
+        </trim>
+        where id = #{metricTagGroupId}
+    </update>
+
+    <delete id="deleteThingTagGroup" parameterType="com.zgiot.app.server.module.thingtag.pojo.ThingTagGroup">
+      DELETE FROM tb_thing_tag_group
+      WHERE
+      id = #{metricTagId}
+    </delete>
+</mapper>
