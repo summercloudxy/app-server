@@ -66,8 +66,8 @@ public class AlertManager {
     private static final int SORT_DESC = 0;
     private static final int SORT_ASC = 1;
 
-    @PostConstruct
-    void init() {
+
+    public void init() {
         initMetricAlertType();
         initParamRuleMap();
         initProtectRuleMap();
