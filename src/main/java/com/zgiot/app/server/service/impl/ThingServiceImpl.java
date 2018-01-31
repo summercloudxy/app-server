@@ -182,8 +182,8 @@ public class ThingServiceImpl implements ThingService {
      */
 
     public List<ThingModel> getThingCodeByAssetAndCategory(String assetType, String category, String metricCode,
-            String metricType) {
-        return tmlMapper.getThingCodeByAssetAndCategory(assetType, category, metricCode, metricType);
+            String metricType,String thingStartCode) {
+        return tmlMapper.getThingCodeByAssetAndCategory(assetType, category, metricCode, metricType,thingStartCode);
     }
 
 }

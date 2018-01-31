@@ -9,10 +9,7 @@ import com.zgiot.app.server.service.impl.FileServiceImpl;
 import com.zgiot.common.constants.AlertConstants;
 import com.zgiot.common.constants.MetricCodes;
 import com.zgiot.common.exceptions.SysException;
-import com.zgiot.common.pojo.CategoryModel;
-import com.zgiot.common.pojo.DataModel;
-import com.zgiot.common.pojo.MetricModel;
-import com.zgiot.common.pojo.SystemModel;
+import com.zgiot.common.pojo.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -400,7 +397,7 @@ public class AlertManager {
             }
         }
         List<ThingAlertRule> protAlertRuleList = alertMapper.getProtAlertRuleList(filterCondition);
-        for(ThingAlertRule alertRule:protAlertRuleList){
+        for (ThingAlertRule alertRule : protAlertRuleList) {
             getMetricAndSystemName(alertRule);
         }
         AlertRuleRsp alertRuleRsp = new AlertRuleRsp(protAlertRuleList);
@@ -409,16 +406,52 @@ public class AlertManager {
 
     }
 
-    private void getMetricAndSystemName(ThingAlertRule alertRule) {
-        alertRule.setMetricTypeName(metricService.getMetricTypeName(alertRule.getMetricType()));
-        SystemModel systemModel = thingService.findSystemById(alertRule.getSystemId());
+    private void getMetricAndSystemName(AlertData alertData) {
+        SystemModel systemModel = alertData.getSystemModel();
         if (systemModel != null) {
-            alertRule.setSystemName(systemModel.getSystemName());
+            int systemId = systemModel.getId();
+            SystemModel systemNameModel = thingService.findSystemById(systemId);
+            alertData.setSystemModel(systemNameModel);
         }
-        CategoryModel categoryModel = thingService.findCategoryByCode(alertRule.getCategory());
-        if (categoryModel != null) {
-            alertRule.setCategoryName(categoryModel.getCategoryName());
+        ThingModel thingModel = alertData.getThingModel();
+        if (thingModel != null && thingModel.getThingType2Code() != null) {
+            CategoryModel categoryModel = thingService.findCategoryByCode(thingModel.getThingType2Code());
+            if (categoryModel != null) {
+                thingModel.setThingType2Code(categoryModel.getCategoryName());
+            }
         }
+    }
+
+    private void getMetricAndSystemName(AlertMaskStatistics alertMaskStatistics) {
+        Integer systemId = alertMaskStatistics.getSystemId();
+        if (systemId != null) {
+            SystemModel systemNameModel = thingService.findSystemById(systemId);
+            alertMaskStatistics.setSystemName(systemNameModel.getSystemName());
+        }
+        String metricCode = alertMaskStatistics.getMetricCode();
+        MetricModel metric = metricService.getMetric(metricCode);
+        if (metric != null) {
+            alertMaskStatistics.setAlertInfo(metric.getMetricName());
+        }
+    }
+
+    private void getMetricAndSystemName(ThingAlertRule alertRule) {
+        if (alertRule.getMetricType() != null) {
+            alertRule.setMetricTypeName(metricService.getMetricTypeName(alertRule.getMetricType()));
+        }
+        if (alertRule.getSystemId() != null) {
+            SystemModel systemModel = thingService.findSystemById(alertRule.getSystemId());
+            if (systemModel != null) {
+                alertRule.setSystemName(systemModel.getSystemName());
+            }
+        }
+        if (alertRule.getCategory() != null) {
+            CategoryModel categoryModel = thingService.findCategoryByCode(alertRule.getCategory());
+            if (categoryModel != null) {
+                alertRule.setCategoryName(categoryModel.getCategoryName());
+            }
+        }
+
     }
 
     /**
@@ -1330,6 +1363,10 @@ public class AlertManager {
         AlertRecord alertRecord = new AlertRecord();
         alertRecord.setPageCount(pageCount);
         alertRecord.setQueryTime(queryTime);
+        List<AlertData> alertDataList = alertMapper.getAlertDataList(filterCondition);
+        for (AlertData alertData : alertDataList) {
+            getMetricAndSystemName(alertData);
+        }
         alertRecord.setAlertDataList(alertMapper.getAlertDataList(filterCondition));
         return alertRecord;
     }
@@ -1361,6 +1398,49 @@ public class AlertManager {
         return levelMap;
     }
 
+
+    public List<AlertData> getSeriousAlertLevelInList(List<String> thingCodeList, int count) {
+        TreeSet<AlertData> alertDataSet = new TreeSet<>(new Comparator<AlertData>() {
+            @Override
+            public int compare(AlertData o1, AlertData o2) {
+                if (o2.getAlertLevel() == null) {
+                    return -1;
+                }
+                if (o2.getAlertLevel().equals(o1.getAlertLevel())) {
+                    if (o2.getAlertDateTime().equals(o1.getAlertDateTime())){
+                        return o2.getThingCode().compareTo(o1.getThingCode());
+                    }
+                    return o2.getAlertDateTime().compareTo(o1.getAlertDateTime());
+                }
+                return o2.getAlertLevel().compareTo(o1.getAlertLevel());
+            }
+        });
+        Map<String, AlertData> seriousAlertDataMap = new HashMap<>();
+        for (String thingCode : thingCodeList) {
+            short level = 0;
+            if (seriousAlertDataMap.containsKey(thingCode)) {
+                level = seriousAlertDataMap.get(thingCode).getAlertLevel();
+            }
+            if (alertDataMap.containsKey(thingCode)) {
+                Map<String, AlertData> metricAlertDataMap = alertDataMap.get(thingCode);
+                for (Map.Entry<String, AlertData> alertDataEntry : metricAlertDataMap.entrySet()) {
+                    AlertData value = alertDataEntry.getValue();
+                    Short alertLevel = value.getAlertLevel();
+                    if (alertLevel != null && alertLevel > level) {
+                        seriousAlertDataMap.put(thingCode, value);
+                    }
+                }
+            }
+        }
+        alertDataSet.addAll(seriousAlertDataMap.values());
+        List<AlertData> alertData = new ArrayList<>(alertDataSet);
+        if (alertData.size()>count){
+            alertData = alertData.subList(0, count);
+        }
+
+        return alertData;
+    }
+
     /**
      * 设置参数类报警规则的设备、信号可设置范围
      *
@@ -1370,7 +1450,7 @@ public class AlertManager {
         Set<String> inputAlertRulesCode = alertRules.stream()
                 .map(alertRule -> alertRule.getThingCode() + "-" + alertRule.getMetricCode())
                 .collect(Collectors.toSet());
-        List<AlertRule> paramConfigurationList = alertMapper.getParamConfigurationList();
+        List<AlertRule> paramConfigurationList = alertMapper.getParamConfigurationList(null);
         Set<String> existAlertRulesCode = paramConfigurationList.stream()
                 .map(alertRule -> alertRule.getThingCode() + "-" + alertRule.getMetricCode())
                 .collect(Collectors.toSet());
@@ -1382,6 +1462,26 @@ public class AlertManager {
             alertMapper.setParamConfigurationList(addList);
         }
         return duplicateList;
+    }
+
+
+    public List<ConfigurableAlertRule> getParamConfigurationList(String assetType, String category, String metricCode,
+                                                                 String metricType, String thingStartCode) {
+        List<ThingModel> thingCodeByAssetAndCategory = thingService.getThingCodeByAssetAndCategory(assetType, category, metricCode, metricType, thingStartCode);
+        List<AlertRule> paramConfigurationList = alertMapper.getParamConfigurationList(metricCode);
+        Set<String> thingSet = paramConfigurationList.stream().map(AlertRule::getThingCode).collect(Collectors.toSet());
+        List<ConfigurableAlertRule> configurableAlertRules = new ArrayList<>(thingCodeByAssetAndCategory.size());
+        for (ThingModel thingModel : thingCodeByAssetAndCategory) {
+            ConfigurableAlertRule configurableAlertRule = new ConfigurableAlertRule();
+            configurableAlertRule.setThingCode(thingModel.getThingCode());
+            configurableAlertRule.setThingName(thingModel.getThingName());
+            configurableAlertRule.setMetricCode(metricCode);
+            if (thingSet.contains(thingModel.getThingCode())) {
+                configurableAlertRule.setConfigured(true);
+            }
+            configurableAlertRules.add(configurableAlertRule);
+        }
+        return configurableAlertRules;
     }
 
     private List<AlertRule> codesToAlertRule(Collection<String> codeCollection) {
@@ -1400,9 +1500,9 @@ public class AlertManager {
 
     public void setParamThreshlold(AlertRule alertRule) {
         AlertRule paramThreshold = getParamThreshold(alertRule.getThingCode(), alertRule.getMetricCode());
-        if (paramThreshold == null || paramThreshold.getId()==null){
+        if (paramThreshold == null || paramThreshold.getId() == null) {
             alertMapper.insertParamThreshold(alertRule);
-        }else {
+        } else {
             alertMapper.setParamThreshold(alertRule);
         }
     }
@@ -1431,7 +1531,11 @@ public class AlertManager {
             }
         }
         AlertMaskRsp alertMaskRsp = new AlertMaskRsp();
-        alertMaskRsp.setAlertMaskStatisticsInfo(alertMapper.getMaskStatisticsInfo(filterCondition));
+        List<AlertMaskStatistics> maskStatisticsInfo = alertMapper.getMaskStatisticsInfo(filterCondition);
+        for (AlertMaskStatistics alertMaskStatistics : maskStatisticsInfo) {
+            getMetricAndSystemName(alertMaskStatistics);
+        }
+        alertMaskRsp.setAlertMaskStatisticsInfo(maskStatisticsInfo);
         alertMaskRsp.setPageCount(pageCount);
         alertMaskRsp.setQueryTime(queryTime);
         return alertMaskRsp;

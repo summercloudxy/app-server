@@ -18,10 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -40,7 +37,13 @@ public class AlertController {
 
     @ApiOperation("获取参数类报警规则")
     @PostMapping(value = "rule/param/show")
-    public ResponseEntity<String> getParamRule(@RequestBody FilterCondition filterCondition) {
+    public ResponseEntity<String> getParamRule(@RequestBody FilterCondition filterCondition,HttpServletRequest request) {
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()){
+            String s = headerNames.nextElement();
+            String header = request.getHeader(s);
+            System.out.println(s+":"+header);
+        }
         AlertRuleRsp alertRules = alertManager.getParamAlertRuleList(filterCondition);
         return new ResponseEntity<>(ServerResponse.buildOkJson(alertRules), HttpStatus.OK);
     }
@@ -254,12 +257,29 @@ public class AlertController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(seriousAlertLevel), HttpStatus.OK);
     }
 
+    @ApiOperation("获取一批设备中报警等级最严重、时间最新的报警")
+    @GetMapping(value = "seriousAlert")
+    public ResponseEntity<String> getAlertSeriousLevelInList(@RequestParam List<String> thingCodeList,@RequestParam int count){
+        List<AlertData> seriousAlertLevelInList = alertManager.getSeriousAlertLevelInList(thingCodeList, count);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(seriousAlertLevelInList),HttpStatus.OK);
+    }
+
+
     @ApiOperation("设置参数类可以配置报警规则的信号列表")
     @PostMapping(value = "param/configureList")
     public ResponseEntity<String> setParamConfigurationList(@RequestBody List<AlertRule> list) {
         List<AlertRule> duplicateRules = alertManager.setParamConfigurationList(list);
         return new ResponseEntity<>(ServerResponse.buildOkJson(duplicateRules), HttpStatus.OK);
     }
+
+    @ApiOperation("获取所有参数列表")
+    @GetMapping(value = "param/list")
+    public ResponseEntity<String> getParamConfigurationList(@RequestParam(required = false) String assetType, @RequestParam(required = false) String category, @RequestParam String metricCode,
+                                                            @RequestParam(required = false) String metricType,@RequestParam(required = false)String thingStartCode) {
+        List<ConfigurableAlertRule> paramConfigurationList = alertManager.getParamConfigurationList(assetType, category, metricCode, metricType,thingStartCode);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(paramConfigurationList), HttpStatus.OK);
+    }
+
 
     @ApiOperation("获取参数类配置阈值")
     @GetMapping(value = "param/threshold")

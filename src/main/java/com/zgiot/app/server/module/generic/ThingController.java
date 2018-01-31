@@ -175,9 +175,9 @@ public class ThingController {
 
     @GetMapping("/assetAndCategory")
     public ResponseEntity<String> getThingCodeByAssetAndCategory(@RequestParam(required = false) String assetType, @RequestParam(required = false) String category, @RequestParam(required = false) String metricCode,
-                                                                 @RequestParam(required = false) String metricType) {
+                                                                 @RequestParam(required = false) String metricType,@RequestParam(required = false)String thingStartCode) {
         List<ThingModel> result =
-                thingService.getThingCodeByAssetAndCategory(assetType, category, metricCode, metricType);
+                thingService.getThingCodeByAssetAndCategory(assetType, category, metricCode, metricType,thingStartCode);
         return new ResponseEntity<>(ServerResponse.buildOkJson(result), HttpStatus.OK);
     }
 

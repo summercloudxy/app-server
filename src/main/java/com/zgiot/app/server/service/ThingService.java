@@ -79,5 +79,5 @@ public interface ThingService {
 
     @Deprecated
     List<ThingModel> getThingCodeByAssetAndCategory(String assetType, String category, String metricCode,
-            String metricType);
+            String metricType,String thingStartCode);
 }

@@ -1074,6 +1074,9 @@
 
     <select id="getParamConfigurationList" resultType="com.zgiot.app.server.module.alert.pojo.AlertRule">
         SELECT thing_code, metric_code FROM tb_alert_param_configuration_list
+        <if test="metricCode != null">
+            WHERE metric_code = #{metricCode}
+        </if>
     </select>
 
     <select id="getParamThreshold" resultType="com.zgiot.app.server.module.alert.pojo.AlertRule">

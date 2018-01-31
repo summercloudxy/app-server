@@ -3,6 +3,7 @@ package com.zgiot.app.server.module.alert.mapper;
 import com.zgiot.app.server.module.alert.pojo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.Date;
 import java.util.List;
@@ -114,7 +115,7 @@ public interface AlertMapper {
 
     void setParamConfigurationList(@Param("list") List<AlertRule> list);
 
-    List<AlertRule> getParamConfigurationList();
+    List<AlertRule> getParamConfigurationList(@Param("metricCode")String metricCode);
 
     AlertRule getParamThreshold(@Param("thingCode") String thingCode, @Param("metricCode") String metricCode);
 

@@ -78,5 +78,5 @@ public interface TMLMapper {
 
     List<ThingModel> getThingCodeByAssetAndCategory(@Param("assetType") String assetType,
             @Param("category") String category, @Param("metricCode") String metricCode,
-            @Param("metricType") String metricType);
+            @Param("metricType") String metricType,@Param("thingStartCode")String thingStartCode);
 }

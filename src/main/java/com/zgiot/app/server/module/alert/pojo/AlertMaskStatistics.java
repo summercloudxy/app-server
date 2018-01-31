@@ -6,7 +6,9 @@ public class AlertMaskStatistics {
     private String thingCode;
     private ThingModel thingModel;
     private Integer systemId;
+    private String systemName;
     private String metricCode;
+    private String alertInfo;
     private int alertType;
     private Integer count;
 //    private List<AlertMask> alertMasks;
@@ -65,5 +67,21 @@ public class AlertMaskStatistics {
 
     public void setCount(Integer count) {
         this.count = count;
+    }
+
+    public String getSystemName() {
+        return systemName;
+    }
+
+    public void setSystemName(String systemName) {
+        this.systemName = systemName;
+    }
+
+    public String getAlertInfo() {
+        return alertInfo;
+    }
+
+    public void setAlertInfo(String alertInfo) {
+        this.alertInfo = alertInfo;
     }
 }
