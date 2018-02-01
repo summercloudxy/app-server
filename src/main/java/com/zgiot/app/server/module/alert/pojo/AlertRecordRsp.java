@@ -31,4 +31,6 @@ public class AlertRecordRsp {
     public AlertRecordRsp() {
 
     }
+
+
 }

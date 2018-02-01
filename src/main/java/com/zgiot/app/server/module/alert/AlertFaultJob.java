@@ -6,9 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AlertFaultJob implements Job {
-    private static final Logger logger = LoggerFactory.getLogger(AlertFaultJob.class);
+    private final Logger logger = LoggerFactory.getLogger(AlertFaultJob.class);
     @Override
-    public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+    public void execute(JobExecutionContext jobExecutionContext) {
         JobDetail jobDetail = jobExecutionContext.getJobDetail();
         JobDataMap jobDataMap = jobDetail.getJobDataMap();
         AlertFaultHandler alertFaultHandler = (AlertFaultHandler) jobDataMap.get("handler");

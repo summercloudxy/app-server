@@ -15,6 +15,9 @@ public interface TMLMapper {
     @Select("SELECT * FROM `tb_metric` ")
     List<MetricModel> findAllMetrics();
 
+    @Select("SELECT metrictype_code as metricCode,metrictype_name as metricName from tb_metrictype")
+    List<MetricModel> findAllMetricTypes();
+
     @Select("SELECT * FROM `tb_thing` ")
     List<ThingModel> findAllThings();
 
@@ -75,5 +78,5 @@ public interface TMLMapper {
 
     List<ThingModel> getThingCodeByAssetAndCategory(@Param("assetType") String assetType,
             @Param("category") String category, @Param("metricCode") String metricCode,
-            @Param("metricType") String metricType);
+            @Param("metricType") String metricType,@Param("thingStartCode")String thingStartCode);
 }

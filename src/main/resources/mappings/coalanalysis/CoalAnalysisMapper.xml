@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.coalanalysis.mapper.CoalAnalysisMapper">
+
+    <resultMap id="DensityAndFlowInfoMap" type="com.zgiot.app.server.module.coalanalysis.pojo.DensityAndFlowInfo">
+        <result property="coalTarget" column="coal_target"/>
+        <result property="system" column="system"/>
+        <result property="densityCode" column="density_code"/>
+        <result property="flowCode" column="flow_code"/>
+        <result property="runDensityThreshold" column="run_density_threshold"/>
+        <result property="runFlowThreshold" column="run_flow_threshold"/>
+        <collection property="thingCodes" ofType="java.lang.String">
+            <result column="thing_code"/>
+        </collection>
+    </resultMap>
+
+    <select id="getExistRecordId" resultType="java.lang.Integer">
+        select id from tb_coal_analysis where target = #{target} and sample = #{sample} and time = #{time}
+    </select>
+
+    <update id="updateRecord">
+        update tb_coal_analysis set
+        aad = #{record.aad},
+        mt = #{record.mt},
+        stad = #{record.stad},
+        qnetar = #{record.qnetar}
+        where id = #{id}
+    </update>
+
+    <insert id="insertRecord" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
+        insert tb_coal_analysis (target,sample,time,system,aad,mt,stad,qnetar) values (#{target},#{sample},#{time},#{system},#{aad},#{mt},#{stad},#{qnetar})
+    </insert>
+
+    <update id="updateRecordDensityAndFlow">
+        update tb_coal_analysis set
+        avg_density = #{avgDensity},
+        avg_flow = #{avgFlow}
+        where id = #{id}
+    </update>
+
+    <insert id="insertDensityAndFlowValues">
+        insert tb_coal_analysis_density_flow_value (analysis_id,thing_code,density,flow) values
+        <foreach collection="list" separator="," item="item">
+            (#{item.analysisId},#{item.thingCode},#{item.density},#{item.flow})
+        </foreach>
+    </insert>
+
+    <select id="getDensityAndFlowInfo" resultMap="DensityAndFlowInfoMap">
+        select coal_target,system,thing_code,density_code,flow_code,run_density_threshold,run_flow_threshold from tb_coal_analysis_density_flow_info
+    </select>
+
+
+</mapper>

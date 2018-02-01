@@ -70,6 +70,9 @@
         <if test="metricType != null">
             and metric_type2_code = #{metricType}
         </if>
+        <if test="thingStartCode != null">
+            AND t.thing_code LIKE CONCAT(#{thingStartCode},"%")
+        </if>
 
     </select>
 </mapper>

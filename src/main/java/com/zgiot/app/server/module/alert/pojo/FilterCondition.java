@@ -1,5 +1,7 @@
 package com.zgiot.app.server.module.alert.pojo;
 
+import java.util.Date;
+
 public class FilterCondition {
     private String assetType;
     private String category;
@@ -15,6 +17,12 @@ public class FilterCondition {
     private Integer offset;
     private Integer count;
     private Integer sortType;
+    private String stage;
+    private String excluStage;
+    private Short type;
+    private Long duration;
+    private Date startTime;
+    private Date endTime;
 
 
     public String getAlertType() {
@@ -131,4 +139,53 @@ public class FilterCondition {
     public void setSortType(Integer sortType) {
         this.sortType = sortType;
     }
+
+    public String getStage() {
+        return stage;
+    }
+
+    public void setStage(String stage) {
+        this.stage = stage;
+    }
+
+    public String getExcluStage() {
+        return excluStage;
+    }
+
+    public void setExcluStage(String excluStage) {
+        this.excluStage = excluStage;
+    }
+
+    public Short getType() {
+        return type;
+    }
+
+    public void setType(Short type) {
+        this.type = type;
+    }
+
+    public Long getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Long duration) {
+        this.duration = duration;
+    }
+
+    public Date getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
+    }
+
+    public Date getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Date endTime) {
+        this.endTime = endTime;
+    }
+
 }

@@ -7,10 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
@@ -127,7 +124,7 @@ public class ThingController {
     }
 
     private void parsePropertiesByType(List<ThingPropertyModel> base, Map<String, String> propMap,
-            Map<String, String> dispPropMap) {
+                                       Map<String, String> dispPropMap) {
         if (base.size() > 0) {
             for (ThingPropertyModel model : base) {
                 if (model.getPropType().equals(ThingPropertyModel.PROP_TYPE_PROP)) {
@@ -152,7 +149,7 @@ public class ThingController {
     }
 
     @GetMapping("/category/asset")
-    public ResponseEntity<String> getCategoryListByAssetType(String assetType) {
+    public ResponseEntity<String> getCategoryListByAssetType(@RequestParam String assetType) {
         List<CategoryModel> result = thingService.getCategoryListByAssetType(assetType);
         return new ResponseEntity<>(ServerResponse.buildOkJson(result), HttpStatus.OK);
     }
@@ -164,23 +161,23 @@ public class ThingController {
     }
 
     @GetMapping("/metricType/assetAndCategory")
-    public ResponseEntity<String> getMetricTypeByAssetAndCategory(String assetType, String category, String thingCode) {
+    public ResponseEntity<String> getMetricTypeByAssetAndCategory(@RequestParam(required = false) String assetType, @RequestParam(required = false) String category, @RequestParam(required = false) String thingCode) {
         List<CategoryModel> result = thingService.getMetricTypeByAssetAndCategory(assetType, category, thingCode);
         return new ResponseEntity<>(ServerResponse.buildOkJson(result), HttpStatus.OK);
     }
 
     @GetMapping("/metric/assetAndCategory")
-    public ResponseEntity<String> getMetricByAssetAndCategory(String assetType, String category, String thingCode,
-            String metricType) {
+    public ResponseEntity<String> getMetricByAssetAndCategory(@RequestParam(required = false) String assetType, @RequestParam(required = false) String category, @RequestParam(required = false) String thingCode,
+                                                              @RequestParam(required = false) String metricType) {
         List<MetricModel> result = thingService.getMetricByAssetAndCategory(assetType, category, thingCode, metricType);
         return new ResponseEntity<>(ServerResponse.buildOkJson(result), HttpStatus.OK);
     }
 
-    @GetMapping("/thing/assetAndCategory")
-    public ResponseEntity<String> getThingCodeByAssetAndCategory(String assetType, String category, String metricCode,
-            String metricType) {
+    @GetMapping("/assetAndCategory")
+    public ResponseEntity<String> getThingCodeByAssetAndCategory(@RequestParam(required = false) String assetType, @RequestParam(required = false) String category, @RequestParam(required = false) String metricCode,
+                                                                 @RequestParam(required = false) String metricType,@RequestParam(required = false)String thingStartCode) {
         List<ThingModel> result =
-                thingService.getThingCodeByAssetAndCategory(assetType, category, metricCode, metricType);
+                thingService.getThingCodeByAssetAndCategory(assetType, category, metricCode, metricType,thingStartCode);
         return new ResponseEntity<>(ServerResponse.buildOkJson(result), HttpStatus.OK);
     }
 

@@ -11,13 +11,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by xiayun on 2017/9/26.
@@ -28,11 +29,11 @@ public class AlertParamHandler implements AlertHandler {
     private AlertManager alertManager;
     @Autowired
     private MetricService metricService;
-    private Map<String, Map<String, List<AlertRule>>> alertRuleMap;
+//    private Map<String, Map<String, List<AlertRule>>> alertRuleMap;
     private Map<String, Map<String, AlertData>> alertDataCache;
     @Value("${alert.param.period}")
     private Long paramAlertUpdatePeriod;
-    private static final Logger logger = LoggerFactory.getLogger(AlertParamHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(AlertParamHandler.class);
 
     @Override
     public void check(DataModel dataModel) {
@@ -58,7 +59,7 @@ public class AlertParamHandler implements AlertHandler {
             if (alertDataCache.containsKey(thingCode)) {
                 metricAlertDataCache = alertDataCache.get(thingCode);
             } else {
-                metricAlertDataCache = new HashMap<>();
+                metricAlertDataCache = new ConcurrentHashMap<>();
                 alertDataCache.put(thingCode, metricAlertDataCache);
             }
             metricAlertDataCache.put(metricCode, alertData);
@@ -69,7 +70,7 @@ public class AlertParamHandler implements AlertHandler {
 
     }
 
-    // @Scheduled(cron = "0/10 * * * * ?")
+    @Scheduled(cron = "0/10 * * * * ?")
     public void updateAlertLevel() {
         alertDataCache = alertManager.getAlertParamDataMap();
         for (Map.Entry<String, Map<String, AlertData>> entry : alertDataCache.entrySet()) {
@@ -105,16 +106,15 @@ public class AlertParamHandler implements AlertHandler {
     }
 
     private AlertRule getAlertLevel(String thingCode, String metricCode, double value) {
-        alertRuleMap = alertManager.getParamRuleMap();
-        if (alertRuleMap.containsKey(thingCode)) {
-            if (alertRuleMap.get(thingCode).containsKey(metricCode)) {
-                List<AlertRule> alertRuleList = alertRuleMap.get(thingCode).get(metricCode);
-                for (AlertRule alertRule : alertRuleList) {
-                    if (value < alertRule.getUpperLimit() && value >= alertRule.getLowerLimit()) {
-                        return alertRule;
-                    }
+        Map<String, Map<String, List<AlertRule>>> alertRuleMap = alertManager.getParamRuleMap();
+        if (alertRuleMap.containsKey(thingCode) && alertRuleMap.get(thingCode).containsKey(metricCode)) {
+            List<AlertRule> alertRuleList = alertRuleMap.get(thingCode).get(metricCode);
+            for (AlertRule alertRule : alertRuleList) {
+                if (value < alertRule.getUpperLimit() && value >= alertRule.getLowerLimit()) {
+                    return alertRule;
                 }
             }
+
         }
         return null;
     }

@@ -1,12 +1,13 @@
 package com.zgiot.app.server.module.alert.pojo;
 
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AlertStatisticsNum {
     private String thingCode;
     private int sumNum;
-    private Map<Integer, Integer> alertLevelNums = new TreeMap<>();
+    private List<AlertLevelNum> alertLevelNumList = new ArrayList<>();
+//    private Map<Integer, Integer> alertLevelNums = new TreeMap<>();
     private String dayStr;
 
     public String getThingCode() {
@@ -25,13 +26,13 @@ public class AlertStatisticsNum {
         this.sumNum = sumNum;
     }
 
-    public Map<Integer, Integer> getAlertLevelNums() {
-        return alertLevelNums;
-    }
-
-    public void setAlertLevelNums(Map<Integer, Integer> alertLevelNums) {
-        this.alertLevelNums = alertLevelNums;
-    }
+//    public Map<Integer, Integer> getAlertLevelNums() {
+//        return alertLevelNums;
+//    }
+//
+//    public void setAlertLevelNums(Map<Integer, Integer> alertLevelNums) {
+//        this.alertLevelNums = alertLevelNums;
+//    }
 
     public String getDayStr() {
         return dayStr;
@@ -39,5 +40,13 @@ public class AlertStatisticsNum {
 
     public void setDayStr(String dayStr) {
         this.dayStr = dayStr;
+    }
+
+    public List<AlertLevelNum> getAlertLevelNumList() {
+        return alertLevelNumList;
+    }
+
+    public void setAlertLevelNumList(List<AlertLevelNum> alertLevelNumList) {
+        this.alertLevelNumList = alertLevelNumList;
     }
 }

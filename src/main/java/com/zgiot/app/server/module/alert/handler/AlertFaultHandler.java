@@ -35,7 +35,7 @@ public class AlertFaultHandler implements AlertHandler {
     private static final String DISABLE_VALUE = Boolean.FALSE.toString();
     private static final String STATE_RUN = "2";
     private static final String STATE_STOP = "1";
-    private static final String STATE_FAULT = "4";
+//    private static final String STATE_FAULT = "4";
     private Map<String, List<DataModel>> preFaultAlertCache = new ConcurrentHashMap<>();
     private static final int WAIT_TIME = 1000;
 
@@ -57,10 +57,10 @@ public class AlertFaultHandler implements AlertHandler {
         } else if (DISABLE_VALUE.equalsIgnoreCase(dataModel.getValue()) && alertData != null) {
             alertData.setRecovery(true);
             logger.debug("报警恢复，thing:{},metric:{}", thingCode, metricCode);
-            if (!alertData.isManualIntervention()) {
-                alertManager.releaseAlert(alertData);
-            } else {
+            if (alertData.isManualIntervention()) {
                 alertManager.updateAlert(alertData);
+            } else {
+                alertManager.releaseAlert(alertData);
             }
         }
     }
@@ -68,7 +68,7 @@ public class AlertFaultHandler implements AlertHandler {
     public void checkCache(DataModel stateModel) {
         if (preFaultAlertCache.containsKey(stateModel.getThingCode())) {
             List<DataModel> dataModels = preFaultAlertCache.get(stateModel.getThingCode());
-            if (dataModels != null && dataModels.size() != 0) {
+            if (dataModels != null && !dataModels.isEmpty()) {
                 for (DataModel dataModel : dataModels) {
                     Short alertLevel = getAlertLevel(stateModel.getPreValue());
                     logger.debug("设备{}生成{}等级为{}的报警，状态点于故障点之后返回，设备状态当前值为：{}，上一状态值为：{},状态点时间戳为{},故障点时间戳为{}",
@@ -85,7 +85,7 @@ public class AlertFaultHandler implements AlertHandler {
     public void updateCache() {
         for (Map.Entry<String, List<DataModel>> entry : preFaultAlertCache.entrySet()) {
             List<DataModel> faultModels = entry.getValue();
-            if (faultModels != null && faultModels.size() != 0) {
+            if (faultModels != null && !faultModels.isEmpty()) {
                 for (DataModel dataModel : faultModels) {
                     long currentTimeMillis = System.currentTimeMillis();
                     if (Math.abs(currentTimeMillis - dataModel.getDataTimeStamp().getTime()) >= WAIT_TIME) {
@@ -132,8 +132,9 @@ public class AlertFaultHandler implements AlertHandler {
     }
 
     private Short getAlertLevelWithState(DataModel dataModel, Boolean checkInterval) {
-        if (dataService.getData(dataModel.getThingCode(), MetricCodes.STATE).isPresent()) {
-            DataModelWrapper dataModelWrapper = dataService.getData(dataModel.getThingCode(), MetricCodes.STATE).get();
+        Optional<DataModelWrapper> stateData = dataService.getData(dataModel.getThingCode(), MetricCodes.STATE);
+        if (stateData.isPresent()) {
+            DataModelWrapper dataModelWrapper = stateData.get();
             String preState = dataModelWrapper.getPreValue();
             if (checkInterval) {
                 long stateTime = dataModelWrapper.getDataTimeStamp().getTime();

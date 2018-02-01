@@ -13,4 +13,6 @@ public interface MetricService {
      * @throws com.zgiot.common.exceptions.SysException
      */
     void validateMetric(String metricCode);
+
+    String getMetricTypeName(String typeCode);
 }

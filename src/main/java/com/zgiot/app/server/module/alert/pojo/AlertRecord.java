@@ -8,6 +8,8 @@ import java.util.List;
 public class AlertRecord {
     private String thingCode;
     private List<AlertData> alertDataList;
+    private Integer pageCount;
+    private Long queryTime;
 
     public String getThingCode() {
         return thingCode;
@@ -23,5 +25,21 @@ public class AlertRecord {
 
     public void setAlertDataList(List<AlertData> alertDataList) {
         this.alertDataList = alertDataList;
+    }
+
+    public Integer getPageCount() {
+        return pageCount;
+    }
+
+    public void setPageCount(Integer pageCount) {
+        this.pageCount = pageCount;
+    }
+
+    public Long getQueryTime() {
+        return queryTime;
+    }
+
+    public void setQueryTime(Long queryTime) {
+        this.queryTime = queryTime;
     }
 }

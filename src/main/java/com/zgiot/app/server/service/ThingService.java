@@ -57,6 +57,10 @@ public interface ThingService {
      */
     List<SystemModel> findAllSystem();
 
+    SystemModel findSystemById(Integer id);
+
+    CategoryModel findCategoryByCode(String categoryCode);
+
     void validateThing(String thingCode);
 
     // TODO Refactoring
@@ -75,5 +79,5 @@ public interface ThingService {
 
     @Deprecated
     List<ThingModel> getThingCodeByAssetAndCategory(String assetType, String category, String metricCode,
-            String metricType);
+            String metricType,String thingStartCode);
 }

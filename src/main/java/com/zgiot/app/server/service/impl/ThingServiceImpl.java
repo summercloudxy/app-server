@@ -1,8 +1,7 @@
 package com.zgiot.app.server.service.impl;
 
-import com.zgiot.app.server.service.impl.mapper.TMLMapper;
 import com.zgiot.app.server.service.ThingService;
-import com.zgiot.common.constants.MetricCodes;
+import com.zgiot.app.server.service.impl.mapper.TMLMapper;
 import com.zgiot.common.constants.MetricTypes;
 import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.*;
@@ -11,13 +10,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.*;
+import java.lang.ref.PhantomReference;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class ThingServiceImpl implements ThingService {
     private final ConcurrentHashMap<String, ThingModel> thingCache = new ConcurrentHashMap<>(5000);
     private Map<String, ThingPropertyModel> propertyCache = new ConcurrentHashMap<>(50000);
+    private Map<Integer, SystemModel> systemCache = new ConcurrentHashMap<>(100);
+    private Map<String, CategoryModel> categoryCache = new ConcurrentHashMap<>(200);
     @Autowired
     private TMLMapper tmlMapper;
 
@@ -36,6 +41,16 @@ public class ThingServiceImpl implements ThingService {
         List<ThingPropertyModel> allProperties = tmlMapper.findAllProperties();
         for (ThingPropertyModel property : allProperties) {
             propertyCache.put(property.getThingCode() + "_" + property.getPropKey(), property);
+        }
+
+        List<SystemModel> allSystems = tmlMapper.findAllSystems();
+        for (SystemModel system : allSystems){
+            systemCache.put(system.getId(),system);
+        }
+
+        List<CategoryModel> categoryList = tmlMapper.getCategoryList();
+        for (CategoryModel category : categoryList){
+            categoryCache.put(category.getCode() ,category);
         }
     }
 
@@ -83,6 +98,22 @@ public class ThingServiceImpl implements ThingService {
     @Override
     public List<SystemModel> findAllSystem() {
         return tmlMapper.findAllSystems();
+    }
+
+    @Override
+    public SystemModel findSystemById(Integer id){
+        if(id == null){
+            return null;
+        }
+        return systemCache.get(id);
+    }
+
+    @Override
+    public CategoryModel findCategoryByCode(String categoryCode){
+        if (categoryCode == null){
+            return null;
+        }
+        return categoryCache.get(categoryCode);
     }
 
     @Override
@@ -151,8 +182,8 @@ public class ThingServiceImpl implements ThingService {
      */
 
     public List<ThingModel> getThingCodeByAssetAndCategory(String assetType, String category, String metricCode,
-            String metricType) {
-        return tmlMapper.getThingCodeByAssetAndCategory(assetType, category, metricCode, metricType);
+            String metricType,String thingStartCode) {
+        return tmlMapper.getThingCodeByAssetAndCategory(assetType, category, metricCode, metricType,thingStartCode);
     }
 
 }

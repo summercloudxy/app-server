@@ -1,5 +1,9 @@
 package com.zgiot.app.server.module.alert.pojo;
 
+import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.annotation.JSONPOJOBuilder;
+import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.fasterxml.jackson.databind.jsonschema.JsonSerializableSchema;
 import com.zgiot.common.constants.AlertConstants;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.SystemModel;
@@ -11,37 +15,54 @@ import java.util.List;
 /**
  * Created by xiayun on 2017/9/25.
  */
+
 public class AlertData {
     private Integer id;
     private String thingCode;
     private String metricCode;
+    @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue)
     private Short alertSource;
     private Short alertType;
+    @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue)
     private Short alertLevel;
+    @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue)
     private Date alertDateTime;
+    @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue)
     private String alertInfo;
+    @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue)
     private String reporter;
     private String alertStage = AlertConstants.STAGE_NOT_VERIFY;
     private Boolean repair = false;
     private String repairConfirmUser;
     private Date repairStartTime;
+    @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue)
     private Date repairEndTime;
     private Boolean manualIntervention = false;
     private String feedBackImage;
     private String feedBackVideo;
+    @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue)
     private String sceneConfirmUser;
+    @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue)
     private Date sceneConfirmTime;
+    @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue)
     private Boolean sceneConfirmState;
     private Boolean recovery = false;
     private Double paramValue;
     private Double paramLower;
     private Double paramUpper;
+    @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue)
     private Date lastUpdateTime;
+    @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue)
     private Date verifyTime;
+    @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue)
     private String postWorker;
+    @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue)
     private String dispatcher;
+    @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue)
     private Date releaseTime;
+    @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue)
     private Long alertDuration;
+    @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue)
     private Long repairDuration;
     private List<AlertMessage> alertMessageList;
     private int messageUnreadCount;

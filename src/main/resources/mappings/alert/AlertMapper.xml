@@ -66,13 +66,14 @@
         <result property="permission" column="permission"/>
     </resultMap>
 
-    <resultMap id="alertMaskRspMap" type="com.zgiot.app.server.module.alert.pojo.AlertMaskRsp">
+    <resultMap id="alertMaskStatisticsMap" type="com.zgiot.app.server.module.alert.pojo.AlertMaskStatistics">
         <result property="thingCode" column="thing_code"/>
         <result property="systemId" column="system_id"/>
         <result property="alertType" column="alert_type"/>
-        <result property="alertInfo" column="alert_info"/>
+        <result property="metricCode" column="metric_code"/>
+        <result property="count" column="count"/>
         <association property="thingModel" resultMap="thingMap"/>
-        <collection property="alertMasks" resultMap="alertMaskMap"/>
+        <!--<collection property="alertMasks" resultMap="alertMaskMap"/>-->
     </resultMap>
 
     <resultMap id="alertMaskMap" type="com.zgiot.app.server.module.alert.pojo.AlertMask">
@@ -83,7 +84,13 @@
         <result property="paramValue" column="param_value"/>
         <result property="paramLower" column="param_lower"/>
         <result property="paramUpper" column="param_upper"/>
-        <result property="maskInfo" column="mask_info"/>
+        <result property="info" column="info"/>
+    </resultMap>
+
+    <resultMap id="alertMaskInfoMap" type="com.zgiot.app.server.module.alert.pojo.AlertMaskInfo">
+        <result property="maskId" column="mask_id"/>
+        <result property="info" column="info"/>
+        <collection property="alertMasks" resultMap="alertMaskMap"/>
     </resultMap>
 
     <resultMap id="thingAlertRuleMap" type="com.zgiot.app.server.module.alert.pojo.ThingAlertRule">
@@ -222,19 +229,6 @@
                 r.enable = TRUE
             </if>
         </trim>
-        <if test="filter.sortType == 2">
-            ORDER BY thing_code ASC,metric_name ASC
-        </if>
-        <if test="filter.sortType == 3">
-            order BY metric_name ASC ,category asc,thing_code asc
-        </if>
-        <if test="filter.sortType == 4">
-            ORDER BY category ASC,metric_name asc,thing_code asc
-        </if>
-        <if test="filter.offset != null">
-            limit #{filter.offset},#{filter.count}
-        </if>
-
     </select>
 
 
@@ -367,187 +361,195 @@
 
     <select id="getWholeAlertRuleList" resultType="com.zgiot.app.server.module.alert.pojo.AlertRule">
         SELECT
-            id,
-            thing_code,
-            metric_code,
-            rule_type,
-            alert_level,
-            lower_limit,
-            upper_limit,
-            enable
+        id,
+        thing_code,
+        metric_code,
+        rule_type,
+        alert_level,
+        lower_limit,
+        upper_limit,
+        enable
         FROM
-            tb_alert_rule
+        tb_alert_rule
         WHERE
-            rule_type = #{alertType}
-            AND enable = TRUE
+        rule_type = #{alertType}
+        AND enable = TRUE
     </select>
 
     <select id="getCurrentAlertData" resultMap="alertDataMap">
         SELECT
-            id,
-            thing_code,
-            metric_code,
-            alert_source,
-            alert_type,
-            alert_level,
-            alert_datetime,
-            alert_info,
-            reporter,
-            alert_stage,
-            is_repair,
-            repair_confirm_user,
-            repair_start_time,
-            repair_end_time,
-            is_manual_intervention,
-            feedback_image,
-            feedback_video,
-            scene_confirm_state,
-            scene_confirm_time,
-            scene_confirm_user,
-            is_recovery,
-            param_value,
-            param_lower,
-            param_upper,
-            last_update_time,
-            verify_time,
-            post_worker,
-            release_time
+        id,
+        thing_code,
+        metric_code,
+        alert_source,
+        alert_type,
+        alert_level,
+        alert_datetime,
+        alert_info,
+        reporter,
+        alert_stage,
+        is_repair,
+        repair_confirm_user,
+        repair_start_time,
+        repair_end_time,
+        is_manual_intervention,
+        feedback_image,
+        feedback_video,
+        scene_confirm_state,
+        scene_confirm_time,
+        scene_confirm_user,
+        is_recovery,
+        param_value,
+        param_lower,
+        param_upper,
+        last_update_time,
+        verify_time,
+        post_worker,
+        release_time
         FROM tb_alert_data
         WHERE alert_stage != 'RELEASE'
     </select>
 
     <select id="getMetricAlertType" resultType="com.zgiot.app.server.module.alert.pojo.MetricAlertType">
         SELECT
-            metric_code,
-            alert_type
+        metric_code,
+        alert_type
         FROM rel_metric_alert_type
         WHERE 1 = 1
     </select>
 
     <insert id="createAlertData" keyColumn="id" keyProperty="id" useGeneratedKeys="true"
             parameterType="com.zgiot.app.server.module.alert.pojo.AlertData">
-        INSERT INTO tb_alert_data (thing_code, metric_code, alert_source, alert_type, alert_level, alert_datetime, alert_info, reporter, alert_stage, is_repair, repair_confirm_user, repair_start_time, repair_end_time, is_manual_intervention, feedback_image, feedback_video, scene_confirm_state, scene_confirm_time, scene_confirm_user, is_recovery, param_value, param_lower, param_upper, last_update_time, verify_time, post_worker, dispatcher, release_time)
+        INSERT INTO tb_alert_data (thing_code, metric_code, alert_source, alert_type, alert_level, alert_datetime,
+        alert_info, reporter, alert_stage, is_repair, repair_confirm_user, repair_start_time, repair_end_time,
+        is_manual_intervention, feedback_image, feedback_video, scene_confirm_state, scene_confirm_time,
+        scene_confirm_user, is_recovery, param_value, param_lower, param_upper, last_update_time, verify_time,
+        post_worker, dispatcher, release_time)
         VALUES
-            (#{thingCode}, #{metricCode}, #{alertSource}, #{alertType}, #{alertLevel}, #{alertDateTime}, #{alertInfo},
-                           #{reporter}, #{alertStage}, #{repair}, #{repairConfirmUser}, #{repairStartTime},
-                                                                                        #{repairEndTime},
-                                                                                        #{manualIntervention},
-                                                                                        #{feedBackImage},
-                                                                                        #{feedBackVideo},
-                                                                                        #{sceneConfirmState},
-                                                                                        #{sceneConfirmTime},
-                                                                                        #{sceneConfirmUser},
-                                                                                        #{recovery}, #{paramValue},
-             #{paramLower}, #{paramUpper}, #{lastUpdateTime}, #{verifyTime}, #{postWorker}, #{dispatcher},
-             #{releaseTime})
+        (#{thingCode}, #{metricCode}, #{alertSource}, #{alertType}, #{alertLevel}, #{alertDateTime}, #{alertInfo},
+        #{reporter}, #{alertStage}, #{repair}, #{repairConfirmUser}, #{repairStartTime},
+        #{repairEndTime},
+        #{manualIntervention},
+        #{feedBackImage},
+        #{feedBackVideo},
+        #{sceneConfirmState},
+        #{sceneConfirmTime},
+        #{sceneConfirmUser},
+        #{recovery}, #{paramValue},
+        #{paramLower}, #{paramUpper}, #{lastUpdateTime}, #{verifyTime}, #{postWorker}, #{dispatcher},
+        #{releaseTime})
     </insert>
 
     <insert id="createAlertDataBackup"
             parameterType="com.zgiot.app.server.module.alert.pojo.AlertData">
-        INSERT INTO tb_alert_data_backup (id, thing_code, metric_code, alert_source, alert_type, alert_level, alert_datetime, alert_info, reporter, alert_stage, is_repair, repair_confirm_user, repair_start_time, repair_end_time, is_manual_intervention, feedback_image, feedback_video, scene_confirm_state, scene_confirm_time, scene_confirm_user, is_recovery, param_value, param_lower, param_upper, last_update_time, verify_time, post_worker, dispatcher, release_time)
+        INSERT INTO tb_alert_data_backup (id, thing_code, metric_code, alert_source, alert_type, alert_level,
+        alert_datetime, alert_info, reporter, alert_stage, is_repair, repair_confirm_user, repair_start_time,
+        repair_end_time, is_manual_intervention, feedback_image, feedback_video, scene_confirm_state,
+        scene_confirm_time, scene_confirm_user, is_recovery, param_value, param_lower, param_upper, last_update_time,
+        verify_time, post_worker, dispatcher, release_time)
         VALUES (#{id}, #{thingCode}, #{metricCode}, #{alertSource}, #{alertType}, #{alertLevel}, #{alertDateTime},
-                       #{alertInfo}, #{reporter}, #{alertStage}, #{repair}, #{repairConfirmUser}, #{repairStartTime},
-                                                                            #{repairEndTime}, #{manualIntervention},
-                                                                            #{feedBackImage}, #{feedBackVideo},
-                                                                            #{sceneConfirmState}, #{sceneConfirmTime},
-                                                                            #{sceneConfirmUser}, #{recovery},
-                #{paramValue}, #{paramLower}, #{paramUpper}, #{lastUpdateTime}, #{verifyTime}, #{postWorker},
-                #{dispatcher}, #{releaseTime})
+        #{alertInfo}, #{reporter}, #{alertStage}, #{repair}, #{repairConfirmUser}, #{repairStartTime},
+        #{repairEndTime}, #{manualIntervention},
+        #{feedBackImage}, #{feedBackVideo},
+        #{sceneConfirmState}, #{sceneConfirmTime},
+        #{sceneConfirmUser}, #{recovery},
+        #{paramValue}, #{paramLower}, #{paramUpper}, #{lastUpdateTime}, #{verifyTime}, #{postWorker},
+        #{dispatcher}, #{releaseTime})
     </insert>
 
     <update id="updateAlertData">
         UPDATE tb_alert_data
         SET
-            thing_code             = #{thingCode},
-            metric_code            = #{metricCode},
-            alert_source           = #{alertSource},
-            alert_type             = #{alertType},
-            alert_level            = #{alertLevel},
-            alert_datetime         = #{alertDateTime},
-            alert_info             = #{alertInfo},
-            reporter               = #{reporter},
-            alert_stage            = #{alertStage},
-            is_repair              = #{repair},
-            repair_confirm_user    = #{repairConfirmUser},
-            repair_start_time      = #{repairStartTime},
-            repair_end_time        = #{repairEndTime},
-            is_manual_intervention = #{manualIntervention},
-            feedback_image         = #{feedBackImage},
-            feedback_video         = #{feedBackVideo},
-            scene_confirm_state    = #{sceneConfirmState},
-            scene_confirm_time     = #{sceneConfirmTime},
-            scene_confirm_user     = #{sceneConfirmUser},
-            is_recovery            = #{recovery},
-            param_value            = #{paramValue},
-            param_lower            = #{paramLower},
-            param_upper            = #{paramUpper},
-            last_update_time       = #{lastUpdateTime},
-            verify_time            = #{verifyTime},
-            post_worker            = #{postWorker},
-            dispatcher             = #{dispatcher},
-            release_time           = #{releaseTime}
+        thing_code = #{thingCode},
+        metric_code = #{metricCode},
+        alert_source = #{alertSource},
+        alert_type = #{alertType},
+        alert_level = #{alertLevel},
+        alert_datetime = #{alertDateTime},
+        alert_info = #{alertInfo},
+        reporter = #{reporter},
+        alert_stage = #{alertStage},
+        is_repair = #{repair},
+        repair_confirm_user = #{repairConfirmUser},
+        repair_start_time = #{repairStartTime},
+        repair_end_time = #{repairEndTime},
+        is_manual_intervention = #{manualIntervention},
+        feedback_image = #{feedBackImage},
+        feedback_video = #{feedBackVideo},
+        scene_confirm_state = #{sceneConfirmState},
+        scene_confirm_time = #{sceneConfirmTime},
+        scene_confirm_user = #{sceneConfirmUser},
+        is_recovery = #{recovery},
+        param_value = #{paramValue},
+        param_lower = #{paramLower},
+        param_upper = #{paramUpper},
+        last_update_time = #{lastUpdateTime},
+        verify_time = #{verifyTime},
+        post_worker = #{postWorker},
+        dispatcher = #{dispatcher},
+        release_time = #{releaseTime}
         WHERE id = #{id}
     </update>
 
     <update id="updateAlertDataBackup">
         UPDATE tb_alert_data_backup
         SET
-            thing_code             = #{thingCode},
-            metric_code            = #{metricCode},
-            alert_source           = #{alertSource},
-            alert_type             = #{alertType},
-            alert_level            = #{alertLevel},
-            alert_datetime         = #{alertDateTime},
-            alert_info             = #{alertInfo},
-            reporter               = #{reporter},
-            alert_stage            = #{alertStage},
-            is_repair              = #{repair},
-            repair_confirm_user    = #{repairConfirmUser},
-            repair_start_time      = #{repairStartTime},
-            repair_end_time        = #{repairEndTime},
-            is_manual_intervention = #{manualIntervention},
-            feedback_image         = #{feedBackImage},
-            feedback_video         = #{feedBackVideo},
-            scene_confirm_state    = #{sceneConfirmState},
-            scene_confirm_time     = #{sceneConfirmTime},
-            scene_confirm_user     = #{sceneConfirmUser},
-            is_recovery            = #{recovery},
-            param_value            = #{paramValue},
-            param_lower            = #{paramLower},
-            param_upper            = #{paramUpper},
-            last_update_time       = #{lastUpdateTime},
-            verify_time            = #{verifyTime},
-            post_worker            = #{postWorker},
-            dispatcher             = #{dispatcher},
-            release_time           = #{releaseTime}
+        thing_code = #{thingCode},
+        metric_code = #{metricCode},
+        alert_source = #{alertSource},
+        alert_type = #{alertType},
+        alert_level = #{alertLevel},
+        alert_datetime = #{alertDateTime},
+        alert_info = #{alertInfo},
+        reporter = #{reporter},
+        alert_stage = #{alertStage},
+        is_repair = #{repair},
+        repair_confirm_user = #{repairConfirmUser},
+        repair_start_time = #{repairStartTime},
+        repair_end_time = #{repairEndTime},
+        is_manual_intervention = #{manualIntervention},
+        feedback_image = #{feedBackImage},
+        feedback_video = #{feedBackVideo},
+        scene_confirm_state = #{sceneConfirmState},
+        scene_confirm_time = #{sceneConfirmTime},
+        scene_confirm_user = #{sceneConfirmUser},
+        is_recovery = #{recovery},
+        param_value = #{paramValue},
+        param_lower = #{paramLower},
+        param_upper = #{paramUpper},
+        last_update_time = #{lastUpdateTime},
+        verify_time = #{verifyTime},
+        post_worker = #{postWorker},
+        dispatcher = #{dispatcher},
+        release_time = #{releaseTime}
         WHERE id = #{id}
     </update>
 
     <update id="releaseAlertData">
         UPDATE tb_alert_data
         SET
-            alert_stage         = #{alertStage},
-            scene_confirm_state = #{sceneConfirmState},
-            scene_confirm_time  = #{sceneConfirmTime},
-            scene_confirm_user  = #{sceneConfirmUser},
-            is_recovery         = #{recovery},
-            post_worker         = #{postWorker},
-            dispatcher          = #{dispatcher},
-            release_time        = #{releaseTime}
+        alert_stage = #{alertStage},
+        scene_confirm_state = #{sceneConfirmState},
+        scene_confirm_time = #{sceneConfirmTime},
+        scene_confirm_user = #{sceneConfirmUser},
+        is_recovery = #{recovery},
+        post_worker = #{postWorker},
+        dispatcher = #{dispatcher},
+        release_time = #{releaseTime}
         WHERE id = #{id}
     </update>
 
     <update id="releaseAlertDataBackup">
         UPDATE tb_alert_data_backup
         SET
-            alert_stage         = #{alertStage},
-            scene_confirm_state = #{sceneConfirmState},
-            scene_confirm_time  = #{sceneConfirmTime},
-            scene_confirm_user  = #{sceneConfirmUser},
-            is_recovery         = #{recovery},
-            post_worker         = #{postWorker},
-            dispatcher          = #{dispatcher},
-            release_time        = #{releaseTime}
+        alert_stage = #{alertStage},
+        scene_confirm_state = #{sceneConfirmState},
+        scene_confirm_time = #{sceneConfirmTime},
+        scene_confirm_user = #{sceneConfirmUser},
+        is_recovery = #{recovery},
+        post_worker = #{postWorker},
+        dispatcher = #{dispatcher},
+        release_time = #{releaseTime}
         WHERE id = #{id}
     </update>
 
@@ -558,14 +560,14 @@
 
     <select id="getAlertMessage" resultType="com.zgiot.app.server.module.alert.pojo.AlertMessage">
         SELECT
-            id,
-            info,
-            type,
-            alert_id,
-            time,
-            is_read,
-            user_id,
-            permission
+        id,
+        info,
+        type,
+        alert_id,
+        time,
+        is_read,
+        user_id,
+        permission
         FROM tb_alert_message
         WHERE alert_id = #{alertId}
         ORDER BY time
@@ -764,6 +766,51 @@
 
     </select>
 
+    <select id="getAlertDataListCount" resultType="java.lang.Integer">
+        SELECT
+        count(*)
+        FROM tb_alert_data ad,tb_thing tt,rel_thing_system rts
+        WHERE ad.thing_code = tt.thing_code AND ad.thing_code = rts.thing_code
+        <if test="stage !=null">
+            AND
+            ad.alert_stage = #{stage}
+        </if>
+        <if test="excluStage != null">
+            AND
+            ad.alert_stage != #{excluStage}
+        </if>
+        <if test="level != null">
+            AND
+            ad.alert_level= #{level}
+        </if>
+        <if test="type != null">
+            AND
+            ad.alert_type = #{type}
+        </if>
+        <if test="system != null">
+            AND
+            rts.system_id= #{system}
+        </if>
+        <if test="startTime != null">
+            AND
+            ad.alert_datetime &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND ad.alert_datetime &lt; #{endTime}
+        </if>
+        <if test="assetType != null">
+            AND
+            tt.thing_type1_code = #{assetType}
+        </if>
+        <if test="category != null">
+            AND
+            tt.thing_type2_code = #{category}
+        </if>
+        <if test="thingCode != null">
+            AND
+            ad.thing_code = #{thingCode}
+        </if>
+    </select>
 
     <insert id="saveAlertShield" parameterType="com.zgiot.app.server.module.alert.pojo.AlertMask"
             useGeneratedKeys="true" keyColumn="id" keyProperty="id">
@@ -773,20 +820,29 @@
         </foreach>
     </insert>
 
-    <select id="getAlertShieldInfo" resultType="com.zgiot.app.server.module.alert.pojo.AlertMask">
+    <select id="getAlertMaskInfo" resultMap="alertMaskInfoMap">
         SELECT
-            d.thing_code,
-            d.metric_code,
-            d.alert_type,
-            s.mask_id,
-            m.info,
-            s."time",
-            s.user_id,
-            s.param_upper,
-            s.param_lower,
-            s.param_value
+        d.thing_code,
+        d.metric_code,
+        d.alert_type,
+        s.mask_id,
+        m.info,
+        s.time,
+        s.user_id,
+        s.param_upper,
+        s.param_lower,
+        s.param_value
         FROM tb_alert_data d, tb_alert_mask s, tb_fix_message m
         WHERE s.mask_id = m.id
+        AND d.id = s.alert_id
+        and d.thing_code = #{thingCode} and d.metric_code = #{metricCode}
+        <if test="startTime != null">
+            AND
+            alert_datetime &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            and alert_datetime &lt; #{endTime}
+        </if>
     </select>
 
     <insert id="insertAlertRules" useGeneratedKeys="true" keyProperty="id" keyColumn="id"
@@ -865,11 +921,11 @@
 
     <select id="getTypeStatisticsInfo" resultType="com.zgiot.app.server.module.alert.pojo.AlertStatisticsNum">
         SELECT
-            DATE_FORMAT(alert_datetime, '%Y%m%d') dayStr,
-            count(alert_type) AS                  sumNum
+        DATE_FORMAT(alert_datetime, '%Y%m%d') dayStr,
+        count(alert_type) AS sumNum
         FROM tb_alert_data
         WHERE alert_type = #{alertType}
-              AND alert_datetime &gt;= #{startTime} AND alert_datetime &lt; #{endTime}
+        AND alert_datetime &gt;= #{startTime} AND alert_datetime &lt; #{endTime}
         GROUP BY dayStr
         ORDER BY dayStr DESC;
     </select>
@@ -880,10 +936,13 @@
         repair_end_time - repair_start_time
         ) repair_duration
         FROM `tb_alert_data`
-        <trim prefix="and" prefixOverrides="where">
+        <trim prefix="where" prefixOverrides="and">
             <if test="startTime != null">
                 AND
-                alert_datetime &gt;= #{startTime} and alert_datetime &lt; #{endTime}
+                alert_datetime &gt;= #{startTime}
+            </if>
+            <if test="endTime !=null">
+                and alert_datetime &lt; #{endTime}
             </if>
             <if test="alertLevel != null">
                 and
@@ -891,24 +950,30 @@
             </if>
         </trim>
         GROUP BY thing_code
+        HAVING repair_duration is not null
         ORDER BY repair_duration DESC ;
     </select>
 
-    <select id="getMaskStatisticsInfo" resultMap="alertMaskRspMap">
-        select d.thing_code,d.alert_type,d.alert_info,t.thing_name,t.thing_type1_code,t.thing_type2_code,
-        s.system_id,m.time,m.user_id,m.param_value,m.param_lower,m.param_upper,m.mask_id,f.info as mask_info
-        from tb_alert_data d,tb_alert_mask m,tb_thing t,rel_thing_system s,tb_fix_message f
+    <select id="getMaskStatisticsInfo" resultMap="alertMaskStatisticsMap">
+        select d.thing_code,d.alert_type,d.metric_code,t.thing_name,t.thing_type1_code,t.thing_type2_code,
+        s.system_id,count(*) as count
+        <!--,m.time,m.user_id,m.param_value,m.param_lower,m.param_upper,m.mask_id,f.info as mask_info-->
+        from tb_alert_data d,tb_alert_mask m,tb_thing t,rel_thing_system s
+        <!--,tb_fix_message f-->
         WHERE d.id = m.alert_id
         AND d.thing_code = t.thing_code
         AND d.thing_code = s.thing_code
-        AND m.mask_id = f.id
+        <!--AND m.mask_id = f.id-->
         <if test="system != null">
             AND
             s.system_id = #{system}
         </if>
         <if test="startTime != null">
             AND
-            d.alert_datetime &gt;= #{startTime} AND d.alert_datetime &lt; #{endTime}
+            d.alert_datetime &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND d.alert_datetime &lt; #{endTime}
         </if>
         <if test="assetType != null">
             AND
@@ -930,9 +995,53 @@
             AND
             d.alert_type = #{type}
         </if>
+        group by thing_code,metric_code
+        order by count desc,thing_code asc
         <if test="offset != null">
             limit #{offset},#{count}
         </if>
+    </select>
+
+    <select id="getMaskStatisticsInfoCount" resultType="java.lang.Integer">
+        select count(*) from
+        (select count(*),d.thing_code,d.metric_code
+        from tb_alert_data d,tb_alert_mask m,tb_thing t,rel_thing_system s,tb_fix_message f
+        WHERE d.id = m.alert_id
+        AND d.thing_code = t.thing_code
+        AND d.thing_code = s.thing_code
+        AND m.mask_id = f.id
+        <if test="system != null">
+            AND
+            s.system_id = #{system}
+        </if>
+        <if test="startTime != null">
+            AND
+            d.alert_datetime &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND d.alert_datetime &lt; #{endTime}
+        </if>
+        <if test="assetType != null">
+            AND
+            t.thing_type1_code = #{assetType}
+        </if>
+        <if test="category != null">
+            AND
+            t.thing_type2_code = #{category}
+        </if>
+        <if test="thingCode != null">
+            AND
+            d.thing_code = #{thingCode}
+        </if>
+        <if test="level != null">
+            AND
+            d.alert_level = #{level}
+        </if>
+        <if test="type != null">
+            AND
+            d.alert_type = #{type}
+        </if>
+        group by d.thing_code,d.metric_code) aa
     </select>
 
     <delete id="clearAlertDateHistory">
@@ -942,15 +1051,18 @@
 
     <update id="updateAlertRule" parameterType="com.zgiot.app.server.module.alert.pojo.AlertRule">
         UPDATE tb_alert_rule
-        SET alert_level = #{alertRule.alertLevel},lower_limit = #{alertRule.lowerLimit},upper_limit = #{alertRule.upperLimit},
-                          enable = #{alertRule.enable}
+        SET alert_level = #{alertRule.alertLevel},lower_limit = #{alertRule.lowerLimit},upper_limit =
+        #{alertRule.upperLimit},
+        enable = #{alertRule.enable}
         WHERE id = #{alertRule.id};
     </update>
 
-    <insert id="insertAlertRule" parameterType="com.zgiot.app.server.module.alert.pojo.AlertRule" useGeneratedKeys="true" keyColumn="id" keyProperty="alertRule.id">
+    <insert id="insertAlertRule" parameterType="com.zgiot.app.server.module.alert.pojo.AlertRule"
+            useGeneratedKeys="true" keyColumn="id" keyProperty="alertRule.id">
         INSERT INTO tb_alert_rule (thing_code, metric_code, rule_type, alert_level, lower_limit, upper_limit, enable)
         VALUES
-            (#{alertRule.thingCode}, #{alertRule.metricCode}, #{alertRule.ruleType}, #{alertRule.alertLevel}, #{alertRule.lowerLimit}, #{alertRule.upperLimit}, #{alertRule.enable})
+        (#{alertRule.thingCode}, #{alertRule.metricCode}, #{alertRule.ruleType}, #{alertRule.alertLevel},
+        #{alertRule.lowerLimit}, #{alertRule.upperLimit}, #{alertRule.enable})
     </insert>
 
     <insert id="setParamConfigurationList" parameterType="com.zgiot.app.server.module.alert.pojo.AlertRule">
@@ -962,20 +1074,30 @@
 
     <select id="getParamConfigurationList" resultType="com.zgiot.app.server.module.alert.pojo.AlertRule">
         SELECT thing_code, metric_code FROM tb_alert_param_configuration_list
+        <if test="metricCode != null">
+            WHERE metric_code = #{metricCode}
+        </if>
     </select>
 
-    <select id="getParamthreshold" resultType="com.zgiot.app.server.module.alert.pojo.AlertRule">
+    <select id="getParamThreshold" resultType="com.zgiot.app.server.module.alert.pojo.AlertRule">
         SELECT
-            lower_limit,
-            upper_limit
+        id,
+        thing_code,
+        metric_code,
+        lower_limit,
+        upper_limit
         FROM tb_param_range
         WHERE thing_code = #{thingCode} AND metric_code = #{metricCode}
     </select>
 
-    <update id="setParamthreshold" parameterType="com.zgiot.app.server.module.alert.pojo.AlertRule">
+    <update id="setParamThreshold" parameterType="com.zgiot.app.server.module.alert.pojo.AlertRule">
         UPDATE tb_param_range
         SET lower_limit = #{lowerLimit} , upper_limit = #{upperLimit}
         WHERE thing_code = #{thingCode} AND metric_code = #{metricCode}
     </update>
+
+    <insert id="insertParamThreshold" parameterType="com.zgiot.app.server.module.alert.pojo.AlertRule">
+        INSERT INTO tb_param_range (thing_code,metric_code,lower_limit,upper_limit) VALUES (#{thingCode},#{metricCode},#{lowerLimit},#{upperLimit})
+    </insert>
 
 </mapper>
