@@ -38,12 +38,6 @@ public class AlertController {
     @ApiOperation("获取参数类报警规则")
     @PostMapping(value = "rule/param/show")
     public ResponseEntity<String> getParamRule(@RequestBody FilterCondition filterCondition,HttpServletRequest request) {
-        Enumeration<String> headerNames = request.getHeaderNames();
-        while (headerNames.hasMoreElements()){
-            String s = headerNames.nextElement();
-            String header = request.getHeader(s);
-            System.out.println(s+":"+header);
-        }
         AlertRuleRsp alertRules = alertManager.getParamAlertRuleList(filterCondition);
         return new ResponseEntity<>(ServerResponse.buildOkJson(alertRules), HttpStatus.OK);
     }
