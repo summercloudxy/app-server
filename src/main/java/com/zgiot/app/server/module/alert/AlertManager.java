@@ -52,6 +52,7 @@ public class AlertManager {
     private static final int SORT_TYPE_LEVEL_ASC = 3;
     private static final int READ_STATE = 1;
     private static final int STATISTICS_TYPE_DEVICE = 1;
+    public static final String SPLIT_CHARACTER="&%";
     @Autowired
     private AlertMapper alertMapper;
     @Autowired
@@ -1448,11 +1449,11 @@ public class AlertManager {
      */
     public List<AlertRule> setParamConfigurationList(List<AlertRule> alertRules) {
         Set<String> inputAlertRulesCode = alertRules.stream()
-                .map(alertRule -> alertRule.getThingCode() + "-" + alertRule.getMetricCode())
+                .map(alertRule -> alertRule.getThingCode() + SPLIT_CHARACTER + alertRule.getMetricCode())
                 .collect(Collectors.toSet());
         List<AlertRule> paramConfigurationList = alertMapper.getParamConfigurationList(null);
         Set<String> existAlertRulesCode = paramConfigurationList.stream()
-                .map(alertRule -> alertRule.getThingCode() + "-" + alertRule.getMetricCode())
+                .map(alertRule -> alertRule.getThingCode() + SPLIT_CHARACTER + alertRule.getMetricCode())
                 .collect(Collectors.toSet());
         Collection<String> duplicateCodes = CollectionUtils.intersection(inputAlertRulesCode, existAlertRulesCode);
         Collection<String> addCodes = CollectionUtils.subtract(inputAlertRulesCode, existAlertRulesCode);
@@ -1487,7 +1488,7 @@ public class AlertManager {
     private List<AlertRule> codesToAlertRule(Collection<String> codeCollection) {
         return codeCollection.stream().map((String code) -> {
             AlertRule alertRule = new AlertRule();
-            String[] codes = code.split("-");
+            String[] codes = code.split(SPLIT_CHARACTER);
             alertRule.setThingCode(codes[0]);
             alertRule.setMetricCode(codes[1]);
             return alertRule;

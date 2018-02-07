@@ -60,7 +60,9 @@
         WHERE
         t.thing_code = tml.thing_code
         AND tml.metric_code = m.metric_code
-
+        <if test="metricCode != null">
+            AND tml.metric_code = #{metricCode}
+        </if>
         <if test="assetType != null">
             and t.thing_type1_code = #{assetType}
         </if>

@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -61,7 +62,6 @@ public class AlertController {
     @ApiOperation("更新报警规则")
     @PostMapping(value = "rule")
     public ResponseEntity<String> updateRule(@RequestBody List<AlertRule> alertRules, @RequestParam int type) {
-
         List<AlertRule> alertRulesRsp = alertManager.updateRule(alertRules, type);
         return new ResponseEntity<>(ServerResponse.buildOkJson(alertRulesRsp), HttpStatus.OK);
     }
