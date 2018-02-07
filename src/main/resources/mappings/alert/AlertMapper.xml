@@ -241,9 +241,9 @@
         as assetType,t.thing_type2_code as category,m.metric_name,t.thing_name
         FROM
         tb_alert_param_configuration_list c
-        INNER JOIN tb_metric m ON c.metric_code = m.metric_code
-        INNER JOIN tb_thing t on c.thing_code = t.thing_code
-        INNER JOIN rel_thing_system s ON c.thing_code = s.thing_code
+        LEFT JOIN tb_metric m ON c.metric_code = m.metric_code
+        LEFT JOIN tb_thing t on c.thing_code = t.thing_code
+        LEFT JOIN rel_thing_system s ON c.thing_code = s.thing_code
         <!-- LEFT JOIN tb_alert_rule r on c.thing_code = r.thing_code -->
         <!--AND c.metric_code = r.metric_code-->
         <trim prefixOverrides="AND" prefix="WHERE">
