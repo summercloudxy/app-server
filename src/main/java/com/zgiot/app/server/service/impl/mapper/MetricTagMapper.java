@@ -1,4 +1,4 @@
-package com.zgiot.app.server.module.metrictag.dao;
+package com.zgiot.app.server.service.impl.mapper;
 
 import com.zgiot.app.server.module.metrictag.pojo.MetricTag;
 import org.apache.ibatis.annotations.Mapper;
