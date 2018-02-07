@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.zgiot.app.server.module.metricTagRelation.dao.MetricTagRelationMapper">
+<mapper namespace="com.zgiot.app.server.service.impl.mapper.MetricTagRelationMapper">
     <resultMap id="metricTagRelation" type="com.zgiot.app.server.module.metrictag.pojo.MetricTagRelation">
         <result column="id"  property="metricTagRelationId"/>
         <result column="metric_code" property="metricCode"/>

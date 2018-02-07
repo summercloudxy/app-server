@@ -1,8 +1,8 @@
 package com.zgiot.app.server.service.impl;
 
-import com.zgiot.app.server.module.thingtag.dao.ThingTagMapper;
 import com.zgiot.app.server.module.thingtag.pojo.ThingTag;
 import com.zgiot.app.server.service.ThingTagService;
+import com.zgiot.app.server.service.impl.mapper.ThingTagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
