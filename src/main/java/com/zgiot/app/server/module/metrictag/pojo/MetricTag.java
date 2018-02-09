@@ -62,6 +62,12 @@ public class MetricTag {
      */
     private Date createDate;
 
+    private Date updateDate;
+
+    private String comments;
+
+    private String operator;
+
     /**
      * 逻辑删除
      */
@@ -145,5 +151,29 @@ public class MetricTag {
 
     public void setIsDelete(Integer isDelete) {
         this.isDelete = isDelete;
+    }
+
+    public Date getUpdateDate() {
+        return updateDate;
+    }
+
+    public String getComments() {
+        return comments;
+    }
+
+    public String getOperator() {
+        return operator;
+    }
+
+    public void setUpdateDate(Date updateDate) {
+        this.updateDate = updateDate;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
+    }
+
+    public void setOperator(String operator) {
+        this.operator = operator;
     }
 }
