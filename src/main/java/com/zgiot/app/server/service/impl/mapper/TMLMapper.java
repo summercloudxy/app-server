@@ -21,6 +21,9 @@ public interface TMLMapper {
     @Select("SELECT * FROM `tb_thing` ")
     List<ThingModel> findAllThings();
 
+    @Select("select * from tb_thing tb,rel_thingtag_thing re where re.thing_tag_code=#{thingTag} and tb.thing_code=re.thing_code")
+    List<ThingModel> fingThingByTag(@Param("thingTag") String thingTag);
+
     @Select("SELECT * FROM `tb_thing_properties`")
     List<ThingPropertyModel> findAllProperties();
 
@@ -79,4 +82,8 @@ public interface TMLMapper {
     List<ThingModel> getThingCodeByAssetAndCategory(@Param("assetType") String assetType,
             @Param("category") String category, @Param("metricCode") String metricCode,
             @Param("metricType") String metricType,@Param("thingStartCode")String thingStartCode);
+
+    @Select("select * from tb_metric a," +
+            "(select metric_code from rel_thing_metric_label where thing_code=#{thingCode}) b where  a.metric_code=b.metric_code and a.metric_type1_code=#{metricType}")
+    List<MetricModel> findMetricByThingCode(@Param("thingCode") String thingCode,@Param("metricType") String metricType);
 }

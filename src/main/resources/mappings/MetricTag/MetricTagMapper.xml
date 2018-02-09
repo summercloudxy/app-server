@@ -10,6 +10,9 @@
         <result column="metric_tag_group_id" property="metricTagGroupId"/>
         <result column="metric_tag_group_code" property="metricTagGroupCode"/>
         <result column="create_date" property="createDate"/>
+        <result column="update_date" property="updateDate"/>
+        <result column="comments" property="comments"/>
+        <result column="operator" property="operator"/>
     </resultMap>
 
     <select id="findMetricTag" resultMap="metricTag">
@@ -22,7 +25,10 @@
         tmt.code_path,
         tmt.metric_tag_group_id,
         tmtg.`code` AS metric_tag_group_code,
-        tmt.create_date
+        tmt.create_date,
+        tmt.update_date,
+        tmt.comments,
+        tmt.operator
         FROM
         tb_metric_tag AS tmt
         INNER JOIN tb_metric_tag_group AS tmtg ON tmt.metric_tag_group_id = tmtg.id
@@ -55,6 +61,15 @@
         <if test="createDate != null">
             AND tmt.create_date = #{createDate}
         </if>
+        <if test="updateDate != null">
+            AND tmt.update_date = #{updateDate}
+        </if>
+        <if test="comments != null">
+            AND tmt.comments = #{comments}
+        </if>
+        <if test="operator != null">
+            AND tmt.operator = #{operator}
+        </if>
     </select>
 
     <insert id="addMetricTag" parameterType="com.zgiot.app.server.module.metrictag.pojo.MetricTag">
@@ -78,6 +93,15 @@
             <if test="createDate != null">
                 create_date,
             </if>
+            <if test="updateDate != null">
+                update_date,
+            </if>
+            <if test="comments != null">
+                comments,
+            </if>
+            <if test="operator != null">
+                operator
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="code != null">
@@ -97,6 +121,15 @@
             </if>
             <if test="createDate != null">
                 #{createDate},
+            </if>
+            <if test="updateDate != null">
+                #{updateDate},
+            </if>
+            <if test="comments != null">
+                #{comments},
+            </if>
+            <if test="operator != null">
+                #{operator}
             </if>
         </trim>
     </insert>
@@ -123,7 +156,16 @@
                 metric_tag_group_id =#{metricTagGroupId},
             </if>
             <if test="createDate != null">
-                create_date =#{createDate}
+                create_date =#{createDate},
+            </if>
+            <if test="updateDate != null">
+                update_date =#{updateDate},
+            </if>
+            <if test="comments != null">
+                comments =#{comments},
+            </if>
+            <if test="operator != null">
+                operator =#{operator}
             </if>
         </trim>
         where id = #{metricTagId}

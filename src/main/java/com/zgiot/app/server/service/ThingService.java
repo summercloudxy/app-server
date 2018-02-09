@@ -22,6 +22,13 @@ public interface ThingService {
     List<ThingModel> findAllThing();
 
     /**
+     *
+     * @param thingTag
+     * @return
+     */
+    List<ThingModel> findThingByTag(String thingTag);
+
+    /**
      * @return List<ThingPropertyModel>
      *         获取所有properties
      */
