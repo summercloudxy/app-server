@@ -73,65 +73,8 @@
     </select>
 
     <insert id="addMetricTag" parameterType="com.zgiot.app.server.module.metrictag.pojo.MetricTag">
-        INSERT INTO tb_metric_tag
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="code != null">
-                code,
-            </if>
-            <if test="tagName != null">
-                tag_name,
-            </if>
-            <if test="parentId != null">
-                parent_id,
-            </if>
-            <if test="codePath != null">
-                code_path,
-            </if>
-            <if test="metricTagGroupId != null">
-                metric_tag_group_id,
-            </if>
-            <if test="createDate != null">
-                create_date,
-            </if>
-            <if test="updateDate != null">
-                update_date,
-            </if>
-            <if test="comments != null">
-                comments,
-            </if>
-            <if test="operator != null">
-                operator
-            </if>
-        </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="code != null">
-                #{code},
-            </if>
-            <if test="tagName != null">
-                #{tagName},
-            </if>
-            <if test="parentId != null">
-                #{parentId},
-            </if>
-            <if test="codePath != null">
-                #{codePath},
-            </if>
-            <if test="metricTagGroupId != null">
-                #{metricTagGroupId},
-            </if>
-            <if test="createDate != null">
-                #{createDate},
-            </if>
-            <if test="updateDate != null">
-                #{updateDate},
-            </if>
-            <if test="comments != null">
-                #{comments},
-            </if>
-            <if test="operator != null">
-                #{operator}
-            </if>
-        </trim>
+        INSERT INTO tb_metric_tag(code,tagName,parentId,code_path,metric_tag_group_id,createDate,update_date,comments,operator)
+        values(#{code},#{tagName},#{parentId},#{codePath},#{metricTagGroupId},#{createDate},#{updateDate},#{comments},#{operator})
     </insert>
 
     <update id="updateMetricTag" parameterType="com.zgiot.app.server.module.metrictag.pojo.MetricTag">

@@ -58,11 +58,12 @@ public class MonitorController {
             for(SFMonitor sfMonitor:monitors){ 
                 MonitorWrapper monitorWrapper = new MonitorWrapper(); 
                 monitorWrapper.setSfMonitor(sfMonitor); 
-                List<MonitorItemInfo> monitorItemInfos = relSFMonitorItemMapper.getRelSFMonitorItemByMonId(sfMonitor.getId()); 
-                monitorWrapper.setMonitorItemInfos(monitorItemInfos); 
+                List<MonitorItemInfo> monitorItemInfos = relSFMonitorItemMapper.getRelSFMonitorItemByMonId(sfMonitor.getId());
+                monitorItemInfos = addNoMetricWrapper(monitorItemInfos,sfMonitor.getId());
+                monitorWrapper.setMonitorItemInfos(monitorItemInfos);
                 int count = relSFMonitorItemMapper.getEquipmentCount(sfMonitor.getId()); 
-                monitorWrapper.setEquipmentCount(count); 
-                monitorWrappers.add(monitorWrapper); 
+                monitorWrapper.setEquipmentCount(count);
+                monitorWrappers.add(monitorWrapper);
             } 
         } 
  
@@ -79,9 +80,22 @@ public class MonitorController {
                 monitorItemInfo.setRelSFMonItem(relSFMonItem);
                 monitorItemInfos.add(monitorItemInfo);
             }
+            //monitorItemInfos = addNoMetricWrapper(monitorItemInfos,monId);
         }
         return new ResponseEntity<>(ServerResponse.buildOkJson(monitorItemInfos),HttpStatus.OK); 
-    } 
+    }
+
+    private List<MonitorItemInfo> addNoMetricWrapper(List<MonitorItemInfo> monitorItemInfos,long monId){
+        List<RelSFMonItem> relSFMonItemList = relSFMonitorItemMapper.getRelSFMonItemNoMetric(monId);
+        for(RelSFMonItem relSFMonItem:relSFMonItemList){
+            MonitorItemInfo monitor = new MonitorItemInfo();
+            MetricModel metricModel = new MetricModel();
+            monitor.setMetricModel(metricModel);
+            monitor.setRelSFMonItem(relSFMonItem);
+            monitorItemInfos.add(monitor);
+        }
+        return monitorItemInfos;
+    }
  
  
     @RequestMapping(value="/addOrEditMonitorInfo",method= RequestMethod.POST) 

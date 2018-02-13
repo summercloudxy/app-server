@@ -68,10 +68,6 @@ public class MetricTag {
 
     private String operator;
 
-    /**
-     * 逻辑删除
-     */
-    private Integer isDelete;
 
     public Integer getMetricTagId() {
         return metricTagId;
@@ -143,14 +139,6 @@ public class MetricTag {
 
     public void setCreateDate(Date createDate) {
         this.createDate = createDate;
-    }
-
-    public Integer getIsDelete() {
-        return isDelete;
-    }
-
-    public void setIsDelete(Integer isDelete) {
-        this.isDelete = isDelete;
     }
 
     public Date getUpdateDate() {
