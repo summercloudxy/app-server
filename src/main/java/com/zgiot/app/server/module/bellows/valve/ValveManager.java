@@ -335,29 +335,31 @@ public class ValveManager {
     /**
      * 是否包含泵thingCode
      * @param pumpThingCode
-     * @return 不包含返回null
+     * @return 不包含返回空列表
      */
-    public Valve getValveByPumpThingCode(String pumpThingCode) {
+    public List<Valve> getValveByPumpThingCode(String pumpThingCode) {
+        List<Valve> res = new ArrayList<>();
         for (Valve valve : valveCache.findAll()) {
             if (valve.getPumpThingCode().equals(pumpThingCode)) {
-                return valve;
+                res.add(valve);
             }
         }
-        return null;
+        return res;
     }
 
     /**
      * 是否包含介质桶thingCode
      * @param bucketThingCode
-     * @return 不包含返回null
+     * @return 不包含返回空列表
      */
-    public Valve getValveByBucketThingCode(String bucketThingCode) {
+    public List<Valve> getValveByBucketThingCode(String bucketThingCode) {
+        List<Valve> res = new ArrayList<>();
         for (Valve valve : valveCache.findAll()) {
             if (valve.getBucketThingCode().equals(bucketThingCode)) {
-                return valve;
+                res.add(valve);
             }
         }
-        return null;
+        return res;
     }
 
     /**
@@ -365,15 +367,21 @@ public class ValveManager {
      * @param dataModel
      */
     public void handlePumpSpeedChange(DataModel dataModel) {
-        Valve valve = getValveByPumpThingCode(dataModel.getThingCode());
-        double pumpSpeed = Double.parseDouble(dataModel.getValue());
-        valve.setPumpSpeed(pumpSpeed);
+        List<Valve> valves = getValveByPumpThingCode(dataModel.getThingCode());
+        if (CollectionUtils.isEmpty(valves)) {
+            return;
+        }
 
+        double pumpSpeed = Double.parseDouble(dataModel.getValue());
         boolean pumpSpeedHigh = false;
         if (pumpSpeed > speedLimit) {
             pumpSpeedHigh = true;
         }
-        valve.setPumpSpeedHigh(pumpSpeedHigh);
+
+        for (Valve valve : valves) {
+            valve.setPumpSpeed(pumpSpeed);
+            valve.setPumpSpeedHigh(pumpSpeedHigh);
+        }
     }
 
     /**
@@ -381,8 +389,16 @@ public class ValveManager {
      * @param dataModel
      */
     public void handleBucketStateChange(DataModel dataModel) {
-        Valve valve = getValveByBucketThingCode(dataModel.getThingCode());
-        valve.setBucketState(Integer.parseInt(dataModel.getValue()));
+        List<Valve> valves = getValveByBucketThingCode(dataModel.getThingCode());
+        if (CollectionUtils.isEmpty(valves)) {
+            return;
+        }
+
+        int value = Integer.parseInt(dataModel.getValue());
+        for (Valve valve : valves) {
+            valve.setBucketState(value);
+        }
+
     }
 
 
