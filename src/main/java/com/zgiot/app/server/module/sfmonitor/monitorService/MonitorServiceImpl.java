@@ -44,14 +44,14 @@ public class MonitorServiceImpl implements MonitorService {
             if(sort == null){
                 sort = 1f;
             }
-            sfMonitor.setSort(sort);
+            sfMonitor.setSort(sort + 1);
             sfMonitorMapper.addMonitor(sfMonitor);
         }
 
         if(!isExist){
-            relSFMonitorItemMapper.deleteRelRelSFMonitorItem(sfMonitor.getId());
             Float count = relSFMonitorItemMapper.getMaxSortFromMonitorByMonId(sfMonitor.getId());
-            if(count == null){
+            relSFMonitorItemMapper.deleteRelRelSFMonitorItem(sfMonitor.getId());
+            if((count == null )|| (count == 0f)){
                 count = 1f;
             }
             if(relSFMonItems.size() > 0){
@@ -64,7 +64,7 @@ public class MonitorServiceImpl implements MonitorService {
                             }
                         }
                     }
-                    if(relSFMonItem.getSort() == null){
+                    if(relSFMonItem.getSort() == null || relSFMonItem.getSort() == 0f){
                         count = count + 1;
                         relSFMonItem.setSort(count);
                     }

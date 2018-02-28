@@ -21,6 +21,6 @@ public interface MetricTagRelationMapper {
 
     void deleteMetricTagRelation(MetricTagRelation metricTagRelation);
 
-    @Select("select count(b.*) from tb_metric_tag a,rel_metrictag_metric b where a.id=#{wrapperId} and b.code=a.metric_code")
+    @Select("select count(1) from tb_metric_tag a,rel_metrictag_metric b where a.id=#{wrapperId} and b.metric_tag_code=a.code")
     Integer getMetricCount(@Param("wrapperId") int wrapperId);
 }

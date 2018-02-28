@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zgiot.app.server.service.impl.mapper.MetricTagMapper">
     <resultMap id="metricTag" type="com.zgiot.app.server.module.metrictag.pojo.MetricTag">
-        <result column="id"  property="metricTagId"/>
+        <result column="id"  property="id"/>
         <result column="code" property="code"/>
         <result column="tag_name" property="tagName"/>
         <result column="parent_id" property="parentId"/>
@@ -15,7 +15,7 @@
         <result column="operator" property="operator"/>
     </resultMap>
 
-    <select id="findMetricTag" resultMap="metricTag">
+    <!--select id="findMetricTag" resultMap="metricTag">
         SELECT
         tmt.id,
         tmt.`code`,
@@ -37,8 +37,8 @@
         </if>
         WHERE
         1 = 1
-        <if test="metricTagId != null">
-            AND tmt.id = #{metricTagId}
+        <if test="id != null">
+            AND tmt.id = #{id}
         </if>
         <if test="code != null">
             AND tmt.code = #{code}
@@ -70,11 +70,14 @@
         <if test="operator != null">
             AND tmt.operator = #{operator}
         </if>
-    </select>
+    </select-->
 
     <insert id="addMetricTag" parameterType="com.zgiot.app.server.module.metrictag.pojo.MetricTag">
-        INSERT INTO tb_metric_tag(code,tagName,parentId,code_path,metric_tag_group_id,createDate,update_date,comments,operator)
+        INSERT INTO tb_metric_tag(code,tag_name,parent_id,code_path,metric_tag_group_id,create_date,update_date,comments,operator)
         values(#{code},#{tagName},#{parentId},#{codePath},#{metricTagGroupId},#{createDate},#{updateDate},#{comments},#{operator})
+        <selectKey resultType="java.lang.Integer" keyProperty="id">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
     </insert>
 
     <update id="updateMetricTag" parameterType="com.zgiot.app.server.module.metrictag.pojo.MetricTag">
@@ -111,7 +114,7 @@
                 operator =#{operator}
             </if>
         </trim>
-        where id = #{metricTagId}
+        where id = #{id}
     </update>
 
     <delete id="deleteMetricTag" parameterType="com.zgiot.app.server.module.metrictag.pojo.MetricTag">

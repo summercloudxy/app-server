@@ -11,7 +11,7 @@ public interface SFMonDisplayZoneMapper {
     @Select("select * from tb_sfmon_displayzone")
     List<SFMonDisplayZone> getDisplayZone();
 
-    @Insert("insert into rel_sfmon_tag_displayzone(metric_tag_code,zone_id) values(#{metricTagCode}.#{zoneId})")
+    @Insert("insert into rel_sfmon_tag_displayzone(metric_tag_code,zone_id) values(#{metricTagCode},#{zoneId})")
     void addRelSFMonTagDisplayZone(@Param("metricTagCode") String metricTagCode,@Param("zoneId") int zoneId);
 
     @Delete("delete from rel_sfmon_tag_displayzone where metric_tag_code=#{metricTagCode}")

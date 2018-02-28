@@ -13,7 +13,7 @@
     </resultMap>
 
     <select id="getRelSFMonitorItemByMonId" resultMap="monitorItemInfo">
-        select a.id as item_id,a.sfmon_id,a.thing_code,a.metric_code,b.id,b.metric_name,b.metric_code,b.metric_type1_code from rel_sfmon_item a,tb_metric b where sfmon_id=#{sfMonId} and a.metric_code=b.metric_code order by sort asc
+        select a.id as item_id,a.sfmon_id,a.thing_code,a.metric_code,b.id,b.metric_name,b.metric_code,b.metric_type1_code from rel_sfmon_item a,tb_metric b where sfmon_id=#{sfMonId} and a.metric_code=b.metric_code or sfmon_id=#{sfMonId} and a.metric_code='--' group by a.metric_code,a.thing_code order by sort asc
     </select>
 
 </mapper>

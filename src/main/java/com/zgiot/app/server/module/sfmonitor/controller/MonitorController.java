@@ -59,7 +59,6 @@ public class MonitorController {
                 MonitorWrapper monitorWrapper = new MonitorWrapper(); 
                 monitorWrapper.setSfMonitor(sfMonitor); 
                 List<MonitorItemInfo> monitorItemInfos = relSFMonitorItemMapper.getRelSFMonitorItemByMonId(sfMonitor.getId());
-                monitorItemInfos = addNoMetricWrapper(monitorItemInfos,sfMonitor.getId());
                 monitorWrapper.setMonitorItemInfos(monitorItemInfos);
                 int count = relSFMonitorItemMapper.getEquipmentCount(sfMonitor.getId()); 
                 monitorWrapper.setEquipmentCount(count);
@@ -80,7 +79,6 @@ public class MonitorController {
                 monitorItemInfo.setRelSFMonItem(relSFMonItem);
                 monitorItemInfos.add(monitorItemInfo);
             }
-            //monitorItemInfos = addNoMetricWrapper(monitorItemInfos,monId);
         }
         return new ResponseEntity<>(ServerResponse.buildOkJson(monitorItemInfos),HttpStatus.OK); 
     }
