@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -56,10 +57,10 @@ public class BellowsDataListener implements DataListener {
         } else if (compressorManager.containCompressor(thingCode) && compressorMetricCode.contains(metricCode)) {
             //空压机状态变化
             handleCompressorData(dataModel);
-        } else if (ValveMetricConstants.BUCKET_STATE.equals(metricCode) && valveManager.getValveByBucketThingCode(thingCode) != null) {
+        } else if (ValveMetricConstants.BUCKET_STATE.equals(metricCode) && !CollectionUtils.isEmpty(valveManager.getValveByBucketThingCode(thingCode))) {
             //阀门介质桶状态变化
             handleBucketStateChange(dataModel);
-        } else if (ValveMetricConstants.PUMP_SPEED.equals(metricCode) && valveManager.getValveByPumpThingCode(thingCode) != null) {
+        } else if (ValveMetricConstants.PUMP_SPEED.equals(metricCode) && !CollectionUtils.isEmpty(valveManager.getValveByPumpThingCode(thingCode))) {
             //阀门泵频率变化
             handlePumpSpeedChange(dataModel);
         }
