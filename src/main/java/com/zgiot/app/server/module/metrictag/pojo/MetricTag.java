@@ -17,7 +17,7 @@ public class MetricTag {
      * 主键
      */
     @NotNull(message = "主键(metricTagId)不能为空", groups = {UpdateValidate.class, DeleteValidate.class})
-    private Integer metricTagId;
+    private Integer id;
 
     /**
      * code编号
@@ -68,17 +68,13 @@ public class MetricTag {
 
     private String operator;
 
-    /**
-     * 逻辑删除
-     */
-    private Integer isDelete;
 
-    public Integer getMetricTagId() {
-        return metricTagId;
+    public Integer getId() {
+        return id;
     }
 
-    public void setMetricTagId(Integer metricTagId) {
-        this.metricTagId = metricTagId;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getCode() {
@@ -143,14 +139,6 @@ public class MetricTag {
 
     public void setCreateDate(Date createDate) {
         this.createDate = createDate;
-    }
-
-    public Integer getIsDelete() {
-        return isDelete;
-    }
-
-    public void setIsDelete(Integer isDelete) {
-        this.isDelete = isDelete;
     }
 
     public Date getUpdateDate() {

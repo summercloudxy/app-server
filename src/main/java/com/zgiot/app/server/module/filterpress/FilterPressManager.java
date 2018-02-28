@@ -769,7 +769,9 @@ public class FilterPressManager {
          * @param filterPress
          */
         synchronized  void enqueue(FilterPress filterPress) {
-            queuePosition.put(filterPress.getCode(), queuePosition.size() + 1);
+            if(!queuePosition.containsKey(filterPress.getCode())){
+                queuePosition.put(filterPress.getCode(), queuePosition.size() + 1);
+            }
             if(logger.isDebugEnabled()){
                 logger.debug("filterPress:" + filterPress.getCode() + " enqueue,position:" + (queuePosition.size() + 1));
             }
@@ -843,7 +845,7 @@ public class FilterPressManager {
             for(String thingCode:queuePosition.keySet()){
                 if(queuePosition.get(thingCode) > position)
                     queuePosition.put(thingCode, queuePosition.get(thingCode) - 1);
-                    logger.debug("resort filterpress:" + thingCode + " and afterresortposition:" + (queuePosition.get(thingCode) - 1));
+                    logger.debug("resort filterpress:" + thingCode + " and afterresortposition:" + (queuePosition.get(thingCode)));
             }
         }
 

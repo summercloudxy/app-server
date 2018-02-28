@@ -161,9 +161,10 @@ public class FilterPress {
         if (FilterPressMetricConstants.PAUSE.equals(metricCode) && unloadManager.isUnloading) {
             if (Boolean.TRUE.toString().equals(value)) {
                 unloadManager.pauseTimer();
-            } else {
-                unloadManager.scheduleTimer();
             }
+//            else {
+//                unloadManager.scheduleTimer();
+//            }
         }
     }
 
@@ -294,7 +295,7 @@ public class FilterPress {
     }
 
     public void onLoosen() {
-        logger.trace("{} on loosen", code);
+        logger.debug("{} on loosen", code);
         isFilterPressUnloading = true;
         looseStartTime = System.currentTimeMillis();
         this.startUnload();
@@ -715,6 +716,9 @@ public class FilterPress {
         while(iterator.hasNext()){
             if(filterPress.getCode().equals(iterator.next().code)){
                 queue.remove(filterPress);
+                if(logger.isDebugEnabled()){
+                    logger.debug("delete filterpress {}",filterPress.getCode());
+                }
             }
         }
     }
@@ -750,7 +754,7 @@ public class FilterPress {
          */
         private void startUnload() {
             isUnloading = true;
-            scheduleTimer();
+            //scheduleTimer();
         }
 
         /**

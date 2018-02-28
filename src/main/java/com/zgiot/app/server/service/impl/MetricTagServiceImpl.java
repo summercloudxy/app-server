@@ -69,7 +69,7 @@ public class MetricTagServiceImpl implements MetricTagService {
 
         // 获取所有待修改codePath的数据
         MetricTag metricTagSelect = new MetricTag();
-        metricTagSelect.setMetricTagId(metricTag.getMetricTagId());
+        metricTagSelect.setId(metricTag.getId());
         MetricTag metricTagBefore = metricTagMapper.findMetricTag(metricTagSelect).get(0);
         metricTagSelect = new MetricTag();
         metricTagSelect.setCodePathLike(metricTagBefore.getCodePath());
@@ -96,7 +96,7 @@ public class MetricTagServiceImpl implements MetricTagService {
             return CODE_PATH_CUT_OFF_RULE;
         }
         MetricTag tagParent = new MetricTag();
-        tagParent.setMetricTagId(parentId);
+        tagParent.setId(parentId);
         tagParent = metricTagMapper.findMetricTag(tagParent).get(0);
         StringBuffer codePath = new StringBuffer();
         codePath.append(tagParent.getCodePath())

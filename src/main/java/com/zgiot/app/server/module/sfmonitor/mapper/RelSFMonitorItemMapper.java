@@ -9,7 +9,10 @@ import java.util.List;
 @Mapper 
 public interface RelSFMonitorItemMapper { 
 
-    List<MonitorItemInfo> getRelSFMonitorItemByMonId(@Param("sfMonId") long sfMonId); 
+    List<MonitorItemInfo> getRelSFMonitorItemByMonId(@Param("sfMonId") long sfMonId);
+
+    @Select("select * from rel_sfmon_item where sfmon_id=#{sfmonId} and metric_code='--' order by sort asc")
+    List<RelSFMonItem> getRelSFMonItemNoMetric(@Param("sfmonId") long sfmonId);
  
     @Select("select * from rel_sfmon_item where sfmon_id=#{sfMonId} order by sort asc") 
     List<RelSFMonItem> getRelSFMonitorItem(@Param("sfMonId") long sfMonId); 

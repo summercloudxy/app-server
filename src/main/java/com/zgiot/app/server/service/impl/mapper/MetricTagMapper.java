@@ -13,18 +13,33 @@ import java.util.List;
  */
 @Mapper
 public interface MetricTagMapper {
-
+    @Select("select * from tb_metric_tag")
     List<MetricTag> findMetricTag(MetricTag metricTag);
 
-    @Select("select * from tb_thing_tag where tag_name=#{name}")
+    @Select("select * from tb_metric_tag where tag_name=#{name}")
     MetricTag getMetricTagByName(@Param("name") String name);
 
-    @Delete("delete from tb_thing_tag where metricTagId=#{id}")
-    void deleteThingTag(@Param("id") int id);
+    @Select("select * from tb_metric_tag where tag_name like #{name}'%'")
+    List<MetricTag> getMetricTag(@Param("name") String name);
+
+    @Delete("delete from tb_metric_tag where id=#{id}")
+    void delMetricTag(@Param("id") int id);
+
+    @Delete("delete from rel_sfmon_tag_displayzone where metric_tag_code=#{metricTagCode}")
+    void delRelMetricTagDisplayzone(@Param("metricTagCode") String metricTagCode);
 
     void addMetricTag(MetricTag metricTag);
 
     void updateMetricTag(MetricTag metricTag);
 
     void deleteMetricTag(MetricTag metricTag);
+
+    @Select("select b.name from rel_sfmon_tag_displayzone a,tb_sfmon_displayzone b where a.metric_tag_code=#{metricTagCode} and a.zone_id=b.id")
+    String getMetricTagZone(@Param("metricTagCode") String metricTagCode);
+
+    @Select("select count(1) from tb_metric_tag")
+    int getMetricTagCount();
+
+    @Select("select * from tb_metric_tag where id=#{id}")
+    MetricTag getMetricTagById(@Param("id") int id);
 }
