@@ -331,7 +331,7 @@ public class FilterPress {
                 && manager.getUnloadSequence().containsKey(this.getCode())) {
             position = manager.getUnloadSequence().get(this.getCode());
         }
-
+        manager.getUnloadSequence().remove(this.getCode());
         if (position > 0) {
             manager.getUnloadManager().reSort(position);
             logger.debug("resort");
