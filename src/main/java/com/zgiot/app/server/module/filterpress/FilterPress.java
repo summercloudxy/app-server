@@ -336,6 +336,7 @@ public class FilterPress {
             manager.getUnloadManager().reSort(position);
             logger.debug("resort");
         }
+        removeFilterPress(manager.getUnloadManager().getQueue(),this);
     }
 
     public void offLoosen() {
