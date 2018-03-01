@@ -83,6 +83,7 @@
     <update id="updateMetricTag" parameterType="com.zgiot.app.server.module.metrictag.pojo.MetricTag">
         update tb_metric_tag
         <trim prefix="set" suffixOverrides=",">
+            id=#{id},
             <if test="code != null">
                 code =#{code},
             </if>
