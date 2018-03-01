@@ -276,7 +276,7 @@ public class FilterPress {
     public void onLocal() {
         logger.trace("{} on local", code);
         int position = -1;
-        if (manager != null && (!manager.getUnloadSequence().isEmpty()) && (!StringUtils.isBlank(getCode()))) {
+        if (manager != null && (!manager.getUnloadSequence().isEmpty()) && (!StringUtils.isBlank(this.getCode()))) {
             position = manager.getUnloadSequence().get(this.getCode());
         }
         //manager.getUnloadManager().getQueue().remove(this);
@@ -301,7 +301,7 @@ public class FilterPress {
         this.startUnload();
         int position = -1;
         if (manager != null && (!manager.getUnloadSequence().isEmpty())
-                && (!StringUtils.isBlank(getCode()))
+                && (!StringUtils.isBlank(this.getCode()))
                 && manager.getUnloadSequence().containsKey(this.getCode())) {
             position = manager.getUnloadSequence().get(this.getCode());
         }
@@ -321,6 +321,20 @@ public class FilterPress {
         if (position > 0) {
             manager.getUnloadManager().reSort(position);
             logger.debug("loose resort");
+        }
+    }
+
+    private void deleteFilterPressInQueue(){
+        int position = -1;
+        if (manager != null && (!manager.getUnloadSequence().isEmpty())
+                && (!StringUtils.isBlank(this.getCode()))
+                && manager.getUnloadSequence().containsKey(this.getCode())) {
+            position = manager.getUnloadSequence().get(this.getCode());
+        }
+
+        if (position > 0) {
+            manager.getUnloadManager().reSort(position);
+            logger.debug("resort");
         }
     }
 
@@ -398,11 +412,13 @@ public class FilterPress {
         }
         filterPressTakeAndPullCount.set(0);
         unloadManager.stopUnload();
+        this.deleteFilterPressInQueue();
     }
 
     public void onFeed() {
         logger.trace("{} on feed", code);
         feedStartTime = System.currentTimeMillis();
+        this.deleteFilterPressInQueue();
     }
 
     public void onFeedOver() {
@@ -412,6 +428,7 @@ public class FilterPress {
     public void onBlow() {
         logger.trace("{} on blow", code);
         waitDuration = System.currentTimeMillis();
+        this.deleteFilterPressInQueue();
     }
 
     public void onCycle() {
