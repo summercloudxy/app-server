@@ -235,6 +235,12 @@ public class FilterPressManager {
         }
     }
 
+    public void clearAllUnloadQueue(){
+        getUnloadSequence().clear();
+        getUnloadManager().getQueue().clear();
+        getUnConfirmedUnload().clear();
+    }
+
     /**
      * process the stage data and call the specific method of filter press
      *
