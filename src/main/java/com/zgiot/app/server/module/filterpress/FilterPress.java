@@ -276,7 +276,7 @@ public class FilterPress {
     public void onLocal() {
         logger.trace("{} on local", code);
         int position = -1;
-        if (manager != null && (!manager.getUnloadSequence().isEmpty()) && (!StringUtils.isBlank(this.getCode()))) {
+        if (manager != null && (!manager.getUnloadSequence().isEmpty()) && (!StringUtils.isBlank(this.getCode())) && (manager.getUnloadSequence().containsKey(this.getCode()))) {
             position = manager.getUnloadSequence().get(this.getCode());
         }
         //manager.getUnloadManager().getQueue().remove(this);
