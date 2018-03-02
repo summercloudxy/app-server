@@ -337,6 +337,11 @@ public class FilterPress {
             logger.debug("resort");
         }
         removeFilterPress(manager.getUnloadManager().getQueue(),this);
+        if (manager != null && (!manager.getUnConfirmedUnload().isEmpty())
+                && (!StringUtils.isBlank(this.getCode()))
+                && manager.getUnConfirmedUnload().contains(this.getCode())) {
+            manager.getUnConfirmedUnload().remove(this.getCode());
+        }
     }
 
     public void offLoosen() {
