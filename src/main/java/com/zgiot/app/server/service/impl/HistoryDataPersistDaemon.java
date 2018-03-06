@@ -50,9 +50,9 @@ public class HistoryDataPersistDaemon {
                                         try {
                                             historyDataService.insertBatch(list);
                                         } catch (Exception e) {
-                                            logger.error("Batch insert histdata error (msg: `{}`), write back to buffer for {} items."
+                                            logger.error("Batch insert histdata error (msg: `{}`)."
                                                     , e.getMessage(), list.size());
-                                            dataBuffer.addAll(list);
+                                            // dataBuffer.addAll(list); // avoid mem crash when Mongo down.
                                         }
                                     });
                                 }
