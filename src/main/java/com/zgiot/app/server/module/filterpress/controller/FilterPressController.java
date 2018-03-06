@@ -163,6 +163,15 @@ public class FilterPressController {
                 , HttpStatus.OK);
     }
 
+    @ApiOperation("清除卸料队列")
+    @RequestMapping(value = "/filterpress/clearUnloadQueue",method = RequestMethod.POST)
+    public ResponseEntity<String> clearUnloadQueue(){
+        filterPressManager.clearAllUnloadQueue();
+        return new ResponseEntity<>(
+                ServerResponse.buildOkJson(null)
+                , HttpStatus.OK);
+    }
+
     private Map<String,String> getMapByMetricCode(String metricCode){
         Class<FilterPressMetricConstants> clz = FilterPressMetricConstants.class;
         Field[] fields = clz.getDeclaredFields();

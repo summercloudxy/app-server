@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.zgiot.app.server.module.thingtag.dao.ThingTagMapper">
+<mapper namespace="com.zgiot.app.server.service.impl.mapper.ThingTagMapper">
     <resultMap id="thingTag" type="com.zgiot.app.server.module.thingtag.pojo.ThingTag">
         <result column="id"  property="thingTagId"/>
         <result column="code" property="code"/>
@@ -10,6 +10,9 @@
         <result column="thing_tag_group_id" property="thingTagGroupId"/>
         <result column="thing_tag_group_code" property="thingTagGroupCode"/>
         <result column="create_date" property="createDate"/>
+        <result column="update_date" property="updateDate"/>
+        <result column="comments" property="comments"/>
+        <result column="operator" property="operator"/>
     </resultMap>
 
     <select id="findThingTag" resultMap="thingTag">
@@ -21,7 +24,10 @@
         ttt.code_path,
         ttt.thing_tag_group_id,
         tttg.`code` AS thing_tag_group_code,
-        ttt.create_date
+        ttt.create_date,
+        ttt.update_date,
+        ttt.comments,
+        ttt.operator
         FROM
         tb_thing_tag AS ttt
         INNER JOIN tb_thing_tag_group AS tttg ON ttt.thing_tag_group_id = tttg.id
@@ -54,6 +60,15 @@
         <if test="createDate != null">
         AND ttt.create_date = #{createDate}
         </if>
+        <if test="updateDate != null">
+            AND ttt.update_date = #{updateDate}
+        </if>
+        <if test="comments != null">
+            AND ttt.comments = #{comments}
+        </if>
+        <if test="operator != null">
+            AND ttt.operator = #{operator}
+        </if>
     </select>
 
     <insert id="addThingTag" parameterType="com.zgiot.app.server.module.thingtag.pojo.ThingTag">
@@ -77,6 +92,15 @@
             <if test="createDate != null">
                 create_date,
             </if>
+            <if test="updateDate != null">
+                updateDate,
+            </if>
+            <if test="comments != null">
+                comments,
+            </if>
+            <if test="operator != null">
+                operator
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="code != null">
@@ -96,6 +120,15 @@
             </if>
             <if test="createDate != null">
                 #{createDate},
+            </if>
+            <if test="updateDate != null">
+                #{updateDate},
+            </if>
+            <if test="comments != null">
+                #{comments},
+            </if>
+            <if test="operator != null">
+                #{operator}
             </if>
         </trim>
     </insert>
@@ -123,6 +156,15 @@
             </if>
             <if test="createDate != null">
                 create_date =#{createDate}
+            </if>
+            <if test="updateDate != null">
+                update_date =#{updateDate}
+            </if>
+            <if test="comments != null">
+                comments =#{comments}
+            </if>
+            <if test="operator != null">
+                operator =#{operator}
             </if>
         </trim>
         where id = #{thingTagId}

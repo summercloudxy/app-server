@@ -1,4 +1,4 @@
-package com.zgiot.app.server.module.thingtag.dao;
+package com.zgiot.app.server.service.impl.mapper;
 
 import com.zgiot.app.server.module.thingtag.pojo.ThingTagRelation;
 import org.apache.ibatis.annotations.Mapper;

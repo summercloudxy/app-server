@@ -62,6 +62,12 @@ public class ThingTag {
      */
     private Date createDate;
 
+    private Date updateDate;
+
+    private String comments;
+
+    private String operator;
+
     public Integer getThingTagId() {
         return thingTagId;
     }
@@ -132,5 +138,29 @@ public class ThingTag {
 
     public void setCreateDate(Date createDate) {
         this.createDate = createDate;
+    }
+
+    public Date getUpdateDate() {
+        return updateDate;
+    }
+
+    public String getComments() {
+        return comments;
+    }
+
+    public String getOperator() {
+        return operator;
+    }
+
+    public void setUpdateDate(Date updateDate) {
+        this.updateDate = updateDate;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
+    }
+
+    public void setOperator(String operator) {
+        this.operator = operator;
     }
 }

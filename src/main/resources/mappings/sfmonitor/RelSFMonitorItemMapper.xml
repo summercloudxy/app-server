@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.sfmonitor.mapper.RelSFMonitorItemMapper">
+    <resultMap id="monitorItemInfo" type="com.zgiot.app.server.module.sfmonitor.controller.MonitorItemInfo">
+        <result column="id"  property="metricModel.id"/>
+        <result column="metric_name" property="metricModel.metricName"/>
+        <result column="metric_code" property="metricModel.metricCode"/>
+        <result column="metric_type1_codefrom" property="metricModel.metricType1Code"/>
+        <result column="item_id" property="relSFMonItem.id"/>
+        <result column="sfmon_id" property="relSFMonItem.sfMonId"/>
+        <result column="thing_code" property="relSFMonItem.thingCode"/>
+        <result column="metric_code" property="relSFMonItem.metricCode"/>
+    </resultMap>
+
+    <select id="getRelSFMonitorItemByMonId" resultMap="monitorItemInfo">
+        select a.id as item_id,a.sfmon_id,a.thing_code,a.metric_code,b.id,b.metric_name,b.metric_code,b.metric_type1_code from rel_sfmon_item a,tb_metric b where sfmon_id=#{sfMonId} and a.metric_code=b.metric_code or sfmon_id=#{sfMonId} and ISNULL(a.metric_code) group by a.metric_code,a.thing_code order by sort asc
+    </select>
+
+</mapper>
+ 

@@ -1,6 +1,7 @@
 package com.zgiot.app.server.module.generic;
 
 import com.zgiot.app.server.service.ThingService;
+import com.zgiot.common.constants.ThingTagConstants;
 import com.zgiot.common.pojo.*;
 import com.zgiot.common.restcontroller.ServerResponse;
 import org.apache.commons.lang.StringUtils;
@@ -94,6 +95,24 @@ public class ThingController {
     @GetMapping("")
     public ResponseEntity<String> findAllThing() {
         List<ThingModel> baseThings = thingService.findAllThing();
+        List<Map<String, Map<String, String>>> things = getThingInfo(baseThings);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(things), HttpStatus.OK);
+    }
+
+    @GetMapping("/equipmentType")
+    public ResponseEntity<String> findThingByType() {
+        List<ThingModel> baseThings = thingService.findThingByTag(ThingTagConstants.EQUIPMENT);
+        List<String> thingCodeList = new ArrayList<>();
+        //List<Map<String, Map<String, String>>> things = getThingInfo(baseThings);
+        for(ThingModel thingModel:baseThings){
+            if(!StringUtils.isBlank(thingModel.getThingCode())){
+                thingCodeList.add(thingModel.getThingCode());
+            }
+        }
+        return new ResponseEntity<>(ServerResponse.buildOkJson(thingCodeList), HttpStatus.OK);
+    }
+
+    private List<Map<String, Map<String, String>>> getThingInfo(List<ThingModel> thingModels){
         Map<String, Map<String, String>> thingMap = null;
         Map<String, String> base = null;
         Map<String, String> prop = null;
@@ -101,8 +120,8 @@ public class ThingController {
         List<Map<String, Map<String, String>>> things = new ArrayList<>();
         List<ThingPropertyModel> thingPropertyModels = null;
 
-        if (baseThings.size() > 0) {
-            for (ThingModel baseProperty : baseThings) {
+        if (thingModels.size() > 0) {
+            for (ThingModel baseProperty : thingModels) {
                 base = new LinkedHashMap<>();
                 prop = new LinkedHashMap<>();
                 disProp = new LinkedHashMap<>();
@@ -120,7 +139,7 @@ public class ThingController {
                 things.add(thingMap);
             }
         }
-        return new ResponseEntity<>(ServerResponse.buildOkJson(things), HttpStatus.OK);
+        return things;
     }
 
     private void parsePropertiesByType(List<ThingPropertyModel> base, Map<String, String> propMap,

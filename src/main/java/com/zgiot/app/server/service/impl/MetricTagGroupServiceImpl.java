@@ -1,6 +1,6 @@
 package com.zgiot.app.server.service.impl;
 
-import com.zgiot.app.server.module.metrictag.dao.MetricTagGroupMapper;
+import com.zgiot.app.server.service.impl.mapper.MetricTagGroupMapper;
 import com.zgiot.app.server.module.metrictag.pojo.MetricTagGroup;
 import com.zgiot.app.server.service.MetricTagGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
