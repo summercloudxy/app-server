@@ -107,8 +107,10 @@ public class SubscriptionCardServiceImpl implements SubscriptionCardService {
 
             if (StringUtils.isNotBlank(metricData.getFirstMetricValue()) && StringUtils.isNotBlank(metricData.getSecondMetricValue())) {
                 BigDecimal totalValue = new BigDecimal(metricData.getFirstMetricValue()).add(new BigDecimal(metricData.getSecondMetricValue()));
-                metricData.setFirstMetricPecent(new BigDecimal(metricData.getFirstMetricValue()).divide(totalValue, 1, BigDecimal.ROUND_HALF_UP) + "%");
-                metricData.setSecondMetricPecent(new BigDecimal(metricData.getSecondMetricValue()).divide(totalValue, 1, BigDecimal.ROUND_HALF_UP) + "%");
+                BigDecimal fistValue = new BigDecimal(metricData.getFirstMetricValue()).divide(totalValue, 3, BigDecimal.ROUND_HALF_UP);
+                metricData.setFirstMetricPecent((fistValue).multiply(new BigDecimal(100)).setScale(1) + "%");
+                BigDecimal secondvalue = (new BigDecimal(metricData.getSecondMetricValue()).divide(totalValue, 3, BigDecimal.ROUND_HALF_UP));
+                metricData.setSecondMetricPecent(secondvalue.multiply(new BigDecimal(100)).setScale(1) + "%");
             } else if (StringUtils.isNotBlank(metricData.getFirstMetricValue()) && StringUtils.isBlank(metricData.getSecondMetricValue())) {
                 metricData.setFirstMetricPecent("100%");
             } else if (StringUtils.isBlank(metricData.getFirstMetricValue()) && StringUtils.isNotBlank(metricData.getSecondMetricValue())) {
@@ -121,7 +123,7 @@ public class SubscriptionCardServiceImpl implements SubscriptionCardService {
         }
         historyWashingQuantity.setMetricDatas(metricDatas);
         cardData.setCardCode(CardTypeEnum.HISTORYWASHINGQUANTITY_ONE.getCardCode());
-        cardData.setCardData(JSON.toJSONString(historyWashingQuantity));
+        cardData.setCardData(JSON.toJSONString(historyWashingQuantity).replace("\"", "'"));
         //.replace("\"", "'"));
         return cardData;
     }
