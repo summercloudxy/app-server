@@ -1,16 +1,16 @@
-package com.zgiot.app.server.module.sfsubsc.dto;
+package com.zgiot.app.server.module.sfsubsc.entity.dto;
 
 /**
  * 卡片数据
  *
  * @author jys
  */
-public class CardData {
+public class CardDataDTO {
 
 
     private String cardCode;
 
-    private String cardData;
+    private Object cardData;
 
     public String getCardCode() {
         return cardCode;
@@ -20,11 +20,11 @@ public class CardData {
         this.cardCode = cardCode;
     }
 
-    public String getCardData() {
+    public Object getCardData() {
         return cardData;
     }
 
-    public void setCardData(String cardData) {
+    public void setCardData(Object cardData) {
         this.cardData = cardData;
     }
 }

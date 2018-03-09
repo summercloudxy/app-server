@@ -1,6 +1,6 @@
-package com.zgiot.app.server.module.sfsubsc.client;
+package com.zgiot.app.server.module.sfsubsc.service.client;
 
-import com.zgiot.app.server.module.sfsubsc.dto.CardData;
+import com.zgiot.app.server.module.sfsubsc.entity.dto.CardDataDTO;
 import com.zgiot.common.restcontroller.ServerResponse;
 import feign.Headers;
 import feign.RequestLine;
@@ -15,11 +15,11 @@ public interface CloudServerClient {
     /**
      * cloudserver客户端
      *
-     * @param cardDatas
+     * @param cardDataDTOS
      * @return
      */
     @Headers({"Content-Type: application/json"})
     @RequestLine("POST cloudServer/v1/subsc/saveAllCardDatas")
-    ServerResponse saveAllCardDatas(@RequestBody List<CardData> cardDatas);
+    ServerResponse saveAllCardDatas(@RequestBody List<CardDataDTO> cardDataDTOS);
 
 }

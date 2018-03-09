@@ -12,7 +12,20 @@ public enum CardTypeEnum {
     /**
      * 二期历史入洗量
      */
-    HISTORYWASHINGQUANTITY_TWO("lsrxl_02", "二期历史入洗量");
+    HISTORYWASHINGQUANTITY_TWO("lsrxl_02", "二期历史入洗量"),
+    /**
+     * 一期历史产品量
+     */
+    HISTORYPRODUCTRATE_ONE("lscpl_01", "一期历史产品量"),
+    /**
+     * 二期历史产品量
+     */
+    HISTORYPRODUCTRATE_TWO("lscpl_02", "二期历史产品量"),
+
+    /**
+     * 原煤配比
+     */
+    COALPRECENT("ympb", "原煤配比");
 
 
     private String cardCode;

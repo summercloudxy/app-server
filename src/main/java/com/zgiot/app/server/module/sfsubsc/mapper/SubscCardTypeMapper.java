@@ -1,6 +1,6 @@
 package com.zgiot.app.server.module.sfsubsc.mapper;
 
-import com.zgiot.app.server.module.sfsubsc.pojo.SubscriptionCardSetting;
+import com.zgiot.app.server.module.sfsubsc.entity.pojo.SubscCardTypeDO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -11,12 +11,12 @@ import java.util.List;
  * 卡片配置
  */
 @Mapper
-public interface SubscriptionCardSettingMapper {
+public interface SubscCardTypeMapper {
     /**
      * 查询所有的订阅开篇配置
      *
      * @return
      */
-    @Select("select * from tb_sfsubscription_card_setting")
-    List<SubscriptionCardSetting> getAllSubscriptionCardSetting();
+    @Select("select * from tb_subsc_card_type")
+    List<SubscCardTypeDO> getAllSubscCardTypes();
 }

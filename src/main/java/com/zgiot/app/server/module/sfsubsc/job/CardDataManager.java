@@ -1,6 +1,6 @@
 package com.zgiot.app.server.module.sfsubsc.job;
 
-import com.zgiot.app.server.module.sfsubsc.service.SubscriptionCardService;
+import com.zgiot.app.server.module.sfsubsc.service.SubscCardTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,11 +12,11 @@ public class CardDataManager {
 
 
     @Autowired
-    private SubscriptionCardService subscriptionCardService;
+    private SubscCardTypeService subscCardTypeService;
 
 
     public void getAllCardDatas() {
-        subscriptionCardService.getAllCardDatas();
+        subscCardTypeService.getAllCardDatas();
     }
 
 }

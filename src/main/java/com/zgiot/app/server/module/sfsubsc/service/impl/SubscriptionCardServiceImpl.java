@@ -1,13 +1,12 @@
 package com.zgiot.app.server.module.sfsubsc.service.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.zgiot.app.server.module.sfsubsc.client.CloudServerClient;
-import com.zgiot.app.server.module.sfsubsc.dto.CardData;
+import com.zgiot.app.server.module.sfsubsc.entity.dto.CardDataDTO;
+import com.zgiot.app.server.module.sfsubsc.entity.pojo.SubscCardTypeDO;
+import com.zgiot.app.server.module.sfsubsc.entity.vo.HistoryWashingQuantityVO;
 import com.zgiot.app.server.module.sfsubsc.enums.CardTypeEnum;
-import com.zgiot.app.server.module.sfsubsc.mapper.SubscriptionCardSettingMapper;
-import com.zgiot.app.server.module.sfsubsc.pojo.SubscriptionCardSetting;
-import com.zgiot.app.server.module.sfsubsc.service.SubscriptionCardService;
-import com.zgiot.app.server.module.sfsubsc.vo.HistoryWashingQuantity;
+import com.zgiot.app.server.module.sfsubsc.mapper.SubscCardTypeMapper;
+import com.zgiot.app.server.module.sfsubsc.service.SubscCardTypeService;
+import com.zgiot.app.server.module.sfsubsc.service.client.CloudServerClient;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.common.constants.MetricCodes;
 import com.zgiot.common.pojo.DataModelWrapper;
@@ -33,7 +32,7 @@ import java.util.Optional;
  * @author
  */
 @Service
-public class SubscriptionCardServiceImpl implements SubscriptionCardService {
+public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
     private static final Logger logger = LoggerFactory.getLogger(SubscriptionCardServiceImpl.class);
 
@@ -45,28 +44,28 @@ public class SubscriptionCardServiceImpl implements SubscriptionCardService {
 
 
     @Autowired
-    private SubscriptionCardSettingMapper subscriptionCardSettingMapper;
+    private SubscCardTypeMapper subscCardTypeMapper;
 
     @Autowired
     private DataService dataService;
 
+
     @Override
-    public List<SubscriptionCardSetting> getAllSubscriptionCardSetting() {
-        return subscriptionCardSettingMapper.getAllSubscriptionCardSetting();
+    public List<SubscCardTypeDO> getAllSubscCardTypes() {
+        return subscCardTypeMapper.getAllSubscCardTypes();
     }
 
     @Override
-    public CardData getHistoryWashingQuantity(SubscriptionCardSetting subscriptionCardSetting) {
-        CardData cardData = new CardData();
-        HistoryWashingQuantity historyWashingQuantity = new HistoryWashingQuantity();
-        historyWashingQuantity.setCardTitle(subscriptionCardSetting.getCardName());
-
-        String[] cardParamValues = subscriptionCardSetting.getCardParamValue().split(",");
-        historyWashingQuantity.setLegend(cardParamValues);
-        List<HistoryWashingQuantity.MetricData> metricDatas = new ArrayList<>();
+    public CardDataDTO getHistoryWashingQuantity(SubscCardTypeDO subscCardTypeDO) {
+        CardDataDTO cardDataDTO = new CardDataDTO();
+        HistoryWashingQuantityVO historyWashingQuantityVO = new HistoryWashingQuantityVO();
+        historyWashingQuantityVO.setCardTitle(subscCardTypeDO.getCardName());
+        String[] cardParamValues = subscCardTypeDO.getCardParamValue().split(",");
+        historyWashingQuantityVO.setLegend(cardParamValues);
+        List<HistoryWashingQuantityVO.MetricData> metricDatas = new ArrayList<>();
         String[] metricTypes = {MetricCodes.CT_C, MetricCodes.CT_D, MetricCodes.CT_M, MetricCodes.CT_Y, MetricCodes.CT_T};
         for (String metrictype : metricTypes) {
-            HistoryWashingQuantity.MetricData metricData = historyWashingQuantity.new MetricData();
+            HistoryWashingQuantityVO.MetricData metricData = historyWashingQuantityVO.new MetricData();
             switch (metrictype) {
                 case MetricCodes.CT_C:
                     metricData.setMetricIndex("班");
@@ -87,24 +86,18 @@ public class SubscriptionCardServiceImpl implements SubscriptionCardService {
                     metricData.setMetricIndex("");
                     break;
             }
-
             Optional<DataModelWrapper> firstMetirc = dataService.getData(cardParamValues[0], metrictype);
-
             if (firstMetirc.isPresent()) {
                 metricData.setFirstMetricValue(firstMetirc.get().getValue());
             } else {
                 metricData.setFirstMetricValue("");
             }
-
             Optional<DataModelWrapper> secondMetirc = dataService.getData(cardParamValues[1], metrictype);
-
             if (secondMetirc.isPresent()) {
                 metricData.setSecondMetricValue(secondMetirc.get().getValue());
             } else {
                 metricData.setSecondMetricValue("");
             }
-
-
             if (StringUtils.isNotBlank(metricData.getFirstMetricValue()) && StringUtils.isNotBlank(metricData.getSecondMetricValue())) {
                 BigDecimal totalValue = new BigDecimal(metricData.getFirstMetricValue()).add(new BigDecimal(metricData.getSecondMetricValue()));
                 BigDecimal fistValue = new BigDecimal(metricData.getFirstMetricValue()).divide(totalValue, 3, BigDecimal.ROUND_HALF_UP);
@@ -121,22 +114,22 @@ public class SubscriptionCardServiceImpl implements SubscriptionCardService {
             }
             metricDatas.add(metricData);
         }
-        historyWashingQuantity.setMetricDatas(metricDatas);
-        cardData.setCardCode(CardTypeEnum.HISTORYWASHINGQUANTITY_ONE.getCardCode());
-        cardData.setCardData(JSON.toJSONString(historyWashingQuantity).replace("\"", "'"));
-        //.replace("\"", "'"));
-        return cardData;
+        historyWashingQuantityVO.setMetricDatas(metricDatas);
+        cardDataDTO.setCardCode(CardTypeEnum.HISTORYWASHINGQUANTITY_ONE.getCardCode());
+        cardDataDTO.setCardData(historyWashingQuantityVO);
+        return cardDataDTO;
     }
 
     @Override
     public void getAllCardDatas() {
-        List<CardData> cardDatas = new ArrayList<>();
-        List<SubscriptionCardSetting> allSubscriptionCardSettings = getAllSubscriptionCardSetting();
-        for (SubscriptionCardSetting subscriptionCardSetting : allSubscriptionCardSettings) {
-            CardData cardData = new CardData();
-            if (subscriptionCardSetting.getCardCode().equals(CardTypeEnum.HISTORYWASHINGQUANTITY_ONE.getCardCode())) {
-                cardData = getHistoryWashingQuantity(subscriptionCardSetting);
-                cardDatas.add(cardData);
+        List<CardDataDTO> cardDataDTOS = new ArrayList<>();
+        List<SubscCardTypeDO> subscCardTypeDOS = getAllSubscCardTypes();
+        for (SubscCardTypeDO subscCardTypeDO : subscCardTypeDOS) {
+            CardDataDTO cardDataDTO = new CardDataDTO();
+            // TODO 其他卡片数据
+            if (subscCardTypeDO.getCardCode().equals(CardTypeEnum.HISTORYWASHINGQUANTITY_ONE.getCardCode())) {
+                cardDataDTO = getHistoryWashingQuantity(subscCardTypeDO);
+                cardDataDTOS.add(cardDataDTO);
             }
         }
 
@@ -145,14 +138,11 @@ public class SubscriptionCardServiceImpl implements SubscriptionCardService {
                     @Override
                     public void apply(RequestTemplate requestTemplate) {
                         requestTemplate.header("Authorization", authorization);
-
                     }
                 })
-                //.logger(new Logger.JavaLogger().appendToFile("D:/logs/http.log"))
-                //.logLevel(Logger.Level.FULL)
                 .target(CloudServerClient.class,
                         authServiceIp);
-        ServerResponse serverResponse = cloudServerClient.saveAllCardDatas(cardDatas);
+        ServerResponse serverResponse = cloudServerClient.saveAllCardDatas(cardDataDTOS);
         if (serverResponse.getCode() == 0) {
             logger.debug("卡片数据上传CloudServer完成");
         }

@@ -1,7 +1,7 @@
 package com.zgiot.app.server.module.sfsubsc.service;
 
-import com.zgiot.app.server.module.sfsubsc.dto.CardData;
-import com.zgiot.app.server.module.sfsubsc.pojo.SubscriptionCardSetting;
+import com.zgiot.app.server.module.sfsubsc.entity.dto.CardDataDTO;
+import com.zgiot.app.server.module.sfsubsc.entity.pojo.SubscCardTypeDO;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -11,21 +11,21 @@ import java.util.List;
  * 卡片配置
  */
 @Component
-public interface SubscriptionCardService {
+public interface SubscCardTypeService {
     /**
      * 查询用户订阅的卡片
      *
      * @return
      */
-    List<SubscriptionCardSetting> getAllSubscriptionCardSetting();
+    List<SubscCardTypeDO> getAllSubscCardTypes();
 
     /**
      * 查询历史入洗量指标数据
      *
-     * @param subscriptionCardSetting
+     * @param subscCardTypeDO
      * @return
      */
-    CardData getHistoryWashingQuantity(SubscriptionCardSetting subscriptionCardSetting);
+    CardDataDTO getHistoryWashingQuantity(SubscCardTypeDO subscCardTypeDO);
 
     /**
      * 查询所有的卡片数据

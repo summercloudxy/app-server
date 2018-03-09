@@ -1,4 +1,4 @@
-package com.zgiot.app.server.module.sfsubsc.vo;
+package com.zgiot.app.server.module.sfsubsc.entity.vo;
 
 import java.util.List;
 
@@ -6,7 +6,7 @@ import java.util.List;
  * @author jys
  * 历史入洗量
  */
-public class HistoryWashingQuantity {
+public class HistoryWashingQuantityVO {
     /**
      * 卡片标题
      */

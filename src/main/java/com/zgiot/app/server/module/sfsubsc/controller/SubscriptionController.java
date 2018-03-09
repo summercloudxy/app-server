@@ -1,9 +1,9 @@
 package com.zgiot.app.server.module.sfsubsc.controller;
 
-import com.zgiot.app.server.module.sfsubsc.dto.CardData;
+import com.zgiot.app.server.module.sfsubsc.entity.dto.CardDataDTO;
+import com.zgiot.app.server.module.sfsubsc.entity.pojo.SubscCardTypeDO;
 import com.zgiot.app.server.module.sfsubsc.enums.CardTypeEnum;
-import com.zgiot.app.server.module.sfsubsc.pojo.SubscriptionCardSetting;
-import com.zgiot.app.server.module.sfsubsc.service.SubscriptionCardService;
+import com.zgiot.app.server.module.sfsubsc.service.SubscCardTypeService;
 import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.restcontroller.ServerResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,20 +23,20 @@ import java.util.List;
 @RequestMapping(value = GlobalConstants.API + GlobalConstants.API_VERSION + "/sfsubsc")
 public class SubscriptionController {
     @Autowired
-    private SubscriptionCardService subscriptionCardService;
+    private SubscCardTypeService subscCardTypeService;
 
 
     @RequestMapping(value = "/getSubscriptionData", method = RequestMethod.GET)
     public ResponseEntity<String> getSubscriptionData() {
-        List<CardData> cardDatas = new ArrayList<>();
-        List<SubscriptionCardSetting> allSubscriptionCardSettings = subscriptionCardService.getAllSubscriptionCardSetting();
-        for (SubscriptionCardSetting subscriptionCardSetting : allSubscriptionCardSettings) {
-            CardData cardData = new CardData();
-            if (subscriptionCardSetting.getCardCode().equals(CardTypeEnum.HISTORYWASHINGQUANTITY_ONE.getCardCode())) {
-                cardData = subscriptionCardService.getHistoryWashingQuantity(subscriptionCardSetting);
-                cardDatas.add(cardData);
+        List<CardDataDTO> cardDataDTOS = new ArrayList<>();
+        List<SubscCardTypeDO> subscCardTypeDOS = subscCardTypeService.getAllSubscCardTypes();
+        for (SubscCardTypeDO subscCardTypeDO : subscCardTypeDOS) {
+            CardDataDTO cardDataDTO = new CardDataDTO();
+            if (subscCardTypeDO.getCardCode().equals(CardTypeEnum.HISTORYWASHINGQUANTITY_ONE.getCardCode())) {
+                cardDataDTO = subscCardTypeService.getHistoryWashingQuantity(subscCardTypeDO);
+                cardDataDTOS.add(cardDataDTO);
             }
-            return new ResponseEntity<>(ServerResponse.buildOkJson(cardDatas), HttpStatus.OK);
+            return new ResponseEntity<>(ServerResponse.buildOkJson(cardDataDTOS), HttpStatus.OK);
 
         }
         return null;
