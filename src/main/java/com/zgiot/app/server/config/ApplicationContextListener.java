@@ -88,7 +88,7 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
         processor.addListener(completerDataListener);
         processor.addListener(cacheUpdater);
 
-        completerDataListener.addCompleter();
+//        completerDataListener.addCompleter(new DemoDataCompleter());  // place here as a sample, could be injected instead.
 
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
                 || moduleListConfig.containModule(ModuleListConfig.MODULE_HIST_PERSIST)) {

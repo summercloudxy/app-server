@@ -2,6 +2,7 @@ package com.zgiot.app.server.config;
 
 import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.restcontroller.AccessLogInterceptor;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +15,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -22,6 +24,7 @@ import java.util.List;
 public class WebConfig extends WebMvcConfigurerAdapter {
     @Value("${uploadFile.dir}")
     private String uploadFileUri;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new AccessLogInterceptor()).addPathPatterns("/**");
@@ -32,7 +35,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         //将所有/product/images/** 访问都映射到classpath:/product/images/ 目录下
         registry.addResourceHandler("/product/images/**").addResourceLocations("classpath:/product/images/");
-        registry.addResourceHandler("/files/**").addResourceLocations("file:"+uploadFileUri + "/");
+        registry.addResourceHandler("/files/**").addResourceLocations("file:" + uploadFileUri + "/");
         super.addResourceHandlers(registry);
     }
 
@@ -41,13 +44,29 @@ public class WebConfig extends WebMvcConfigurerAdapter {
         return new Converter<String, Date>() {
             @Override
             public Date convert(String source) {
-                try {
-                    //进行日期转换
-                    return new Date(Long.parseLong(source));
-
-                } catch (Exception e) {
-                    throw new SysException("日期转换出错",SysException.EC_UNKNOWN);
+                if (StringUtils.isBlank(source)) {
+                    return null;
                 }
+
+                int len = source.length();
+
+                final int STD_LEN = 13;
+                final int STD_STR_LEN = 14;
+
+                if (len == STD_LEN) { // for standard timestamp, like '1520659080000'
+                    return new Date(Long.parseLong(source));
+                } else if (len == STD_STR_LEN) { // for common date format
+                    try {
+                        SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmSS");
+                        return df.parse(source);
+                    } catch (Exception e) {
+                        throw new SysException("Date conversion failed for `" + source + "`", SysException.EC_UNKNOWN);
+                    }
+                } else {
+                    throw new SysException("Unsupportted date format for `{" + source + "}`! "
+                            , SysException.EC_UNKNOWN);
+                }
+
             }
         };
     }
@@ -61,6 +80,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
                 .allowedMethods("GET", "POST", "DELETE", "PUT")
                 .maxAge(3600);
     }
+
     private CorsConfiguration buildConfig() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         List<String> list = new ArrayList<>();
@@ -74,6 +94,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
         corsConfiguration.addAllowedMethod("*");//设置访问源请求方法
         return corsConfiguration;
     }
+
     @Bean
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

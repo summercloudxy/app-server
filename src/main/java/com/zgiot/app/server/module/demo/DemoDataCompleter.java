@@ -3,10 +3,10 @@ package com.zgiot.app.server.module.demo;
 import com.zgiot.app.server.dataprocessor.DataCompleter;
 import com.zgiot.common.pojo.DataModel;
 import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-
 public class DemoDataCompleter implements DataCompleter{
 
     @Override
