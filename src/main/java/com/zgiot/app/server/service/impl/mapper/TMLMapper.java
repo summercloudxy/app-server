@@ -86,4 +86,10 @@ public interface TMLMapper {
     @Select("select * from tb_metric a," +
             "(select metric_code from rel_thing_metric_label where thing_code=#{thingCode}) b where  a.metric_code=b.metric_code and a.metric_type1_code=#{metricType}")
     List<MetricModel> findMetricByThingCode(@Param("thingCode") String thingCode,@Param("metricType") String metricType);
+
+    @Select("select * from tb_metric a," +
+            "(select metric_code from rel_thing_metric_label where thing_code=#{thingCode}) b where  a.metric_code=b.metric_code")
+    List<MetricModel> findMetric(@Param("thingCode") String thingCode);
+
+
 }

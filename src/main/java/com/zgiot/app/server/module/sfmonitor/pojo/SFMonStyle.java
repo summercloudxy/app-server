@@ -4,7 +4,7 @@ public class SFMonStyle {
     private int id;
     private String code;
     private String name;
-    private String comments;
+    private String comment;
     private String previewImageName;
 
     public int getId() {
@@ -19,8 +19,8 @@ public class SFMonStyle {
         return name;
     }
 
-    public String getComments() {
-        return comments;
+    public String getComment() {
+        return comment;
     }
 
     public String getPreviewImageName() {
@@ -39,8 +39,8 @@ public class SFMonStyle {
         this.name = name;
     }
 
-    public void setComments(String comments) {
-        this.comments = comments;
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     public void setPreviewImageName(String previewImageName) {

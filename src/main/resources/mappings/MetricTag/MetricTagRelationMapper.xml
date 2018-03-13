@@ -2,11 +2,33 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zgiot.app.server.service.impl.mapper.MetricTagRelationMapper">
     <resultMap id="metricTagRelation" type="com.zgiot.app.server.module.metrictag.pojo.MetricTagRelation">
-        <result column="id"  property="metricTagRelationId"/>
+        <result column="id"  property="id"/>
         <result column="metric_code" property="metricCode"/>
         <result column="metric_tag_code" property="metricTagCode"/>
         <result column="create_date" property="createDate"/>
     </resultMap>
+
+    <resultMap id="findTag" type="com.zgiot.app.server.module.sfmonitor.controller.FindSignalWrapperRes">
+        <result column="id"  property="id"/>
+        <result column="tag_name" property="tagName"/>
+        <result column="metric_name" property="metricName"/>
+        <result column="editor" property="editor"/>
+        <result column="create_date" property="createDate"/>
+        <result column="comment" property="comment"/>
+    </resultMap>
+
+    <resultMap id="findTagById" type="com.zgiot.app.server.module.sfmonitor.controller.SignalWrapperRelateMetric">
+        <result column="id"  property="id"/>
+        <result column="tag_name" property="wrapperName"/>
+        <!--result column="metric_name" property="metricNames"/-->
+        <result column="comment" property="comment"/>
+    </resultMap>
+
+    <select id="findTagById" resultMap="findTagById">
+        select c.id as id,a.tag_name as tag_name,c.comment as comment
+        from tb_metric_tag a,tb_metric b,rel_metrictag_metric c where c.id=#{id} and a.code=c.metric_tag_code
+        and c.metric_code=b.metric_code
+    </select>
 
     <select id="findMetricTagRelation" resultMap="metricTagRelation">
         SELECT
@@ -18,8 +40,8 @@
         rel_metrictag_metric
         WHERE
         1 = 1
-        <if test="metricTagRelationId != null">
-            AND id = #{metricTagRelationId}
+        <if test="id != null">
+            AND id = #{id}
         </if>
         <if test="metricCode != null">
             AND metric_code = #{metricCode}
@@ -41,8 +63,14 @@
             <if test="metricTagCode != null">
                 metric_tag_code,
             </if>
-            <if test="parentId != null">
+            <if test="createDate != null">
                 create_date,
+            </if>
+            <if test="userName != null">
+                editor,
+            </if>
+            <if test="comment != null">
+                comment
             </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -54,6 +82,12 @@
             </if>
             <if test="createDate != null">
                 #{createDate},
+            </if>
+            <if test="userName != null">
+                #{userName},
+            </if>
+            <if test="comment != null">
+                #{comment}
             </if>
         </trim>
     </insert>
@@ -71,12 +105,30 @@
                 create_date =#{createDate}
             </if>
         </trim>
-        where id = #{metricTagRelationId}
+        where id = #{id}
     </update>
 
     <delete id="deleteMetricTagRelation" parameterType="com.zgiot.app.server.module.metrictag.pojo.MetricTagRelation">
         DELETE FROM rel_metrictag_metric
         WHERE
-        id = #{metricTagRelationId}
+        metric_code =#{metricCode} and metric_tag_code =#{metricTagCode}
     </delete>
+
+    <select id="findSignalWrapperByWrapperName" resultMap="findTag">
+        select a.tag_name as tag_name,b.metric_name metric_name,c.editor as editor,c.create_date as create_date,c.comment as comment
+        from tb_metric_tag a,tb_metric b,rel_metrictag_metric c where a.tag_name like CONCAT(#{tagName},'%') and a.code=c.metric_tag_code
+        and c.metric_code=b.metric_code
+    </select>
+
+    <select id="findSignalWrapperByMetricName" resultMap="findTag">
+        select a.tag_name as tag_name,b.metric_name metric_name,c.editor as editor,c.create_date as create_date,c.comment as comment
+        from tb_metric_tag a,tb_metric b,rel_metrictag_metric c where b.metric_name like CONCAT(#{metricName},'%')
+        and c.metric_code=b.metric_code and  a.code=c.metric_tag_code
+    </select>
+
+    <select id="findAllSignalWrapper" resultMap="findTag">
+        select c.id as id,a.tag_name as tag_name,b.metric_name metric_name,c.editor as editor,c.create_date as create_date,c.comment as comment
+        from tb_metric_tag a,tb_metric b,rel_metrictag_metric c where a.code=c.metric_tag_code
+        and c.metric_code=b.metric_code order by c.create_date desc
+    </select>
 </mapper>

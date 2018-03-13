@@ -13,7 +13,7 @@ import java.util.List;
  */
 @Mapper
 public interface MetricTagMapper {
-    @Select("select * from tb_metric_tag")
+    @Select("select * from tb_metric_tag order by create_date desc")
     List<MetricTag> findMetricTag(MetricTag metricTag);
 
     @Select("select * from tb_metric_tag where tag_name=#{name}")
@@ -42,4 +42,7 @@ public interface MetricTagMapper {
 
     @Select("select * from tb_metric_tag where id=#{id}")
     MetricTag getMetricTagById(@Param("id") int id);
+
+    @Select("select a.tag_name from tb_metric_tag a,tb_metric_tag_group b where b.tag_group_name='智能监控' and a.metric_tag_group_id=b.id")
+    List<String> getAllSignalWrapper();
 }

@@ -3,12 +3,12 @@ package com.zgiot.app.server.module.sfmonitor.pojo;
 import java.util.Date;
 
 public class RelSFMonMetricTagStyle {
+    private int id;
     private String metricTagCode;
     private String styleCode;
-    private String userUuid;
     private Date createDate;
-    private Date updateDate;
-    private String comments;
+    private String comment;
+    private String editor;
 
     public String getMetricTagCode() {
         return metricTagCode;
@@ -18,20 +18,12 @@ public class RelSFMonMetricTagStyle {
         return styleCode;
     }
 
-    public String getUserUuid() {
-        return userUuid;
-    }
-
     public Date getCreateDate() {
         return createDate;
     }
 
-    public Date getUpdateDate() {
-        return updateDate;
-    }
-
-    public String getComments() {
-        return comments;
+    public String getComment() {
+        return comment;
     }
 
     public void setMetricTagCode(String metricTagCode) {
@@ -42,19 +34,27 @@ public class RelSFMonMetricTagStyle {
         this.styleCode = styleCode;
     }
 
-    public void setUserUuid(String userUuid) {
-        this.userUuid = userUuid;
-    }
-
     public void setCreateDate(Date createDate) {
         this.createDate = createDate;
     }
 
-    public void setUpdateDate(Date updateDate) {
-        this.updateDate = updateDate;
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
-    public void setComments(String comments) {
-        this.comments = comments;
+    public String getEditor() {
+        return editor;
+    }
+
+    public void setEditor(String editor) {
+        this.editor = editor;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

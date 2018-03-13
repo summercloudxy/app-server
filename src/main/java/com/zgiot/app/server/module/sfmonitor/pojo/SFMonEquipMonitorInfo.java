@@ -9,10 +9,9 @@ public class SFMonEquipMonitorInfo {
     private String thingCode;
     private String thingName;
     private String configProgress;
-    private String userUuid;
+    private String editor;
     private Date createDate;
-    private Date updateDate;
-    private String comments;
+    private String comment;
 
     public int getId() {
         return id;
@@ -30,20 +29,16 @@ public class SFMonEquipMonitorInfo {
         return configProgress;
     }
 
-    public String getUserUuid() {
-        return userUuid;
-    }
-
     public Date getCreateDate() {
         return createDate;
     }
 
-    public Date getUpdateDate() {
-        return updateDate;
+    public String getEditor() {
+        return editor;
     }
 
-    public String getComments() {
-        return comments;
+    public String getComment() {
+        return comment;
     }
 
     public void setId(int id) {
@@ -62,19 +57,15 @@ public class SFMonEquipMonitorInfo {
         this.configProgress = configProgress;
     }
 
-    public void setUserUuid(String userUuid) {
-        this.userUuid = userUuid;
-    }
-
     public void setCreateDate(Date createDate) {
         this.createDate = createDate;
     }
 
-    public void setUpdateDate(Date updateDate) {
-        this.updateDate = updateDate;
+    public void setEditor(String editor) {
+        this.editor = editor;
     }
 
-    public void setComments(String comments) {
-        this.comments = comments;
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 }
