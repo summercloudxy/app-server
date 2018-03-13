@@ -18,6 +18,6 @@ public class SFMonitorConstant {
     public static final int OPERATE = 1;//操作
     public static final int NO_SHOW = 2;//不显示
     public static final String ALL_PARAMETER = "all";
-
-
+    public static final String MONITOR_GROUP = "智能监控";
+    public static final String FUZZY_QUERY_TAG = "%";
 }

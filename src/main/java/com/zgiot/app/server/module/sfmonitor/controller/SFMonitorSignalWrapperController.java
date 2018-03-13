@@ -193,7 +193,7 @@ public class SFMonitorSignalWrapperController {
     //此处开始为监控二级页面api
     @GetMapping("/signalWrapper/metric/parameterType/{metricName}")
     public ResponseEntity<String> getParameterMetric(@PathVariable String metricName) {
-        return new ResponseEntity<>(ServerResponse.buildOkJson(metricMapper.findParameterMetric(metricName)), HttpStatus.OK);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(metricMapper.findParameterMetric(metricName + SFMonitorConstant.FUZZY_QUERY_TAG)), HttpStatus.OK);
     }
 
     @GetMapping("/signalWrapper/metric/parameterType")
@@ -242,16 +242,16 @@ public class SFMonitorSignalWrapperController {
         String combineName = findSignalWrapperReq.getCombineName();
         List<FindSignalWrapperRes> findSignalWrapperRes = null;
         if (!StringUtils.isBlank(combineName)) {
-            findSignalWrapperRes = metricTagRelationMapper.findSignalWrapperByMetricName(combineName);
-            findSignalWrapperRes.addAll(metricTagRelationMapper.findSignalWrapperByWrapperName(combineName));
+            findSignalWrapperRes = metricTagRelationMapper.findSignalWrapperByMetricName(combineName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            findSignalWrapperRes.addAll(metricTagRelationMapper.findSignalWrapperByWrapperName(combineName + SFMonitorConstant.FUZZY_QUERY_TAG));
             return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
         }
         if (!StringUtils.isBlank(metricName)) {
-            findSignalWrapperRes = metricTagRelationMapper.findSignalWrapperByMetricName(metricName);
+            findSignalWrapperRes = metricTagRelationMapper.findSignalWrapperByMetricName(metricName + SFMonitorConstant.FUZZY_QUERY_TAG);
             return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
         }
         if (!StringUtils.isBlank(wrapperName)) {
-            findSignalWrapperRes = metricTagRelationMapper.findSignalWrapperByWrapperName(wrapperName);
+            findSignalWrapperRes = metricTagRelationMapper.findSignalWrapperByWrapperName(wrapperName + SFMonitorConstant.FUZZY_QUERY_TAG);
             return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
         }
         return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
@@ -308,7 +308,7 @@ public class SFMonitorSignalWrapperController {
 
     @GetMapping("/signalWrapper/style/allWrapperName")
     public ResponseEntity<String> getAllSignalWrapperName() {
-        return new ResponseEntity<>(ServerResponse.buildOkJson(metricTagMapper.getAllSignalWrapper()), HttpStatus.OK);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(metricTagMapper.getAllSignalWrapper(SFMonitorConstant.MONITOR_GROUP)), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/signalWrapper/style", method = RequestMethod.POST)
@@ -360,16 +360,16 @@ public class SFMonitorSignalWrapperController {
         String combineName = findSignalWrapperReq.getCombineName();
         List<FindSignalWrapperRes> findSignalWrapperRes = null;
         if (!StringUtils.isBlank(combineName)) {
-            findSignalWrapperRes = relSFMonMetricTagStyleMapper.getSiganlWrapperStyleByStyleName(combineName);
-            findSignalWrapperRes.addAll(relSFMonMetricTagStyleMapper.getSiganlWrapperStyleByWrapperName(combineName));
+            findSignalWrapperRes = relSFMonMetricTagStyleMapper.getSiganlWrapperStyleByStyleName(combineName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            findSignalWrapperRes.addAll(relSFMonMetricTagStyleMapper.getSiganlWrapperStyleByWrapperName(combineName + SFMonitorConstant.FUZZY_QUERY_TAG));
             return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
         }
         if (!StringUtils.isBlank(styleName)) {
-            findSignalWrapperRes = relSFMonMetricTagStyleMapper.getSiganlWrapperStyleByStyleName(styleName);
+            findSignalWrapperRes = relSFMonMetricTagStyleMapper.getSiganlWrapperStyleByStyleName(styleName + SFMonitorConstant.FUZZY_QUERY_TAG);
             return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
         }
         if (!StringUtils.isBlank(wrapperName)) {
-            findSignalWrapperRes = relSFMonMetricTagStyleMapper.getSiganlWrapperStyleByWrapperName(wrapperName);
+            findSignalWrapperRes = relSFMonMetricTagStyleMapper.getSiganlWrapperStyleByWrapperName(wrapperName + SFMonitorConstant.FUZZY_QUERY_TAG);
             return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
         }
 
@@ -399,7 +399,7 @@ public class SFMonitorSignalWrapperController {
 
     @GetMapping("/equipmentConfig/thing/{thingCode}")
     public ResponseEntity<String> getEquipmentInfo(@PathVariable String thingCode) {
-        return new ResponseEntity<>(ServerResponse.buildOkJson(thingTagMapper.getEquipmentByCode(thingCode, SFMonitorConstant.EQUIPMENT)), HttpStatus.OK);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(thingTagMapper.getEquipmentByCode(thingCode + SFMonitorConstant.FUZZY_QUERY_TAG, SFMonitorConstant.EQUIPMENT)), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/equipmentConfig/addEquipment", method = RequestMethod.POST)

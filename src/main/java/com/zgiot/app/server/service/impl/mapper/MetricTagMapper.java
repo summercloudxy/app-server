@@ -43,6 +43,6 @@ public interface MetricTagMapper {
     @Select("select * from tb_metric_tag where id=#{id}")
     MetricTag getMetricTagById(@Param("id") int id);
 
-    @Select("select a.tag_name from tb_metric_tag a,tb_metric_tag_group b where b.tag_group_name='智能监控' and a.metric_tag_group_id=b.id")
-    List<String> getAllSignalWrapper();
+    @Select("select a.tag_name from tb_metric_tag a,tb_metric_tag_group b where b.tag_group_name=#{groupName} and a.metric_tag_group_id=b.id")
+    List<String> getAllSignalWrapper(@Param("groupName") String groupName);
 }

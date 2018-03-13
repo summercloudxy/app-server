@@ -11,7 +11,7 @@ import java.util.List;
 
 @Mapper
 public interface MetricMapper {
-    @Select("select metric_name from tb_metric where metric_name like CONCAT(#{metricName},'%')")
+    @Select("select metric_name from tb_metric where metric_name like #{metricName}")
     List<String> findParameterMetric(@Param("metricName") String metricName);
 
     @Select("select metric_name from tb_metric")

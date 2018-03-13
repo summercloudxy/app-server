@@ -183,6 +183,6 @@
 
     <select id = "getEquipmentByCode" resultMap="thingInfo">
         select a.thing_code as thing_code,b.thing_name as name from rel_thingtag_thing a,tb_thing b where a.thing_tag_code=#{thingTagCode}
-        and a.thing_code like CONCAT(#{thingCode},'%') and a.thing_code=b.thing_code
+        and a.thing_code like #{thingCode} and a.thing_code=b.thing_code
     </select>
 </mapper>
