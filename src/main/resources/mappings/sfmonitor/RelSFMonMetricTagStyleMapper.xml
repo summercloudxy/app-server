@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.sfmonitor.mapper.RelSFMonMetricTagStyleMapper">
+    <resultMap id="signalWrapperStyle" type="com.zgiot.app.server.module.sfmonitor.controller.FindSignalWrapperRes">
+        <result column="id"  property="id"/>
+        <result column="tag_name" property="tagName"/>
+        <result column="style_name" property="metricName"/>
+        <result column="editor" property="editor"/>
+        <result column="create_date" property="createDate"/>
+        <result column="comment" property="comment"/>
+    </resultMap>
+
+    <resultMap id="signalWrapperStyleRes" type="com.zgiot.app.server.module.sfmonitor.controller.SignalWrapperStyleRes">
+        <result column="id"  property="id"/>
+        <result column="style_name" property="styleName"/>
+        <result column="tag_name" property="signalWrapperName"/>
+        <result column="image_name" property="styleImageName"/>
+        <result column="comment" property="comment"/>
+    </resultMap>
+
+
+    <select id="getSiganlWrapperStyleByWrapperName" resultMap="signalWrapperStyle">
+        select c.id as id,a.tag_name as tag_name,b.name style_name,c.editor as editor,c.create_date as create_date,c.comment as comment
+        from tb_metric_tag a,tb_sfmon_style b,rel_sfmon_metrictag_style c where a.tag_name like #{tagName}
+        and c.style_code=b.code and  a.code=c.metric_tag_code
+    </select>
+
+    <select id="getSiganlWrapperStyleByStyleName" resultMap="signalWrapperStyle">
+        select c.id as id,a.tag_name as tag_name,b.name style_name,c.editor as editor,c.create_date as create_date,c.comment as comment
+        from tb_metric_tag a,tb_sfmon_style b,rel_sfmon_metrictag_style c where b.name like #{metricName}
+        and c.style_code=b.code and  a.code=c.metric_tag_code
+    </select>
+
+    <select id="getSignalWrapperStyleById" resultMap="signalWrapperStyleRes">
+        select c.id as id,a.tag_name as tag_name,b.name as style_name,b.preview_image_name as image_name,c.comment as comment from tb_metric_tag a,tb_sfmon_style b,rel_sfmon_metrictag_style c
+        where c.id=#{id} and a.code=c.metric_tag_code and c.style_code=b.code
+    </select>
+
+    <select id="getAllSignalWrapperStyle" resultMap="signalWrapperStyle">
+        select c.id as id,a.tag_name as tag_name,b.name style_name,c.editor as editor,c.create_date as create_date,c.comment as comment
+        from tb_metric_tag a,tb_sfmon_style b,rel_sfmon_metrictag_style c where
+        c.style_code=b.code and  a.code=c.metric_tag_code order by c.create_date desc
+    </select>
+
+</mapper>
+ 

@@ -15,6 +15,11 @@
         <result column="operator" property="operator"/>
     </resultMap>
 
+    <resultMap id="thingInfo" type="com.zgiot.app.server.module.sfmonitor.controller.EquipmentBaseInfo">
+        <result column="thing_code"  property="thingCode"/>
+        <result column="name" property="name"/>
+    </resultMap>
+
     <select id="findThingTag" resultMap="thingTag">
         SELECT
         ttt.id,
@@ -175,4 +180,9 @@
     WHERE
     id = #{thingTagId}
     </delete>
+
+    <select id = "getEquipmentByCode" resultMap="thingInfo">
+        select a.thing_code as thing_code,b.thing_name as name from rel_thingtag_thing a,tb_thing b where a.thing_tag_code=#{thingTagCode}
+        and a.thing_code like #{thingCode} and a.thing_code=b.thing_code
+    </select>
 </mapper>

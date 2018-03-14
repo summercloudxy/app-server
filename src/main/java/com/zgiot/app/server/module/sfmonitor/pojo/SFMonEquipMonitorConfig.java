@@ -1,12 +1,14 @@
 package com.zgiot.app.server.module.sfmonitor.pojo;
 
+
 public class SFMonEquipMonitorConfig {
     private int id;
     private String thingCode;
-    private String metricTagCode;
+    private String metricTagName;
     private String key;
     private String value;
-    private boolean model;
+    private Boolean selected;
+    private int model;
 
     public int getId() {
         return id;
@@ -16,8 +18,8 @@ public class SFMonEquipMonitorConfig {
         return thingCode;
     }
 
-    public String getMetricTagCode() {
-        return metricTagCode;
+    public String getMetricTagName() {
+        return metricTagName;
     }
 
     public String getKey() {
@@ -28,7 +30,11 @@ public class SFMonEquipMonitorConfig {
         return value;
     }
 
-    public boolean isModel() {
+    public Boolean isSelected() {
+        return selected;
+    }
+
+    public int getModel() {
         return model;
     }
 
@@ -40,8 +46,8 @@ public class SFMonEquipMonitorConfig {
         this.thingCode = thingCode;
     }
 
-    public void setMetricTagCode(String metricTagCode) {
-        this.metricTagCode = metricTagCode;
+    public void setMetricTagName(String metricTagName) {
+        this.metricTagName = metricTagName;
     }
 
     public void setKey(String key) {
@@ -52,7 +58,11 @@ public class SFMonEquipMonitorConfig {
         this.value = value;
     }
 
-    public void setModel(boolean model) {
+    public void setSelected(Boolean selected) {
+        this.selected = selected;
+    }
+
+    public void setModel(int model) {
         this.model = model;
     }
 }

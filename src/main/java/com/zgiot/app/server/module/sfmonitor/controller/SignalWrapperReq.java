@@ -5,7 +5,7 @@ import com.zgiot.app.server.module.metrictag.pojo.MetricTag;
 public class SignalWrapperReq {
     private MetricTag metricTag;
     private int zoneId;
-    private int userId;
+    private String userName;
 
     public MetricTag getMetricTag() {
         return metricTag;
@@ -15,8 +15,8 @@ public class SignalWrapperReq {
         return zoneId;
     }
 
-    public int getUserId() {
-        return userId;
+    public String getUserName() {
+        return userName;
     }
 
     public void setMetricTag(MetricTag metricTag) {
@@ -27,7 +27,7 @@ public class SignalWrapperReq {
         this.zoneId = zoneId;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 }

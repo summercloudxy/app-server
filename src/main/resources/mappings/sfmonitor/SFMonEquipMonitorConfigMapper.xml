@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.sfmonitor.mapper.SFMonEquipMonitorConfigMapper">
+    <resultMap id="signalWrapperBaseInfo" type="com.zgiot.app.server.module.sfmonitor.controller.EquipmentRelateToSignalWrapper">
+        <result column="tag_name" property="warpperName"/>
+        <collection property="signalWrapperMetrics" ofType="com.zgiot.app.server.module.sfmonitor.pojo.SignalWrapperMetric">
+            <result column="metric_name" property="metricName"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="signalWrapperBaseInfoFind" type="com.zgiot.app.server.module.sfmonitor.controller.EquipmentRelateToSignalWrapper">
+        <result column="tag_name" property="warpperName"/>
+        <result column="selected" property="selected"/>
+        <result column="zone" property="zone"/>
+        <collection property="signalWrapperMetrics" ofType="com.zgiot.app.server.module.sfmonitor.pojo.SignalWrapperMetric">
+            <result column="metric_name" property="metricName"/>
+            <result column="model" property="model"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="signalWrapperBaseParameterAreaInfoFind" type="com.zgiot.app.server.module.sfmonitor.pojo.StateControlAreaInfo">
+        <result column="tag_name" property="wrapperName"/>
+        <result column="model" property="model"/>
+    </resultMap>
+
+    <select id="getSignalWrapperData" resultMap="signalWrapperBaseInfo">
+        select a.tag_name as tag_name,b.metric_name as metric_name from tb_metric_tag a,tb_metric b,
+        rel_metrictag_metric c,rel_sfmon_tag_displayzone d,tb_sfmon_displayzone e
+        where c.metric_tag_code=a.code and c.metric_code=b.metric_code
+        and e.code=#{zoneCode} and e.id=d.zone_id and d.metric_tag_code=c.metric_tag_code
+    </select>
+
+    <select id="getEquipmentRelateToSignalWrapperByThingCode" resultMap="signalWrapperBaseInfoFind">
+        select distinct(a.metric_tag_name) as tag_name,a.value as metric_name,a.model as model,a.key as zone,a.selected as selected
+        from tb_sfmon_equipmonitor_config a
+        where a.key=#{zoneCode} and a.thing_code=#{thingCode}
+    </select>
+
+    <select id="getParameterAreaData" resultMap="signalWrapperBaseParameterAreaInfoFind">
+        select a.metric_tag_name as tag_name,a.model as model from tb_sfmon_equipmonitor_config a
+        where a.thing_code=#{thingCode} and a.key=#{zoneCode}
+    </select>
+    <delete id="deleteEquipmentConfig" parameterType="com.zgiot.app.server.module.sfmonitor.pojo.SFMonEquipMonitorConfig">
+        delete from tb_sfmon_equipmonitor_config
+        where
+        1 = 1
+        <if test="thingCode != null">
+            AND thing_code = #{thingCode}
+        </if>
+        <if test="metricTagName != null">
+            AND metric_tag_name = #{metricTagName}
+        </if>
+        <if test="key != null">
+            AND `key` = #{key}
+        </if>
+        <if test="value != null">
+            AND `value` = #{value}
+        </if>
+        <if test="selected != null">
+            AND selected = #{selected}
+        </if>
+    </delete>
+
+    <!--insert id="addEquipmentMonitorInfo" parameterType="com.zgiot.app.server.module.sfmonitor.pojo.SFMonEquipMonitorConfig">
+        insert into tb_sfmon_equipmonitor_config (thing_code,metric_tag_name,`key`,`value`,selected,model)
+        values(#{thingCode},#{metricTagName},#{key},#{value},#{selected},#{model}
+    </insert-->
+
+</mapper>
+ 
