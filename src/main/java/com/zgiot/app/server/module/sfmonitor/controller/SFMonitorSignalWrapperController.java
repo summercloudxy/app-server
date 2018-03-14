@@ -11,14 +11,10 @@ import com.zgiot.app.server.module.sfmonitor.pojo.*;
 import com.zgiot.app.server.module.util.validate.ControllerUtil;
 import com.zgiot.app.server.service.impl.mapper.*;
 import com.zgiot.common.constants.GlobalConstants;
-import com.zgiot.common.constants.MetricTypes;
 import com.zgiot.common.pojo.MetricModel;
 import com.zgiot.common.restcontroller.ServerResponse;
 import org.apache.commons.lang.StringUtils;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -434,7 +430,7 @@ public class SFMonitorSignalWrapperController {
         if(SFMonitorConstant.ALL_PARAMETER.equals(metricName)){
             return new ResponseEntity<>(ServerResponse.buildOkJson(thingTagMapper.getAllMetricNamesByThingCode(thingCode)), HttpStatus.OK);
         }
-        return new ResponseEntity<>(ServerResponse.buildOkJson(thingTagMapper.getMetricNamesByThingCode(thingCode,metricName)), HttpStatus.OK);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(thingTagMapper.getMetricNamesByThingCode(thingCode,metricName + SFMonitorConstant.FUZZY_QUERY_TAG)), HttpStatus.OK);
     }
 
     @RequestMapping(value="/equipmentConfig/editEquipmentMonitorInfo",method=RequestMethod.POST)

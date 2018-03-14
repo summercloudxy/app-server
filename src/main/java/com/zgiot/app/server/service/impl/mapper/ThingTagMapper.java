@@ -25,7 +25,7 @@ public interface ThingTagMapper {
     List<EquipmentBaseInfo> getEquipmentByCode(@Param("thingCode") String thingCode,@Param("thingTagCode") String thingTagCode);
 
     @Select("select b.metric_name from rel_thing_metric_label a,tb_metric b " +
-            "where a.thing_code=#{thingCode} and b.metric_name like CONCAT(#{metricName},'%') and a.metric_code=b.metric_code")
+            "where a.thing_code=#{thingCode} and b.metric_name like #{metricName} and a.metric_code=b.metric_code")
     List<String> getMetricNamesByThingCode(@Param("thingCode") String thingCode,@Param("metricName") String metricName);
 
     @Select("select b.metric_name from rel_thing_metric_label a,tb_metric b " +
