@@ -27,6 +27,8 @@ public class SubscCardTypeDO {
 
     private String remark;
 
+    private String picurl;
+
     public String getCardId() {
         return cardId;
     }
@@ -97,5 +99,13 @@ public class SubscCardTypeDO {
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    public String getPicurl() {
+        return picurl;
+    }
+
+    public void setPicurl(String picurl) {
+        this.picurl = picurl;
     }
 }
