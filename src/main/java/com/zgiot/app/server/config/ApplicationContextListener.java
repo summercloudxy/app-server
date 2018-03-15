@@ -15,7 +15,8 @@ import com.zgiot.app.server.module.demo.DemoBusiness;
 import com.zgiot.app.server.module.demo.DemoDataCompleter;
 import com.zgiot.app.server.module.densitycontrol.DensityControlListener;
 import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
-import com.zgiot.app.server.module.sfsubsc.job.SubscriptionCardDatasJob;
+import com.zgiot.app.server.module.sfsubsc.job.UploadHistorySubscCardDatas;
+import com.zgiot.app.server.module.sfsubsc.job.UploadSubscCardDatas;
 import com.zgiot.app.server.service.impl.HistoryDataPersistDaemon;
 import com.zgiot.app.server.service.impl.QuartzManager;
 import org.quartz.JobDataMap;
@@ -143,8 +144,11 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
                 || moduleListConfig.containModule(ModuleListConfig.MODULE_SUBSCRIPTION)) {
             if (subscriptioncarddataQuartzUploadFlag) {
-                QuartzManager.addJob("subscriptionCardDatas", ModuleListConfig.MODULE_SUBSCRIPTION, "subscriptionCardDatas",
-                        ModuleListConfig.MODULE_SUBSCRIPTION, SubscriptionCardDatasJob.class, "0/10 * * * * ?");
+                QuartzManager.addJob("uploadsubscCardDatasOf5s", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf5s",
+                        ModuleListConfig.MODULE_SUBSCRIPTION, UploadSubscCardDatas.class, "0/5 * * * * ?");
+
+                QuartzManager.addJob("uploadsubscCardDatasOf10s", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf10s",
+                        ModuleListConfig.MODULE_SUBSCRIPTION, UploadHistorySubscCardDatas.class, "0/10 * * * * ?");
             }
 
         }

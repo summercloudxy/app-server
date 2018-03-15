@@ -42,6 +42,9 @@ public class ChemicalTestsDataVO {
 
         private String endScope;
 
+
+        private String unusual;
+
         private String flag;
 
         private String percent;
@@ -93,6 +96,16 @@ public class ChemicalTestsDataVO {
         public void setFlag(String flag) {
             this.flag = flag;
         }
+
+
+        public String getUnusual() {
+            return unusual;
+        }
+
+        public void setUnusual(String unusual) {
+            this.unusual = unusual;
+        }
+
     }
 
     public String getCardTitle() {

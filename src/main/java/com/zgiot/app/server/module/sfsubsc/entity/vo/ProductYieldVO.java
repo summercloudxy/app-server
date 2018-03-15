@@ -14,7 +14,9 @@ public class ProductYieldVO {
      */
     private String cardTitle;
 
-    private List<MetricData> metricDatas;
+
+    private List<MetricData> teamMetricDatas;
+
 
     private String rawCoalCapValue;
 
@@ -59,12 +61,14 @@ public class ProductYieldVO {
         this.cardTitle = cardTitle;
     }
 
-    public List<MetricData> getMetricDatas() {
-        return metricDatas;
+
+    public List<MetricData> getTeamMetricDatas() {
+        return teamMetricDatas;
     }
 
-    public void setMetricDatas(List<MetricData> metricDatas) {
-        this.metricDatas = metricDatas;
+    public void setTeamMetricDatas(List<MetricData> teamMetricDatas) {
+        this.teamMetricDatas = teamMetricDatas;
+
     }
 
     public String getRawCoalCapValue() {

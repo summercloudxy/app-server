@@ -29,7 +29,7 @@ public interface SubscCardTypeService {
 
 
     /**
-     * 查询历史产品率
+     * 查询历史产品量
      *
      * @param subscCardTypeDO
      * @return
@@ -60,6 +60,7 @@ public interface SubscCardTypeService {
      */
     CardDataDTO getInstantaneousProductQuantity(SubscCardTypeDO subscCardTypeDO);
 
+
     /**
      * 查询产品产率
      *
@@ -77,6 +78,7 @@ public interface SubscCardTypeService {
      */
     CardDataDTO getChemicalTestsData(SubscCardTypeDO subscCardTypeDO);
 
+
     /**
      * 查询智能压滤
      *
@@ -86,7 +88,7 @@ public interface SubscCardTypeService {
     CardDataDTO getIntelligentFilter(SubscCardTypeDO subscCardTypeDO);
 
     /**
-     * 查询化验数据
+     * 查询智能鼓风
      *
      * @param subscCardTypeDO
      * @return
@@ -94,14 +96,17 @@ public interface SubscCardTypeService {
     CardDataDTO getIntelligentBlower(SubscCardTypeDO subscCardTypeDO);
 
 
-
-
     /**
-     * 查询所有的卡片数据
+     * 判断卡片类型数据
      *
-     * @return
+     * @param cardDataDTOS
+     * @param subscCardTypeDO
      */
-    void getAllCardDatas();
+    void switchCardType(List<CardDataDTO> cardDataDTOS, SubscCardTypeDO subscCardTypeDO);
+
+
+
+
 
 
 }

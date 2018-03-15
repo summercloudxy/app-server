@@ -10,7 +10,7 @@ public class CardDataDTO {
 
     private String cardCode;
 
-    private Object cardData;
+    private String cardData;
 
     public String getCardCode() {
         return cardCode;
@@ -20,11 +20,11 @@ public class CardDataDTO {
         this.cardCode = cardCode;
     }
 
-    public Object getCardData() {
+    public String getCardData() {
         return cardData;
     }
 
-    public void setCardData(Object cardData) {
+    public void setCardData(String cardData) {
         this.cardData = cardData;
     }
 }

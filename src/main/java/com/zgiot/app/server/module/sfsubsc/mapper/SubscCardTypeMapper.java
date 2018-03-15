@@ -13,7 +13,7 @@ import java.util.List;
 @Mapper
 public interface SubscCardTypeMapper {
     /**
-     * 查询所有的订阅开篇配置
+     * 查询所有的订阅卡片配置
      *
      * @return
      */
