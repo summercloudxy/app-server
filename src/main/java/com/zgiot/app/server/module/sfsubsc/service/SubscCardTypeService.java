@@ -25,7 +25,76 @@ public interface SubscCardTypeService {
      * @param subscCardTypeDO
      * @return
      */
-    CardDataDTO getHistoryWashingQuantity(SubscCardTypeDO subscCardTypeDO);
+    CardDataDTO getHistoricalWashingCapacity(SubscCardTypeDO subscCardTypeDO);
+
+
+    /**
+     * 查询历史产品率
+     *
+     * @param subscCardTypeDO
+     * @return
+     */
+    CardDataDTO getHistoricalProductRate(SubscCardTypeDO subscCardTypeDO);
+
+    /**
+     * 查询原煤配比
+     *
+     * @param subscCardTypeDO
+     * @return
+     */
+    CardDataDTO getMixtureOfRawCoal(SubscCardTypeDO subscCardTypeDO);
+
+    /**
+     * 查询瞬时入洗量
+     *
+     * @param subscCardTypeDO
+     * @return
+     */
+    CardDataDTO getInstantaneousWash(SubscCardTypeDO subscCardTypeDO);
+
+    /**
+     * 查询瞬时产品量
+     *
+     * @param subscCardTypeDO
+     * @return
+     */
+    CardDataDTO getInstantaneousProductQuantity(SubscCardTypeDO subscCardTypeDO);
+
+    /**
+     * 查询产品产率
+     *
+     * @param subscCardTypeDO
+     * @return
+     */
+    CardDataDTO getProductYield(SubscCardTypeDO subscCardTypeDO);
+
+
+    /**
+     * 查询化验数据
+     *
+     * @param subscCardTypeDO
+     * @return
+     */
+    CardDataDTO getChemicalTestsData(SubscCardTypeDO subscCardTypeDO);
+
+    /**
+     * 查询智能压滤
+     *
+     * @param subscCardTypeDO
+     * @return
+     */
+    CardDataDTO getIntelligentFilter(SubscCardTypeDO subscCardTypeDO);
+
+    /**
+     * 查询化验数据
+     *
+     * @param subscCardTypeDO
+     * @return
+     */
+    CardDataDTO getIntelligentBlower(SubscCardTypeDO subscCardTypeDO);
+
+
+
 
     /**
      * 查询所有的卡片数据

@@ -32,14 +32,39 @@ public class SubscriptionController {
         List<SubscCardTypeDO> subscCardTypeDOS = subscCardTypeService.getAllSubscCardTypes();
         for (SubscCardTypeDO subscCardTypeDO : subscCardTypeDOS) {
             CardDataDTO cardDataDTO = new CardDataDTO();
-            if (subscCardTypeDO.getCardCode().equals(CardTypeEnum.HISTORYWASHINGQUANTITY_ONE.getCardCode())) {
-                cardDataDTO = subscCardTypeService.getHistoryWashingQuantity(subscCardTypeDO);
+            if (subscCardTypeDO.getCardType().equals(CardTypeEnum.HISTORICAL_WASHING_CAPACITY.getCardCode())) {
+                cardDataDTO = subscCardTypeService.getHistoricalWashingCapacity(subscCardTypeDO);
+                //cardDataDTOS.add(cardDataDTO);
+            } else if (subscCardTypeDO.getCardType().equals(CardTypeEnum.HISTORICAL_PRODUCT_RATE.getCardCode())) {
+
+                cardDataDTO = subscCardTypeService.getHistoricalProductRate(subscCardTypeDO);
+                //cardDataDTOS.add(cardDataDTO);
+
+            } else if (subscCardTypeDO.getCardType().equals(CardTypeEnum.INSTANTANEOUS_WASH.getCardCode())) {
+                cardDataDTO = subscCardTypeService.getInstantaneousWash(subscCardTypeDO);
+                // cardDataDTOS.add(cardDataDTO);
+            } else if (subscCardTypeDO.getCardType().equals(CardTypeEnum.INSTANTANEOUS_PRODUCT_QUANTITY.getCardCode())) {
+                cardDataDTO = subscCardTypeService.getInstantaneousProductQuantity(subscCardTypeDO);
+                //cardDataDTOS.add(cardDataDTO);
+            } else if (subscCardTypeDO.getCardType().equals(CardTypeEnum.PRODUCT_YIELD.getCardCode())) {
+                cardDataDTO = subscCardTypeService.getProductYield(subscCardTypeDO);
+                //cardDataDTOS.add(cardDataDTO);
+            } else if (subscCardTypeDO.getCardType().equals(CardTypeEnum.INTELLIGENT_FILTER.getCardCode())) {
+                cardDataDTO = subscCardTypeService.getIntelligentFilter(subscCardTypeDO);
+                //cardDataDTOS.add(cardDataDTO);
+            } else if (subscCardTypeDO.getCardType().equals(CardTypeEnum.INTELLIGENT_BLOWER.getCardCode())) {
+                cardDataDTO = subscCardTypeService.getIntelligentBlower(subscCardTypeDO);
+                //cardDataDTOS.add(cardDataDTO);
+            } else if (subscCardTypeDO.getCardType().equals(CardTypeEnum.MIXTURE_OF_RAW_COAL.getCardCode())) {
+                cardDataDTO = subscCardTypeService.getMixtureOfRawCoal(subscCardTypeDO);
+                //cardDataDTOS.add(cardDataDTO);
+            } else if (subscCardTypeDO.getCardType().equals(CardTypeEnum.CHEMICAL_TESTS_DATA.getCardCode())) {
+                cardDataDTO = subscCardTypeService.getChemicalTestsData(subscCardTypeDO);
                 cardDataDTOS.add(cardDataDTO);
             }
-            return new ResponseEntity<>(ServerResponse.buildOkJson(cardDataDTOS), HttpStatus.OK);
 
         }
-        return null;
+        return new ResponseEntity<>(ServerResponse.buildOkJson(cardDataDTOS), HttpStatus.OK);
 
     }
 
