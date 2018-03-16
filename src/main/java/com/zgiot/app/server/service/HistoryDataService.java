@@ -49,19 +49,21 @@ public interface HistoryDataService {
 
     /**
      * find history data of one metricCode of multi thingCodes in a time range by segment
-     * @param thingCodes    thingCode list
+     *
+     * @param thingCodes thingCode list
      * @param metricCode
      * @param startDate
      * @param endDate
      * @param segment
      * @return {"2492":[{"dt":1508833769000,"v":"1.3"},{"dt":1508833769001,"v":"1.4"}],"2493":[{"dt":1508833769000,"v":"1.3"},{"dt":1508833769001,"v":"1.4"}]}
      */
-    Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment);
+    Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment,boolean isTimeCorrection);
 
 
     /**
      * find all history data of one metricCode of multi thingCodes in a time range
-     * @param thingCodes    thingCode list
+     *
+     * @param thingCodes thingCode list
      * @param metricCode
      * @param startDate
      * @param endDate
@@ -77,12 +79,14 @@ public interface HistoryDataService {
 
     /**
      * Check whitelist and determine how to add to batch insert queue.
+     *
      * @param dm
      */
     void asyncSmartAddData(DataModel dm);
 
     /**
      * find the history data which is the closest to queryTime
+     *
      * @param thingCodes
      * @param metricCodes
      * @param queryTime
@@ -92,6 +96,7 @@ public interface HistoryDataService {
 
     /**
      * find the last history data which is before queryTime or the first history data which is after queryTime()
+     *
      * @param thingCodes
      * @param metricCodes
      * @param queryTime
@@ -99,5 +104,17 @@ public interface HistoryDataService {
      * @return
      */
     DataModel findClosestHistoryDataInDuration(List<String> thingCodes, List<String> metricCodes, Date queryTime, String queryType);
+
+    /**
+     * find the history data which has the max value in duration
+     * @param thingCode
+     * @param metricCode
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    DataModel findMaxValueDataInDuration(String thingCode, String metricCode, Date startDate, Date endDate);
+
+    Double findAvgValueDataInDuration(String thingCode, String metricCode, Date startDate, Date endDate);
 
 }

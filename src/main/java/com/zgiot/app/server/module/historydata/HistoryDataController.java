@@ -63,7 +63,7 @@ public class HistoryDataController {
         if (historyDataDto.getSegment() != null) {
             // by segment
             result = historyDataService.findMultiThingsHistoryDataOfMetricBySegment(historyDataDto.getThingCodes(), metricCode,
-                    historyDataDto.getStartTime(), historyDataDto.getEndTime(), historyDataDto.getSegment());
+                    historyDataDto.getStartTime(), historyDataDto.getEndTime(), historyDataDto.getSegment(),historyDataDto.isTimeCorrection());
         } else {
             // all data in time range
             result = historyDataService.findMultiThingsHistoryDataOfMetric(historyDataDto.getThingCodes(), metricCode, historyDataDto.getStartTime(), historyDataDto.getEndTime());

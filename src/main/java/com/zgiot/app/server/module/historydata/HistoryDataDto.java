@@ -16,6 +16,8 @@ public class HistoryDataDto {
 
     private Integer segment;
 
+    private boolean isTimeCorrection;
+
     public Date getStartTime() {
         return startTime;
     }
@@ -46,5 +48,13 @@ public class HistoryDataDto {
 
     public void setSegment(Integer segment) {
         this.segment = segment;
+    }
+
+    public boolean isTimeCorrection() {
+        return isTimeCorrection;
+    }
+
+    public void setTimeCorrection(boolean timeCorrection) {
+        isTimeCorrection = timeCorrection;
     }
 }
