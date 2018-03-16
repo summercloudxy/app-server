@@ -42,7 +42,7 @@ public class WebSocketProcessor implements DataProcessor {
 
     private boolean autoReconnect = true;
 
-    private ExecutorService executor = new ThreadPoolExecutor(1, Runtime.getRuntime().availableProcessors(), 5000L, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<>(), new ThreadFactory() {
+    private ExecutorService executor = new ThreadPoolExecutor(40, 800, 5000L, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(20000), new ThreadFactory() {
         private AtomicInteger counter = new AtomicInteger(0);
 
         @Override
@@ -50,6 +50,7 @@ public class WebSocketProcessor implements DataProcessor {
             return new Thread(r, "WebSocket Common Pool-" + counter.getAndIncrement());
         }
     });
+
 
     public WebSocketProcessor(String serverUrl) {
         this(serverUrl, DEFAULT_HANDSHAKE_TIMEOUT, DEFAULT_CONNECT_TIMEOUT);
