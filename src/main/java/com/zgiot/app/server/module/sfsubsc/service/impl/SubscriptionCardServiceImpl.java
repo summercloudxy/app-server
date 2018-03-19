@@ -452,9 +452,9 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         CardDataDTO cardDataDTO = new CardDataDTO();
         InstantaneousWashVo instantaneousWashVo = new InstantaneousWashVo();
         instantaneousWashVo.setCardTitle(subscCardTypeDO.getCardName());
-        if (subscCardTypeDO.getCardCode().split("_")[1].equals(GlobalConstants.SYSTEM_01)) {
+        if (subscCardTypeDO.getCardCode().contains(GlobalConstants.SYSTEM_01)) {
             instantaneousWashVo.setSystemName(GlobalConstants.SYSTEM_ONE);
-        } else if (subscCardTypeDO.getCardCode().split("_")[1].equals(GlobalConstants.SYSTEM_02)) {
+        } else if (subscCardTypeDO.getCardCode().contains(GlobalConstants.SYSTEM_02)) {
             instantaneousWashVo.setSystemName(GlobalConstants.SYSTEM_TWO);
         }
         String[] cardParamValues = subscCardTypeDO.getCardParamValue().split(",");
