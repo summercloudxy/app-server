@@ -15,6 +15,7 @@ import com.zgiot.app.server.service.pojo.HistdataWhitelistModel;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.reloader.Reloader;
 import com.zgiot.common.reloader.ServerReloadManager;
+import org.apache.commons.collections4.CollectionUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.slf4j.Logger;
@@ -103,17 +104,21 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
             collection.find(criteria)
                     .sort(Sorts.descending(DataModel.DATA_TIMESTAMP))
                     .forEach((Block<Document>) document -> {
-                        DataModel model = new DataModel();
-                        model.setThingCode(document.getString(DataModel.THING_CODE));
-                        model.setMetricCode(document.getString(DataModel.METRIC_CODE));
-                        model.setValue(document.getString(DataModel.VALUE));
-                        model.setDataTimeStamp(new Date(document.getLong(DataModel.DATA_TIMESTAMP)));
-                        result.add(model);
+                        documentToDataModel(result, document);
                     });
         } else {
             logger.warn("mongo disabled");
         }
         return result;
+    }
+
+    private void documentToDataModel(List<DataModel> result, Document document) {
+        DataModel model = new DataModel();
+        model.setThingCode(document.getString(DataModel.THING_CODE));
+        model.setMetricCode(document.getString(DataModel.METRIC_CODE));
+        model.setValue(document.getString(DataModel.VALUE));
+        model.setDataTimeStamp(new Date(document.getLong(DataModel.DATA_TIMESTAMP)));
+        result.add(model);
     }
 
     @Override
@@ -130,7 +135,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
      * created by wangwei
      */
     @Override
-    public Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment) {
+    public Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment,boolean isTimeCorrection) {
         if (!checkEnabled()) {
             return new HashMap<>();
         }
@@ -178,7 +183,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
                     map.put(tc, temp);
                 }
 
-                checkDocument(document, temp, interval);
+                checkDocument(document, temp, interval ,isTimeCorrection);
             }
         }
 
@@ -190,12 +195,12 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
             DataModel[] dataModels;
             if (temp == null) {
                 dataModels = new DataModel[segment];
-                queryForUnsetDataModel(thingCode, metricCode, startTime, dataModels, segment);
+                queryForUnsetDataModel(thingCode, metricCode, startTime, dataModels, segment ,interval ,isTimeCorrection);
             } else {
                 dataModels = (DataModel[]) temp.get(KEY_ARRAY);
                 int size = (int) temp.get(KEY_SIZE);
                 if (size > 0) {
-                    queryForUnsetDataModel(thingCode, metricCode, startTime, dataModels, size);
+                    queryForUnsetDataModel(thingCode, metricCode, startTime, dataModels, size,interval ,isTimeCorrection);
                 }
             }
 
@@ -257,7 +262,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
      * @param tempMap  store dataModel array, timestamp and unset size
      * @param interval interval by segment
      */
-    private void checkDocument(Document document, Map<String, Object> tempMap, long interval) {
+    private void checkDocument(Document document, Map<String, Object> tempMap, long interval, boolean isTimeCorrection) {
         while (true) {
             int size = (int) tempMap.get(KEY_SIZE);
             if (size == 0) {
@@ -277,6 +282,9 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
             DataModel model = new DataModel();
             model.setValue(document.getString(DataModel.VALUE));
             model.setDataTimeStamp(new Date(dt));
+            if (isTimeCorrection){
+                model.setDataTimeStamp(new Date(timestamp));
+            }
             dataModels[size] = model;
 
             timestamp -= interval;
@@ -296,7 +304,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
      * @param dataModels
      * @param size
      */
-    private void queryForUnsetDataModel(String thingCode, String metricCode, long endTime, DataModel[] dataModels, int size) {
+    private void queryForUnsetDataModel(String thingCode, String metricCode, long endTime, DataModel[] dataModels, int size , long interval, boolean isTimeCorrection) {
         Bson criteria = and(lte(DataModel.DATA_TIMESTAMP, endTime), eq(DataModel.METRIC_CODE, metricCode), eq(DataModel.THING_CODE, thingCode));
         FindIterable<Document> iterable = collection.find(criteria).sort(Sorts.descending(DataModel.DATA_TIMESTAMP)).limit(1);
         for (Document document : iterable) {
@@ -304,12 +312,17 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
             model.setValue(document.getString(DataModel.VALUE));
             model.setDataTimeStamp(new Date(document.getLong(DataModel.DATA_TIMESTAMP)));
             for (int i = 0; i < size; i++) {
-                dataModels[i] = model.clone();
+                DataModel clone = model.clone();
+                if (isTimeCorrection){
+                    clone.setDataTimeStamp(new Date(endTime + i *interval));
+                }
+                dataModels[i]= clone;
             }
         }
     }
 
 
+    @Override
     public DataModel findClosestHistoryDataInDuration(List<String> thingCodes, List<String> metricCodes, Date queryTime, String queryType) {
         if (!checkEnabled()) {
             return null;
@@ -340,22 +353,18 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
             collection.find(criteria)
                     .sort(sortBson)
                     .limit(1).forEach((Block<Document>) document -> {
-                DataModel model = new DataModel();
-                model.setThingCode(document.getString(DataModel.THING_CODE));
-                model.setMetricCode(document.getString(DataModel.METRIC_CODE));
-                model.setValue(document.getString(DataModel.VALUE));
-                model.setDataTimeStamp(new Date(document.getLong(DataModel.DATA_TIMESTAMP)));
-                result.add(model);
+                documentToDataModel(result, document);
             });
         } else {
             logger.warn("mongo disabled");
         }
-        if(result.size()!=0) {
+        if (result.size() != 0) {
             return result.get(0);
         }
         return null;
     }
 
+    @Override
     public DataModel findClosestHistoryData(List<String> thingCodes, List<String> metricCodes, Date queryTime) {
         DataModel closestHistoryDataBeforeTime = findClosestHistoryDataInDuration(thingCodes, metricCodes, queryTime, QUERY_TIME_TYPE_BEFORE);
         DataModel closestHistoryDataAfterTime = findClosestHistoryDataInDuration(thingCodes, metricCodes, queryTime, QUERY_TIME_TYPE_AFTER);
@@ -365,13 +374,86 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
             } else {
                 return closestHistoryDataAfterTime;
             }
-        }else if(closestHistoryDataAfterTime != null){
+        } else if (closestHistoryDataAfterTime != null) {
             return closestHistoryDataAfterTime;
-        }else if(closestHistoryDataBeforeTime != null){
+        } else if (closestHistoryDataBeforeTime != null) {
             return closestHistoryDataBeforeTime;
-        }else {
+        } else {
             return null;
         }
+    }
+
+    @Override
+    public DataModel findMaxValueDataInDuration(String thingCode, String metricCode, Date startTime, Date endTime) {
+        List<DataModel> result = getDataListInDuration(thingCode, metricCode, startTime, endTime);
+        if (result == null) {
+            return null;
+        }
+        if (result.size() != 0) {
+            if (result.size() == 1) {
+                return result.get(0);
+            }
+            Optional<DataModel> max = result.stream().max((o1, o2) -> {
+                String valueStr1 = o1.getValue();
+                Double value1 = Double.valueOf(valueStr1);
+                String valueStr2 = o2.getValue();
+                Double value2 = Double.valueOf(valueStr2);
+                return value1.compareTo(value2);
+            });
+            return max.get();
+        }
+        return null;
+    }
+
+    @Override
+    public Double findAvgValueDataInDuration(String thingCode, String metricCode, Date startTime, Date endTime) {
+        List<DataModel> resultList = getDataListInDuration(thingCode, metricCode, startTime, endTime);
+        if (CollectionUtils.isEmpty(resultList)) {
+            return null;
+        }
+        return getAvgValue(resultList);
+    }
+
+    private double getAvgValue(List<DataModel> resultList) {
+        int count = 0;
+        double sumValue = 0.0;
+        double avgValue = 0.0;
+        for (DataModel dataModel : resultList) {
+            sumValue += Double.parseDouble(dataModel.getValue());
+            count++;
+        }
+        if (count != 0) {
+            avgValue = sumValue / count;
+        }
+        return avgValue;
+    }
+
+    private List<DataModel> getDataListInDuration(String thingCode, String metricCode, Date startTime, Date endTime) {
+        if (!checkEnabled()) {
+            return null;
+        }
+        Bson criteria;
+        // for end date
+        if (startTime == null) {
+            throw new IllegalArgumentException("start time required.");
+        }
+        if (endTime == null) {
+            throw new IllegalArgumentException("end time required.");
+        }
+        if (startTime.after(endTime)) {
+            throw new IllegalArgumentException("StartDate must be earlier than endDate");
+        }
+        criteria = and(gte(DataModel.DATA_TIMESTAMP, startTime), lt(DataModel.DATA_TIMESTAMP, endTime), eq(DataModel.METRIC_CODE, metricCode), eq(DataModel.THING_CODE, thingCode));
+        List<DataModel> result = new LinkedList<>();
+        if (collection != null) {
+            collection.find(criteria)
+                    .forEach((Block<Document>) document -> {
+                        documentToDataModel(result, document);
+                    });
+        } else {
+            logger.warn("mongo disabled");
+        }
+        return result;
     }
 
     @Override

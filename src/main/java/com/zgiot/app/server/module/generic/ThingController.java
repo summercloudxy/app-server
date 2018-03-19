@@ -103,7 +103,6 @@ public class ThingController {
     public ResponseEntity<String> findThingByType() {
         List<ThingModel> baseThings = thingService.findThingByTag(ThingTagConstants.EQUIPMENT);
         List<String> thingCodeList = new ArrayList<>();
-        //List<Map<String, Map<String, String>>> things = getThingInfo(baseThings);
         for(ThingModel thingModel:baseThings){
             if(!StringUtils.isBlank(thingModel.getThingCode())){
                 thingCodeList.add(thingModel.getThingCode());

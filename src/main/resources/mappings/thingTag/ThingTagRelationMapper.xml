@@ -79,4 +79,5 @@
         WHERE
         id = #{thingTagRelationId}
     </delete>
+
 </mapper>

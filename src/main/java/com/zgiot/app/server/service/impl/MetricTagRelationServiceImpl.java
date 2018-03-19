@@ -23,7 +23,7 @@ public class MetricTagRelationServiceImpl implements MetricTagRelationService {
     @Override
     public MetricTagRelation getMetricTagRelation(Integer metricTagRelationId) {
         MetricTagRelation metricTagRelation = new MetricTagRelation();
-        metricTagRelation.setMetricTagRelationId(metricTagRelationId);
+        metricTagRelation.setId(metricTagRelationId);
         List<MetricTagRelation> thingTagRelations = metricTagRelationMapper.findMetricTagRelation(metricTagRelation);
         if(thingTagRelations.isEmpty()){
             return null;

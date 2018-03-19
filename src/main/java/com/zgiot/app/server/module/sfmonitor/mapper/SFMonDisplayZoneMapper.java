@@ -16,4 +16,7 @@ public interface SFMonDisplayZoneMapper {
 
     @Delete("delete from rel_sfmon_tag_displayzone where metric_tag_code=#{metricTagCode}")
     void deleteRelSFMonTagDisplayZone(@Param("metricTagCode") String metricTagCode);
+
+    @Select("select code from tb_sfmon_displayzone where id=#{id}")
+    String getZoneCode(@Param("id") int id);
 }

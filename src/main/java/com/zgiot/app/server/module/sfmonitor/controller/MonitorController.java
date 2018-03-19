@@ -77,22 +77,11 @@ public class MonitorController {
             for(RelSFMonItem relSFMonItem:relSFMonItems){
                 MonitorItemInfo monitorItemInfo = new MonitorItemInfo();
                 monitorItemInfo.setRelSFMonItem(relSFMonItem);
+                monitorItemInfos = new ArrayList<>();
                 monitorItemInfos.add(monitorItemInfo);
             }
         }
         return new ResponseEntity<>(ServerResponse.buildOkJson(monitorItemInfos),HttpStatus.OK); 
-    }
-
-    private List<MonitorItemInfo> addNoMetricWrapper(List<MonitorItemInfo> monitorItemInfos,long monId){
-        List<RelSFMonItem> relSFMonItemList = relSFMonitorItemMapper.getRelSFMonItemNoMetric(monId);
-        for(RelSFMonItem relSFMonItem:relSFMonItemList){
-            MonitorItemInfo monitor = new MonitorItemInfo();
-            MetricModel metricModel = new MetricModel();
-            monitor.setMetricModel(metricModel);
-            monitor.setRelSFMonItem(relSFMonItem);
-            monitorItemInfos.add(monitor);
-        }
-        return monitorItemInfos;
     }
  
  
