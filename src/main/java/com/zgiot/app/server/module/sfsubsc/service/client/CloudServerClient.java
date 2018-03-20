@@ -19,7 +19,7 @@ public interface CloudServerClient {
      * @return
      */
     @Headers({"Content-Type: application/json"})
-    @RequestLine("POST cloudServer/v1/sfsubsc/usersubsc/saveAllCardDatas")
+    @RequestLine("POST /sfsubsc/usersubsc/saveAllCardDatas")
     ServerResponse saveAllCardDatas(@RequestBody List<CardDataDTO> cardDataDTOS);
 
 }

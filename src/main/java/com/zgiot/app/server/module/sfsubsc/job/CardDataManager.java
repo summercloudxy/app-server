@@ -7,8 +7,8 @@ import com.zgiot.app.server.module.sfsubsc.service.SubscCardTypeService;
 import com.zgiot.app.server.module.sfsubsc.service.client.CloudServerClient;
 import com.zgiot.common.restcontroller.ServerResponse;
 import feign.Feign;
-import feign.jackson.JacksonDecoder;
-import feign.jackson.JacksonEncoder;
+import feign.gson.GsonDecoder;
+import feign.gson.GsonEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,11 +26,15 @@ import java.util.List;
 public class CardDataManager {
 
     private static final Logger logger = LoggerFactory.getLogger(CardDataManager.class);
+    //注意token后 有空格
+    private final static String AUTHORIZATION_PRIFIX = "Bearer ";
 
     @Value("${cloud.serviceaccount.token}")
     private String authorization;
     @Value("${cloud.service.ip}")
-    private String authServiceIp;
+    private String cloudServiceIp;
+    @Value("${cloud.service.path}")
+    private String cloudServerPath;
 
 
     @Autowired
@@ -56,10 +60,10 @@ public class CardDataManager {
                 cardDataDTOS.add(cardDataDTO);
             }
         }
-        CloudServerClient cloudServerClient = Feign.builder().encoder(new JacksonEncoder())
-                .decoder(new JacksonDecoder()).requestInterceptor(requestTemplate -> requestTemplate.header("Authorization", authorization))
+        CloudServerClient cloudServerClient = Feign.builder().encoder(new GsonEncoder())
+                .decoder(new GsonDecoder()).requestInterceptor(requestTemplate -> requestTemplate.header("Authorization", AUTHORIZATION_PRIFIX + authorization))
                 .target(CloudServerClient.class,
-                        authServiceIp);
+                        cloudServiceIp + cloudServerPath);
         ServerResponse serverResponse = cloudServerClient.saveAllCardDatas(cardDataDTOS);
         if (serverResponse.getCode() == 0) {
             logger.debug("卡片历史数据上传CloudServer完成");
@@ -95,10 +99,10 @@ public class CardDataManager {
                 cardDataDTOS.add(cardDataDTO);
             }
         }
-        CloudServerClient cloudServerClient = Feign.builder().encoder(new JacksonEncoder())
-                .decoder(new JacksonDecoder()).requestInterceptor(requestTemplate -> requestTemplate.header("Authorization", authorization))
+        CloudServerClient cloudServerClient = Feign.builder().encoder(new GsonEncoder())
+                .decoder(new GsonDecoder()).requestInterceptor(requestTemplate -> requestTemplate.header("Authorization", authorization))
                 .target(CloudServerClient.class,
-                        authServiceIp);
+                        cloudServiceIp + cloudServerPath);
         ServerResponse serverResponse = cloudServerClient.saveAllCardDatas(cardDataDTOS);
         if (serverResponse.getCode() == 0) {
             logger.debug("卡片实时数据上传CloudServer完成");
