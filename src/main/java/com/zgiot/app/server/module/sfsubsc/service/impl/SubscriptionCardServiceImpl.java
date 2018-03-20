@@ -1067,6 +1067,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             IntelligentBlowerVO.MompressorMetric mompressorMetric = intelligentBlowerVO.new MompressorMetric();
             mompressorMetric.setThingCode(mompressor);
             //不考虑轻故障，当重故障信号使能时显示【故障】状态，当不是重故障时判断【运行/待机】信号，当为待机时显示【待机】状态，否则判断【加载/卸载】信号并显示对应的状态；
+            //0  待机    1 加载  2 卸载  故障3    RunState 用于前端颜色显示 不是真实信号状态
             getMompressorFaultStates(mompressor, mompressorMetric);
             mompressorMetrics.add(mompressorMetric);
         }
@@ -1084,7 +1085,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         if (mompressorData != null) {
             String faultValue = mompressorData.getValue();
             if (SubscriptionConstants.FAULT_1.equals(faultValue)) {
-                mompressorMetric.setRunState(SubscriptionConstants.FAULT_1);
+                mompressorMetric.setRunState("3");
                 mompressorMetric.setRunStateName(SubscriptionConstants.FAULT);
             } else {
                 //空压机的运行、待机状态
@@ -1131,10 +1132,10 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         if (loadStateData != null) {
             String loadStates = loadStateData.getValue();
             if (SubscriptionConstants.LOAD_STATE_LOAD_1.equals(loadStates)) {
-                mompressorMetric.setRunState(SubscriptionConstants.LOAD_STATE_LOAD_1);
+                mompressorMetric.setRunState("1");
                 mompressorMetric.setRunStateName(SubscriptionConstants.LOAD_STATE_LOAD);
             } else if (SubscriptionConstants.LOAD_STATE_LOAD_0.equals(loadStates)) {
-                mompressorMetric.setRunState(SubscriptionConstants.LOAD_STATE_LOAD_0);
+                mompressorMetric.setRunState("2");
                 mompressorMetric.setRunStateName(SubscriptionConstants.LOAD_STATE_UNLOAD);
             } else {
                 mompressorMetric.setRunState("");
