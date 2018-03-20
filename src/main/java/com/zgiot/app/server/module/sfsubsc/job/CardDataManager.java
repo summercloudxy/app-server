@@ -7,8 +7,8 @@ import com.zgiot.app.server.module.sfsubsc.service.SubscCardTypeService;
 import com.zgiot.app.server.module.sfsubsc.service.client.CloudServerClient;
 import com.zgiot.common.restcontroller.ServerResponse;
 import feign.Feign;
-import feign.gson.GsonDecoder;
-import feign.gson.GsonEncoder;
+import feign.jackson.JacksonDecoder;
+import feign.jackson.JacksonEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,8 +60,8 @@ public class CardDataManager {
                 cardDataDTOS.add(cardDataDTO);
             }
         }
-        CloudServerClient cloudServerClient = Feign.builder().encoder(new GsonEncoder())
-                .decoder(new GsonDecoder()).requestInterceptor(requestTemplate -> requestTemplate.header("Authorization", AUTHORIZATION_PRIFIX + authorization))
+        CloudServerClient cloudServerClient = Feign.builder().encoder(new JacksonEncoder())
+                .decoder(new JacksonDecoder()).requestInterceptor(requestTemplate -> requestTemplate.header("Authorization", AUTHORIZATION_PRIFIX + authorization))
                 .target(CloudServerClient.class,
                         cloudServiceIp + cloudServerPath);
         ServerResponse serverResponse = cloudServerClient.saveAllCardDatas(cardDataDTOS);
@@ -99,8 +99,8 @@ public class CardDataManager {
                 cardDataDTOS.add(cardDataDTO);
             }
         }
-        CloudServerClient cloudServerClient = Feign.builder().encoder(new GsonEncoder())
-                .decoder(new GsonDecoder()).requestInterceptor(requestTemplate -> requestTemplate.header("Authorization", authorization))
+        CloudServerClient cloudServerClient = Feign.builder().encoder(new JacksonEncoder())
+                .decoder(new JacksonDecoder()).requestInterceptor(requestTemplate -> requestTemplate.header("Authorization", authorization))
                 .target(CloudServerClient.class,
                         cloudServiceIp + cloudServerPath);
         ServerResponse serverResponse = cloudServerClient.saveAllCardDatas(cardDataDTOS);
