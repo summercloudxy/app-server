@@ -551,5 +551,22 @@ insert into rel_historydata_whitelist values('1859.DY-1','LEVEL',1);
 insert into rel_historydata_whitelist values('2857.DY-1','LEVEL',1);
 insert into rel_historydata_whitelist values('2858.DY-1','LEVEL',1);
 insert into rel_historydata_whitelist values('2859.DY-1','LEVEL',1);
-
+insert into rel_historydata_whitelist values('1857-1','FL',1);
+insert into rel_historydata_whitelist values('1857-2','FL',1);
+insert into rel_historydata_whitelist values('1857-3','FL',1);
+insert into rel_historydata_whitelist values('1858-1','FL',1);
+insert into rel_historydata_whitelist values('1858-2','FL',1);
+insert into rel_historydata_whitelist values('1858-3','FL',1);
+insert into rel_historydata_whitelist values('1859-1','FL',1);
+insert into rel_historydata_whitelist values('1859-2','FL',1);
+insert into rel_historydata_whitelist values('1859-3','FL',1);
+insert into rel_historydata_whitelist values('2857-1','FL',1);
+insert into rel_historydata_whitelist values('2857-2','FL',1);
+insert into rel_historydata_whitelist values('2857-3','FL',1);
+insert into rel_historydata_whitelist values('2858-1','FL',1);
+insert into rel_historydata_whitelist values('2858-2','FL',1);
+insert into rel_historydata_whitelist values('2858-3','FL',1);
+insert into rel_historydata_whitelist values('2859-1','FL',1);
+insert into rel_historydata_whitelist values('2859-2','FL',1);
+insert into rel_historydata_whitelist values('2859-3','FL',1);
 
