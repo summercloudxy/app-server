@@ -41,9 +41,9 @@ public class TcsController {
 
     @RequestMapping(value = "analysis/curve")
     public ResponseEntity<String> getRecordCurve(@RequestParam Long duration){
-        Map<Integer,List<TcsAnalysisInfo>> curveMap = new HashMap<>(2);
-        curveMap.put(1,tcsService.getTcsAnalysisCurve(1,duration));
-        curveMap.put(2,tcsService.getTcsAnalysisCurve(2,duration));
+        Map<String,List<TcsAnalysisInfo>> curveMap = new HashMap<>(2);
+        curveMap.put("1",tcsService.getTcsAnalysisCurve(1,duration));
+        curveMap.put("2",tcsService.getTcsAnalysisCurve(2,duration));
         return new ResponseEntity<>(ServerResponse.buildOkJson(curveMap), HttpStatus.OK);
     }
 

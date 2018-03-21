@@ -11,7 +11,6 @@ public class AlertMaskStatistics {
     private String alertInfo;
     private int alertType;
     private Integer count;
-//    private List<AlertMask> alertMasks;
 
     public String getThingCode() {
         return thingCode;
@@ -52,14 +51,6 @@ public class AlertMaskStatistics {
     public void setAlertType(int alertType) {
         this.alertType = alertType;
     }
-
-//    public List<AlertMask> getAlertMasks() {
-//        return alertMasks;
-//    }
-//
-//    public void setAlertMasks(List<AlertMask> alertMasks) {
-//        this.alertMasks = alertMasks;
-//    }
 
     public Integer getCount() {
         return count;

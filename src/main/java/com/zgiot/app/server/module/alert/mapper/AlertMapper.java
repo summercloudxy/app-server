@@ -3,7 +3,6 @@ package com.zgiot.app.server.module.alert.mapper;
 import com.zgiot.app.server.module.alert.pojo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.Date;
 import java.util.List;
@@ -59,11 +58,6 @@ public interface AlertMapper {
 
     Integer getAlertDataListCount(FilterCondition filterCondition);
 
-    //    List<AlertData> getAlertDataList(@Param("stage") String stage, @Param("excluStage") String excluStage,
-////            @Param("level") Integer level, @Param("type") Short type, @Param("system") Integer system,
-////            @Param("assetType") String assetType, @Param("category") String category,
-////            @Param("sortType") Integer sortType, @Param("startTime") Date startTime, @Param("endTime") Date endTime,
-////            @Param("thingCode") String thingCode, @Param("offset") Integer offset, @Param("count") Integer count);
     List<AlertData> getAlertDataList(FilterCondition filterCondition);
 
     List<AlertMaskInfo> getAlertMaskInfo(FilterCondition filterCondition);

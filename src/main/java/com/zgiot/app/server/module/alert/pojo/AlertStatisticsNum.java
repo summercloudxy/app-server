@@ -7,7 +7,6 @@ public class AlertStatisticsNum {
     private String thingCode;
     private int sumNum;
     private List<AlertLevelNum> alertLevelNumList = new ArrayList<>();
-//    private Map<Integer, Integer> alertLevelNums = new TreeMap<>();
     private String dayStr;
 
     public String getThingCode() {
@@ -25,14 +24,6 @@ public class AlertStatisticsNum {
     public void setSumNum(int sumNum) {
         this.sumNum = sumNum;
     }
-
-//    public Map<Integer, Integer> getAlertLevelNums() {
-//        return alertLevelNums;
-//    }
-//
-//    public void setAlertLevelNums(Map<Integer, Integer> alertLevelNums) {
-//        this.alertLevelNums = alertLevelNums;
-//    }
 
     public String getDayStr() {
         return dayStr;

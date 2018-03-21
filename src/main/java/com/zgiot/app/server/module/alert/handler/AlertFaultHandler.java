@@ -35,7 +35,6 @@ public class AlertFaultHandler implements AlertHandler {
     private static final String DISABLE_VALUE = Boolean.FALSE.toString();
     private static final String STATE_RUN = "2";
     private static final String STATE_STOP = "1";
-//    private static final String STATE_FAULT = "4";
     private Map<String, List<DataModel>> preFaultAlertCache = new ConcurrentHashMap<>();
     private static final int WAIT_TIME = 1000;
 
@@ -89,19 +88,23 @@ public class AlertFaultHandler implements AlertHandler {
                 for (DataModel dataModel : faultModels) {
                     long currentTimeMillis = System.currentTimeMillis();
                     if (Math.abs(currentTimeMillis - dataModel.getDataTimeStamp().getTime()) >= WAIT_TIME) {
-                        faultModels.remove(dataModel);
-                        Short alertLevel = getAlertLevelWithState(dataModel, false);
-                        if (alertLevel == null) {
-                            alertLevel = AlertConstants.LEVEL_30;
-                        }
-                        logger.debug("设备{}生成{}等级为{}报警，超过等待时间未获取到设备状态信号点，当前时间戳为{}，故障点时间戳为{}", dataModel.getThingCode(),
-                                dataModel.getMetricCode(), alertLevel, currentTimeMillis,
-                                dataModel.getDataTimeStamp().getTime());
-                        generateFaultAlert(dataModel, alertLevel);
+                        disposeTimeOutFaultInCache(faultModels, dataModel, currentTimeMillis);
                     }
                 }
             }
         }
+    }
+
+    private void disposeTimeOutFaultInCache(List<DataModel> faultModels, DataModel dataModel, long currentTimeMillis) {
+        faultModels.remove(dataModel);
+        Short alertLevel = getAlertLevelWithState(dataModel, false);
+        if (alertLevel == null) {
+            alertLevel = AlertConstants.LEVEL_30;
+        }
+        logger.debug("设备{}生成{}等级为{}报警，超过等待时间未获取到设备状态信号点，当前时间戳为{}，故障点时间戳为{}", dataModel.getThingCode(),
+                dataModel.getMetricCode(), alertLevel, currentTimeMillis,
+                dataModel.getDataTimeStamp().getTime());
+        generateFaultAlert(dataModel, alertLevel);
     }
 
     private void generateFaultAlert(DataModel dataModel, Short level) {

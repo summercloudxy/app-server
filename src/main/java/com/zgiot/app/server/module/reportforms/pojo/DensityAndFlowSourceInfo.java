@@ -1,9 +1,9 @@
-package com.zgiot.app.server.module.coalanalysis.pojo;
+package com.zgiot.app.server.module.reportforms.pojo;
 
 import java.util.List;
 
-public class DensityAndFlowInfo {
-    private String coalTarget;
+public class DensityAndFlowSourceInfo {
+    private String coalSample;
     private Integer system;
     private List<String> thingCodes;
     private String densityCode;
@@ -28,13 +28,6 @@ public class DensityAndFlowInfo {
         this.runDensityThreshold = runDensityThreshold;
     }
 
-    public String getCoalTarget() {
-        return coalTarget;
-    }
-
-    public void setCoalTarget(String coalTarget) {
-        this.coalTarget = coalTarget;
-    }
 
     public Integer getSystem() {
         return system;
@@ -66,5 +59,13 @@ public class DensityAndFlowInfo {
 
     public void setFlowCode(String flowCode) {
         this.flowCode = flowCode;
+    }
+
+    public String getCoalSample() {
+        return coalSample;
+    }
+
+    public void setCoalSample(String coalSample) {
+        this.coalSample = coalSample;
     }
 }

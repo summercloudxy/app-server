@@ -1,9 +1,7 @@
 package com.zgiot.app.server.module.alert.pojo;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import com.alibaba.fastjson.annotation.JSONPOJOBuilder;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.fasterxml.jackson.databind.jsonschema.JsonSerializableSchema;
 import com.zgiot.common.constants.AlertConstants;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.SystemModel;
