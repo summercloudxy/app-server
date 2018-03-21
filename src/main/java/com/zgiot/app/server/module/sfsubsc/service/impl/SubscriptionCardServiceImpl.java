@@ -189,7 +189,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
                 metricData.setCleanCoalPrecent((fistPrecent).multiply(new BigDecimal(100)).setScale(1) + "%");
 
                 BigDecimal secondPrecent = new BigDecimal(mixedCoalValue).divide(totalValue, 3, BigDecimal.ROUND_HALF_UP);
-                metricData.setMixedCoalValue((secondPrecent).multiply(new BigDecimal(100)).setScale(1) + "%");
+                metricData.setMixedCoalPrecent((secondPrecent).multiply(new BigDecimal(100)).setScale(1) + "%");
 
                 BigDecimal thirdPrecent = new BigDecimal(wasteRockValue).divide(totalValue, 3, BigDecimal.ROUND_HALF_UP);
                 metricData.setWasteRockPrecent((thirdPrecent).multiply(new BigDecimal(100)).setScale(1) + "%");
