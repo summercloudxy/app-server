@@ -474,7 +474,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
         BigDecimal instantaneousWashTotal = new BigDecimal(StringUtils.isEmpty(thingCoalCap1) ? "0" : thingCoalCap1).add(new BigDecimal(StringUtils.isEmpty(thingCoalCap1) ? "0" : thingCoalCap2));
         instantaneousWashVo.setInstantaneousValue1(thingCoalCap1);
-        instantaneousWashVo.setInstantaneousValue1(thingCoalCap2);
+        instantaneousWashVo.setInstantaneousValue2(thingCoalCap2);
         instantaneousWashVo.setInstantaneousTotalValue(String.valueOf(instantaneousWashTotal));
 
         String thingCtc1 = "";
