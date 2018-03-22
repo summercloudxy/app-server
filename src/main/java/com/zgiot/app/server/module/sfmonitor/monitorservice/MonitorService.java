@@ -1,4 +1,4 @@
-package com.zgiot.app.server.module.sfmonitor.monitorService;
+package com.zgiot.app.server.module.sfmonitor.monitorservice;
 
 import com.zgiot.app.server.module.sfmonitor.controller.AddOrEditMonitorResponse;
 import com.zgiot.app.server.module.sfmonitor.controller.EquipmentRelateToSignalWrapperReq;

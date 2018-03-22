@@ -1,4 +1,4 @@
-package com.zgiot.app.server.module.sfmonitor.monitorService;
+package com.zgiot.app.server.module.sfmonitor.monitorservice;
 
 import com.zgiot.app.server.module.sfmonitor.constants.SFMonitorConstant;
 import com.zgiot.app.server.module.sfmonitor.controller.*;
@@ -139,6 +139,7 @@ public class MonitorServiceImpl implements MonitorService {
         List<String> keyChannels = equipmentRelateToSignalWrapperReq.getKeyChannels();
         SFMonEquipMonitorConfig sfMonEquipMonitorConfig = null;
         sfMonEquipMonitorConfig = new SFMonEquipMonitorConfig();
+        //保存页面”关键通道”数据
         if(keyChannels != null && keyChannels.size() != 0){
             List<SFMonEquipMonitorConfig> keyChannelEquipments = createEquipmentMonitorConfig(keyChannels,thingCode, SFMonitorConstant.KEY_CHANNEL);
             sfMonEquipMonitorConfig.setThingCode(thingCode);
@@ -146,7 +147,7 @@ public class MonitorServiceImpl implements MonitorService {
             sfMonEquipMonitorConfigMapper.deleteEquipmentConfig(sfMonEquipMonitorConfig);
             saveEquipmentMonitorConfigInfo(keyChannelEquipments);
         }
-
+        //保存页面“自”设备数据
         List<String> fromEquipments = equipmentRelateToSignalWrapperReq.getFromEquipments();
         if(fromEquipments != null && fromEquipments.size() != 0){
             List<SFMonEquipMonitorConfig> fromEquipmentInfos = createEquipmentMonitorConfig(fromEquipments,thingCode, SFMonitorConstant.FROM);
@@ -154,7 +155,7 @@ public class MonitorServiceImpl implements MonitorService {
             sfMonEquipMonitorConfigMapper.deleteEquipmentConfig(sfMonEquipMonitorConfig);
             saveEquipmentMonitorConfigInfo(fromEquipmentInfos);
         }
-
+        //保存页面“至”设备数据
         List<String> toEquipments = equipmentRelateToSignalWrapperReq.getToEquipments();
         if(toEquipments != null && toEquipments.size() != 0){
             List<SFMonEquipMonitorConfig> toEquipmentInfos = createEquipmentMonitorConfig(toEquipments,thingCode, SFMonitorConstant.TO);
@@ -162,7 +163,7 @@ public class MonitorServiceImpl implements MonitorService {
             sfMonEquipMonitorConfigMapper.deleteEquipmentConfig(sfMonEquipMonitorConfig);
             saveEquipmentMonitorConfigInfo(toEquipmentInfos);
         }
-
+        //保存页面“同”设备数据
         List<String> similarEquipments = equipmentRelateToSignalWrapperReq.getSimilarEquipments();
         if(similarEquipments != null && similarEquipments.size() != 0){
             List<SFMonEquipMonitorConfig> similarEquipmentInfos = createEquipmentMonitorConfig(similarEquipments,thingCode, SFMonitorConstant.SIMILAR);
@@ -170,7 +171,7 @@ public class MonitorServiceImpl implements MonitorService {
             sfMonEquipMonitorConfigMapper.deleteEquipmentConfig(sfMonEquipMonitorConfig);
             saveEquipmentMonitorConfigInfo(similarEquipmentInfos);
         }
-
+        //保存页面“参数选择区”数据
         List<String> selectedparameters = equipmentRelateToSignalWrapperReq.getSelectedparameters();
         if(selectedparameters != null && selectedparameters.size() != 0){
             List<SFMonEquipMonitorConfig> selectedparameterInfos = createEquipmentMonitorConfig(selectedparameters,thingCode, SFMonitorConstant.SELECTED_PARAMETER);
@@ -178,11 +179,16 @@ public class MonitorServiceImpl implements MonitorService {
             sfMonEquipMonitorConfigMapper.deleteEquipmentConfig(sfMonEquipMonitorConfig);
             saveEquipmentMonitorConfigInfo(selectedparameterInfos);
         }
-
+        //保存页面“辅助操作区”设备数据
         List<EquipmentRelateToSignalWrapper> equipmentRelateToSignalWrappers = equipmentRelateToSignalWrapperReq.getEquipmentRelateToSignalWrappers();
-        List<SFMonEquipMonitorConfig> auxiliaryAreaInfos = createAuxiliaryAreaEquipmentMonitorConfig(equipmentRelateToSignalWrappers,thingCode, SFMonitorConstant.AUXILIARY_AREA);
-        sfMonEquipMonitorConfig.setKey(SFMonitorConstant.AUXILIARY_AREA);
-        sfMonEquipMonitorConfigMapper.deleteEquipmentConfig(sfMonEquipMonitorConfig);
+        List<String> relateEquipments = tmlMapper.findRelateThing(thingCode + SFMonitorConstant.FUZZY_QUERY_TAG);
+        for(String code:relateEquipments){
+            sfMonEquipMonitorConfig.setThingCode(code);
+            sfMonEquipMonitorConfig.setKey(SFMonitorConstant.AUXILIARY_AREA);
+            sfMonEquipMonitorConfigMapper.deleteEquipmentConfig(sfMonEquipMonitorConfig);
+        }
+        //保存页面“状态控制操作区”数据
+        List<SFMonEquipMonitorConfig> auxiliaryAreaInfos = createAuxiliaryAreaEquipmentMonitorConfig(equipmentRelateToSignalWrappers,SFMonitorConstant.AUXILIARY_AREA);
         saveEquipmentMonitorConfigInfo(auxiliaryAreaInfos);
         StateControlAreaInfo stateControlAreaInfo = equipmentRelateToSignalWrapperReq.getStateControlAreaInfo();
         List<SFMonEquipMonitorConfig> stateControlInfo = createStateControlAreaEquipmentMonitorConfig(stateControlAreaInfo,thingCode,SFMonitorConstant.STATE_AREA);
@@ -211,14 +217,14 @@ public class MonitorServiceImpl implements MonitorService {
         return sfMonEquipMonitorConfigs;
     }
 
-    private List<SFMonEquipMonitorConfig> createAuxiliaryAreaEquipmentMonitorConfig(List<EquipmentRelateToSignalWrapper>equipmentRelateToSignalWrappers, String thingCode,String equipmentType){
+    private List<SFMonEquipMonitorConfig> createAuxiliaryAreaEquipmentMonitorConfig(List<EquipmentRelateToSignalWrapper>equipmentRelateToSignalWrappers,String equipmentType){
         List<SFMonEquipMonitorConfig> sfMonEquipMonitorConfigs = new ArrayList<>();
         for(EquipmentRelateToSignalWrapper code:equipmentRelateToSignalWrappers){
             List<SignalWrapperMetric> signalWrapperMetrics = code.getSignalWrapperMetrics();
             if((signalWrapperMetrics != null) && (signalWrapperMetrics.size() > 0)){
                 for(SignalWrapperMetric metric:signalWrapperMetrics){
                     SFMonEquipMonitorConfig sfMonEquipMonitorConfig = new SFMonEquipMonitorConfig();
-                    sfMonEquipMonitorConfig.setThingCode(thingCode);
+                    sfMonEquipMonitorConfig.setThingCode(code.getThingCode());
                     sfMonEquipMonitorConfig.setMetricTagName(code.getWarpperName());
                     sfMonEquipMonitorConfig.setKey(equipmentType);
                     sfMonEquipMonitorConfig.setValue(metric.getMetricName());

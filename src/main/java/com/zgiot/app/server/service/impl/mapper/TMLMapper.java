@@ -91,5 +91,8 @@ public interface TMLMapper {
             "(select metric_code from rel_thing_metric_label where thing_code=#{thingCode}) b where  a.metric_code=b.metric_code")
     List<MetricModel> findMetric(@Param("thingCode") String thingCode);
 
+    @Select("select thing_code from rel_thing_metric_label where thing_code like #{thingCode} group by thing_code")
+    List<String> findRelateThing(@Param("thingCode") String thingCode);
+
 
 }

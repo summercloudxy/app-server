@@ -9,6 +9,7 @@ public class EquipmentRelateToSignalWrapper {
     private List<SignalWrapperMetric> signalWrapperMetrics;
     private boolean selected;
     private String zone;
+    private String thingCode;
 
     public String getWarpperName() {
         return warpperName;
@@ -26,6 +27,10 @@ public class EquipmentRelateToSignalWrapper {
         return zone;
     }
 
+    public String getThingCode() {
+        return thingCode;
+    }
+
     public void setWarpperName(String warpperName) {
         this.warpperName = warpperName;
     }
@@ -40,5 +45,9 @@ public class EquipmentRelateToSignalWrapper {
 
     public void setZone(String zone) {
         this.zone = zone;
+    }
+
+    public void setThingCode(String thingCode) {
+        this.thingCode = thingCode;
     }
 }

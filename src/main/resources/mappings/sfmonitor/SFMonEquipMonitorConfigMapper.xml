@@ -1,27 +1,132 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zgiot.app.server.module.sfmonitor.mapper.SFMonEquipMonitorConfigMapper">
-    <resultMap id="signalWrapperBaseInfo" type="com.zgiot.app.server.module.sfmonitor.controller.EquipmentRelateToSignalWrapper">
+    <resultMap id="signalWrapperBaseInfo"
+               type="com.zgiot.app.server.module.sfmonitor.controller.EquipmentRelateToSignalWrapper">
         <result column="tag_name" property="warpperName"/>
-        <collection property="signalWrapperMetrics" ofType="com.zgiot.app.server.module.sfmonitor.pojo.SignalWrapperMetric">
+        <collection property="signalWrapperMetrics"
+                    ofType="com.zgiot.app.server.module.sfmonitor.pojo.SignalWrapperMetric">
             <result column="metric_name" property="metricName"/>
         </collection>
     </resultMap>
 
-    <resultMap id="signalWrapperBaseInfoFind" type="com.zgiot.app.server.module.sfmonitor.controller.EquipmentRelateToSignalWrapper">
+    <resultMap id="signalWrapperBaseInfoFind"
+               type="com.zgiot.app.server.module.sfmonitor.controller.EquipmentRelateToSignalWrapper">
         <result column="tag_name" property="warpperName"/>
         <result column="selected" property="selected"/>
         <result column="zone" property="zone"/>
-        <collection property="signalWrapperMetrics" ofType="com.zgiot.app.server.module.sfmonitor.pojo.SignalWrapperMetric">
+        <collection property="signalWrapperMetrics"
+                    ofType="com.zgiot.app.server.module.sfmonitor.pojo.SignalWrapperMetric">
             <result column="metric_name" property="metricName"/>
             <result column="model" property="model"/>
         </collection>
     </resultMap>
 
-    <resultMap id="signalWrapperBaseParameterAreaInfoFind" type="com.zgiot.app.server.module.sfmonitor.pojo.StateControlAreaInfo">
+    <resultMap id="signalWrapperBaseParameterAreaInfoFind"
+               type="com.zgiot.app.server.module.sfmonitor.pojo.StateControlAreaInfo">
         <result column="tag_name" property="wrapperName"/>
         <result column="model" property="model"/>
     </resultMap>
+
+    <resultMap id="jumpZoneData" type="com.zgiot.app.server.module.sfmonitor.controller.SFMonPadJumpZoneInfo">
+        <collection property="sfMonPadJumpZoneEquipmentInfos"
+                    ofType="com.zgiot.app.server.module.sfmonitor.controller.SFMonPadJumpZoneEquipmentInfo">
+            <result column="thing_shortname" property="thingName"/>
+            <result column="value" property="thingCode"/>
+        </collection>
+
+    </resultMap>
+
+    <resultMap id="parameterZoneData" type="com.zgiot.app.server.module.sfmonitor.controller.SFMonPadParameterZoneInfo">
+        <result column="metric_name" property="metricName"/>
+        <result column="metric_code" property="metricCode"/>
+        <result column="value_unit" property="unit"/>
+    </resultMap>
+
+    <!--resultMap id="stateControlZoneRule" type="com.zgiot.app.server.module.sfmonitor.controller.StateContrlZoneRuleData">
+        <result column="value" property="metricCode"/>
+        <result column="sort" property="sort"/>
+        <result column="direction" property="direction"/>
+        <result column="rule" property="rule"/>
+    </resultMap-->
+    <resultMap id="stateControlZoneRule" type="com.zgiot.app.server.module.sfmonitor.controller.SFMonPadStateControlMetricInfo">
+        <result column="value" property="metricCode"/>
+        <result column="metric_name" property="metricName"/>
+        <result column="model" property="model"/>
+        <result column="sort" property="sort"/>
+    </resultMap>
+
+    <resultMap id="auxiliaryZoneData" type="com.zgiot.app.server.module.sfmonitor.controller.SFMonPadAuxiliaryZoneInfo">
+        <result column="metric_tag_name" property="wrapperName"/>
+        <result column="code" property="styleName"/>
+        <result column="rule" property="rule"/>
+        <result column="style_code" property="styleName"/>
+        <collection property="sfMonPadAuxiliaryZoneMetricInfoList"
+                    ofType="com.zgiot.app.server.module.sfmonitor.controller.SFMonPadAuxiliaryZoneMetricInfo">
+            <result column="thing_name" property="thingName"/>
+            <result column="thing_code" property="thingCode"/>
+            <result column="metric_name" property="metricName"/>
+            <result column="model" property="model"/>
+            <result column="direction" property="direction"/>
+            <result column="sort" property="sort"/>
+            <result column="metric_code" property="metricCode"/>
+            <result column="unit" property="unit"/>
+        </collection>
+    </resultMap>
+
+    <select id="getMetricTagNames" resultType="java.util.List">
+        select metric_tag_name from tb_sfmon_equipmonitor_config
+        where thing_code=#{thingCode} and key=#{zoneCode}
+    </select>
+
+    <select id="getAuxiliaryZoneData" resultMap="auxiliaryZoneData">
+        select a.metric_tag_name as metric_tag_name,a.thing_code as thing_code,c.metric_name as metric_name,a.model as model,
+        b.direction as direction,d.thing_name as thing_name,b.rule as rule,b.sort as sort,f.style_code as style_code,
+        c.metric_code as metric_code,c.value_unit as unit
+        from tb_sfmon_equipmonitor_config a,rel_sfmon_metrictag_metric_sort b,tb_metric c,tb_thing d,tb_metric_tag e,
+        rel_sfmon_metrictag_style f
+        where
+        a.thing_code=#{thingCode}
+        and a.`key`=#{zoneCode}
+        and a.`value`=c.metric_name
+        and a.metric_tag_name=b.metric_tag_name
+        and c.metric_code=b.metric_code
+        and b.direction in
+        <foreach collection="directions" item="direction" index="index"
+                 open="(" close=")" separator=",">
+            #{direction}
+        </foreach>
+        and a.thing_code=d.thing_code
+        and a.metric_tag_name=e.tag_name
+        and e.code=f.metric_tag_code
+        and a.selected = 1
+        order by b.sort asc
+    </select>
+
+    <select id="getStateControlZoneData" resultMap="stateControlZoneRule">
+        select a.value as value,c.metric_name as metric_name,a.model as model,b.sort as sort
+        from tb_sfmon_equipmonitor_config a,rel_sfmon_metrictag_metric_sort b,tb_metric c
+        where
+        a.thing_code=#{thingCode}
+        and a.metric_tag_name=#{metricTagname}
+        and b.metric_tag_name=#{metricTagname}
+        and a.`key`=#{zoneCode}
+        and a.`value`=c.metric_name
+        and c.metric_code=b.metric_code
+        and b.direction=#{direction}
+        and a.selected = 1
+        order by b.sort asc
+    </select>
+
+    <select id="getJumpZoneData" resultMap="jumpZoneData">
+        select b.thing_shortname as thing_shortname ,a.value as value from tb_sfmon_equipmonitor_config a,tb_thing b where
+        a.thing_code=#{thingCode} and a.key=#{zoneCode} and a.thing_code= b.thing_code
+    </select>
+
+    <select id="getParameterData" resultMap="parameterZoneData">
+        select a.value,b.metric_code,b.value_unit from tb_sfmon_equipmonitor_config a,tb_metric b
+        where a.thing_code=#{thingCode} and a.key=#{zoneCode} and a.value=b.metric_name
+    </select>
 
     <select id="getSignalWrapperData" resultMap="signalWrapperBaseInfo">
         select a.tag_name as tag_name,b.metric_name as metric_name from tb_metric_tag a,tb_metric b,
@@ -31,7 +136,8 @@
     </select>
 
     <select id="getEquipmentRelateToSignalWrapperByThingCode" resultMap="signalWrapperBaseInfoFind">
-        select distinct(a.metric_tag_name) as tag_name,a.value as metric_name,a.model as model,a.key as zone,a.selected as selected
+        select distinct(a.metric_tag_name) as tag_name,a.value as metric_name,a.model as model,a.key as zone,a.selected
+        as selected
         from tb_sfmon_equipmonitor_config a
         where a.key=#{zoneCode} and a.thing_code=#{thingCode}
     </select>
@@ -40,7 +146,8 @@
         select a.metric_tag_name as tag_name,a.model as model from tb_sfmon_equipmonitor_config a
         where a.thing_code=#{thingCode} and a.key=#{zoneCode}
     </select>
-    <delete id="deleteEquipmentConfig" parameterType="com.zgiot.app.server.module.sfmonitor.pojo.SFMonEquipMonitorConfig">
+    <delete id="deleteEquipmentConfig"
+            parameterType="com.zgiot.app.server.module.sfmonitor.pojo.SFMonEquipMonitorConfig">
         delete from tb_sfmon_equipmonitor_config
         where
         1 = 1
