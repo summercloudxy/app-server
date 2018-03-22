@@ -11,9 +11,7 @@ import com.zgiot.app.server.module.sfsubsc.mapper.SubscCardTypeMapper;
 import com.zgiot.app.server.module.sfsubsc.service.SubscCardTypeService;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.service.HistoryDataService;
-import com.zgiot.common.constants.GlobalConstants;
-import com.zgiot.common.constants.MetricCodes;
-import com.zgiot.common.constants.SubscriptionConstants;
+import com.zgiot.common.constants.*;
 import com.zgiot.common.pojo.CoalAnalysisRecord;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
@@ -898,8 +896,8 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         ChemicalTestsDataVO.MetricData metricData1 = chemicalTestsDataVO.new MetricData();
         metricData1.setMetricName(SubscriptionConstants.ASH_CONTENT);
         metricData1.setMetricValue(String.valueOf(coalAnalysisRecord.getAad()));
-        String startScope1 = SubscriptionConstants.ASH_CONTENT_CLEANCOAL_SCOPE.split("-")[0];
-        String endScope1 = SubscriptionConstants.ASH_CONTENT_CLEANCOAL_SCOPE.split("-")[1];
+        String startScope1 = SubscriptionConstants.ASH_CONTENT_CLEAN_COAL_SCOPE.split("-")[0];
+        String endScope1 = SubscriptionConstants.ASH_CONTENT_CLEAN_COAL_SCOPE.split("-")[1];
         metricData1.setStartScope(startScope1);
         metricData1.setEndScope(endScope1);
 
@@ -939,7 +937,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
         IntelligentFilterVO.ThickenerMetric thickenerMetric1 = intelligentFilterVO.new ThickenerMetric();
         thickenerMetric1.setThingCode(cardParamValues[0]);
-        DataModelWrapper thickenerDataModelWrapper1 = dataService.getData(cardParamValues[0], MetricCodes.CURRENT).orElse(null);
+        DataModelWrapper thickenerDataModelWrapper1 = dataService.getData(cardParamValues[0], FilterPressMetricConstants.FEED_PUMP_CURRENT).orElse(null);
         if (thickenerDataModelWrapper1 != null) {
             thickenerMetric1.setCurrentValue(thickenerDataModelWrapper1.getValue());
         } else {
@@ -950,7 +948,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
         IntelligentFilterVO.ThickenerMetric thickenerMetric2 = intelligentFilterVO.new ThickenerMetric();
         thickenerMetric2.setThingCode(cardParamValues[1]);
-        DataModelWrapper thickenerDataModelWrapper2 = dataService.getData(cardParamValues[1], MetricCodes.CURRENT).orElse(null);
+        DataModelWrapper thickenerDataModelWrapper2 = dataService.getData(cardParamValues[1], FilterPressMetricConstants.FEED_PUMP_CURRENT).orElse(null);
         if (thickenerDataModelWrapper2 != null) {
             thickenerMetric2.setCurrentValue(thickenerDataModelWrapper2.getValue());
         } else {
@@ -962,7 +960,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         if (StringUtils.isNotEmpty(cardParamValues[2])) {
             IntelligentFilterVO.ThickenerMetric thickenerMetric3 = intelligentFilterVO.new ThickenerMetric();
             thickenerMetric3.setThingCode(cardParamValues[2]);
-            DataModelWrapper thickenerDataModelWrapper3 = dataService.getData(cardParamValues[2], MetricCodes.CURRENT).orElse(null);
+            DataModelWrapper thickenerDataModelWrapper3 = dataService.getData(cardParamValues[2], FilterPressMetricConstants.FEED_PUMP_CURRENT).orElse(null);
             if (thickenerDataModelWrapper3 != null) {
                 thickenerMetric3.setCurrentValue(thickenerDataModelWrapper3.getValue());
             } else {
@@ -979,27 +977,27 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         String plateValue4 = "";
         String plateValue5 = "";
         String plateValue6 = "";
-        DataModelWrapper plateDataModelWrapper1 = dataService.getData(plates[0], MetricCodes.PLATE_CNT).orElse(null);
+        DataModelWrapper plateDataModelWrapper1 = dataService.getData(plates[0], FilterPressMetricConstants.PLATE_CNT).orElse(null);
         if (plateDataModelWrapper1 != null) {
             plateValue1 = plateDataModelWrapper1.getValue();
         }
-        DataModelWrapper plateDataModelWrapper2 = dataService.getData(plates[1], MetricCodes.PLATE_CNT).orElse(null);
+        DataModelWrapper plateDataModelWrapper2 = dataService.getData(plates[1], FilterPressMetricConstants.PLATE_CNT).orElse(null);
         if (plateDataModelWrapper2 != null) {
             plateValue2 = plateDataModelWrapper2.getValue();
         }
-        DataModelWrapper plateDataModelWrapper3 = dataService.getData(plates[2], MetricCodes.PLATE_CNT).orElse(null);
+        DataModelWrapper plateDataModelWrapper3 = dataService.getData(plates[2], FilterPressMetricConstants.PLATE_CNT).orElse(null);
         if (plateDataModelWrapper3 != null) {
             plateValue3 = plateDataModelWrapper3.getValue();
         }
-        DataModelWrapper plateDataModelWrapper4 = dataService.getData(plates[3], MetricCodes.PLATE_CNT).orElse(null);
+        DataModelWrapper plateDataModelWrapper4 = dataService.getData(plates[3], FilterPressMetricConstants.PLATE_CNT).orElse(null);
         if (plateDataModelWrapper4 != null) {
             plateValue4 = plateDataModelWrapper4.getValue();
         }
-        DataModelWrapper plateDataModelWrapper5 = dataService.getData(plates[4], MetricCodes.PLATE_CNT).orElse(null);
+        DataModelWrapper plateDataModelWrapper5 = dataService.getData(plates[4], FilterPressMetricConstants.PLATE_CNT).orElse(null);
         if (plateDataModelWrapper5 != null) {
             plateValue5 = plateDataModelWrapper5.getValue();
         }
-        DataModelWrapper plateDataModelWrapper6 = dataService.getData(plates[5], MetricCodes.PLATE_CNT).orElse(null);
+        DataModelWrapper plateDataModelWrapper6 = dataService.getData(plates[5], FilterPressMetricConstants.PLATE_CNT).orElse(null);
         if (plateDataModelWrapper6 != null) {
             plateValue6 = plateDataModelWrapper6.getValue();
         }
@@ -1041,7 +1039,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         List<String> pipelineList = Lists.newArrayList(cardParamValue[6], cardParamValue[7]);
         for (String pipeline : pipelineList) {
 
-            DataModelWrapper pipelineData = dataService.getData(pipeline, MetricCodes.PRESS_CUR).orElse(null);
+            DataModelWrapper pipelineData = dataService.getData(pipeline, BellowsConstants.METRIC_PRESSURE).orElse(null);
             if (pipelineData != null) {
                 String pipelineMetricValue = pipelineData.getValue();
                 pipelineMetrics.add(pipelineMetricValue);
@@ -1081,7 +1079,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
      * @param mompressorMetric
      */
     private void getMompressorFaultStates(String mompressor, IntelligentBlowerVO.MompressorMetric mompressorMetric) {
-        DataModelWrapper mompressorData = dataService.getData(mompressor, MetricCodes.FAULT).orElse(null);
+        DataModelWrapper mompressorData = dataService.getData(mompressor, FilterPressMetricConstants.FAULT).orElse(null);
         if (mompressorData != null) {
             String faultValue = mompressorData.getValue();
             if (SubscriptionConstants.FAULT_1.equals(faultValue)) {
@@ -1176,5 +1174,10 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             cardDataDTO = getChemicalTestsData(subscCardTypeDO);
             cardDataDTOS.add(cardDataDTO);
         }
+    }
+
+    @Override
+    public SubscCardTypeDO getCardTypeByCardCode(String cardCode) {
+        return subscCardTypeMapper.getCardTypeByCardCode(cardCode);
     }
 }

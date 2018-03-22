@@ -105,8 +105,13 @@ public interface SubscCardTypeService {
     void switchCardType(List<CardDataDTO> cardDataDTOS, SubscCardTypeDO subscCardTypeDO);
 
 
-
-
+    /**
+     * 根据卡片编码查询卡片信息
+     *
+     * @param cardCode
+     * @return
+     */
+    SubscCardTypeDO getCardTypeByCardCode(String cardCode);
 
 
 }
