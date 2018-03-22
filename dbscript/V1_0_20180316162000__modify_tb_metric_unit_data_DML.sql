@@ -1,0 +1,14 @@
+update tb_metric set value_unit='Hz' where metric_code='FREQUENCY';
+update tb_metric set value_unit='t' where metric_code='CT_C';
+update tb_metric set value_unit='t' where metric_code='CT_D';
+update tb_metric set value_unit='t' where metric_code='CT_M';
+update tb_metric set value_unit='t' where metric_code='CT_T';
+update tb_metric set value_unit='t' where metric_code='CT_Y';
+update tb_metric set value_unit='Hz' where metric_code='SPEED1';
+update tb_metric set value_unit='Hz' where metric_code='FL_AVG';
+update tb_metric set value_unit='A' where metric_code='CURRENT_30S_AVE';
+update tb_metric set value_unit='A' where metric_code='CURRENT_5S_AVE';
+update tb_metric set value_unit='A' where metric_code='FEED_ASUM';
+update tb_metric set value_unit='t' where metric_code='CCF';
+update tb_metric set value_unit='t' where metric_code='TON';
+commit;

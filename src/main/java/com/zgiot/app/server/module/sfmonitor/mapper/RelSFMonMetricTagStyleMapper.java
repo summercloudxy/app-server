@@ -29,6 +29,10 @@ public interface RelSFMonMetricTagStyleMapper {
 
     public List<FindSignalWrapperRes> getSiganlWrapperStyleByStyleName(@Param("metricName") String metricName);
 
+    public List<FindSignalWrapperRes> fuzzyGetSiganlWrapperStyleByWrapperName(@Param("tagName") String tagName);
+
+    public List<FindSignalWrapperRes> fuzzyGetSiganlWrapperStyleByStyleName(@Param("metricName") String metricName);
+
     public SignalWrapperStyleRes getSignalWrapperStyleById(@Param("id") int id);
 
     public List<FindSignalWrapperRes> getAllSignalWrapperStyle();

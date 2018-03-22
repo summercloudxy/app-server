@@ -29,7 +29,11 @@ public interface MetricTagRelationMapper {
 
     List<FindSignalWrapperRes> findSignalWrapperByWrapperName(@Param("tagName") String tagName);
 
+    List<FindSignalWrapperRes> fuzzyFindSignalWrapperByWrapperName(@Param("tagName") String tagName);
+
     List<FindSignalWrapperRes> findSignalWrapperByMetricName(@Param("metricName") String metricName);
+
+    List<FindSignalWrapperRes> fuzzyFindSignalWrapperByMetricName(@Param("metricName") String metricName);
 
     List<FindSignalWrapperRes> findAllSignalWrapper();
 
