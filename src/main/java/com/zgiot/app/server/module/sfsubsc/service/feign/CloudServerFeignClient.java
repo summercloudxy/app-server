@@ -1,4 +1,4 @@
-package com.zgiot.app.server.module.sfsubsc.service.client;
+package com.zgiot.app.server.module.sfsubsc.service.feign;
 
 import com.zgiot.app.server.module.sfsubsc.entity.dto.CardDataDTO;
 import com.zgiot.common.restcontroller.ServerResponse;
@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * @author jys
  */
-public interface CloudServerClient {
+public interface CloudServerFeignClient {
     /**
      * cloudserver客户端
      *

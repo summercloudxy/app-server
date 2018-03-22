@@ -4,7 +4,7 @@ import com.zgiot.app.server.module.sfsubsc.entity.dto.CardDataDTO;
 import com.zgiot.app.server.module.sfsubsc.entity.pojo.SubscCardTypeDO;
 import com.zgiot.app.server.module.sfsubsc.enums.CardTypeEnum;
 import com.zgiot.app.server.module.sfsubsc.service.SubscCardTypeService;
-import com.zgiot.app.server.module.sfsubsc.service.client.CloudServerClient;
+import com.zgiot.app.server.module.sfsubsc.service.feign.CloudServerFeignClient;
 import com.zgiot.common.restcontroller.ServerResponse;
 import feign.Feign;
 import feign.jackson.JacksonDecoder;
@@ -60,11 +60,11 @@ public class CardDataManager {
                 cardDataDTOS.add(cardDataDTO);
             }
         }
-        CloudServerClient cloudServerClient = Feign.builder().encoder(new JacksonEncoder())
+        CloudServerFeignClient cloudServerFeignClient = Feign.builder().encoder(new JacksonEncoder())
                 .decoder(new JacksonDecoder()).requestInterceptor(requestTemplate -> requestTemplate.header("Authorization", AUTHORIZATION_PRIFIX + authorization))
-                .target(CloudServerClient.class,
+                .target(CloudServerFeignClient.class,
                         cloudServiceIp + cloudServerPath);
-        ServerResponse serverResponse = cloudServerClient.saveAllCardDatas(cardDataDTOS);
+        ServerResponse serverResponse = cloudServerFeignClient.saveAllCardDatas(cardDataDTOS);
         if (serverResponse.getCode() == 0) {
             logger.debug("卡片历史数据上传CloudServer完成");
         }
@@ -99,11 +99,11 @@ public class CardDataManager {
                 cardDataDTOS.add(cardDataDTO);
             }
         }
-        CloudServerClient cloudServerClient = Feign.builder().encoder(new JacksonEncoder())
+        CloudServerFeignClient cloudServerFeignClient = Feign.builder().encoder(new JacksonEncoder())
                 .decoder(new JacksonDecoder()).requestInterceptor(requestTemplate -> requestTemplate.header("Authorization", authorization))
-                .target(CloudServerClient.class,
+                .target(CloudServerFeignClient.class,
                         cloudServiceIp + cloudServerPath);
-        ServerResponse serverResponse = cloudServerClient.saveAllCardDatas(cardDataDTOS);
+        ServerResponse serverResponse = cloudServerFeignClient.saveAllCardDatas(cardDataDTOS);
         if (serverResponse.getCode() == 0) {
             logger.debug("卡片实时数据上传CloudServer完成");
         }
