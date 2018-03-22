@@ -130,8 +130,10 @@ public class QualityAndQuantityServiceImp implements QualityAndQuantityService {
         List<CardInfo> cardInfos = qualityAndQuantityMapper.getCardInfosInArea(areaId);
         for (CardInfo cardInfo:cardInfos){
             CardParser cardParser = cardParserSelector.getParserByName(cardInfo.getParserName());
-            Object parse = cardParser.parse(cardInfo.getCardParamValue());
-            cardInfo.setCardDetailInfo(parse);
+            if (cardParser!= null) {
+                Object parse = cardParser.parse(cardInfo.getCardParamValue());
+                cardInfo.setCardDetailInfo(parse);
+            }
         }
         return cardInfos;
 
