@@ -20,6 +20,7 @@ import java.util.List;
 
 /**
  * 卡片定时任务
+ *
  * @author jys
  */
 @Component
@@ -31,8 +32,8 @@ public class CardDataManager {
 
     @Value("${cloud.serviceaccount.token}")
     private String authorization;
-    @Value("${cloud.service.ip}")
-    private String cloudServiceIp;
+    @Value("${cloud.service.url}")
+    private String cloudServiceUrl;
     @Value("${cloud.service.path}")
     private String cloudServerPath;
 
@@ -63,7 +64,7 @@ public class CardDataManager {
         CloudServerFeignClient cloudServerFeignClient = Feign.builder().encoder(new JacksonEncoder())
                 .decoder(new JacksonDecoder()).requestInterceptor(requestTemplate -> requestTemplate.header("Authorization", AUTHORIZATION_PRIFIX + authorization))
                 .target(CloudServerFeignClient.class,
-                        cloudServiceIp + cloudServerPath);
+                        cloudServiceUrl + cloudServerPath);
         ServerResponse serverResponse = cloudServerFeignClient.saveAllCardDatas(cardDataDTOS);
         if (serverResponse.getCode() == 0) {
             logger.debug("卡片历史数据上传CloudServer完成");
@@ -102,7 +103,7 @@ public class CardDataManager {
         CloudServerFeignClient cloudServerFeignClient = Feign.builder().encoder(new JacksonEncoder())
                 .decoder(new JacksonDecoder()).requestInterceptor(requestTemplate -> requestTemplate.header("Authorization", authorization))
                 .target(CloudServerFeignClient.class,
-                        cloudServiceIp + cloudServerPath);
+                        cloudServiceUrl + cloudServerPath);
         ServerResponse serverResponse = cloudServerFeignClient.saveAllCardDatas(cardDataDTOS);
         if (serverResponse.getCode() == 0) {
             logger.debug("卡片实时数据上传CloudServer完成");
