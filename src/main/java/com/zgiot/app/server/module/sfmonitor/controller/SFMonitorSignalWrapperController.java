@@ -671,7 +671,7 @@ public class SFMonitorSignalWrapperController {
             }
             List<String> thingCodes = new ArrayList<>();
             thingCodes.add(thingCode);
-            Map<String,List<DataModel>> hisData = historyDataService.findMultiThingsHistoryDataOfMetricBySegment(thingCodes,sfMonPadParameterZoneInfo.getMetricCode(),startDate,endDate,segment);
+            Map<String,List<DataModel>> hisData = historyDataService.findMultiThingsHistoryDataOfMetricBySegment(thingCodes,sfMonPadParameterZoneInfo.getMetricCode(),startDate,endDate,segment,true);
             sfMonPadParameterZoneInfo.setHisData(hisData);
             sfMonPadParameterZoneInfo.setStartDate(startDate);
             sfMonPadParameterZoneInfo.setEndDate(endDate);
