@@ -12,7 +12,7 @@ import java.util.List;
 @Mapper
 public interface ProductionInspectMapper {
     Integer getExistRecordId(ProductionInspectRecord record);
-    void updateRecord(@Param("record") ProductionInspectRecord record);
+    void updateRecordWithOutDensityAndFlow(@Param("record") ProductionInspectRecord record);
     void insertRecord(ProductionInspectRecord record);
     void updateRecordDensityAndFlow(ProductionInspectRecord record);
     void insertDensityAndFlowValues(List<DensityAndFlowInfo> densityAndFlowValues);

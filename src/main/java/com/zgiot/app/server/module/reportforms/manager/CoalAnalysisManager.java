@@ -6,19 +6,20 @@ import com.zgiot.app.server.module.coalanalysis.mapper.CoalAnalysisMapper;
 import com.zgiot.app.server.module.reportforms.pojo.CumulativeData;
 import com.zgiot.app.server.module.tcs.pojo.FilterCondition;
 import com.zgiot.common.constants.MetricCodes;
-import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 @Component
+@Transactional
 public class CoalAnalysisManager implements ReportFormsManager {
     @Autowired
     private CoalAnalysisMapper coalAnalysisMapper;
@@ -34,23 +35,34 @@ public class CoalAnalysisManager implements ReportFormsManager {
     @Override
     public void updateRecord(ReportFormsRecord record) {
         logger.debug("该化验数据已经存在，进行更新");
-        coalAnalysisMapper.updateRecord((CoalAnalysisRecord) record);
-        if (record.getTarget().contains(ReportFormsUtils.AVG_RECORD_KEYWORD)) {
+        coalAnalysisMapper.updateRecordWithOutDensityAndFlow((CoalAnalysisRecord) record);
+    }
+
+
+    @Override
+    public void updateAvgRecord(ReportFormsRecord record) {
+        logger.debug("该化验数据已经存在，进行更新");
+        coalAnalysisMapper.updateRecordWithOutDensityAndFlow((CoalAnalysisRecord) record);
             coalAnalysisMapper.updateRecordDensityAndFlow((CoalAnalysisRecord) record);
-        }
     }
 
     @Override
     public void insertRecord(ReportFormsRecord record) {
         logger.debug("新增一条煤质化验数据");
         coalAnalysisMapper.insertRecord((CoalAnalysisRecord) record);
-        if (!record.getTarget().contains(ReportFormsUtils.AVG_RECORD_KEYWORD)) {
-            List<DensityAndFlowInfo> densityAndFlowValues = reportFormsUtils.getDensityAndFlowValues(record);
-            if (!CollectionUtils.isEmpty(densityAndFlowValues)) {
-                densityAndFlowValues.forEach(t -> t.setAnalysisId(record.getId()));
-                disposeCoalAnalysisDensityAndFlow(densityAndFlowValues, (CoalAnalysisRecord) record);
-            }
+        List<DensityAndFlowInfo> densityAndFlowValues = reportFormsUtils.getDensityAndFlowValues(record);
+        if (!CollectionUtils.isEmpty(densityAndFlowValues)) {
+            densityAndFlowValues.forEach(t -> t.setAnalysisId(record.getId()));
+            disposeCoalAnalysisDensityAndFlow(densityAndFlowValues, (CoalAnalysisRecord) record);
         }
+
+    }
+
+
+    @Override
+    public void insertAvgRecord(ReportFormsRecord record) {
+        logger.debug("新增一条煤质化验平均数据");
+        coalAnalysisMapper.insertRecord((CoalAnalysisRecord) record);
     }
 
     private void disposeCoalAnalysisDensityAndFlow(List<DensityAndFlowInfo> densityAndFlowValues, CoalAnalysisRecord record) {
@@ -119,22 +131,19 @@ public class CoalAnalysisManager implements ReportFormsManager {
     }
 
     @Override
-    public void disposeAvgRecord(ReportFormsRecord record) {
+    public boolean hasAllRecordsBeforeAvgRecord(ReportFormsRecord record) {
         FilterCondition filterCondition = reportFormsUtils.getDutyFilterCondition(record);
+        List<CoalAnalysisRecord> recordsOnDuty = getRecordsOnDuty(filterCondition);
         //确认平均记录之前的所有记录已经读取到，再取所有记录计算平均密度
-        while (!hasAllRecordBeforeAvgRecord((CoalAnalysisRecord) record, filterCondition)) {
-            try {
-                Thread.sleep(100);
-            } catch (Exception e) {
-                throw new SysException(e.getMessage(), SysException.EC_UNKNOWN);
-            }
+        if (!hasAllRecordBeforeAvgRecord((CoalAnalysisRecord) record, recordsOnDuty)) {
+            return false;
         }
         reportFormsUtils.getAvgDensityAndFlowOnDuty(record, getRecordsOnDuty(filterCondition));
+        return true;
     }
 
 
-    private boolean hasAllRecordBeforeAvgRecord(CoalAnalysisRecord record, FilterCondition filterCondition) {
-        List<CoalAnalysisRecord> recordsOnDuty = getRecordsOnDuty(filterCondition);
+    private boolean hasAllRecordBeforeAvgRecord(CoalAnalysisRecord record, List<CoalAnalysisRecord> recordsOnDuty) {
         CumulativeData aadCumulativeData = new CumulativeData();
         CumulativeData mtCumulativeData = new CumulativeData();
         CumulativeData stadCumulativeData = new CumulativeData();
@@ -148,11 +157,9 @@ public class CoalAnalysisManager implements ReportFormsManager {
         Double avgAad = aadCumulativeData.getAvgValue(true, 2);
         Double avgMt = mtCumulativeData.getAvgValue(true, 1);
         Double avgStad = stadCumulativeData.getAvgValue(true, 2);
-        Double avgQnetar = qnetarCumulativeData.getAvgValue(true, 0);
         return Objects.equals(avgAad, record.getAad()) &&
                 Objects.equals(avgMt, record.getMt()) &&
-                Objects.equals(avgStad, record.getStad()) &&
-                Objects.equals(avgQnetar, record.getQnetar());
+                Objects.equals(avgStad, record.getStad()) ;
 
     }
 

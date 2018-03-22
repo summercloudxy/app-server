@@ -18,7 +18,7 @@
         select id from tb_coal_analysis where target = #{target} and sample = #{sample} and time = #{time}
     </select>
 
-    <update id="updateRecord">
+    <update id="updateRecordWithOutDensityAndFlow">
         update tb_coal_analysis set
         aad = #{record.aad},
         mt = #{record.mt},

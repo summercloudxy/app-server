@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.Objects;
 
 
 @Component
+@Transactional
 public class ProductionInspectManager implements ReportFormsManager {
     @Autowired
     private ProductionInspectMapper productionInspectMapper;
@@ -35,23 +37,32 @@ public class ProductionInspectManager implements ReportFormsManager {
     @Override
     public void updateRecord(ReportFormsRecord record) {
         logger.debug("该生产检查数据已经存在，进行更新");
-        productionInspectMapper.updateRecord((ProductionInspectRecord) record);
-        if (record.getTarget().contains(ReportFormsUtils.AVG_RECORD_KEYWORD)) {
+        productionInspectMapper.updateRecordWithOutDensityAndFlow((ProductionInspectRecord) record);
+    }
+
+    @Override
+    public void updateAvgRecord(ReportFormsRecord record) {
+        logger.debug("该生产检查数据已经存在，进行更新");
+        productionInspectMapper.updateRecordWithOutDensityAndFlow((ProductionInspectRecord) record);
             productionInspectMapper.updateRecordDensityAndFlow((ProductionInspectRecord) record);
-        }
     }
 
     @Override
     public void insertRecord(ReportFormsRecord record) {
         logger.debug("新增一条生产检查数据");
         productionInspectMapper.insertRecord((ProductionInspectRecord) record);
-        if (!record.getTarget().contains(ReportFormsUtils.AVG_RECORD_KEYWORD)) {
-            List<DensityAndFlowInfo> densityAndFlowValues = reportFormsUtils.getDensityAndFlowValues(record);
-            if (!CollectionUtils.isEmpty(densityAndFlowValues)) {
-                densityAndFlowValues.forEach(t -> t.setInspectId(record.getId()));
-                disposeProductInspectDensityAndFlow(densityAndFlowValues, (ProductionInspectRecord) record);
-            }
+        List<DensityAndFlowInfo> densityAndFlowValues = reportFormsUtils.getDensityAndFlowValues(record);
+        if (!CollectionUtils.isEmpty(densityAndFlowValues)) {
+            densityAndFlowValues.forEach(t -> t.setInspectId(record.getId()));
+            disposeProductInspectDensityAndFlow(densityAndFlowValues, (ProductionInspectRecord) record);
         }
+    }
+
+
+    @Override
+    public void insertAvgRecord(ReportFormsRecord record) {
+        logger.debug("新增一条生产检查平均数据");
+        productionInspectMapper.insertRecord((ProductionInspectRecord) record);
     }
 
     private void disposeProductInspectDensityAndFlow(List<DensityAndFlowInfo> densityAndFlowValues, ProductionInspectRecord record) {
@@ -121,20 +132,18 @@ public class ProductionInspectManager implements ReportFormsManager {
     }
 
     @Override
-    public void disposeAvgRecord(ReportFormsRecord record) {
+    public boolean hasAllRecordsBeforeAvgRecord(ReportFormsRecord record) {
         FilterCondition filterCondition = reportFormsUtils.getDutyFilterCondition(record);
-        while (!hasAllRecordBeforeAvgRecord((ProductionInspectRecord) record, filterCondition)) {
-            try {
-                Thread.sleep(100);
-            } catch (Exception e) {
-                throw new SysException(e.getMessage(), SysException.EC_UNKNOWN);
-            }
+        List<ProductionInspectRecord> recordsOnDuty = getRecordsOnDuty(filterCondition);
+        if (!hasAllRecordBeforeAvgRecord((ProductionInspectRecord) record, recordsOnDuty)) {
+            return false;
         }
         reportFormsUtils.getAvgDensityAndFlowOnDuty(record, getRecordsOnDuty(filterCondition));
+        return true;
     }
 
 
-    private boolean hasAllRecordBeforeAvgRecord(ProductionInspectRecord record, FilterCondition filterCondition) {
+    private boolean hasAllRecordBeforeAvgRecord(ProductionInspectRecord record, List<ProductionInspectRecord> recordsOnDuty) {
         CumulativeData negative50mmData = new CumulativeData();
         CumulativeData positive1Point45Data = new CumulativeData();
         CumulativeData negative1Point45Data = new CumulativeData();
@@ -142,7 +151,6 @@ public class ProductionInspectManager implements ReportFormsManager {
         CumulativeData negative1Point8Data = new CumulativeData();
         CumulativeData onePoint45To1Point8Data = new CumulativeData();
         CumulativeData positive50mm = new CumulativeData();
-        List<ProductionInspectRecord> recordsOnDuty = getRecordsOnDuty(filterCondition);
         for (ProductionInspectRecord recordOnDuty : recordsOnDuty) {
             reportFormsUtils.cumulateValue(positive1Point45Data, recordOnDuty.getPositive1Point45());
             reportFormsUtils.cumulateValue(negative1Point45Data, recordOnDuty.getNegative1Point45());

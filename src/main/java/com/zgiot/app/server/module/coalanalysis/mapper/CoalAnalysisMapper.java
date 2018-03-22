@@ -13,7 +13,7 @@ import java.util.List;
 public interface CoalAnalysisMapper {
     Integer getExistRecordId(CoalAnalysisRecord record);
 
-    void updateRecord(@Param("record") CoalAnalysisRecord record);
+    void updateRecordWithOutDensityAndFlow(@Param("record") CoalAnalysisRecord record);
 
     void insertRecord(CoalAnalysisRecord record);
 

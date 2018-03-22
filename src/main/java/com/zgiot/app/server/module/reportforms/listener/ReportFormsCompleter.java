@@ -39,8 +39,18 @@ public class ReportFormsCompleter implements DataCompleter {
         }
         ReportFormsRecord record = reportFormsManager.parseDataModelToRecord(dataModel);
         if (record.getTarget().contains(ReportFormsUtils.AVG_RECORD_KEYWORD)) {
-            reportFormsManager.disposeAvgRecord(record);
+            if (!reportFormsManager.hasAllRecordsBeforeAvgRecord(record)){
+                return Collections.emptyList();
+            }
+            disposeAvgRecord(reportFormsManager, record);
+        }else {
+            disposeCommonRecord(reportFormsManager, record);
         }
+        return getParamDataToCache(record, reportFormsManager);
+
+    }
+
+    private void disposeCommonRecord(ReportFormsManager reportFormsManager, ReportFormsRecord record) {
         Integer existRecordId = reportFormsManager.getExistRecordId(record);
         if (existRecordId != null) {
             record.setId(existRecordId);
@@ -48,8 +58,16 @@ public class ReportFormsCompleter implements DataCompleter {
         } else {
             reportFormsManager.insertRecord(record);
         }
-        return getParamDataToCache(record, reportFormsManager);
+    }
 
+    private void disposeAvgRecord(ReportFormsManager reportFormsManager, ReportFormsRecord record) {
+        Integer existRecordId = reportFormsManager.getExistRecordId(record);
+        if (existRecordId != null) {
+            record.setId(existRecordId);
+            reportFormsManager.updateAvgRecord(record);
+        } else {
+            reportFormsManager.insertAvgRecord(record);
+        }
     }
 
     @Override

@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import static com.zgiot.app.server.module.tcs.pojo.FilterCondition.FilterConditionBuilder.newFilterCondition;
 
 import javax.annotation.PostConstruct;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -87,14 +88,16 @@ public class ReportFormsUtils {
             cumulateValue(densityCumulativeData,densityAndFlowValue.getDensity());
             cumulateValue(flowCumulativeData,densityAndFlowValue.getFlow());
         }
-        record.setAvgDensity(densityCumulativeData.getAvgValue(true));
-        record.setAvgFlow(flowCumulativeData.getAvgValue(true));
+        record.setAvgDensity(densityCumulativeData.getAvgValue(true,2));
+        record.setAvgFlow(flowCumulativeData.getAvgValue(true,2));
     }
 
 
     public void cumulateValue(CumulativeData data, Double currentValue){
         if (currentValue!= null && !INVALID_VALUE.equals(currentValue)){
-            data.setSumValue(data.getSumValue()+currentValue);
+            BigDecimal currentValueDecimal = BigDecimal.valueOf(currentValue);
+            BigDecimal add = data.getSumValue().add(currentValueDecimal);
+            data.setSumValue(add);
             data.setCount(data.getCount()+1);
         }
     }

@@ -3,16 +3,15 @@ package com.zgiot.app.server.module.reportforms.pojo;
 import java.math.BigDecimal;
 
 public class CumulativeData {
-    private double sumValue;
+    private BigDecimal sumValue = BigDecimal.ZERO;
     private int count;
 
 
-
-    public double getSumValue() {
+    public BigDecimal getSumValue() {
         return sumValue;
     }
 
-    public void setSumValue(double sumValue) {
+    public void setSumValue(BigDecimal sumValue) {
         this.sumValue = sumValue;
     }
 
@@ -25,18 +24,6 @@ public class CumulativeData {
     }
 
 
-    public Double getAvgValue(boolean needNull) {
-        if (count == 0) {
-            if (needNull) {
-                return null;
-            } else {
-                return 0.0;
-            }
-        } else {
-            return sumValue / count;
-        }
-    }
-
 
     public Double getAvgValue(boolean needNull,Integer scale){
         if (count==0){
@@ -46,10 +33,10 @@ public class CumulativeData {
                 return 0.0;
             }
         }else {
-            Double avgValue = sumValue/count;
-            BigDecimal bigDecimal = new BigDecimal(avgValue);
-            BigDecimal bigDecimalWithScale = bigDecimal.setScale(scale,BigDecimal.ROUND_HALF_UP);
-            return bigDecimalWithScale.doubleValue();
+
+            BigDecimal countDecimal = BigDecimal.valueOf(count);
+            BigDecimal divide = sumValue.divide(countDecimal,scale, BigDecimal.ROUND_HALF_UP);
+            return divide.doubleValue();
         }
     }
 }

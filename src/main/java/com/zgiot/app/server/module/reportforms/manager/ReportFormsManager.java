@@ -11,5 +11,14 @@ public interface ReportFormsManager {
     void insertRecord(ReportFormsRecord record);
     List<DataModel> getDataForCache(ReportFormsRecord record);
     ReportFormsRecord parseDataModelToRecord(DataModel dataModel);
-    void disposeAvgRecord(ReportFormsRecord record);
+
+    /**
+     * 读取到平均数据时，先确定该班所有记录已经读取到，然后取所有记录的密度平均值，否则返回，等下一次读取再做处理
+     * @param record
+     * @return
+     */
+    boolean hasAllRecordsBeforeAvgRecord(ReportFormsRecord record);
+    void updateAvgRecord(ReportFormsRecord record);
+    void insertAvgRecord(ReportFormsRecord record);
+
 }

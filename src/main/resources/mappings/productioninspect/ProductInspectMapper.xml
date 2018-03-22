@@ -34,7 +34,7 @@
         select id from tb_production_inspect where target = #{target} and sample = #{sample} and time = #{time}
     </select>
 
-    <update id="updateRecord">
+    <update id="updateRecordWithOutDensityAndFlow">
         update tb_production_inspect set
         `-1.45` = #{record.negative1Point45},
         `1.45-1.8` = #{record.onePoint45To1Point8},
