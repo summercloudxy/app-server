@@ -488,9 +488,9 @@ public class SFMonitorSignalWrapperController {
     @RequestMapping(value = "/equipmentConfig/metrics/thing/{thingCode}/metricName/{metricName}")
     public ResponseEntity<String> getMetricNamesByThingCode(@PathVariable String thingCode,@PathVariable String metricName) {
         if(SFMonitorConstant.ALL_PARAMETER.equals(metricName)){
-            return new ResponseEntity<>(ServerResponse.buildOkJson(thingTagMapper.getAllMetricNamesByThingCode(thingCode)), HttpStatus.OK);
+            return new ResponseEntity<>(ServerResponse.buildOkJson(relSFMonMetricTagStyleMapper.getAllMetricNamesByThingCode(thingCode)), HttpStatus.OK);
         }
-        return new ResponseEntity<>(ServerResponse.buildOkJson(thingTagMapper.getMetricNamesByThingCode(thingCode,metricName + SFMonitorConstant.FUZZY_QUERY_TAG)), HttpStatus.OK);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(relSFMonMetricTagStyleMapper.getMetricNamesByThingCode(thingCode,metricName + SFMonitorConstant.FUZZY_QUERY_TAG)), HttpStatus.OK);
     }
 
     @RequestMapping(value="/equipmentConfig/editEquipmentMonitorInfo",method=RequestMethod.POST)

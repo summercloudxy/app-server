@@ -24,11 +24,4 @@ public interface ThingTagMapper {
 
     List<EquipmentBaseInfo> getEquipmentByCode(@Param("thingCode") String thingCode,@Param("thingTagCode") String thingTagCode);
 
-    @Select("select b.metric_name from tb_sfmonitor_signal a,tb_metric b " +
-            "where a.thing_code=#{thingCode} and b.metric_name like #{metricName} and a.metric_code=b.metric_code")
-    List<String> getMetricNamesByThingCode(@Param("thingCode") String thingCode,@Param("metricName") String metricName);
-
-    @Select("select b.metric_name from tb_sfmonitor_signal a,tb_metric b " +
-            "where a.thing_code=#{thingCode} and  a.metric_code=b.metric_code")
-    List<String> getAllMetricNamesByThingCode(@Param("thingCode") String thingCode);
 }

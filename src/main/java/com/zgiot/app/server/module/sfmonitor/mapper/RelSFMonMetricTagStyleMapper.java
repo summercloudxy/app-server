@@ -39,4 +39,12 @@ public interface RelSFMonMetricTagStyleMapper {
 
     @Select("select count(1) from rel_sfmon_metrictag_style")
     public int getSignalWrapperStyleCount();
+
+    @Select("select b.metric_name from tb_sfmonitor_signal a,tb_metric b " +
+            "where a.thing_code=#{thingCode} and b.metric_name like #{metricName} and a.metric_code=b.metric_code")
+    List<String> getMetricNamesByThingCode(@Param("thingCode") String thingCode,@Param("metricName") String metricName);
+
+    @Select("select b.metric_name from tb_sfmonitor_signal a,tb_metric b " +
+            "where a.thing_code=#{thingCode} and  a.metric_code=b.metric_code")
+    List<String> getAllMetricNamesByThingCode(@Param("thingCode") String thingCode);
 }
