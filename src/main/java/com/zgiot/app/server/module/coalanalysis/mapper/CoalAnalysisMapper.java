@@ -19,6 +19,24 @@ public interface CoalAnalysisMapper {
     void insertRecord(CoalAnalysisRecord record);
 
     void updateRecordDensityAndFlow(CoalAnalysisRecord record);
+
+    void insertDensityAndFlowValues(List<DensityAndFlowInfo> densityAndFlowValues);
+
+    List<DensityAndFlowSourceInfo> getDensityAndFlowSourceInfo();
+
     List<CoalAnalysisRecord> getRecordsMatchCondition(FilterCondition filterCondition);
+
     List<DensityAndFlowInfo> getDensityAndFlowInfo(int recordId);
+
+    /**
+     * 查询某个设备的最新的两条化验数据
+     *
+     * @param sample
+     * @param target
+     * @return
+     */
+    @Select("select * from tb_coal_analysis where sample =#{sample} and  target =#{target} ORDER BY time DESC  LIMIT 0,2")
+    List<CoalAnalysisRecord> getTop2CoalAnalysisRecord(@Param("sample") String sample, @Param("target") String target);
+
+
 }
