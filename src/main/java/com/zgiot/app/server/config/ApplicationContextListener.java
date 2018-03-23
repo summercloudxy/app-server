@@ -10,7 +10,7 @@ import com.zgiot.app.server.module.bellows.BellowsDataListener;
 import com.zgiot.app.server.module.bellows.compressor.CompressorManager;
 import com.zgiot.app.server.module.bellows.valve.ValveIntelligentJob;
 import com.zgiot.app.server.module.bellows.valve.ValveManager;
-import com.zgiot.app.server.module.coalanalysis.listener.CoalAnalysisListener;
+import com.zgiot.app.server.module.reportforms.listener.ReportFormsCompleter;
 import com.zgiot.app.server.module.demo.DemoBusiness;
 import com.zgiot.app.server.module.demo.DemoDataCompleter;
 import com.zgiot.app.server.module.densitycontrol.DensityControlListener;
@@ -61,7 +61,7 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
     @Autowired
     private DensityControlListener densityControlListener;
     @Autowired
-    private CoalAnalysisListener coalAnalysisListener;
+    private ReportFormsCompleter reportFormsCompleter;
     @Autowired
     private AlertManager alertManager;
 
@@ -85,6 +85,11 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
     }
 
     void installModules(DataProcessor processor) {
+//        if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
+//                || moduleListConfig.containModule(ModuleListConfig.MODULE_COAL_ANALYSIS)) {
+//            completerDataListener.addCompleter(reportFormsCompleter);
+//        }
+        processor.addListener(cacheUpdater);
         processor.addListener(completerDataListener);
         processor.addListener(cacheUpdater);
 
@@ -125,10 +130,7 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
                     });
         }
 
-        if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
-                || moduleListConfig.containModule(ModuleListConfig.MODULE_COAL_ANALYSIS)) {
-            processor.addListener(coalAnalysisListener);
-        }
+
 
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
                 || moduleListConfig.containModule(ModuleListConfig.MODULE_BELLOWS)) {
@@ -141,9 +143,9 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
 
 
         if (false) {
-            processor.addListener(demoBusiness);
             completerDataListener.addCompleter(new DemoDataCompleter());
-        }
+            processor.addListener(demoBusiness);
+            }
 
     }
 

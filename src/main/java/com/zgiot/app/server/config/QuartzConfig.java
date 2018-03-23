@@ -8,8 +8,7 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 public class QuartzConfig {
 
     @Bean(name = "quartzScheduler")
-    public SchedulerFactoryBean schedulerFactory(){
-        SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean ();
-        return schedulerFactoryBean;
+    public SchedulerFactoryBean schedulerFactory() {
+        return new SchedulerFactoryBean();
     }
 }

@@ -95,7 +95,7 @@ public class FilterCondition {
         this.sample = sample;
     }
 
-    public static class FilterConditionBuilder{
+    public static class FilterConditionBuilder {
         private Integer page;
         private Integer offset;
         private Integer count;
@@ -105,10 +105,12 @@ public class FilterCondition {
         private Date endTime;
         private Integer system;
         private Set<String> targetLists = new HashSet<>(10);
-        public static FilterConditionBuilder newFilterCondition(){
+
+        public static FilterConditionBuilder newFilterCondition() {
             return new FilterConditionBuilder();
         }
-        public FilterCondition build(){
+
+        public FilterCondition build() {
             FilterCondition filterCondition = new FilterCondition();
             filterCondition.setPage(page);
             filterCondition.setOffset(offset);
@@ -118,60 +120,90 @@ public class FilterCondition {
             filterCondition.setStartTime(startTime);
             filterCondition.setEndTime(endTime);
             filterCondition.setSystem(system);
-            if(!targetLists.isEmpty()){
+            if (!targetLists.isEmpty()) {
                 filterCondition.setTargetList(new ArrayList<>(targetLists));
             }
             return filterCondition;
         }
-        public FilterConditionBuilder page(int page){
+
+        public FilterConditionBuilder page(Integer page) {
+            if (page == null) {
+                return this;
+            }
             this.page = page;
-            if(count!=null){
+            if (count != null) {
                 offset = count * page;
             }
             return this;
         }
-        public FilterConditionBuilder count(int count){
+
+        public FilterConditionBuilder count(Integer count) {
+            if (count == null) {
+                return this;
+            }
             this.count = count;
-            if(page != null){
+            if (page != null) {
                 offset = count * page;
             }
             return this;
         }
-        public FilterConditionBuilder sortType(int sortType){
+
+        public FilterConditionBuilder sortType(Integer sortType) {
+            if (sortType == null) {
+                return this;
+            }
             this.sortType = sortType;
             return this;
         }
-        public FilterConditionBuilder startTime(Date startTime){
+
+        public FilterConditionBuilder startTime(Date startTime) {
+            if (startTime == null) {
+                return this;
+            }
             this.startTime = startTime;
-            if(duration != null){
+            if (duration != null) {
                 endTime = new Date(startTime.getTime() + duration);
             }
             return this;
         }
-        public FilterConditionBuilder endTime(Date endTime){
+
+        public FilterConditionBuilder endTime(Date endTime) {
+            if (endTime == null) {
+                return this;
+            }
             this.endTime = endTime;
-            if(duration != null){
+            if (duration != null) {
                 startTime = new Date(endTime.getTime() - duration);
             }
             return this;
         }
-        public FilterConditionBuilder duration(Long duration){
+
+        public FilterConditionBuilder duration(Long duration) {
+            if (duration == null) {
+                return this;
+            }
             this.duration = duration;
 
-            if(startTime == null && endTime != null){
+            if (startTime == null && endTime != null) {
                 startTime = new Date(endTime.getTime() - duration);
-            }else if(startTime != null && endTime == null){
+            } else if (startTime != null && endTime == null) {
                 endTime = new Date(startTime.getTime() + duration);
             }
             return this;
         }
 
-        public FilterConditionBuilder system(int system){
+        public FilterConditionBuilder system(Integer system) {
+            if (system == null) {
+                return this;
+            }
             this.system = system;
             return this;
         }
 
-        public FilterConditionBuilder addTarget(String target){
+        public FilterConditionBuilder addTarget(String target) {
+            if (target == null) {
+                return this;
+            }
             targetLists.add(target);
             return this;
         }

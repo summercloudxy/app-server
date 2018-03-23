@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.produtioninspect.mapper.ProductionInspectMapper">
+
+    <resultMap id="DensityAndFlowSourceInfoMap" type="com.zgiot.app.server.module.reportforms.pojo.DensityAndFlowSourceInfo">
+        <result property="coalSample" column="coal_sample"/>
+        <result property="system" column="system"/>
+        <result property="densityCode" column="density_code"/>
+        <result property="flowCode" column="flow_code"/>
+        <result property="runDensityThreshold" column="run_density_threshold"/>
+        <result property="runFlowThreshold" column="run_flow_threshold"/>
+        <collection property="thingCodes" ofType="java.lang.String">
+            <result column="thing_code"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="ProductionInspectRecordMap" type="com.zgiot.common.pojo.ProductionInspectRecord">
+        <id property="id" column="id"/>
+        <result property="target" column="target"/>
+        <result property="sample" column="sample"/>
+        <result property="time" column="time"/>
+        <result property="system" column="system"/>
+        <result property="negative1Point45" column="-1.45"/>
+        <result property="onePoint45To1Point8" column="1.45-1.8"/>
+        <result property="positive1Point8" column="+1.8"/>
+        <result property="positive1Point45" column="+1.45"/>
+        <result property="negative1Point8" column="-1.8"/>
+        <result property="positive50mm" column="+50mm"/>
+        <result property="negative50mm" column="-50mm"/>
+        <result property="avgDensity" column="avg_density"/>
+    </resultMap>
+
+    <select id="getExistRecordId" resultType="java.lang.Integer">
+        select id from tb_production_inspect where target = #{target} and sample = #{sample} and time = #{time}
+    </select>
+
+    <update id="updateRecordWithOutDensityAndFlow">
+        update tb_production_inspect set
+        `-1.45` = #{record.negative1Point45},
+        `1.45-1.8` = #{record.onePoint45To1Point8},
+        `+1.8` = #{record.positive1Point8},
+        `+1.45` = #{record.positive1Point45},
+        `-1.8` = #{record.negative1Point8},
+        `+50mm` = #{record.positive50mm},
+        `-50mm` = #{record.negative50mm}
+        where id = #{record.id}
+    </update>
+
+    <insert id="insertRecord" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
+        insert tb_production_inspect(`target`,`sample`,`time`,`system`,`-1.45`,`1.45-1.8`,`+1.8`,`+1.45`,`-1.8`,`+50mm`,`-50mm`,`avg_density`)
+        values (#{target},#{sample},#{time},#{system},#{negative1Point45},#{onePoint45To1Point8},#{positive1Point8},#{positive1Point45},#{negative1Point8},#{positive50mm},#{negative50mm},#{avgDensity})
+    </insert>
+
+    <update id="updateRecordDensityAndFlow">
+        update tb_production_inspect set
+        avg_density = #{avgDensity}
+        where id = #{id}
+    </update>
+
+    <insert id="insertDensityAndFlowValues">
+        insert tb_coal_analysis_density_flow_value (inspect_id,thing_code,density,flow) values
+        <foreach collection="list" separator="," item="item">
+            (#{item.inspectId},#{item.thingCode},#{item.density},#{item.flow})
+        </foreach>
+    </insert>
+
+    <select id="getDensityAndFlowSourceInfo" resultMap="DensityAndFlowSourceInfoMap">
+        select coal_sample,system,thing_code,density_code,flow_code,run_density_threshold,run_flow_threshold from tb_coal_analysis_density_flow_info
+    </select>
+
+    <select id="getRecordsMatchCondition" resultMap="ProductionInspectRecordMap">
+        select id,`target`,`sample`,`time`,`system`,`-1.45`,`1.45-1.8`,`+1.8`,`+1.45`,`-1.8`,`+50mm`,`-50mm`,avg_density from tb_production_inspect
+        WHERE
+        <trim prefix="" prefixOverrides="and">
+            <if test="startTime != null">
+                and time &gt; #{startTime}
+            </if>
+            <if test="endTime !=null">
+                and time &lt; #{endTime}
+            </if>
+            <if test="targetList != null">
+                and target in
+                <foreach collection="targetList" item="target" open="(" close=")" separator=",">
+                    #{target}
+                </foreach>
+            </if>
+            <if test="sample != null">
+                and sample = #{sample}
+            </if>
+            <if test="system != null">
+                and system = #{system}
+            </if>
+        </trim>
+
+        <if test="sortType == 0">
+            ORDER BY time ASC
+        </if>
+        <if test="sortType == 1">
+            ORDER BY time DESC
+        </if>
+        <if test="offset != null and count != null">
+            limit #{offset},#{count}
+        </if>
+    </select>
+
+
+</mapper>

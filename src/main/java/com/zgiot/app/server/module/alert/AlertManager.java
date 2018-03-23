@@ -19,7 +19,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,17 +33,15 @@ import java.util.stream.Collectors;
 @Transactional
 public class AlertManager {
     private Map<String, Map<String, AlertData>> alertDataMap = new ConcurrentHashMap<>();
-    // private Set<AlertData> verifySet = new HashSet<>();
     private Map<String, Map<String, List<AlertRule>>> paramRuleMap = new ConcurrentHashMap<>();
     private Map<String, Map<String, AlertRule>> protectRuleMap = new ConcurrentHashMap<>();
     private Map<String, Short> metricAlertTypeMap = new HashMap<>();
     private Map<String, Map<String, AlertData>> alertParamDataMap = new ConcurrentHashMap<>();
     private DelayQueue<VerifyDelayed> verifyDelayQueue = new DelayQueue<>();
-    private static String MESSAGE_URI = "/topic/alert/message";
-    private static String REPAIR_URI = "/topic/alert/repair";
-    private static String FEEDBACK_URI = "/topic/alert/feedback";
-    private static String READ_STATE_URI = "/topic/alert/readstate";
-    // private static String REQ_RESET_URI= "topic/alert/reset";
+    private static final String MESSAGE_URI = "/topic/alert/message";
+    private static final String REPAIR_URI = "/topic/alert/repair";
+    private static final String FEEDBACK_URI = "/topic/alert/feedback";
+    private static final String READ_STATE_URI = "/topic/alert/readstate";
     private static final int VERIFY_TO_UNTREATED_PERIOD = 60000;
     private static final int SORT_TYPE_TIME_DESC = 0;
     private static final int SORT_TYPE_TIME_ASC = 1;
@@ -52,7 +49,7 @@ public class AlertManager {
     private static final int SORT_TYPE_LEVEL_ASC = 3;
     private static final int READ_STATE = 1;
     private static final int STATISTICS_TYPE_DEVICE = 1;
-    public static final String SPLIT_CHARACTER="&%";
+    private static final String SPLIT_CHARACTER = "&%";
     @Autowired
     private AlertMapper alertMapper;
     @Autowired
@@ -190,6 +187,17 @@ public class AlertManager {
         return paramRuleMap;
     }
 
+    public List<AlertRule> getParamRules(String thingCode, String metricCode) {
+        if (paramRuleMap.containsKey(thingCode)) {
+            Map<String, List<AlertRule>> metricRuleMap = paramRuleMap.get(thingCode);
+            if (metricRuleMap.containsKey(metricCode)) {
+                List<AlertRule> alertRules = metricRuleMap.get(metricCode);
+                return alertRules;
+            }
+        }
+        return Collections.emptyList();
+    }
+
     public Map<String, Map<String, AlertRule>> getProtectRuleMap() {
         return protectRuleMap;
     }
@@ -202,33 +210,41 @@ public class AlertManager {
     public List<AlertRule> updateRule(List<AlertRule> alertRules, int type) {
         for (AlertRule alertRule : alertRules) {
             if (alertRule.getId() == null) {
-                alertMapper.insertAlertRule(alertRule);
-                if (alertRule.getEnable()) {
-                    if (type == AlertConstants.TYPE_PARAM) {
-                        insertParamRule(alertRule);
-                    } else {
-                        insertProtectRule(alertRule);
-                    }
-                }
+                disposeNewAlertRule(type, alertRule);
             } else {
-                alertMapper.updateAlertRule(alertRule);
-                if (alertRule.getEnable()) {
-                    if (type == AlertConstants.TYPE_PARAM) {
-                        updateParamRule(alertRule);
-                    } else {
-                        updateProtectRule(alertRule);
-                    }
-                } else {
-                    if (type == AlertConstants.TYPE_PARAM) {
-                        removeParamRule(alertRule.getId());
-                    } else {
-                        removeProtectRule(alertRule.getId());
-                    }
-                }
+                disposeExistAlerRule(type, alertRule);
             }
         }
         return alertRules;
 
+    }
+
+    private void disposeExistAlerRule(int type, AlertRule alertRule) {
+        alertMapper.updateAlertRule(alertRule);
+        if (alertRule.getEnable()) {
+            if (type == AlertConstants.TYPE_PARAM) {
+                updateParamRule(alertRule);
+            } else {
+                updateProtectRule(alertRule);
+            }
+        } else {
+            if (type == AlertConstants.TYPE_PARAM) {
+                removeParamRule(alertRule.getId());
+            } else {
+                removeProtectRule(alertRule.getId());
+            }
+        }
+    }
+
+    private void disposeNewAlertRule(int type, AlertRule alertRule) {
+        alertMapper.insertAlertRule(alertRule);
+        if (alertRule.getEnable()) {
+            if (type == AlertConstants.TYPE_PARAM) {
+                insertParamRule(alertRule);
+            } else {
+                insertProtectRule(alertRule);
+            }
+        }
     }
 
     public void deleteRule(List<Long> ids, int type) {
@@ -244,52 +260,85 @@ public class AlertManager {
     }
 
     private void removeProtectRule(Long id) {
-        outer:
         for (Map.Entry<String, Map<String, AlertRule>> entry : protectRuleMap.entrySet()) {
             Map<String, AlertRule> metricRuleMap = entry.getValue();
-            for (Map.Entry<String, AlertRule> innerEntry : metricRuleMap.entrySet()) {
-                AlertRule alertRule = innerEntry.getValue();
-                String metricCode = innerEntry.getKey();
-                if (alertRule.getId().equals(id)) {
-                    metricRuleMap.remove(metricCode);
-                    break outer;
-                }
+            if (removeProtectRuleInMetricMap(id, metricRuleMap)) {
+                break;
             }
         }
 
     }
 
-    private void removeParamRule(Long id) {
-        outer:
-        for (Map.Entry<String, Map<String, List<AlertRule>>> entry : paramRuleMap.entrySet()) {
-            Map<String, List<AlertRule>> metricRuleMap = entry.getValue();
-            for (Map.Entry<String, List<AlertRule>> innerEntry : metricRuleMap.entrySet()) {
-                List<AlertRule> alertRules = innerEntry.getValue();
-                for (AlertRule alertRule : alertRules) {
-                    if (alertRule.getId().equals(id)) {
-                        alertRules.remove(alertRule);
-                        break outer;
-                    }
-                }
+    private boolean removeProtectRuleInMetricMap(Long id, Map<String, AlertRule> metricRuleMap) {
+        for (Map.Entry<String, AlertRule> innerEntry : metricRuleMap.entrySet()) {
+            AlertRule alertRule = innerEntry.getValue();
+            String metricCode = innerEntry.getKey();
+            if (alertRule.getId().equals(id)) {
+                metricRuleMap.remove(metricCode);
+                return true;
             }
         }
+        return false;
+    }
+
+    private void removeParamRule(Long id) {
+        for (Map.Entry<String, Map<String, List<AlertRule>>> entry : paramRuleMap.entrySet()) {
+            Map<String, List<AlertRule>> metricRuleMap = entry.getValue();
+            if (removeParamRuleInMetricMap(id, metricRuleMap)) {
+                break;
+            }
+        }
+    }
+
+    private boolean removeParamRuleInMetricMap(Long id, Map<String, List<AlertRule>> metricRuleMap) {
+        for (Map.Entry<String, List<AlertRule>> innerEntry : metricRuleMap.entrySet()) {
+            List<AlertRule> alertRules = innerEntry.getValue();
+            if (removeParamRuleInRuleList(id, alertRules)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean removeParamRuleInRuleList(Long id, List<AlertRule> alertRules) {
+        for (AlertRule alertRule : alertRules) {
+            if (alertRule.getId().equals(id)) {
+                alertRules.remove(alertRule);
+                return true;
+            }
+        }
+        return false;
     }
 
     private void updateParamRule(AlertRule alertRule) {
         for (Map.Entry<String, Map<String, List<AlertRule>>> entry : paramRuleMap.entrySet()) {
             Map<String, List<AlertRule>> metricRuleMap = entry.getValue();
-            outer:
-            for (Map.Entry<String, List<AlertRule>> innerEntry : metricRuleMap.entrySet()) {
-                List<AlertRule> alertRules = innerEntry.getValue();
-                for (AlertRule existAlertRule : alertRules) {
-                    if (existAlertRule.getId().equals(alertRule.getId())) {
-                        alertRules.remove(existAlertRule);
-                        alertRules.add(alertRule);
-                        break outer;
-                    }
-                }
+
+            if (updateParamRuleInMetricMap(alertRule, metricRuleMap)) {
+                break;
             }
         }
+    }
+
+    private boolean updateParamRuleInMetricMap(AlertRule alertRule, Map<String, List<AlertRule>> metricRuleMap) {
+        for (Map.Entry<String, List<AlertRule>> innerEntry : metricRuleMap.entrySet()) {
+            List<AlertRule> alertRules = innerEntry.getValue();
+            if (updateParamRuleInRuleList(alertRule, alertRules)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean updateParamRuleInRuleList(AlertRule alertRule, List<AlertRule> alertRules) {
+        for (AlertRule existAlertRule : alertRules) {
+            if (existAlertRule.getId().equals(alertRule.getId())) {
+                alertRules.remove(existAlertRule);
+                alertRules.add(alertRule);
+                return true;
+            }
+        }
+        return false;
     }
 
     private void updateProtectRule(AlertRule alertRule) {
@@ -491,7 +540,6 @@ public class AlertManager {
             }
             if (AlertConstants.STAGE_VERIFIED.equals(alertData.getAlertStage())) {
                 verifyDelayQueue.put(new VerifyDelayed(alertData, VERIFY_TO_UNTREATED_PERIOD));
-                // verifySet.add(alertData);
             }
         }
     }
@@ -523,7 +571,7 @@ public class AlertManager {
      * @return
      * @throws Exception
      */
-    public Integer sendAlertCmd(String thingCode, String metricCode, AlertMessage alertMessage, String requestId) {
+    public Integer sendAlertCmd(String thingCode, String metricCode, AlertMessage alertMessage) {
         AlertData alertData = getAlertDataByThingAndMetricCode(thingCode, metricCode);
         boolean updateFlag = false;
         if (alertData == null) {
@@ -587,13 +635,6 @@ public class AlertManager {
             case AlertConstants.MESSAGE_TYPE_SCENE_CONFIRM_DIS_RELEASE: // 现场确认报警未解除
                 sceneConfirmReleaseAlert(alertData, alertMessage, false);
                 break;
-            // case AlertConstants.MESSAGE_REQ_RESET: // 申请复位（岗位）
-            // requestReset(alertData, alertMessage);
-            // updateFlag = true;
-            // break;
-            // case AlertConstants.MESSAGE_RESET: // 复位（调度）
-            // reset(alertData, alertMessage, requestId);
-            // break;
             case AlertConstants.MESSAGE_TYPE_SET_LEVEL: // 报警评级（调度）
                 gradeAlert(alertData, alertMessage);
                 updateFlag = true;
@@ -621,8 +662,7 @@ public class AlertManager {
         alertData.setReporter(alertMessage.getUserId());
         alertMapper.saveAlertMessage(alertMessage);
         messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
-        logger.debug("推送报警消息，报警设备{}，报警内容{}，未发现报警存在", alertData.getThingCode(), alertData.getMetricCode(),
-                alertMessage.getType());
+        logger.debug("推送报警消息，报警设备{}，报警内容{}，未发现报警存在", alertData.getThingCode(), alertData.getMetricCode());
     }
 
     /**
@@ -635,13 +675,10 @@ public class AlertManager {
         alertData.setAlertStage(AlertConstants.STAGE_VERIFIED);
         alertData.setVerifyTime(new Date());
         alertData.setReporter(alertMessage.getUserId());
-        // updateAlert(alertData);
-        // verifySet.add(alertData);
         verifyDelayQueue.put(new VerifyDelayed(alertData, VERIFY_TO_UNTREATED_PERIOD));
         alertMapper.saveAlertMessage(alertMessage);
         messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
-        logger.debug("推送报警消息，报警设备{}，报警内容{}，核实报警存在", alertData.getThingCode(), alertData.getMetricCode(),
-                alertMessage.getType());
+        logger.debug("推送报警消息，报警设备{}，报警内容{}，核实报警存在", alertData.getThingCode(), alertData.getMetricCode());
     }
 
     /**
@@ -652,12 +689,10 @@ public class AlertManager {
     private void assignRepair(AlertData alertData, AlertMessage alertMessage) {
         alertData.setAlertStage(AlertConstants.STAGE_REQUEST_REPAIR);
         alertData.setRepair(true);
-        // updateAlert(alertData);
         alertMapper.saveAlertMessage(alertMessage);
         messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
         messagingTemplate.convertAndSend(REPAIR_URI, alertData);
-        logger.debug("推送报警消息，报警设备{}，报警内容{}，申报维修", alertData.getThingCode(), alertData.getMetricCode(),
-                alertMessage.getType());
+        logger.debug("推送报警消息，报警设备{}，报警内容{}，申报维修", alertData.getThingCode(), alertData.getMetricCode());
     }
 
     /**
@@ -670,7 +705,6 @@ public class AlertManager {
         alertData.setAlertStage(AlertConstants.STAGE_REPAIRING);
         alertData.setRepairConfirmUser(userId);
         alertData.setRepairStartTime(new Date());
-        // updateAlert(alertData);
         messagingTemplate.convertAndSend(REPAIR_URI, alertData);
         logger.debug("推送报警消息，报警设备{}，报警内容{}，开始维修", alertData.getThingCode(), alertData.getMetricCode());
     }
@@ -684,19 +718,10 @@ public class AlertManager {
         alertData.setRepair(false);
         alertData.setAlertStage(AlertConstants.STAGE_REPAIRED);
         alertData.setRepairEndTime(new Date());
-        // updateAlert(alertData);
         messagingTemplate.convertAndSend(REPAIR_URI, alertData);
         logger.debug("推送报警消息，报警设备{}，报警内容{}，结束维修", alertData.getThingCode(), alertData.getMetricCode());
     }
 
-    // public void requestReset(AlertData alertData, AlertMessage alertMessage) {
-    // alertData.setManualIntervention(true);
-    // // updateAlert(alertData);
-    // alertMapper.saveAlertMessage(alertMessage);
-    // messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
-    // logger.debug("推送报警消息，报警设备{}，报警内容{}，申请复位", alertData.getThingCode(),
-    // alertData.getMetricCode());
-    // }
 
     /**
      * 申请复位（岗位）
@@ -724,21 +749,9 @@ public class AlertManager {
             messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
             logger.debug("推送报警消息，报警设备{}，报警内容{}，申请复位", alertData.getThingCode(), alertData.getMetricCode());
         }
-        // messagingTemplate.convertAndSend(REQ_RESET_URI,thingCode);
     }
 
-    // public void reset(AlertData alertData, AlertMessage alertMessage, String
-    // requestId) {
-    // DataModel dataModel = new DataModel();
-    // dataModel.setThingCode(alertData.getThingCode());
-    // dataModel.setMetricCode(MetricCodes.RESET);
-    // dataModel.setValue(Boolean.TRUE.toString());
-    // cmdControlService.sendCmd(dataModel, requestId);
-    // alertMapper.saveAlertMessage(alertMessage);
-    // messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
-    // logger.debug("推送报警消息，报警设备{}，报警内容{}，进行复位", alertData.getThingCode(),
-    // alertData.getMetricCode());
-    // }
+
 
     /**
      * 复位（调度）
@@ -779,8 +792,6 @@ public class AlertManager {
         alertData.setAlertStage(AlertConstants.STAGE_VERIFIED);
         alertData.setAlertLevel(Short.parseShort(alertMessage.getInfo()));
         alertData.setVerifyTime(new Date());
-        // updateAlert(alertData);
-        // verifySet.add(alertData);
         verifyDelayQueue.put(new VerifyDelayed(alertData, VERIFY_TO_UNTREATED_PERIOD));
         alertMapper.saveAlertMessage(alertMessage);
         messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
@@ -801,7 +812,7 @@ public class AlertManager {
         releaseAlert(alertData);
         alertMapper.saveAlertMessage(alertMessage);
         messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
-        logger.debug("推送报警消息，报警设备{}，报警内容{}，现场确认报警解除状态：", alertData.getThingCode(), alertData.getMetricCode(),
+        logger.debug("推送报警消息，报警设备{}，报警内容{}，现场确认报警解除状态：{}", alertData.getThingCode(), alertData.getMetricCode(),
                 sceneConfirmState);
     }
 
@@ -842,20 +853,7 @@ public class AlertManager {
         return alertMapper.getAlertMessage(alertId);
     }
 
-    /**
-     * 检查未处理的报警
-     */
-    // @Scheduled(cron = "0/10 * * * * ?")
-    // public void checkVerifiedAlert() {
-    // for (AlertData alertData : verifySet) {
-    // if (new Date().getTime() - alertData.getVerifyTime().getTime() >
-    // VERIFY_TO_UNTREATED_PERIOD) {
-    // alertData.setAlertStage(AlertConstants.STAGE_UNTREATED);
-    // updateAlert(alertData);
-    // verifySet.remove(alertData);
-    // }
-    // }
-    // }
+
 
     /**
      * 消息已读
@@ -937,7 +935,6 @@ public class AlertManager {
             List<AlertData> alertDatas = alertRecord.getAlertDataList();
             for (AlertData alertData : alertDatas) {
                 transImageStrToList(alertData);
-                // countUnreadMessage(alertData);
             }
         }
     }
@@ -1054,19 +1051,7 @@ public class AlertManager {
         }
     }
 
-    /**
-     * 获取报警屏蔽信息
-     *
-     * @param thingCode
-     * @param metricCode
-     * @param startTime
-     * @param endTime
-     * @return
-     */
-    // public List<AlertMask> getAlertShieldInfo(String thingCode, String
-    // metricCode, Date startTime, Date endTime){
-    // List
-    // }
+
 
     /**
      * 反馈图片视频信息
@@ -1148,13 +1133,8 @@ public class AlertManager {
                                                      Date endTime) {
         List<AlertLevelNum> alertLevelNumList =
                 alertMapper.getLevelStatisticsInfo(type, alertStage, excluStage, startTime, endTime);
-//        Map<Integer, Integer> alertLevelMap = new HashMap<>();
-//        for (AlertLevelNum alertLevelNum : alertLevelNumList) {
-//            alertLevelMap.put(alertLevelNum.getAlertLevel(), alertLevelNum.getCount());
-//        }
         AlertStatisticsNum statisticsNum =
                 alertMapper.getStatisticsInfo(type, alertStage, excluStage, startTime, endTime).get(0);
-//        statisticsNum.setAlertLevelNums(alertLevelMap);
         statisticsNum.setAlertLevelNumList(alertLevelNumList);
         return statisticsNum;
     }
@@ -1185,7 +1165,6 @@ public class AlertManager {
                 alertStatisticsNum.setThingCode(thingCode);
             }
             alertStatisticsNum.getAlertLevelNumList().add(alertLevelNum);
-//            alertStatisticsNum.getAlertLevelNums().put(alertLevelNum.getAlertLevel(), alertLevelNum.getCount());
         }
         List<AlertStatisticsNum> alertStatisticsNums = sortAlertStatisticsNum(alertStatisticsNumMap);
         alertStatisticsRsp.setDetailStatisticsInfo(alertStatisticsNums);
@@ -1201,24 +1180,16 @@ public class AlertManager {
         List<AlertStatisticsNum> alertStatisticsNums = new ArrayList<>(alertStatisticsNumMap.values());
         alertStatisticsNums.sort((AlertStatisticsNum o1, AlertStatisticsNum o2) -> {
             List<AlertLevelNum> alertLevelNumList1 = o1.getAlertLevelNumList();
-//            Collection<Integer> count1 = o1.getAlertLevelNums().values();
             Integer sumNum1 = 0;
             Integer sumNum2 = 0;
             for (AlertLevelNum levelNum : alertLevelNumList1) {
                 sumNum1 += levelNum.getCount();
             }
-//            for (Integer i : count1) {
-//                sumNum1 += i;
-//            }
             o1.setSumNum(sumNum1);
-//            Collection<Integer> count2 = o2.getAlertLevelNums().values();
             List<AlertLevelNum> alertLevelNumList2 = o2.getAlertLevelNumList();
             for (AlertLevelNum levelNum : alertLevelNumList2) {
                 sumNum2 += levelNum.getCount();
             }
-//            for (Integer i : count2) {
-//                sumNum2 += i;
-//            }
             o2.setSumNum(sumNum2);
             if (sumNum1.equals(sumNum2)) {
                 return o1.getThingCode().compareTo(o2.getThingCode());
@@ -1386,11 +1357,9 @@ public class AlertManager {
                 Map<String, AlertData> metricAlertDataMap = alertDataMap.get(thingCode);
                 for (Map.Entry<String, AlertData> alertDataEntry : metricAlertDataMap.entrySet()) {
                     AlertData value = alertDataEntry.getValue();
-//                    if (AlertConstants.STAGE_UNTREATED.equals(value.getAlertStage())) {
                     Short alertLevel = value.getAlertLevel();
                     if (alertLevel != null && alertLevel > level) {
                         level = alertLevel;
-//                        }
                     }
                 }
             }
@@ -1401,45 +1370,46 @@ public class AlertManager {
 
 
     public List<AlertData> getSeriousAlertLevelInList(List<String> thingCodeList, int count) {
-        TreeSet<AlertData> alertDataSet = new TreeSet<>(new Comparator<AlertData>() {
-            @Override
-            public int compare(AlertData o1, AlertData o2) {
-                if (o2.getAlertLevel() == null) {
-                    return -1;
-                }
-                if (o2.getAlertLevel().equals(o1.getAlertLevel())) {
-                    if (o2.getAlertDateTime().equals(o1.getAlertDateTime())){
-                        return o2.getThingCode().compareTo(o1.getThingCode());
-                    }
-                    return o2.getAlertDateTime().compareTo(o1.getAlertDateTime());
-                }
-                return o2.getAlertLevel().compareTo(o1.getAlertLevel());
+        TreeSet<AlertData> alertDataSet = new TreeSet<>((AlertData o1, AlertData o2) -> {
+            if (o2.getAlertLevel() == null) {
+                return -1;
             }
+            if (o2.getAlertLevel().equals(o1.getAlertLevel())) {
+                if (o2.getAlertDateTime().equals(o1.getAlertDateTime())) {
+                    return o2.getThingCode().compareTo(o1.getThingCode());
+                }
+                return o2.getAlertDateTime().compareTo(o1.getAlertDateTime());
+            }
+            return o2.getAlertLevel().compareTo(o1.getAlertLevel());
         });
         Map<String, AlertData> seriousAlertDataMap = new HashMap<>();
         for (String thingCode : thingCodeList) {
-            short level = 0;
-            if (seriousAlertDataMap.containsKey(thingCode)) {
-                level = seriousAlertDataMap.get(thingCode).getAlertLevel();
-            }
-            if (alertDataMap.containsKey(thingCode)) {
-                Map<String, AlertData> metricAlertDataMap = alertDataMap.get(thingCode);
-                for (Map.Entry<String, AlertData> alertDataEntry : metricAlertDataMap.entrySet()) {
-                    AlertData value = alertDataEntry.getValue();
-                    Short alertLevel = value.getAlertLevel();
-                    if (alertLevel != null && alertLevel > level) {
-                        seriousAlertDataMap.put(thingCode, value);
-                    }
-                }
-            }
+            getSeriousAlertMap(seriousAlertDataMap, thingCode);
         }
         alertDataSet.addAll(seriousAlertDataMap.values());
         List<AlertData> alertData = new ArrayList<>(alertDataSet);
-        if (alertData.size()>count){
+        if (alertData.size() > count) {
             alertData = alertData.subList(0, count);
         }
 
         return alertData;
+    }
+
+    void getSeriousAlertMap(Map<String, AlertData> seriousAlertDataMap, String thingCode) {
+        short level = 0;
+        if (seriousAlertDataMap.containsKey(thingCode)) {
+            level = seriousAlertDataMap.get(thingCode).getAlertLevel();
+        }
+        if (alertDataMap.containsKey(thingCode)) {
+            Map<String, AlertData> metricAlertDataMap = alertDataMap.get(thingCode);
+            for (Map.Entry<String, AlertData> alertDataEntry : metricAlertDataMap.entrySet()) {
+                AlertData value = alertDataEntry.getValue();
+                Short alertLevel = value.getAlertLevel();
+                if (alertLevel != null && alertLevel > level) {
+                    seriousAlertDataMap.put(thingCode, value);
+                }
+            }
+        }
     }
 
     /**
@@ -1459,7 +1429,7 @@ public class AlertManager {
         Collection<String> addCodes = CollectionUtils.subtract(inputAlertRulesCode, existAlertRulesCode);
         List<AlertRule> addList = codesToAlertRule(addCodes);
         List<AlertRule> duplicateList = codesToAlertRule(duplicateCodes);
-        if (addList.size() > 0) {
+        if (!addList.isEmpty()) {
             alertMapper.setParamConfigurationList(addList);
         }
         return duplicateList;
