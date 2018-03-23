@@ -3,6 +3,7 @@ package com.zgiot.app.server.module.sfmonitor.mapper;
 import com.zgiot.app.server.module.sfmonitor.pojo.SFMonEquipMonitorInfo;
 import com.zgiot.app.server.module.sfmonitor.pojo.SFMonStyle;
 import org.apache.ibatis.annotations.*;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -30,4 +31,7 @@ public interface SFMonEquipMonitorInfoMapper {
     public int getEquipmentMonitorCount();
 
     public List<SFMonEquipMonitorInfo> getEquipmentMonitorInfo(SFMonEquipMonitorInfo sfMonEquipMonitorInfo);
+
+    @Select("select thing_name from tb_sfmon_equipmonitor_info where thing_name like #{thingName} group by thing_name")
+    public List<String> getEquipmentNames(@Param("thingName") String thingName);
 }

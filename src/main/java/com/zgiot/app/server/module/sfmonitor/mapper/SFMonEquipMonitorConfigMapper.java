@@ -1,7 +1,6 @@
 package com.zgiot.app.server.module.sfmonitor.mapper;
 
-import com.zgiot.app.server.module.sfmonitor.controller.EquipmentBaseInfo;
-import com.zgiot.app.server.module.sfmonitor.controller.EquipmentRelateToSignalWrapper ;
+import com.zgiot.app.server.module.sfmonitor.controller.*;
 import com.zgiot.app.server.module.sfmonitor.pojo.SFMonEquipMonitorConfig;
 import com.zgiot.app.server.module.sfmonitor.pojo.SignalWrapperMatchRule;
 import com.zgiot.app.server.module.sfmonitor.pojo.StateControlAreaInfo;
@@ -34,4 +33,18 @@ public interface SFMonEquipMonitorConfigMapper {
 
     void deleteEquipmentConfig(SFMonEquipMonitorConfig sfMonEquipMonitorConfig);
 
+    List<SFMonPadJumpZoneInfo> getJumpZoneData(@Param("thingCode") String thingCode,@Param("zoneCode") String zoneCode);
+
+    List<SFMonPadParameterZoneInfo> getParameterData(@Param("thingCode") String thingCode, @Param("zoneCode") String zoneCode);
+
+    List<SFMonPadStateControlMetricInfo> getStateControlZoneData(@Param("thingCode") String thingCode,
+                                                                 @Param("zoneCode") String zoneCode,
+                                                                 @Param("metricTagname") String metricTagname,
+                                                                 @Param("direction") int direction);
+
+    List<String> getMetricTagNames(@Param("thingCode") String thingCode,@Param("zoneCode") String zoneCode);
+
+    List<SFMonPadAuxiliaryZoneInfo> getAuxiliaryZoneData(@Param("thingCode") String thingCode,
+                                                         @Param("zoneCode") String zoneCode,
+                                                         @Param("directions") List<Integer> directions);
 }

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.qualityandquantity.mapper.QualityAndQuantityMapper">
+
+
+
+
+
+    <select id="getCardInfosInArea" resultType="com.zgiot.app.server.module.qualityandquantity.pojo.CardInfo">
+        select c.id,c.card_style_id,c.card_param_value_json as cardParamValue,s.parser_name FROM tb_card c,tb_card_style s,rel_qualityandquantity_area_card p WHERE c.card_style_id = s.id and p.card_id = c.id and p.area_id = #{area} ORDER BY p.sequence
+    </select>
+
+    <select id="getAreaInfo" resultType="com.zgiot.app.server.module.qualityandquantity.pojo.AreaInfo">
+        SELECT area_id,area_title FROM rel_qualityandquantity_area_card WHERE area_id = #{areaId} GROUP BY area_id
+    </select>
+
+
+
+</mapper>

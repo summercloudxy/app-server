@@ -386,13 +386,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
     @Override
     public DataModel findMaxValueDataInDuration(String thingCode, String metricCode, Date startTime, Date endTime) {
         List<DataModel> result = getDataListInDuration(thingCode, metricCode, startTime, endTime);
-        if (result == null) {
-            return null;
-        }
-        if (result.size() != 0) {
-            if (result.size() == 1) {
-                return result.get(0);
-            }
+        if (!result.isEmpty()) {
             Optional<DataModel> max = result.stream().max((o1, o2) -> {
                 String valueStr1 = o1.getValue();
                 Double value1 = Double.valueOf(valueStr1);
@@ -400,7 +394,9 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
                 Double value2 = Double.valueOf(valueStr2);
                 return value1.compareTo(value2);
             });
-            return max.get();
+            if (max.isPresent()) {
+                return max.get();
+            }
         }
         return null;
     }
@@ -430,7 +426,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
 
     private List<DataModel> getDataListInDuration(String thingCode, String metricCode, Date startTime, Date endTime) {
         if (!checkEnabled()) {
-            return null;
+            return Collections.emptyList();
         }
         Bson criteria;
         // for end date
@@ -443,7 +439,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
         if (startTime.after(endTime)) {
             throw new IllegalArgumentException("StartDate must be earlier than endDate");
         }
-        criteria = and(gte(DataModel.DATA_TIMESTAMP, startTime), lt(DataModel.DATA_TIMESTAMP, endTime), eq(DataModel.METRIC_CODE, metricCode), eq(DataModel.THING_CODE, thingCode));
+        criteria = and(gte(DataModel.DATA_TIMESTAMP, startTime.getTime()), lt(DataModel.DATA_TIMESTAMP, endTime.getTime()), eq(DataModel.METRIC_CODE, metricCode), eq(DataModel.THING_CODE, thingCode));
         List<DataModel> result = new LinkedList<>();
         if (collection != null) {
             collection.find(criteria)

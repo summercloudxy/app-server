@@ -1,6 +1,6 @@
 package com.zgiot.app.server.module.alert.controller;
 
-import com.alibaba.fastjson.JSON;
+
 import com.zgiot.app.server.module.alert.AlertManager;
 import com.zgiot.app.server.module.alert.pojo.*;
 import com.zgiot.app.server.service.FileService;
@@ -9,18 +9,15 @@ import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.FileModel;
 import com.zgiot.common.restcontroller.ServerResponse;
 import io.swagger.annotations.ApiOperation;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Created by xiayun on 2017/9/26.
@@ -50,14 +47,7 @@ public class AlertController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(alertRules), HttpStatus.OK);
     }
 
-    // @ApiOperation("更新参数类报警规则")
-    // @PostMapping(value = "rule/param")
-    // public ResponseEntity<String> updateParamRule(@RequestBody List<AlertRule>
-    // alertRules) {
-    //
-    // alertManager.initParamRuleMap();
-    // return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
-    // }
+
 
     @ApiOperation("更新报警规则")
     @PostMapping(value = "rule")
@@ -66,12 +56,7 @@ public class AlertController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(alertRulesRsp), HttpStatus.OK);
     }
 
-    // @ApiOperation("更新保护类报警规则")
-    // @PostMapping(value = "rule/protect")
-    // public ResponseEntity<String> updateProtectRule() {
-    // alertManager.initProtectRuleMap();
-    // return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
-    // }
+
 
     @ApiOperation("删除报警规则")
     @DeleteMapping(value = "rule")
@@ -84,8 +69,7 @@ public class AlertController {
     @PostMapping(value = "cmd")
     public ResponseEntity<String> sendAlertCmd(@RequestParam String thingCode, @RequestParam String metricCode,
                                                @RequestBody AlertMessage alertMessage, HttpServletRequest request) {
-        String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
-        Integer messageId = alertManager.sendAlertCmd(thingCode, metricCode, alertMessage, requestId);
+        Integer messageId = alertManager.sendAlertCmd(thingCode, metricCode, alertMessage);
         return new ResponseEntity<>(ServerResponse.buildOkJson(messageId), HttpStatus.OK);
     }
 
@@ -109,18 +93,6 @@ public class AlertController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(alertRecordRsp), HttpStatus.OK);
     }
 
-//    @ApiOperation("获取报警记录")
-//    @GetMapping(value = "record")
-//    public ResponseEntity<String> getAlertRecord(@RequestParam(required = false) String stage,
-//            @RequestParam(required = false) Integer level, @RequestParam(required = false) Short type,
-//            @RequestParam(required = false) Integer system, @RequestParam(required = false) String assetType,
-//            @RequestParam(required = false) String category, @RequestParam(required = false) Integer sortType,
-//            @RequestParam(required = false) Long duration, @RequestParam(required = false) String thingCode,
-//            @RequestParam(required = false) Integer page, @RequestParam(required = false) Integer count) {
-//        List<AlertData> alertDataList = alertManager.getAlertDataList(stage, level, type, system, assetType, category,
-//                sortType, duration, thingCode, page, count);
-//        return new ResponseEntity<>(ServerResponse.buildOkJson(alertDataList), HttpStatus.OK);
-//    }
 
     @ApiOperation("获取报警记录")
     @PostMapping(value = "record")

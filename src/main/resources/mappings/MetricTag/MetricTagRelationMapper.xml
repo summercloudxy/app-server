@@ -120,10 +120,22 @@
         and c.metric_code=b.metric_code
     </select>
 
+    <select id="fuzzyFindSignalWrapperByWrapperName" resultMap="findTag">
+        select a.tag_name as tag_name,b.metric_name metric_name,c.editor as editor,c.create_date as create_date,c.comment as comment
+        from tb_metric_tag a,tb_metric b,rel_metrictag_metric c where a.tag_name like #{tagName} and a.code=c.metric_tag_code
+        and c.metric_code=b.metric_code group by a.tag_name
+    </select>
+
     <select id="findSignalWrapperByMetricName" resultMap="findTag">
         select a.tag_name as tag_name,b.metric_name metric_name,c.editor as editor,c.create_date as create_date,c.comment as comment
         from tb_metric_tag a,tb_metric b,rel_metrictag_metric c where b.metric_name like #{metricName}
         and c.metric_code=b.metric_code and  a.code=c.metric_tag_code
+    </select>
+
+    <select id="fuzzyFindSignalWrapperByMetricName" resultMap="findTag">
+        select a.tag_name as tag_name,b.metric_name metric_name,c.editor as editor,c.create_date as create_date,c.comment as comment
+        from tb_metric_tag a,tb_metric b,rel_metrictag_metric c where b.metric_name like #{metricName}
+        and c.metric_code=b.metric_code and  a.code=c.metric_tag_code group by b.metric_name
     </select>
 
     <select id="findAllSignalWrapper" resultMap="findTag">

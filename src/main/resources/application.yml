@@ -1,3 +1,4 @@
+
 # 监控服务配置
 spring:
   application:
@@ -59,4 +60,9 @@ stomp:
     topics:
       topic/ss,topic/12
 
+
+shift:
+  time:
+    day: 8
+    night: 20
 

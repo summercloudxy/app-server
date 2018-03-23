@@ -14,8 +14,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DensityControlListener implements DataListener {
-//    @Autowired
-//    private DensityControlManager densityControlManager;
 
     @Autowired
     private AddingMediumHandler addingMediumHandler;
@@ -23,33 +21,13 @@ public class DensityControlListener implements DataListener {
     private BackFlowHandler backFlowHandler;
     @Autowired
     private NotifyAlertHandler notifyAlertHandler;
-//    @Autowired
-//    private CancelNotifyHandler cancelNotifyHandler;
-//    @Autowired
-//    private DensityControlMapper densityControlMapper;
 
     private final Logger logger = LoggerFactory.getLogger(DensityControlListener.class);
-    // private int maskIndex = 0;
-    // private Map<String, MonitoredThing> monitoredThingMap;
 
 
     @Override
     public void onDataChange(DataModel dataModel) {
 
-        // if (monitoredThingMap.containsKey(dataModel.getThingCode())) {
-        // if (monitoredThingMap.get(dataModel.getThingCode()).getParentThingCode() !=
-        // null) {
-        // dataModel = dataModel.clone();
-        // dataModel.setThingCode(monitoredThingMap.get(dataModel.getThingCode()).getParentThingCode());
-        // }
-        // String controlStage = densityControlManager.getControlStage(dataModel);
-        // String realStage = densityControlManager.convertToRealStage(controlStage,
-        // maskIndex);
-        // if (densityControlManager.isStageChange(dataModel.getThingCode(), realStage))
-        // {
-        // densityControlManager.checkStage(dataModel.getThingCode(), realStage);
-        // }
-        // }
         switch (dataModel.getMetricCode()) {
             case MetricCodes.DENSITY_CONTROL_NOTIFY_ADD_MEDIUM:
                 if (Boolean.valueOf(dataModel.getValue())) {

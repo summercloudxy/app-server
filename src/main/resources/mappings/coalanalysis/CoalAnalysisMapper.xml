@@ -2,8 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zgiot.app.server.module.coalanalysis.mapper.CoalAnalysisMapper">
 
-    <resultMap id="DensityAndFlowInfoMap" type="com.zgiot.app.server.module.coalanalysis.pojo.DensityAndFlowInfo">
-        <result property="coalTarget" column="coal_target"/>
+    <resultMap id="DensityAndFlowSourceInfoMap" type="com.zgiot.app.server.module.reportforms.pojo.DensityAndFlowSourceInfo">
+        <result property="coalSample" column="coal_sample"/>
         <result property="system" column="system"/>
         <result property="densityCode" column="density_code"/>
         <result property="flowCode" column="flow_code"/>
@@ -18,17 +18,17 @@
         select id from tb_coal_analysis where target = #{target} and sample = #{sample} and time = #{time}
     </select>
 
-    <update id="updateRecord">
+    <update id="updateRecordWithOutDensityAndFlow">
         update tb_coal_analysis set
         aad = #{record.aad},
         mt = #{record.mt},
         stad = #{record.stad},
         qnetar = #{record.qnetar}
-        where id = #{id}
+        where id = #{record.id}
     </update>
 
     <insert id="insertRecord" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
-        insert tb_coal_analysis (target,sample,time,system,aad,mt,stad,qnetar) values (#{target},#{sample},#{time},#{system},#{aad},#{mt},#{stad},#{qnetar})
+        insert tb_coal_analysis (target,sample,time,system,aad,mt,stad,qnetar,avg_density,avg_flow) values (#{target},#{sample},#{time},#{system},#{aad},#{mt},#{stad},#{qnetar},#{avgDensity},#{avgFlow})
     </insert>
 
     <update id="updateRecordDensityAndFlow">
@@ -45,9 +45,50 @@
         </foreach>
     </insert>
 
-    <select id="getDensityAndFlowInfo" resultMap="DensityAndFlowInfoMap">
-        select coal_target,system,thing_code,density_code,flow_code,run_density_threshold,run_flow_threshold from tb_coal_analysis_density_flow_info
+    <select id="getDensityAndFlowSourceInfo" resultMap="DensityAndFlowSourceInfoMap">
+        select coal_sample,system,thing_code,density_code,flow_code,run_density_threshold,run_flow_threshold from tb_coal_analysis_density_flow_info
     </select>
+
+    <select id="getRecordsMatchCondition" resultType="com.zgiot.common.pojo.CoalAnalysisRecord">
+        select id,time,target,sample,aad,mt,stad,qnetar,system,avg_density,avg_flow from tb_coal_analysis
+        WHERE
+        <trim prefix="" prefixOverrides="and">
+            <if test="startTime != null">
+                and time &gt; #{startTime}
+            </if>
+            <if test="endTime !=null">
+                and time &lt; #{endTime}
+            </if>
+            <if test="targetList != null">
+                and target in
+                <foreach collection="targetList" item="target" open="(" close=")" separator=",">
+                    #{target}
+                </foreach>
+            </if>
+            <if test="sample != null">
+                and sample = #{sample}
+            </if>
+            <if test="system != null">
+                and system = #{system}
+            </if>
+        </trim>
+
+        <if test="sortType == 0">
+            ORDER BY time ASC
+        </if>
+        <if test="sortType == 1">
+            ORDER BY time DESC
+        </if>
+        <if test="offset != null and count != null">
+            limit #{offset},#{count}
+        </if>
+
+    </select>
+
+    <select id="getDensityAndFlowInfo" resultType="com.zgiot.common.pojo.DensityAndFlowInfo">
+        select thing_code,density,flow FROM tb_coal_analysis_density_flow_value WHERE analysis_id = #{param1}
+    </select>
+
 
 
 </mapper>

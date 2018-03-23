@@ -16,6 +16,7 @@ import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
  *
  */
 public class QuartzManager {
+    public static final String QUARTZ_BEAN_NAME = "quartzScheduler";
 
     /**
      * 添加一个定时任务
@@ -31,7 +32,7 @@ public class QuartzManager {
             @SuppressWarnings("rawtypes") Class cls, String cronExpression) {
         try {
             ApplicationContext context = ApplicationContextListener.getApplicationContext();
-            StdScheduler scheduler = (StdScheduler) context.getBean("quartzScheduler");
+            StdScheduler scheduler = (StdScheduler) context.getBean(QUARTZ_BEAN_NAME);
             JobDetail jobDetail = newJob().withIdentity(JobKey.jobKey(jobName, jobGroup)).ofType(cls).build();
             // 触发器
             CronTrigger trigger = newTrigger().withIdentity(TriggerKey.triggerKey(triggerName, triggerGroup))
@@ -50,7 +51,7 @@ public class QuartzManager {
             Class cls, long interval, JobDataMap jobDataMap) {
         try {
             ApplicationContext context = ApplicationContextListener.getApplicationContext();
-            StdScheduler scheduler = (StdScheduler) context.getBean("quartzScheduler");
+            StdScheduler scheduler = (StdScheduler) context.getBean(QUARTZ_BEAN_NAME);
             JobDetail jobDetail =
                     newJob().setJobData(jobDataMap).withIdentity(JobKey.jobKey(jobName, jobGroup)).ofType(cls).build();
             // 触发器
@@ -71,7 +72,7 @@ public class QuartzManager {
             Class cls, int interval, JobDataMap jobDataMap) {
         try {
             ApplicationContext context = ApplicationContextListener.getApplicationContext();
-            StdScheduler scheduler = (StdScheduler) context.getBean("quartzScheduler");
+            StdScheduler scheduler = (StdScheduler) context.getBean(QUARTZ_BEAN_NAME);
             JobDetail jobDetail;
             if (jobDataMap != null) {
                 jobDetail = newJob().setJobData(jobDataMap).withIdentity(JobKey.jobKey(jobName, jobGroup)).ofType(cls)
@@ -97,7 +98,7 @@ public class QuartzManager {
             @SuppressWarnings("rawtypes") Class cls, String cronExpression, JobDataMap jobDataMap) {
         try {
             ApplicationContext context = ApplicationContextListener.getApplicationContext();
-            StdScheduler scheduler = (StdScheduler) context.getBean("quartzScheduler");
+            StdScheduler scheduler = (StdScheduler) context.getBean(QUARTZ_BEAN_NAME);
             JobDetail jobDetail =
                     newJob().setJobData(jobDataMap).withIdentity(JobKey.jobKey(jobName, jobGroup)).ofType(cls).build();
             // 触发器
@@ -145,7 +146,7 @@ public class QuartzManager {
     public static void modifyJobTime(String jobName, String time) {
         try {
             ApplicationContext context = ApplicationContextListener.getApplicationContext();
-            StdScheduler scheduler = (StdScheduler) context.getBean("quartzScheduler");
+            StdScheduler scheduler = (StdScheduler) context.getBean(QUARTZ_BEAN_NAME);
             CronTrigger trigger = (CronTrigger) scheduler.getTrigger(TriggerKey.triggerKey(jobName));
             if (trigger == null) {
                 return;
@@ -172,7 +173,7 @@ public class QuartzManager {
     public static void modifyJobTime(String triggerName, String triggerGroupName, String time) {
         try {
             ApplicationContext context = ApplicationContextListener.getApplicationContext();
-            StdScheduler scheduler = (StdScheduler) context.getBean("quartzScheduler");
+            StdScheduler scheduler = (StdScheduler) context.getBean(QUARTZ_BEAN_NAME);
             CronTriggerImpl trigger =
                     (CronTriggerImpl) scheduler.getTrigger(TriggerKey.triggerKey(triggerName, triggerGroupName));
             if (trigger == null) {
@@ -198,7 +199,7 @@ public class QuartzManager {
     public static void removeJob(String jobName) {
         try {
             ApplicationContext context = ApplicationContextListener.getApplicationContext();
-            StdScheduler scheduler = (StdScheduler) context.getBean("quartzScheduler");
+            StdScheduler scheduler = (StdScheduler) context.getBean(QUARTZ_BEAN_NAME);
             scheduler.pauseTrigger(TriggerKey.triggerKey(jobName));// 停止触发器
             scheduler.unscheduleJob(TriggerKey.triggerKey(jobName));// 移除触发器
             scheduler.deleteJob(JobKey.jobKey(jobName));// 删除任务
@@ -218,7 +219,7 @@ public class QuartzManager {
     public static void removeJob(String jobName, String jobGroupName, String triggerName, String triggerGroupName) {
         try {
             ApplicationContext context = ApplicationContextListener.getApplicationContext();
-            StdScheduler scheduler = (StdScheduler) context.getBean("quartzScheduler");
+            StdScheduler scheduler = (StdScheduler) context.getBean(QUARTZ_BEAN_NAME);
             scheduler.pauseTrigger(TriggerKey.triggerKey(triggerName, triggerGroupName));// 停止触发器
             scheduler.unscheduleJob(TriggerKey.triggerKey(triggerName, triggerGroupName));// 移除触发器
             scheduler.deleteJob(JobKey.jobKey(jobName, jobGroupName));// 删除任务
@@ -259,7 +260,7 @@ public class QuartzManager {
         boolean exists;
         try {
             ApplicationContext context = ApplicationContextListener.getApplicationContext();
-            StdScheduler scheduler = (StdScheduler) context.getBean("quartzScheduler");
+            StdScheduler scheduler = (StdScheduler) context.getBean(QUARTZ_BEAN_NAME);
             exists = scheduler.checkExists(new JobKey(jobName, jobGroup));
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -271,7 +272,7 @@ public class QuartzManager {
         JobDataMap jobDataMap;
         try {
             ApplicationContext context = ApplicationContextListener.getApplicationContext();
-            StdScheduler scheduler = (StdScheduler) context.getBean("quartzScheduler");
+            StdScheduler scheduler = (StdScheduler) context.getBean(QUARTZ_BEAN_NAME);
             jobDataMap = scheduler.getJobDetail(JobKey.jobKey(jobName, jobGroup)).getJobDataMap();
         } catch (Exception e) {
             throw new RuntimeException(e);

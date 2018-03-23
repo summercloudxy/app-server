@@ -1,7 +1,7 @@
 package com.zgiot.app.server.module.tcs.service;
 
 import com.google.common.collect.Lists;
-import com.zgiot.app.server.module.tcs.mapper.TcsMapper;
+import com.zgiot.app.server.module.coalanalysis.mapper.CoalAnalysisMapper;
 import com.zgiot.app.server.module.tcs.pojo.AnalysisInfoList;
 import com.zgiot.app.server.module.tcs.pojo.FilterCondition;
 import com.zgiot.app.server.module.tcs.pojo.TcsAnalysisInfo;
@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 
 
 import java.text.DecimalFormat;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,17 +29,16 @@ import static com.zgiot.app.server.module.tcs.pojo.FilterCondition.FilterConditi
 @Service
 public class TcsService {
     @Autowired
-    private TcsMapper tcsMapper;
-    @Autowired
     private DataService dataService;
     @Autowired
     private HistoryDataService historyDataService;
-    private static final int SORT_TYPE_ASC = 0;
+    @Autowired
+    private CoalAnalysisMapper coalAnalysisMapper;
     private static final int SORT_TYPE_DESC = 1;
     private static final String RAW_COAL_301 = "301";
     private static final String RAW_COAL_302 = "302";
     private static final double RUN_FLOW_THRESHOLD = 10.0;
-    private static final double PRE_COAL_SCALE = 0.7;
+    private static final double PRE_COAL_SCALE = 0.07;
     private static final String ONE_DECIMAL_FORMAT = "#####0.0";
     private static final String INT_FORMAT = "#";
     private static final String[] FEED_BARREL_CODE = {"857-1.FT-1", "857-2.FT-1", "857-3.FT-1", "858-1.FT-1", "858-2.FT-1", "858-3.FT-1","859-1.FT-1", "859-2.FT-1", "859-3.FT-1"};
@@ -54,21 +55,21 @@ public class TcsService {
     public List<AnalysisInfoList> getAnalysisHistoryListGroupByDay(Integer system, Date endTime, Integer page, Integer count) {
         FilterCondition filterCondition = newFilterCondition().endTime(endTime).page(page).count(count).sortType(SORT_TYPE_DESC).
                 system(system).addTarget(CoalAnalysisConstants.TCS_CONCENTRATE).build();
-        List<CoalAnalysisRecord> recordsMatchCondition = tcsMapper.getRecordsMatchCondition(filterCondition);
+        List<CoalAnalysisRecord> recordsMatchCondition = coalAnalysisMapper.getRecordsMatchCondition(filterCondition);
         if (recordsMatchCondition.isEmpty()) {
-            return null;
+            return Collections.emptyList();
         }
         CoalAnalysisRecord firstRecord = recordsMatchCondition.stream().min(Comparator.comparing(CoalAnalysisRecord::getTime)).get();
         Date startDate = DateUtils.truncate(firstRecord.getTime(), Calendar.DAY_OF_MONTH);
         filterCondition = newFilterCondition().startTime(startDate).endTime(endTime).system(system).sortType(SORT_TYPE_DESC).addTarget(CoalAnalysisConstants.TCS_CONCENTRATE).build();
-        List<CoalAnalysisRecord> concentrateRecords = tcsMapper.getRecordsMatchCondition(filterCondition);
+        List<CoalAnalysisRecord> concentrateRecords = coalAnalysisMapper.getRecordsMatchCondition(filterCondition);
         filterCondition.setTargetList(Lists.newArrayList(CoalAnalysisConstants.TCS_TAIL));
-        List<CoalAnalysisRecord> tailRecords = tcsMapper.getRecordsMatchCondition(filterCondition);
+        List<CoalAnalysisRecord> tailRecords = coalAnalysisMapper.getRecordsMatchCondition(filterCondition);
         filterCondition.setTargetList(Lists.newArrayList(CoalAnalysisConstants.RAW_COAL));
         filterCondition.setSample(system + RAW_COAL_301);
-        List<CoalAnalysisRecord> rawCoal01Record = tcsMapper.getRecordsMatchCondition(filterCondition);
+        List<CoalAnalysisRecord> rawCoal01Record = coalAnalysisMapper.getRecordsMatchCondition(filterCondition);
         filterCondition.setSample(system + RAW_COAL_302);
-        List<CoalAnalysisRecord> rawCoal02Record = tcsMapper.getRecordsMatchCondition(filterCondition);
+        List<CoalAnalysisRecord> rawCoal02Record = coalAnalysisMapper.getRecordsMatchCondition(filterCondition);
         Map<Date, List<TcsAnalysisInfo>> concentrateAndTailDateMap = getConcentrateAndTailDateMap(concentrateRecords, tailRecords);
         Map<Date, List<TcsAnalysisInfo>> raw01And02DateMap = getRaw01And02DateMap(rawCoal01Record, rawCoal02Record);
         return getAnalysisInfoListGroupByDate(concentrateAndTailDateMap, raw01And02DateMap);
@@ -235,11 +236,11 @@ public class TcsService {
     }
 
     private CoalAnalysisRecord getRecentRecord(FilterCondition filterCondition) {
-        List<CoalAnalysisRecord> concentrateRecords = tcsMapper.getRecordsMatchCondition(filterCondition);
+        List<CoalAnalysisRecord> concentrateRecords = coalAnalysisMapper.getRecordsMatchCondition(filterCondition);
         CoalAnalysisRecord recentRecord = null;
-        if (concentrateRecords.size() > 0) {
+        if (!concentrateRecords.isEmpty()) {
             recentRecord = concentrateRecords.get(0);
-            recentRecord.setDensityAndFlowInfos(tcsMapper.getDensityAndFlowInfo(recentRecord.getId()));
+            recentRecord.setDensityAndFlowInfos(coalAnalysisMapper.getDensityAndFlowInfo(recentRecord.getId()));
         }
         return recentRecord;
     }
@@ -254,9 +255,9 @@ public class TcsService {
     public List<TcsAnalysisInfo> getTcsAnalysisCurve(int system, long duration) {
         FilterCondition filterCondition = newFilterCondition().endTime(new Date()).duration(duration).sortType(SORT_TYPE_DESC).
                 system(system).addTarget(CoalAnalysisConstants.TCS_CONCENTRATE).build();
-        List<CoalAnalysisRecord> concentrateRecords = tcsMapper.getRecordsMatchCondition(filterCondition);
+        List<CoalAnalysisRecord> concentrateRecords = coalAnalysisMapper.getRecordsMatchCondition(filterCondition);
         filterCondition.setTargetList(Lists.newArrayList(CoalAnalysisConstants.TCS_TAIL));
-        List<CoalAnalysisRecord> tailRecords = tcsMapper.getRecordsMatchCondition(filterCondition);
+        List<CoalAnalysisRecord> tailRecords = coalAnalysisMapper.getRecordsMatchCondition(filterCondition);
         Map<Date, List<TcsAnalysisInfo>> concentrateAndTailDateMap = getConcentrateAndTailDateMap(concentrateRecords, tailRecords);
         List<TcsAnalysisInfo> tcsAnalysisInfos = new ArrayList<>();
         for (Map.Entry<Date, List<TcsAnalysisInfo>> entry : concentrateAndTailDateMap.entrySet()) {
@@ -306,10 +307,9 @@ public class TcsService {
         //运行状态桶的个数
         Integer currentCount = 0;
         Double singleCoal = 0.0;
-
         //入料流量大于10，则认为该桶处于运行状态
         for (String thingCode : FEED_BARREL_CODE) {
-            Optional<DataModelWrapper> flowData = dataService.getData(thingCode, MetricCodes.FL);
+            Optional<DataModelWrapper> flowData = dataService.getData(system+thingCode, MetricCodes.FL);
             if (flowData.isPresent()) {
                 Double flow = Double.valueOf(flowData.get().getValue());
                 if (flow > RUN_FLOW_THRESHOLD) {
@@ -347,6 +347,9 @@ public class TcsService {
         }
         return preCoal;
     }
+
+
+
 
 
 }

@@ -25,10 +25,22 @@
         and c.style_code=b.code and  a.code=c.metric_tag_code
     </select>
 
+    <select id="fuzzyGetSiganlWrapperStyleByWrapperName" resultMap="signalWrapperStyle">
+        select c.id as id,a.tag_name as tag_name,b.name style_name,c.editor as editor,c.create_date as create_date,c.comment as comment
+        from tb_metric_tag a,tb_sfmon_style b,rel_sfmon_metrictag_style c where a.tag_name like #{tagName}
+        and c.style_code=b.code and  a.code=c.metric_tag_code group by a.tag_name
+    </select>
+
     <select id="getSiganlWrapperStyleByStyleName" resultMap="signalWrapperStyle">
         select c.id as id,a.tag_name as tag_name,b.name style_name,c.editor as editor,c.create_date as create_date,c.comment as comment
         from tb_metric_tag a,tb_sfmon_style b,rel_sfmon_metrictag_style c where b.name like #{metricName}
         and c.style_code=b.code and  a.code=c.metric_tag_code
+    </select>
+
+    <select id="fuzzyGetSiganlWrapperStyleByStyleName" resultMap="signalWrapperStyle">
+        select c.id as id,a.tag_name as tag_name,b.name style_name,c.editor as editor,c.create_date as create_date,c.comment as comment
+        from tb_metric_tag a,tb_sfmon_style b,rel_sfmon_metrictag_style c where b.name like #{metricName}
+        and c.style_code=b.code and  a.code=c.metric_tag_code group by b.name
     </select>
 
     <select id="getSignalWrapperStyleById" resultMap="signalWrapperStyleRes">
