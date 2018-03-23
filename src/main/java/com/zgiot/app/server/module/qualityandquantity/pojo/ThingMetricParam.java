@@ -11,6 +11,8 @@ public class ThingMetricParam {
     private List<String> metricCodes;
     @JSONField(name = "ignoretc")
     private boolean ignoreTc;
+    @JSONField(name = "title")
+    private String title;
 
     public List<String> getMetricCodes() {
         return metricCodes;
@@ -35,5 +37,13 @@ public class ThingMetricParam {
 
     public void setIgnoreTc(boolean ignoreTc) {
         this.ignoreTc = ignoreTc;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 }
