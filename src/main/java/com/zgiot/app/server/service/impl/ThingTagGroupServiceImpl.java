@@ -1,6 +1,6 @@
 package com.zgiot.app.server.service.impl;
 
-import com.zgiot.app.server.module.thingtag.dao.ThingTagGroupMapper;
+import com.zgiot.app.server.service.impl.mapper.ThingTagGroupMapper;
 import com.zgiot.app.server.module.thingtag.pojo.ThingTagGroup;
 import com.zgiot.app.server.service.ThingTagGroupService;
 import org.springframework.beans.factory.annotation.Autowired;

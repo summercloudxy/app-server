@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.sfmonitor.mapper.SFMonSignalWrapperRuleMapper">
+
+    <resultMap id="equipmentMonitorFind" type="com.zgiot.app.server.module.sfmonitor.pojo.SFMonSignalWrapperRule">
+        <result column="id" property="id"/>
+        <result column="signal_wrapper_name" property="signalWrapperName"/>
+        <result column="zone_code" property="zoneCode"/>
+        <result column="is_allmatch" property="allMatch"/>
+    </resultMap>
+
+    <select id="getSignalWrapperRule" resultMap="equipmentMonitorFind">
+        select * from tb_sfmon_signal_wrapper_rule
+        where
+        1 = 1
+        <if test = "signalWrapperName !=  null" >
+            and signal_wrapper_name=#{signalWrapperName}
+        </if>
+        <!--if test = "zoneCode !=  null" >
+            and zone_code=#{zoneCode}
+        </if-->
+    </select>
+
+    <update id="updateSignalWrapperRule">
+        update tb_sfmon_signal_wrapper_rule set signal_wrapper_name=#{signalWrapperName},zone_code=#{zoneCode} where id=#{id}
+    </update>
+
+    <insert id="addSignalWrapperRule">
+        insert into tb_sfmon_signal_wrapper_rule(signal_wrapper_name,zone_code) values(#{signalWrapperName},#{zoneCode})
+    </insert>
+</mapper>
+ 

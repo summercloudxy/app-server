@@ -161,9 +161,10 @@ public class FilterPress {
         if (FilterPressMetricConstants.PAUSE.equals(metricCode) && unloadManager.isUnloading) {
             if (Boolean.TRUE.toString().equals(value)) {
                 unloadManager.pauseTimer();
-            } else {
-                unloadManager.scheduleTimer();
             }
+//            else {
+//                unloadManager.scheduleTimer();
+//            }
         }
     }
 
@@ -275,7 +276,7 @@ public class FilterPress {
     public void onLocal() {
         logger.trace("{} on local", code);
         int position = -1;
-        if (manager != null && (!manager.getUnloadSequence().isEmpty()) && (!StringUtils.isBlank(getCode()))) {
+        if (manager != null && (!manager.getUnloadSequence().isEmpty()) && (!StringUtils.isBlank(this.getCode())) && (manager.getUnloadSequence().containsKey(this.getCode()))) {
             position = manager.getUnloadSequence().get(this.getCode());
         }
         //manager.getUnloadManager().getQueue().remove(this);
@@ -294,13 +295,13 @@ public class FilterPress {
     }
 
     public void onLoosen() {
-        logger.trace("{} on loosen", code);
+        logger.debug("{} on loosen", code);
         isFilterPressUnloading = true;
         looseStartTime = System.currentTimeMillis();
         this.startUnload();
         int position = -1;
         if (manager != null && (!manager.getUnloadSequence().isEmpty())
-                && (!StringUtils.isBlank(getCode()))
+                && (!StringUtils.isBlank(this.getCode()))
                 && manager.getUnloadSequence().containsKey(this.getCode())) {
             position = manager.getUnloadSequence().get(this.getCode());
         }
@@ -320,6 +321,26 @@ public class FilterPress {
         if (position > 0) {
             manager.getUnloadManager().reSort(position);
             logger.debug("loose resort");
+        }
+    }
+
+    private void deleteFilterPressInQueue(){
+        int position = -1;
+        if (manager != null && (!manager.getUnloadSequence().isEmpty())
+                && (!StringUtils.isBlank(this.getCode()))
+                && manager.getUnloadSequence().containsKey(this.getCode())) {
+            position = manager.getUnloadSequence().get(this.getCode());
+        }
+        manager.getUnloadSequence().remove(this.getCode());
+        if (position > 0) {
+            manager.getUnloadManager().reSort(position);
+            logger.debug("resort");
+        }
+        removeFilterPress(manager.getUnloadManager().getQueue(),this);
+        if (manager != null && (!manager.getUnConfirmedUnload().isEmpty())
+                && (!StringUtils.isBlank(this.getCode()))
+                && manager.getUnConfirmedUnload().contains(this.getCode())) {
+            manager.getUnConfirmedUnload().remove(this.getCode());
         }
     }
 
@@ -387,6 +408,7 @@ public class FilterPress {
         logger.debug("{} on press", code);
         logger.debug("take and pull count:", filterPressTakeAndPullCount.get());
         isFilterPressUnloading = false;
+        this.deleteFilterPressInQueue();
         //压紧后通知下一台
         if((manager.getUnloadManager().getUnloadingCount(code) < manager.getMaxUnloadParallel()) && (filterPressTakeAndPullCount.get() < 16)){
             unloadManager.notifyNext();
@@ -402,6 +424,7 @@ public class FilterPress {
     public void onFeed() {
         logger.trace("{} on feed", code);
         feedStartTime = System.currentTimeMillis();
+        this.deleteFilterPressInQueue();
     }
 
     public void onFeedOver() {
@@ -411,6 +434,7 @@ public class FilterPress {
     public void onBlow() {
         logger.trace("{} on blow", code);
         waitDuration = System.currentTimeMillis();
+        this.deleteFilterPressInQueue();
     }
 
     public void onCycle() {
@@ -715,6 +739,9 @@ public class FilterPress {
         while(iterator.hasNext()){
             if(filterPress.getCode().equals(iterator.next().code)){
                 queue.remove(filterPress);
+                if(logger.isDebugEnabled()){
+                    logger.debug("delete filterpress {}",filterPress.getCode());
+                }
             }
         }
     }
@@ -750,7 +777,7 @@ public class FilterPress {
          */
         private void startUnload() {
             isUnloading = true;
-            scheduleTimer();
+            //scheduleTimer();
         }
 
         /**

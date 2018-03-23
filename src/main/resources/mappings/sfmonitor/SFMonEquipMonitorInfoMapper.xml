@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.sfmonitor.mapper.SFMonEquipMonitorInfoMapper">
+
+    <resultMap id="equipmentMonitorFind" type="com.zgiot.app.server.module.sfmonitor.pojo.SFMonEquipMonitorInfo">
+        <result column="thing_code" property="thingCode"/>
+        <result column="config_progress" property="configProgress"/>
+    </resultMap>
+
+    <select id="getEquipmentMonitorInfo" parameterType="com.zgiot.app.server.module.sfmonitor.pojo.SFMonEquipMonitorInfo" resultMap="equipmentMonitorFind">
+        select * from tb_sfmon_equipmonitor_info
+        where
+        1 = 1
+        <if test="thingCode != null">
+            and thing_code like #{thingCode}
+        </if>
+        <if test="configProgress != null">
+            and config_progress = #{configProgress}
+        </if>
+    </select>
+
+    <update id="updateEquipmonitorInfo" parameterType="com.zgiot.app.server.module.sfmonitor.pojo.SFMonEquipMonitorInfo">
+        update tb_sfmon_equipmonitor_info set config_progress=#{configProgress},editor=#{editor},create_date=#{createDate} where thing_code=#{thingCode}
+    </update>
+</mapper>
+ 

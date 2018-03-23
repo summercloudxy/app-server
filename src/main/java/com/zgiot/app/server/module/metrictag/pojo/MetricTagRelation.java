@@ -16,8 +16,8 @@ public class MetricTagRelation {
     /**
      * 主键
      */
-    @NotNull(message = "主键(metricTagRelationId)不能为空", groups = {UpdateValidate.class, DeleteValidate.class})
-    private Integer metricTagRelationId;
+    @NotNull(message = "主键(id)不能为空", groups = {UpdateValidate.class, DeleteValidate.class})
+    private Integer id;
 
     @NotBlank(message = "信号类型(metricCode)不能为空", groups = {AddValidate.class})
     private String metricCode;
@@ -27,12 +27,18 @@ public class MetricTagRelation {
 
     private Date createDate;
 
-    public Integer getMetricTagRelationId() {
-        return metricTagRelationId;
+    private String editor;
+
+    private String comment;
+
+    private String userName;
+
+    public Integer getId() {
+        return id;
     }
 
-    public void setMetricTagRelationId(Integer metricTagRelationId) {
-        this.metricTagRelationId = metricTagRelationId;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getMetricCode() {
@@ -57,5 +63,29 @@ public class MetricTagRelation {
 
     public void setCreateDate(Date createDate) {
         this.createDate = createDate;
+    }
+
+    public String getEditor() {
+        return editor;
+    }
+
+    public void setEditor(String editor) {
+        this.editor = editor;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 }

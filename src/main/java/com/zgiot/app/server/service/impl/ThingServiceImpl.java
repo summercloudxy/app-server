@@ -64,6 +64,11 @@ public class ThingServiceImpl implements ThingService {
     }
 
     @Override
+    public List<ThingModel> findThingByTag(String thingType) {
+        return tmlMapper.fingThingByTag(thingType);
+    }
+
+    @Override
     public List<ThingPropertyModel> findThingProperties() {
         List<ThingPropertyModel> thingPropertyModelList = new ArrayList<>();
         thingPropertyModelList = tmlMapper.findAllProperties();

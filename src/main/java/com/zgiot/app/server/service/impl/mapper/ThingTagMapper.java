@@ -1,7 +1,10 @@
-package com.zgiot.app.server.module.thingtag.dao;
+package com.zgiot.app.server.service.impl.mapper;
 
+import com.zgiot.app.server.module.sfmonitor.controller.EquipmentBaseInfo;
 import com.zgiot.app.server.module.thingtag.pojo.ThingTag;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -18,5 +21,7 @@ public interface ThingTagMapper {
     void updateThingTag(ThingTag thingTag);
 
     void deleteThingTag(ThingTag thingTag);
+
+    List<EquipmentBaseInfo> getEquipmentByCode(@Param("thingCode") String thingCode,@Param("thingTagCode") String thingTagCode);
 
 }

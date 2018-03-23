@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.zgiot.app.server.module.thingtag.dao.">
+<mapper namespace="com.zgiot.app.server.service.impl.mapper.ThingTagRelationMapper">
     <resultMap id="thingTagRelation" type="com.zgiot.app.server.module.thingtag.pojo.ThingTagRelation">
         <result column="id"  property="thingTagRelationId"/>
         <result column="thing_code" property="thingCode"/>
@@ -79,4 +79,5 @@
         WHERE
         id = #{thingTagRelationId}
     </delete>
+
 </mapper>
