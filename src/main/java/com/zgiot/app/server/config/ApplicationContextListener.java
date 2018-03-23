@@ -85,10 +85,10 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
     }
 
     void installModules(DataProcessor processor) {
-//        if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
-//                || moduleListConfig.containModule(ModuleListConfig.MODULE_COAL_ANALYSIS)) {
-//            completerDataListener.addCompleter(reportFormsCompleter);
-//        }
+        if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
+                || moduleListConfig.containModule(ModuleListConfig.MODULE_COAL_ANALYSIS)) {
+            completerDataListener.addCompleter(reportFormsCompleter);
+        }
         processor.addListener(completerDataListener);
         processor.addListener(cacheUpdater);
 
