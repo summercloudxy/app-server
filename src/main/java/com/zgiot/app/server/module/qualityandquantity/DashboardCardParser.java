@@ -36,7 +36,7 @@ public class DashboardCardParser implements CardParser {
         dashboardData.setThingName(thingName);
         dashboardData.setMetricDataValues(getMetricDataValue(thingMetricParam, thingCode));
         if (thingMetricParam.isIgnoreTc()){
-            dashboardData.setThingCode(null);
+            dashboardData.setIgnoreTc(thingMetricParam.isIgnoreTc());
             dashboardData.setThingName(thingMetricParam.getTitle());
         }
         return dashboardData;
