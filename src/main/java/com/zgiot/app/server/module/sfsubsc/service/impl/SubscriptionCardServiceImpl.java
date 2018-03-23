@@ -737,6 +737,23 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             //精煤水分
             ChemicalTestsDataVO.MetricData metricData4 = get552MtMetricValue(chemicalTestsDataVO, coalAnalysisRecord, preCoalAnalysisRecord);
             metricDataList2.add(metricData4);
+        } else {
+            chemicalTestsDataVO.setCleanCoalSamplingTime("");
+            ChemicalTestsDataVO.MetricData metricData1 = chemicalTestsDataVO.new MetricData();
+            metricData1.setPercent("");
+            metricData1.setFlag("");
+            metricData1.setUnusual("");
+            metricData1.setMetricName(SubscriptionConstants.ASH_CONTENT);
+            metricData1.setMetricValue("");
+            metricDataList2.add(metricData1);
+            ChemicalTestsDataVO.MetricData metricData2 = chemicalTestsDataVO.new MetricData();
+            metricData2.setPercent("");
+            metricData2.setFlag("");
+            metricData2.setUnusual("");
+            metricData2.setMetricName(SubscriptionConstants.MOISTURE_CONTENT);
+            metricData2.setMetricValue("");
+            metricDataList2.add(metricData2);
+
         }
         return metricDataList2;
     }
@@ -840,6 +857,23 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             metricDataList1.add(metricData1);
             ChemicalTestsDataVO.MetricData metricData2 = get551StadMetricValue(chemicalTestsDataVO, coalAnalysisRecord, preCoalAnalysisRecord);
             metricDataList1.add(metricData2);
+        } else {
+            chemicalTestsDataVO.setCleanCoalSamplingTime("");
+            ChemicalTestsDataVO.MetricData metricData1 = chemicalTestsDataVO.new MetricData();
+            metricData1.setPercent("");
+            metricData1.setFlag("");
+            metricData1.setUnusual("");
+            metricData1.setMetricName(SubscriptionConstants.ASH_CONTENT);
+            metricData1.setMetricValue("");
+            metricDataList1.add(metricData1);
+            ChemicalTestsDataVO.MetricData metricData2 = chemicalTestsDataVO.new MetricData();
+            metricData2.setPercent("");
+            metricData2.setFlag("");
+            metricData2.setUnusual("");
+            metricData2.setMetricName(SubscriptionConstants.SULFUR_CONTENT);
+            metricData2.setMetricValue("");
+            metricDataList1.add(metricData2);
+
         }
         return metricDataList1;
     }
