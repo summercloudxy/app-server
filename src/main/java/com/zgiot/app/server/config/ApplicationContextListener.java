@@ -89,7 +89,6 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
 //                || moduleListConfig.containModule(ModuleListConfig.MODULE_COAL_ANALYSIS)) {
 //            completerDataListener.addCompleter(reportFormsCompleter);
 //        }
-        processor.addListener(cacheUpdater);
         processor.addListener(completerDataListener);
         processor.addListener(cacheUpdater);
 
