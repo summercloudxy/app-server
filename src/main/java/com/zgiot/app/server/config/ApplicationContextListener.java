@@ -15,6 +15,8 @@ import com.zgiot.app.server.module.demo.DemoBusiness;
 import com.zgiot.app.server.module.demo.DemoDataCompleter;
 import com.zgiot.app.server.module.densitycontrol.DensityControlListener;
 import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
+import com.zgiot.app.server.module.sfsubsc.job.UploadHistorySubscCardDatas;
+import com.zgiot.app.server.module.sfsubsc.job.UploadSubscCardDatas;
 import com.zgiot.app.server.service.impl.HistoryDataPersistDaemon;
 import com.zgiot.app.server.service.impl.QuartzManager;
 import org.quartz.JobDataMap;
@@ -22,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -67,9 +70,10 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
 
     private static final int FAULT_SCAN_RATE = 20;
 
+    @Value("${subscriptioncarddata.quartz.upload.flag}")
+    private Boolean subscriptioncarddataQuartzUploadFlag;
 
 
-    @SuppressWarnings("unchecked")
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         if (applicationContext == null) {
@@ -96,7 +100,7 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
 
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
                 || moduleListConfig.containModule(ModuleListConfig.MODULE_HIST_PERSIST)) {
-            this.historyDataPersistDaemon.start();
+            historyDataPersistDaemon.start();
         }
 
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
@@ -138,6 +142,18 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
             processor.addListener(bellowsDataListener);
             QuartzManager.addJob("checkBlow", ModuleListConfig.MODULE_BELLOWS, "checkBlow",
                     ModuleListConfig.MODULE_BELLOWS, ValveIntelligentJob.class, "2 * * * * ?");
+        }
+
+        if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
+                || moduleListConfig.containModule(ModuleListConfig.MODULE_SUBSCRIPTION)) {
+            if (subscriptioncarddataQuartzUploadFlag) {
+                QuartzManager.addJob("uploadsubscCardDatasOf5s", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf5s",
+                        ModuleListConfig.MODULE_SUBSCRIPTION, UploadSubscCardDatas.class, "0/5 * * * * ?");
+
+                QuartzManager.addJob("uploadsubscCardDatasOf10s", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf10s",
+                        ModuleListConfig.MODULE_SUBSCRIPTION, UploadHistorySubscCardDatas.class, "0/10 * * * * ?");
+            }
+
         }
 
 
