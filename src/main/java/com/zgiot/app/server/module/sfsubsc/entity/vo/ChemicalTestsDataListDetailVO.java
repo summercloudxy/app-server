@@ -5,7 +5,7 @@ package com.zgiot.app.server.module.sfsubsc.entity.vo;
  *
  * @author jys
  */
-public class ChemicalTestsDataLIstDetailVO {
+public class ChemicalTestsDataListDetailVO {
     private String collectDate;
 
     private String collectTime;

@@ -3,7 +3,7 @@ package com.zgiot.app.server.module.sfsubsc.controller.handler;
 import com.zgiot.app.server.module.coalanalysis.mapper.CoalAnalysisMapper;
 import com.zgiot.app.server.module.sfsubsc.entity.pojo.SubscCardTypeDO;
 import com.zgiot.app.server.module.sfsubsc.entity.vo.ChemicalTestsDataChartDetailVO;
-import com.zgiot.app.server.module.sfsubsc.entity.vo.ChemicalTestsDataLIstDetailVO;
+import com.zgiot.app.server.module.sfsubsc.entity.vo.ChemicalTestsDataListDetailVO;
 import com.zgiot.app.server.module.sfsubsc.service.SubscCardTypeService;
 import com.zgiot.app.server.module.tcs.pojo.FilterCondition;
 import com.zgiot.common.constants.SubscriptionConstants;
@@ -66,7 +66,7 @@ public class ChemicalTestsDataDetailHandler {
             ChemicalTestsDataChartDetailVO chemicalTestsDataChartDetailVO = getChemicalTestsDataChartDetail(cardParamValue, startDate, endDate);
             return new ResponseEntity<>(ServerResponse.buildOkJson(chemicalTestsDataChartDetailVO), HttpStatus.OK);
         } else if (SubscriptionConstants.LIST_TYPE.equals(chartType)) {
-            List<ChemicalTestsDataLIstDetailVO> chemicalTestsDataLIstDetailVOList = getChemicalTestsDataListDetail(cardParamValue, startDate, endDate);
+            List<ChemicalTestsDataListDetailVO> chemicalTestsDataLIstDetailVOList = getChemicalTestsDataListDetail(cardParamValue, startDate, endDate);
             return new ResponseEntity<>(ServerResponse.buildOkJson(chemicalTestsDataLIstDetailVOList), HttpStatus.OK);
         }
         return new ResponseEntity<>(ServerResponse.buildOkJson(""), HttpStatus.FORBIDDEN);
@@ -79,7 +79,7 @@ public class ChemicalTestsDataDetailHandler {
      * @param startDate
      * @param endDate
      */
-    private List<ChemicalTestsDataLIstDetailVO> getChemicalTestsDataListDetail(String[] cardParamValue, Date startDate, Date endDate) {
+    private List<ChemicalTestsDataListDetailVO> getChemicalTestsDataListDetail(String[] cardParamValue, Date startDate, Date endDate) {
 
         List<CoalAnalysisRecord> allAnalysisRecords = new ArrayList<>();
         FilterCondition cleanCoalfilterCondition = newFilterCondition().startTime(startDate).endTime(endDate).addTarget(SubscriptionConstants.CLEAN_COAL_551).build();
@@ -106,9 +106,9 @@ public class ChemicalTestsDataDetailHandler {
                 maps.put(key, list);
             }
         }
-        List<ChemicalTestsDataLIstDetailVO> chemicalTestsDataListDetailVOList = new ArrayList<>();
+        List<ChemicalTestsDataListDetailVO> chemicalTestsDataListDetailVOList = new ArrayList<>();
         for (Map.Entry<Date, List<CoalAnalysisRecord>> entry : maps.entrySet()) {
-            ChemicalTestsDataLIstDetailVO chemicalTestsDataLIstDetailVO = new ChemicalTestsDataLIstDetailVO();
+            ChemicalTestsDataListDetailVO chemicalTestsDataLIstDetailVO = new ChemicalTestsDataListDetailVO();
             chemicalTestsDataLIstDetailVO.setCollectDate(new SimpleDateFormat("yyyy-MM-dd").format(entry.getKey()));
             chemicalTestsDataLIstDetailVO.setCollectTime(new SimpleDateFormat("HH:mm").format(entry.getKey()));
             List<CoalAnalysisRecord> coalAnalysisRecords = entry.getValue();

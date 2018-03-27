@@ -37,21 +37,33 @@ public class SubscriptionCardDetailController {
      * @return
      */
     @RequestMapping(value = "/getInstantProductDetail", method = RequestMethod.GET)
-
     public ResponseEntity<String> getInstantProductDetail(@RequestParam("cardCode") String cardCode, @RequestParam("dateType") String dateType) {
         return new ResponseEntity<>(ServerResponse.buildOkJson(instantProductDetailHandler.getInstantProductDetail(cardCode, dateType)), HttpStatus.OK);
     }
 
     /**
-     * 化验数据详情
+     * 化验数据图详情
      *
      * @param cardCode
      * @param dateType
      * @param chartType
      * @return
      */
-    @RequestMapping(value = "/getChemicalTestsDataDetail", method = RequestMethod.GET)
-    public ResponseEntity<String> getChemicalTestsDataDetail(@RequestParam("cardCode") String cardCode, @RequestParam("dateType") String dateType, @RequestParam("chartType") String chartType) {
+    @RequestMapping(value = "/getChemicalTestsDataChartDetail", method = RequestMethod.GET)
+    public ResponseEntity<String> getChemicalTestsDataChartDetail(@RequestParam("cardCode") String cardCode, @RequestParam("dateType") String dateType, @RequestParam("chartType") String chartType) {
+        return chemicalTestsDataDetailHandler.getChemicalTestsDataDetail(cardCode, dateType, chartType);
+    }
+
+    /**
+     * 化验数据列表详情
+     *
+     * @param cardCode
+     * @param dateType
+     * @param chartType
+     * @return
+     */
+    @RequestMapping(value = "/getChemicalTestsDataListDetail", method = RequestMethod.GET)
+    public ResponseEntity<String> getChemicalTestsDataListDetail(@RequestParam("cardCode") String cardCode, @RequestParam("dateType") String dateType, @RequestParam("chartType") String chartType) {
         return chemicalTestsDataDetailHandler.getChemicalTestsDataDetail(cardCode, dateType, chartType);
     }
 
