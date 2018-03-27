@@ -189,7 +189,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
                 BigDecimal secondPrecent = new BigDecimal(mixedCoalValue).divide(totalValue, 3, BigDecimal.ROUND_HALF_UP);
                 metricData.setMixedCoalPrecent((secondPrecent).multiply(new BigDecimal(100)).setScale(1) + "%");
 
-                BigDecimal thirdPrecent = new BigDecimal(wasteRockValue).divide(totalValue, 3, BigDecimal.ROUND_HALF_UP);
+                BigDecimal thirdPrecent = new BigDecimal(1.00).subtract(totalValue).subtract(secondPrecent);
                 metricData.setWasteRockPrecent((thirdPrecent).multiply(new BigDecimal(100)).setScale(1) + "%");
 
             } else {
@@ -507,13 +507,13 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         instantaneousProductQuantityVO.setWasteRockName(SubscriptionConstants.WASTE_ROCK);
         String[] cardParamValues = subscCardTypeDO.getCardParamValue().split(",");
         DataModelWrapper cleanCoalInstantaneousWash = dataService.getData(cardParamValues[0], MetricCodes.COAL_CAP).orElse(null);
-        instantaneousProductQuantityVO.setCleanCoalInstantaneousValue(cleanCoalInstantaneousWash == null ? "" : cleanCoalInstantaneousWash.getValue());
+        instantaneousProductQuantityVO.setCleanCoalInstantaneousValue(cleanCoalInstantaneousWash == null ? "" : String.valueOf(new BigDecimal(cleanCoalInstantaneousWash.getValue()).setScale(0)));
 
         DataModelWrapper cleanCoalTeamWash = dataService.getData(cardParamValues[0], MetricCodes.CT_C).orElse(null);
         instantaneousProductQuantityVO.setCleanCoalTeamValue(cleanCoalTeamWash == null ? "" : cleanCoalTeamWash.getValue());
 
         DataModelWrapper mixedCoalInstantaneousWash = dataService.getData(cardParamValues[1], MetricCodes.COAL_CAP).orElse(null);
-        instantaneousProductQuantityVO.setMixedCoalInstantaneousValue(mixedCoalInstantaneousWash == null ? "" : mixedCoalInstantaneousWash.getValue());
+        instantaneousProductQuantityVO.setMixedCoalInstantaneousValue(mixedCoalInstantaneousWash == null ? "" : String.valueOf(new BigDecimal(mixedCoalInstantaneousWash.getValue()).setScale(0)));
 
         DataModelWrapper mixedCoalTeamWash = dataService.getData(cardParamValues[0], MetricCodes.CT_C).orElse(null);
         instantaneousProductQuantityVO.setMixedCoalTeamValue(mixedCoalTeamWash == null ? "" : mixedCoalTeamWash.getValue());
@@ -531,7 +531,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             wasteRockInsValue2 = wasteRockInstantaneousWash2.getValue();
         }
         BigDecimal wasteRockInstantaneousWash = new BigDecimal(StringUtils.isEmpty(wasteRockInsValue1) ? "0" : wasteRockInsValue1).add(new BigDecimal(StringUtils.isEmpty(wasteRockInsValue2) ? "0" : wasteRockInsValue2));
-        instantaneousProductQuantityVO.setWasteRockInstantaneousValue(String.valueOf(wasteRockInstantaneousWash).equals("0") ? "" : String.valueOf(wasteRockInstantaneousWash));
+        instantaneousProductQuantityVO.setWasteRockInstantaneousValue(String.valueOf(wasteRockInstantaneousWash).equals("0") ? "" : String.valueOf(wasteRockInstantaneousWash.setScale(0)));
 
 
         DataModelWrapper wasteRockTeamWash1 = dataService.getData(wasteRocks[0], MetricCodes.CT_C).orElse(null);
@@ -584,25 +584,25 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         String rawCoalCapValue = "";
         DataModel rawCoalCap = historyDataService.findClosestHistoryData(Lists.newArrayList(rawCoals[0], rawCoals[1]), Lists.newArrayList(MetricCodes.COAL_CAP), new Date(System.currentTimeMillis() - 240000));
         if (rawCoalCap != null) {
-            rawCoalCapValue = rawCoalCap.getValue();
+            rawCoalCapValue = String.valueOf(new BigDecimal(rawCoalCap.getValue()).setScale(0));
         }
         //精煤瞬时量
         String cleanCoalCapValue = "";
         DataModelWrapper cleanCoalCap = dataService.getData(cardParamValues[1], MetricCodes.COAL_CAP).orElse(null);
         if (cleanCoalCap != null) {
-            cleanCoalCapValue = cleanCoalCap.getValue();
+            cleanCoalCapValue = String.valueOf(new BigDecimal(cleanCoalCap.getValue()).setScale(0));
         }
         //混煤瞬时量
         String mixedCoalCapValue = "";
         DataModel mixedCoalCap = historyDataService.findClosestHistoryData(Lists.newArrayList(cardParamValues[2]), Lists.newArrayList(MetricCodes.COAL_CAP), new Date(System.currentTimeMillis() - 60000));
         if (mixedCoalCap != null) {
-            mixedCoalCapValue = mixedCoalCap.getValue();
+            mixedCoalCapValue = String.valueOf(new BigDecimal(mixedCoalCap.getValue()).setScale(0));
         }
         //煤泥瞬时量
         String slurryCoalCapValue = "";
         DataModel slurryCoalCap = historyDataService.findClosestHistoryData(Lists.newArrayList(cardParamValues[3]), Lists.newArrayList(MetricCodes.COAL_CAP), new Date(System.currentTimeMillis() - 10000));
         if (slurryCoalCap != null) {
-            slurryCoalCapValue = slurryCoalCap.getValue();
+            slurryCoalCapValue = String.valueOf(new BigDecimal(slurryCoalCap.getValue()).setScale(0));
         }
         //矸石瞬时量
         BigDecimal wasteRockCapVale = new BigDecimal(StringUtils.isEmpty(rawCoalCapValue) ? "0" : rawCoalCapValue).
@@ -611,7 +611,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
                 subtract(new BigDecimal(StringUtils.isEmpty(slurryCoalCapValue) ? "0" : slurryCoalCapValue));
         String wasteRockCapValue = "";
         if (wasteRockCapVale.compareTo(BigDecimal.ZERO) > -1) {
-            wasteRockCapValue = String.valueOf(wasteRockCapVale);
+            wasteRockCapValue = String.valueOf(wasteRockCapVale.setScale(0));
         }
         productYieldVO.setRawCoalCapValue(rawCoalCapValue);
         productYieldVO.setCleanCoalCapValue(cleanCoalCapValue);
@@ -727,7 +727,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
      */
     private List<ChemicalTestsDataVO.MetricData> getChemicalTestsDataOf552(ChemicalTestsDataVO chemicalTestsDataVO, String[] cardParamValue) {
         List<ChemicalTestsDataVO.MetricData> metricDataList2 = new ArrayList<>();
-        List<CoalAnalysisRecord> top2CoalAnalysisRecords2 = coalAnalysisMapper.getTop2CoalAnalysisRecord(cardParamValue[1], SubscriptionConstants.MIXE_COAL_551);
+        List<CoalAnalysisRecord> top2CoalAnalysisRecords2 = coalAnalysisMapper.getTop2CoalAnalysisRecord(cardParamValue[1], SubscriptionConstants.MIXE_COAL_552);
         if (CollectionUtils.isNotEmpty(top2CoalAnalysisRecords2)) {
             chemicalTestsDataVO.setMixedCoalSamplingTime(new SimpleDateFormat("HH:mm").format(top2CoalAnalysisRecords2.get(0).getTime()));
             CoalAnalysisRecord coalAnalysisRecord = top2CoalAnalysisRecords2.get(0);

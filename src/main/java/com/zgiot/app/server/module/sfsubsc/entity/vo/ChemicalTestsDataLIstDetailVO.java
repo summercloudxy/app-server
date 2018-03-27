@@ -6,6 +6,7 @@ package com.zgiot.app.server.module.sfsubsc.entity.vo;
  * @author jys
  */
 public class ChemicalTestsDataLIstDetailVO {
+    private String collectDate;
 
     private String collectTime;
 
@@ -55,5 +56,13 @@ public class ChemicalTestsDataLIstDetailVO {
 
     public void setMixedCoalMt(String mixedCoalMt) {
         this.mixedCoalMt = mixedCoalMt;
+    }
+
+    public String getCollectDate() {
+        return collectDate;
+    }
+
+    public void setCollectDate(String collectDate) {
+        this.collectDate = collectDate;
     }
 }
