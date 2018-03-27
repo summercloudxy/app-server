@@ -7,6 +7,8 @@ public class DashboardData {
     private String thingName;
     private boolean ignoreTc;
     private List<MetricDataValue> metricDataValues;
+    private String module;
+    private int system;
 
     public String getThingCode() {
         return thingCode;
@@ -38,5 +40,21 @@ public class DashboardData {
 
     public void setIgnoreTc(boolean ignoreTc) {
         this.ignoreTc = ignoreTc;
+    }
+
+    public String getModule() {
+        return module;
+    }
+
+    public void setModule(String module) {
+        this.module = module;
+    }
+
+    public int getSystem() {
+        return system;
+    }
+
+    public void setSystem(int system) {
+        this.system = system;
     }
 }

@@ -13,6 +13,10 @@ public class ThingMetricParam {
     private boolean ignoreTc;
     @JSONField(name = "title")
     private String title;
+    @JSONField(name = "sys")
+    private int system;
+    @JSONField(name = "module")
+    private String module;
 
     public List<String> getMetricCodes() {
         return metricCodes;
@@ -45,5 +49,21 @@ public class ThingMetricParam {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public int getSystem() {
+        return system;
+    }
+
+    public void setSystem(int system) {
+        this.system = system;
+    }
+
+    public String getModule() {
+        return module;
+    }
+
+    public void setModule(String module) {
+        this.module = module;
     }
 }

@@ -185,6 +185,7 @@ public class QualityAndQuantityDataManager {
 
     public MetricDataValue getValueWithRule(String thingCode, String metricCode) {
         MetricDataValue metricDataValue = new MetricDataValue();
+        metricDataValue.setMetricCode(metricCode);
         Optional<DataModelWrapper> data = dataService.getData(thingCode, metricCode);
         if (data.isPresent()) {
             String value = data.get().getValue();
