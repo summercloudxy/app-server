@@ -1,0 +1,1 @@
+ALTER  TABLE  rel_historydata_whitelist add minute_summary VARCHAR(1); 
