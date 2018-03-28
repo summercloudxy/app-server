@@ -358,7 +358,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
                 metricData.setThingCode(thingCode);
                 DataModelWrapper instantDataMode = dataService.getData(thingCode, MetricCodes.CT_C).orElse(null);
                 if (instantDataMode != null) {
-                    metricData.setMetricValue(instantDataMode.getValue());
+                    metricData.setMetricValue(String.valueOf(new BigDecimal(instantDataMode.getValue()).setScale(0, BigDecimal.ROUND_HALF_UP)));
                 }
             } else {
                 metricData.setThingCode("");
@@ -480,12 +480,12 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
         DataModelWrapper team1 = dataService.getData(cardParamValues[0], MetricCodes.COAL_CAP).orElse(null);
         if (team1 != null) {
-            thingCtc1 = team1.getValue();
+            thingCtc1 = String.valueOf(new BigDecimal(team1.getValue()).setScale(0, BigDecimal.ROUND_HALF_UP));
         }
 
         DataModelWrapper team2 = dataService.getData(cardParamValues[1], MetricCodes.COAL_CAP).orElse(null);
         if (team2 != null) {
-            thingCtc2 = team2.getValue();
+            thingCtc2 = String.valueOf(new BigDecimal(team2.getValue()).setScale(0, BigDecimal.ROUND_HALF_UP));
         }
         BigDecimal teamTatol = new BigDecimal(StringUtils.isEmpty(thingCtc1) ? "0" : thingCtc1).add(new BigDecimal(StringUtils.isEmpty(thingCtc2) ? "0" : thingCtc2));
         instantaneousWashVo.setTeamValue1(thingCtc1);
@@ -510,13 +510,13 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         instantaneousProductQuantityVO.setCleanCoalInstantaneousValue(cleanCoalInstantaneousWash == null ? "" : String.valueOf(new BigDecimal(cleanCoalInstantaneousWash.getValue()).setScale(0)));
 
         DataModelWrapper cleanCoalTeamWash = dataService.getData(cardParamValues[0], MetricCodes.CT_C).orElse(null);
-        instantaneousProductQuantityVO.setCleanCoalTeamValue(cleanCoalTeamWash == null ? "" : cleanCoalTeamWash.getValue());
+        instantaneousProductQuantityVO.setCleanCoalTeamValue(cleanCoalTeamWash == null ? "" : String.valueOf(new BigDecimal(cleanCoalTeamWash.getValue()).setScale(0, BigDecimal.ROUND_HALF_UP)));
 
         DataModelWrapper mixedCoalInstantaneousWash = dataService.getData(cardParamValues[1], MetricCodes.COAL_CAP).orElse(null);
         instantaneousProductQuantityVO.setMixedCoalInstantaneousValue(mixedCoalInstantaneousWash == null ? "" : String.valueOf(new BigDecimal(mixedCoalInstantaneousWash.getValue()).setScale(0)));
 
         DataModelWrapper mixedCoalTeamWash = dataService.getData(cardParamValues[0], MetricCodes.CT_C).orElse(null);
-        instantaneousProductQuantityVO.setMixedCoalTeamValue(mixedCoalTeamWash == null ? "" : mixedCoalTeamWash.getValue());
+        instantaneousProductQuantityVO.setMixedCoalTeamValue(mixedCoalTeamWash == null ? "" : String.valueOf(new BigDecimal(mixedCoalTeamWash.getValue()).setScale(0, BigDecimal.ROUND_HALF_UP)));
         String[] wasteRocks = cardParamValues[2].split("\\+");
 
 
@@ -545,7 +545,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             wasteRockTeamValue2 = wasteRockTeamWash2.getValue();
         }
         BigDecimal wasteRockTeamWash = new BigDecimal(StringUtils.isEmpty(wasteRockTeamValue1) ? "0" : wasteRockTeamValue1).add(new BigDecimal(StringUtils.isEmpty(wasteRockTeamValue2) ? "0" : wasteRockTeamValue2));
-        instantaneousProductQuantityVO.setWasteRockTeamValue(String.valueOf(wasteRockTeamWash).equals("0") ? "" : String.valueOf(wasteRockTeamWash));
+        instantaneousProductQuantityVO.setWasteRockTeamValue(String.valueOf(wasteRockTeamWash).equals("0") ? "" : String.valueOf(wasteRockTeamWash.setScale(0, BigDecimal.ROUND_HALF_UP)));
         cardDataDTO.setCardCode(subscCardTypeDO.getCardCode());
         cardDataDTO.setCardData(JSON.toJSONString(instantaneousProductQuantityVO));
 
