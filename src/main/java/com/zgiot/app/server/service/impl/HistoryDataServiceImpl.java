@@ -104,79 +104,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
      */
     @Override
     public Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment, boolean isTimeCorrection) {
-        if (!checkEnabled()) {
-            return new HashMap<>();
-        }
-
-        if (collection == null) {
-            logger.warn("mongo disabled");
-            return new HashMap<>();
-        }
-
-        long startTime = startDate.getTime();
-        long endTime = endDate.getTime();
-        //param validator
-        if (segment <= 0) {
-            throw new IllegalArgumentException("Segment must be greater than 0");
-        }
-        if (startTime >= endTime) {
-            throw new IllegalArgumentException("StartDate must be earlier than endDate");
-        }
-
-        long interval;
-        FindIterable<Document> iterable = null; //query result
-
-        if (segment == 1) {
-            //when segment eq 1, take startTime as the standard
-            interval = 0;
-        } else {
-            interval = (endTime - startTime) / (segment - 1);
-            //query
-            Bson criteria = and(gte(DataModel.DATA_TIMESTAMP, startTime), lt(DataModel.DATA_TIMESTAMP, endTime), eq(DataModel.METRIC_CODE, metricCode), in(DataModel.THING_CODE, thingCodes));
-            iterable = collection.find(criteria).sort(Sorts.descending(DataModel.DATA_TIMESTAMP));
-        }
-
-
-        Map<String, Map<String, Object>> map = new HashMap<>(thingCodes.size());    //store dataModel array, timestamp and unset size
-        if (iterable != null) {
-            for (Document document : iterable) {
-                String tc = document.getString(DataModel.THING_CODE);
-                Map<String, Object> temp = map.get(tc);
-                if (temp == null) {
-                    //init temp map
-                    temp = new HashMap<>(3);
-                    temp.put(KEY_ARRAY, new DataModel[segment]);  //empty dataModel array
-                    temp.put(KEY_TIMESTAMP, endTime); //timestamp for check
-                    temp.put(KEY_SIZE, segment);  //unset size
-                    map.put(tc, temp);
-                }
-
-                checkDocument(document, temp, interval, isTimeCorrection);
-            }
-        }
-
-
-        //generate result map
-        Map<String, List<DataModel>> result = new LinkedHashMap<>(thingCodes.size());
-        for (String thingCode : thingCodes) {
-            Map<String, Object> temp = map.get(thingCode);
-            DataModel[] dataModels;
-            if (temp == null) {
-                dataModels = new DataModel[segment];
-                queryForUnsetDataModel(thingCode, metricCode, startTime, dataModels, segment, interval, isTimeCorrection, AccuracyEnum.MINUTE);
-            } else {
-                dataModels = (DataModel[]) temp.get(KEY_ARRAY);
-                int size = (int) temp.get(KEY_SIZE);
-                if (size > 0) {
-                    queryForUnsetDataModel(thingCode, metricCode, startTime, dataModels, size, interval, isTimeCorrection, AccuracyEnum.MINUTE);
-                }
-            }
-
-            List<DataModel> dataModelList = Arrays.asList(dataModels);
-            result.put(thingCode, dataModelList);
-        }
-
-        return result;
+        return findMultiThingsHistoryDataOfMetricBySegment(thingCodes, metricCode, startDate, endDate, segment, isTimeCorrection, AccuracyEnum.SECOND);
     }
 
 
@@ -523,6 +451,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
 
     @Override
     public Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment, boolean isTimeCorrection, AccuracyEnum accuracy) {
+
         MongoCollection<Document> mongoCollection = null;
         if (AccuracyEnum.SECOND.equals(accuracy)) {
             mongoCollection = collection;
