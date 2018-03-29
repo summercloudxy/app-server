@@ -145,4 +145,39 @@ public class EquipmentManagementController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(flag), HttpStatus.OK);
     }
 
+
+    /**
+     * 添加溜槽
+     * @param chuteInfo
+     * @return
+     */
+    @RequestMapping(value = "/chute/add", method = RequestMethod.POST)
+    public ResponseEntity<String> addChute(@RequestBody ChuteInfo chuteInfo) {
+        thingService.addChute(chuteInfo);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+    /**
+     * 编辑溜槽
+     * @param chuteInfo，id
+     * @return
+     */
+    @RequestMapping(value = "/chute/edit/{id}", method = RequestMethod.PUT)
+    public ResponseEntity<String> editChute(@RequestBody ChuteInfo chuteInfo, @PathVariable("id") Long id) {
+        chuteInfo.setId(id);
+        thingService.editChute(chuteInfo);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+    /**
+     * 删除溜槽
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/chute/delete/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<String> delChute(@PathVariable("id") Long id) {
+        thingService.delChute(id);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
 }

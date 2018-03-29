@@ -1,14 +1,78 @@
 package com.zgiot.app.server.module.equipments.controller;
 
 public class PipeInfo {
+    /**
+     * 主键
+     */
+    private Long id;
 
+    /**
+     *编号
+     */
     private String thingCode;
-    private String thingName;
+
+    /**
+     *更新时间
+     */
+    private String updateDate;
+
+    /**
+     *起始设备CODE
+     */
     private String startThingCode;
+
+    /**
+     *起始设备名称
+     */
+    private String startThingName;
+
+    /**
+     *终止设备CODE
+     */
+    private String terminalThingCode;
+
+    /**
+     *终止设备名称
+     */
     private String terminalThingName;
-    private String systemName;
-    private Long systemId;
-    private String updateTime;
+
+    /**
+     *投用日期
+     */
+    private String enableDate;
+
+    /**
+     *停用日期
+     */
+    private String disableDate;
+
+    /**
+     *所属系统
+     */
+    private Long thingSystemId;
+
+    /**
+     *管道名称
+     */
+    private String  pipeName;
+
+    /**
+     *管道通径
+     */
+    private String nominalDiameter;
+
+    /**
+     *生产厂家
+     */
+    private String manufacturer;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getThingCode() {
         return thingCode;
@@ -18,12 +82,12 @@ public class PipeInfo {
         this.thingCode = thingCode;
     }
 
-    public String getThingName() {
-        return thingName;
+    public String getUpdateDate() {
+        return updateDate;
     }
 
-    public void setThingName(String thingName) {
-        this.thingName = thingName;
+    public void setUpdateDate(String updateDate) {
+        this.updateDate = updateDate;
     }
 
     public String getStartThingCode() {
@@ -34,6 +98,22 @@ public class PipeInfo {
         this.startThingCode = startThingCode;
     }
 
+    public String getStartThingName() {
+        return startThingName;
+    }
+
+    public void setStartThingName(String startThingName) {
+        this.startThingName = startThingName;
+    }
+
+    public String getTerminalThingCode() {
+        return terminalThingCode;
+    }
+
+    public void setTerminalThingCode(String terminalThingCode) {
+        this.terminalThingCode = terminalThingCode;
+    }
+
     public String getTerminalThingName() {
         return terminalThingName;
     }
@@ -42,27 +122,51 @@ public class PipeInfo {
         this.terminalThingName = terminalThingName;
     }
 
-    public String getSystemName() {
-        return systemName;
+    public String getEnableDate() {
+        return enableDate;
     }
 
-    public void setSystemName(String systemName) {
-        this.systemName = systemName;
+    public void setEnableDate(String enableDate) {
+        this.enableDate = enableDate;
     }
 
-    public Long getSystemId() {
-        return systemId;
+    public String getDisableDate() {
+        return disableDate;
     }
 
-    public void setSystemId(Long systemId) {
-        this.systemId = systemId;
+    public void setDisableDate(String disableDate) {
+        this.disableDate = disableDate;
     }
 
-    public String getUpdateTime() {
-        return updateTime;
+    public Long getThingSystemId() {
+        return thingSystemId;
     }
 
-    public void setUpdateTime(String updateTime) {
-        this.updateTime = updateTime;
+    public void setThingSystemId(Long thingSystemId) {
+        this.thingSystemId = thingSystemId;
+    }
+
+    public String getPipeName() {
+        return pipeName;
+    }
+
+    public void setPipeName(String pipeName) {
+        this.pipeName = pipeName;
+    }
+
+    public String getNominalDiameter() {
+        return nominalDiameter;
+    }
+
+    public void setNominalDiameter(String nominalDiameter) {
+        this.nominalDiameter = nominalDiameter;
+    }
+
+    public String getManufacturer() {
+        return manufacturer;
+    }
+
+    public void setManufacturer(String manufacturer) {
+        this.manufacturer = manufacturer;
     }
 }

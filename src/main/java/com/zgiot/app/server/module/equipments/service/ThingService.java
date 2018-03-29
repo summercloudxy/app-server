@@ -20,4 +20,9 @@ public interface ThingService {
     public void addDevice(DeviceInfo deviceInfo);
 
     public void deleteDevice(Long id);
+
+    public void editChute(ChuteInfo chuteInfo);
+
+    public void delChute(Long id);
+
 }
