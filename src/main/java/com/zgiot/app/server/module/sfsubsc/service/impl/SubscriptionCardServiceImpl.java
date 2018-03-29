@@ -127,7 +127,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             } else {
                 BigDecimal metricValue = new BigDecimal(firstMetirc.get().getValue()).divide(new BigDecimal(10000), 3, BigDecimal.ROUND_HALF_UP);
                 firstMetric = String.valueOf(metricValue);
-                metricData.setFirstMetricValue(MetricValueUtil.formart(firstMetirc.get().getValue()) + SubscriptionConstants.UNIT_THOUSAND_T);
+                metricData.setFirstMetricValue(firstMetric + SubscriptionConstants.UNIT_THOUSAND_T);
             }
         } else {
             metricData.setFirstMetricValue("");
@@ -140,7 +140,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             } else {
                 BigDecimal metricValue = new BigDecimal(secondMetirc.get().getValue()).divide(new BigDecimal(10000), 3, BigDecimal.ROUND_HALF_UP);
                 secondMetric = String.valueOf(metricValue);
-                metricData.setSecondMetricValue(MetricValueUtil.formart(secondMetirc.get().getValue()) + SubscriptionConstants.UNIT_THOUSAND_T);
+                metricData.setSecondMetricValue(firstMetric + SubscriptionConstants.UNIT_THOUSAND_T);
             }
         } else {
             metricData.setSecondMetricValue("");

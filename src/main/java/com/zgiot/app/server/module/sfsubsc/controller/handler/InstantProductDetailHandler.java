@@ -6,6 +6,7 @@ import com.zgiot.app.server.module.historydata.enums.AccuracyEnum;
 import com.zgiot.app.server.module.sfsubsc.entity.pojo.SubscCardTypeDO;
 import com.zgiot.app.server.module.sfsubsc.entity.vo.InstantProductDetailVO;
 import com.zgiot.app.server.module.sfsubsc.service.SubscCardTypeService;
+import com.zgiot.app.server.module.sfsubsc.util.MetricValueUtil;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.service.HistoryDataService;
 import com.zgiot.common.constants.MetricCodes;
@@ -282,21 +283,42 @@ public class InstantProductDetailHandler {
      * @param rawCoalCapLists
      */
     private void getRawCoalCapValues(String thingCode, Date startDate, Date endDate, AccuracyEnum accuracyEnum, List<String> times, List<String> rawCoalCapLists) {
-        Long rawCoalDataBatchCount = historyDataService.getDataBatchCount(startDate, endDate, thingCode, MetricCodes.COAL_CAP, accuracyEnum);
-        List<DataModel> rawCoalHistoryDataList = new ArrayList<>();
-        if (rawCoalDataBatchCount < sfsubscriptionDefaultSegmentWeb) {
-            rawCoalHistoryDataList = historyDataService.findHistoryDataList(Lists.newArrayList(thingCode), Lists.newArrayList(MetricCodes.COAL_CAP), startDate, endDate, accuracyEnum);
+
+        //原煤是两个设备 数据
+        String[] rowCoals = thingCode.split("\\+");
+        Long rawCoalDataBatchCount1 = historyDataService.getDataBatchCount(startDate, endDate, rowCoals[0], MetricCodes.COAL_CAP, accuracyEnum);
+        List<DataModel> rawCoalHistoryDataList1 = new ArrayList<>();
+        if (rawCoalDataBatchCount1 < sfsubscriptionDefaultSegmentWeb) {
+            rawCoalHistoryDataList1 = historyDataService.findHistoryDataList(Lists.newArrayList(rowCoals[0]), Lists.newArrayList(MetricCodes.COAL_CAP), startDate, endDate, accuracyEnum);
         } else {
             Map<String, List<DataModel>> metricBySegmentMap =
-                    historyDataService.findMultiThingsHistoryDataOfMetricBySegment(Lists.newArrayList(thingCode), MetricCodes.COAL_CAP, startDate, endDate, sfsubscriptionDefaultSegmentWeb, false, accuracyEnum);
+                    historyDataService.findMultiThingsHistoryDataOfMetricBySegment(Lists.newArrayList(rowCoals[0]), MetricCodes.COAL_CAP, startDate, endDate, sfsubscriptionDefaultSegmentWeb, false, accuracyEnum);
             if (metricBySegmentMap != null) {
-                rawCoalHistoryDataList = metricBySegmentMap.get(thingCode);
+                rawCoalHistoryDataList1 = metricBySegmentMap.get(rowCoals[0]);
+            }
+        }
+        Long rawCoalDataBatchCount2 = historyDataService.getDataBatchCount(startDate, endDate, rowCoals[1], MetricCodes.COAL_CAP, accuracyEnum);
+        List<DataModel> rawCoalHistoryDataList2 = new ArrayList<>();
+        if (rawCoalDataBatchCount2 < sfsubscriptionDefaultSegmentWeb) {
+            rawCoalHistoryDataList2 = historyDataService.findHistoryDataList(Lists.newArrayList(rowCoals[1]), Lists.newArrayList(MetricCodes.COAL_CAP), startDate, endDate, accuracyEnum);
+        } else {
+            Map<String, List<DataModel>> metricBySegmentMap =
+                    historyDataService.findMultiThingsHistoryDataOfMetricBySegment(Lists.newArrayList(rowCoals[1]), MetricCodes.COAL_CAP, startDate, endDate, sfsubscriptionDefaultSegmentWeb, false, accuracyEnum);
+            if (metricBySegmentMap != null) {
+                rawCoalHistoryDataList2 = metricBySegmentMap.get(rowCoals[1]);
             }
         }
 
-        for (DataModel dataModel : rawCoalHistoryDataList) {
-            times.add(new SimpleDateFormat("HH:mm:ss").format(dataModel.getDataTimeStamp()));
-            rawCoalCapLists.add(dataModel.getValue());
+
+        for (DataModel dataModel1 : rawCoalHistoryDataList1) {
+            times.add(new SimpleDateFormat("HH:mm:ss").format(dataModel1.getDataTimeStamp()));
+            for (DataModel dataModel2 : rawCoalHistoryDataList2) {
+                if (dataModel1.getDataTimeStamp().compareTo(dataModel2.getDataTimeStamp()) == 0) {
+                    rawCoalCapLists.add(MetricValueUtil.formart(new BigDecimal(dataModel1.getValue()).add(new BigDecimal(dataModel2.getValue()))));
+                    break;
+                }
+            }
+
         }
     }
 
