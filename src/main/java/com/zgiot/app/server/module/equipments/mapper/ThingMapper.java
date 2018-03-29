@@ -1,5 +1,6 @@
 package com.zgiot.app.server.module.equipments.mapper;
 
+import com.zgiot.app.server.module.equipments.controller.EquipmentInfo;
 import com.zgiot.app.server.module.equipments.pojo.Thing;
 import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.annotations.Mapper;
@@ -27,5 +28,7 @@ public interface ThingMapper {
     @Update("UPDATE tb_thing SET thing_code = #{thing_code},thing_name=#{thing_name}," +
             "thing_type1_code=#{thing_type1_code},thing_shortname=#{thing_shortname} where id = #{id}")
     void editThing(Thing thing);
+
+    List<EquipmentInfo> getEquipmentInfoByThingcode(List<String> thingCodeList);
 
 }

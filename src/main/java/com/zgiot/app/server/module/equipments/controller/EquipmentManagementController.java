@@ -65,18 +65,32 @@ public class EquipmentManagementController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(building), HttpStatus.OK);
     }
 
+    /**
+     * 获取所有装备类型
+     * @return
+     */
     @RequestMapping(value = "/thingTag/getAllEquipmentType", method = RequestMethod.GET)
     public ResponseEntity<String> getAllEquipmentType() {
         List<ThingTag> thingTagList = thingTagService.getAllEquipmentType();
         return new ResponseEntity<>(ServerResponse.buildOkJson(thingTagList), HttpStatus.OK);
     }
 
+    /**
+     * 根据key查找基础数据字典
+     * @param key
+     * @return
+     */
     @RequestMapping(value = "/thingBaseDict/getThingBaseDictListByKey/{key}", method = RequestMethod.GET)
     public ResponseEntity<String> getThingBaseDictListByKey(@PathVariable("key") String key){
         List<ThingBaseDict> thingBaseDictList = thingBaseDictService.getThingBaseDictListByKey(key);
         return new ResponseEntity<>(ServerResponse.buildOkJson(thingBaseDictList), HttpStatus.OK);
     }
 
+    /**
+     * 根据当前节点id获取对应设备thing_code
+     * @param id
+     * @return
+     */
     @RequestMapping(value = "/relThingtagThing/relThingtagThingService/{id}", method = RequestMethod.GET)
     public ResponseEntity<String> getRelThingtagThingByThreeLevelId(@PathVariable("id") Long id){
         List<RelThingtagThing> relThingtagThingList = relThingtagThingService.getRelThingtagThingByThreeLevelId(id);
