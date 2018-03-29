@@ -128,6 +128,12 @@ public class EquipmentManagementController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/device/delete/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<String> delDevice(@PathVariable("id") Long id) {
+        thingService.deleteDevice(id);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
     /**
      * 是否有此thingCode
      * @param thingCode

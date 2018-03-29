@@ -35,7 +35,6 @@ public class ThingServiceImpl implements ThingService {
     private ThingPropertiesMapper thingPropertiesMapper;
     @Autowired
     private RelThingtagThingMapper relThingtagThingMapper;
-
     @Autowired
     private RelThingSystemMapper relThingSystemMapper;
 
@@ -62,6 +61,7 @@ public class ThingServiceImpl implements ThingService {
     @Override
     @Transactional
     public void addDevice(DeviceInfo deviceInfo) {
+        // thing
         Thing thing = new Thing();
         thing.setThingCode(deviceInfo.getThingCode());
         thing.setThingName(deviceInfo.getThingName());
@@ -69,6 +69,7 @@ public class ThingServiceImpl implements ThingService {
         thing.setThingShortName(deviceInfo.getThingShortname());
         thingMapper.addThing(thing);
 
+        // thingPosition
         ThingPosition thingPosition = new ThingPosition();
         thingPosition.setThingCode(deviceInfo.getThingCode());
         thingPosition.setBuildingId(Long.parseLong(deviceInfo.getBuildingId()));
@@ -78,13 +79,74 @@ public class ThingServiceImpl implements ThingService {
         thingPosition.setLocationY(Double.parseDouble(deviceInfo.getLocationY()));
         thingPositionMapper.addThingPosition(thingPosition);
 
+        // relThingtagThing
         RelThingtagThing relThingtagThing = new RelThingtagThing();
         relThingtagThing.setThingCode(deviceInfo.getThingCode());
         relThingtagThing.setThingTagCode(deviceInfo.getThingTagCode());
         relThingtagThing.setCreateDate(new Date());
         relThingtagThingMapper.addRelThingtagThing(relThingtagThing);
 
+        // relThingSystem
+        RelThingSystem relThingSystem = new RelThingSystem();
+        relThingSystem.setSystemId(Long.parseLong(deviceInfo.getThingSystemId()));
+        relThingSystem.setThingCode(deviceInfo.getThingCode());
+        relThingSystem.setUpdateTime(new Date());
+        relThingSystemMapper.addRelThingSystem(relThingSystem);
 
+        // thingProperties
+        ThingProperties tp = new ThingProperties();
+        tp.setThingCode(deviceInfo.getThingCode());
+        tp.setPropKey(EquipmentConstant.SPECIFICATION);
+        tp.setPropValue(deviceInfo.getSpecification());
+        tp.setPropType(EquipmentConstant.PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp);
+
+        tp.setPropKey(EquipmentConstant.POWER_PROPERTIES);
+        tp.setPropValue(deviceInfo.getPowerProperties());
+        thingPropertiesMapper.addThingProperties(tp);
+
+        tp.setPropKey(EquipmentConstant.START_DATE);
+        tp.setPropValue(deviceInfo.getEnableDate());
+        thingPropertiesMapper.addThingProperties(tp);
+
+        tp.setPropKey(EquipmentConstant.STOP_DATE);
+        tp.setPropValue(deviceInfo.getDisableDate());
+        thingPropertiesMapper.addThingProperties(tp);
+
+        tp.setPropKey(EquipmentConstant.ANGLE);
+        tp.setPropValue(deviceInfo.getAngle());
+        thingPropertiesMapper.addThingProperties(tp);
+
+        tp.setPropKey(EquipmentConstant.GRANULARITY);
+        tp.setPropValue(deviceInfo.getGranularity());
+        thingPropertiesMapper.addThingProperties(tp);
+
+        tp.setPropKey(EquipmentConstant.IMAGE_NAME);
+        tp.setPropValue(deviceInfo.getImageName());
+        tp.setPropType(EquipmentConstant.PROP_TYPE_DISP_PROP);
+        thingPropertiesMapper.addThingProperties(tp);
+
+    }
+
+    @Override
+    @Transactional
+    public void deleteDevice(Long id) {
+        Thing thing = thingMapper.getThingById(id);
+        String thingCode = thing.getThingCode();
+        // thing
+        thingMapper.deleteThingById(id);
+
+        // thingPosition
+        thingPositionMapper.deleteThingPosition(thingCode);
+
+        // relThingtagThing
+        relThingtagThingMapper.deleteRelThingtagThingByThingCode(thingCode);
+
+        // relThingSystem
+        relThingSystemMapper.deleteRelThingSystemByThingCode(thingCode);
+
+        // thingProperties
+        thingPropertiesMapper.deleteThingPropertiesByThingCode(thingCode);
 
     }
 

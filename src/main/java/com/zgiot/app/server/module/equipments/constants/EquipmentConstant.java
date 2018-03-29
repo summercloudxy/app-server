@@ -32,6 +32,11 @@ public class EquipmentConstant {
      */
     public static final String GRANULARITY = "GRANULARITY";
 
+    /**
+     * 图片名
+     */
+    public static final String IMAGE_NAME = "IMAGE_NAME";
+
     /*3.29 begin*/
 
     /**
