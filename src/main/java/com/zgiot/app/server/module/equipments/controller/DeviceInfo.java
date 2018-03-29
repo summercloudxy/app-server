@@ -21,7 +21,7 @@ public class DeviceInfo {
     private String floor;// 楼层
     private String angle;// 角度
     private String granularity;// 给料粒度
-    private String imageName;
+    private String imageName;// 图片名
 
     public String getThingCode() {
         return thingCode;

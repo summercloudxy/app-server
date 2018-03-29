@@ -121,4 +121,11 @@ public class EquipmentManagementController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(tbSystemList), HttpStatus.OK);
     }
     /*3.29 end*/
+
+    @RequestMapping(value = "/device/add", method = RequestMethod.POST)
+    public ResponseEntity<String> addDevice(@RequestBody DeviceInfo deviceInfo) {
+        thingService.addDevice(deviceInfo);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
 }
