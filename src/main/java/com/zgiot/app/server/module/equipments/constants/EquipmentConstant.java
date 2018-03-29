@@ -110,6 +110,16 @@ public class EquipmentConstant {
      */
     public static final String CHUTE_DISABLE_DATE = "chute_disable_date";
 
+    /**
+     *tb_thing_properties表prop_type字段PROP
+     */
+    public static final String PROP_TYPE_PROP = "PROP";
+
+    /**
+     *tb_thing_properties表prop_type字段DISP_PROP
+     */
+    public static final String PROP_TYPE_DISP_PROP = "DISP_PROP";
+
     /*3.29 end*/
 
 }

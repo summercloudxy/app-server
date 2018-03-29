@@ -1,6 +1,7 @@
 package com.zgiot.app.server.module.equipments.service;
 
 import com.zgiot.app.server.module.equipments.controller.DeviceInfo;
+import com.zgiot.app.server.module.equipments.controller.ChuteInfo;
 import com.zgiot.app.server.module.equipments.controller.EquipmentInfo;
 import com.zgiot.app.server.module.equipments.pojo.Thing;
 
@@ -12,7 +13,7 @@ public interface ThingService {
 
     public List<Thing> getThingByCode(String thingCode, String thingType1Code);
 
-    public void addChute();
+    public void addChute(ChuteInfo chuteInfo);
 
     public void addDevice(DeviceInfo deviceInfo);
 

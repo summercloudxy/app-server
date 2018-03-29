@@ -10,17 +10,17 @@ public class ChuteInfo {
     /**
      *编号
      */
-    private Long thingCode;
+    private String thingCode;
 
     /**
      *更新时间
      */
-    private Long updateDate;
+    private String updateDate;
 
     /**
      *起始设备CODE
      */
-    private Long startThingCode;
+    private String startThingCode;
 
     /**
      *起始设备名称
@@ -30,7 +30,7 @@ public class ChuteInfo {
     /**
      *终止设备CODE
      */
-    private Long terminalThingCode;
+    private String terminalThingCode;
 
     /**
      *终止设备名称
@@ -65,27 +65,27 @@ public class ChuteInfo {
         this.id = id;
     }
 
-    public Long getThingCode() {
+    public String getThingCode() {
         return thingCode;
     }
 
-    public void setThingCode(Long thingCode) {
+    public void setThingCode(String thingCode) {
         this.thingCode = thingCode;
     }
 
-    public Long getUpdateDate() {
+    public String getUpdateDate() {
         return updateDate;
     }
 
-    public void setUpdateDate(Long updateDate) {
+    public void setUpdateDate(String updateDate) {
         this.updateDate = updateDate;
     }
 
-    public Long getStartThingCode() {
+    public String getStartThingCode() {
         return startThingCode;
     }
 
-    public void setStartThingCode(Long startThingCode) {
+    public void setStartThingCode(String startThingCode) {
         this.startThingCode = startThingCode;
     }
 
@@ -97,11 +97,11 @@ public class ChuteInfo {
         this.startThingName = startThingName;
     }
 
-    public Long getTerminalThingCode() {
+    public String getTerminalThingCode() {
         return terminalThingCode;
     }
 
-    public void setTerminalThingCode(Long terminalThingCode) {
+    public void setTerminalThingCode(String terminalThingCode) {
         this.terminalThingCode = terminalThingCode;
     }
 
