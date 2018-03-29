@@ -13,6 +13,8 @@ public interface ThingService {
 
     public List<Thing> getThingByCode(String thingCode, String thingType1Code);
 
+    public boolean getThingByThingCode(String thingCode);
+
     public void addChute(ChuteInfo chuteInfo);
 
     public void addDevice(DeviceInfo deviceInfo);

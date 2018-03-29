@@ -35,4 +35,7 @@ public interface ThingMapper {
             " ORDER BY t.thing_code")
     List<Thing> getThingByCode(@Param("thingCode") String thingCode,@Param("thingType1Code") String thingType1Code);
 
+    @Select("select * from tb_thing where thing_code = #{thingCode}")
+    List<Thing> getThingByThingCode(@Param("thingCode") String thingCode);
+
 }

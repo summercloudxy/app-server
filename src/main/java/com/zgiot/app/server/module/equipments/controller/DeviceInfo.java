@@ -1,14 +1,12 @@
 package com.zgiot.app.server.module.equipments.controller;
 
-import java.util.Date;
-
 public class DeviceInfo {
 
     private String thingCode;// 设备编号
     private String thingName;// 设备名称
     private String thingShortname;// 设备简称
     private String specification;// 规格型号
-    private String tagName;// 设备类型-3级类型名称
+    private String thingTagCode;// 设备类型-3级类型code
     private String manufacturer;// 生产厂家
     private String thingSystemId;// 所属系统id
     private String enableDate;// 投用日期
@@ -55,12 +53,12 @@ public class DeviceInfo {
         this.specification = specification;
     }
 
-    public String getTagName() {
-        return tagName;
+    public String getThingTagCode() {
+        return thingTagCode;
     }
 
-    public void setTagName(String tagName) {
-        this.tagName = tagName;
+    public void setThingTagCode(String thingTagCode) {
+        this.thingTagCode = thingTagCode;
     }
 
     public String getManufacturer() {

@@ -3,8 +3,10 @@ package com.zgiot.app.server.module.equipments.service.impl;
 import com.zgiot.app.server.module.equipments.constants.EquipmentConstant;
 import com.zgiot.app.server.module.equipments.controller.DeviceInfo;
 import com.zgiot.app.server.module.equipments.controller.EquipmentInfo;
+import com.zgiot.app.server.module.equipments.mapper.RelThingtagThingMapper;
 import com.zgiot.app.server.module.equipments.mapper.ThingMapper;
 import com.zgiot.app.server.module.equipments.mapper.ThingPositionMapper;
+import com.zgiot.app.server.module.equipments.pojo.RelThingtagThing;
 import com.zgiot.app.server.module.equipments.pojo.Thing;
 import com.zgiot.app.server.module.equipments.pojo.ThingPosition;
 import com.zgiot.app.server.module.equipments.controller.ChuteInfo;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 
 import static com.zgiot.app.server.module.equipments.constants.EquipmentConstant.*;
@@ -22,13 +25,15 @@ import static com.zgiot.app.server.module.equipments.constants.EquipmentConstant
 
 @Service
 public class ThingServiceImpl implements ThingService {
+
     @Autowired
     private ThingMapper thingMapper;
     @Autowired
     private ThingPositionMapper thingPositionMapper;
-
     @Autowired
     private ThingPropertiesMapper thingPropertiesMapper;
+    @Autowired
+    private RelThingtagThingMapper relThingtagThingMapper;
 
     @Override
     public List<EquipmentInfo> getEquipmentInfoByThingcode(List<String> thingCodeList) {
@@ -39,6 +44,15 @@ public class ThingServiceImpl implements ThingService {
     public List<Thing> getThingByCode(String thingCode, String thingType1Code) {
         thingCode = "%" + thingCode + "%";
         return thingMapper.getThingByCode(thingCode,thingType1Code);
+    }
+
+    @Override
+    public boolean getThingByThingCode(String thingCode) {
+        List<Thing> thingList = thingMapper.getThingByThingCode(thingCode);
+        if(thingList != null && thingList.size() > 0){
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -59,6 +73,15 @@ public class ThingServiceImpl implements ThingService {
         thingPosition.setLocationX(Double.parseDouble(deviceInfo.getLocationX()));
         thingPosition.setLocationY(Double.parseDouble(deviceInfo.getLocationY()));
         thingPositionMapper.addThingPosition(thingPosition);
+
+        RelThingtagThing relThingtagThing = new RelThingtagThing();
+        relThingtagThing.setThingCode(deviceInfo.getThingCode());
+        relThingtagThing.setThingTagCode(deviceInfo.getThingTagCode());
+        relThingtagThing.setCreateDate(new Date());
+        relThingtagThingMapper.addRelThingtagThing(relThingtagThing);
+
+
+
     }
 
     @Transactional

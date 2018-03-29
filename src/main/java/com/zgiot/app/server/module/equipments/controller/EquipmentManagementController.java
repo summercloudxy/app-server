@@ -128,4 +128,15 @@ public class EquipmentManagementController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
+    /**
+     * 是否有此thingCode
+     * @param thingCode
+     * @return
+     */
+    @RequestMapping(value = "/thing/isHasThingCode/{thingCode}", method = RequestMethod.GET)
+    public ResponseEntity<String> isHasThingCode(@PathVariable("thingCode") String thingCode) {
+        boolean flag = thingService.getThingByThingCode(thingCode);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(flag), HttpStatus.OK);
+    }
+
 }
