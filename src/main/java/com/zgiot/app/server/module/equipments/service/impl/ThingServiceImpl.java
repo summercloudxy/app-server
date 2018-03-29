@@ -9,9 +9,10 @@ import com.zgiot.app.server.module.equipments.mapper.ThingPositionMapper;
 import com.zgiot.app.server.module.equipments.pojo.RelThingtagThing;
 import com.zgiot.app.server.module.equipments.pojo.Thing;
 import com.zgiot.app.server.module.equipments.pojo.ThingPosition;
+import com.zgiot.app.server.module.equipments.mapper.RelThingSystemMapper;
+import com.zgiot.app.server.module.equipments.pojo.*;
 import com.zgiot.app.server.module.equipments.controller.ChuteInfo;
 import com.zgiot.app.server.module.equipments.mapper.ThingPropertiesMapper;
-import com.zgiot.app.server.module.equipments.pojo.ThingProperties;
 import com.zgiot.app.server.module.equipments.service.ThingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,9 @@ public class ThingServiceImpl implements ThingService {
     private ThingPropertiesMapper thingPropertiesMapper;
     @Autowired
     private RelThingtagThingMapper relThingtagThingMapper;
+
+    @Autowired
+    private RelThingSystemMapper relThingSystemMapper;
 
     @Override
     public List<EquipmentInfo> getEquipmentInfoByThingcode(List<String> thingCodeList) {
@@ -88,12 +92,14 @@ public class ThingServiceImpl implements ThingService {
     public void addChute(ChuteInfo chuteInfo) {
 
         String thingCode = "调用wang磊的方法";
+        //插入tb_thing表
         Thing thing = new Thing();
         thing.setThingCode(thingCode);
         thing.setThingName(chuteInfo.getChuteName());
         thing.setThingType1Code(THING_TYPE1_CODE_CHUTE);
         thingMapper.addThing(thing);
 
+        //插入tb_thing_properties表
         ThingProperties tp1 = new ThingProperties();
         tp1.setThingCode(thingCode);
         tp1.setPropKey(CHUTE_START_THING_CODE);
@@ -135,5 +141,28 @@ public class ThingServiceImpl implements ThingService {
         tp1.setPropValue(chuteInfo.getDisableDate());
         tp1.setPropType(PROP_TYPE_PROP);
         thingPropertiesMapper.addThingProperties(tp6);
+
+        //插入rel_thing_system表
+        RelThingSystem rts = new RelThingSystem();
+        rts.setThingCode(thingCode);
+        rts.setSystemId(chuteInfo.getThingSystemId());
+        relThingSystemMapper.addRelThingSystem(rts);
+
+    }
+
+    @Transactional
+    public void delChute(Long id){
+        Thing t = thingMapper.getThingById(id);
+        String thingCode = t.getThingCode();
+        thingMapper.deleteThingById(id);
+        thingPropertiesMapper.deleteThingPropertiesByThingCode(thingCode);
+        relThingSystemMapper.deleteRelThingSystemByThingCode(thingCode);
+    }
+
+    @Transactional
+    public void editChute(ChuteInfo chuteInfo){
+        Long id = chuteInfo.getId();
+        delChute(id);
+        addChute(chuteInfo);
     }
 }
