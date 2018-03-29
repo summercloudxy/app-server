@@ -32,6 +32,9 @@ public class EquipmentManagementController {
     @Autowired
     private ThingService thingService;
 
+    @Autowired
+    private TBSystemService tbSystemService;
+
     @RequestMapping(value = "/building/list/pageNum/{pageNum}/pageSize/{pageSize}", method = RequestMethod.GET)
     public ResponseEntity<String> getBuildingList(@PathVariable int pageNum, @PathVariable int pageSize) {
         List<Building> buildingList = buildingService.getBuildingAll(pageNum,pageSize);
@@ -105,6 +108,17 @@ public class EquipmentManagementController {
     public ResponseEntity<String> getThingByCode(@PathVariable("thingCode") String thingCode) {
         List<Thing> thingList = thingService.getThingByCode(thingCode, THING_TYPE1_CODE_DEVICE);
         return new ResponseEntity<>(ServerResponse.buildOkJson(thingList), HttpStatus.OK);
+    }
+
+    /**
+     * 下拉框-所属系统
+     * @param sysLevel,系统层级，分为1,2,3,4
+     * @return 集合
+     */
+    @RequestMapping(value = "/thing/sysLevel/{sysLevel}", method = RequestMethod.GET)
+    public ResponseEntity<String> getSysByLevel(@PathVariable("sysLevel") int sysLevel) {
+        List<TBSystem> tbSystemList = tbSystemService.getTBSystemALL(sysLevel);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(tbSystemList), HttpStatus.OK);
     }
     /*3.29 end*/
 }

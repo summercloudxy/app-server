@@ -11,4 +11,6 @@ public interface ThingService {
 
     public List<Thing> getThingByCode(String thingCode, String thingType1Code);
 
+    public void addChute();
+
 }

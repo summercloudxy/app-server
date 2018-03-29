@@ -75,6 +75,41 @@ public class EquipmentConstant {
      */
     public static final String THING_TYPE1_CODE_FLASHBOARD = "FLASHBOARD";
 
+    /**
+     *THING_TYPE1_CODE溜槽
+     */
+    public static final String THING_TYPE1_CODE_CHUTE = "CHUTE";
+
+    /**
+     *起始设备CODE
+     */
+    public static final String CHUTE_START_THING_CODE = "chute_start_thing_code";
+
+    /**
+     *起始设备名称
+     */
+    public static final String CHUTE_START_THING_NAME = "chute_start_thing_name";
+
+    /**
+     *终止设备CODE
+     */
+    public static final String CHUTE_TERMINAL_THING_CODE = "chute_terminal_thing_code";
+
+    /**
+     *终止设备名称
+     */
+    public static final String CHUTE_TERMINAL_THING_NAME = "chute_terminal_thing_name";
+
+    /**
+     *投用日期
+     */
+    public static final String CHUTE_ENABLE_DATE = "chute_enable_date";
+
+    /**
+     *停用日期
+     */
+    public static final String CHUTE_DISABLE_DATE = "chute_disable_date";
+
     /*3.29 end*/
 
 }
