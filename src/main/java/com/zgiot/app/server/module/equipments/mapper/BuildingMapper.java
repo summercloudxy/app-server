@@ -1,7 +1,6 @@
 package com.zgiot.app.server.module.equipments.mapper;
 
 import com.zgiot.app.server.module.equipments.pojo.Building;
-import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;

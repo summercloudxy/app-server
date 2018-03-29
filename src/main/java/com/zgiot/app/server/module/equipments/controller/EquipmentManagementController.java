@@ -1,13 +1,7 @@
 package com.zgiot.app.server.module.equipments.controller;
 
-import com.zgiot.app.server.module.equipments.pojo.Building;
-import com.zgiot.app.server.module.equipments.pojo.RelThingtagThing;
-import com.zgiot.app.server.module.equipments.pojo.ThingBaseDict;
-import com.zgiot.app.server.module.equipments.pojo.ThingTag;
-import com.zgiot.app.server.module.equipments.service.BuildingService;
-import com.zgiot.app.server.module.equipments.service.RelThingtagThingService;
-import com.zgiot.app.server.module.equipments.service.ThingBaseDictService;
-import com.zgiot.app.server.module.equipments.service.ThingTagService;
+import com.zgiot.app.server.module.equipments.pojo.*;
+import com.zgiot.app.server.module.equipments.service.*;
 import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.restcontroller.ServerResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.List;
 
+import static com.zgiot.app.server.module.equipments.constants.EquipmentConstant.THING_TYPE1_CODE_DEVICE;
+
 @Controller
 @RequestMapping(value = GlobalConstants.API + GlobalConstants.API_VERSION + "/equipments")
 public class EquipmentManagementController {
@@ -33,10 +29,12 @@ public class EquipmentManagementController {
     private ThingBaseDictService thingBaseDictService;
     @Autowired
     private RelThingtagThingService relThingtagThingService;
+    @Autowired
+    private ThingService thingService;
 
-    @RequestMapping(value = "/building/list", method = RequestMethod.GET)
-    public ResponseEntity<String> getBuildingList() {
-        List<Building> buildingList = buildingService.getBuildingAll();
+    @RequestMapping(value = "/building/list/pageNum/{pageNum}/pageSize/{pageSize}", method = RequestMethod.GET)
+    public ResponseEntity<String> getBuildingList(@PathVariable int pageNum, @PathVariable int pageSize) {
+        List<Building> buildingList = buildingService.getBuildingAll(pageNum,pageSize);
         return new ResponseEntity<>(ServerResponse.buildOkJson(buildingList), HttpStatus.OK);
     }
 
@@ -97,4 +95,16 @@ public class EquipmentManagementController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(relThingtagThingList), HttpStatus.OK);
     }
 
+    /*3.29 begin*/
+    /**
+     * 下拉框根据thingCode模糊搜索设备
+     * @param thingCode
+     * @return 集合
+     */
+    @RequestMapping(value = "/thing/thingCode/{thingCode}", method = RequestMethod.GET)
+    public ResponseEntity<String> getThingByCode(@PathVariable("thingCode") String thingCode) {
+        List<Thing> thingList = thingService.getThingByCode(thingCode, THING_TYPE1_CODE_DEVICE);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(thingList), HttpStatus.OK);
+    }
+    /*3.29 end*/
 }

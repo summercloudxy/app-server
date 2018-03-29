@@ -16,5 +16,5 @@ public interface BuildingService {
 
     public void deleteBuilding(Long id);
 
-    public List<Building> getBuildingAll();
+    public List<Building> getBuildingAll(int pageNum,int pageSize);
 }

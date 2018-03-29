@@ -32,4 +32,49 @@ public class EquipmentConstant {
      */
     public static final String GRANULARITY = "GRANULARITY";
 
+    /*3.29 begin*/
+
+    /**
+     * 管道
+     */
+    public static final String GD = "GD";
+
+    /**
+     * 溜槽
+     */
+    public static final String LC = "LC";
+
+    /**
+     *THING_TYPE1_CODE设备
+     */
+    public static final String THING_TYPE1_CODE_DEVICE = "DEVICE";
+
+    /**
+     *THING_TYPE1_CODE仪表
+     */
+    public static final String THING_TYPE1_CODE_METER = "METER";
+
+
+    /**
+     *THING_TYPE1_CODE部件
+     */
+    public static final String THING_TYPE1_CODE_PARTS = "PARTS";
+
+    /**
+     *THING_TYPE1_CODE阀门
+     */
+    public static final String THING_TYPE1_CODE_VALVE = "VALVE";
+
+    /**
+     *THING_TYPE1_CODE管道
+     */
+    public static final String THING_TYPE1_CODE_PIPE = "PIPE";
+
+    /**
+     *THING_TYPE1_CODE闸板
+     */
+    public static final String THING_TYPE1_CODE_FLASHBOARD = "FLASHBOARD";
+
+    /*3.29 end*/
+
 }
