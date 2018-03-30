@@ -5,7 +5,7 @@ import com.zgiot.app.server.module.equipments.controller.DeviceInfo;
 import com.zgiot.app.server.module.equipments.controller.PartsInfo;
 import com.zgiot.app.server.module.equipments.controller.PipeInfo;
 import com.zgiot.app.server.module.equipments.mapper.RelThingtagThingMapper;
-import com.zgiot.app.server.module.equipments.mapper.ThingMapper;
+import com.zgiot.app.server.module.equipments.mapper.ThingManagementMapper;
 import com.zgiot.app.server.module.equipments.mapper.ThingPositionMapper;
 import com.zgiot.app.server.module.equipments.pojo.RelThingtagThing;
 import com.zgiot.app.server.module.equipments.pojo.Thing;
@@ -28,7 +28,7 @@ import static com.zgiot.app.server.module.equipments.constants.EquipmentConstant
 public class ThingManagementServiceImpl implements ThingManagementService {
 
     @Autowired
-    private ThingMapper thingMapper;
+    private ThingManagementMapper thingMapper;
     @Autowired
     private ThingPositionMapper thingPositionMapper;
     @Autowired
@@ -142,11 +142,11 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         tp.setPropValue(deviceInfo.getPowerProperties());
         thingPropertiesMapper.addThingProperties(tp);
 
-        tp.setPropKey(EquipmentConstant.START_DATE);
+        tp.setPropKey(EquipmentConstant.ENABLE_DATE);
         tp.setPropValue(deviceInfo.getEnableDate());
         thingPropertiesMapper.addThingProperties(tp);
 
-        tp.setPropKey(EquipmentConstant.STOP_DATE);
+        tp.setPropKey(EquipmentConstant.DISABLE_DATE);
         tp.setPropValue(deviceInfo.getDisableDate());
         thingPropertiesMapper.addThingProperties(tp);
 
@@ -287,7 +287,90 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         thing.setThingType1Code(EquipmentConstant.THING_TYPE1_CODE_PARTS);
         thingMapper.addThing(thing);
 
-        //
+        // relThingtagThing
+        RelThingtagThing relThingtagThing = new RelThingtagThing();
+        relThingtagThing.setThingCode(thingCode);
+        relThingtagThing.setThingTagCode(partsInfo.getThingType());
+        relThingtagThing.setCreateDate(new Date());
+        relThingtagThingMapper.addRelThingtagThing(relThingtagThing);
+
+        // thingProperties
+        ThingProperties tp = new ThingProperties();
+        tp.setThingCode(thingCode);
+        tp.setPropKey(EquipmentConstant.SPECIFICATION);
+        tp.setPropValue(partsInfo.getSpecification());
+        tp.setPropType(EquipmentConstant.PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp);
+
+        tp.setPropKey(EquipmentConstant.MANUFACTURER);
+        tp.setPropValue(partsInfo.getManufacturer());
+        tp.setPropType(EquipmentConstant.PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp);
+
+        tp.setPropKey(EquipmentConstant.PARENT_THING_CODE);
+        tp.setPropValue(partsInfo.getParentThingCode());
+        tp.setPropType(EquipmentConstant.PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp);
+
+        tp.setPropKey(EquipmentConstant.PARENT_THING_NAME);
+        tp.setPropValue(partsInfo.getParentThingName());
+        tp.setPropType(EquipmentConstant.PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp);
+
+        tp.setPropKey(EquipmentConstant.ENABLE_DATE);
+        tp.setPropValue(partsInfo.getEnableDate());
+        tp.setPropType(EquipmentConstant.PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp);
+
+        tp.setPropKey(EquipmentConstant.DISABLE_DATE);
+        tp.setPropValue(partsInfo.getDisableDate());
+        tp.setPropType(EquipmentConstant.PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp);
+
+        tp.setPropKey(EquipmentConstant.START_TYPE);
+        tp.setPropValue(partsInfo.getStartType());
+        tp.setPropType(EquipmentConstant.PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp);
+
+        tp.setPropKey(EquipmentConstant.RATED_POWER);
+        tp.setPropValue(partsInfo.getRatedPower());
+        tp.setPropType(EquipmentConstant.PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp);
+
+        tp.setPropKey(EquipmentConstant.VOLTAGE_LEVEL);
+        tp.setPropValue(partsInfo.getVoltageLevel());
+        tp.setPropType(EquipmentConstant.PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp);
+
+        tp.setPropKey(EquipmentConstant.EXPLOSION_PROOF);
+        tp.setPropValue(partsInfo.getExplosionProof());
+        tp.setPropType(EquipmentConstant.PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp);
+
+        tp.setPropKey(EquipmentConstant.Grade);
+        tp.setPropValue(partsInfo.getGrade());
+        tp.setPropType(EquipmentConstant.PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp);
+
+        tp.setPropKey(EquipmentConstant.INSULATION_GRADE);
+        tp.setPropValue(partsInfo.getInsulationGrade());
+        tp.setPropType(EquipmentConstant.PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp);
+
+        tp.setPropKey(EquipmentConstant.PROTECTION_GRADE);
+        tp.setPropValue(partsInfo.getProtectionGrade());
+        tp.setPropType(EquipmentConstant.PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp);
+
+        tp.setPropKey(EquipmentConstant.RATED_CURRENT);
+        tp.setPropValue(partsInfo.getRatedCurrent());
+        tp.setPropType(EquipmentConstant.PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp);
+
+        tp.setPropKey(EquipmentConstant.UPDATE_TIME);
+        tp.setPropValue(partsInfo.getUpdateTime());
+        tp.setPropType(EquipmentConstant.PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp);
 
     }
 

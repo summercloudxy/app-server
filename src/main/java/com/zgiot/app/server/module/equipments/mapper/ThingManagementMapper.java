@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.*;
 import java.util.List;
 
 @Mapper
-public interface ThingMapper {
+public interface ThingManagementMapper {
 
     @Insert("insert into tb_thing(parent_thing_id,thing_code,thing_name,thing_type1_code,thing_shortname) " +
             "values(#{parentThingId},#{thingCode},#{thingName},#{thingType1Code},#{thingShortName})")
