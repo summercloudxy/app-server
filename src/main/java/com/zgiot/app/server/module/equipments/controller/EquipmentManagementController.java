@@ -339,7 +339,7 @@ public class EquipmentManagementController {
     /*3.30 end*/
 
     /**
-     * 添加设备
+     * 添加部件
      * @param partsInfo
      * @return
      */
@@ -350,7 +350,7 @@ public class EquipmentManagementController {
     }
 
     /**
-     * 删除管道
+     * 删除部件
      * @param id
      * @return
      */
@@ -361,8 +361,8 @@ public class EquipmentManagementController {
     }
 
     /**
-     * 编辑设备
-     * @param deviceInfo，id
+     * 编辑部件
+     * @param partsInfo，id
      * @return
      */
     @RequestMapping(value = "/patrs/edit/{id}", method = RequestMethod.PUT)
@@ -370,6 +370,17 @@ public class EquipmentManagementController {
         partsInfo.setId(id);
         thingService.editParts(partsInfo);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+    /**
+     * 根据当前节点id获取管道信息列表
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/thing/getPipeInfoByThingTagId/{id}", method = RequestMethod.GET)
+    public ResponseEntity<String> getPipeInfoByThingTagId(@PathVariable("id") Long id){
+        List<PipeInfo> pipeInfoList = thingService.getPipeInfoByThingTagId(id);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(pipeInfoList), HttpStatus.OK);
     }
 
 }

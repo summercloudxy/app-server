@@ -633,4 +633,37 @@ public class ThingManagementServiceImpl implements ThingManagementService {
     }
 
     /*3.30 end*/
+
+    @Override
+    public List<PipeInfo> getPipeInfoByThingTagId(Long id) {
+        List<RelThingtagThing> relThingtagThingList = relThingtagThingMapper.getRelThingtagThingByThingTagCode(id);
+        List<String> thingCodeList = new ArrayList<>();
+        if(relThingtagThingList != null && relThingtagThingList.size() > 0){
+            for(int i=0;i<relThingtagThingList.size();i++){
+                thingCodeList.add(relThingtagThingList.get(i).getThingCode());
+            }
+        }
+        List<PipeInfo> pipeInfoList = getPipeInfoByThingcode(thingCodeList);
+        return pipeInfoList;
+    }
+
+    private List<PipeInfo> getPipeInfoByThingcode(List<String> thingCodeList) {
+        List<PipeInfo> pipeInfoList = thingMapper.getPipeInfoByThingcode(thingCodeList);
+        List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
+        if(pipeInfoList != null && pipeInfoList.size() > 0){
+            for(int i=0;i<pipeInfoList.size();i++){
+                for(int j=0;j<thingPropertiesList.size();j++){
+                    if(pipeInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                            && thingPropertiesList.get(j).getPropKey().equals(EquipmentConstant.START_THING_NAME)){
+                        pipeInfoList.get(i).setStartThingName(thingPropertiesList.get(j).getPropValue());
+                    }
+                    if(pipeInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                            && thingPropertiesList.get(j).getPropKey().equals(EquipmentConstant.TERMINAL_THING_NAME)){
+                        pipeInfoList.get(i).setTerminalThingName(thingPropertiesList.get(j).getPropValue());
+                    }
+                }
+            }
+        }
+        return pipeInfoList;
+    }
 }

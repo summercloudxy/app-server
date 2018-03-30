@@ -52,6 +52,11 @@ public class PipeInfo {
     private Long thingSystemId;
 
     /**
+     * 所属系统名称
+     */
+    private String thingSystemName;
+
+    /**
      *管道名称
      */
     private String  pipeName;
@@ -168,5 +173,13 @@ public class PipeInfo {
 
     public void setManufacturer(String manufacturer) {
         this.manufacturer = manufacturer;
+    }
+
+    public String getThingSystemName() {
+        return thingSystemName;
+    }
+
+    public void setThingSystemName(String thingSystemName) {
+        this.thingSystemName = thingSystemName;
     }
 }

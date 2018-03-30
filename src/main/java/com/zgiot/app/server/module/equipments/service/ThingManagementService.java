@@ -41,4 +41,6 @@ public interface ThingManagementService {
     public void deleteParts(Long id);
 
     public void editParts(PartsInfo partsInfo);
+
+    List<PipeInfo> getPipeInfoByThingTagId(Long id);
 }

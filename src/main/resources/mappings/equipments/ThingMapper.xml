@@ -39,4 +39,23 @@
         </foreach>
     </select>
 
+    <resultMap id="pipeInfo" type="com.zgiot.app.server.module.equipments.controller.PipeInfo">
+        <result column="id" property="id"/>
+        <result column="thing_code" property="thingCode"/>
+        <result column="thing_name" property="thingName"/>
+        <result column="system_name" property="thingSystemName"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+    <select id="getPipeInfoByThingcode" resultMap="pipeInfo"
+            resultType="com.zgiot.app.server.module.equipments.controller.PipeInfo">
+        SELECT t1.id,t1.thing_code,t1.thing_name,t2.update_time,t3.system_name
+        FROM tb_thing t1, rel_thing_system t2, tb_system t3
+        WHERE t1.thing_code = t2.thing_code AND t2.system_id = t3.id
+        AND t1.thing_code in
+        <foreach collection="thingCodeList" item="thingCode" index="index"
+                 open="(" close=")" separator=",">
+            #{thingCode}
+        </foreach>
+    </select>
+
 </mapper>
