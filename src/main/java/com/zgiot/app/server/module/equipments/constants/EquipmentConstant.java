@@ -163,6 +163,25 @@ public class EquipmentConstant {
      */
     public static final String SUBJECT_TYPE = "subject_type";
 
+    /**
+     *阀门类型
+     */
+    public static final String VALVE_TYPE  = "valve_type";
+
+    /**
+     *阀门执行方式
+     */
+    public static final String VALVE_EXECUTION_MODE  = "valve_execution_mode";
+
+    /**
+     *阀门控制方式
+     */
+    public static final String VALVE_CONTROL_MODE  = "valve_control_mode";
+
+    /**
+     *阀门用途
+     */
+    public static final String VALVE_PURPOSE  = "valve_purpose";
 
 
 
