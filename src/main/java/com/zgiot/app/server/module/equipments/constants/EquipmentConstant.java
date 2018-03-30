@@ -55,6 +55,11 @@ public class EquipmentConstant {
     public static final String LC = "LC";
 
     /**
+     * 闸板
+     */
+    public static final String ZB = "ZB";
+
+    /**
      *THING_TYPE1_CODE设备
      */
     public static final String THING_TYPE1_CODE_DEVICE = "DEVICE";
@@ -152,6 +157,14 @@ public class EquipmentConstant {
      *闸板控制方式
      */
     public static final String FLASHBOARD_CONTROL_MODE = "flashboard_control_mode";
+
+    /**
+     *归属主体类型
+     */
+    public static final String SUBJECT_TYPE = "subject_type";
+
+
+
 
     /*3.30 end*/
 

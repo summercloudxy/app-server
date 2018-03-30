@@ -1,9 +1,7 @@
 package com.zgiot.app.server.module.equipments.service.impl;
 
 import com.zgiot.app.server.module.equipments.constants.EquipmentConstant;
-import com.zgiot.app.server.module.equipments.controller.DeviceInfo;
-import com.zgiot.app.server.module.equipments.controller.PartsInfo;
-import com.zgiot.app.server.module.equipments.controller.PipeInfo;
+import com.zgiot.app.server.module.equipments.controller.*;
 import com.zgiot.app.server.module.equipments.mapper.RelThingtagThingMapper;
 import com.zgiot.app.server.module.equipments.mapper.ThingManagementMapper;
 import com.zgiot.app.server.module.equipments.mapper.ThingPositionMapper;
@@ -12,7 +10,6 @@ import com.zgiot.app.server.module.equipments.pojo.Thing;
 import com.zgiot.app.server.module.equipments.pojo.ThingPosition;
 import com.zgiot.app.server.module.equipments.mapper.RelThingSystemMapper;
 import com.zgiot.app.server.module.equipments.pojo.*;
-import com.zgiot.app.server.module.equipments.controller.ChuteInfo;
 import com.zgiot.app.server.module.equipments.mapper.ThingPropertiesMapper;
 import com.zgiot.app.server.module.equipments.service.ThingManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -196,7 +193,9 @@ public class ThingManagementServiceImpl implements ThingManagementService {
     @Transactional
     public void addChute(ChuteInfo chuteInfo) {
 
-        String thingCode = "调用wang磊的方法";
+        String parentThingCode = chuteInfo.getStartThingCode() + "-" +chuteInfo.getTerminalThingCode();
+        String thingType = "." + LC + "-";
+        String thingCode = getThingCodeByInfo(parentThingCode,thingType,THING_TYPE1_CODE_CHUTE);
         //插入tb_thing表
         Thing thing = new Thing();
         thing.setThingCode(thingCode);
@@ -406,10 +405,13 @@ public class ThingManagementServiceImpl implements ThingManagementService {
 
     /*3.30 begin*/
 
+    //管道
     @Transactional
     public void addPipe(PipeInfo pipeInfo) {
 
-        String thingCode = "调用wang磊的方法";
+        String parentThingCode = pipeInfo.getStartThingCode() + "-" +pipeInfo.getTerminalThingCode();
+        String thingType = "." + GD + "-";
+        String thingCode = getThingCodeByInfo(parentThingCode,thingType,THING_TYPE1_CODE_PIPE);
         //插入tb_thing表
         Thing thing = new Thing();
         thing.setThingCode(thingCode);
@@ -487,6 +489,110 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         Long id = pipeInfo.getId();
         delChuteOrPipe(id);
         addPipe(pipeInfo);
+    }
+
+    //闸板
+    @Transactional
+    public void addFlashboard(FlashboardInfo flashboardInfo) {
+
+        String parentThingCode = flashboardInfo.getParentThingCode();
+        String thingType = "." + ZB + "-";
+        String thingCode = getThingCodeByInfo(parentThingCode,thingType,THING_TYPE1_CODE_FLASHBOARD);
+        //插入tb_thing表
+        Thing thing = new Thing();
+        thing.setThingCode(thingCode);
+        thing.setThingName(flashboardInfo.getFlashboardName());
+        thing.setThingType1Code(THING_TYPE1_CODE_FLASHBOARD);
+        thingMapper.addThing(thing);
+
+        //插入tb_thing_properties表
+        ThingProperties tp1 = new ThingProperties();
+        tp1.setThingCode(thingCode);
+        tp1.setPropKey(SUBJECT_TYPE);
+        tp1.setPropValue(flashboardInfo.getSubjectType());
+        tp1.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp1);
+
+        ThingProperties tp2 = new ThingProperties();
+        tp2.setThingCode(thingCode);
+        tp2.setPropKey(PARENT_THING_CODE);
+        tp2.setPropValue(flashboardInfo.getParentThingCode());
+        tp2.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp2);
+
+        ThingProperties tp3 = new ThingProperties();
+        tp3.setThingCode(thingCode);
+        tp3.setPropKey(PARENT_THING_NAME);
+        tp3.setPropValue(flashboardInfo.getParentThingName());
+        tp3.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp3);
+
+        ThingProperties tp4 = new ThingProperties();
+        tp4.setThingCode(thingCode);
+        tp4.setPropKey(FLASHBOARD_TYPE);
+        tp4.setPropValue(flashboardInfo.getFlashboardType());
+        tp4.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp4);
+
+        ThingProperties tp5 = new ThingProperties();
+        tp5.setThingCode(thingCode);
+        tp5.setPropKey(MANUFACTURER);
+        tp5.setPropValue(flashboardInfo.getManufacturer());
+        tp5.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp5);
+
+        ThingProperties tp6 = new ThingProperties();
+        tp6.setThingCode(thingCode);
+        tp6.setPropKey(ENABLE_DATE);
+        tp6.setPropValue(flashboardInfo.getEnableDate());
+        tp6.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp6);
+
+        ThingProperties tp7 = new ThingProperties();
+        tp7.setThingCode(thingCode);
+        tp7.setPropKey(DISABLE_DATE);
+        tp7.setPropValue(flashboardInfo.getDisableDate());
+        tp7.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp7);
+
+        ThingProperties tp8 = new ThingProperties();
+        tp8.setThingCode(thingCode);
+        tp8.setPropKey(FLASHBOARD_EXECUTION_MODE);
+        tp8.setPropValue(flashboardInfo.getFlashboardExecutionMode());
+        tp8.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp8);
+
+        ThingProperties tp9 = new ThingProperties();
+        tp9.setThingCode(thingCode);
+        tp9.setPropKey(FLASHBOARD_CONTROL_MODE);
+        tp9.setPropValue(flashboardInfo.getFlashboardControlMode());
+        tp9.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp9);
+
+        // 插入thingPosition表
+        ThingPosition thingPosition = new ThingPosition();
+        thingPosition.setThingCode(flashboardInfo.getThingCode());
+        thingPosition.setBuildingId(flashboardInfo.getBuildingId());
+        thingPosition.setFloor(flashboardInfo.getFloor());
+
+        thingPositionMapper.addThingPosition(thingPosition);
+
+    }
+
+    @Transactional
+    public void delFlashboard(Long id){
+        Thing t = thingMapper.getThingById(id);
+        String thingCode = t.getThingCode();
+        thingMapper.deleteThingById(id);
+        thingPropertiesMapper.deleteThingPropertiesByThingCode(thingCode);
+        thingPositionMapper.deleteThingPosition(thingCode);
+    }
+
+    @Transactional
+    public void editFlashboard(FlashboardInfo flashboardInfo){
+        Long id = flashboardInfo.getId();
+        delFlashboard(id);
+        addFlashboard(flashboardInfo);
     }
 
     /*3.30 end*/

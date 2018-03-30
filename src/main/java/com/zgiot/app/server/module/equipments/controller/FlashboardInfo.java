@@ -56,7 +56,7 @@ public class FlashboardInfo {
     /**
      *闸板类型
      */
-    private String flashboard_type;
+    private String flashboardType;
 
     /**
      *所属车间
@@ -77,6 +77,11 @@ public class FlashboardInfo {
      *控制方式
      */
     private String flashboardControlMode;
+
+    /**
+     *类型简称
+     */
+    private String thingType;
 
     public Long getId() {
         return id;
@@ -158,14 +163,6 @@ public class FlashboardInfo {
         this.parentThingName = parentThingName;
     }
 
-    public String getFlashboard_type() {
-        return flashboard_type;
-    }
-
-    public void setFlashboard_type(String flashboard_type) {
-        this.flashboard_type = flashboard_type;
-    }
-
     public Long getBuildingId() {
         return buildingId;
     }
@@ -196,5 +193,21 @@ public class FlashboardInfo {
 
     public void setFlashboardControlMode(String flashboardControlMode) {
         this.flashboardControlMode = flashboardControlMode;
+    }
+
+    public String getThingType() {
+        return thingType;
+    }
+
+    public void setThingType(String thingType) {
+        this.thingType = thingType;
+    }
+
+    public String getFlashboardType() {
+        return flashboardType;
+    }
+
+    public void setFlashboardType(String flashboardType) {
+        this.flashboardType = flashboardType;
     }
 }
