@@ -45,7 +45,9 @@ public interface MetricTagRelationMapper {
     @Delete("delete from rel_metrictag_metric where id=#{id}")
     void deleteSignalWrapperConfig(@Param("id") int id);
 
-    @Select("select count(1) from rel_metrictag_metric")
+    @Select("select count(1)\n" +
+            " from tb_metric_tag a,tb_metric b,rel_metrictag_metric c where a.code=c.metric_tag_code\n" +
+            " and c.metric_code=b.metric_code order by c.create_date desc")
     int getSignalWrapperItemCount();
 
     @Select("select tag_name from tb_metric_tag")

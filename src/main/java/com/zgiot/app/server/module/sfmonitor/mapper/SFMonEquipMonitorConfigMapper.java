@@ -33,7 +33,7 @@ public interface SFMonEquipMonitorConfigMapper {
 
     void deleteEquipmentConfig(SFMonEquipMonitorConfig sfMonEquipMonitorConfig);
 
-    List<SFMonPadJumpZoneInfo> getJumpZoneData(@Param("thingCode") String thingCode,@Param("zoneCode") String zoneCode);
+    List<SFMonPadJumpZoneEquipmentInfo> getJumpZoneData(@Param("thingCode") String thingCode,@Param("zoneCode") String zoneCode);
 
     List<SFMonPadParameterZoneInfo> getParameterData(@Param("thingCode") String thingCode, @Param("zoneCode") String zoneCode);
 
