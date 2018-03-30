@@ -38,7 +38,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
     private static final Logger logger = LoggerFactory.getLogger(SubscriptionCardServiceImpl.class);
 
-
+   
     @Autowired
     private SubscCardTypeMapper subscCardTypeMapper;
 
@@ -582,10 +582,15 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
      */
     private void getProductYieldOfMetricCAP(ProductYieldVO productYieldVO, String[] cardParamValues, String[] rawCoals) {
         //原煤瞬时量
-        String rawCoalCapValue = "";
-        DataModel rawCoalCap = historyDataService.findClosestHistoryData(Lists.newArrayList(rawCoals[0], rawCoals[1]), Lists.newArrayList(MetricCodes.COAL_CAP), new Date(System.currentTimeMillis() - 240000));
-        if (rawCoalCap != null) {
-            rawCoalCapValue = MetricValueUtil.formart(rawCoalCap.getValue());
+        BigDecimal rawCoalCapValue = BigDecimal.ZERO;
+        long millis = System.currentTimeMillis();
+        DataModel rawCoalCap1 = historyDataService.findClosestHistoryData(Lists.newArrayList(rawCoals[0]), Lists.newArrayList(MetricCodes.COAL_CAP), new Date(millis - 240000));
+        if (rawCoalCap1 != null) {
+            rawCoalCapValue = rawCoalCapValue.add(new BigDecimal(rawCoalCap1.getValue()));
+        }
+        DataModel rawCoalCap2 = historyDataService.findClosestHistoryData(Lists.newArrayList(rawCoals[1]), Lists.newArrayList(MetricCodes.COAL_CAP), new Date(millis - 240000));
+        if (rawCoalCap2 != null) {
+            rawCoalCapValue = rawCoalCapValue.add(new BigDecimal(rawCoalCap2.getValue()));
         }
         //精煤瞬时量
         String cleanCoalCapValue = "";
@@ -606,7 +611,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             slurryCoalCapValue = MetricValueUtil.formart(slurryCoalCap.getValue());
         }
         //矸石瞬时量
-        BigDecimal wasteRockCapVale = new BigDecimal(StringUtils.isEmpty(rawCoalCapValue) ? "0" : rawCoalCapValue).
+        BigDecimal wasteRockCapVale = rawCoalCapValue.
                 subtract(new BigDecimal(StringUtils.isEmpty(cleanCoalCapValue) ? "0" : cleanCoalCapValue)).
                 subtract(new BigDecimal(StringUtils.isEmpty(mixedCoalCapValue) ? "0" : mixedCoalCapValue)).
                 subtract(new BigDecimal(StringUtils.isEmpty(slurryCoalCapValue) ? "0" : slurryCoalCapValue));
@@ -614,7 +619,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         if (wasteRockCapVale.compareTo(BigDecimal.ZERO) > -1) {
             wasteRockCapValue = String.valueOf(wasteRockCapVale);
         }
-        productYieldVO.setRawCoalCapValue(rawCoalCapValue);
+        productYieldVO.setRawCoalCapValue(MetricValueUtil.formart(rawCoalCapValue));
         productYieldVO.setCleanCoalCapValue(cleanCoalCapValue);
         productYieldVO.setMixedCoalCapValue(mixedCoalCapValue);
         productYieldVO.setSlurryCapValue(slurryCoalCapValue);
@@ -1145,7 +1150,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
                 //空压机加载，卸载状态
                 getMompressorLoadStates(mompressor, mompressorMetric);
             } else if (SubscriptionConstants.RUN_STATE_STOP_0.equals(runStates)) {
-                mompressorMetric.setRunState(SubscriptionConstants.RUN_STATE_STOP_0);
+                mompressorMetric.setRunState("0");
                 mompressorMetric.setRunStateName(SubscriptionConstants.RUN_STATE_STOP);
             } else {
                 mompressorMetric.setRunState("");
@@ -1215,4 +1220,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
     public SubscCardTypeDO getCardTypeByCardCode(String cardCode) {
         return subscCardTypeMapper.getCardTypeByCardCode(cardCode);
     }
+
+
 }
+
