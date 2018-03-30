@@ -60,6 +60,11 @@ public class EquipmentConstant {
     public static final String ZB = "ZB";
 
     /**
+     * 阀门
+     */
+    public static final String FM = "FM";
+
+    /**
      *THING_TYPE1_CODE设备
      */
     public static final String THING_TYPE1_CODE_DEVICE = "DEVICE";
@@ -139,7 +144,7 @@ public class EquipmentConstant {
 
     /*3.30 begin*/
     /**
-     *管道通径
+     *通径
      */
     public static final String NOMINAL_DIAMETER = "nominal_diameter";
 
