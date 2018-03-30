@@ -1,9 +1,6 @@
 package com.zgiot.app.server.module.equipments.service;
 
-import com.zgiot.app.server.module.equipments.controller.DeviceInfo;
-import com.zgiot.app.server.module.equipments.controller.ChuteInfo;
-import com.zgiot.app.server.module.equipments.controller.PartsInfo;
-import com.zgiot.app.server.module.equipments.controller.PipeInfo;
+import com.zgiot.app.server.module.equipments.controller.*;
 import com.zgiot.app.server.module.equipments.pojo.Thing;
 
 import java.util.List;
@@ -43,4 +40,15 @@ public interface ThingManagementService {
     public void editParts(PartsInfo partsInfo);
 
     List<PipeInfo> getPipeInfoByThingTagId(Long id);
+
+    public void addFlashboard(FlashboardInfo flashboardInfo);
+
+    public void delFlashboardOrValve(Long id);
+
+    public void editFlashboard(FlashboardInfo flashboardInfo);
+
+    public void addValve(ValveInfo valveInfo);
+
+    public void editValve(ValveInfo valveInfo);
+
 }

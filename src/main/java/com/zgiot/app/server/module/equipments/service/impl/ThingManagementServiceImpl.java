@@ -617,7 +617,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
     }
 
     @Transactional
-    public void delFlashboard(Long id){
+    public void delFlashboardOrValve(Long id){
         Thing t = thingMapper.getThingById(id);
         String thingCode = t.getThingCode();
         thingMapper.deleteThingById(id);
@@ -628,8 +628,126 @@ public class ThingManagementServiceImpl implements ThingManagementService {
     @Transactional
     public void editFlashboard(FlashboardInfo flashboardInfo){
         Long id = flashboardInfo.getId();
-        delFlashboard(id);
+        delFlashboardOrValve(id);
         addFlashboard(flashboardInfo);
+    }
+
+
+    //阀门
+    @Transactional
+    public void addValve(ValveInfo valveInfo) {
+
+        String parentThingCode = valveInfo.getParentThingCode();
+        String thingType = "." + FM + "-";
+        String thingCode = getThingCodeByInfo(parentThingCode,thingType,THING_TYPE1_CODE_VALVE);
+        //插入tb_thing表
+        Thing thing = new Thing();
+        thing.setThingCode(thingCode);
+        thing.setThingName(valveInfo.getValveName());
+        thing.setThingType1Code(THING_TYPE1_CODE_VALVE);
+        thingMapper.addThing(thing);
+
+        //插入tb_thing_properties表
+        ThingProperties tp1 = new ThingProperties();
+        tp1.setThingCode(thingCode);
+        tp1.setPropKey(SUBJECT_TYPE);
+        tp1.setPropValue(valveInfo.getSubjectType());
+        tp1.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp1);
+
+        ThingProperties tp2 = new ThingProperties();
+        tp2.setThingCode(thingCode);
+        tp2.setPropKey(PARENT_THING_CODE);
+        tp2.setPropValue(valveInfo.getParentThingCode());
+        tp2.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp2);
+
+        ThingProperties tp3 = new ThingProperties();
+        tp3.setThingCode(thingCode);
+        tp3.setPropKey(PARENT_THING_NAME);
+        tp3.setPropValue(valveInfo.getParentThingName());
+        tp3.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp3);
+
+        ThingProperties tp4 = new ThingProperties();
+        tp4.setThingCode(thingCode);
+        tp4.setPropKey(VALVE_TYPE);
+        tp4.setPropValue(valveInfo.getValveType());
+        tp4.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp4);
+
+        ThingProperties tp5 = new ThingProperties();
+        tp5.setThingCode(thingCode);
+        tp5.setPropKey(MANUFACTURER);
+        tp5.setPropValue(valveInfo.getManufacturer());
+        tp5.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp5);
+
+        ThingProperties tp6 = new ThingProperties();
+        tp6.setThingCode(thingCode);
+        tp6.setPropKey(ENABLE_DATE);
+        tp6.setPropValue(valveInfo.getEnableDate());
+        tp6.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp6);
+
+        ThingProperties tp7 = new ThingProperties();
+        tp7.setThingCode(thingCode);
+        tp7.setPropKey(DISABLE_DATE);
+        tp7.setPropValue(valveInfo.getDisableDate());
+        tp7.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp7);
+
+        ThingProperties tp8 = new ThingProperties();
+        tp8.setThingCode(thingCode);
+        tp8.setPropKey(VALVE_EXECUTION_MODE);
+        tp8.setPropValue(valveInfo.getValveExecutionMode());
+        tp8.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp8);
+
+        ThingProperties tp9 = new ThingProperties();
+        tp9.setThingCode(thingCode);
+        tp9.setPropKey(VALVE_CONTROL_MODE);
+        tp9.setPropValue(valveInfo.getValveControlMode());
+        tp9.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp9);
+
+        ThingProperties tp10 = new ThingProperties();
+        tp10.setThingCode(thingCode);
+        tp10.setPropKey(VALVE_PURPOSE);
+        tp10.setPropValue(valveInfo.getValvePurpose());
+        tp10.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp10);
+
+        ThingProperties tp11 = new ThingProperties();
+        tp11.setThingCode(thingCode);
+        tp11.setPropKey(NOMINAL_DIAMETER);
+        tp11.setPropValue(valveInfo.getNominalDiameter());
+        tp11.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp11);
+
+        ThingProperties tp12 = new ThingProperties();
+        tp12.setThingCode(thingCode);
+        tp12.setPropKey(SPECIFICATION);
+        tp12.setPropValue(valveInfo.getSpecification());
+        tp12.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp12);
+
+        // 插入thingPosition表
+        ThingPosition thingPosition = new ThingPosition();
+        thingPosition.setThingCode(valveInfo.getThingCode());
+        thingPosition.setBuildingId(valveInfo.getBuildingId());
+        thingPosition.setFloor(valveInfo.getFloor());
+
+        thingPositionMapper.addThingPosition(thingPosition);
+
+    }
+
+
+    @Transactional
+    public void editValve(ValveInfo valveInfo){
+        Long id = valveInfo.getId();
+        delFlashboardOrValve(id);
+        addValve(valveInfo);
     }
 
     /*3.30 end*/

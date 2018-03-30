@@ -60,6 +60,11 @@ public class EquipmentConstant {
     public static final String ZB = "ZB";
 
     /**
+     * 阀门
+     */
+    public static final String FM = "FM";
+
+    /**
      *THING_TYPE1_CODE设备
      */
     public static final String THING_TYPE1_CODE_DEVICE = "DEVICE";
@@ -139,7 +144,7 @@ public class EquipmentConstant {
 
     /*3.30 begin*/
     /**
-     *管道通径
+     *通径
      */
     public static final String NOMINAL_DIAMETER = "nominal_diameter";
 
@@ -163,6 +168,25 @@ public class EquipmentConstant {
      */
     public static final String SUBJECT_TYPE = "subject_type";
 
+    /**
+     *阀门类型
+     */
+    public static final String VALVE_TYPE  = "valve_type";
+
+    /**
+     *阀门执行方式
+     */
+    public static final String VALVE_EXECUTION_MODE  = "valve_execution_mode";
+
+    /**
+     *阀门控制方式
+     */
+    public static final String VALVE_CONTROL_MODE  = "valve_control_mode";
+
+    /**
+     *阀门用途
+     */
+    public static final String VALVE_PURPOSE  = "valve_purpose";
 
 
 
