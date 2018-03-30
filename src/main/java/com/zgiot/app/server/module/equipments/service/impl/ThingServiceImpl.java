@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -39,8 +40,21 @@ public class ThingServiceImpl implements ThingService {
     private RelThingSystemMapper relThingSystemMapper;
 
     @Override
-    public List<EquipmentInfo> getEquipmentInfoByThingcode(List<String> thingCodeList) {
-        return thingMapper.getEquipmentInfoByThingcode(thingCodeList);
+    public List<DeviceInfo> getDeviceInfoByThingcode(List<String> thingCodeList) {
+        return thingMapper.getDeviceInfoByThingcode(thingCodeList);
+    }
+
+    @Override
+    public List<DeviceInfo> getDeviceInfoByThingTagId(Long id) {
+        List<RelThingtagThing> relThingtagThingList = relThingtagThingMapper.getRelThingtagThingByThreeLevelId(id);
+        List<String> thingCodeList = new ArrayList<>();
+        if(relThingtagThingList != null && relThingtagThingList.size() > 0){
+            for(int i=0;i<relThingtagThingList.size();i++){
+                thingCodeList.add(relThingtagThingList.get(i).getThingCode());
+            }
+        }
+        List<DeviceInfo> deviceInfoList = getDeviceInfoByThingcode(thingCodeList);
+        return  deviceInfoList;
     }
 
     @Override
@@ -88,7 +102,7 @@ public class ThingServiceImpl implements ThingService {
 
         // relThingSystem
         RelThingSystem relThingSystem = new RelThingSystem();
-        relThingSystem.setSystemId(Long.parseLong(deviceInfo.getThingSystemId()));
+        relThingSystem.setSystemId(Long.parseLong(deviceInfo.getSystemId()));
         relThingSystem.setThingCode(deviceInfo.getThingCode());
         relThingSystem.setUpdateTime(new Date());
         relThingSystemMapper.addRelThingSystem(relThingSystem);
@@ -148,6 +162,12 @@ public class ThingServiceImpl implements ThingService {
         // thingProperties
         thingPropertiesMapper.deleteThingPropertiesByThingCode(thingCode);
 
+    }
+
+    @Override
+    public void editDevice(DeviceInfo deviceInfo) {
+        deleteDevice(deviceInfo.getId());
+        addDevice(deviceInfo);
     }
 
     @Transactional

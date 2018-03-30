@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface ThingService {
 
-    public List<EquipmentInfo> getEquipmentInfoByThingcode(List<String> thingCodeList);
+    public List<DeviceInfo> getDeviceInfoByThingcode(List<String> thingCodeList);
 
     public List<Thing> getThingByCode(String thingCode, String thingType1Code);
 
@@ -17,12 +17,15 @@ public interface ThingService {
 
     public void addChute(ChuteInfo chuteInfo);
 
-    public void addDevice(DeviceInfo deviceInfo);
-
-    public void deleteDevice(Long id);
-
     public void editChute(ChuteInfo chuteInfo);
 
     public void delChute(Long id);
 
+    public void addDevice(DeviceInfo deviceInfo);
+
+    public void deleteDevice(Long id);
+
+    public void editDevice(DeviceInfo deviceInfo);
+
+    public List<DeviceInfo> getDeviceInfoByThingTagId(Long id);
 }
