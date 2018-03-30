@@ -10,7 +10,6 @@
         <result column="tag_name" property="thingTagName"/>
         <result column="update_time" property="updateTime"/>
     </resultMap>
-
     <select id="getDeviceInfoByThingcode" resultMap="deviceInfo"
             resultType="com.zgiot.app.server.module.equipments.controller.DeviceInfo">
         SELECT t1.id,t1.thing_code,t1.thing_name,t3.system_id,t2.system_name,t4.create_date AS update_time,t5.tag_name
@@ -22,6 +21,22 @@
         </foreach>
         AND t1.thing_code = t3.thing_code AND t2.id = t3.system_id
         AND t4.thing_code = t1.thing_code AND t5.code = t4.thing_tag_code
+    </select>
+
+    <resultMap id="partsInfo" type="com.zgiot.app.server.module.equipments.controller.PartsInfo">
+        <result column="id" property="id"/>
+        <result column="thing_code" property="thingCode"/>
+        <result column="thing_name" property="thingName"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+    <select id="getPartsInfoByThingcode" resultMap="partsInfo"
+            resultType="com.zgiot.app.server.module.equipments.controller.PartsInfo">
+        SELECT t1.id,t1.thing_code,t1.thing_name,t2.create_date AS update_time FROM tb_thing t1, rel_thingtag_thing t2
+        WHERE t1.thing_code = t2.thing_code AND t1.thing_code in
+        <foreach collection="thingCodeList" item="thingCode" index="index"
+                 open="(" close=")" separator=",">
+            #{thingCode}
+        </foreach>
     </select>
 
 </mapper>

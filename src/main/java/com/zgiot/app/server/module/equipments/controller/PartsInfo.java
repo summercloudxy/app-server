@@ -8,6 +8,7 @@ public class PartsInfo {
     private String thingType;// 部件类型简称
     private String thingTypeName;// 部件类型名称
     private String thingName;// 部件名称
+    private String thingCode;// 部件编号
     private String specification;// 规格型号
     private String manufacturer;// 生产厂家
     private String enableDate;// 投用日期
@@ -21,6 +22,7 @@ public class PartsInfo {
     private String protectionGrade;// 防护等级
     private String ratedCurrent;// 额定电流
     private String updateTime;// 更新时间
+    private String thingTagCode;// 菜单id
 
     public Long getId() {
         return id;
@@ -172,5 +174,21 @@ public class PartsInfo {
 
     public void setUpdateTime(String updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public String getThingTagCode() {
+        return thingTagCode;
+    }
+
+    public void setThingTagCode(String thingTagCode) {
+        this.thingTagCode = thingTagCode;
+    }
+
+    public String getThingCode() {
+        return thingCode;
+    }
+
+    public void setThingCode(String thingCode) {
+        this.thingCode = thingCode;
     }
 }

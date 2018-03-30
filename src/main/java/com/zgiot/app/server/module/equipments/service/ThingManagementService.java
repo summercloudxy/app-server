@@ -37,4 +37,8 @@ public interface ThingManagementService {
     public void editPipe(PipeInfo pipeInfo);
 
     public void addParts(PartsInfo partsInfo);
+
+    public void deleteParts(Long id);
+
+    public void editParts(PartsInfo partsInfo);
 }

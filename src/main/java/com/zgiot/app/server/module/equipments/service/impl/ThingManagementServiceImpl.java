@@ -4,16 +4,12 @@ import com.zgiot.app.server.module.equipments.constants.EquipmentConstant;
 import com.zgiot.app.server.module.equipments.controller.DeviceInfo;
 import com.zgiot.app.server.module.equipments.controller.PartsInfo;
 import com.zgiot.app.server.module.equipments.controller.PipeInfo;
-import com.zgiot.app.server.module.equipments.mapper.RelThingtagThingMapper;
-import com.zgiot.app.server.module.equipments.mapper.ThingManagementMapper;
-import com.zgiot.app.server.module.equipments.mapper.ThingPositionMapper;
+import com.zgiot.app.server.module.equipments.mapper.*;
 import com.zgiot.app.server.module.equipments.pojo.RelThingtagThing;
 import com.zgiot.app.server.module.equipments.pojo.Thing;
 import com.zgiot.app.server.module.equipments.pojo.ThingPosition;
-import com.zgiot.app.server.module.equipments.mapper.RelThingSystemMapper;
 import com.zgiot.app.server.module.equipments.pojo.*;
 import com.zgiot.app.server.module.equipments.controller.ChuteInfo;
-import com.zgiot.app.server.module.equipments.mapper.ThingPropertiesMapper;
 import com.zgiot.app.server.module.equipments.service.ThingManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,10 +33,31 @@ public class ThingManagementServiceImpl implements ThingManagementService {
     private RelThingtagThingMapper relThingtagThingMapper;
     @Autowired
     private RelThingSystemMapper relThingSystemMapper;
+    @Autowired
+    private ThingTagManagementMapper thingTagManagementMapper;
 
-    @Override
+
     public List<DeviceInfo> getDeviceInfoByThingcode(List<String> thingCodeList) {
         return thingMapper.getDeviceInfoByThingcode(thingCodeList);
+    }
+    public List<PartsInfo> getPartsInfoByThingcode(List<String> thingCodeList) {
+        List<PartsInfo> partsInfoList = thingMapper.getPartsInfoByThingcode(thingCodeList);
+        List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
+        if(partsInfoList != null && partsInfoList.size() > 0){
+            for(int i=0;i<partsInfoList.size();i++){
+                for(int j=0;j<thingPropertiesList.size();j++){
+                    if(partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                            && thingPropertiesList.get(j).getPropKey().equals(EquipmentConstant.PARENT_THING_CODE)){
+                        partsInfoList.get(i).setParentThingCode(thingPropertiesList.get(j).getPropValue());
+                    }
+                    if(partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                            && thingPropertiesList.get(j).getPropKey().equals(EquipmentConstant.PARENT_THING_NAME)){
+                        partsInfoList.get(i).setParentThingName(thingPropertiesList.get(j).getPropValue());
+                    }
+                }
+            }
+        }
+        return partsInfoList;
     }
 
     /**
@@ -75,9 +92,8 @@ public class ThingManagementServiceImpl implements ThingManagementService {
                 thingCodeList.add(relThingtagThingList.get(i).getThingCode());
             }
         }
-//        List<PartsInfo> partsInfoList = getPartsInfoByThingcode(thingCodeList);
-//        return partsInfoList;
-        return null;
+        List<PartsInfo> partsInfoList = getPartsInfoByThingcode(thingCodeList);
+        return partsInfoList;
     }
 
     @Override
@@ -188,6 +204,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
     }
 
     @Override
+    @Transactional
     public void editDevice(DeviceInfo deviceInfo) {
         deleteDevice(deviceInfo.getId());
         addDevice(deviceInfo);
@@ -290,7 +307,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         // relThingtagThing
         RelThingtagThing relThingtagThing = new RelThingtagThing();
         relThingtagThing.setThingCode(thingCode);
-        relThingtagThing.setThingTagCode(partsInfo.getThingType());
+        relThingtagThing.setThingTagCode(partsInfo.getThingTagCode());
         relThingtagThing.setCreateDate(new Date());
         relThingtagThingMapper.addRelThingtagThing(relThingtagThing);
 
@@ -372,6 +389,29 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         tp.setPropType(EquipmentConstant.PROP_TYPE_PROP);
         thingPropertiesMapper.addThingProperties(tp);
 
+    }
+
+    @Override
+    @Transactional
+    public void deleteParts(Long id) {
+        Thing thing = thingMapper.getThingById(id);
+        String thingCode = thing.getThingCode();
+        // thing
+        thingMapper.deleteThingById(id);
+
+        // relThingtagThing
+        relThingtagThingMapper.deleteRelThingtagThingByThingCode(thingCode);
+
+        // thingProperties
+        thingPropertiesMapper.deleteThingPropertiesByThingCode(thingCode);
+
+    }
+
+    @Override
+    @Transactional
+    public void editParts(PartsInfo partsInfo) {
+        deleteParts(partsInfo.getId());
+        addParts(partsInfo);
     }
 
     /**
