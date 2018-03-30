@@ -2,8 +2,8 @@ package com.zgiot.app.server.module.equipments.service.impl;
 
 import com.zgiot.app.server.module.equipments.constants.EquipmentConstant;
 import com.zgiot.app.server.module.equipments.controller.DeviceInfo;
-import com.zgiot.app.server.module.equipments.controller.EquipmentInfo;
 import com.zgiot.app.server.module.equipments.controller.PartsInfo;
+import com.zgiot.app.server.module.equipments.controller.PipeInfo;
 import com.zgiot.app.server.module.equipments.mapper.RelThingtagThingMapper;
 import com.zgiot.app.server.module.equipments.mapper.ThingMapper;
 import com.zgiot.app.server.module.equipments.mapper.ThingPositionMapper;
@@ -207,44 +207,44 @@ public class ThingServiceImpl implements ThingService {
         //插入tb_thing_properties表
         ThingProperties tp1 = new ThingProperties();
         tp1.setThingCode(thingCode);
-        tp1.setPropKey(CHUTE_START_THING_CODE);
+        tp1.setPropKey(START_THING_CODE);
         tp1.setPropValue(chuteInfo.getStartThingCode());
         tp1.setPropType(PROP_TYPE_PROP);
         thingPropertiesMapper.addThingProperties(tp1);
 
         ThingProperties tp2 = new ThingProperties();
-        tp1.setThingCode(thingCode);
-        tp1.setPropKey(CHUTE_START_THING_NAME);
-        tp1.setPropValue(chuteInfo.getStartThingName());
-        tp1.setPropType(PROP_TYPE_PROP);
+        tp2.setThingCode(thingCode);
+        tp2.setPropKey(START_THING_NAME);
+        tp2.setPropValue(chuteInfo.getStartThingName());
+        tp2.setPropType(PROP_TYPE_PROP);
         thingPropertiesMapper.addThingProperties(tp2);
 
         ThingProperties tp3 = new ThingProperties();
-        tp1.setThingCode(thingCode);
-        tp1.setPropKey(CHUTE_TERMINAL_THING_CODE);
-        tp1.setPropValue(chuteInfo.getTerminalThingCode());
-        tp1.setPropType(PROP_TYPE_PROP);
+        tp3.setThingCode(thingCode);
+        tp3.setPropKey(TERMINAL_THING_CODE);
+        tp3.setPropValue(chuteInfo.getTerminalThingCode());
+        tp3.setPropType(PROP_TYPE_PROP);
         thingPropertiesMapper.addThingProperties(tp3);
 
         ThingProperties tp4 = new ThingProperties();
-        tp1.setThingCode(thingCode);
-        tp1.setPropKey(CHUTE_TERMINAL_THING_NAME);
-        tp1.setPropValue(chuteInfo.getTerminalThingName());
-        tp1.setPropType(PROP_TYPE_PROP);
+        tp4.setThingCode(thingCode);
+        tp4.setPropKey(TERMINAL_THING_NAME);
+        tp4.setPropValue(chuteInfo.getTerminalThingName());
+        tp4.setPropType(PROP_TYPE_PROP);
         thingPropertiesMapper.addThingProperties(tp4);
 
         ThingProperties tp5 = new ThingProperties();
-        tp1.setThingCode(thingCode);
-        tp1.setPropKey(CHUTE_ENABLE_DATE);
-        tp1.setPropValue(chuteInfo.getEnableDate());
-        tp1.setPropType(PROP_TYPE_PROP);
+        tp5.setThingCode(thingCode);
+        tp5.setPropKey(ENABLE_DATE);
+        tp5.setPropValue(chuteInfo.getEnableDate());
+        tp5.setPropType(PROP_TYPE_PROP);
         thingPropertiesMapper.addThingProperties(tp5);
 
         ThingProperties tp6 = new ThingProperties();
-        tp1.setThingCode(thingCode);
-        tp1.setPropKey(CHUTE_DISABLE_DATE);
-        tp1.setPropValue(chuteInfo.getDisableDate());
-        tp1.setPropType(PROP_TYPE_PROP);
+        tp6.setThingCode(thingCode);
+        tp6.setPropKey(DISABLE_DATE);
+        tp6.setPropValue(chuteInfo.getDisableDate());
+        tp6.setPropType(PROP_TYPE_PROP);
         thingPropertiesMapper.addThingProperties(tp6);
 
         //插入rel_thing_system表
@@ -255,8 +255,12 @@ public class ThingServiceImpl implements ThingService {
 
     }
 
+    /**
+     * 删除，溜槽和管道可共用此方法
+     * @param id
+     */
     @Transactional
-    public void delChute(Long id){
+    public void delChuteOrPipe(Long id){
         Thing t = thingMapper.getThingById(id);
         String thingCode = t.getThingCode();
         thingMapper.deleteThingById(id);
@@ -267,7 +271,7 @@ public class ThingServiceImpl implements ThingService {
     @Transactional
     public void editChute(ChuteInfo chuteInfo){
         Long id = chuteInfo.getId();
-        delChute(id);
+        delChuteOrPipe(id);
         addChute(chuteInfo);
     }
 
@@ -317,4 +321,90 @@ public class ThingServiceImpl implements ThingService {
         return thingCode;
     }
 
+    /*3.30 begin*/
+
+    @Transactional
+    public void addPipe(PipeInfo pipeInfo) {
+
+        String thingCode = "调用wang磊的方法";
+        //插入tb_thing表
+        Thing thing = new Thing();
+        thing.setThingCode(thingCode);
+        thing.setThingName(pipeInfo.getPipeName());
+        thing.setThingType1Code(THING_TYPE1_CODE_PIPE);
+        thingMapper.addThing(thing);
+
+        //插入tb_thing_properties表
+        ThingProperties tp1 = new ThingProperties();
+        tp1.setThingCode(thingCode);
+        tp1.setPropKey(START_THING_CODE);
+        tp1.setPropValue(pipeInfo.getStartThingCode());
+        tp1.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp1);
+
+        ThingProperties tp2 = new ThingProperties();
+        tp2.setThingCode(thingCode);
+        tp2.setPropKey(START_THING_NAME);
+        tp2.setPropValue(pipeInfo.getStartThingName());
+        tp2.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp2);
+
+        ThingProperties tp3 = new ThingProperties();
+        tp3.setThingCode(thingCode);
+        tp3.setPropKey(TERMINAL_THING_CODE);
+        tp3.setPropValue(pipeInfo.getTerminalThingCode());
+        tp3.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp3);
+
+        ThingProperties tp4 = new ThingProperties();
+        tp4.setThingCode(thingCode);
+        tp4.setPropKey(TERMINAL_THING_NAME);
+        tp4.setPropValue(pipeInfo.getTerminalThingName());
+        tp4.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp4);
+
+        ThingProperties tp5 = new ThingProperties();
+        tp5.setThingCode(thingCode);
+        tp5.setPropKey(ENABLE_DATE);
+        tp5.setPropValue(pipeInfo.getEnableDate());
+        tp5.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp5);
+
+        ThingProperties tp6 = new ThingProperties();
+        tp6.setThingCode(thingCode);
+        tp6.setPropKey(DISABLE_DATE);
+        tp6.setPropValue(pipeInfo.getDisableDate());
+        tp6.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp6);
+
+        ThingProperties tp7 = new ThingProperties();
+        tp7.setThingCode(thingCode);
+        tp7.setPropKey(MANUFACTURER);
+        tp7.setPropValue(pipeInfo.getManufacturer());
+        tp7.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp7);
+
+        ThingProperties tp8 = new ThingProperties();
+        tp8.setThingCode(thingCode);
+        tp8.setPropKey(NOMINAL_DIAMETER);
+        tp8.setPropValue(pipeInfo.getNominalDiameter());
+        tp8.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp8);
+
+        //插入rel_thing_system表
+        RelThingSystem rts = new RelThingSystem();
+        rts.setThingCode(thingCode);
+        rts.setSystemId(pipeInfo.getThingSystemId());
+        relThingSystemMapper.addRelThingSystem(rts);
+
+    }
+
+    @Transactional
+    public void editPipe(PipeInfo pipeInfo){
+        Long id = pipeInfo.getId();
+        delChuteOrPipe(id);
+        addPipe(pipeInfo);
+    }
+
+    /*3.30 end*/
 }

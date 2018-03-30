@@ -35,18 +35,38 @@ public class EquipmentManagementController {
     @Autowired
     private TBSystemService tbSystemService;
 
+    @Autowired
+    private CoalStorageDepotService coalStorageDepotService;
+
+    /**
+     * 生产车间列表
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
     @RequestMapping(value = "/building/list/pageNum/{pageNum}/pageSize/{pageSize}", method = RequestMethod.GET)
     public ResponseEntity<String> getBuildingList(@PathVariable int pageNum, @PathVariable int pageSize) {
         List<Building> buildingList = buildingService.getBuildingAll(pageNum,pageSize);
         return new ResponseEntity<>(ServerResponse.buildOkJson(buildingList), HttpStatus.OK);
     }
 
+    /**
+     * 生产车间添加
+     * @param building
+     * @return
+     */
     @RequestMapping(value = "/building/add", method = RequestMethod.POST)
     public ResponseEntity<String> addBuilding(@RequestBody Building building) {
         buildingService.addBuilding(building);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
+    /**
+     * 生产车间编辑
+     * @param building
+     * @param id
+     * @return
+     */
     @RequestMapping(value = "/building/edit/{id}", method = RequestMethod.PUT)
     public ResponseEntity<String> editBuilding(@RequestBody Building building, @PathVariable("id") Long id) {
         building.setId(id);
@@ -54,12 +74,22 @@ public class EquipmentManagementController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
+    /**
+     * 生产车间删除
+     * @param id
+     * @return
+     */
     @RequestMapping(value = "/building/delete/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<String> delBuilding(@PathVariable("id") Long id) {
         buildingService.deleteBuilding(id);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
+    /**
+     * 生产车间-获取指定生产车间
+     * @param id
+     * @return
+     */
     @RequestMapping(value = "/building/find/{id}", method = RequestMethod.GET)
     public ResponseEntity<String> findBuilding(@PathVariable("id") Long id) {
         Building building = buildingService.getBuildingById(id);
@@ -208,13 +238,26 @@ public class EquipmentManagementController {
      */
     @RequestMapping(value = "/chute/delete/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<String> delChute(@PathVariable("id") Long id) {
-        thingService.delChute(id);
+        thingService.delChuteOrPipe(id);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+    /*3.30 begin*/
+
+    /**
+     * 添加管道
+     * @param pipeInfo
+     * @return
+     */
+    @RequestMapping(value = "/pipe/add", method = RequestMethod.POST)
+    public ResponseEntity<String> addChute(@RequestBody PipeInfo pipeInfo) {
+        thingService.addPipe(pipeInfo);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
     /**
      * 添加设备
-     * @param deviceInfo
+     * @param partsInfo
      * @return
      */
     @RequestMapping(value = "/parts/add", method = RequestMethod.POST)
@@ -223,4 +266,86 @@ public class EquipmentManagementController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
+    /**
+     * 编辑管道
+     * @param pipeInfo，id
+     * @return
+     */
+    @RequestMapping(value = "/pipe/edit/{id}", method = RequestMethod.PUT)
+    public ResponseEntity<String> editChute(@RequestBody PipeInfo pipeInfo, @PathVariable("id") Long id) {
+        pipeInfo.setId(id);
+        thingService.editPipe(pipeInfo);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+    /**
+     * 删除管道
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/pipe/delete/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<String> delPipe(@PathVariable("id") Long id) {
+        thingService.delChuteOrPipe(id);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+
+    /**
+     * 储煤仓列表
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    @RequestMapping(value = "/coalStorageDepot/list/pageNum/{pageNum}/pageSize/{pageSize}", method = RequestMethod.GET)
+    public ResponseEntity<String> getCoalStorageDepotList(@PathVariable int pageNum, @PathVariable int pageSize) {
+        List<CoalStorageDepot> coalStorageDepotList = coalStorageDepotService.getCoalStorageDepotAll(pageNum,pageSize);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(coalStorageDepotList), HttpStatus.OK);
+    }
+
+    /**
+     * 储煤仓添加
+     * @param coalStorageDepot
+     * @return
+     */
+    @RequestMapping(value = "/coalStorageDepot/add", method = RequestMethod.POST)
+    public ResponseEntity<String> addCoalStorageDepot(@RequestBody CoalStorageDepot coalStorageDepot) {
+        coalStorageDepotService.addCoalStorageDepot(coalStorageDepot);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+    /**
+     * 储煤仓编辑
+     * @param coalStorageDepot
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/coalStorageDepot/edit/{id}", method = RequestMethod.PUT)
+    public ResponseEntity<String> editCoalStorageDepot(@RequestBody CoalStorageDepot coalStorageDepot, @PathVariable("id") Long id) {
+        coalStorageDepot.setId(id);
+        coalStorageDepotService.editCoalStorageDepot(coalStorageDepot);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+    /**
+     * 储煤仓删除
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/coalStorageDepot/delete/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<String> delCoalStorageDepot(@PathVariable("id") Long id) {
+        coalStorageDepotService.deleteCoalStorageDepot(id);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+    /**
+     * 储煤仓-获取指定储煤仓
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/coalStorageDepot/find/{id}", method = RequestMethod.GET)
+    public ResponseEntity<String> findCoalStorageDepot(@PathVariable("id") Long id) {
+        CoalStorageDepot coalStorageDepot = coalStorageDepotService.getCoalStorageDepotById(id);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(coalStorageDepot), HttpStatus.OK);
+    }
+    /*3.30 end*/
 }
