@@ -38,7 +38,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
     private static final Logger logger = LoggerFactory.getLogger(SubscriptionCardServiceImpl.class);
 
-
+   
     @Autowired
     private SubscCardTypeMapper subscCardTypeMapper;
 
@@ -1220,4 +1220,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
     public SubscCardTypeDO getCardTypeByCardCode(String cardCode) {
         return subscCardTypeMapper.getCardTypeByCardCode(cardCode);
     }
+
+
 }
+
