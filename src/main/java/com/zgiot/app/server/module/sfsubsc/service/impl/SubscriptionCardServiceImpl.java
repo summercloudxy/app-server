@@ -775,7 +775,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
     private ChemicalTestsDataVO.MetricData get552MtMetricValue(ChemicalTestsDataVO chemicalTestsDataVO, CoalAnalysisRecord coalAnalysisRecord, CoalAnalysisRecord preCoalAnalysisRecord) {
         ChemicalTestsDataVO.MetricData metricData4 = chemicalTestsDataVO.new MetricData();
         metricData4.setMetricName(SubscriptionConstants.MOISTURE_CONTENT);
-        metricData4.setMetricValue(String.valueOf(coalAnalysisRecord.getMt()));
+        metricData4.setMetricValue(String.valueOf(coalAnalysisRecord.getMt() == null ? "" : coalAnalysisRecord.getMt()));
         String startScope = SubscriptionConstants.MOISTURE_CONTENT_SCOPE.split("-")[0];
         String endScope = SubscriptionConstants.MOISTURE_CONTENT_SCOPE.split("-")[1];
         metricData4.setStartScope(startScope);
@@ -794,7 +794,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             }
         }
         //计算是否是异常数据
-        if (!metricData4.getMetricValue().equals("null")) {
+        if (coalAnalysisRecord.getMt() != null) {
             if (new BigDecimal(metricData4.getMetricValue()).compareTo(new BigDecimal(startScope)) > 0 && new BigDecimal(endScope).compareTo(new BigDecimal(metricData4.getMetricValue())) > 0) {
                 metricData4.setUnusual("0");
             } else {
@@ -818,7 +818,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         //精煤灰分
         ChemicalTestsDataVO.MetricData metricData3 = chemicalTestsDataVO.new MetricData();
         metricData3.setMetricName(SubscriptionConstants.ASH_CONTENT);
-        metricData3.setMetricValue(String.valueOf(coalAnalysisRecord.getAad()));
+        metricData3.setMetricValue(String.valueOf(coalAnalysisRecord.getAad() == null ? "" : coalAnalysisRecord.getAad()));
 
         String startScope = SubscriptionConstants.ASH_CONTENT_MIXED_COAL_SCOPE.split("-")[0];
         String endScope = SubscriptionConstants.ASH_CONTENT_MIXED_COAL_SCOPE.split("-")[1];
@@ -838,14 +838,16 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
             }
         }
-
-        //计算是否是异常数据
-        if (new BigDecimal(metricData3.getMetricValue()).compareTo(new BigDecimal(startScope)) > 0 && new BigDecimal(endScope).compareTo(new BigDecimal(metricData3.getMetricValue())) > 0) {
-            metricData3.setUnusual("0");
+        if (coalAnalysisRecord.getAad() != null) {
+            //计算是否是异常数据
+            if (new BigDecimal(metricData3.getMetricValue()).compareTo(new BigDecimal(startScope)) > 0 && new BigDecimal(endScope).compareTo(new BigDecimal(metricData3.getMetricValue())) > 0) {
+                metricData3.setUnusual("0");
+            } else {
+                metricData3.setUnusual("1");
+            }
         } else {
             metricData3.setUnusual("1");
         }
-
         return metricData3;
     }
 
@@ -900,7 +902,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         //精煤硫分
         ChemicalTestsDataVO.MetricData metricData2 = chemicalTestsDataVO.new MetricData();
         metricData2.setMetricName(SubscriptionConstants.SULFUR_CONTENT);
-        metricData2.setMetricValue(String.valueOf(coalAnalysisRecord.getStad()));
+        metricData2.setMetricValue(String.valueOf(coalAnalysisRecord.getStad() == null ? "" : coalAnalysisRecord.getStad()));
         String startScope2 = SubscriptionConstants.SULFUR_CONTENT_SCOPE.split("-")[0];
         String endScope2 = SubscriptionConstants.SULFUR_CONTENT_SCOPE.split("-")[1];
         metricData2.setStartScope(startScope2);
@@ -919,11 +921,16 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             }
         }
         //计算是否是异常数据
-        if (new BigDecimal(metricData2.getMetricValue()).compareTo(new BigDecimal(startScope2)) > 0 && new BigDecimal(endScope2).compareTo(new BigDecimal(metricData2.getMetricValue())) > 0) {
-            metricData2.setUnusual("0");
+        if (coalAnalysisRecord.getStad() != null) {
+            if (new BigDecimal(metricData2.getMetricValue()).compareTo(new BigDecimal(startScope2)) > 0 && new BigDecimal(endScope2).compareTo(new BigDecimal(metricData2.getMetricValue())) > 0) {
+                metricData2.setUnusual("0");
+            } else {
+                metricData2.setUnusual("1");
+            }
         } else {
             metricData2.setUnusual("1");
         }
+
         return metricData2;
     }
 
@@ -939,7 +946,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         //精煤灰分
         ChemicalTestsDataVO.MetricData metricData1 = chemicalTestsDataVO.new MetricData();
         metricData1.setMetricName(SubscriptionConstants.ASH_CONTENT);
-        metricData1.setMetricValue(String.valueOf(coalAnalysisRecord.getAad()));
+        metricData1.setMetricValue(String.valueOf(coalAnalysisRecord.getAad() == null ? "" : coalAnalysisRecord.getAad()));
         String startScope1 = SubscriptionConstants.ASH_CONTENT_CLEAN_COAL_SCOPE.split("-")[0];
         String endScope1 = SubscriptionConstants.ASH_CONTENT_CLEAN_COAL_SCOPE.split("-")[1];
         metricData1.setStartScope(startScope1);
@@ -960,8 +967,12 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         }
 
         //计算是否是异常数据
-        if (new BigDecimal(metricData1.getMetricValue()).compareTo(new BigDecimal(startScope1)) > 0 && new BigDecimal(endScope1).compareTo(new BigDecimal(metricData1.getMetricValue())) > 0) {
-            metricData1.setUnusual("0");
+        if (coalAnalysisRecord != null) {
+            if (new BigDecimal(metricData1.getMetricValue()).compareTo(new BigDecimal(startScope1)) > 0 && new BigDecimal(endScope1).compareTo(new BigDecimal(metricData1.getMetricValue())) > 0) {
+                metricData1.setUnusual("0");
+            } else {
+                metricData1.setUnusual("1");
+            }
         } else {
             metricData1.setUnusual("1");
         }
