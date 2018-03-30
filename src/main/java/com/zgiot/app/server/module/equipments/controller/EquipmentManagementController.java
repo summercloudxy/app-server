@@ -135,8 +135,8 @@ public class EquipmentManagementController {
      */
     @RequestMapping(value = "/thing/getPartsInfoByThingTagId/{id}", method = RequestMethod.GET)
     public ResponseEntity<String> getPartsInfoByThingTagId(@PathVariable("id") Long id){
-        List<DeviceInfo> deviceInfoList = thingService.getDeviceInfoByThingTagId(id);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(deviceInfoList), HttpStatus.OK);
+        List<PartsInfo> partsInfoList = thingService.getPartsInfoByThingTagId(id);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(partsInfoList), HttpStatus.OK);
     }
 
     /*3.29 begin*/
@@ -256,17 +256,6 @@ public class EquipmentManagementController {
     }
 
     /**
-     * 添加设备
-     * @param partsInfo
-     * @return
-     */
-    @RequestMapping(value = "/parts/add", method = RequestMethod.POST)
-    public ResponseEntity<String> addParts(@RequestBody PartsInfo partsInfo) {
-        thingService.addParts(partsInfo);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
-    }
-
-    /**
      * 编辑管道
      * @param pipeInfo，id
      * @return
@@ -348,4 +337,39 @@ public class EquipmentManagementController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(coalStorageDepot), HttpStatus.OK);
     }
     /*3.30 end*/
+
+    /**
+     * 添加设备
+     * @param partsInfo
+     * @return
+     */
+    @RequestMapping(value = "/parts/add", method = RequestMethod.POST)
+    public ResponseEntity<String> addParts(@RequestBody PartsInfo partsInfo) {
+        thingService.addParts(partsInfo);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+    /**
+     * 删除管道
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/parts/delete/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<String> deleteParts(@PathVariable("id") Long id) {
+        thingService.deleteParts(id);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+    /**
+     * 编辑设备
+     * @param deviceInfo，id
+     * @return
+     */
+    @RequestMapping(value = "/patrs/edit/{id}", method = RequestMethod.PUT)
+    public ResponseEntity<String> editParts(@RequestBody PartsInfo partsInfo, @PathVariable("id") Long id) {
+        partsInfo.setId(id);
+        thingService.editParts(partsInfo);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
 }
