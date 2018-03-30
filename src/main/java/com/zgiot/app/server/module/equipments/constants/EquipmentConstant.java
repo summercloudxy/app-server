@@ -8,6 +8,11 @@ public class EquipmentConstant {
     public static final String SPECIFICATION = "SPECIFICATION";
 
     /**
+     * 生产厂家
+     */
+    public static final String MANUFACTURER = "MANUFACTURER";
+
+    /**
      * 投用日期
      */
     public static final String START_DATE = "START_DATE";
