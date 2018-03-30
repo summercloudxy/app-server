@@ -794,8 +794,12 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             }
         }
         //计算是否是异常数据
-        if (new BigDecimal(metricData4.getMetricValue()).compareTo(new BigDecimal(startScope)) > 0 && new BigDecimal(endScope).compareTo(new BigDecimal(metricData4.getMetricValue())) > 0) {
-            metricData4.setUnusual("0");
+        if (!metricData4.getMetricValue().equals("null")) {
+            if (new BigDecimal(metricData4.getMetricValue()).compareTo(new BigDecimal(startScope)) > 0 && new BigDecimal(endScope).compareTo(new BigDecimal(metricData4.getMetricValue())) > 0) {
+                metricData4.setUnusual("0");
+            } else {
+                metricData4.setUnusual("1");
+            }
         } else {
             metricData4.setUnusual("1");
         }
