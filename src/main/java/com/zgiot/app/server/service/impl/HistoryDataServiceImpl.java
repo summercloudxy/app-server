@@ -45,6 +45,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
     @Autowired
     private MongoDatabase database;
     private MongoCollection<Document> collection;
+
     @Autowired
     TMLMapper tmlMapper;
 

@@ -14,7 +14,7 @@ import com.zgiot.app.server.module.equipments.mapper.RelThingSystemMapper;
 import com.zgiot.app.server.module.equipments.pojo.*;
 import com.zgiot.app.server.module.equipments.controller.ChuteInfo;
 import com.zgiot.app.server.module.equipments.mapper.ThingPropertiesMapper;
-import com.zgiot.app.server.module.equipments.service.ThingService;
+import com.zgiot.app.server.module.equipments.service.ThingManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +25,7 @@ import static com.zgiot.app.server.module.equipments.constants.EquipmentConstant
 
 
 @Service
-public class ThingServiceImpl implements ThingService {
+public class ThingManagementServiceImpl implements ThingManagementService {
 
     @Autowired
     private ThingMapper thingMapper;

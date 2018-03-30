@@ -4,7 +4,7 @@ import com.zgiot.app.server.module.equipments.pojo.ThingTag;
 
 import java.util.List;
 
-public interface ThingTagService {
+public interface ThingTagManagementService {
 
     public List<ThingTag> getAllEquipmentType();
 

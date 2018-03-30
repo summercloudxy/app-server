@@ -24,13 +24,13 @@ public class EquipmentManagementController {
     @Autowired
     private BuildingService buildingService;
     @Autowired
-    private ThingTagService thingTagService;
+    private ThingTagManagementService thingTagService;
     @Autowired
     private ThingBaseDictService thingBaseDictService;
     @Autowired
     private RelThingtagThingService relThingtagThingService;
     @Autowired
-    private ThingService thingService;
+    private ThingManagementService thingService;
 
     @Autowired
     private TBSystemService tbSystemService;

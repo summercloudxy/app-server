@@ -6,5 +6,5 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping(value = GlobalConstants.API  + GlobalConstants.API_VERSION + "/sfsystems")
-public class SystemController {
+public class SfSystemController {
 }
