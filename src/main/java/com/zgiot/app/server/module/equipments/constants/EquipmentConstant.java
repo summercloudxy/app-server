@@ -3,6 +3,16 @@ package com.zgiot.app.server.module.equipments.constants;
 public class EquipmentConstant {
 
     /**
+     * 所属设备编号
+     */
+    public static final String PARENT_THING_CODE = "PARENT_THING_CODE";
+
+    /**
+     * 所属设备名称
+     */
+    public static final String PARENT_THING_NAME = "PARENT_THING_NAME";
+
+    /**
      * 规格型号
      */
     public static final String SPECIFICATION = "SPECIFICATION";
@@ -11,16 +21,6 @@ public class EquipmentConstant {
      * 生产厂家
      */
     public static final String MANUFACTURER = "MANUFACTURER";
-
-    /**
-     * 投用日期
-     */
-    public static final String START_DATE = "START_DATE";
-
-    /**
-     * 停用日期
-     */
-    public static final String STOP_DATE = "STOP_DATE";
 
     /**
      * 动力属性
@@ -139,5 +139,50 @@ public class EquipmentConstant {
     public static final String NOMINAL_DIAMETER = "nominal_diameter";
 
     /*3.30 end*/
+
+    /**
+     * 启动方式
+     */
+    public static final String START_TYPE = "START_TYPE";
+
+    /**
+     * 额定功率
+     */
+    public static final String RATED_POWER = "RATED_POWER";
+
+    /**
+     * 电压等级
+     */
+    public static final String VOLTAGE_LEVEL = "VOLTAGE_LEVEL";
+
+    /**
+     * 是否防爆
+     */
+    public static final String EXPLOSION_PROOF = "EXPLOSION_PROOF";
+
+    /**
+     * 级数
+     */
+    public static final String Grade = "Grade";
+
+    /**
+     * 绝缘等级
+     */
+    public static final String INSULATION_GRADE = "INSULATION_GRADE";
+
+    /**
+     * 防护等级
+     */
+    public static final String PROTECTION_GRADE = "PROTECTION_GRADE";
+
+    /**
+     * 额定电流
+     */
+    public static final String RATED_CURRENT = "RATED_CURRENT";
+
+    /**
+     * 更新时间
+     */
+    public static final String UPDATE_TIME = "UPDATE_TIME";
 
 }

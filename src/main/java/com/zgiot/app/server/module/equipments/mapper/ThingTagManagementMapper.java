@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Select;
 import java.util.List;
 
 @Mapper
-public interface ThingTagMapper {
+public interface ThingTagManagementMapper {
 
     /**
      * 获取所有设备类型
