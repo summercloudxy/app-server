@@ -93,32 +93,32 @@ public class EquipmentConstant {
     /**
      *起始设备CODE
      */
-    public static final String CHUTE_START_THING_CODE = "chute_start_thing_code";
+    public static final String START_THING_CODE = "start_thing_code";
 
     /**
      *起始设备名称
      */
-    public static final String CHUTE_START_THING_NAME = "chute_start_thing_name";
+    public static final String START_THING_NAME = "start_thing_name";
 
     /**
      *终止设备CODE
      */
-    public static final String CHUTE_TERMINAL_THING_CODE = "chute_terminal_thing_code";
+    public static final String TERMINAL_THING_CODE = "terminal_thing_code";
 
     /**
      *终止设备名称
      */
-    public static final String CHUTE_TERMINAL_THING_NAME = "chute_terminal_thing_name";
+    public static final String TERMINAL_THING_NAME = "terminal_thing_name";
 
     /**
      *投用日期
      */
-    public static final String CHUTE_ENABLE_DATE = "chute_enable_date";
+    public static final String ENABLE_DATE = "enable_date";
 
     /**
      *停用日期
      */
-    public static final String CHUTE_DISABLE_DATE = "chute_disable_date";
+    public static final String DISABLE_DATE = "disable_date";
 
     /**
      *tb_thing_properties表prop_type字段PROP
@@ -131,5 +131,13 @@ public class EquipmentConstant {
     public static final String PROP_TYPE_DISP_PROP = "DISP_PROP";
 
     /*3.29 end*/
+
+    /*3.30 begin*/
+    /**
+     *管道通径
+     */
+    public static final String NOMINAL_DIAMETER = "nominal_diameter";
+
+    /*3.30 end*/
 
 }
