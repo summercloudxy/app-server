@@ -138,6 +138,21 @@ public class EquipmentConstant {
      */
     public static final String NOMINAL_DIAMETER = "nominal_diameter";
 
+    /**
+     *闸板类型
+     */
+    public static final String FLASHBOARD_TYPE = "flashboard_type";
+
+    /**
+     *闸板执行方式
+     */
+    public static final String FLASHBOARD_EXECUTION_MODE = "flashboard_execution_mode";
+
+    /**
+     *闸板控制方式
+     */
+    public static final String FLASHBOARD_CONTROL_MODE = "flashboard_control_mode";
+
     /*3.30 end*/
 
 }
