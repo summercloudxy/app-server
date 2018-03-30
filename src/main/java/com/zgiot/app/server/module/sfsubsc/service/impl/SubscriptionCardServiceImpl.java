@@ -38,7 +38,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
     private static final Logger logger = LoggerFactory.getLogger(SubscriptionCardServiceImpl.class);
 
-   
+
     @Autowired
     private SubscCardTypeMapper subscCardTypeMapper;
 
@@ -976,7 +976,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
 
         IntelligentFilterVO.ThickenerMetric thickenerMetric1 = intelligentFilterVO.new ThickenerMetric();
-        thickenerMetric1.setThingCode(cardParamValues[0]);
+        thickenerMetric1.setThingCode(cardParamValues[0].split(".")[0]);
         DataModelWrapper thickenerDataModelWrapper1 = dataService.getData(cardParamValues[0], FilterPressMetricConstants.FEED_PUMP_CURRENT).orElse(null);
         if (thickenerDataModelWrapper1 != null) {
             thickenerMetric1.setCurrentValue(MetricValueUtil.formart(thickenerDataModelWrapper1.getValue()));
@@ -987,7 +987,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
 
         IntelligentFilterVO.ThickenerMetric thickenerMetric2 = intelligentFilterVO.new ThickenerMetric();
-        thickenerMetric2.setThingCode(cardParamValues[1]);
+        thickenerMetric2.setThingCode(cardParamValues[1].split(".")[0]);
         DataModelWrapper thickenerDataModelWrapper2 = dataService.getData(cardParamValues[1], FilterPressMetricConstants.FEED_PUMP_CURRENT).orElse(null);
         if (thickenerDataModelWrapper2 != null) {
             thickenerMetric2.setCurrentValue(MetricValueUtil.formart(thickenerDataModelWrapper2.getValue()));
@@ -999,7 +999,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
         if (StringUtils.isNotEmpty(cardParamValues[2])) {
             IntelligentFilterVO.ThickenerMetric thickenerMetric3 = intelligentFilterVO.new ThickenerMetric();
-            thickenerMetric3.setThingCode(cardParamValues[2]);
+            thickenerMetric3.setThingCode(cardParamValues[2].split(".")[0]);
             DataModelWrapper thickenerDataModelWrapper3 = dataService.getData(cardParamValues[2], FilterPressMetricConstants.FEED_PUMP_CURRENT).orElse(null);
             if (thickenerDataModelWrapper3 != null) {
                 thickenerMetric3.setCurrentValue(MetricValueUtil.formart(thickenerDataModelWrapper3.getValue()));
