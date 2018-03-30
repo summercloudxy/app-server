@@ -1,14 +1,19 @@
 package com.zgiot.app.server.module.equipments.controller;
 
+import java.util.Date;
+
 public class DeviceInfo {
 
+    private Long id;
     private String thingCode;// 设备编号
     private String thingName;// 设备名称
     private String thingShortname;// 设备简称
     private String specification;// 规格型号
     private String thingTagCode;// 设备类型-3级类型code
+    private String thingTagName;// 设备类型-3级类型名称
     private String manufacturer;// 生产厂家
-    private String thingSystemId;// 所属系统id
+    private String systemId;// 所属系统id
+    private String systemName;// 所属系统名称
     private String enableDate;// 投用日期
     private String disableDate;// 停用日期
     private String powerProperties;// 动力属性
@@ -20,6 +25,15 @@ public class DeviceInfo {
     private String angle;// 角度
     private String granularity;// 给料粒度
     private String imageName;// 图片名
+    private Date updateTime;// 更新时间
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getThingCode() {
         return thingCode;
@@ -61,6 +75,14 @@ public class DeviceInfo {
         this.thingTagCode = thingTagCode;
     }
 
+    public String getThingTagName() {
+        return thingTagName;
+    }
+
+    public void setThingTagName(String thingTagName) {
+        this.thingTagName = thingTagName;
+    }
+
     public String getManufacturer() {
         return manufacturer;
     }
@@ -69,12 +91,20 @@ public class DeviceInfo {
         this.manufacturer = manufacturer;
     }
 
-    public String getThingSystemId() {
-        return thingSystemId;
+    public String getSystemId() {
+        return systemId;
     }
 
-    public void setThingSystemId(String thingSystemId) {
-        this.thingSystemId = thingSystemId;
+    public void setSystemId(String systemId) {
+        this.systemId = systemId;
+    }
+
+    public String getSystemName() {
+        return systemName;
+    }
+
+    public void setSystemName(String systemName) {
+        this.systemName = systemName;
     }
 
     public String getEnableDate() {
@@ -163,5 +193,13 @@ public class DeviceInfo {
 
     public void setImageName(String imageName) {
         this.imageName = imageName;
+    }
+
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
     }
 }

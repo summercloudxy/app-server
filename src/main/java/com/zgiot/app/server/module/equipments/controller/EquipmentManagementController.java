@@ -118,14 +118,25 @@ public class EquipmentManagementController {
     }
 
     /**
-     * 根据当前节点id获取对应设备thing_code
+     * 根据当前节点id获取设备信息列表
      * @param id
      * @return
      */
-    @RequestMapping(value = "/relThingtagThing/relThingtagThingService/{id}", method = RequestMethod.GET)
-    public ResponseEntity<String> getRelThingtagThingByThreeLevelId(@PathVariable("id") Long id){
-        List<RelThingtagThing> relThingtagThingList = relThingtagThingService.getRelThingtagThingByThreeLevelId(id);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(relThingtagThingList), HttpStatus.OK);
+    @RequestMapping(value = "/thing/getDeviceInfoByThingTagId/{id}", method = RequestMethod.GET)
+    public ResponseEntity<String> getDeviceInfoByThingTagId(@PathVariable("id") Long id){
+        List<DeviceInfo> deviceInfoList = thingService.getDeviceInfoByThingTagId(id);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(deviceInfoList), HttpStatus.OK);
+    }
+
+    /**
+     * 根据当前节点id获取部件信息列表
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/thing/getPartsInfoByThingTagId/{id}", method = RequestMethod.GET)
+    public ResponseEntity<String> getPartsInfoByThingTagId(@PathVariable("id") Long id){
+        List<DeviceInfo> deviceInfoList = thingService.getDeviceInfoByThingTagId(id);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(deviceInfoList), HttpStatus.OK);
     }
 
     /*3.29 begin*/
@@ -152,15 +163,37 @@ public class EquipmentManagementController {
     }
     /*3.29 end*/
 
+    /**
+     * 添加设备
+     * @param deviceInfo
+     * @return
+     */
     @RequestMapping(value = "/device/add", method = RequestMethod.POST)
     public ResponseEntity<String> addDevice(@RequestBody DeviceInfo deviceInfo) {
         thingService.addDevice(deviceInfo);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
+    /**
+     * 删除设备
+     * @param id
+     * @return
+     */
     @RequestMapping(value = "/device/delete/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<String> delDevice(@PathVariable("id") Long id) {
         thingService.deleteDevice(id);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+    /**
+     * 编辑设备
+     * @param deviceInfo，id
+     * @return
+     */
+    @RequestMapping(value = "/device/edit/{id}", method = RequestMethod.PUT)
+    public ResponseEntity<String> editDevice(@RequestBody DeviceInfo deviceInfo, @PathVariable("id") Long id) {
+        deviceInfo.setId(id);
+        thingService.editDevice(deviceInfo);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
@@ -174,7 +207,6 @@ public class EquipmentManagementController {
         boolean flag = thingService.getThingByThingCode(thingCode);
         return new ResponseEntity<>(ServerResponse.buildOkJson(flag), HttpStatus.OK);
     }
-
 
     /**
      * 添加溜槽
@@ -220,6 +252,17 @@ public class EquipmentManagementController {
     @RequestMapping(value = "/pipe/add", method = RequestMethod.POST)
     public ResponseEntity<String> addChute(@RequestBody PipeInfo pipeInfo) {
         thingService.addPipe(pipeInfo);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+    /**
+     * 添加设备
+     * @param partsInfo
+     * @return
+     */
+    @RequestMapping(value = "/parts/add", method = RequestMethod.POST)
+    public ResponseEntity<String> addParts(@RequestBody PartsInfo partsInfo) {
+        thingService.addParts(partsInfo);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
