@@ -3,6 +3,7 @@ package com.zgiot.app.server.module.equipments.service;
 import com.zgiot.app.server.module.equipments.controller.DeviceInfo;
 import com.zgiot.app.server.module.equipments.controller.ChuteInfo;
 import com.zgiot.app.server.module.equipments.controller.EquipmentInfo;
+import com.zgiot.app.server.module.equipments.controller.PartsInfo;
 import com.zgiot.app.server.module.equipments.pojo.Thing;
 
 import java.util.List;
@@ -28,4 +29,8 @@ public interface ThingService {
     public void editDevice(DeviceInfo deviceInfo);
 
     public List<DeviceInfo> getDeviceInfoByThingTagId(Long id);
+
+    public List<PartsInfo> getPartsInfoByThingTagId(Long id);
+
+    public void addParts(PartsInfo partsInfo);
 }

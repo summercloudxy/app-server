@@ -3,6 +3,7 @@ package com.zgiot.app.server.module.equipments.service.impl;
 import com.zgiot.app.server.module.equipments.constants.EquipmentConstant;
 import com.zgiot.app.server.module.equipments.controller.DeviceInfo;
 import com.zgiot.app.server.module.equipments.controller.EquipmentInfo;
+import com.zgiot.app.server.module.equipments.controller.PartsInfo;
 import com.zgiot.app.server.module.equipments.mapper.RelThingtagThingMapper;
 import com.zgiot.app.server.module.equipments.mapper.ThingMapper;
 import com.zgiot.app.server.module.equipments.mapper.ThingPositionMapper;
@@ -18,9 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static com.zgiot.app.server.module.equipments.constants.EquipmentConstant.*;
 
@@ -44,6 +43,11 @@ public class ThingServiceImpl implements ThingService {
         return thingMapper.getDeviceInfoByThingcode(thingCodeList);
     }
 
+    /**
+     * 设备信息列表
+     * @param id
+     * @return
+     */
     @Override
     public List<DeviceInfo> getDeviceInfoByThingTagId(Long id) {
         List<RelThingtagThing> relThingtagThingList = relThingtagThingMapper.getRelThingtagThingByThreeLevelId(id);
@@ -55,6 +59,25 @@ public class ThingServiceImpl implements ThingService {
         }
         List<DeviceInfo> deviceInfoList = getDeviceInfoByThingcode(thingCodeList);
         return  deviceInfoList;
+    }
+
+    /**
+     * 部件信息列表
+     * @param id
+     * @return
+     */
+    @Override
+    public List<PartsInfo> getPartsInfoByThingTagId(Long id) {
+        List<RelThingtagThing> relThingtagThingList = relThingtagThingMapper.getRelThingtagThingByThingTagCode(id);
+        List<String> thingCodeList = new ArrayList<>();
+        if(relThingtagThingList != null && relThingtagThingList.size() > 0){
+            for(int i=0;i<relThingtagThingList.size();i++){
+                thingCodeList.add(relThingtagThingList.get(i).getThingCode());
+            }
+        }
+//        List<PartsInfo> partsInfoList = getPartsInfoByThingcode(thingCodeList);
+//        return partsInfoList;
+        return null;
     }
 
     @Override
@@ -247,4 +270,51 @@ public class ThingServiceImpl implements ThingService {
         delChute(id);
         addChute(chuteInfo);
     }
+
+    @Override
+    @Transactional
+    public void addParts(PartsInfo partsInfo) {
+        // thing
+        Thing thing = new Thing();
+        String thingCode = getThingCodeByInfo(partsInfo.getParentThingCode(), partsInfo.getThingType(),
+                EquipmentConstant.THING_TYPE1_CODE_PARTS);
+        thing.setThingCode(thingCode);
+        thing.setThingName(partsInfo.getThingName());
+        thing.setThingType1Code(EquipmentConstant.THING_TYPE1_CODE_PARTS);
+        thingMapper.addThing(thing);
+
+        //
+
+    }
+
+    /**
+     * 获取该设备的thingCode
+     * @param parentThingCode 701
+     * @param thingType .BJ.BS-
+     * @param thingType1CodeParts PARTS
+     * @return
+     */
+    private String getThingCodeByInfo(String parentThingCode, String thingType, String thingType1CodeParts) {
+        String thingCode = "";
+        String likeThingCode = parentThingCode + thingType + "%";
+        List<Thing> thingList = thingMapper.getThingByType(likeThingCode, thingType1CodeParts);
+        if(thingList != null && thingList.size() > 0){
+            Collections.sort(thingList, new Comparator<Thing>() {
+                @Override
+                public int compare(Thing o1, Thing o2) {
+                    Integer code1 = Integer.parseInt(o1.getThingCode().substring(o1.getThingCode().lastIndexOf("-") + 1));
+                    Integer code2 = Integer.parseInt(o2.getThingCode().substring(o2.getThingCode().lastIndexOf("-") + 1));
+                    return code2 - code1;
+                }
+            });
+
+            Thing thing = thingList.get(0);
+            thingCode = new Integer(Integer.parseInt(thing.getThingCode()
+                    .substring(thing.getThingCode().lastIndexOf("-") + 1)) + 1).toString();
+        }else{
+            thingCode = parentThingCode + thingType + 1;
+        }
+        return thingCode;
+    }
+
 }

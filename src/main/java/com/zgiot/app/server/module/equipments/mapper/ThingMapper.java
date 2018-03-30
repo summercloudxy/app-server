@@ -44,4 +44,7 @@ public interface ThingMapper {
     @Select("select * from tb_thing where thing_code = #{thingCode}")
     List<Thing> getThingByThingCode(@Param("thingCode") String thingCode);
 
+    @Select("SELECT * FROM tb_thing WHERE thing_code LIKE #{thingCode} AND thing_type1_code = #{thingType1Code}")
+    List<Thing> getThingByType(@Param("thingCode") String thingCode, @Param("thingType1Code") String thingType1Code);
+
 }

@@ -19,4 +19,7 @@ public interface RelThingtagThingMapper {
             "(SELECT code FROM tb_thing_tag WHERE parent_id = #{id})")
     List<RelThingtagThing> getRelThingtagThingByThreeLevelId(@Param("id") Long id);
 
+    @Select("SELECT * FROM rel_thingtag_thing WHERE thing_tag_code = #{id})")
+    List<RelThingtagThing> getRelThingtagThingByThingTagCode(@Param("id") Long id);
+
 }

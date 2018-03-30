@@ -13,7 +13,7 @@
 
     <select id="getDeviceInfoByThingcode" resultMap="deviceInfo"
             resultType="com.zgiot.app.server.module.equipments.controller.DeviceInfo">
-        SELECT t1.thing_code,t1.thing_name,t3.system_id,t2.system_name,t4.create_date AS update_time,t5.tag_name
+        SELECT t1.id,t1.thing_code,t1.thing_name,t3.system_id,t2.system_name,t4.create_date AS update_time,t5.tag_name
         FROM `tb_thing` t1,tb_system t2,rel_thing_system t3,rel_thingtag_thing t4,tb_thing_tag t5
         WHERE t1.thing_code in
         <foreach collection="thingCodeList" item="thingCode" index="index"
