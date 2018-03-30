@@ -5,9 +5,11 @@ import com.zgiot.app.server.module.equipments.mapper.CoalStorageDepotMapper;
 import com.zgiot.app.server.module.equipments.pojo.CoalStorageDepot;
 import com.zgiot.app.server.module.equipments.service.CoalStorageDepotService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class CoalStorageDepotServiceImpl implements CoalStorageDepotService {
 
     @Autowired
