@@ -695,23 +695,34 @@ public class SFMonitorSignalWrapperController {
         }
         List<SFMonPadAuxiliaryZoneInfo> sfMonPadAuxiliaryZoneInfoList = new ArrayList<>();
         List<SFMonPadAuxiliaryZoneMetricInfo> sfMonPadAuxiliaryZoneMetricInfoList = new ArrayList<>();
-        for(SFMonPadAuxiliaryZoneInfo sfMonPadAuxiliaryZoneInfo:sfMonPadAuxiliaryZoneInfos){
+       // for(SFMonPadAuxiliaryZoneInfo sfMonPadAuxiliaryZoneInfo:sfMonPadAuxiliaryZoneInfos){
+        for(int i = 0;i < sfMonPadAuxiliaryZoneInfos.size();i++){
+            SFMonPadAuxiliaryZoneInfo data = sfMonPadAuxiliaryZoneInfos.get(i);
             SFMonPadAuxiliaryZoneInfo compositionInfo = new SFMonPadAuxiliaryZoneInfo();
             SFMonPadAuxiliaryZoneInfo remoteValve = new SFMonPadAuxiliaryZoneInfo();
             List<SFMonPadAuxiliaryZoneMetricInfo> remoteValveInfoList = new ArrayList<>();
-            if(sfMonPadAuxiliaryZoneInfo.getRule() == SFMonitorConstant.SINGLE_PARTION
-                    || (sfMonPadAuxiliaryZoneInfo.getRule() == 0)){
-                sfMonPadAuxiliaryZoneInfoList.add(sfMonPadAuxiliaryZoneInfo);
+            if(data.getRule() == SFMonitorConstant.SINGLE_PARTION
+                    || (data.getRule() == 0)){
+                sfMonPadAuxiliaryZoneInfoList.add(data);
+                sfMonPadAuxiliaryZoneInfos.remove(i);
+                i--;
+                continue;
             }
-            specialRuleOperate(sfMonPadAuxiliaryZoneInfos,sfMonPadAuxiliaryZoneInfo,sfMonPadAuxiliaryZoneMetricInfoList,remoteValveInfoList);
+            specialRuleOperate(sfMonPadAuxiliaryZoneInfos,data,sfMonPadAuxiliaryZoneMetricInfoList,remoteValveInfoList);
 
             if((sfMonPadAuxiliaryZoneMetricInfoList != null) && (sfMonPadAuxiliaryZoneMetricInfoList.size() > 0)){
                 compositionInfo.setSfMonPadAuxiliaryZoneMetricInfoList(sfMonPadAuxiliaryZoneMetricInfoList);
+                compositionInfo.setWrapperName(data.getWrapperName());
+                compositionInfo.setStyleName(data.getStyleName());
                 sfMonPadAuxiliaryZoneInfoList.add(compositionInfo);
+                i--;
             }
             if((remoteValveInfoList != null) && (remoteValveInfoList.size() > 0)){
                 remoteValve.setSfMonPadAuxiliaryZoneMetricInfoList(remoteValveInfoList);
+                remoteValve.setWrapperName(data.getWrapperName());
+                remoteValve.setStyleName(data.getStyleName());
                 sfMonPadAuxiliaryZoneInfoList.add(remoteValve);
+                i--;
             }
             if(sfMonPadAuxiliaryZoneInfos.size() == 0){
                 break;
@@ -729,10 +740,14 @@ public class SFMonitorSignalWrapperController {
             if((sfMonPadAuxiliaryZoneInfo.getRule() == SFMonitorConstant.COMPOSITION_ALL_PARTION)
                     && sfMonPadAuxiliaryZoneInfo.getWrapperName().equals(sfMonPadAuxiliaryZoneInfos.get(i).getWrapperName())){
                 sfMonPadAuxiliaryZoneMetricInfoList.addAll(sfMonPadAuxiliaryZoneInfos.get(i).getSfMonPadAuxiliaryZoneMetricInfoList());
+                sfMonPadAuxiliaryZoneInfos.remove(i);
+                //i++;
                 continue;
             }else if((sfMonPadAuxiliaryZoneInfo.getRule() == SFMonitorConstant.REMOTE_VALVE)
                     && (sfMonPadAuxiliaryZoneInfo.getWrapperName().equals(sfMonPadAuxiliaryZoneInfos.get(i).getWrapperName()))){//远程阀门
                 remoteValveInfoList.addAll(sfMonPadAuxiliaryZoneInfos.get(i).getSfMonPadAuxiliaryZoneMetricInfoList());
+                sfMonPadAuxiliaryZoneInfos.remove(i);
+                //i++;
                 continue;
             }
             i++;
@@ -768,6 +783,16 @@ public class SFMonitorSignalWrapperController {
         if((sfMonPadStateControlMetricInfos != null) && (sfMonPadStateControlMetricInfos.size() == 1
         && sfMonPadStateControlMetricInfos.get(0).getMetricName().equals(SFMonitorConstant.EQUIPMENT_STATE))){
             sfMonPadStateControlInfo.setPowerEquipment(false);
+        }
+        for(SFMonPadStateControlMetricInfo sfMonPadStateControlMetricInfo:sfMonPadStateControlMetricInfos){
+            MetricModel metric = metricMapper.getMetric(sfMonPadStateControlMetricInfo.getMetricName());
+            if(metric != null){
+                Optional<DataModelWrapper> wrapper = dataService.getData(thingCode,metric.getMetricCode());
+                if((wrapper.isPresent()) && (!wrapper.get().isEmpty()) && (!StringUtils.isBlank(wrapper.get().getValue()))){
+                    String value = wrapper.get().getValue();
+                    sfMonPadStateControlMetricInfo.setValue(value);
+                }
+            }
         }
         sfMonPadStateControlInfo.setSfMonPadStateControlMetricInfos(sfMonPadStateControlMetricInfos);
         return sfMonPadStateControlInfo;
