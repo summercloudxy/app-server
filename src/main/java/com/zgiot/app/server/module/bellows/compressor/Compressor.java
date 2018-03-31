@@ -206,25 +206,25 @@ public class Compressor {
      */
     public Compressor initState() {
         //运行状态
-        Optional<String> runData = BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.RUN_STATE);
+        Optional<String> runData = BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.RUN_STATE, true);
         running = Boolean.parseBoolean(runData.orElse(BellowsConstants.FALSE));
 
 
         //加载状态
-        Optional<String> loadData = BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.LOAD_STATE);
+        Optional<String> loadData = BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.LOAD_STATE, true);
         loading = Boolean.parseBoolean(loadData.orElse(BellowsConstants.FALSE));
 
 
         //远程/就地状态
-        Optional<String> localData = BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.LOCAL);
+        Optional<String> localData = BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.LOCAL, true);
         local = Boolean.parseBoolean(localData.orElse(BellowsConstants.TRUE));
 
         //轻故障状态
-        Optional<String> warnData = BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.WARN);
+        Optional<String> warnData = BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.WARN, true);
         warn = Boolean.parseBoolean(warnData.orElse(BellowsConstants.FALSE));
 
         //重故障状态
-        Optional<String> errorData = BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.ERROR);
+        Optional<String> errorData = BellowsUtil.getDataModelValue(dataService, thingCode, CompressorMetricConstants.ERROR, true);
         error = Boolean.parseBoolean(errorData.orElse(BellowsConstants.FALSE));
 
         confirmState(false);
