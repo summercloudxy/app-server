@@ -51,7 +51,7 @@
         <result column="rule" property="rule"/>
     </resultMap-->
     <resultMap id="stateControlZoneRule" type="com.zgiot.app.server.module.sfmonitor.controller.SFMonPadStateControlMetricInfo">
-        <result column="value" property="metricCode"/>
+        <result column="metric_code" property="metricCode"/>
         <result column="metric_name" property="metricName"/>
         <result column="model" property="model"/>
         <result column="sort" property="sort"/>
@@ -105,7 +105,7 @@
     </select>
 
     <select id="getStateControlZoneData" resultMap="stateControlZoneRule">
-        select a.value as value,c.metric_name as metric_name,a.model as model,b.sort as sort
+        select c.metric_code as metric_code,c.metric_name as metric_name,a.model as model,b.sort as sort
         from tb_sfmon_equipmonitor_config a,rel_sfmon_metrictag_metric_sort b,tb_metric c
         where
         a.thing_code=#{thingCode}
