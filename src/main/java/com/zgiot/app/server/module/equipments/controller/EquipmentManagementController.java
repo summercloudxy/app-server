@@ -26,10 +26,8 @@ public class EquipmentManagementController {
     private ThingBaseDictService thingBaseDictService;
     @Autowired
     private ThingManagementService thingService;
-
     @Autowired
     private TBSystemService tbSystemService;
-
     @Autowired
     private CoalStorageDepotService coalStorageDepotService;
 
@@ -53,7 +51,7 @@ public class EquipmentManagementController {
      * @return
      */
     @RequestMapping(value = "/building/add", method = RequestMethod.POST)
-    public ResponseEntity<String> addBuilding(Building building) {
+    public ResponseEntity<String> addBuilding(@RequestBody Building building) {
         buildingService.addBuilding(building);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -65,7 +63,7 @@ public class EquipmentManagementController {
      * @return
      */
     @RequestMapping(value = "/building/edit/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<String> editBuilding(Building building, @PathVariable("id") Long id) {
+    public ResponseEntity<String> editBuilding(@RequestBody Building building, @PathVariable("id") Long id) {
         building.setId(id);
         buildingService.editBuilding(building);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
@@ -103,6 +101,11 @@ public class EquipmentManagementController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(thingTagList), HttpStatus.OK);
     }
 
+    /**
+     * 根据父节点获取其所有子节点
+     * @param id
+     * @return
+     */
     @RequestMapping(value = "/thingTag/getThingTagByParentId/{id}", method = RequestMethod.GET)
     public ResponseEntity<String> getThingTagByParentId(@PathVariable("id") Long id){
         List<ThingTag> thingTagList = thingTagService.getThingTagByParentId(id);
@@ -180,7 +183,7 @@ public class EquipmentManagementController {
      * @return
      */
     @RequestMapping(value = "/device/add", method = RequestMethod.POST)
-    public ResponseEntity<String> addDevice(DeviceInfo deviceInfo) {
+    public ResponseEntity<String> addDevice(@RequestBody DeviceInfo deviceInfo) {
         thingService.addDevice(deviceInfo);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -225,7 +228,7 @@ public class EquipmentManagementController {
      * @return
      */
     @RequestMapping(value = "/chute/add", method = RequestMethod.POST)
-    public ResponseEntity<String> addChute(ChuteInfo chuteInfo) {
+    public ResponseEntity<String> addChute(@RequestBody ChuteInfo chuteInfo) {
         thingService.addChute(chuteInfo);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -261,7 +264,7 @@ public class EquipmentManagementController {
      * @return
      */
     @RequestMapping(value = "/pipe/add", method = RequestMethod.POST)
-    public ResponseEntity<String> addChute(PipeInfo pipeInfo) {
+    public ResponseEntity<String> addChute(@RequestBody PipeInfo pipeInfo) {
         thingService.addPipe(pipeInfo);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -310,7 +313,7 @@ public class EquipmentManagementController {
      * @return
      */
     @RequestMapping(value = "/coalStorageDepot/add", method = RequestMethod.POST)
-    public ResponseEntity<String> addCoalStorageDepot(CoalStorageDepot coalStorageDepot) {
+    public ResponseEntity<String> addCoalStorageDepot(@RequestBody CoalStorageDepot coalStorageDepot) {
         coalStorageDepotService.addCoalStorageDepot(coalStorageDepot);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -357,7 +360,7 @@ public class EquipmentManagementController {
      * @return
      */
     @RequestMapping(value = "/parts/add", method = RequestMethod.POST)
-    public ResponseEntity<String> addParts(PartsInfo partsInfo) {
+    public ResponseEntity<String> addParts(@RequestBody PartsInfo partsInfo) {
         thingService.addParts(partsInfo);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -406,7 +409,7 @@ public class EquipmentManagementController {
      * @return
      */
     @RequestMapping(value = "/valve/add", method = RequestMethod.POST)
-    public ResponseEntity<String> addValve(ValveInfo valveInfo) {
+    public ResponseEntity<String> addValve(@RequestBody ValveInfo valveInfo) {
         thingService.addValve(valveInfo);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -440,7 +443,7 @@ public class EquipmentManagementController {
      * @return
      */
     @RequestMapping(value = "/flashboard/add", method = RequestMethod.POST)
-    public ResponseEntity<String> addflashboard(FlashboardInfo flashboardInfo) {
+    public ResponseEntity<String> addflashboard(@RequestBody FlashboardInfo flashboardInfo) {
         thingService.addFlashboard(flashboardInfo);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
