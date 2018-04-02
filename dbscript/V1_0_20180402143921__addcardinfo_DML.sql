@@ -22,3 +22,11 @@ CREATE TABLE `tb_production_inspect` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;
 
+
+alter table excel_range change `-1.45_gap` `param_n1_45_gap` tinyint(4);
+alter table excel_range change `1.45-1.8_gap` `param_1_45to1_8_gap` tinyint(4);
+alter table excel_range change `+1.8_gap` `param_p1_8_gap` tinyint(4);
+alter table excel_range change `+1.45_gap` `param_p1_45_gap` tinyint(4);
+alter table excel_range change `-1.8_gap` `param_n1_8_gap` tinyint(4);
+alter table excel_range change `+50mm_gap` `param_p50mm_gap` tinyint(4);
+alter table excel_range change `-50mm_gap` `param_n50mm_gap` tinyint(4);
