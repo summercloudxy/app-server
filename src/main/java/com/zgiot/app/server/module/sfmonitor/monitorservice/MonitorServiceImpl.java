@@ -300,8 +300,11 @@ public class MonitorServiceImpl implements MonitorService {
         SFMonEquipMonitorInfo sfMonEquipMonitorInfo = sfMonEquipMonitorInfoMapper.getEquiupmentInfoById(id);
         sfMonEquipMonitorInfoMapper.deleteEquipmentBaseInfo(id);
         SFMonEquipMonitorConfig sfMonEquipMonitorConfig = new SFMonEquipMonitorConfig();
-        sfMonEquipMonitorConfig.setThingCode(sfMonEquipMonitorInfo.getThingCode());
-        sfMonEquipMonitorConfigMapper.deleteEquipmentConfig(sfMonEquipMonitorConfig);
+        List<String> relateThings = tmlMapper.findRelateThing(sfMonEquipMonitorInfo.getThingCode() + SFMonitorConstant.FUZZY_QUERY_TAG);
+        for(String thingCode:relateThings){
+            sfMonEquipMonitorConfig.setThingCode(thingCode);
+            sfMonEquipMonitorConfigMapper.deleteEquipmentConfig(sfMonEquipMonitorConfig);
+        }
     }
 
 
