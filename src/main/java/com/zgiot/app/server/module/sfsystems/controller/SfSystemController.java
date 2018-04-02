@@ -1,6 +1,7 @@
 package com.zgiot.app.server.module.sfsystems.controller;
 
 import com.zgiot.app.server.module.equipments.controller.DeviceInfo;
+import com.zgiot.app.server.module.equipments.controller.PageHelpInfo;
 import com.zgiot.app.server.module.sfsystems.service.SfSystemService;
 import com.zgiot.app.server.module.equipments.pojo.RelThingSystem;
 import com.zgiot.app.server.module.equipments.service.RelThingSystemService;
@@ -29,8 +30,8 @@ public class SfSystemController {
             method = RequestMethod.GET)
     public ResponseEntity<String> getDeviceInfoBySystemId(@PathVariable("systemId") int systemId, @PathVariable int pageNum,
                                                           @PathVariable int pageSize) {
-        List<DeviceInfo> deviceInfoList = sfSystemService.getDeviceInfoBySystemId(systemId, pageNum, pageSize);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(deviceInfoList), HttpStatus.OK);
+        PageHelpInfo pageHelpInfo = sfSystemService.getDeviceInfoBySystemId(systemId, pageNum, pageSize);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
     /**
