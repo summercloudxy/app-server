@@ -21,6 +21,8 @@ public interface ThingManagementService {
 
     public void editDevice(DeviceInfo deviceInfo);
 
+    public PageHelpInfo getAllDeviceInfo(Long id, int pageNum, int pageSize);
+
     public PageHelpInfo getDeviceInfoByThingTagId(Long id, int pageNum, int pageSize);
 
     public PageHelpInfo getPartsInfoByThingTagId(Long id, int pageNum, int pageSize);
@@ -55,4 +57,13 @@ public interface ThingManagementService {
 
     public PageHelpInfo getFlashboardInfoByThingTagId(Long id, int pageNum, int pageSize);
 
+    public void addMeter(MeterInfo meterInfo);
+
+    public void deleteMeter(Long id);
+
+    public void editMeter(MeterInfo meterInfo);
+
+    public PageHelpInfo getAllMeterInfo(Long id, int pageNum, int pageSize);
+
+    public PageHelpInfo getMeterInfoByThingTagId(Long id, int pageNum, int pageSize);
 }

@@ -65,6 +65,11 @@ public class EquipmentConstant {
     public static final String FM = "FM";
 
     /**
+     * 仪表
+     */
+    public static final String YB = "YB";
+
+    /**
      *THING_TYPE1_CODE设备
      */
     public static final String THING_TYPE1_CODE_DEVICE = "DEVICE";
