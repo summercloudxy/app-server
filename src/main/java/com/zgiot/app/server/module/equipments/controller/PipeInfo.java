@@ -71,6 +71,11 @@ public class PipeInfo {
      */
     private String manufacturer;
 
+    /**
+     *设备类型
+     */
+    private String thingTagCode;
+
     public Long getId() {
         return id;
     }
@@ -181,5 +186,13 @@ public class PipeInfo {
 
     public void setManufacturer(String manufacturer) {
         this.manufacturer = manufacturer;
+    }
+
+    public String getThingTagCode() {
+        return thingTagCode;
+    }
+
+    public void setThingTagCode(String thingTagCode) {
+        this.thingTagCode = thingTagCode;
     }
 }

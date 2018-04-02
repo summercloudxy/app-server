@@ -98,6 +98,11 @@ public class ValveInfo {
      */
     private String specification;
 
+    /**
+     *设备类型
+     */
+    private String thingTagCode;
+
     public Long getId() {
         return id;
     }
@@ -248,5 +253,13 @@ public class ValveInfo {
 
     public void setSpecification(String specification) {
         this.specification = specification;
+    }
+
+    public String getThingTagCode() {
+        return thingTagCode;
+    }
+
+    public void setThingTagCode(String thingTagCode) {
+        this.thingTagCode = thingTagCode;
     }
 }

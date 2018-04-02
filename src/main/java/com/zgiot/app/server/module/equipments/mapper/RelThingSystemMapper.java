@@ -11,5 +11,5 @@ public interface RelThingSystemMapper {
     void addRelThingSystem(RelThingSystem relThingSystem);
 
     @Delete("DELETE FROM rel_thing_system where thing_code = #{thingCode}")
-    void deleteRelThingSystemByThingCode(@Param("thing_code") String thing_code);
+    void deleteRelThingSystemByThingCode(@Param("thingCode") String thingCode);
 }

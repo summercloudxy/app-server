@@ -16,4 +16,6 @@ public interface CoalStorageDepotService {
     public void deleteCoalStorageDepot(Long id);
 
     public PageHelpInfo getCoalStorageDepotAll(int pageNum, int pageSize);
+
+    public PageHelpInfo getCoalStorageDepotByName(int pageNum,int pageSize,String name);
 }
