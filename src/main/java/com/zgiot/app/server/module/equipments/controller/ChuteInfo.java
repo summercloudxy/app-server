@@ -53,9 +53,14 @@ public class ChuteInfo {
     private Long thingSystemId;
 
     /**
+     * 所属系统名称
+     */
+    private String thingSystemName;
+
+    /**
      *溜槽名称
      */
-    private String  chuteName;
+    private String  thingName;
 
     public Long getId() {
         return id;
@@ -137,11 +142,19 @@ public class ChuteInfo {
         this.thingSystemId = thingSystemId;
     }
 
-    public String getChuteName() {
-        return chuteName;
+    public String getThingName() {
+        return thingName;
     }
 
-    public void setChuteName(String chuteName) {
-        this.chuteName = chuteName;
+    public void setThingName(String thingName) {
+        this.thingName = thingName;
+    }
+
+    public String getThingSystemName() {
+        return thingSystemName;
+    }
+
+    public void setThingSystemName(String thingSystemName) {
+        this.thingSystemName = thingSystemName;
     }
 }

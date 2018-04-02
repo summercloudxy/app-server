@@ -16,7 +16,7 @@ public interface RelThingtagThingMapper {
     void deleteRelThingtagThingByThingCode(@Param("thingCode") String thingCode);
 
     @Select("SELECT * FROM rel_thingtag_thing WHERE thing_tag_code in " +
-            "(SELECT code FROM tb_thing_tag WHERE parent_id = #{id})")
+            "(SELECT code FROM tb_thing_tag WHERE id = #{id})")
     List<RelThingtagThing> getRelThingtagThingByThreeLevelId(@Param("id") Long id);
 
     @Select("SELECT * FROM rel_thingtag_thing WHERE thing_tag_code = #{id})")

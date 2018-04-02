@@ -8,10 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -27,8 +24,6 @@ public class EquipmentManagementController {
     private ThingTagManagementService thingTagService;
     @Autowired
     private ThingBaseDictService thingBaseDictService;
-    @Autowired
-    private RelThingtagThingService relThingtagThingService;
     @Autowired
     private ThingManagementService thingService;
 
@@ -56,7 +51,7 @@ public class EquipmentManagementController {
      * @return
      */
     @RequestMapping(value = "/building/add", method = RequestMethod.POST)
-    public ResponseEntity<String> addBuilding(@RequestBody Building building) {
+    public ResponseEntity<String> addBuilding(Building building) {
         buildingService.addBuilding(building);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -68,7 +63,7 @@ public class EquipmentManagementController {
      * @return
      */
     @RequestMapping(value = "/building/edit/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<String> editBuilding(@RequestBody Building building, @PathVariable("id") Long id) {
+    public ResponseEntity<String> editBuilding(Building building, @PathVariable("id") Long id) {
         building.setId(id);
         buildingService.editBuilding(building);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
@@ -97,7 +92,7 @@ public class EquipmentManagementController {
     }
 
     /**
-     * 获取所有装备类型
+     * 获取所有设备类型
      * @return
      */
     @RequestMapping(value = "/thingTag/getAllEquipmentType", method = RequestMethod.GET)
@@ -120,22 +115,30 @@ public class EquipmentManagementController {
     /**
      * 根据当前节点id获取设备信息列表
      * @param id
+     * @param pageNum
+     * @param pageSize
      * @return
      */
-    @RequestMapping(value = "/thing/getDeviceInfoByThingTagId/{id}", method = RequestMethod.GET)
-    public ResponseEntity<String> getDeviceInfoByThingTagId(@PathVariable("id") Long id){
-        List<DeviceInfo> deviceInfoList = thingService.getDeviceInfoByThingTagId(id);
+    @RequestMapping(value = "/thing/getDeviceInfoByThingTagId/{id}/pageNum/{pageNum}/pageSize/{pageSize}",
+            method = RequestMethod.GET)
+    public ResponseEntity<String> getDeviceInfoByThingTagId(@PathVariable("id") Long id, @PathVariable int pageNum,
+                                                            @PathVariable int pageSize){
+        List<DeviceInfo> deviceInfoList = thingService.getDeviceInfoByThingTagId(id, pageNum, pageSize);
         return new ResponseEntity<>(ServerResponse.buildOkJson(deviceInfoList), HttpStatus.OK);
     }
 
     /**
      * 根据当前节点id获取部件信息列表
      * @param id
+     * @param pageNum
+     * @param pageSize
      * @return
      */
-    @RequestMapping(value = "/thing/getPartsInfoByThingTagId/{id}", method = RequestMethod.GET)
-    public ResponseEntity<String> getPartsInfoByThingTagId(@PathVariable("id") Long id){
-        List<PartsInfo> partsInfoList = thingService.getPartsInfoByThingTagId(id);
+    @RequestMapping(value = "/thing/getPartsInfoByThingTagId/{id}/pageNum/{pageNum}/pageSize/{pageSize}",
+            method = RequestMethod.GET)
+    public ResponseEntity<String> getPartsInfoByThingTagId(@PathVariable("id") Long id, @PathVariable int pageNum,
+                                                           @PathVariable int pageSize){
+        List<PartsInfo> partsInfoList = thingService.getPartsInfoByThingTagId(id, pageNum, pageSize);
         return new ResponseEntity<>(ServerResponse.buildOkJson(partsInfoList), HttpStatus.OK);
     }
 
@@ -169,7 +172,7 @@ public class EquipmentManagementController {
      * @return
      */
     @RequestMapping(value = "/device/add", method = RequestMethod.POST)
-    public ResponseEntity<String> addDevice(@RequestBody DeviceInfo deviceInfo) {
+    public ResponseEntity<String> addDevice(DeviceInfo deviceInfo) {
         thingService.addDevice(deviceInfo);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -214,7 +217,7 @@ public class EquipmentManagementController {
      * @return
      */
     @RequestMapping(value = "/chute/add", method = RequestMethod.POST)
-    public ResponseEntity<String> addChute(@RequestBody ChuteInfo chuteInfo) {
+    public ResponseEntity<String> addChute(ChuteInfo chuteInfo) {
         thingService.addChute(chuteInfo);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -250,7 +253,7 @@ public class EquipmentManagementController {
      * @return
      */
     @RequestMapping(value = "/pipe/add", method = RequestMethod.POST)
-    public ResponseEntity<String> addChute(@RequestBody PipeInfo pipeInfo) {
+    public ResponseEntity<String> addChute(PipeInfo pipeInfo) {
         thingService.addPipe(pipeInfo);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -297,7 +300,7 @@ public class EquipmentManagementController {
      * @return
      */
     @RequestMapping(value = "/coalStorageDepot/add", method = RequestMethod.POST)
-    public ResponseEntity<String> addCoalStorageDepot(@RequestBody CoalStorageDepot coalStorageDepot) {
+    public ResponseEntity<String> addCoalStorageDepot(CoalStorageDepot coalStorageDepot) {
         coalStorageDepotService.addCoalStorageDepot(coalStorageDepot);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -344,7 +347,7 @@ public class EquipmentManagementController {
      * @return
      */
     @RequestMapping(value = "/parts/add", method = RequestMethod.POST)
-    public ResponseEntity<String> addParts(@RequestBody PartsInfo partsInfo) {
+    public ResponseEntity<String> addParts(PartsInfo partsInfo) {
         thingService.addParts(partsInfo);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -375,12 +378,129 @@ public class EquipmentManagementController {
     /**
      * 根据当前节点id获取管道信息列表
      * @param id
+     * @param pageNum
+     * @param pageSize
      * @return
      */
-    @RequestMapping(value = "/thing/getPipeInfoByThingTagId/{id}", method = RequestMethod.GET)
-    public ResponseEntity<String> getPipeInfoByThingTagId(@PathVariable("id") Long id){
-        List<PipeInfo> pipeInfoList = thingService.getPipeInfoByThingTagId(id);
+    @RequestMapping(value = "/thing/getPipeInfoByThingTagId/{id}/pageNum/{pageNum}/pageSize/{pageSize}",
+            method = RequestMethod.GET)
+    public ResponseEntity<String> getPipeInfoByThingTagId(@PathVariable("id") Long id, @PathVariable int pageNum,
+                                                          @PathVariable int pageSize){
+        List<PipeInfo> pipeInfoList = thingService.getPipeInfoByThingTagId(id, pageNum, pageSize);
         return new ResponseEntity<>(ServerResponse.buildOkJson(pipeInfoList), HttpStatus.OK);
+    }
+
+    /**
+     * 添加阀门
+     * @param valveInfo
+     * @return
+     */
+    @RequestMapping(value = "/valve/add", method = RequestMethod.POST)
+    public ResponseEntity<String> addValve(ValveInfo valveInfo) {
+        thingService.addValve(valveInfo);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+    /**
+     * 删除阀门
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/valve/delete/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<String> deleteValve(@PathVariable("id") Long id) {
+        thingService.delFlashboardOrValve(id);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+    /**
+     * 编辑阀门
+     * @param valveInfo，id
+     * @return
+     */
+    @RequestMapping(value = "/valve/edit/{id}", method = RequestMethod.PUT)
+    public ResponseEntity<String> editValve(@RequestBody ValveInfo valveInfo, @PathVariable("id") Long id) {
+        valveInfo.setId(id);
+        thingService.editValve(valveInfo);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+    /**
+     * 添加闸板
+     * @param flashboardInfo
+     * @return
+     */
+    @RequestMapping(value = "/flashboard/add", method = RequestMethod.POST)
+    public ResponseEntity<String> addflashboard(FlashboardInfo flashboardInfo) {
+        thingService.addFlashboard(flashboardInfo);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+    /**
+     * 删除闸板
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/flashboard/delete/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<String> deleteflashboard(@PathVariable("id") Long id) {
+        thingService.delFlashboardOrValve(id);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+    /**
+     * 编辑闸板
+     * @param flashboardInfo，id
+     * @return
+     */
+    @RequestMapping(value = "/flashboard/edit/{id}", method = RequestMethod.PUT)
+    public ResponseEntity<String> editflashboard(@RequestBody FlashboardInfo flashboardInfo, @PathVariable("id") Long id) {
+        flashboardInfo.setId(id);
+        thingService.editFlashboard(flashboardInfo);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+    /**
+     * 根据当前节点id获取溜槽信息列表
+     * @param id
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    @RequestMapping(value = "/thing/getChuteInfoByThingTagId/{id}/pageNum/{pageNum}/pageSize/{pageSize}",
+            method = RequestMethod.GET)
+    public ResponseEntity<String> getChuteInfoByThingTagId(@PathVariable("id") Long id, @PathVariable int pageNum,
+                                                          @PathVariable int pageSize){
+        List<ChuteInfo> chuteInfoList = thingService.getChuteInfoByThingTagId(id, pageNum, pageSize);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(chuteInfoList), HttpStatus.OK);
+    }
+
+    /**
+     * 根据当前节点id获取阀门信息列表
+     * @param id
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    @RequestMapping(value = "/thing/getValveInfoByThingTagId/{id}/pageNum/{pageNum}/pageSize/{pageSize}",
+            method = RequestMethod.GET)
+    public ResponseEntity<String> getValveInfoByThingTagId(@PathVariable("id") Long id, @PathVariable int pageNum,
+                                                           @PathVariable int pageSize){
+        List<ValveInfo> valveInfoList = thingService.getValveInfoByThingTagId(id, pageNum, pageSize);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(valveInfoList), HttpStatus.OK);
+    }
+
+    /**
+     * 根据当前节点id获取闸板信息列表
+     * @param id
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    @RequestMapping(value = "/thing/getFlashboardInfoByThingTagId/{id}/pageNum/{pageNum}/pageSize/{pageSize}",
+            method = RequestMethod.GET)
+    public ResponseEntity<String> getFlashboardInfoByThingTagId(@PathVariable("id") Long id, @PathVariable int pageNum,
+                                                           @PathVariable int pageSize){
+        List<FlashboardInfo> flashboardInfoList = thingService.getFlashboardInfoByThingTagId(id, pageNum, pageSize);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(flashboardInfoList), HttpStatus.OK);
     }
 
 }

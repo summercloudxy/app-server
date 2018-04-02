@@ -1,5 +1,6 @@
 package com.zgiot.app.server.module.equipments.service.impl;
 
+import com.github.pagehelper.PageHelper;
 import com.zgiot.app.server.module.equipments.constants.EquipmentConstant;
 import com.zgiot.app.server.module.equipments.mapper.*;
 import com.zgiot.app.server.module.equipments.controller.*;
@@ -31,10 +32,12 @@ public class ThingManagementServiceImpl implements ThingManagementService {
     private ThingTagManagementMapper thingTagManagementMapper;
 
 
-    public List<DeviceInfo> getDeviceInfoByThingcode(List<String> thingCodeList) {
+    public List<DeviceInfo> getDeviceInfoByThingcode(List<String> thingCodeList, int pageNum, int pageSize) {
+        PageHelper.startPage(pageNum, pageSize);
         return thingMapper.getDeviceInfoByThingcode(thingCodeList);
     }
-    public List<PartsInfo> getPartsInfoByThingcode(List<String> thingCodeList) {
+    public List<PartsInfo> getPartsInfoByThingcode(List<String> thingCodeList, int pageNum, int pageSize) {
+        PageHelper.startPage(pageNum, pageSize);
         List<PartsInfo> partsInfoList = thingMapper.getPartsInfoByThingcode(thingCodeList);
         List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
         if(partsInfoList != null && partsInfoList.size() > 0){
@@ -60,7 +63,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
      * @return
      */
     @Override
-    public List<DeviceInfo> getDeviceInfoByThingTagId(Long id) {
+    public List<DeviceInfo> getDeviceInfoByThingTagId(Long id, int pageNum, int pageSize) {
         List<RelThingtagThing> relThingtagThingList = relThingtagThingMapper.getRelThingtagThingByThreeLevelId(id);
         List<String> thingCodeList = new ArrayList<>();
         if(relThingtagThingList != null && relThingtagThingList.size() > 0){
@@ -68,7 +71,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
                 thingCodeList.add(relThingtagThingList.get(i).getThingCode());
             }
         }
-        List<DeviceInfo> deviceInfoList = getDeviceInfoByThingcode(thingCodeList);
+        List<DeviceInfo> deviceInfoList = getDeviceInfoByThingcode(thingCodeList, pageNum, pageSize);
         return  deviceInfoList;
     }
 
@@ -78,7 +81,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
      * @return
      */
     @Override
-    public List<PartsInfo> getPartsInfoByThingTagId(Long id) {
+    public List<PartsInfo> getPartsInfoByThingTagId(Long id, int pageNum, int pageSize) {
         List<RelThingtagThing> relThingtagThingList = relThingtagThingMapper.getRelThingtagThingByThingTagCode(id);
         List<String> thingCodeList = new ArrayList<>();
         if(relThingtagThingList != null && relThingtagThingList.size() > 0){
@@ -86,7 +89,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
                 thingCodeList.add(relThingtagThingList.get(i).getThingCode());
             }
         }
-        List<PartsInfo> partsInfoList = getPartsInfoByThingcode(thingCodeList);
+        List<PartsInfo> partsInfoList = getPartsInfoByThingcode(thingCodeList, pageNum, pageSize);
         return partsInfoList;
     }
 
@@ -213,7 +216,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         //插入tb_thing表
         Thing thing = new Thing();
         thing.setThingCode(thingCode);
-        thing.setThingName(chuteInfo.getChuteName());
+        thing.setThingName(chuteInfo.getThingName());
         thing.setThingType1Code(THING_TYPE1_CODE_CHUTE);
         thingMapper.addThing(thing);
 
@@ -452,7 +455,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         //插入tb_thing表
         Thing thing = new Thing();
         thing.setThingCode(thingCode);
-        thing.setThingName(pipeInfo.getPipeName());
+        thing.setThingName(pipeInfo.getThingName());
         thing.setThingType1Code(THING_TYPE1_CODE_PIPE);
         thingMapper.addThing(thing);
 
@@ -538,7 +541,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         //插入tb_thing表
         Thing thing = new Thing();
         thing.setThingCode(thingCode);
-        thing.setThingName(flashboardInfo.getFlashboardName());
+        thing.setThingName(flashboardInfo.getThingName());
         thing.setThingType1Code(THING_TYPE1_CODE_FLASHBOARD);
         thingMapper.addThing(thing);
 
@@ -643,7 +646,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         //插入tb_thing表
         Thing thing = new Thing();
         thing.setThingCode(thingCode);
-        thing.setThingName(valveInfo.getValveName());
+        thing.setThingName(valveInfo.getThingName());
         thing.setThingType1Code(THING_TYPE1_CODE_VALVE);
         thingMapper.addThing(thing);
 
@@ -753,7 +756,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
     /*3.30 end*/
 
     @Override
-    public List<PipeInfo> getPipeInfoByThingTagId(Long id) {
+    public List<PipeInfo> getPipeInfoByThingTagId(Long id, int pageNum, int pageSize) {
         List<RelThingtagThing> relThingtagThingList = relThingtagThingMapper.getRelThingtagThingByThingTagCode(id);
         List<String> thingCodeList = new ArrayList<>();
         if(relThingtagThingList != null && relThingtagThingList.size() > 0){
@@ -761,11 +764,12 @@ public class ThingManagementServiceImpl implements ThingManagementService {
                 thingCodeList.add(relThingtagThingList.get(i).getThingCode());
             }
         }
-        List<PipeInfo> pipeInfoList = getPipeInfoByThingcode(thingCodeList);
+        List<PipeInfo> pipeInfoList = getPipeInfoByThingcode(thingCodeList, pageNum, pageSize);
         return pipeInfoList;
     }
 
-    private List<PipeInfo> getPipeInfoByThingcode(List<String> thingCodeList) {
+    private List<PipeInfo> getPipeInfoByThingcode(List<String> thingCodeList, int pageNum, int pageSize) {
+        PageHelper.startPage(pageNum, pageSize);
         List<PipeInfo> pipeInfoList = thingMapper.getPipeInfoByThingcode(thingCodeList);
         List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
         if(pipeInfoList != null && pipeInfoList.size() > 0){
@@ -784,4 +788,89 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         }
         return pipeInfoList;
     }
+
+    @Override
+    public List<ChuteInfo> getChuteInfoByThingTagId(Long id, int pageNum, int pageSize) {
+        List<RelThingtagThing> relThingtagThingList = relThingtagThingMapper.getRelThingtagThingByThingTagCode(id);
+        List<String> thingCodeList = new ArrayList<>();
+        if(relThingtagThingList != null && relThingtagThingList.size() > 0){
+            for(int i=0;i<relThingtagThingList.size();i++){
+                thingCodeList.add(relThingtagThingList.get(i).getThingCode());
+            }
+        }
+        List<ChuteInfo> chuteInfoList = getChuteInfoByThingcode(thingCodeList, pageNum, pageSize);
+        return chuteInfoList;
+    }
+
+    private List<ChuteInfo> getChuteInfoByThingcode(List<String> thingCodeList, int pageNum, int pageSize) {
+        List<PipeInfo> pipeInfoList = getPipeInfoByThingcode(thingCodeList, pageNum, pageSize);
+
+        List<ChuteInfo> chuteInfoList = new ArrayList<>();
+        for(int i=0;i<pipeInfoList.size();i++){
+            PipeInfo pipeInfo = pipeInfoList.get(i);
+            ChuteInfo chuteInfo = new ChuteInfo();
+            chuteInfo.setId(pipeInfo.getId());
+            chuteInfo.setThingCode(pipeInfo.getThingCode());
+            chuteInfo.setThingName(pipeInfo.getThingName());
+            chuteInfo.setStartThingName(pipeInfo.getStartThingName());
+            chuteInfo.setTerminalThingName(pipeInfo.getTerminalThingName());
+            chuteInfo.setThingSystemName(pipeInfo.getThingSystemName());
+            chuteInfo.setUpdateDate(pipeInfo.getUpdateDate());
+            chuteInfoList.add(chuteInfo);
+        }
+        return chuteInfoList;
+    }
+
+    @Override
+    public List<ValveInfo> getValveInfoByThingTagId(Long id, int pageNum, int pageSize) {
+        List<RelThingtagThing> relThingtagThingList = relThingtagThingMapper.getRelThingtagThingByThingTagCode(id);
+        List<String> thingCodeList = new ArrayList<>();
+        if(relThingtagThingList != null && relThingtagThingList.size() > 0){
+            for(int i=0;i<relThingtagThingList.size();i++){
+                thingCodeList.add(relThingtagThingList.get(i).getThingCode());
+            }
+        }
+        List<PartsInfo> partsInfoList = getPartsInfoByThingcode(thingCodeList, pageNum, pageSize);
+
+        List<ValveInfo> valveInfoList = new ArrayList<>();
+        for(int i=0;i<partsInfoList.size();i++){
+            PartsInfo partsInfo = partsInfoList.get(i);
+            ValveInfo valveInfo = new ValveInfo();
+            valveInfo.setId(partsInfo.getId());
+            valveInfo.setThingCode(partsInfo.getThingCode());
+            valveInfo.setThingName(partsInfo.getThingName());
+            valveInfo.setParentThingName(partsInfo.getParentThingName());
+            valveInfo.setParentThingCode(partsInfo.getParentThingCode());
+            valveInfo.setUpdateDate(partsInfo.getUpdateTime());
+            valveInfoList.add(valveInfo);
+        }
+        return valveInfoList;
+    }
+
+    @Override
+    public List<FlashboardInfo> getFlashboardInfoByThingTagId(Long id, int pageNum, int pageSize) {
+        List<RelThingtagThing> relThingtagThingList = relThingtagThingMapper.getRelThingtagThingByThingTagCode(id);
+        List<String> thingCodeList = new ArrayList<>();
+        if(relThingtagThingList != null && relThingtagThingList.size() > 0){
+            for(int i=0;i<relThingtagThingList.size();i++){
+                thingCodeList.add(relThingtagThingList.get(i).getThingCode());
+            }
+        }
+        List<PartsInfo> partsInfoList = getPartsInfoByThingcode(thingCodeList, pageNum, pageSize);
+
+        List<FlashboardInfo> flashboardInfoList = new ArrayList<>();
+        for(int i=0;i<partsInfoList.size();i++){
+            PartsInfo partsInfo = partsInfoList.get(i);
+            FlashboardInfo flashboardInfo = new FlashboardInfo();
+            flashboardInfo.setId(partsInfo.getId());
+            flashboardInfo.setThingCode(partsInfo.getThingCode());
+            flashboardInfo.setThingName(partsInfo.getThingName());
+            flashboardInfo.setParentThingName(partsInfo.getParentThingName());
+            flashboardInfo.setParentThingCode(partsInfo.getParentThingCode());
+            flashboardInfo.setUpdateDate(partsInfo.getUpdateTime());
+            flashboardInfoList.add(flashboardInfo);
+        }
+        return flashboardInfoList;
+    }
+
 }

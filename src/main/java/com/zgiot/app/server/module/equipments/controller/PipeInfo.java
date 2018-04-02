@@ -59,7 +59,7 @@ public class PipeInfo {
     /**
      *管道名称
      */
-    private String  pipeName;
+    private String  thingName;
 
     /**
      *管道通径
@@ -151,12 +151,20 @@ public class PipeInfo {
         this.thingSystemId = thingSystemId;
     }
 
-    public String getPipeName() {
-        return pipeName;
+    public String getThingSystemName() {
+        return thingSystemName;
     }
 
-    public void setPipeName(String pipeName) {
-        this.pipeName = pipeName;
+    public void setThingSystemName(String thingSystemName) {
+        this.thingSystemName = thingSystemName;
+    }
+
+    public String getThingName() {
+        return thingName;
+    }
+
+    public void setThingName(String thingName) {
+        this.thingName = thingName;
     }
 
     public String getNominalDiameter() {
@@ -173,13 +181,5 @@ public class PipeInfo {
 
     public void setManufacturer(String manufacturer) {
         this.manufacturer = manufacturer;
-    }
-
-    public String getThingSystemName() {
-        return thingSystemName;
-    }
-
-    public void setThingSystemName(String thingSystemName) {
-        this.thingSystemName = thingSystemName;
     }
 }

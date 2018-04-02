@@ -30,7 +30,7 @@ public class ValveInfo {
     /**
      *阀门名称
      */
-    private String  valveName;
+    private String  thingName;
 
 
     /**
@@ -138,12 +138,12 @@ public class ValveInfo {
         this.disableDate = disableDate;
     }
 
-    public String getValveName() {
-        return valveName;
+    public String getThingName() {
+        return thingName;
     }
 
-    public void setValveName(String valveName) {
-        this.valveName = valveName;
+    public void setThingName(String thingName) {
+        this.thingName = thingName;
     }
 
     public String getManufacturer() {

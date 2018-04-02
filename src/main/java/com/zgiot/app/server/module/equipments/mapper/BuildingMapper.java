@@ -17,7 +17,7 @@ public interface BuildingMapper {
     @Select("SELECT t.id,t.building_name,t.max_floor FROM tb_building t ORDER BY t.building_name")
     List<Building> getBuildingAll();
 
-    @Update("UPDATE tb_building SET building_name=#{building_name},max_floor=#{max_floor} where id = #{id}")
+    @Update("UPDATE tb_building SET building_name=#{buildingName},max_floor=#{maxFloor} where id = #{id}")
     void editBuilding(Building building);
 
     @Delete("DELETE FROM tb_building where id = #{id}")

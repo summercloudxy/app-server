@@ -7,9 +7,9 @@ import org.apache.ibatis.annotations.*;
 public interface RelThingSystemMapper {
 
     @Insert("INSERT INTO rel_thing_system(thing_code,system_id,update_time) " +
-            "VALUES(#{thing_code},#{system_id},NOW())")
+            "VALUES(#{thingCode},#{systemId},NOW())")
     void addRelThingSystem(RelThingSystem relThingSystem);
 
-    @Delete("DELETE FROM rel_thing_system where thing_code = #{thing_code}")
+    @Delete("DELETE FROM rel_thing_system where thing_code = #{thingCode}")
     void deleteRelThingSystemByThingCode(@Param("thing_code") String thing_code);
 }

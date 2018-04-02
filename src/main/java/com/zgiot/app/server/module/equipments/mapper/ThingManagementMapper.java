@@ -26,8 +26,8 @@ public interface ThingManagementMapper {
     @Delete("DELETE FROM tb_thing where id = #{id}")
     void deleteThingById(@Param("id") Long id);
 
-    @Update("UPDATE tb_thing SET thing_code = #{thing_code},thing_name=#{thing_name}," +
-            "thing_type1_code=#{thing_type1_code},thing_shortname=#{thing_shortname} where id = #{id}")
+    @Update("UPDATE tb_thing SET thing_code = #{thingCode},thing_name=#{thingName}," +
+            "thing_type1_code=#{thingType1Code},thing_shortname=#{thingShortname} where id = #{id}")
     void editThing(Thing thing);
 
     /**
@@ -35,7 +35,7 @@ public interface ThingManagementMapper {
      * @param thingCodeList
      * @return
      */
-    List<DeviceInfo> getDeviceInfoByThingcode(List<String> thingCodeList);
+    List<DeviceInfo> getDeviceInfoByThingcode(@Param("thingCodeList") List<String> thingCodeList);
 
     @Select("SELECT t.id,t.thing_code,t.thing_name,t.thing_type1_code,t.thing_shortname FROM tb_thing t " +
             "where t.thing_code like #{thingCode}  and t.thing_type1_code = #{thingType1Code}" +

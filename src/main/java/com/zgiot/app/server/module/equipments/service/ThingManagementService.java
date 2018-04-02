@@ -7,8 +7,6 @@ import java.util.List;
 
 public interface ThingManagementService {
 
-    public List<DeviceInfo> getDeviceInfoByThingcode(List<String> thingCodeList);
-
     public List<Thing> getThingByCode(String thingCode, String thingType1Code);
 
     public boolean getThingByThingCode(String thingCode);
@@ -23,9 +21,9 @@ public interface ThingManagementService {
 
     public void editDevice(DeviceInfo deviceInfo);
 
-    public List<DeviceInfo> getDeviceInfoByThingTagId(Long id);
+    public List<DeviceInfo> getDeviceInfoByThingTagId(Long id, int pageNum, int pageSize);
 
-    public List<PartsInfo> getPartsInfoByThingTagId(Long id);
+    public List<PartsInfo> getPartsInfoByThingTagId(Long id, int pageNum, int pageSize);
 
     public void delChuteOrPipe(Long id);
 
@@ -39,7 +37,7 @@ public interface ThingManagementService {
 
     public void editParts(PartsInfo partsInfo);
 
-    List<PipeInfo> getPipeInfoByThingTagId(Long id);
+    public List<PipeInfo> getPipeInfoByThingTagId(Long id, int pageNum, int pageSize);
 
     public void addFlashboard(FlashboardInfo flashboardInfo);
 
@@ -50,5 +48,11 @@ public interface ThingManagementService {
     public void addValve(ValveInfo valveInfo);
 
     public void editValve(ValveInfo valveInfo);
+
+    public List<ChuteInfo> getChuteInfoByThingTagId(Long id, int pageNum, int pageSize);
+
+    public List<ValveInfo> getValveInfoByThingTagId(Long id, int pageNum, int pageSize);
+
+    public List<FlashboardInfo> getFlashboardInfoByThingTagId(Long id, int pageNum, int pageSize);
 
 }

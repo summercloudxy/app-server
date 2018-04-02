@@ -30,7 +30,7 @@ public class FlashboardInfo {
     /**
      *闸板名称
      */
-    private String  flashboardName;
+    private String  thingName;
 
 
     /**
@@ -123,12 +123,12 @@ public class FlashboardInfo {
         this.disableDate = disableDate;
     }
 
-    public String getFlashboardName() {
-        return flashboardName;
+    public String getThingName() {
+        return thingName;
     }
 
-    public void setFlashboardName(String flashboardName) {
-        this.flashboardName = flashboardName;
+    public void setThingName(String thingName) {
+        this.thingName = thingName;
     }
 
     public String getManufacturer() {
@@ -161,6 +161,14 @@ public class FlashboardInfo {
 
     public void setParentThingName(String parentThingName) {
         this.parentThingName = parentThingName;
+    }
+
+    public String getFlashboardType() {
+        return flashboardType;
+    }
+
+    public void setFlashboardType(String flashboardType) {
+        this.flashboardType = flashboardType;
     }
 
     public Long getBuildingId() {
@@ -201,13 +209,5 @@ public class FlashboardInfo {
 
     public void setThingType(String thingType) {
         this.thingType = thingType;
-    }
-
-    public String getFlashboardType() {
-        return flashboardType;
-    }
-
-    public void setFlashboardType(String flashboardType) {
-        this.flashboardType = flashboardType;
     }
 }
