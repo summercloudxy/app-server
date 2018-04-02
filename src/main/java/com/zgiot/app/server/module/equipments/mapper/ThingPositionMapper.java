@@ -10,7 +10,7 @@ import org.apache.ibatis.annotations.Param;
 public interface ThingPositionMapper {
 
     @Insert("INSERT INTO tb_thing_position(thing_code,building_id,floor,location_area,location_x,location_y) " +
-            "values(#{thingCode},#{buildingId},#{floor},#{locationArea},#{locationX},#{locationY})")
+            "VALUES(#{thingCode},#{buildingId},#{floor},#{locationArea},#{locationX},#{locationY})")
     void addThingPosition(ThingPosition thingPosition);
 
     @Delete("delete from tb_thing_position where thing_code = #{thingCode}")

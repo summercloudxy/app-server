@@ -38,8 +38,8 @@ public interface ThingManagementMapper {
     List<DeviceInfo> getDeviceInfoByThingcode(@Param("thingCodeList") List<String> thingCodeList);
 
     @Select("SELECT t.id,t.thing_code,t.thing_name,t.thing_type1_code,t.thing_shortname FROM tb_thing t " +
-            "where t.thing_code like #{thingCode}  and t.thing_type1_code = #{thingType1Code}" +
-            " ORDER BY t.thing_code")
+            "WHERE t.thing_code like #{thingCode} AND t.thing_type1_code = #{thingType1Code} " +
+            "ORDER BY t.thing_code")
     List<Thing> getThingByCode(@Param("thingCode") String thingCode,@Param("thingType1Code") String thingType1Code);
 
     @Select("select * from tb_thing where thing_code = #{thingCode}")

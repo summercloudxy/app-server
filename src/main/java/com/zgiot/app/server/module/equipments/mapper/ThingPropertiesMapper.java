@@ -13,7 +13,7 @@ public interface ThingPropertiesMapper {
             "VALUES(#{thingCode},#{propKey},#{propValue},#{propType})")
     void addThingProperties(ThingProperties thingProperties);
 
-    @Delete("DELETE FROM tb_thing_properties where thing_code = #{thingCode}")
+    @Delete("DELETE FROM tb_thing_properties WHERE thing_code = #{thingCode}")
     void deleteThingPropertiesByThingCode(@Param("thing_code") String thing_code);
 
     List<ThingProperties> getThingPropertiesByThingCode(List<String> thingCodeList);
