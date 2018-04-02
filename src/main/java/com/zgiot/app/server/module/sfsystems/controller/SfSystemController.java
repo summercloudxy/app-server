@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -40,19 +41,19 @@ public class SfSystemController {
      * @return
      */
     @RequestMapping(value = "/relThingSystem/add", method = RequestMethod.POST)
-    public ResponseEntity<String> addBuilding(RelThingSystem relThingSystem) {
+    public ResponseEntity<String> addBuilding(@RequestBody RelThingSystem relThingSystem) {
         relThingSystemService.addRelThingSystem(relThingSystem);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
     /**
      * 系统设备删除
-     * @param thing_code
+     * @param thingCode
      * @return
      */
-    @RequestMapping(value = "/relThingSystem/delete/{thing_code}", method = RequestMethod.DELETE)
-    public ResponseEntity<String> delBuilding(@PathVariable("thing_code") String thing_code) {
-        relThingSystemService.deleteRelThingSystemByThingCode(thing_code);
+    @RequestMapping(value = "/relThingSystem/delete/{thingCode}", method = RequestMethod.DELETE)
+    public ResponseEntity<String> delBuilding(@PathVariable("thingCode") String thingCode) {
+        relThingSystemService.deleteRelThingSystemByThingCode(thingCode);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
