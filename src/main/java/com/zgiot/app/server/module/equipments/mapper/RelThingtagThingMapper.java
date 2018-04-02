@@ -15,11 +15,16 @@ public interface RelThingtagThingMapper {
     @Delete("delete from rel_thingtag_thing where thing_code = #{thingCode}")
     void deleteRelThingtagThingByThingCode(@Param("thingCode") String thingCode);
 
+    @Select("SELECT * FROM rel_thingtag_thing WHERE thing_tag_code in (" +
+            "SELECT code FROM tb_thing_tag WHERE parent_id in(" +
+            "SELECT code FROM tb_thing_tag WHERE parent_id = #{id}))")
+    List<RelThingtagThing> getRelThingtagThingByTwoLevelId(@Param("id") Long id);
+
     @Select("SELECT * FROM rel_thingtag_thing WHERE thing_tag_code in " +
-            "(SELECT code FROM tb_thing_tag WHERE id = #{id})")
+            "(SELECT code FROM tb_thing_tag WHERE parent_id = #{id})")
     List<RelThingtagThing> getRelThingtagThingByThreeLevelId(@Param("id") Long id);
 
-    @Select("SELECT * FROM rel_thingtag_thing WHERE thing_tag_code = #{id})")
+    @Select("SELECT * FROM rel_thingtag_thing WHERE thing_tag_code = #{id}")
     List<RelThingtagThing> getRelThingtagThingByThingTagCode(@Param("id") Long id);
 
 }
