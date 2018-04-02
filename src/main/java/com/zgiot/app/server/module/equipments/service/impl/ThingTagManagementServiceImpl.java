@@ -17,4 +17,9 @@ public class ThingTagManagementServiceImpl implements ThingTagManagementService 
     public List<ThingTag> getAllEquipmentType() {
         return thingTagMapper.getAllEquipmentType();
     }
+
+    @Override
+    public List<ThingTag> getThingTagByParentId(Long id) {
+        return thingTagMapper.getThingTagByParentId(id);
+    }
 }

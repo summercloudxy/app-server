@@ -101,6 +101,12 @@ public class EquipmentManagementController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(thingTagList), HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/thingTag/getThingTagByParentId/{id}", method = RequestMethod.GET)
+    public ResponseEntity<String> getThingTagByParentId(@PathVariable("id") Long id){
+        List<ThingTag> thingTagList = thingTagService.getThingTagByParentId(id);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(thingTagList), HttpStatus.OK);
+    }
+
     /**
      * 根据key查找基础数据字典
      * @param key

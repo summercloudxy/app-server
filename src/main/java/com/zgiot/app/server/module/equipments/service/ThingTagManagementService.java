@@ -8,4 +8,5 @@ public interface ThingTagManagementService {
 
     public List<ThingTag> getAllEquipmentType();
 
+    public List<ThingTag> getThingTagByParentId(Long id);
 }
