@@ -41,8 +41,11 @@ public class EquipmentManagementController {
      */
     @RequestMapping(value = "/building/list/pageNum/{pageNum}/pageSize/{pageSize}", method = RequestMethod.GET)
     public ResponseEntity<String> getBuildingList(@PathVariable int pageNum, @PathVariable int pageSize) {
+        BuildingInfo buildingInfo = new BuildingInfo();
         List<Building> buildingList = buildingService.getBuildingAll(pageNum,pageSize);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(buildingList), HttpStatus.OK);
+        buildingInfo.setBuildingList(buildingList);
+        buildingInfo.setCount(buildingList.size());
+        return new ResponseEntity<>(ServerResponse.buildOkJson(buildingInfo), HttpStatus.OK);
     }
 
     /**
@@ -296,8 +299,11 @@ public class EquipmentManagementController {
      */
     @RequestMapping(value = "/coalStorageDepot/list/pageNum/{pageNum}/pageSize/{pageSize}", method = RequestMethod.GET)
     public ResponseEntity<String> getCoalStorageDepotList(@PathVariable int pageNum, @PathVariable int pageSize) {
+        CoalStorageDepotInfo coalStorageDepotInfo = new CoalStorageDepotInfo();
         List<CoalStorageDepot> coalStorageDepotList = coalStorageDepotService.getCoalStorageDepotAll(pageNum,pageSize);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(coalStorageDepotList), HttpStatus.OK);
+        coalStorageDepotInfo.setCoalStorageDepotList(coalStorageDepotList);
+        coalStorageDepotInfo.setCount(coalStorageDepotList.size());
+        return new ResponseEntity<>(ServerResponse.buildOkJson(coalStorageDepotInfo), HttpStatus.OK);
     }
 
     /**
