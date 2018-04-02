@@ -1,6 +1,8 @@
 package com.zgiot.app.server.module.equipments.service.impl;
 
+import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.zgiot.app.server.module.equipments.controller.PageHelpInfo;
 import com.zgiot.app.server.module.equipments.mapper.CoalStorageDepotMapper;
 import com.zgiot.app.server.module.equipments.pojo.CoalStorageDepot;
 import com.zgiot.app.server.module.equipments.service.CoalStorageDepotService;
@@ -36,9 +38,12 @@ public class CoalStorageDepotServiceImpl implements CoalStorageDepotService {
     }
 
     @Override
-    public List<CoalStorageDepot> getCoalStorageDepotAll(int pageNum, int pageSize) {
-        PageHelper.startPage(pageNum, pageSize);
+    public PageHelpInfo getCoalStorageDepotAll(int pageNum, int pageSize) {
+        Page page = PageHelper.startPage(pageNum, pageSize);
         List<CoalStorageDepot> csdList = coalStorageDepotMapper.getCoalStorageDepotAll();
-        return csdList;
+        PageHelpInfo pageHelpInfo = new PageHelpInfo();
+        pageHelpInfo.setList(csdList);
+        pageHelpInfo.setSum(page.getTotal());
+        return pageHelpInfo;
     }
 }

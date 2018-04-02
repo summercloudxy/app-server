@@ -41,8 +41,10 @@ public class EquipmentManagementController {
      */
     @RequestMapping(value = "/building/list/pageNum/{pageNum}/pageSize/{pageSize}", method = RequestMethod.GET)
     public ResponseEntity<String> getBuildingList(@PathVariable int pageNum, @PathVariable int pageSize) {
-        List<Building> buildingList = buildingService.getBuildingAll(pageNum,pageSize);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(buildingList), HttpStatus.OK);
+
+        PageHelpInfo pageHelpInfo = buildingService.getBuildingAll(pageNum,pageSize);
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
     /**
@@ -296,8 +298,10 @@ public class EquipmentManagementController {
      */
     @RequestMapping(value = "/coalStorageDepot/list/pageNum/{pageNum}/pageSize/{pageSize}", method = RequestMethod.GET)
     public ResponseEntity<String> getCoalStorageDepotList(@PathVariable int pageNum, @PathVariable int pageSize) {
-        List<CoalStorageDepot> coalStorageDepotList = coalStorageDepotService.getCoalStorageDepotAll(pageNum,pageSize);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(coalStorageDepotList), HttpStatus.OK);
+
+        PageHelpInfo pageHelpInfo = coalStorageDepotService.getCoalStorageDepotAll(pageNum,pageSize);
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
     /**

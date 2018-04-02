@@ -1,11 +1,13 @@
 package com.zgiot.app.server.module.equipments.service.impl;
 
 import com.github.pagehelper.PageHelper;
+import com.zgiot.app.server.module.equipments.controller.PageHelpInfo;
 import com.zgiot.app.server.module.equipments.mapper.BuildingMapper;
 import com.zgiot.app.server.module.equipments.pojo.Building;
 import com.zgiot.app.server.module.equipments.service.BuildingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.github.pagehelper.Page;
 
 import java.util.List;
 
@@ -38,9 +40,12 @@ public class BuildingServiceImpl implements BuildingService {
     }
 
     @Override
-    public List<Building> getBuildingAll(int pageNum,int pageSize) {
-        PageHelper.startPage(pageNum, pageSize);
+    public PageHelpInfo getBuildingAll(int pageNum,int pageSize) {
+        Page page = PageHelper.startPage(pageNum, pageSize);
         List<Building> buildingList = buildingMapper.getBuildingAll();
-        return buildingList;
+        PageHelpInfo pageHelpInfo = new PageHelpInfo();
+        pageHelpInfo.setList(buildingList);
+        pageHelpInfo.setSum(page.getTotal());
+        return pageHelpInfo;
     }
 }

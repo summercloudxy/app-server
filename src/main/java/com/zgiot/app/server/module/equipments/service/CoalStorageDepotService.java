@@ -1,5 +1,6 @@
 package com.zgiot.app.server.module.equipments.service;
 
+import com.zgiot.app.server.module.equipments.controller.PageHelpInfo;
 import com.zgiot.app.server.module.equipments.pojo.CoalStorageDepot;
 
 import java.util.List;
@@ -14,5 +15,5 @@ public interface CoalStorageDepotService {
 
     public void deleteCoalStorageDepot(Long id);
 
-    public List<CoalStorageDepot> getCoalStorageDepotAll(int pageNum, int pageSize);
+    public PageHelpInfo getCoalStorageDepotAll(int pageNum, int pageSize);
 }

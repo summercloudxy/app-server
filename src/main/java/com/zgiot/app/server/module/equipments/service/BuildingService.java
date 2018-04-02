@@ -1,5 +1,6 @@
 package com.zgiot.app.server.module.equipments.service;
 
+import com.zgiot.app.server.module.equipments.controller.PageHelpInfo;
 import com.zgiot.app.server.module.equipments.pojo.Building;
 import org.springframework.stereotype.Service;
 
@@ -16,5 +17,5 @@ public interface BuildingService {
 
     public void deleteBuilding(Long id);
 
-    public List<Building> getBuildingAll(int pageNum,int pageSize);
+    public PageHelpInfo getBuildingAll(int pageNum, int pageSize);
 }
