@@ -22,6 +22,9 @@ public interface MetricTagMapper {
     @Select("select * from tb_metric_tag where tag_name like #{name}")
     List<MetricTag> getMetricTag(@Param("name") String name);
 
+    @Select("select * from tb_metric_tag")
+    List<MetricTag> getAllMetricTag();
+
     @Delete("delete from tb_metric_tag where id=#{id}")
     void delMetricTag(@Param("id") int id);
 

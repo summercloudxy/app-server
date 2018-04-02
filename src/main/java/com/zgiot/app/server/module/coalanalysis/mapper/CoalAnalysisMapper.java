@@ -8,11 +8,18 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.Date;
 import java.util.List;
 
 @Mapper
 public interface CoalAnalysisMapper {
     Integer getExistRecordId(CoalAnalysisRecord record);
+
+    CoalAnalysisRecord getExistRecord(CoalAnalysisRecord record);
+
+    CoalAnalysisRecord getRecentRecord(CoalAnalysisRecord record);
+
+    CoalAnalysisRecord getLastRecordOnDuty(@Param("record") CoalAnalysisRecord record,@Param("endTime") Date dutyEndTime);
 
     void updateRecordWithOutDensityAndFlow(@Param("record") CoalAnalysisRecord record);
 
@@ -20,13 +27,14 @@ public interface CoalAnalysisMapper {
 
     void updateRecordDensityAndFlow(CoalAnalysisRecord record);
 
-    void insertDensityAndFlowValues(List<DensityAndFlowInfo> densityAndFlowValues);
+    void insertDetailDensityAndFlowValues(@Param("list") List<DensityAndFlowInfo> densityAndFlowValues,@Param("analysisId")Integer id);
 
     List<DensityAndFlowSourceInfo> getDensityAndFlowSourceInfo();
 
     List<CoalAnalysisRecord> getRecordsMatchCondition(FilterCondition filterCondition);
 
-    List<DensityAndFlowInfo> getDensityAndFlowInfo(int recordId);
+    List<DensityAndFlowInfo> getDetailDensityAndFlowInfo(int recordId);
+
 
     /**
      * 查询某个设备的最新的两条化验数据
@@ -37,6 +45,7 @@ public interface CoalAnalysisMapper {
      */
     @Select("select * from tb_coal_analysis where sample =#{sample} and  target =#{target} ORDER BY time DESC  LIMIT 0,2")
     List<CoalAnalysisRecord> getTop2CoalAnalysisRecord(@Param("sample") String sample, @Param("target") String target);
+
 
 
 }

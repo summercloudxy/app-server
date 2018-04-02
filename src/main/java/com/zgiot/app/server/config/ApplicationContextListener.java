@@ -70,9 +70,15 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
 
     private static final int FAULT_SCAN_RATE = 20;
 
+    private static boolean initFlag = false;
+
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+        if (initFlag){
+            return;
+        }
+        initFlag = true;
         if (applicationContext == null) {
             applicationContext = contextRefreshedEvent.getApplicationContext();
         }
@@ -83,9 +89,13 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
             logger.error("error", throwable);
             return null;
         });
+
+
     }
 
     void installModules(DataProcessor processor) {
+
+
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
                 || moduleListConfig.containModule(ModuleListConfig.MODULE_COAL_ANALYSIS)) {
             completerDataListener.addCompleter(reportFormsCompleter);
@@ -158,6 +168,7 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
             completerDataListener.addCompleter(new DemoDataCompleter());
             processor.addListener(demoBusiness);
             }
+
 
     }
 

@@ -14,6 +14,9 @@
         <if test="thingCode != null">
             and thing_code like #{thingCode}
         </if>
+        <if test="thingName != null">
+            and thing_name like #{thingName}
+        </if>
         <if test="configProgress != null">
             and config_progress = #{configProgress}
         </if>

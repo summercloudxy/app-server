@@ -9,7 +9,6 @@ import com.zgiot.app.server.module.qualityandquantity.service.QualityAndQuantity
 import com.zgiot.app.server.module.tcs.pojo.FilterCondition;
 import com.zgiot.app.server.service.HistoryDataService;
 import com.zgiot.common.constants.GlobalConstants;
-import com.zgiot.common.constants.MetricCodes;
 import com.zgiot.common.enums.MetricDataTypeEnum;
 import com.zgiot.common.pojo.*;
 import org.apache.commons.lang.StringUtils;
@@ -75,13 +74,15 @@ public class ReportFormsUtils {
             densityAndFlowValue.setFlow(t.getAvgFlow());
             return densityAndFlowValue;
         }).collect(Collectors.toList());
-        countAvgValue(densityAndFlowValues, record);
+        record.setDensityAndFlowInfos(densityAndFlowValues);
+        countDensityAndFlowAvgValue(record);
     }
 
 
 
 
-    public void countAvgValue(List<DensityAndFlowInfo> densityAndFlowValues, ReportFormsRecord record) {
+    public void countDensityAndFlowAvgValue(ReportFormsRecord record) {
+        List<DensityAndFlowInfo> densityAndFlowValues = record.getDensityAndFlowInfos();
         CumulativeData densityCumulativeData = new CumulativeData();
         CumulativeData flowCumulativeData = new CumulativeData();
         for (DensityAndFlowInfo densityAndFlowValue : densityAndFlowValues) {
@@ -93,6 +94,11 @@ public class ReportFormsUtils {
     }
 
 
+    /**
+     * 求和
+     * @param data
+     * @param currentValue
+     */
     public void cumulateValue(CumulativeData data, Double currentValue){
         if (currentValue!= null && !INVALID_VALUE.equals(currentValue)){
             BigDecimal currentValueDecimal = BigDecimal.valueOf(currentValue);
@@ -111,11 +117,11 @@ public class ReportFormsUtils {
      *
      * @param record
      */
-    public List<DataModel> getTargetSampleModel(ReportFormsRecord record) {
+    public List<DataModel> getTargetSampleModel(ReportFormsRecord record,MetricCodeEnum code) {
         List<DataModel> dataModels = new ArrayList<>();
-        DataModel sampleThingModel = getSampleThingModel(record);
-        DataModel targetDataModel = getTargetDataModel(record);
-        DataModel sampleDataModel = getSampleDataModel(record);
+        DataModel sampleThingModel = getSampleThingModel(record,code);
+        DataModel targetDataModel = getTargetDataModel(record,code);
+        DataModel sampleDataModel = getSampleDataModel(record,code);
         dataModels.add(sampleThingModel);
         dataModels.add(targetDataModel);
         dataModels.add(sampleDataModel);
@@ -124,90 +130,70 @@ public class ReportFormsUtils {
     }
 
 
-    private DataModel getSampleDataModel(ReportFormsRecord record) {
+    private DataModel getSampleDataModel(ReportFormsRecord record,MetricCodeEnum code) {
         DataModel sampleDataModel = new DataModel();
         sampleDataModel.setMetricDataType(MetricDataTypeEnum.METRIC_DATA_TYPE_OK.getName());
         sampleDataModel.setThingCode(record.getSample());
-        if (record instanceof CoalAnalysisRecord) {
-            sampleDataModel.setMetricCategoryCode(MetricModel.CATEGORY_ASSAY);
-            sampleDataModel.setMetricCode(MetricCodes.ASSAY_DATA);
-        } else if (record instanceof ProductionInspectRecord) {
-            sampleDataModel.setMetricCategoryCode(MetricModel.CATEGORY_PRODUCTION_INSPECT);
-            sampleDataModel.setMetricCode(MetricCodes.PRODUCT_INSPECT_DATA);
-        }
+        sampleDataModel.setMetricCategoryCode(code.getMetricType());
+        sampleDataModel.setMetricCode(code.getDataCode());
         sampleDataModel.setDataTimeStamp(record.getTime());
         sampleDataModel.setValue(JSON.toJSONString(record));
         return sampleDataModel;
     }
 
-    private DataModel getTargetDataModel(ReportFormsRecord record) {
+    private DataModel getTargetDataModel(ReportFormsRecord record,MetricCodeEnum code) {
         DataModel targetDataModel = new DataModel();
         targetDataModel.setMetricDataType(MetricDataTypeEnum.METRIC_DATA_TYPE_OK.getName());
         String system = getSystemStr(record);
         targetDataModel.setThingCode(system + record.getTarget());
-        if (record instanceof CoalAnalysisRecord) {
-            targetDataModel.setMetricCategoryCode(MetricModel.CATEGORY_ASSAY);
-            targetDataModel.setMetricCode(MetricCodes.ASSAY_DATA);
-        } else if (record instanceof ProductionInspectRecord) {
-            targetDataModel.setMetricCategoryCode(MetricModel.CATEGORY_PRODUCTION_INSPECT);
-            targetDataModel.setMetricCode(MetricCodes.PRODUCT_INSPECT_DATA);
-        }
+        targetDataModel.setMetricCategoryCode(code.getMetricType());
+        targetDataModel.setMetricCode(code.getDataCode());
         targetDataModel.setDataTimeStamp(record.getTime());
         targetDataModel.setValue(JSON.toJSONString(record));
         return targetDataModel;
     }
 
-    private DataModel getSampleThingModel(ReportFormsRecord record) {
+    private DataModel getSampleThingModel(ReportFormsRecord record,MetricCodeEnum code) {
         DataModel sampleThingModel = new DataModel();
         sampleThingModel.setMetricDataType(MetricDataTypeEnum.METRIC_DATA_TYPE_OK.getName());
         String system = getSystemStr(record);
         sampleThingModel.setThingCode(system + record.getTarget());
-        if (record instanceof CoalAnalysisRecord) {
-            sampleThingModel.setMetricCategoryCode(MetricModel.CATEGORY_ASSAY);
-            sampleThingModel.setMetricCode(MetricCodes.ASSAY_SAMPLE);
-        } else if (record instanceof ProductionInspectRecord) {
-            sampleThingModel.setMetricCategoryCode(MetricModel.CATEGORY_PRODUCTION_INSPECT);
-            sampleThingModel.setMetricCode(MetricCodes.PRODUCT_INSPECT_SAMPLE);
-        }
+        sampleThingModel.setMetricCategoryCode(code.getMetricType());
+        sampleThingModel.setMetricCode(code.getSampleCode());
         sampleThingModel.setDataTimeStamp(record.getTime());
         sampleThingModel.setValue(record.getSample());
         return sampleThingModel;
     }
 
     private String getSystemStr(ReportFormsRecord record) {
-        String system;
+        String system= "";
         if (record.getSystem().equals(1)) {
             system = GlobalConstants.SYSTEM_ONE;
-        } else {
+        } else if (record.getSystem().equals(2)){
             system = GlobalConstants.SYSTEM_TWO;
         }
         return system;
     }
 
-    public void getParamModel(List<DataModel> dataModels, ReportFormsRecord record, String metricCode,
-                              Double value) {
+    public DataModel getParamModel(ReportFormsRecord record, String metricCode,
+                              Double value,MetricCodeEnum codeEnum) {
         DataModel dataModel = new DataModel();
         dataModel.setMetricDataType(MetricDataTypeEnum.METRIC_DATA_TYPE_OK.getName());
         dataModel.setThingCode(record.getSample());
-        if (record instanceof CoalAnalysisRecord) {
-            dataModel.setMetricCategoryCode(MetricModel.CATEGORY_ASSAY);
-        } else if (record instanceof ProductionInspectRecord) {
-            dataModel.setMetricCategoryCode(MetricModel.CATEGORY_PRODUCTION_INSPECT);
-        }
+        dataModel.setMetricCategoryCode(codeEnum.getMetricType());
         dataModel.setMetricCode(metricCode);
         dataModel.setDataTimeStamp(record.getTime());
         dataModel.setValue(String.valueOf(value));
-        dataModels.add(dataModel);
+        return dataModel;
     }
 
 
     public List<DensityAndFlowInfo> getDensityAndFlowValues(ReportFormsRecord record) {
-        List<DensityAndFlowInfo> densityAndFlowValues = null;
+        List<DensityAndFlowInfo> densityAndFlowValues = new ArrayList<>();
         if (densityThingMap.containsKey(record.getSample())) {
             DensityAndFlowSourceInfo densityAndFlowInfo = densityThingMap.get(record.getSample()).get(record.getSystem());
             List<String> thingCodes = densityAndFlowInfo.getThingCodes();
             logger.debug("开始计算id为{}的煤质化验数据对应的分选密度/顶水流量，设备列表为：{}", record.getId(), thingCodes);
-            densityAndFlowValues = new ArrayList<>();
             for (String runThingCode : thingCodes) {
                 DensityAndFlowInfo densityAndFlowValue = getDensityAndFlowInfoInThing(record, densityAndFlowInfo, runThingCode);
                 if (densityAndFlowValue != null) {

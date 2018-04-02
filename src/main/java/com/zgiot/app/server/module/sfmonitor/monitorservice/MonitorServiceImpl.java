@@ -192,10 +192,14 @@ public class MonitorServiceImpl implements MonitorService {
         saveEquipmentMonitorConfigInfo(auxiliaryAreaInfos);
         StateControlAreaInfo stateControlAreaInfo = equipmentRelateToSignalWrapperReq.getStateControlAreaInfo();
         List<SFMonEquipMonitorConfig> stateControlInfo = createStateControlAreaEquipmentMonitorConfig(stateControlAreaInfo,thingCode,SFMonitorConstant.STATE_AREA);
+        sfMonEquipMonitorConfig.setThingCode(thingCode);
         sfMonEquipMonitorConfig.setKey(SFMonitorConstant.STATE_AREA);
         sfMonEquipMonitorConfigMapper.deleteEquipmentConfig(sfMonEquipMonitorConfig);
         sfMonEquipMonitorConfig.setKey(SFMonitorConstant.STATE_AREA_FIND);
         sfMonEquipMonitorConfigMapper.deleteEquipmentConfig(sfMonEquipMonitorConfig);
+        for(SFMonEquipMonitorConfig stateZoneData:stateControlInfo){
+            stateZoneData.setSelected(true);
+        }
         saveEquipmentMonitorConfigInfo(stateControlInfo);
         SFMonEquipMonitorInfo sfMonEquipMonitorInfo = new SFMonEquipMonitorInfo();
         sfMonEquipMonitorInfo.setThingCode(thingCode);
@@ -266,10 +270,10 @@ public class MonitorServiceImpl implements MonitorService {
 
     private List<SFMonEquipMonitorConfig> getAllStateControlAreaMetric(String wrapperName,int model, String thingCode,String equipmentType){
         List<SFMonEquipMonitorConfig> sfMonEquipMonitorConfigs = new ArrayList<>();
-        List<String> metricNames = metricTagRelationMapper.getAllMetric(wrapperName);
+        List<String> metricCodes = metricTagRelationMapper.getAllMetric(wrapperName);
         List<MetricModel> metricModels = tmlMapper.findMetric(thingCode);
         for (MetricModel metric : metricModels) {
-            if (metricNames.contains(metric.getMetricName())) {
+            if (metricCodes.contains(metric.getMetricCode())) {
                 SFMonEquipMonitorConfig sfMonEquipMonitorConfig = new SFMonEquipMonitorConfig();
                 sfMonEquipMonitorConfig.setThingCode(thingCode);
                 sfMonEquipMonitorConfig.setKey(equipmentType);
@@ -296,8 +300,11 @@ public class MonitorServiceImpl implements MonitorService {
         SFMonEquipMonitorInfo sfMonEquipMonitorInfo = sfMonEquipMonitorInfoMapper.getEquiupmentInfoById(id);
         sfMonEquipMonitorInfoMapper.deleteEquipmentBaseInfo(id);
         SFMonEquipMonitorConfig sfMonEquipMonitorConfig = new SFMonEquipMonitorConfig();
-        sfMonEquipMonitorConfig.setThingCode(sfMonEquipMonitorInfo.getThingCode());
-        sfMonEquipMonitorConfigMapper.deleteEquipmentConfig(sfMonEquipMonitorConfig);
+        List<String> relateThings = tmlMapper.findRelateThing(sfMonEquipMonitorInfo.getThingCode() + SFMonitorConstant.FUZZY_QUERY_TAG);
+        for(String thingCode:relateThings){
+            sfMonEquipMonitorConfig.setThingCode(thingCode);
+            sfMonEquipMonitorConfigMapper.deleteEquipmentConfig(sfMonEquipMonitorConfig);
+        }
     }
 
 
