@@ -278,53 +278,26 @@ public class SFMonitorSignalWrapperController {
             return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
         }
         if (!StringUtils.isBlank(metricName)) {
-            findSignalWrapperRes = metricTagRelationMapper.findSignalWrapperByMetricName(metricName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            if(metricName.equals(SFMonitorConstant.ALL_PARAMETER)){
+                findSignalWrapperRes = metricTagRelationMapper.findAllSignalWrapper();
+            }else{
+                findSignalWrapperRes = metricTagRelationMapper.findSignalWrapperByMetricName(metricName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            }
+
             return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
         }
         if (!StringUtils.isBlank(wrapperName)) {
-            findSignalWrapperRes = metricTagRelationMapper.findSignalWrapperByWrapperName(wrapperName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            if(wrapperName.equals(SFMonitorConstant.ALL_PARAMETER)){
+                findSignalWrapperRes = metricTagRelationMapper.findAllSignalWrapper();
+            }else{
+                findSignalWrapperRes = metricTagRelationMapper.findSignalWrapperByWrapperName(wrapperName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            }
+
             return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
         }
         return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
     }
 
-    @GetMapping("/signalWrapper/fuzzyFind/findSignalWrapperByWrapperName/{wrapperName}")
-    public ResponseEntity<String> findSignalWrapperByWrapperName(@PathVariable String wrapperName){
-        List<FindSignalWrapperRes> findSignalWrapperRes = null;
-        Set<String> wrapperNameAndSignalName = new HashSet<>();
-        if(wrapperName.equals(SFMonitorConstant.ALL_PARAMETER)){
-            findSignalWrapperRes = metricTagRelationMapper.findAllSignalWrapper();
-            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
-                wrapperNameAndSignalName.add(signalWrapper.getTagName());
-            }
-        }else{
-            findSignalWrapperRes = metricTagRelationMapper.fuzzyFindSignalWrapperByWrapperName(wrapperName + SFMonitorConstant.FUZZY_QUERY_TAG);
-            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
-                wrapperNameAndSignalName.add(signalWrapper.getTagName());
-            }
-        }
-
-        return new ResponseEntity<>(ServerResponse.buildOkJson(new ArrayList<>(wrapperNameAndSignalName)), HttpStatus.OK);
-    }
-
-    @GetMapping("/signalWrapper/fuzzyFind/findSignalWrapperBySignalName/{signalName}")
-    public ResponseEntity<String> findSignalWrapperBySignalName(@PathVariable String signalName){
-        List<FindSignalWrapperRes> findSignalWrapperRes = null;
-        Set<String> wrapperNameAndSignalName = new HashSet<>();
-        if(signalName.equals(SFMonitorConstant.ALL_PARAMETER)){
-            findSignalWrapperRes = metricTagRelationMapper.findAllSignalWrapper();
-            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
-                wrapperNameAndSignalName.add(signalWrapper.getMetricName());
-            }
-        }else{
-            findSignalWrapperRes = metricTagRelationMapper.fuzzyFindSignalWrapperByMetricName(signalName + SFMonitorConstant.FUZZY_QUERY_TAG);
-            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
-                wrapperNameAndSignalName.add(signalWrapper.getMetricName());
-            }
-        }
-
-        return new ResponseEntity<>(ServerResponse.buildOkJson(new ArrayList<>(wrapperNameAndSignalName)), HttpStatus.OK);
-    }
 
     @GetMapping("/signalWrapper/fuzzyFind/findSignalWrapper/{wrapperNameOrSignalName}")
     public ResponseEntity<String> findSignalWrapperByName(@PathVariable String wrapperNameOrSignalName){
@@ -468,54 +441,26 @@ public class SFMonitorSignalWrapperController {
             return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
         }
         if (!StringUtils.isBlank(styleName)) {
-            findSignalWrapperRes = relSFMonMetricTagStyleMapper.getSiganlWrapperStyleByStyleName(styleName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            if(styleName.equals(SFMonitorConstant.ALL_PARAMETER)){
+                findSignalWrapperRes = relSFMonMetricTagStyleMapper.getAllSignalWrapperStyle();
+            }else{
+                findSignalWrapperRes = relSFMonMetricTagStyleMapper.getSiganlWrapperStyleByStyleName(styleName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            }
             return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
         }
         if (!StringUtils.isBlank(wrapperName)) {
-            findSignalWrapperRes = relSFMonMetricTagStyleMapper.getSiganlWrapperStyleByWrapperName(wrapperName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            if(wrapperName.equals(SFMonitorConstant.ALL_PARAMETER)){
+                findSignalWrapperRes = relSFMonMetricTagStyleMapper.getAllSignalWrapperStyle();
+            }else{
+                findSignalWrapperRes = relSFMonMetricTagStyleMapper.getSiganlWrapperStyleByWrapperName(wrapperName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            }
+
             return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
         }
 
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
-    @GetMapping("/signalWrapper/style/fuzzyFind/findAllSignalWrapperStyleByWrapperName/{wrapperName}")
-    public ResponseEntity<String> findAllSignalWrapperStyleByWrapperName(@PathVariable String wrapperName){
-        List<FindSignalWrapperRes> findSignalWrapperRes = null;
-        Set<String> wrapperNameAndStyleNames = new HashSet<>();
-        if(wrapperName.equals(SFMonitorConstant.ALL_PARAMETER)){
-            findSignalWrapperRes = relSFMonMetricTagStyleMapper.getAllSignalWrapperStyle();
-            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
-                wrapperNameAndStyleNames.add(signalWrapper.getTagName());
-            }
-        }else{
-            findSignalWrapperRes = relSFMonMetricTagStyleMapper.fuzzyGetSiganlWrapperStyleByWrapperName(wrapperName + SFMonitorConstant.FUZZY_QUERY_TAG);
-            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
-                wrapperNameAndStyleNames.add(signalWrapper.getTagName());
-            }
-        }
-
-        return new ResponseEntity<>(ServerResponse.buildOkJson(new ArrayList<>(wrapperNameAndStyleNames)), HttpStatus.OK);
-    }
-
-    @GetMapping("/signalWrapper/style/fuzzyFind/findAllSignalWrapperStyleByStyleName/{styleName}")
-    public ResponseEntity<String> findAllSignalWrapperStyleByStyleName(@PathVariable String styleName){
-        List<FindSignalWrapperRes> findSignalWrapperRes = null;
-        Set<String> wrapperNameAndStyleNames = new HashSet<>();
-        if(styleName.equals(SFMonitorConstant.ALL_PARAMETER)){
-            findSignalWrapperRes = relSFMonMetricTagStyleMapper.getAllSignalWrapperStyle();
-            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
-                wrapperNameAndStyleNames.add(signalWrapper.getMetricName());
-            }
-        }else{
-            findSignalWrapperRes = relSFMonMetricTagStyleMapper.fuzzyGetSiganlWrapperStyleByStyleName(styleName + SFMonitorConstant.FUZZY_QUERY_TAG);
-            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
-                wrapperNameAndStyleNames.add(signalWrapper.getMetricName());
-            }
-        }
-
-        return new ResponseEntity<>(ServerResponse.buildOkJson(new ArrayList<>(wrapperNameAndStyleNames)), HttpStatus.OK);
-    }
 
     @GetMapping("/signalWrapper/style/fuzzyFind/findAllSignalWrapperStyle/{wrapperNameOrStyleName}")
     public ResponseEntity<String> findAllSignalWrapperStyleByName(@PathVariable String wrapperNameOrStyleName){
@@ -641,6 +586,8 @@ public class SFMonitorSignalWrapperController {
         }
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
+
+
     @GetMapping("/equipmentConfig/fuzzyFind/thing/{thingCode}")
     public ResponseEntity<String> findEquipmentMonitorInfoByThingCode(@PathVariable String thingCode){
         SFMonEquipMonitorInfo sfMonEquipMonitorInfo = new SFMonEquipMonitorInfo();
