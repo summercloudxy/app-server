@@ -129,8 +129,8 @@ public class EquipmentManagementController {
             method = RequestMethod.GET)
     public ResponseEntity<String> getDeviceInfoByThingTagId(@PathVariable("id") Long id, @PathVariable int pageNum,
                                                             @PathVariable int pageSize){
-        List<DeviceInfo> deviceInfoList = thingService.getDeviceInfoByThingTagId(id, pageNum, pageSize);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(deviceInfoList), HttpStatus.OK);
+        PageHelpInfo pageHelpInfo = thingService.getDeviceInfoByThingTagId(id, pageNum, pageSize);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
     /**
@@ -144,8 +144,8 @@ public class EquipmentManagementController {
             method = RequestMethod.GET)
     public ResponseEntity<String> getPartsInfoByThingTagId(@PathVariable("id") Long id, @PathVariable int pageNum,
                                                            @PathVariable int pageSize){
-        List<PartsInfo> partsInfoList = thingService.getPartsInfoByThingTagId(id, pageNum, pageSize);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(partsInfoList), HttpStatus.OK);
+        PageHelpInfo pageHelpInfo = thingService.getPartsInfoByThingTagId(id, pageNum, pageSize);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
     /*3.29 begin*/
@@ -392,8 +392,8 @@ public class EquipmentManagementController {
             method = RequestMethod.GET)
     public ResponseEntity<String> getPipeInfoByThingTagId(@PathVariable("id") Long id, @PathVariable int pageNum,
                                                           @PathVariable int pageSize){
-        List<PipeInfo> pipeInfoList = thingService.getPipeInfoByThingTagId(id, pageNum, pageSize);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(pipeInfoList), HttpStatus.OK);
+        PageHelpInfo pageHelpInfo = thingService.getPipeInfoByThingTagId(id, pageNum, pageSize);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
     /**
@@ -475,8 +475,8 @@ public class EquipmentManagementController {
             method = RequestMethod.GET)
     public ResponseEntity<String> getChuteInfoByThingTagId(@PathVariable("id") Long id, @PathVariable int pageNum,
                                                           @PathVariable int pageSize){
-        List<ChuteInfo> chuteInfoList = thingService.getChuteInfoByThingTagId(id, pageNum, pageSize);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(chuteInfoList), HttpStatus.OK);
+        PageHelpInfo pageHelpInfo = thingService.getChuteInfoByThingTagId(id, pageNum, pageSize);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
     /**
@@ -490,8 +490,8 @@ public class EquipmentManagementController {
             method = RequestMethod.GET)
     public ResponseEntity<String> getValveInfoByThingTagId(@PathVariable("id") Long id, @PathVariable int pageNum,
                                                            @PathVariable int pageSize){
-        List<ValveInfo> valveInfoList = thingService.getValveInfoByThingTagId(id, pageNum, pageSize);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(valveInfoList), HttpStatus.OK);
+        PageHelpInfo pageHelpInfo = thingService.getValveInfoByThingTagId(id, pageNum, pageSize);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
     /**
@@ -505,8 +505,8 @@ public class EquipmentManagementController {
             method = RequestMethod.GET)
     public ResponseEntity<String> getFlashboardInfoByThingTagId(@PathVariable("id") Long id, @PathVariable int pageNum,
                                                            @PathVariable int pageSize){
-        List<FlashboardInfo> flashboardInfoList = thingService.getFlashboardInfoByThingTagId(id, pageNum, pageSize);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(flashboardInfoList), HttpStatus.OK);
+        PageHelpInfo pageHelpInfo = thingService.getFlashboardInfoByThingTagId(id, pageNum, pageSize);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
 }

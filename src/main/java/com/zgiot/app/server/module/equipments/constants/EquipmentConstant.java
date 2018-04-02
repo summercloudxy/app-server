@@ -23,7 +23,7 @@ public class EquipmentConstant {
     public static final String MANUFACTURER = "MANUFACTURER";
 
     /**
-     * 动力属性
+     * 动力属性:0非动力 1动力
      */
     public static final String POWER_PROPERTIES = "POWER_PROPERTIES";
 

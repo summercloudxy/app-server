@@ -1,5 +1,6 @@
 package com.zgiot.app.server.module.equipments.service.impl;
 
+import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.zgiot.app.server.module.equipments.constants.EquipmentConstant;
 import com.zgiot.app.server.module.equipments.mapper.*;
@@ -28,16 +29,19 @@ public class ThingManagementServiceImpl implements ThingManagementService {
     private RelThingtagThingMapper relThingtagThingMapper;
     @Autowired
     private RelThingSystemMapper relThingSystemMapper;
-    @Autowired
-    private ThingTagManagementMapper thingTagManagementMapper;
 
 
-    public List<DeviceInfo> getDeviceInfoByThingcode(List<String> thingCodeList, int pageNum, int pageSize) {
-        PageHelper.startPage(pageNum, pageSize);
-        return thingMapper.getDeviceInfoByThingcode(thingCodeList);
+    public PageHelpInfo getDeviceInfoByThingcode(List<String> thingCodeList, int pageNum, int pageSize) {
+        Page<Object> page = PageHelper.startPage(pageNum, pageSize);
+        List<DeviceInfo> deviceInfoList = thingMapper.getDeviceInfoByThingcode(thingCodeList);
+
+        PageHelpInfo pageHelpInfo = new PageHelpInfo();
+        pageHelpInfo.setList(deviceInfoList);
+        pageHelpInfo.setSum(page.getTotal());
+        return pageHelpInfo;
     }
-    public List<PartsInfo> getPartsInfoByThingcode(List<String> thingCodeList, int pageNum, int pageSize) {
-        PageHelper.startPage(pageNum, pageSize);
+    public PageHelpInfo getPartsInfoByThingcode(List<String> thingCodeList, int pageNum, int pageSize) {
+        Page<Object> page = PageHelper.startPage(pageNum, pageSize);
         List<PartsInfo> partsInfoList = thingMapper.getPartsInfoByThingcode(thingCodeList);
         List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
         if(partsInfoList != null && partsInfoList.size() > 0){
@@ -54,7 +58,11 @@ public class ThingManagementServiceImpl implements ThingManagementService {
                 }
             }
         }
-        return partsInfoList;
+
+        PageHelpInfo pageHelpInfo = new PageHelpInfo();
+        pageHelpInfo.setList(partsInfoList);
+        pageHelpInfo.setSum(page.getTotal());
+        return pageHelpInfo;
     }
 
     /**
@@ -63,7 +71,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
      * @return
      */
     @Override
-    public List<DeviceInfo> getDeviceInfoByThingTagId(Long id, int pageNum, int pageSize) {
+    public PageHelpInfo getDeviceInfoByThingTagId(Long id, int pageNum, int pageSize) {
         List<RelThingtagThing> relThingtagThingList = relThingtagThingMapper.getRelThingtagThingByThreeLevelId(id);
         List<String> thingCodeList = new ArrayList<>();
         if(relThingtagThingList != null && relThingtagThingList.size() > 0){
@@ -71,8 +79,8 @@ public class ThingManagementServiceImpl implements ThingManagementService {
                 thingCodeList.add(relThingtagThingList.get(i).getThingCode());
             }
         }
-        List<DeviceInfo> deviceInfoList = getDeviceInfoByThingcode(thingCodeList, pageNum, pageSize);
-        return  deviceInfoList;
+        PageHelpInfo pageHelpInfo = getDeviceInfoByThingcode(thingCodeList, pageNum, pageSize);
+        return  pageHelpInfo;
     }
 
     /**
@@ -81,7 +89,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
      * @return
      */
     @Override
-    public List<PartsInfo> getPartsInfoByThingTagId(Long id, int pageNum, int pageSize) {
+    public PageHelpInfo getPartsInfoByThingTagId(Long id, int pageNum, int pageSize) {
         List<RelThingtagThing> relThingtagThingList = relThingtagThingMapper.getRelThingtagThingByThingTagCode(id);
         List<String> thingCodeList = new ArrayList<>();
         if(relThingtagThingList != null && relThingtagThingList.size() > 0){
@@ -89,8 +97,8 @@ public class ThingManagementServiceImpl implements ThingManagementService {
                 thingCodeList.add(relThingtagThingList.get(i).getThingCode());
             }
         }
-        List<PartsInfo> partsInfoList = getPartsInfoByThingcode(thingCodeList, pageNum, pageSize);
-        return partsInfoList;
+        PageHelpInfo pageHelpInfo = getPartsInfoByThingcode(thingCodeList, pageNum, pageSize);
+        return pageHelpInfo;
     }
 
     @Override
@@ -756,7 +764,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
     /*3.30 end*/
 
     @Override
-    public List<PipeInfo> getPipeInfoByThingTagId(Long id, int pageNum, int pageSize) {
+    public PageHelpInfo getPipeInfoByThingTagId(Long id, int pageNum, int pageSize) {
         List<RelThingtagThing> relThingtagThingList = relThingtagThingMapper.getRelThingtagThingByThingTagCode(id);
         List<String> thingCodeList = new ArrayList<>();
         if(relThingtagThingList != null && relThingtagThingList.size() > 0){
@@ -764,12 +772,12 @@ public class ThingManagementServiceImpl implements ThingManagementService {
                 thingCodeList.add(relThingtagThingList.get(i).getThingCode());
             }
         }
-        List<PipeInfo> pipeInfoList = getPipeInfoByThingcode(thingCodeList, pageNum, pageSize);
-        return pipeInfoList;
+        PageHelpInfo pageHelpInfo = getPipeInfoByThingcode(thingCodeList, pageNum, pageSize);
+        return pageHelpInfo;
     }
 
-    private List<PipeInfo> getPipeInfoByThingcode(List<String> thingCodeList, int pageNum, int pageSize) {
-        PageHelper.startPage(pageNum, pageSize);
+    private PageHelpInfo getPipeInfoByThingcode(List<String> thingCodeList, int pageNum, int pageSize) {
+        Page<Object> page = PageHelper.startPage(pageNum, pageSize);
         List<PipeInfo> pipeInfoList = thingMapper.getPipeInfoByThingcode(thingCodeList);
         List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
         if(pipeInfoList != null && pipeInfoList.size() > 0){
@@ -786,11 +794,15 @@ public class ThingManagementServiceImpl implements ThingManagementService {
                 }
             }
         }
-        return pipeInfoList;
+
+        PageHelpInfo pageHelpInfo = new PageHelpInfo();
+        pageHelpInfo.setList(pipeInfoList);
+        pageHelpInfo.setSum(page.getTotal());
+        return pageHelpInfo;
     }
 
     @Override
-    public List<ChuteInfo> getChuteInfoByThingTagId(Long id, int pageNum, int pageSize) {
+    public PageHelpInfo getChuteInfoByThingTagId(Long id, int pageNum, int pageSize) {
         List<RelThingtagThing> relThingtagThingList = relThingtagThingMapper.getRelThingtagThingByThingTagCode(id);
         List<String> thingCodeList = new ArrayList<>();
         if(relThingtagThingList != null && relThingtagThingList.size() > 0){
@@ -798,12 +810,14 @@ public class ThingManagementServiceImpl implements ThingManagementService {
                 thingCodeList.add(relThingtagThingList.get(i).getThingCode());
             }
         }
-        List<ChuteInfo> chuteInfoList = getChuteInfoByThingcode(thingCodeList, pageNum, pageSize);
-        return chuteInfoList;
+        PageHelpInfo pageHelpInfo = getChuteInfoByThingcode(thingCodeList, pageNum, pageSize);
+        return pageHelpInfo;
     }
 
-    private List<ChuteInfo> getChuteInfoByThingcode(List<String> thingCodeList, int pageNum, int pageSize) {
-        List<PipeInfo> pipeInfoList = getPipeInfoByThingcode(thingCodeList, pageNum, pageSize);
+    private PageHelpInfo getChuteInfoByThingcode(List<String> thingCodeList, int pageNum, int pageSize) {
+        PageHelpInfo pageHelpInfo = getPipeInfoByThingcode(thingCodeList, pageNum, pageSize);
+
+        List<PipeInfo> pipeInfoList = pageHelpInfo.getList();
 
         List<ChuteInfo> chuteInfoList = new ArrayList<>();
         for(int i=0;i<pipeInfoList.size();i++){
@@ -818,11 +832,12 @@ public class ThingManagementServiceImpl implements ThingManagementService {
             chuteInfo.setUpdateDate(pipeInfo.getUpdateDate());
             chuteInfoList.add(chuteInfo);
         }
-        return chuteInfoList;
+        pageHelpInfo.setList(chuteInfoList);
+        return pageHelpInfo;
     }
 
     @Override
-    public List<ValveInfo> getValveInfoByThingTagId(Long id, int pageNum, int pageSize) {
+    public PageHelpInfo getValveInfoByThingTagId(Long id, int pageNum, int pageSize) {
         List<RelThingtagThing> relThingtagThingList = relThingtagThingMapper.getRelThingtagThingByThingTagCode(id);
         List<String> thingCodeList = new ArrayList<>();
         if(relThingtagThingList != null && relThingtagThingList.size() > 0){
@@ -830,7 +845,9 @@ public class ThingManagementServiceImpl implements ThingManagementService {
                 thingCodeList.add(relThingtagThingList.get(i).getThingCode());
             }
         }
-        List<PartsInfo> partsInfoList = getPartsInfoByThingcode(thingCodeList, pageNum, pageSize);
+        PageHelpInfo pageHelpInfo = getPartsInfoByThingcode(thingCodeList, pageNum, pageSize);
+
+        List<PartsInfo> partsInfoList = pageHelpInfo.getList();
 
         List<ValveInfo> valveInfoList = new ArrayList<>();
         for(int i=0;i<partsInfoList.size();i++){
@@ -844,11 +861,12 @@ public class ThingManagementServiceImpl implements ThingManagementService {
             valveInfo.setUpdateDate(partsInfo.getUpdateTime());
             valveInfoList.add(valveInfo);
         }
-        return valveInfoList;
+        pageHelpInfo.setList(valveInfoList);
+        return pageHelpInfo;
     }
 
     @Override
-    public List<FlashboardInfo> getFlashboardInfoByThingTagId(Long id, int pageNum, int pageSize) {
+    public PageHelpInfo getFlashboardInfoByThingTagId(Long id, int pageNum, int pageSize) {
         List<RelThingtagThing> relThingtagThingList = relThingtagThingMapper.getRelThingtagThingByThingTagCode(id);
         List<String> thingCodeList = new ArrayList<>();
         if(relThingtagThingList != null && relThingtagThingList.size() > 0){
@@ -856,7 +874,9 @@ public class ThingManagementServiceImpl implements ThingManagementService {
                 thingCodeList.add(relThingtagThingList.get(i).getThingCode());
             }
         }
-        List<PartsInfo> partsInfoList = getPartsInfoByThingcode(thingCodeList, pageNum, pageSize);
+        PageHelpInfo pageHelpInfo = getPartsInfoByThingcode(thingCodeList, pageNum, pageSize);
+
+        List<PartsInfo> partsInfoList = pageHelpInfo.getList();
 
         List<FlashboardInfo> flashboardInfoList = new ArrayList<>();
         for(int i=0;i<partsInfoList.size();i++){
@@ -870,7 +890,8 @@ public class ThingManagementServiceImpl implements ThingManagementService {
             flashboardInfo.setUpdateDate(partsInfo.getUpdateTime());
             flashboardInfoList.add(flashboardInfo);
         }
-        return flashboardInfoList;
+        pageHelpInfo.setList(flashboardInfoList);
+        return pageHelpInfo;
     }
 
 }

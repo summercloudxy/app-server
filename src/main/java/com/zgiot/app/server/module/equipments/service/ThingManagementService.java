@@ -21,9 +21,9 @@ public interface ThingManagementService {
 
     public void editDevice(DeviceInfo deviceInfo);
 
-    public List<DeviceInfo> getDeviceInfoByThingTagId(Long id, int pageNum, int pageSize);
+    public PageHelpInfo getDeviceInfoByThingTagId(Long id, int pageNum, int pageSize);
 
-    public List<PartsInfo> getPartsInfoByThingTagId(Long id, int pageNum, int pageSize);
+    public PageHelpInfo getPartsInfoByThingTagId(Long id, int pageNum, int pageSize);
 
     public void delChuteOrPipe(Long id);
 
@@ -37,7 +37,7 @@ public interface ThingManagementService {
 
     public void editParts(PartsInfo partsInfo);
 
-    public List<PipeInfo> getPipeInfoByThingTagId(Long id, int pageNum, int pageSize);
+    public PageHelpInfo getPipeInfoByThingTagId(Long id, int pageNum, int pageSize);
 
     public void addFlashboard(FlashboardInfo flashboardInfo);
 
@@ -49,10 +49,10 @@ public interface ThingManagementService {
 
     public void editValve(ValveInfo valveInfo);
 
-    public List<ChuteInfo> getChuteInfoByThingTagId(Long id, int pageNum, int pageSize);
+    public PageHelpInfo getChuteInfoByThingTagId(Long id, int pageNum, int pageSize);
 
-    public List<ValveInfo> getValveInfoByThingTagId(Long id, int pageNum, int pageSize);
+    public PageHelpInfo getValveInfoByThingTagId(Long id, int pageNum, int pageSize);
 
-    public List<FlashboardInfo> getFlashboardInfoByThingTagId(Long id, int pageNum, int pageSize);
+    public PageHelpInfo getFlashboardInfoByThingTagId(Long id, int pageNum, int pageSize);
 
 }
