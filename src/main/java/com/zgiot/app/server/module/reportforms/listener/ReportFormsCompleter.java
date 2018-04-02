@@ -1,6 +1,5 @@
 package com.zgiot.app.server.module.reportforms.listener;
 
-import com.zgiot.app.server.config.ApplicationContextListener;
 import com.zgiot.app.server.dataprocessor.DataCompleter;
 import com.zgiot.app.server.module.reportforms.handler.ReportFormsHandler;
 import com.zgiot.app.server.module.reportforms.manager.CoalAnalysisManager;
@@ -11,6 +10,7 @@ import com.zgiot.common.pojo.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -22,11 +22,13 @@ public class ReportFormsCompleter implements DataCompleter {
     private CoalAnalysisManager coalAnalysisManager;
     @Autowired
     private ProductionInspectManager productionInspectManager;
+    @Autowired
+    private ApplicationContext applicationContext;
     private List<ReportFormsHandler> handlers = new ArrayList<>(0);
 
 
     private void initHandlers(){
-        Map<String, ReportFormsHandler> beansOfType = ApplicationContextListener.getApplicationContext().getBeansOfType(ReportFormsHandler.class);
+        Map<String, ReportFormsHandler> beansOfType = applicationContext.getBeansOfType(ReportFormsHandler.class);
         handlers = new ArrayList<>(beansOfType.values());
     }
 
@@ -43,7 +45,6 @@ public class ReportFormsCompleter implements DataCompleter {
         }
         List<DataModel> result = new ArrayList<>();
         for (ReportFormsHandler handler:handlers){
-
             if (handler.isMatch(record)){
                 List<DataModel> handle = handler.handle(reportFormsManager, record);
                 result.addAll(handle);
