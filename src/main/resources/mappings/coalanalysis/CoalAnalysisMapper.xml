@@ -2,7 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zgiot.app.server.module.coalanalysis.mapper.CoalAnalysisMapper">
 
-    <resultMap id="DensityAndFlowSourceInfoMap" type="com.zgiot.app.server.module.reportforms.pojo.DensityAndFlowSourceInfo">
+    <resultMap id="DensityAndFlowSourceInfoMap"
+               type="com.zgiot.app.server.module.reportforms.pojo.DensityAndFlowSourceInfo">
         <result property="coalSample" column="coal_sample"/>
         <result property="system" column="system"/>
         <result property="densityCode" column="density_code"/>
@@ -16,6 +17,31 @@
 
     <select id="getExistRecordId" resultType="java.lang.Integer">
         select id from tb_coal_analysis where target = #{target} and sample = #{sample} and time = #{time}
+    </select>
+
+    <select id="getExistRecord" resultType="com.zgiot.common.pojo.CoalAnalysisRecord">
+        select id,time,target,sample,aad,mt,stad,qnetar,system,avg_density,avg_flow from tb_coal_analysis where target = #{target} and sample = #{sample} and time = #{time}
+    </select>
+
+    <select id="getRecentRecord" resultType="com.zgiot.common.pojo.CoalAnalysisRecord">
+        select id,time,target,sample,aad,mt,stad,qnetar,system,avg_density,avg_flow
+        from tb_coal_analysis
+        where
+        target = #{target}
+        and sample = #{sample}
+        and  <![CDATA[time<#{time}]]>
+        ORDER BY TIME DESC limit 0,1
+    </select>
+
+    <select id="getLastRecordOnDuty" resultType="com.zgiot.common.pojo.CoalAnalysisRecord">
+        select id,time,target,sample,aad,mt,stad,qnetar,system,avg_density,avg_flow
+        from tb_coal_analysis
+        where
+        target = #{record.target}
+        and sample = #{record.sample}
+        and  time>#{record.time}
+        AND <![CDATA[time<#{endTime}]]>
+        ORDER BY TIME DESC limit 0,1
     </select>
 
     <update id="updateRecordWithOutDensityAndFlow">
@@ -38,10 +64,10 @@
         where id = #{id}
     </update>
 
-    <insert id="insertDensityAndFlowValues">
+    <insert id="insertDetailDensityAndFlowValues">
         insert tb_coal_analysis_density_flow_value (analysis_id,thing_code,density,flow) values
         <foreach collection="list" separator="," item="item">
-            (#{item.analysisId},#{item.thingCode},#{item.density},#{item.flow})
+            (#{analysisId},#{item.thingCode},#{item.density},#{item.flow})
         </foreach>
     </insert>
 
@@ -85,10 +111,9 @@
 
     </select>
 
-    <select id="getDensityAndFlowInfo" resultType="com.zgiot.common.pojo.DensityAndFlowInfo">
+    <select id="getDetailDensityAndFlowInfo" resultType="com.zgiot.common.pojo.DensityAndFlowInfo">
         select thing_code,density,flow FROM tb_coal_analysis_density_flow_value WHERE analysis_id = #{param1}
     </select>
-
 
 
 </mapper>
