@@ -190,16 +190,13 @@ public class ValveManager {
      */
     private Valve initBucketAndPump(Valve valve) {
         //介质桶、泵状态
-        int bucketState = Integer.parseInt(BellowsUtil.getDataModelValue(dataService, valve.getBucketThingCode(), ValveMetricConstants.BUCKET_STATE).orElse("0"));
+        int bucketState = Integer.parseInt(BellowsUtil.getDataModelValue(dataService, valve.getBucketThingCode(), ValveMetricConstants.BUCKET_STATE, true).orElse("0"));
         double pumpSpeed = 0;
         if (!valve.getType().equals(BellowsConstants.VALVE_TYPE_LUMP)) {
-            pumpSpeed = Double.parseDouble(BellowsUtil.getDataModelValue(dataService, valve.getPumpThingCode(), ValveMetricConstants.PUMP_SPEED).orElse("0"));
+            pumpSpeed = Double.parseDouble(BellowsUtil.getDataModelValue(dataService, valve.getPumpThingCode(), ValveMetricConstants.PUMP_SPEED, true).orElse("0"));
         }
 
-        boolean pumpSpeedHigh = false;
-        if (pumpSpeed > speedLimit) {
-            pumpSpeedHigh = true;
-        }
+        boolean pumpSpeedHigh = pumpSpeed > speedLimit;
 
         valve.setBucketState(bucketState);
         valve.setPumpSpeed(pumpSpeed);

@@ -114,7 +114,7 @@ public class CompressorGroup {
 
         //初始化低压空压机压力状态和智能状态
         String requestId = RequestIdUtil.generateRequestId();
-        setPressureState(Double.parseDouble(BellowsUtil.getDataModelValue(dataService, BellowsConstants.PRESSURE_THING_CODE, CompressorMetricConstants.PRESSURE_STATE).orElse(BellowsConstants.PRESSURE_NORMAL + "")), requestId);
+        setPressureState(Double.parseDouble(BellowsUtil.getDataModelValue(dataService, BellowsConstants.PRESSURE_THING_CODE, CompressorMetricConstants.PRESSURE_STATE, true).orElse(BellowsConstants.PRESSURE_NORMAL + "")), requestId);
 
         initIntelligent(requestId);
 

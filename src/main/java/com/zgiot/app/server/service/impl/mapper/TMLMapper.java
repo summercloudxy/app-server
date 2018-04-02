@@ -30,6 +30,9 @@ public interface TMLMapper {
     @Select("SELECT * FROM rel_historydata_whitelist")
     List<HistdataWhitelistModel> findAllHistdataWhitelist();
 
+    @Select("SELECT * FROM rel_historydata_whitelist where minute_summary=1 ")
+    List<HistdataWhitelistModel> findAllHistdataMinWhitelist();
+
     @Select("SELECT metric_code FROM `rel_thing_metric_label` WHERE thing_code = #{thingCode}")
     Set<String> findMetricsOfThing(String thingCode);
 
@@ -41,7 +44,7 @@ public interface TMLMapper {
 
     /**
      * 根据资产类别获取部件/设备类别
-     * 
+     *
      * @param assetType
      * @return
      */
@@ -50,7 +53,7 @@ public interface TMLMapper {
 
     /**
      * 获取全部设备/部件类别
-     * 
+     *
      * @return
      */
     @Select("SELECT id,code,category_name FROM `tb_category`;")
@@ -58,17 +61,17 @@ public interface TMLMapper {
 
     /**
      * 获取指定的资产、类别、设备上可能存在的信号类型
-     * 
+     *
      * @param assetType
      * @param category
      * @return
      */
     List<CategoryModel> getMetricTypeByAssetAndCategory(@Param("assetType") String assetType,
-            @Param("category") String category, @Param("thingCode") String thingCode);
+                                                        @Param("category") String category, @Param("thingCode") String thingCode);
 
     /**
      * 获取指定资产、类别、设备、信号类型下可能存在的信号
-     * 
+     *
      * @param assetType
      * @param category
      * @param thingCode
@@ -76,16 +79,16 @@ public interface TMLMapper {
      * @return
      */
     List<MetricModel> getMetricByAssetAndCategory(@Param("assetType") String assetType,
-            @Param("category") String category, @Param("thingCode") String thingCode,
-            @Param("metricType") String metricType, @Param("metricClass") String metricClass);
+                                                  @Param("category") String category, @Param("thingCode") String thingCode,
+                                                  @Param("metricType") String metricType, @Param("metricClass") String metricClass);
 
     List<ThingModel> getThingCodeByAssetAndCategory(@Param("assetType") String assetType,
-            @Param("category") String category, @Param("metricCode") String metricCode,
-            @Param("metricType") String metricType,@Param("thingStartCode")String thingStartCode);
+                                                    @Param("category") String category, @Param("metricCode") String metricCode,
+                                                    @Param("metricType") String metricType, @Param("thingStartCode") String thingStartCode);
 
     @Select("select * from tb_metric a," +
             "(select metric_code from rel_thing_metric_label where thing_code=#{thingCode}) b where  a.metric_code=b.metric_code and a.metric_type1_code=#{metricType}")
-    List<MetricModel> findMetricByThingCode(@Param("thingCode") String thingCode,@Param("metricType") String metricType);
+    List<MetricModel> findMetricByThingCode(@Param("thingCode") String thingCode, @Param("metricType") String metricType);
 
     @Select("select * from tb_metric a," +
             "(select metric_code from rel_thing_metric_label where thing_code=#{thingCode}) b where  a.metric_code=b.metric_code")
