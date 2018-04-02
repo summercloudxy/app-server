@@ -18,4 +18,6 @@ public interface BuildingService {
     public void deleteBuilding(Long id);
 
     public PageHelpInfo getBuildingAll(int pageNum, int pageSize);
+
+    public PageHelpInfo getBuildingByBuildingName(int pageNum,int pageSize,String buildingName);
 }

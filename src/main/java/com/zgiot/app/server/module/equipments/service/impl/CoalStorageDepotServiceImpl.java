@@ -46,4 +46,15 @@ public class CoalStorageDepotServiceImpl implements CoalStorageDepotService {
         pageHelpInfo.setSum(page.getTotal());
         return pageHelpInfo;
     }
+
+    @Override
+    public PageHelpInfo getCoalStorageDepotByName(int pageNum, int pageSize, String name) {
+        name = "%" + name + "%";
+        Page page = PageHelper.startPage(pageNum, pageSize);
+        List<CoalStorageDepot> csdList = coalStorageDepotMapper.getCoalStorageDepotByName(name);
+        PageHelpInfo pageHelpInfo = new PageHelpInfo();
+        pageHelpInfo.setList(csdList);
+        pageHelpInfo.setSum(page.getTotal());
+        return pageHelpInfo;
+    }
 }

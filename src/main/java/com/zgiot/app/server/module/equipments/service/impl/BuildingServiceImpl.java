@@ -48,4 +48,15 @@ public class BuildingServiceImpl implements BuildingService {
         pageHelpInfo.setSum(page.getTotal());
         return pageHelpInfo;
     }
+
+    @Override
+    public PageHelpInfo getBuildingByBuildingName(int pageNum,int pageSize,String buildingName) {
+        buildingName = "%" + buildingName + "%";
+        Page page = PageHelper.startPage(pageNum, pageSize);
+        List<Building> buildingList = buildingMapper.getBuildingByBuildingName(buildingName);
+        PageHelpInfo pageHelpInfo = new PageHelpInfo();
+        pageHelpInfo.setList(buildingList);
+        pageHelpInfo.setSum(page.getTotal());
+        return pageHelpInfo;
+    }
 }

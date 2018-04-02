@@ -90,6 +90,22 @@ public class EquipmentManagementController {
     }
 
     /**
+     * 生产车间-查询
+     * @param buildingName
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+
+    @RequestMapping(value = "/building/query/{buildingName}/pageNum/{pageNum}/pageSize/{pageSize}",
+            method = RequestMethod.GET)
+    public ResponseEntity<String> queryBuildingByBuildingName(@PathVariable String buildingName,
+                                                              @PathVariable int pageNum, @PathVariable int pageSize) {
+        PageHelpInfo pageHelpInfo = buildingService.getBuildingByBuildingName(pageNum,pageSize,buildingName);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
+    }
+
+    /**
      * 获取所有设备类型
      * @return
      */
@@ -346,7 +362,23 @@ public class EquipmentManagementController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(coalStorageDepot), HttpStatus.OK);
     }
     /*3.30 end*/
+    /*4.2 begin*/
+    /**
+     * 储煤仓-查询
+     * @param name
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
 
+    @RequestMapping(value = "/coalStorageDepot/query/{name}/pageNum/{pageNum}/pageSize/{pageSize}",
+            method = RequestMethod.GET)
+    public ResponseEntity<String> querycoalStorageDepotByName(@PathVariable String name,
+                                                              @PathVariable int pageNum, @PathVariable int pageSize) {
+        PageHelpInfo pageHelpInfo = coalStorageDepotService.getCoalStorageDepotByName(pageNum,pageSize,name);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
+    }
+    /*4.2 end*/
     /**
      * 添加部件
      * @param partsInfo

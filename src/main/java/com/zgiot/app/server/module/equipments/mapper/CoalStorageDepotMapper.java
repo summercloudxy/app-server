@@ -25,4 +25,8 @@ public interface CoalStorageDepotMapper {
 
     @Delete("DELETE FROM tb_coal_storage_depot where id = #{id}")
     void deleteCoalStorageDepot(@Param("id") Long id);
+
+    @Select("SELECT t.id,t.name,t.number,t.diameter,t.level FROM tb_coal_storage_depot t " +
+            "WHERE t.name LIKE #{name} ORDER BY t.number")
+    List<CoalStorageDepot> getCoalStorageDepotByName(@Param("name") String name);
 }

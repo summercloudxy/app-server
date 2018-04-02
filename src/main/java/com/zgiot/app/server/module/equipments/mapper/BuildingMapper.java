@@ -22,4 +22,8 @@ public interface BuildingMapper {
 
     @Delete("DELETE FROM tb_building where id = #{id}")
     void deleteBuilding(@Param("id") Long id);
+
+    @Select("SELECT t.id,t.building_name,t.max_floor FROM tb_building t " +
+            "WHERE t.building_name LIKE #{buildingName} ORDER BY t.building_name")
+    List<Building> getBuildingByBuildingName(@Param("buildingName") String buildingName);
 }
