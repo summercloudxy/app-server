@@ -59,12 +59,10 @@ public class EquipmentManagementController {
     /**
      * 生产车间编辑
      * @param building
-     * @param id
      * @return
      */
-    @RequestMapping(value = "/building/edit/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<String> editBuilding(@RequestBody Building building, @PathVariable("id") Long id) {
-        building.setId(id);
+    @RequestMapping(value = "/building/edit", method = RequestMethod.PUT)
+    public ResponseEntity<String> editBuilding(@RequestBody Building building) {
         buildingService.editBuilding(building);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -204,9 +202,8 @@ public class EquipmentManagementController {
      * @param deviceInfo，id
      * @return
      */
-    @RequestMapping(value = "/device/edit/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<String> editDevice(@RequestBody DeviceInfo deviceInfo, @PathVariable("id") Long id) {
-        deviceInfo.setId(id);
+    @RequestMapping(value = "/device/edit", method = RequestMethod.PUT)
+    public ResponseEntity<String> editDevice(@RequestBody DeviceInfo deviceInfo) {
         thingService.editDevice(deviceInfo);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -238,9 +235,8 @@ public class EquipmentManagementController {
      * @param chuteInfo，id
      * @return
      */
-    @RequestMapping(value = "/chute/edit/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<String> editChute(@RequestBody ChuteInfo chuteInfo, @PathVariable("id") Long id) {
-        chuteInfo.setId(id);
+    @RequestMapping(value = "/chute/edit", method = RequestMethod.PUT)
+    public ResponseEntity<String> editChute(@RequestBody ChuteInfo chuteInfo) {
         thingService.editChute(chuteInfo);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -274,9 +270,8 @@ public class EquipmentManagementController {
      * @param pipeInfo，id
      * @return
      */
-    @RequestMapping(value = "/pipe/edit/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<String> editChute(@RequestBody PipeInfo pipeInfo, @PathVariable("id") Long id) {
-        pipeInfo.setId(id);
+    @RequestMapping(value = "/pipe/edit", method = RequestMethod.PUT)
+    public ResponseEntity<String> editChute(@RequestBody PipeInfo pipeInfo) {
         thingService.editPipe(pipeInfo);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -321,12 +316,10 @@ public class EquipmentManagementController {
     /**
      * 储煤仓编辑
      * @param coalStorageDepot
-     * @param id
      * @return
      */
-    @RequestMapping(value = "/coalStorageDepot/edit/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<String> editCoalStorageDepot(@RequestBody CoalStorageDepot coalStorageDepot, @PathVariable("id") Long id) {
-        coalStorageDepot.setId(id);
+    @RequestMapping(value = "/coalStorageDepot/edit", method = RequestMethod.PUT)
+    public ResponseEntity<String> editCoalStorageDepot(@RequestBody CoalStorageDepot coalStorageDepot) {
         coalStorageDepotService.editCoalStorageDepot(coalStorageDepot);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -381,9 +374,8 @@ public class EquipmentManagementController {
      * @param partsInfo，id
      * @return
      */
-    @RequestMapping(value = "/patrs/edit/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<String> editParts(@RequestBody PartsInfo partsInfo, @PathVariable("id") Long id) {
-        partsInfo.setId(id);
+    @RequestMapping(value = "/patrs/edit", method = RequestMethod.PUT)
+    public ResponseEntity<String> editParts(@RequestBody PartsInfo partsInfo) {
         thingService.editParts(partsInfo);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -430,9 +422,8 @@ public class EquipmentManagementController {
      * @param valveInfo，id
      * @return
      */
-    @RequestMapping(value = "/valve/edit/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<String> editValve(@RequestBody ValveInfo valveInfo, @PathVariable("id") Long id) {
-        valveInfo.setId(id);
+    @RequestMapping(value = "/valve/edit", method = RequestMethod.PUT)
+    public ResponseEntity<String> editValve(@RequestBody ValveInfo valveInfo) {
         thingService.editValve(valveInfo);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -464,9 +455,8 @@ public class EquipmentManagementController {
      * @param flashboardInfo，id
      * @return
      */
-    @RequestMapping(value = "/flashboard/edit/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<String> editflashboard(@RequestBody FlashboardInfo flashboardInfo, @PathVariable("id") Long id) {
-        flashboardInfo.setId(id);
+    @RequestMapping(value = "/flashboard/edit", method = RequestMethod.PUT)
+    public ResponseEntity<String> editflashboard(@RequestBody FlashboardInfo flashboardInfo) {
         thingService.editFlashboard(flashboardInfo);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
