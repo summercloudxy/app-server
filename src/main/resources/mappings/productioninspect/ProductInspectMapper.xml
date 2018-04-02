@@ -20,13 +20,13 @@
         <result property="sample" column="sample"/>
         <result property="time" column="time"/>
         <result property="system" column="system"/>
-        <result property="negative1Point45" column="-1.45"/>
-        <result property="onePoint45To1Point8" column="1.45-1.8"/>
-        <result property="positive1Point8" column="+1.8"/>
-        <result property="positive1Point45" column="+1.45"/>
-        <result property="negative1Point8" column="-1.8"/>
-        <result property="positive50mm" column="+50mm"/>
-        <result property="negative50mm" column="-50mm"/>
+        <result property="negative1Point45" column="param_-1.45"/>
+        <result property="onePoint45To1Point8" column="param_1.45-1.8"/>
+        <result property="positive1Point8" column="param_+1.8"/>
+        <result property="positive1Point45" column="param_+1.45"/>
+        <result property="negative1Point8" column="param_-1.8"/>
+        <result property="positive50mm" column="param_+50mm"/>
+        <result property="negative50mm" column="param_-50mm"/>
         <result property="avgDensity" column="avg_density"/>
     </resultMap>
 
@@ -35,11 +35,11 @@
     </select>
 
     <select id="getExistRecord" resultType="com.zgiot.common.pojo.ProductionInspectRecord">
-    select `id`,`target`,`sample`,`time`,`system`,`-1.45`,`1.45-1.8`,`+1.8`,`+1.45`,`-1.8`,`+50mm`,`-50mm`,`avg_density` from tb_production_inspect where target = #{target} and sample = #{sample} and time = #{time}
+    select `id`,`target`,`sample`,`time`,`system`,`param_-1.45`,`param_1.45-1.8`,`param_+1.8`,`param_+1.45`,`param_-1.8`,`param_+50mm`,`param_-50mm`,`avg_density` from tb_production_inspect where target = #{target} and sample = #{sample} and time = #{time}
 </select>
 
     <select id="getRecentRecord" resultType="com.zgiot.common.pojo.ProductionInspectRecord">
-        select `id`,`target`,`sample`,`time`,`system`,`-1.45`,`1.45-1.8`,`+1.8`,`+1.45`,`-1.8`,`+50mm`,`-50mm`,`avg_density`
+        select `id`,`target`,`sample`,`time`,`system`,`param_-1.45`,`param_1.45-1.8`,`param_+1.8`,`param_+1.45`,`param_-1.8`,`param_+50mm`,`param_-50mm`,`avg_density`
         from tb_production_inspect
         where
         target = #{target}
@@ -49,7 +49,7 @@
     </select>
 
     <select id="getLastRecordOnDuty" resultType="com.zgiot.common.pojo.ProductionInspectRecord">
-        select `id`,`target`,`sample`,`time`,`system`,`-1.45`,`1.45-1.8`,`+1.8`,`+1.45`,`-1.8`,`+50mm`,`-50mm`,`avg_density`
+        select `id`,`target`,`sample`,`time`,`system`,`param_-1.45`,`param_1.45-1.8`,`param_+1.8`,`param_+1.45`,`param_-1.8`,`param_+50mm`,`param_-50mm`,`avg_density`
         from tb_production_inspect
         where
         target = #{record.target}
@@ -61,18 +61,18 @@
 
     <update id="updateRecordWithOutDensityAndFlow">
         update tb_production_inspect set
-        `-1.45` = #{record.negative1Point45},
-        `1.45-1.8` = #{record.onePoint45To1Point8},
-        `+1.8` = #{record.positive1Point8},
-        `+1.45` = #{record.positive1Point45},
-        `-1.8` = #{record.negative1Point8},
-        `+50mm` = #{record.positive50mm},
-        `-50mm` = #{record.negative50mm}
+        `param_-1.45` = #{record.negative1Point45},
+        `param_1.45-1.8` = #{record.onePoint45To1Point8},
+        `param_+1.8` = #{record.positive1Point8},
+        `param_+1.45` = #{record.positive1Point45},
+        `param_-1.8` = #{record.negative1Point8},
+        `param_+50mm` = #{record.positive50mm},
+        `param_-50mm` = #{record.negative50mm}
         where id = #{record.id}
     </update>
 
     <insert id="insertRecord" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
-        insert tb_production_inspect(`target`,`sample`,`time`,`system`,`-1.45`,`1.45-1.8`,`+1.8`,`+1.45`,`-1.8`,`+50mm`,`-50mm`,`avg_density`)
+        insert tb_production_inspect(`target`,`sample`,`time`,`system`,`param_-1.45`,`param_1.45-1.8`,`param_+1.8`,`param_+1.45`,`param_-1.8`,`param_+50mm`,`param_-50mm`,`avg_density`)
         values (#{target},#{sample},#{time},#{system},#{negative1Point45},#{onePoint45To1Point8},#{positive1Point8},#{positive1Point45},#{negative1Point8},#{positive50mm},#{negative50mm},#{avgDensity})
     </insert>
 
@@ -94,7 +94,7 @@
     </select>
 
     <select id="getRecordsMatchCondition" resultMap="ProductionInspectRecordMap">
-        select id,`target`,`sample`,`time`,`system`,`-1.45`,`1.45-1.8`,`+1.8`,`+1.45`,`-1.8`,`+50mm`,`-50mm`,avg_density from tb_production_inspect
+        select id,`target`,`sample`,`time`,`system`,`param_-1.45`,`param_1.45-1.8`,`param_+1.8`,`param_+1.45`,`param_-1.8`,`param_+50mm`,`param_-50mm`,avg_density from tb_production_inspect
         WHERE
         <trim prefix="" prefixOverrides="and">
             <if test="startTime != null">
