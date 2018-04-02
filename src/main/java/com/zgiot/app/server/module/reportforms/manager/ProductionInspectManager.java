@@ -1,14 +1,13 @@
 package com.zgiot.app.server.module.reportforms.manager;
 
 import com.alibaba.fastjson.JSON;
+import com.zgiot.app.server.module.reportforms.MetricCodeEnum;
 import com.zgiot.app.server.module.reportforms.ReportFormsUtils;
 import com.zgiot.app.server.module.produtioninspect.mapper.ProductionInspectMapper;
 import com.zgiot.app.server.module.reportforms.pojo.CumulativeData;
 import com.zgiot.app.server.module.tcs.pojo.FilterCondition;
 import com.zgiot.common.constants.MetricCodes;
-import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.*;
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,89 +35,73 @@ public class ProductionInspectManager implements ReportFormsManager {
     }
 
     @Override
-    public void updateRecord(ReportFormsRecord record) {
+    public void updateRecordWithOutDensityAndFlow(ReportFormsRecord record) {
         logger.debug("该生产检查数据已经存在，进行更新");
         productionInspectMapper.updateRecordWithOutDensityAndFlow((ProductionInspectRecord) record);
     }
 
-    @Override
-    public void updateAvgRecord(ReportFormsRecord record) {
-        logger.debug("该生产检查数据已经存在，进行更新");
-        productionInspectMapper.updateRecordWithOutDensityAndFlow((ProductionInspectRecord) record);
-            productionInspectMapper.updateRecordDensityAndFlow((ProductionInspectRecord) record);
+    public void updateRecordDensityAndFlow(ReportFormsRecord record) {
+        logger.debug("该生产检查数据已经存在，更新其分选密度和顶水流量");
+        productionInspectMapper.updateRecordDensityAndFlow((ProductionInspectRecord) record);
     }
+
 
     @Override
     public void insertRecord(ReportFormsRecord record) {
         logger.debug("新增一条生产检查数据");
         productionInspectMapper.insertRecord((ProductionInspectRecord) record);
-        List<DensityAndFlowInfo> densityAndFlowValues = reportFormsUtils.getDensityAndFlowValues(record);
-        if (!CollectionUtils.isEmpty(densityAndFlowValues)) {
-            densityAndFlowValues.forEach(t -> t.setInspectId(record.getId()));
-            disposeProductInspectDensityAndFlow(densityAndFlowValues, (ProductionInspectRecord) record);
-        }
+    }
+
+    public void insertDetailDensityAndFlow(ReportFormsRecord record) {
+        productionInspectMapper.updateRecordDensityAndFlow((ProductionInspectRecord) record);
+        productionInspectMapper.insertDetailDensityAndFlowValues(record.getDensityAndFlowInfos(), record.getId());
     }
 
 
-    @Override
-    public void insertAvgRecord(ReportFormsRecord record) {
-        logger.debug("新增一条生产检查平均数据");
-        productionInspectMapper.insertRecord((ProductionInspectRecord) record);
-    }
-
-    private void disposeProductInspectDensityAndFlow(List<DensityAndFlowInfo> densityAndFlowValues, ProductionInspectRecord record) {
-        reportFormsUtils.countAvgValue(densityAndFlowValues, record);
-        productionInspectMapper.updateRecordDensityAndFlow(record);
-        productionInspectMapper.insertDensityAndFlowValues(densityAndFlowValues);
-    }
-
-
-    private List<DataModel> parseToParamDataModel(ReportFormsRecord record) {
+    private List<DataModel> parseToParamDataModel(ReportFormsRecord record, boolean avgFlag) {
         ProductionInspectRecord productionInspectRecord = (ProductionInspectRecord) record;
-        boolean avgFlag = false;
-        if (record.getTarget().contains(ReportFormsUtils.AVG_RECORD_KEYWORD)) {
-            avgFlag = true;
-        }
         List<DataModel> dataModels = new ArrayList<>();
         if (productionInspectRecord.getNegative1Point8() != null) {
-            getParamModel(productionInspectRecord, avgFlag, dataModels, MetricCodes.PRODUCT_INSPECT_NEGATIVE1_POINT8_AVG, productionInspectRecord.getNegative1Point8(), MetricCodes.PRODUCT_INSPECT_NEGATIVE1_POINT8);
+            dataModels.add(getParamModel(productionInspectRecord, avgFlag, MetricCodes.PRODUCT_INSPECT_NEGATIVE1_POINT8_AVG, productionInspectRecord.getNegative1Point8(), MetricCodes.PRODUCT_INSPECT_NEGATIVE1_POINT8));
         }
         if (productionInspectRecord.getNegative1Point45() != null) {
-            getParamModel(productionInspectRecord, avgFlag, dataModels, MetricCodes.PRODUCT_INSPECT_NEGATIVE1_POINT45_AVG, productionInspectRecord.getNegative1Point45(), MetricCodes.PRODUCT_INSPECT_NEGATIVE1_POINT45);
+            dataModels.add(getParamModel(productionInspectRecord, avgFlag, MetricCodes.PRODUCT_INSPECT_NEGATIVE1_POINT45_AVG, productionInspectRecord.getNegative1Point45(), MetricCodes.PRODUCT_INSPECT_NEGATIVE1_POINT45));
         }
         if (productionInspectRecord.getPositive1Point8() != null) {
-            getParamModel(productionInspectRecord, avgFlag, dataModels, MetricCodes.PRODUCT_INSPECT_POSITIVE1_POINT8_AVG, productionInspectRecord.getPositive1Point8(), MetricCodes.PRODUCT_INSPECT_POSITIVE1_POINT8);
+            dataModels.add(getParamModel(productionInspectRecord, avgFlag, MetricCodes.PRODUCT_INSPECT_POSITIVE1_POINT8_AVG, productionInspectRecord.getPositive1Point8(), MetricCodes.PRODUCT_INSPECT_POSITIVE1_POINT8));
         }
         if (productionInspectRecord.getPositive1Point45() != null) {
-            getParamModel(productionInspectRecord, avgFlag, dataModels, MetricCodes.PRODUCT_INSPECT_POSITIVE1_POINT45_AVG, productionInspectRecord.getPositive1Point45(), MetricCodes.PRODUCT_INSPECT_POSITIVE1_POINT45);
+            dataModels.add(getParamModel(productionInspectRecord, avgFlag, MetricCodes.PRODUCT_INSPECT_POSITIVE1_POINT45_AVG, productionInspectRecord.getPositive1Point45(), MetricCodes.PRODUCT_INSPECT_POSITIVE1_POINT45));
         }
         if (productionInspectRecord.getOnePoint45To1Point8() != null) {
-            getParamModel(productionInspectRecord, avgFlag, dataModels, MetricCodes.PRODUCT_INSPECT_ONE_POINT45_TO1_POINT8_AVG, productionInspectRecord.getOnePoint45To1Point8(), MetricCodes.PRODUCT_INSPECT_ONE_POINT45_TO1_POINT8);
+            dataModels.add(getParamModel(productionInspectRecord, avgFlag, MetricCodes.PRODUCT_INSPECT_ONE_POINT45_TO1_POINT8_AVG, productionInspectRecord.getOnePoint45To1Point8(), MetricCodes.PRODUCT_INSPECT_ONE_POINT45_TO1_POINT8));
         }
         if (productionInspectRecord.getNegative50mm() != null) {
-            getParamModel(productionInspectRecord, avgFlag, dataModels, MetricCodes.PRODUCT_INSPECT_NEGATIVE50MM_AVG, productionInspectRecord.getNegative50mm(), MetricCodes.PRODUCT_INSPECT_NEGATIVE50MM);
+            dataModels.add(getParamModel(productionInspectRecord, avgFlag, MetricCodes.PRODUCT_INSPECT_NEGATIVE50MM_AVG, productionInspectRecord.getNegative50mm(), MetricCodes.PRODUCT_INSPECT_NEGATIVE50MM));
         }
         if (productionInspectRecord.getPositive50mm() != null) {
-            getParamModel(productionInspectRecord, avgFlag, dataModels, MetricCodes.PRODUCT_INSPECT_POSITIVE50MM_AVG, productionInspectRecord.getPositive50mm(), MetricCodes.PRODUCT_INSPECT_POSITIVE50MM);
+            dataModels.add(getParamModel(productionInspectRecord, avgFlag, MetricCodes.PRODUCT_INSPECT_POSITIVE50MM_AVG, productionInspectRecord.getPositive50mm(), MetricCodes.PRODUCT_INSPECT_POSITIVE50MM));
         }
         if (productionInspectRecord.getAvgDensity() != null) {
-            getParamModel(productionInspectRecord, avgFlag, dataModels, MetricCodes.PRODUCT_INSPECT_DENSITY_AVG, productionInspectRecord.getAvgDensity(), MetricCodes.PRODUCT_INSPECT_DENSITY);
+            dataModels.add(getParamModel(productionInspectRecord, avgFlag, MetricCodes.PRODUCT_INSPECT_DENSITY_AVG, productionInspectRecord.getAvgDensity(), MetricCodes.PRODUCT_INSPECT_DENSITY));
         }
         return dataModels;
     }
 
-    private void getParamModel(ProductionInspectRecord productionInspectRecord, boolean avgFlag, List<DataModel> dataModels, String avgParamMetricCode, Double metricValue, String paramMetricCode) {
+    private DataModel getParamModel(ProductionInspectRecord productionInspectRecord, boolean avgFlag, String avgParamMetricCode, Double metricValue, String paramMetricCode) {
+        DataModel dataModel;
         if (avgFlag) {
-            reportFormsUtils.getParamModel(dataModels, productionInspectRecord, avgParamMetricCode, metricValue);
+            dataModel = reportFormsUtils.getParamModel(productionInspectRecord, avgParamMetricCode, metricValue, MetricCodeEnum.PRODUCTION_INSPECT);
         } else {
-            reportFormsUtils.getParamModel(dataModels, productionInspectRecord, paramMetricCode, metricValue);
+            dataModel = reportFormsUtils.getParamModel(productionInspectRecord, paramMetricCode, metricValue, MetricCodeEnum.PRODUCTION_INSPECT);
         }
+        return dataModel;
     }
 
     @Override
-    public List<DataModel> getDataForCache(ReportFormsRecord record) {
-        List<DataModel> targetSampleModels = reportFormsUtils.getTargetSampleModel(record);
-        List<DataModel> paramModels = parseToParamDataModel(record);
+    public List<DataModel> getDataForCache(ReportFormsRecord record, boolean avgFlag) {
+        List<DataModel> targetSampleModels = reportFormsUtils.getTargetSampleModel(record, MetricCodeEnum.PRODUCTION_INSPECT);
+        List<DataModel> paramModels = parseToParamDataModel(record, avgFlag);
         targetSampleModels.addAll(paramModels);
         return targetSampleModels;
     }
@@ -179,5 +163,20 @@ public class ProductionInspectManager implements ReportFormsManager {
 
     private List<ProductionInspectRecord> getRecordsOnDuty(FilterCondition filterCondition) {
         return productionInspectMapper.getRecordsMatchCondition(filterCondition);
+    }
+
+    @Override
+    public ReportFormsRecord getExistRecord(ReportFormsRecord record) {
+        return productionInspectMapper.getExistRecord((ProductionInspectRecord)record);
+    }
+
+    @Override
+    public ReportFormsRecord getRecentRecord(ReportFormsRecord record) {
+        return productionInspectMapper.getRecentRecord((ProductionInspectRecord)record);
+    }
+
+    @Override
+    public ReportFormsRecord getLastRecordOnDuty(ReportFormsRecord record,Date dutyEndTime) {
+        return  productionInspectMapper.getLastRecordOnDuty((ProductionInspectRecord)record, dutyEndTime);
     }
 }

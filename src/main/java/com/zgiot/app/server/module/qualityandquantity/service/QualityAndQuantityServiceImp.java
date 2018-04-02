@@ -32,8 +32,6 @@ public class QualityAndQuantityServiceImp implements QualityAndQuantityService {
     @Autowired
     private QualityAndQuantityMapper qualityAndQuantityMapper;
 
-    private static final int SORT_TYPE_ASC = 0;
-
 
 
 
