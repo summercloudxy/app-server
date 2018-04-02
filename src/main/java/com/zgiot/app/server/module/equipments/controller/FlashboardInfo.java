@@ -83,6 +83,11 @@ public class FlashboardInfo {
      */
     private String thingType;
 
+    /**
+     *设备类型
+     */
+    private String thingTagCode;
+
     public Long getId() {
         return id;
     }
@@ -209,5 +214,13 @@ public class FlashboardInfo {
 
     public void setThingType(String thingType) {
         this.thingType = thingType;
+    }
+
+    public String getThingTagCode() {
+        return thingTagCode;
+    }
+
+    public void setThingTagCode(String thingTagCode) {
+        this.thingTagCode = thingTagCode;
     }
 }

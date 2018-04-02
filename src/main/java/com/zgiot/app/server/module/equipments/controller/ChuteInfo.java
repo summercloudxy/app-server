@@ -62,6 +62,11 @@ public class ChuteInfo {
      */
     private String  thingName;
 
+    /**
+     *设备类型
+     */
+    private String thingTagCode;
+
     public Long getId() {
         return id;
     }
@@ -156,5 +161,13 @@ public class ChuteInfo {
 
     public void setThingSystemName(String thingSystemName) {
         this.thingSystemName = thingSystemName;
+    }
+
+    public String getThingTagCode() {
+        return thingTagCode;
+    }
+
+    public void setThingTagCode(String thingTagCode) {
+        this.thingTagCode = thingTagCode;
     }
 }

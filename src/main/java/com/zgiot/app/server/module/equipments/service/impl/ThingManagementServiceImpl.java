@@ -277,6 +277,13 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         rts.setSystemId(chuteInfo.getThingSystemId());
         relThingSystemMapper.addRelThingSystem(rts);
 
+        // relThingtagThing
+        RelThingtagThing relThingtagThing = new RelThingtagThing();
+        relThingtagThing.setThingCode(chuteInfo.getThingCode());
+        relThingtagThing.setThingTagCode(chuteInfo.getThingTagCode());
+        relThingtagThing.setCreateDate(new Date());
+        relThingtagThingMapper.addRelThingtagThing(relThingtagThing);
+
     }
 
     /**
@@ -530,6 +537,13 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         rts.setSystemId(pipeInfo.getThingSystemId());
         relThingSystemMapper.addRelThingSystem(rts);
 
+        // relThingtagThing
+        RelThingtagThing relThingtagThing = new RelThingtagThing();
+        relThingtagThing.setThingCode(pipeInfo.getThingCode());
+        relThingtagThing.setThingTagCode(pipeInfo.getThingTagCode());
+        relThingtagThing.setCreateDate(new Date());
+        relThingtagThingMapper.addRelThingtagThing(relThingtagThing);
+
     }
 
     @Transactional
@@ -624,6 +638,13 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         thingPosition.setFloor(flashboardInfo.getFloor());
 
         thingPositionMapper.addThingPosition(thingPosition);
+
+        // relThingtagThing
+        RelThingtagThing relThingtagThing = new RelThingtagThing();
+        relThingtagThing.setThingCode(flashboardInfo.getThingCode());
+        relThingtagThing.setThingTagCode(flashboardInfo.getThingTagCode());
+        relThingtagThing.setCreateDate(new Date());
+        relThingtagThingMapper.addRelThingtagThing(relThingtagThing);
 
     }
 
@@ -750,6 +771,13 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         thingPosition.setFloor(valveInfo.getFloor());
 
         thingPositionMapper.addThingPosition(thingPosition);
+
+        // relThingtagThing
+        RelThingtagThing relThingtagThing = new RelThingtagThing();
+        relThingtagThing.setThingCode(valveInfo.getThingCode());
+        relThingtagThing.setThingTagCode(valveInfo.getThingTagCode());
+        relThingtagThing.setCreateDate(new Date());
+        relThingtagThingMapper.addRelThingtagThing(relThingtagThing);
 
     }
 
