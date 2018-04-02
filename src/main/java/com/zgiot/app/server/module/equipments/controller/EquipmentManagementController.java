@@ -61,12 +61,10 @@ public class EquipmentManagementController {
     /**
      * 生产车间编辑
      * @param building
-     * @param id
      * @return
      */
-    @RequestMapping(value = "/building/edit/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<String> editBuilding(Building building, @PathVariable("id") Long id) {
-        building.setId(id);
+    @RequestMapping(value = "/building/edit", method = RequestMethod.PUT)
+    public ResponseEntity<String> editBuilding(Building building) {
         buildingService.editBuilding(building);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -318,12 +316,10 @@ public class EquipmentManagementController {
     /**
      * 储煤仓编辑
      * @param coalStorageDepot
-     * @param id
      * @return
      */
-    @RequestMapping(value = "/coalStorageDepot/edit/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<String> editCoalStorageDepot(@RequestBody CoalStorageDepot coalStorageDepot, @PathVariable("id") Long id) {
-        coalStorageDepot.setId(id);
+    @RequestMapping(value = "/coalStorageDepot/edit", method = RequestMethod.PUT)
+    public ResponseEntity<String> editCoalStorageDepot(CoalStorageDepot coalStorageDepot) {
         coalStorageDepotService.editCoalStorageDepot(coalStorageDepot);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }

@@ -19,8 +19,8 @@ public interface CoalStorageDepotMapper {
     @Select("SELECT t.id,t.name,t.number,t.diameter,t.level FROM tb_coal_storage_depot t ORDER BY t.number")
     List<CoalStorageDepot> getCoalStorageDepotAll();
 
-    @Update("UPDATE FROM tb_coal_storage_depot SET name = #{name},number = #{number}," +
-            "diameter = #{diameter},level = #{level} WHERE t.id = #{id}")
+    @Update("UPDATE tb_coal_storage_depot SET name = #{name},number = #{number}," +
+            "diameter = #{diameter},level = #{level} WHERE id = #{id}")
     void editCoalStorageDepot(CoalStorageDepot coalStorageDepot);
 
     @Delete("DELETE FROM tb_coal_storage_depot where id = #{id}")
