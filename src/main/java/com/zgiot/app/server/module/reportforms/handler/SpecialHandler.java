@@ -221,13 +221,14 @@ public class SpecialHandler implements ReportFormsHandler {
         avgRecord.setTarget(StringUtils.chomp(avgRecord.getTarget(), ReportFormsUtils.AVG_RECORD_KEYWORD));
         anotherAvgRecord.setTarget(StringUtils.chomp(anotherAvgRecord.getTarget(), ReportFormsUtils.AVG_RECORD_KEYWORD));
         double classCoal1 = getAvgClassCoal(manager, avgRecord);
-        double classCoal2 = getAvgClassCoal(manager,anotherAvgRecord);
+        double classCoal2 = getAvgClassCoal(manager, anotherAvgRecord);
         setParamByCount(resultRecord, avgRecord, classCoal1, anotherAvgRecord, classCoal2);
 
     }
 
     /**
      * 平均记录的煤量是该班最后一条数据的时间点的班累计量
+     *
      * @param manager
      * @param avgRecord
      * @return
@@ -251,10 +252,8 @@ public class SpecialHandler implements ReportFormsHandler {
      */
     private DataModel getClassCoalDataModel(CoalAnalysisRecord record) {
         DataModel recentClassCoal = historyDataService.findClosestHistoryDataInDuration(Lists.newArrayList(record.getSample()), Lists.newArrayList(MetricCodes.CT_C), record.getTime(), HistoryDataService.QUERY_TIME_TYPE_BEFORE);
-        if (recentClassCoal != null) {
-            if (record.getTime().getTime() - recentClassCoal.getDataTimeStamp().getTime() > VALID_INTERVAL) {
-                recentClassCoal = null;
-            }
+        if (recentClassCoal != null && record.getTime().getTime() - recentClassCoal.getDataTimeStamp().getTime() > VALID_INTERVAL) {
+            recentClassCoal = null;
         }
         return recentClassCoal;
     }
