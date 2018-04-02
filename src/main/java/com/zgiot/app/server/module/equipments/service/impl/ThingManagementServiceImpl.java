@@ -279,7 +279,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
 
         // relThingtagThing
         RelThingtagThing relThingtagThing = new RelThingtagThing();
-        relThingtagThing.setThingCode(chuteInfo.getThingCode());
+        relThingtagThing.setThingCode(thingCode);
         relThingtagThing.setThingTagCode(chuteInfo.getThingTagCode());
         relThingtagThing.setCreateDate(new Date());
         relThingtagThingMapper.addRelThingtagThing(relThingtagThing);
@@ -539,7 +539,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
 
         // relThingtagThing
         RelThingtagThing relThingtagThing = new RelThingtagThing();
-        relThingtagThing.setThingCode(pipeInfo.getThingCode());
+        relThingtagThing.setThingCode(thingCode);
         relThingtagThing.setThingTagCode(pipeInfo.getThingTagCode());
         relThingtagThing.setCreateDate(new Date());
         relThingtagThingMapper.addRelThingtagThing(relThingtagThing);
@@ -641,7 +641,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
 
         // relThingtagThing
         RelThingtagThing relThingtagThing = new RelThingtagThing();
-        relThingtagThing.setThingCode(flashboardInfo.getThingCode());
+        relThingtagThing.setThingCode(thingCode);
         relThingtagThing.setThingTagCode(flashboardInfo.getThingTagCode());
         relThingtagThing.setCreateDate(new Date());
         relThingtagThingMapper.addRelThingtagThing(relThingtagThing);
@@ -774,7 +774,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
 
         // relThingtagThing
         RelThingtagThing relThingtagThing = new RelThingtagThing();
-        relThingtagThing.setThingCode(valveInfo.getThingCode());
+        relThingtagThing.setThingCode(thingCode);
         relThingtagThing.setThingTagCode(valveInfo.getThingTagCode());
         relThingtagThing.setCreateDate(new Date());
         relThingtagThingMapper.addRelThingtagThing(relThingtagThing);
