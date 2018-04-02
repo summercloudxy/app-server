@@ -30,6 +30,11 @@ public class CardDataManager {
     @Value("${cloud.serviceaccount.token}")
     private String authorization;
 
+    @Value("${cloud.service.url}")
+    private String cloudServiceUrl;
+    @Value("${cloud.service.path}")
+    private String cloudServerPath;
+
 
     @Autowired
     private CloudServerFeignClient cloudServerFeignClient;
@@ -59,11 +64,18 @@ public class CardDataManager {
                 cardDataDTOS.add(cardDataDTO);
             }
         }
+        try {
+            ServerResponse serverResponse = cloudServerFeignClient.saveAllCardDatas(cardDataDTOS, AUTHORIZATION_PRIFIX + authorization);
+            if (serverResponse.getCode() == 0) {
+                logger.debug("卡片历史数据上传CloudServer完成");
+            }
 
-        ServerResponse serverResponse = cloudServerFeignClient.saveAllCardDatas(cardDataDTOS, AUTHORIZATION_PRIFIX + authorization);
-        if (serverResponse.getCode() == 0) {
-            logger.debug("卡片历史数据上传CloudServer完成");
+        } catch (Exception e) {
+            logger.error("连接cloudserver异常.URL:" + cloudServiceUrl + cloudServerPath);
+
         }
+
+
     }
 
     /**
@@ -95,10 +107,15 @@ public class CardDataManager {
                 cardDataDTOS.add(cardDataDTO);
             }
         }
-        ServerResponse serverResponse = cloudServerFeignClient.saveAllCardDatas(cardDataDTOS, AUTHORIZATION_PRIFIX + authorization);
-        if (serverResponse.getCode() == 0) {
-            logger.debug("卡片实时数据上传CloudServer完成");
+        try {
+            ServerResponse serverResponse = cloudServerFeignClient.saveAllCardDatas(cardDataDTOS, AUTHORIZATION_PRIFIX + authorization);
+            if (serverResponse.getCode() == 0) {
+                logger.debug("卡片实时数据上传CloudServer完成");
+            }
+        } catch (Exception e) {
+            logger.error("连接cloudserver异常.URL:" + cloudServiceUrl + cloudServerPath);
         }
+
     }
 
 
