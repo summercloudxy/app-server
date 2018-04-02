@@ -780,7 +780,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         String endScope = SubscriptionConstants.MOISTURE_CONTENT_SCOPE.split("-")[1];
         metricData4.setStartScope(startScope);
         metricData4.setEndScope(endScope);
-        if (preCoalAnalysisRecord.getMt() != null) {
+        if (coalAnalysisRecord.getMt() != null) {
             if (coalAnalysisRecord.getMt().compareTo(preCoalAnalysisRecord.getMt()) > 0) {
                 metricData4.setPercent(String.valueOf(BigDecimal.valueOf(coalAnalysisRecord.getMt()).subtract(BigDecimal.valueOf(preCoalAnalysisRecord.getMt())).setScale(2)));
                 metricData4.setFlag(SubscriptionConstants.FLAG_UP);
@@ -914,7 +914,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         String endScope2 = SubscriptionConstants.SULFUR_CONTENT_SCOPE.split("-")[1];
         metricData2.setStartScope(startScope2);
         metricData2.setEndScope(endScope2);
-        if (preCoalAnalysisRecord.getStad() != null) {
+        if (coalAnalysisRecord.getStad() != null) {
             if (coalAnalysisRecord.getStad().compareTo(preCoalAnalysisRecord.getStad()) > 0) {
                 metricData2.setPercent(String.valueOf(BigDecimal.valueOf(coalAnalysisRecord.getStad()).subtract(BigDecimal.valueOf(preCoalAnalysisRecord.getStad())).setScale(2)));
                 metricData2.setFlag(SubscriptionConstants.FLAG_UP);
