@@ -654,7 +654,7 @@ public class SFMonitorSignalWrapperController {
                 sfMonPadAuxiliaryZoneInfos.remove(i);
                 continue;
             }
-            specialRuleOperate(sfMonPadAuxiliaryZoneInfos,data,sfMonPadAuxiliaryZoneMetricInfoList,remoteValveInfoList);
+            specialRuleOperate(sfMonPadAuxiliaryZoneInfos,data,sfMonPadAuxiliaryZoneMetricInfoList,remoteValveInfoList,sfMonPadAuxiliaryZoneInfoList);
 
             if((sfMonPadAuxiliaryZoneMetricInfoList != null) && (sfMonPadAuxiliaryZoneMetricInfoList.size() > 0)){
                 compositionInfo.setSfMonPadAuxiliaryZoneMetricInfoList(sfMonPadAuxiliaryZoneMetricInfoList);
@@ -681,14 +681,20 @@ public class SFMonitorSignalWrapperController {
 
     private void specialRuleOperate(List<SFMonPadAuxiliaryZoneInfo> sfMonPadAuxiliaryZoneInfos,SFMonPadAuxiliaryZoneInfo sfMonPadAuxiliaryZoneInfo,
                                     List<SFMonPadAuxiliaryZoneMetricInfo> sfMonPadAuxiliaryZoneMetricInfoList,
-                                    List<SFMonPadAuxiliaryZoneMetricInfo> remoteValveInfoList){
+                                    List<SFMonPadAuxiliaryZoneMetricInfo> remoteValveInfoList,
+                                    List<SFMonPadAuxiliaryZoneInfo> sfMonPadAuxiliaryZoneInfoList){
         int i = 0;
         while(i < sfMonPadAuxiliaryZoneInfos.size()){
             if((sfMonPadAuxiliaryZoneInfo.getRule() == SFMonitorConstant.COMPOSITION_ALL_PARTION)
                     && sfMonPadAuxiliaryZoneInfo.getWrapperName().equals(sfMonPadAuxiliaryZoneInfos.get(i).getWrapperName())){
-                sfMonPadAuxiliaryZoneMetricInfoList.addAll(sfMonPadAuxiliaryZoneInfos.get(i).getSfMonPadAuxiliaryZoneMetricInfoList());
-                sfMonPadAuxiliaryZoneInfos.remove(i);
-                continue;
+                if(sfMonPadAuxiliaryZoneInfo.getSfMonPadAuxiliaryZoneMetricInfoList().get(0).getThingCode().split("\\.").length > 1){
+                    sfMonPadAuxiliaryZoneMetricInfoList.addAll(sfMonPadAuxiliaryZoneInfos.get(i).getSfMonPadAuxiliaryZoneMetricInfoList());
+                    sfMonPadAuxiliaryZoneInfos.remove(i);
+                    continue;
+                }else{
+                    sfMonPadAuxiliaryZoneInfoList.add(sfMonPadAuxiliaryZoneInfo);
+                    break;
+                }
             }else if((sfMonPadAuxiliaryZoneInfo.getRule() == SFMonitorConstant.REMOTE_VALVE)
                     && (sfMonPadAuxiliaryZoneInfo.getWrapperName().equals(sfMonPadAuxiliaryZoneInfos.get(i).getWrapperName()))){//远程阀门
                 remoteValveInfoList.addAll(sfMonPadAuxiliaryZoneInfos.get(i).getSfMonPadAuxiliaryZoneMetricInfoList());

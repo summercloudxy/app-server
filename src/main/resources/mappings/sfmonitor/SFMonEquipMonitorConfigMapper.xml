@@ -15,6 +15,7 @@
         <result column="tag_name" property="warpperName"/>
         <result column="selected" property="selected"/>
         <result column="zone" property="zone"/>
+        <result column="thing_code" property="thingCode"/>
         <collection property="signalWrapperMetrics"
                     ofType="com.zgiot.app.server.module.sfmonitor.pojo.SignalWrapperMetric">
             <result column="metric_name" property="metricName"/>
@@ -137,7 +138,7 @@
     </select>
 
     <select id="getEquipmentRelateToSignalWrapperByThingCode" resultMap="signalWrapperBaseInfoFind">
-        select distinct(a.metric_tag_name) as tag_name,a.value as metric_name,a.model as model,a.key as zone,a.selected
+        select distinct(a.metric_tag_name) as tag_name,a.thing_code as thing_code,a.value as metric_name,a.model as model,a.key as zone,a.selected
         as selected
         from tb_sfmon_equipmonitor_config a
         where a.key=#{zoneCode} and a.thing_code=#{thingCode}
