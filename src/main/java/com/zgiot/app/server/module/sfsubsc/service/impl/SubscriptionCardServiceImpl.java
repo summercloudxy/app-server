@@ -140,7 +140,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             } else {
                 BigDecimal metricValue = new BigDecimal(secondMetirc.get().getValue()).divide(new BigDecimal(10000), 3, BigDecimal.ROUND_HALF_UP);
                 secondMetric = String.valueOf(metricValue);
-                metricData.setSecondMetricValue(firstMetric + SubscriptionConstants.UNIT_THOUSAND_T);
+                metricData.setSecondMetricValue(secondMetric + SubscriptionConstants.UNIT_THOUSAND_T);
             }
         } else {
             metricData.setSecondMetricValue("");
@@ -516,7 +516,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         DataModelWrapper mixedCoalInstantaneousWash = dataService.getData(cardParamValues[1], MetricCodes.COAL_CAP).orElse(null);
         instantaneousProductQuantityVO.setMixedCoalInstantaneousValue(mixedCoalInstantaneousWash == null ? "" : MetricValueUtil.formart(mixedCoalInstantaneousWash.getValue()));
 
-        DataModelWrapper mixedCoalTeamWash = dataService.getData(cardParamValues[0], MetricCodes.CT_C).orElse(null);
+        DataModelWrapper mixedCoalTeamWash = dataService.getData(cardParamValues[1], MetricCodes.CT_C).orElse(null);
         instantaneousProductQuantityVO.setMixedCoalTeamValue(mixedCoalTeamWash == null ? "" : MetricValueUtil.formart(mixedCoalTeamWash.getValue()));
         String[] wasteRocks = cardParamValues[2].split("\\+");
 
@@ -600,13 +600,13 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         }
         //混煤瞬时量
         String mixedCoalCapValue = "";
-        DataModel mixedCoalCap = historyDataService.findClosestHistoryData(Lists.newArrayList(cardParamValues[2]), Lists.newArrayList(MetricCodes.COAL_CAP), new Date(System.currentTimeMillis() - 60000));
+        DataModel mixedCoalCap = historyDataService.findClosestHistoryData(Lists.newArrayList(cardParamValues[2]), Lists.newArrayList(MetricCodes.COAL_CAP), new Date(millis - 60000));
         if (mixedCoalCap != null) {
             mixedCoalCapValue = MetricValueUtil.formart(mixedCoalCap.getValue());
         }
         //煤泥瞬时量
         String slurryCoalCapValue = "";
-        DataModel slurryCoalCap = historyDataService.findClosestHistoryData(Lists.newArrayList(cardParamValues[3]), Lists.newArrayList(MetricCodes.COAL_CAP), new Date(System.currentTimeMillis() - 10000));
+        DataModel slurryCoalCap = historyDataService.findClosestHistoryData(Lists.newArrayList(cardParamValues[3]), Lists.newArrayList(MetricCodes.COAL_CAP), new Date(millis - 10000));
         if (slurryCoalCap != null) {
             slurryCoalCapValue = MetricValueUtil.formart(slurryCoalCap.getValue());
         }
