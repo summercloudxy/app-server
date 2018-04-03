@@ -18,4 +18,10 @@ public class TBSystemServiceImpl implements TBSystemService {
     public List<TBSystem> getTBSystemALL(int level) {
         return tbSystemMapper.getTBSystemALL(level);
     }
+
+    @Override
+    public List<TBSystem> getSystemByParentId(Long id) {
+        return tbSystemMapper.getSystemByParentId(id);
+    }
+
 }

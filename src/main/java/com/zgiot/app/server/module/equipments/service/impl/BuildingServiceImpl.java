@@ -59,4 +59,9 @@ public class BuildingServiceImpl implements BuildingService {
         pageHelpInfo.setSum(page.getTotal());
         return pageHelpInfo;
     }
+
+    @Override
+    public List<Building> getBuildingByAreaId(Long id) {
+        return buildingMapper.getBuildingByAreaId(id);
+    }
 }
