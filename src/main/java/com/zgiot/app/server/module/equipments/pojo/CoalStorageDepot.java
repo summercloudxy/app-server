@@ -27,6 +27,11 @@ public class CoalStorageDepot {
      */
     private String level;
 
+    /**
+     *更新时间
+     */
+    private String updateDt;
+
     public Long getId() {
         return id;
     }
@@ -65,5 +70,13 @@ public class CoalStorageDepot {
 
     public void setLevel(String level) {
         this.level = level;
+    }
+
+    public String getUpdateDt() {
+        return updateDt;
+    }
+
+    public void setUpdateDt(String updateDt) {
+        this.updateDt = updateDt;
     }
 }
