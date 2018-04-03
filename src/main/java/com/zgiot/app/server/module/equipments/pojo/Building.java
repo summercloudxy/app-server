@@ -18,6 +18,11 @@ public class Building {
     private Integer seqNo;
 
     /**
+     *更新时间
+     */
+    private String updateDt;
+
+    /**
      *总层数
      */
     private Integer maxFloor;
@@ -52,5 +57,13 @@ public class Building {
 
     public void setMaxFloor(Integer maxFloor) {
         this.maxFloor = maxFloor;
+    }
+
+    public String getUpdateDt() {
+        return updateDt;
+    }
+
+    public void setUpdateDt(String updateDt) {
+        this.updateDt = updateDt;
     }
 }
