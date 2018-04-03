@@ -1,6 +1,8 @@
 package com.zgiot.app.server.module.equipments.pojo;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class ThingTag {
     /**
@@ -43,6 +45,11 @@ public class ThingTag {
      *
      */
     private String operator;
+
+    /**
+     * 用于菜单
+     */
+    private List nodeList = new ArrayList();
 
     public Long getId() {
         return id;
@@ -122,5 +129,13 @@ public class ThingTag {
 
     public void setOperator(String operator) {
         this.operator = operator;
+    }
+
+    public List getNodeList() {
+        return nodeList;
+    }
+
+    public void setNodeList(List nodeList) {
+        this.nodeList = nodeList;
     }
 }

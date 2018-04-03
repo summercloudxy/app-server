@@ -649,11 +649,15 @@ public class EquipmentManagementController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(partsInfoList), HttpStatus.OK);
     }
 
-//    @RequestMapping(value = "/thingTag/getMenu", method = RequestMethod.GET)
-//    public ResponseEntity<String> getMenu(){
-//        thingTagService.getMenu();
-//        return new ResponseEntity<>(ServerResponse.buildOkJson(), HttpStatus.OK);
-//    }
-
+    /**
+     * 菜单
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/thingTag/getMenu/thingTagId/{id}", method = RequestMethod.GET)
+    public ResponseEntity<String> getMenu(@PathVariable("id") Long id){
+        ThingTag thingTag = thingTagService.getMenu(id);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(thingTag), HttpStatus.OK);
+    }
 
 }
