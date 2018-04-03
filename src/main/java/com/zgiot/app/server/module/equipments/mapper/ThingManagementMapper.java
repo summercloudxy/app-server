@@ -53,13 +53,21 @@ public interface ThingManagementMapper {
      * @param thingCodeList
      * @return
      */
-    List<PartsInfo> getPartsInfoByThingcode(List<String> thingCodeList);
+    List<PartsInfo> getPartsInfoByThingcode(@Param("thingCodeList") List<String> thingCodeList);
 
     /**
      * 获取管道信息列表
      * @param thingCodeList
      * @return
      */
-    List<PipeInfo> getPipeInfoByThingcode(List<String> thingCodeList);
+    List<PipeInfo> getPipeInfoByThingcode(@Param("thingCodeList") List<String> thingCodeList);
 
+    /**
+     * 根据设备code
+     * @param thingCode
+     * @return
+     */
+    @Select("SELECT id,thing_code,thing_name FROM tb_thing " +
+            "WHERE thing_type1_code = 'PARTS' AND thing_code LIKE #{thingCode}")
+    List<PartsInfo> getPartsInfoByThingId(@Param("thingCode") String thingCode);
 }

@@ -638,5 +638,22 @@ public class EquipmentManagementController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(buildingList), HttpStatus.OK);
     }
 
+    /**
+     * 根据设备code获取部件信息
+     * @param thingCode
+     * @return
+     */
+    @RequestMapping(value = "/thing/getPartsInfoByThingCode", method = RequestMethod.GET)
+    public ResponseEntity<String> getPartsInfoByThingId(@PathVariable("thingCode") String thingCode){
+        List<PartsInfo> partsInfoList = thingService.getPartsInfoByThingId(thingCode);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(partsInfoList), HttpStatus.OK);
+    }
+
+//    @RequestMapping(value = "/thingTag/getMenu", method = RequestMethod.GET)
+//    public ResponseEntity<String> getMenu(){
+//        thingTagService.getMenu();
+//        return new ResponseEntity<>(ServerResponse.buildOkJson(), HttpStatus.OK);
+//    }
+
 
 }

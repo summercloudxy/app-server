@@ -242,4 +242,9 @@ public class EquipmentConstant {
      */
     public static final String UPDATE_TIME = "UPDATE_TIME";
 
+    /**
+     * 部件类型
+     */
+    public static final String COMPONENT_TYPE_CODE_RULE = "COMPONENT_TYPE_CODE_RULE";
+
 }

@@ -66,4 +66,6 @@ public interface ThingManagementService {
     public PageHelpInfo getAllMeterInfo(Long id, int pageNum, int pageSize);
 
     public PageHelpInfo getMeterInfoByThingTagId(Long id, int pageNum, int pageSize);
+
+    public List<PartsInfo> getPartsInfoByThingId(String thingCode);
 }

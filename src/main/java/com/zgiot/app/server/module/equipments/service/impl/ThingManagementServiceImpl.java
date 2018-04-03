@@ -365,6 +365,11 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         tp.setPropType(EquipmentConstant.PROP_TYPE_PROP);
         thingPropertiesMapper.addThingProperties(tp);
 
+        tp.setPropKey(EquipmentConstant.COMPONENT_TYPE_CODE_RULE);
+        tp.setPropValue(partsInfo.getThingTypeName());
+        tp.setPropType(EquipmentConstant.PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp);
+
         tp.setPropKey(EquipmentConstant.PARENT_THING_CODE);
         tp.setPropValue(partsInfo.getParentThingCode());
         tp.setPropType(EquipmentConstant.PROP_TYPE_PROP);
@@ -424,12 +429,6 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         tp.setPropValue(partsInfo.getRatedCurrent());
         tp.setPropType(EquipmentConstant.PROP_TYPE_PROP);
         thingPropertiesMapper.addThingProperties(tp);
-
-        tp.setPropKey(EquipmentConstant.UPDATE_TIME);
-        tp.setPropValue(partsInfo.getUpdateTime());
-        tp.setPropType(EquipmentConstant.PROP_TYPE_PROP);
-        thingPropertiesMapper.addThingProperties(tp);
-
     }
 
     @Override
@@ -954,7 +953,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
     @Override
     public void addMeter(MeterInfo meterInfo) {
         String parentThingCode = meterInfo.getParentThingCode();
-        String thingType = "." + YB + "-";
+        String thingType = meterInfo.getThingType();
         String thingCode = getThingCodeByInfo(parentThingCode, thingType, THING_TYPE1_CODE_METER);
         meterInfo.setThingCode(thingCode);
         //插入tb_thing表
@@ -977,7 +976,6 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         relThingtagThing.setThingTagCode(meterInfo.getThingTagCode());
         relThingtagThing.setCreateDate(new Date());
         relThingtagThingMapper.addRelThingtagThing(relThingtagThing);
-
 
         //插入tb_thing_properties表
         ThingProperties tp = new ThingProperties();
@@ -1085,6 +1083,32 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         }
         pageHelpInfo.setList(meterInfoList);
         return pageHelpInfo;
+    }
+
+    @Override
+    public List<PartsInfo> getPartsInfoByThingId(String thingCode) {
+        String where = thingCode + ".%";
+        List<PartsInfo> partsInfoList = thingMapper.getPartsInfoByThingId(where);
+
+        List<String> thingCodeList = new ArrayList<>();
+        thingCodeList.add(thingCode);
+        List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
+        if (partsInfoList != null && partsInfoList.size() > 0) {
+            for (int i = 0; i < partsInfoList.size(); i++) {
+                for (int j = 0; j < thingPropertiesList.size(); j++) {
+                    if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                            && thingPropertiesList.get(j).getPropKey().equals(SPECIFICATION)) {
+                        partsInfoList.get(i).setSpecification(thingPropertiesList.get(j).getPropValue());
+                    }
+                    if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                            && thingPropertiesList.get(j).getPropKey().equals(COMPONENT_TYPE_CODE_RULE)) {
+                        partsInfoList.get(i).setThingTypeName(thingPropertiesList.get(j).getPropValue());
+                    }
+                }
+            }
+        }
+
+        return partsInfoList;
     }
 
 }
