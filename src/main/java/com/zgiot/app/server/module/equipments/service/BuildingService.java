@@ -20,4 +20,6 @@ public interface BuildingService {
     public PageHelpInfo getBuildingAll(int pageNum, int pageSize);
 
     public PageHelpInfo getBuildingByBuildingName(int pageNum,int pageSize,String buildingName);
+
+    public List<Building> getBuildingByAreaId(Long id);
 }

@@ -616,4 +616,27 @@ public class EquipmentManagementController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
+    /**
+     * 根据父节点获取系统表信息
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/system/getSystemByParentId/{id}", method = RequestMethod.GET)
+    public ResponseEntity<String> getSystemByParentId(@PathVariable("id") Long id){
+        List<TBSystem> tbSystemList = tbSystemService.getSystemByParentId(id);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(tbSystemList), HttpStatus.OK);
+    }
+
+    /**
+     * 根据地区id获取车间信息
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/building/getBuildingByAreaId/{id}", method = RequestMethod.GET)
+    public ResponseEntity<String> getBuildingByAreaId(@PathVariable("id") Long id){
+        List<Building> buildingList = buildingService.getBuildingByAreaId(id);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(buildingList), HttpStatus.OK);
+    }
+
+
 }

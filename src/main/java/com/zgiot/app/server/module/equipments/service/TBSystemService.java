@@ -7,4 +7,7 @@ import java.util.List;
 public interface TBSystemService {
 
     List<TBSystem> getTBSystemALL(int level);
+
+    List<TBSystem> getSystemByParentId(Long id);
+
 }

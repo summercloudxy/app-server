@@ -18,4 +18,6 @@ public interface TBSystemMapper {
            "AND t3.thing_tag_code = t4.code AND t1.system_id = #{systemId}")
     List<DeviceInfo> getDeviceInfoBySystemId(@Param("systemId") int systemId);
 
+   @Select("SELECT * FROM tb_system WHERE parent_system_id = #{id}")
+    List<TBSystem> getSystemByParentId(@Param("id") Long id);
 }
