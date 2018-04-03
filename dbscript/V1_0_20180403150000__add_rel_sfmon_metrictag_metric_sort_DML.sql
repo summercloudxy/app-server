@@ -8,3 +8,4 @@ insert into
 rel_sfmon_metrictag_metric_sort(metric_tag_name,metric_code,sort,direction,rule) values('液位连锁','LE_H_SET',2,0,3);
 insert into rel_sfmon_metrictag_metric_sort(metric_tag_name,metric_code,sort,direction,rule) values('液位连锁','LE_L_SET',3,0,3);
 delete from tb_sfmon_signal_wrapper_rule where signal_wrapper_name='电机温度';
+commit;
