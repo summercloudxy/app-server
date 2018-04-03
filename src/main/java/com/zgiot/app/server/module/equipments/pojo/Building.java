@@ -1,5 +1,7 @@
 package com.zgiot.app.server.module.equipments.pojo;
 
+import java.util.Date;
+
 public class Building {
 
     /**
@@ -20,7 +22,7 @@ public class Building {
     /**
      *更新时间
      */
-    private String updateDt;
+    private Date updateDt;
 
     /**
      *总层数
@@ -59,11 +61,11 @@ public class Building {
         this.maxFloor = maxFloor;
     }
 
-    public String getUpdateDt() {
+    public Date getUpdateDt() {
         return updateDt;
     }
 
-    public void setUpdateDt(String updateDt) {
+    public void setUpdateDt(Date updateDt) {
         this.updateDt = updateDt;
     }
 }
