@@ -479,12 +479,12 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         String thingCtc1 = "";
         String thingCtc2 = "";
 
-        DataModelWrapper team1 = dataService.getData(cardParamValues[0], MetricCodes.COAL_CAP).orElse(null);
+        DataModelWrapper team1 = dataService.getData(cardParamValues[0], MetricCodes.CT_C).orElse(null);
         if (team1 != null) {
             thingCtc1 = MetricValueUtil.formart(team1.getValue());
         }
 
-        DataModelWrapper team2 = dataService.getData(cardParamValues[1], MetricCodes.COAL_CAP).orElse(null);
+        DataModelWrapper team2 = dataService.getData(cardParamValues[1], MetricCodes.CT_C).orElse(null);
         if (team2 != null) {
             thingCtc2 = MetricValueUtil.formart(team2.getValue());
         }
