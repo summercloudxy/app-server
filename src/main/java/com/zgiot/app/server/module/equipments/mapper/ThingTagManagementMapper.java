@@ -32,4 +32,7 @@ public interface ThingTagManagementMapper {
     @Select("SELECT * FROM tb_thing_tag WHERE parent_id = #{id}")
     List<ThingTag> getThingTagByParentId(@Param("id") Long id);
 
+    @Select("SELECT * FROM tb_thing_tag WHERE id = #{id}")
+    ThingTag getThingTagById(Long id);
+
 }

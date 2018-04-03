@@ -79,6 +79,11 @@ public class FlashboardInfo {
     private String flashboardControlMode;
 
     /**
+     *类型名称
+     */
+    private String thingTypeName;
+
+    /**
      *类型简称
      */
     private String thingType;
@@ -206,6 +211,14 @@ public class FlashboardInfo {
 
     public void setFlashboardControlMode(String flashboardControlMode) {
         this.flashboardControlMode = flashboardControlMode;
+    }
+
+    public String getThingTypeName() {
+        return thingTypeName;
+    }
+
+    public void setThingTypeName(String thingTypeName) {
+        this.thingTypeName = thingTypeName;
     }
 
     public String getThingType() {

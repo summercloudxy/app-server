@@ -78,6 +78,11 @@ public class MeterInfo {
     private String thingTagName;
 
     /**
+     * 仪表类型简称
+     */
+    private String thingType;
+
+    /**
      * 更新时间
      */
     private String updateDate;
@@ -210,6 +215,14 @@ public class MeterInfo {
 
     public void setThingTagName(String thingTagName) {
         this.thingTagName = thingTagName;
+    }
+
+    public String getThingType() {
+        return thingType;
+    }
+
+    public void setThingType(String thingType) {
+        this.thingType = thingType;
     }
 
     public String getUpdateDate() {
