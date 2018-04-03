@@ -1,5 +1,7 @@
 package com.zgiot.app.server.module.equipments.pojo;
 
+import java.util.Date;
+
 public class CoalStorageDepot {
 
     /**
@@ -30,7 +32,7 @@ public class CoalStorageDepot {
     /**
      *更新时间
      */
-    private String updateDt;
+    private Date updateDt;
 
     public Long getId() {
         return id;
@@ -72,11 +74,11 @@ public class CoalStorageDepot {
         this.level = level;
     }
 
-    public String getUpdateDt() {
+    public Date getUpdateDt() {
         return updateDt;
     }
 
-    public void setUpdateDt(String updateDt) {
+    public void setUpdateDt(Date updateDt) {
         this.updateDt = updateDt;
     }
 }
