@@ -687,7 +687,7 @@ public class SFMonitorSignalWrapperController {
         while(i < sfMonPadAuxiliaryZoneInfos.size()){
             if((sfMonPadAuxiliaryZoneInfo.getRule() == SFMonitorConstant.COMPOSITION_ALL_PARTION)
                     && sfMonPadAuxiliaryZoneInfo.getWrapperName().equals(sfMonPadAuxiliaryZoneInfos.get(i).getWrapperName())){
-                if(sfMonPadAuxiliaryZoneInfo.getSfMonPadAuxiliaryZoneMetricInfoList().get(0).getThingCode().split(".").length > 1){
+                if(sfMonPadAuxiliaryZoneInfo.getSfMonPadAuxiliaryZoneMetricInfoList().get(0).getThingCode().split("\\.").length > 1){
                     sfMonPadAuxiliaryZoneMetricInfoList.addAll(sfMonPadAuxiliaryZoneInfos.get(i).getSfMonPadAuxiliaryZoneMetricInfoList());
                     sfMonPadAuxiliaryZoneInfos.remove(i);
                     continue;
