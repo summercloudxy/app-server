@@ -30,6 +30,10 @@ public class ThingTag {
      */
     private Long thingTagGroupId;
     /**
+     * 页面路由
+     */
+    private String webPath;
+    /**
      * 创建时间
      */
     private Date createDate;
@@ -97,6 +101,14 @@ public class ThingTag {
 
     public void setThingTagGroupId(Long thingTagGroupId) {
         this.thingTagGroupId = thingTagGroupId;
+    }
+
+    public String getWebPath() {
+        return webPath;
+    }
+
+    public void setWebPath(String webPath) {
+        this.webPath = webPath;
     }
 
     public Date getCreateDate() {
