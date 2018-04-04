@@ -1,5 +1,7 @@
 package com.zgiot.app.server.module.equipments.controller;
 
+import java.util.Date;
+
 public class ChuteInfo {
 
     /**
@@ -15,7 +17,7 @@ public class ChuteInfo {
     /**
      *更新时间
      */
-    private String updateDate;
+    private Date updateDate;
 
     /**
      *起始设备CODE
@@ -83,11 +85,11 @@ public class ChuteInfo {
         this.thingCode = thingCode;
     }
 
-    public String getUpdateDate() {
+    public Date getUpdateDate() {
         return updateDate;
     }
 
-    public void setUpdateDate(String updateDate) {
+    public void setUpdateDate(Date updateDate) {
         this.updateDate = updateDate;
     }
 

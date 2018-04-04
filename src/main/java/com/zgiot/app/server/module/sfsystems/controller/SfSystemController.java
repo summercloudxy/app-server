@@ -27,7 +27,7 @@ public class SfSystemController {
     @Autowired
     private RelThingSystemService relThingSystemService;
 
-    @RequestMapping(value = "/system/getDeviceInfoBySystemId/{systemId}/pageNum/{pageNum}/pageSize/{pageSize}",
+    @RequestMapping(value = "/getDeviceInfoBySystemId/{systemId}/pageNum/{pageNum}/pageSize/{pageSize}",
             method = RequestMethod.GET)
     public ResponseEntity<String> getDeviceInfoBySystemId(@PathVariable("systemId") int systemId, @PathVariable int pageNum,
                                                           @PathVariable int pageSize) {
