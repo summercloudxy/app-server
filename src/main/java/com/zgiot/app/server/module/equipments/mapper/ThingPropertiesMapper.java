@@ -14,7 +14,7 @@ public interface ThingPropertiesMapper {
     void addThingProperties(ThingProperties thingProperties);
 
     @Delete("DELETE FROM tb_thing_properties WHERE thing_code = #{thingCode}")
-    void deleteThingPropertiesByThingCode(@Param("thing_code") String thing_code);
+    void deleteThingPropertiesByThingCode(@Param("thingCode") String thingCode);
 
     List<ThingProperties> getThingPropertiesByThingCode(@Param("thingCodeList") List<String> thingCodeList);
 
