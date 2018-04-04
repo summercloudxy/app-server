@@ -429,14 +429,14 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
     private List<String> getMixtureOfRawCoalThingCodes(String cardParamValue) {
         List<String> thingCodes = new ArrayList<>();
         DataModelWrapper coal8DataModel = dataService.getData(cardParamValue, MetricCodes.COAL_8_DEVICE).orElse(null);
-        if (coal8DataModel != null) {
+        if (coal8DataModel != null && (!"-1".equals(coal8DataModel.getValue())) && (!"0".equals(coal8DataModel.getValue()))) {
             thingCodes.add(coal8DataModel.getValue());
         } else {
             thingCodes.add("");
         }
 
         DataModelWrapper coal13DataModel = dataService.getData(cardParamValue, MetricCodes.COAL_13_DEVICE).orElse(null);
-        if (coal13DataModel != null) {
+        if (coal13DataModel != null && (!"-1".equals(coal13DataModel.getValue())) && (!"0".equals(coal13DataModel.getValue()))) {
             thingCodes.add(coal13DataModel.getValue());
         } else {
             thingCodes.add("");
