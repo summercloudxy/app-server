@@ -44,7 +44,7 @@
         <result column="thing_code" property="thingCode"/>
         <result column="thing_name" property="thingName"/>
         <result column="system_name" property="thingSystemName"/>
-        <result column="update_time" property="updateTime"/>
+        <result column="update_time" property="updateDate"/>
     </resultMap>
     <select id="getPipeInfoByThingcode" resultMap="pipeInfo"
             resultType="com.zgiot.app.server.module.equipments.controller.PipeInfo">
