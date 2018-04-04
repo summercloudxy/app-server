@@ -662,7 +662,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
 
         // 插入thingPosition表
         ThingPosition thingPosition = new ThingPosition();
-        thingPosition.setThingCode(flashboardInfo.getThingCode());
+        thingPosition.setThingCode(thingCode);
         thingPosition.setBuildingId(flashboardInfo.getBuildingId());
         thingPosition.setFloor(flashboardInfo.getFloor());
 
@@ -684,6 +684,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         thingMapper.deleteThingById(id);
         thingPropertiesMapper.deleteThingPropertiesByThingCode(thingCode);
         thingPositionMapper.deleteThingPosition(thingCode);
+        relThingtagThingMapper.deleteRelThingtagThingByThingCode(thingCode);
     }
 
     @Transactional
@@ -795,7 +796,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
 
         // 插入thingPosition表
         ThingPosition thingPosition = new ThingPosition();
-        thingPosition.setThingCode(valveInfo.getThingCode());
+        thingPosition.setThingCode(thingCode);
         thingPosition.setBuildingId(valveInfo.getBuildingId());
         thingPosition.setFloor(valveInfo.getFloor());
 
