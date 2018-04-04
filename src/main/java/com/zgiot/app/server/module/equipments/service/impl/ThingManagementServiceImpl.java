@@ -324,6 +324,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         thingMapper.deleteThingById(id);
         thingPropertiesMapper.deleteThingPropertiesByThingCode(thingCode);
         relThingSystemMapper.deleteRelThingSystemByThingCode(thingCode);
+        relThingtagThingMapper.deleteRelThingtagThingByThingCode(thingCode);
     }
 
     @Transactional
