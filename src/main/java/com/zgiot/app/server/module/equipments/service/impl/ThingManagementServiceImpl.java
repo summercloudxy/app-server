@@ -842,12 +842,28 @@ public class ThingManagementServiceImpl implements ThingManagementService {
             for (int i = 0; i < pipeInfoList.size(); i++) {
                 for (int j = 0; j < thingPropertiesList.size(); j++) {
                     if (pipeInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(EquipmentConstant.START_THING_NAME)) {
+                            && thingPropertiesList.get(j).getPropKey().equals(START_THING_NAME)) {
                         pipeInfoList.get(i).setStartThingName(thingPropertiesList.get(j).getPropValue());
                     }
                     if (pipeInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(EquipmentConstant.TERMINAL_THING_NAME)) {
+                            && thingPropertiesList.get(j).getPropKey().equals(START_THING_CODE)) {
+                        pipeInfoList.get(i).setStartThingCode(thingPropertiesList.get(j).getPropValue());
+                    }
+                    if (pipeInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                            && thingPropertiesList.get(j).getPropKey().equals(TERMINAL_THING_NAME)) {
                         pipeInfoList.get(i).setTerminalThingName(thingPropertiesList.get(j).getPropValue());
+                    }
+                    if (pipeInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                            && thingPropertiesList.get(j).getPropKey().equals(TERMINAL_THING_CODE)) {
+                        pipeInfoList.get(i).setTerminalThingCode(thingPropertiesList.get(j).getPropValue());
+                    }
+                    if (pipeInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                            && thingPropertiesList.get(j).getPropKey().equals(ENABLE_DATE)) {
+                        pipeInfoList.get(i).setEnableDate(thingPropertiesList.get(j).getPropValue());
+                    }
+                    if (pipeInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                            && thingPropertiesList.get(j).getPropKey().equals(DISABLE_DATE)) {
+                        pipeInfoList.get(i).setDisableDate(thingPropertiesList.get(j).getPropValue());
                     }
                 }
             }
@@ -885,8 +901,13 @@ public class ThingManagementServiceImpl implements ThingManagementService {
             chuteInfo.setThingCode(pipeInfo.getThingCode());
             chuteInfo.setThingName(pipeInfo.getThingName());
             chuteInfo.setStartThingName(pipeInfo.getStartThingName());
+            chuteInfo.setStartThingCode(pipeInfo.getStartThingCode());
             chuteInfo.setTerminalThingName(pipeInfo.getTerminalThingName());
+            chuteInfo.setTerminalThingCode(pipeInfo.getTerminalThingCode());
+            chuteInfo.setThingSystemId(pipeInfo.getThingSystemId());
             chuteInfo.setThingSystemName(pipeInfo.getThingSystemName());
+            chuteInfo.setEnableDate(pipeInfo.getEnableDate());
+            chuteInfo.setDisableDate(pipeInfo.getDisableDate());
             chuteInfo.setUpdateDate(pipeInfo.getUpdateDate());
             chuteInfoList.add(chuteInfo);
         }

@@ -1,5 +1,7 @@
 package com.zgiot.app.server.module.equipments.controller;
 
+import java.util.Date;
+
 public class PartsInfo {
 
     private Long id;
@@ -21,7 +23,7 @@ public class PartsInfo {
     private String insulationGrade;// 绝缘等级
     private String protectionGrade;// 防护等级
     private String ratedCurrent;// 额定电流
-    private String updateTime;// 更新时间
+    private Date updateTime;// 更新时间
     private String thingTagCode;// 菜单id
 
     public Long getId() {
@@ -168,11 +170,11 @@ public class PartsInfo {
         this.ratedCurrent = ratedCurrent;
     }
 
-    public String getUpdateTime() {
+    public Date getUpdateTime() {
         return updateTime;
     }
 
-    public void setUpdateTime(String updateTime) {
+    public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
     }
 
