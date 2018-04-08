@@ -5,7 +5,15 @@ import com.zgiot.app.server.module.equipments.pojo.RelThingSystem;
 
 public interface RelThingSystemService {
 
+    /**
+     * 设备与系统关系-添加
+     * @param relThingSystem
+     */
     public void addRelThingSystem(RelThingSystem relThingSystem);
 
+    /**
+     * 设备与系统关系-删除
+     * @param thing_code
+     */
     public void deleteRelThingSystemByThingCode(String thing_code);
 }

@@ -320,11 +320,13 @@ public class ThingManagementServiceImpl implements ThingManagementService {
     @Transactional
     public void delChuteOrPipe(Long id) {
         Thing t = thingMapper.getThingById(id);
-        String thingCode = t.getThingCode();
-        thingMapper.deleteThingById(id);
-        thingPropertiesMapper.deleteThingPropertiesByThingCode(thingCode);
-        relThingSystemMapper.deleteRelThingSystemByThingCode(thingCode);
-        relThingtagThingMapper.deleteRelThingtagThingByThingCode(thingCode);
+        if(null != t) {
+            String thingCode = t.getThingCode();
+            thingMapper.deleteThingById(id);
+            thingPropertiesMapper.deleteThingPropertiesByThingCode(thingCode);
+            relThingSystemMapper.deleteRelThingSystemByThingCode(thingCode);
+            relThingtagThingMapper.deleteRelThingtagThingByThingCode(thingCode);
+        }
     }
 
     @Transactional
@@ -680,11 +682,13 @@ public class ThingManagementServiceImpl implements ThingManagementService {
     @Transactional
     public void delFlashboardOrValve(Long id) {
         Thing t = thingMapper.getThingById(id);
-        String thingCode = t.getThingCode();
-        thingMapper.deleteThingById(id);
-        thingPropertiesMapper.deleteThingPropertiesByThingCode(thingCode);
-        thingPositionMapper.deleteThingPosition(thingCode);
-        relThingtagThingMapper.deleteRelThingtagThingByThingCode(thingCode);
+        if(null != t) {
+            String thingCode = t.getThingCode();
+            thingMapper.deleteThingById(id);
+            thingPropertiesMapper.deleteThingPropertiesByThingCode(thingCode);
+            thingPositionMapper.deleteThingPosition(thingCode);
+            relThingtagThingMapper.deleteRelThingtagThingByThingCode(thingCode);
+        }
     }
 
     @Transactional
