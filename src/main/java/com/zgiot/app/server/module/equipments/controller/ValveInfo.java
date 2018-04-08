@@ -66,6 +66,11 @@ public class ValveInfo {
     private Long buildingId;
 
     /**
+     * 车间名
+     */
+    private String buildingName;
+
+    /**
      *楼层
      */
     private Integer floor;
@@ -84,7 +89,6 @@ public class ValveInfo {
      *类型简称
      */
     private String thingType;
-
     /**
      *阀门用途
      */
@@ -263,5 +267,13 @@ public class ValveInfo {
 
     public void setThingTagCode(String thingTagCode) {
         this.thingTagCode = thingTagCode;
+    }
+
+    public String getBuildingName() {
+        return buildingName;
+    }
+
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
     }
 }

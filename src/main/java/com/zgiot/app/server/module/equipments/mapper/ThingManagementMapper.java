@@ -1,8 +1,6 @@
 package com.zgiot.app.server.module.equipments.mapper;
 
-import com.zgiot.app.server.module.equipments.controller.DeviceInfo;
-import com.zgiot.app.server.module.equipments.controller.PartsInfo;
-import com.zgiot.app.server.module.equipments.controller.PipeInfo;
+import com.zgiot.app.server.module.equipments.controller.*;
 import com.zgiot.app.server.module.equipments.pojo.Thing;
 import org.apache.ibatis.annotations.*;
 
@@ -56,11 +54,32 @@ public interface ThingManagementMapper {
     List<PartsInfo> getPartsInfoByThingcode(@Param("thingCodeList") List<String> thingCodeList);
 
     /**
+     * 获取阀门信息列表
+     * @param thingCodeList
+     * @return
+     */
+    List<ValveInfo> getValveInfoByThingcode(@Param("thingCodeList") List<String> thingCodeList);
+
+    /**
+     * 获取闸板信息列表
+     * @param thingCodeList
+     * @return
+     */
+    List<FlashboardInfo> getFlashboardInfoByThingcode(@Param("thingCodeList") List<String> thingCodeList);
+
+    /**
      * 获取管道信息列表
      * @param thingCodeList
      * @return
      */
     List<PipeInfo> getPipeInfoByThingcode(@Param("thingCodeList") List<String> thingCodeList);
+
+    /**
+     * 获取仪表信息列表
+     * @param thingCodeList
+     * @return
+     */
+    List<MeterInfo> getMeterInfoByThingcode(@Param("thingCodeList") List<String> thingCodeList);
 
     /**
      * 根据设备code

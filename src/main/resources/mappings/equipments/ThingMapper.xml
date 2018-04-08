@@ -8,31 +8,87 @@
         <result column="system_id" property="systemId"/>
         <result column="system_name" property="systemName"/>
         <result column="tag_name" property="thingTagName"/>
-        <result column="update_time" property="updateTime"/>
+        <result column="create_date" property="updateDate"/>
+        <result column="building_id" property="buildingId"/>
+        <result column="building_name" property="buildingName"/>
+        <result column="floor" property="floor"/>
+        <result column="location_x" property="locationX"/>
+        <result column="location_y" property="locationY"/>
+        <result column="location_area" property="locationArea"/>
     </resultMap>
     <select id="getDeviceInfoByThingcode" resultMap="deviceInfo"
             resultType="com.zgiot.app.server.module.equipments.controller.DeviceInfo">
-        SELECT t1.id,t1.thing_code,t1.thing_name,t3.system_id,t2.system_name,t4.create_date AS update_time,t5.tag_name
-        FROM `tb_thing` t1,tb_system t2,rel_thing_system t3,rel_thingtag_thing t4,tb_thing_tag t5
+        SELECT t1.id,t1.thing_code,t1.thing_name,t3.system_id,t2.system_name,t4.create_date,t5.tag_name,
+          t7.building_name,t6.building_id,t6.floor,t6.location_x,t6.location_y,t6.location_area
+        FROM `tb_thing` t1,tb_system t2,rel_thing_system t3,rel_thingtag_thing t4,tb_thing_tag t5,
+          tb_thing_position t6,tb_building t7
+        WHERE 1
+        AND t1.thing_code = t3.thing_code AND t2.id = t3.system_id
+        AND t4.thing_code = t1.thing_code AND t5.code = t4.thing_tag_code
+        AND t1.thing_code = t6.thing_code AND t6.building_id = t7.id
         WHERE t1.thing_code in
         <foreach collection="thingCodeList" item="thingCode" index="index"
                  open="(" close=")" separator=",">
             #{thingCode}
         </foreach>
-        AND t1.thing_code = t3.thing_code AND t2.id = t3.system_id
-        AND t4.thing_code = t1.thing_code AND t5.code = t4.thing_tag_code
     </select>
 
     <resultMap id="partsInfo" type="com.zgiot.app.server.module.equipments.controller.PartsInfo">
         <result column="id" property="id"/>
         <result column="thing_code" property="thingCode"/>
         <result column="thing_name" property="thingName"/>
-        <result column="update_time" property="updateTime"/>
+        <result column="create_date" property="updateDate"/>
     </resultMap>
     <select id="getPartsInfoByThingcode" resultMap="partsInfo"
             resultType="com.zgiot.app.server.module.equipments.controller.PartsInfo">
-        SELECT t1.id,t1.thing_code,t1.thing_name,t2.create_date AS update_time FROM tb_thing t1, rel_thingtag_thing t2
+        SELECT t1.id,t1.thing_code,t1.thing_name,t2.create_date FROM tb_thing t1, rel_thingtag_thing t2
         WHERE t1.thing_code = t2.thing_code AND t1.thing_code in
+        <foreach collection="thingCodeList" item="thingCode" index="index"
+                 open="(" close=")" separator=",">
+            #{thingCode}
+        </foreach>
+    </select>
+
+    <resultMap id="valveInfo" type="com.zgiot.app.server.module.equipments.controller.ValveInfo">
+        <result column="id" property="id"/>
+        <result column="thing_code" property="thingCode"/>
+        <result column="thing_name" property="thingName"/>
+        <result column="create_date" property="updateDate"/>
+        <result column="building_id" property="buildingId"/>
+        <result column="building_name" property="buildingName"/>
+        <result column="floor" property="floor"/>
+    </resultMap>
+    <select id="getValveInfoByThingcode" resultMap="valveInfo"
+            resultType="com.zgiot.app.server.module.equipments.controller.ValveInfo">
+        SELECT t1.id,t1.thing_code,t1.thing_name,t2.create_date,t4.building_name,t3.building_id,t3.floor
+        FROM tb_thing t1, rel_thingtag_thing t2, tb_thing_position t3, tb_building t4
+        WHERE t1.thing_code = t2.thing_code
+        AND t1.thing_code = t3.thing_code
+        AND t3.building_id = t4.id
+        AND t1.thing_code in
+        <foreach collection="thingCodeList" item="thingCode" index="index"
+                 open="(" close=")" separator=",">
+            #{thingCode}
+        </foreach>
+    </select>
+
+    <resultMap id="flashboardInfo" type="com.zgiot.app.server.module.equipments.controller.FlashboardInfo">
+        <result column="id" property="id"/>
+        <result column="thing_code" property="thingCode"/>
+        <result column="thing_name" property="thingName"/>
+        <result column="create_date" property="updateDate"/>
+        <result column="building_id" property="buildingId"/>
+        <result column="building_name" property="buildingName"/>
+        <result column="floor" property="floor"/>
+    </resultMap>
+    <select id="getFlashboardInfoByThingcode" resultMap="flashboardInfo"
+            resultType="com.zgiot.app.server.module.equipments.controller.FlashboardInfo">
+        SELECT t1.id,t1.thing_code,t1.thing_name,t2.create_date,t4.building_name,t3.building_id,t3.floor
+        FROM tb_thing t1, rel_thingtag_thing t2, tb_thing_position t3, tb_building t4
+        WHERE t1.thing_code = t2.thing_code
+        AND t1.thing_code = t3.thing_code
+        AND t3.building_id = t4.id
+        AND t1.thing_code in
         <foreach collection="thingCodeList" item="thingCode" index="index"
                  open="(" close=")" separator=",">
             #{thingCode}
@@ -52,6 +108,29 @@
         SELECT t1.id,t1.thing_code,t1.thing_name,t2.update_time,t3.system_name,t3.id AS thing_system_id
         FROM tb_thing t1, rel_thing_system t2, tb_system t3
         WHERE t1.thing_code = t2.thing_code AND t2.system_id = t3.id
+        AND t1.thing_code in
+        <foreach collection="thingCodeList" item="thingCode" index="index"
+                 open="(" close=")" separator=",">
+            #{thingCode}
+        </foreach>
+    </select>
+
+    <resultMap id="meterInfo" type="com.zgiot.app.server.module.equipments.controller.MeterInfo">
+        <result column="id" property="id"/>
+        <result column="thing_code" property="thingCode"/>
+        <result column="thing_name" property="thingName"/>
+        <result column="create_date" property="updateDate"/>
+        <result column="building_id" property="buildingId"/>
+        <result column="building_name" property="buildingName"/>
+        <result column="floor" property="floor"/>
+    </resultMap>
+    <select id="getMeterInfoByThingcode" resultMap="meterInfo"
+            resultType="com.zgiot.app.server.module.equipments.controller.MeterInfo">
+        SELECT t1.id,t1.thing_code,t1.thing_name,t2.create_date,t4.building_name,t3.building_id,t3.floor
+        FROM tb_thing t1, rel_thingtag_thing t2, tb_thing_position t3, tb_building t4
+        WHERE t1.thing_code = t2.thing_code
+        AND t1.thing_code = t3.thing_code
+        AND t3.building_id = t4.id
         AND t1.thing_code in
         <foreach collection="thingCodeList" item="thingCode" index="index"
                  open="(" close=")" separator=",">
