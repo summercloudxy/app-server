@@ -15,7 +15,7 @@ public class TBSystemServiceImpl implements TBSystemService {
     @Autowired
     private TBSystemMapper tbSystemMapper;
     @Override
-    public List<TBSystem> getTBSystemALL(int level) {
+    public List<TBSystem> getTBSystemByLevel(int level) {
         return tbSystemMapper.getTBSystemALL(level);
     }
 

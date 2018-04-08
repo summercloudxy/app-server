@@ -201,7 +201,7 @@ public class EquipmentManagementController {
      */
     @RequestMapping(value = "/thing/sysLevel/{sysLevel}", method = RequestMethod.GET)
     public ResponseEntity<String> getSysByLevel(@PathVariable("sysLevel") int sysLevel) {
-        List<TBSystem> tbSystemList = tbSystemService.getTBSystemALL(sysLevel);
+        List<TBSystem> tbSystemList = tbSystemService.getTBSystemByLevel(sysLevel);
         return new ResponseEntity<>(ServerResponse.buildOkJson(tbSystemList), HttpStatus.OK);
     }
     /*3.29 end*/
