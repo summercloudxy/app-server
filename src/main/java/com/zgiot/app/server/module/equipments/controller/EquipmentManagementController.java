@@ -421,7 +421,7 @@ public class EquipmentManagementController {
      * @param partsInfo
      * @return
      */
-    @RequestMapping(value = "/patrs/edit", method = RequestMethod.PUT)
+    @RequestMapping(value = "/parts/edit", method = RequestMethod.PUT)
     public ResponseEntity<String> editParts(@RequestBody PartsInfo partsInfo) {
         thingService.editParts(partsInfo);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
