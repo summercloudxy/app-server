@@ -70,4 +70,10 @@ public interface ThingManagementMapper {
     @Select("SELECT id,thing_code,thing_name FROM tb_thing " +
             "WHERE thing_type1_code = 'PARTS' AND thing_code LIKE #{thingCode}")
     List<PartsInfo> getPartsInfoByThingId(@Param("thingCode") String thingCode);
+
+    @Select("SELECT * FROM tb_thing " +
+            "WHERE (thing_code LIKE #{code} OR thing_name LIKE #{name}) " +
+            "AND thing_type1_code = #{type}")
+    List<Thing> getThingByCodeOrName(@Param("code") String code, @Param("name") String name, @Param("type") String type);
+
 }

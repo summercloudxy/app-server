@@ -660,4 +660,26 @@ public class EquipmentManagementController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(thingTag), HttpStatus.OK);
     }
 
+    /**
+     * 根据设备编号或设备名称查询设备
+     * @param codeOrName
+     * @param type
+     * @return
+     */
+    @RequestMapping(value = "/thing/codeOrName/{codeOrName}/type/{type}", method = RequestMethod.GET)
+    public ResponseEntity<String> getThingByCodeOrName(@PathVariable("codeOrName") String codeOrName,
+                                                       @PathVariable("type") String type) {
+        List<Thing> thingList = thingService.getThingByCodeOrName(codeOrName, type);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(thingList), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/thing/thingCode/{thingCode}/type/{type}/pageNum/{pageNum}/pageSize/{pageSize}",
+            method = RequestMethod.GET)
+    public ResponseEntity<String> getThingInfoByThingCode(
+            @PathVariable("thingCode") String thingCode, @PathVariable("type") String type,
+            @PathVariable int pageNum, @PathVariable int pageSize) {
+        PageHelpInfo pageHelpInfo = thingService.getThingInfoByThingCode(thingCode, type, pageNum, pageSize);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
+    }
+
 }
