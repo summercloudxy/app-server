@@ -68,4 +68,8 @@ public interface ThingManagementService {
     public PageHelpInfo getMeterInfoByThingTagId(Long id, int pageNum, int pageSize);
 
     public List<PartsInfo> getPartsInfoByThingId(String thingCode);
+
+    public List<Thing> getThingByCodeOrName(String codeOrName, String type);
+
+    public PageHelpInfo getThingInfoByThingCode(String thingCode, String type, int pageNum, int pageSize);
 }
