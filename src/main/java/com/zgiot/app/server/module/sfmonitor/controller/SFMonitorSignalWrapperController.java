@@ -126,12 +126,12 @@ public class SFMonitorSignalWrapperController {
     }
 
     @RequestMapping(value = "/signalWrapper", method = RequestMethod.POST)
-    public ResponseEntity<String> addOrEditSignalWrapper(@RequestBody String bodyStr) {
+    public ResponseEntity<String> addOrEditSignalWrapper(@RequestBody String bodyStr,@RequestHeader String userLoginName) {
         ControllerUtil.validateBodyRequired(bodyStr);
         SignalWrapperReq signalWrapperReq = JSON.parseObject(bodyStr, SignalWrapperReq.class);
         MetricTag metricTag = signalWrapperReq.getMetricTag();
         int zoneId = signalWrapperReq.getZoneId();
-        String editor = signalWrapperReq.getUserName();
+        String editor = userLoginName;
         String name = metricTag.getTagName();
         if (StringUtils.isBlank(name)) {
             return new ResponseEntity<>(ServerResponse.buildOkJson(false), HttpStatus.OK);
@@ -233,7 +233,7 @@ public class SFMonitorSignalWrapperController {
     }
 
     @RequestMapping(value = "/signalWrapper/metric", method = RequestMethod.POST)
-    public ResponseEntity<String> addOrEditMetricToSignalWrapper(@RequestBody String bodyStr) {
+    public ResponseEntity<String> addOrEditMetricToSignalWrapper(@RequestBody String bodyStr,@RequestHeader String userLoginName) {
         ControllerUtil.validateBodyRequired(bodyStr);
         SignalWrapperRelateMetric signalWrapperRelateMetric = JSON.parseObject(bodyStr, SignalWrapperRelateMetric.class);
         String wrapperName = signalWrapperRelateMetric.getWrapperName();
@@ -254,7 +254,7 @@ public class SFMonitorSignalWrapperController {
                     } else {
                         metricTagRelation.setComment(signalWrapperRelateMetric.getComment());
                         metricTagRelation.setCreateDate(new Date());
-                        metricTagRelation.setUserName(signalWrapperRelateMetric.getUserName());
+                        metricTagRelation.setUserName(userLoginName);
                         addOrEditSignalWrapperAndMetric(wrapperId, metricTagRelation);
                     }
                 }
@@ -378,13 +378,13 @@ public class SFMonitorSignalWrapperController {
     }
 
     @RequestMapping(value = "/signalWrapper/style", method = RequestMethod.POST)
-    public ResponseEntity<String> addOrEditSignalWrapperStyle(@RequestBody String bodyStr) {
+    public ResponseEntity<String> addOrEditSignalWrapperStyle(@RequestBody String bodyStr,@RequestHeader String userLoginName) {
         ControllerUtil.validateBodyRequired(bodyStr);
         SignalWrapperStyleReq signalWrapperStyleReq = JSON.parseObject(bodyStr, SignalWrapperStyleReq.class);
         int id = signalWrapperStyleReq.getId();
         String styleName = signalWrapperStyleReq.getStyleName();
         List<String> signalWrapperNames = signalWrapperStyleReq.getSignalWrapperNames();
-        String userName = signalWrapperStyleReq.getUserName();
+        String userName = userLoginName;
         List<String> existStyleNames = new ArrayList<>();
         if (!StringUtils.isBlank(styleName) && (signalWrapperNames != null) && (signalWrapperNames.size() != 0)) {
             String styleCode = sfMonStyleMapper.getCodeByName(styleName);
@@ -513,11 +513,12 @@ public class SFMonitorSignalWrapperController {
     }
 
     @RequestMapping(value = "/equipmentConfig/addEquipment", method = RequestMethod.POST)
-    public ResponseEntity<String> addEquipmentConfig(@RequestBody String bodyStr) {
+    public ResponseEntity<String> addEquipmentConfig(@RequestBody String bodyStr,@RequestHeader String userLoginName) {
         ControllerUtil.validateBodyRequired(bodyStr);
         SFMonEquipMonitorInfo sfMonEquipMonitorInfo = JSON.parseObject(bodyStr, SFMonEquipMonitorInfo.class);
         sfMonEquipMonitorInfo.setConfigProgress(SFMonitorConstant.NOT_CONFIG);
         sfMonEquipMonitorInfo.setCreateDate(new Date());
+        sfMonEquipMonitorInfo.setEditor(userLoginName);
         String thingCode = sfMonEquipMonitorInfo.getThingCode();
         SFMonEquipMonitorInfo equipmentInfo = sfMonEquipMonitorInfoMapper.getEquiupmentInfo(thingCode);
         boolean isExist = false;
@@ -548,10 +549,11 @@ public class SFMonitorSignalWrapperController {
     }
 
     @RequestMapping(value="/equipmentConfig/editEquipmentMonitorInfo",method=RequestMethod.POST)
-    public ResponseEntity<String> editEquipmentMonitorInfo(@RequestBody String bodyStr){
+    public ResponseEntity<String> editEquipmentMonitorInfo(@RequestBody String bodyStr,@RequestHeader String userLoginName){
         ControllerUtil.validateBodyRequired(bodyStr);
         EquipmentRelateToSignalWrapperReq equipmentRelateToSignalWrapperReq = JSON.parseObject(bodyStr,EquipmentRelateToSignalWrapperReq.class);
         if(equipmentRelateToSignalWrapperReq !=  null){
+            equipmentRelateToSignalWrapperReq.setEditor(userLoginName);
             monitorService.editEquipmentMonitorInfo(equipmentRelateToSignalWrapperReq);
         }
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
