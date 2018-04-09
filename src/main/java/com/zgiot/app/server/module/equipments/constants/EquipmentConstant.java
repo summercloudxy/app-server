@@ -106,6 +106,11 @@ public class EquipmentConstant {
     public static final String THING_TYPE1_CODE_CHUTE = "CHUTE";
 
     /**
+     *THING_TYPE1_CODE变压器
+     */
+    public static final String THING_TYPE1_CODE_TRANSFORMER = "TRANSFORMER";
+
+    /**
      *起始设备CODE
      */
     public static final String START_THING_CODE = "start_thing_code";
