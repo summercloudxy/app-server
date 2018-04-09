@@ -30,20 +30,34 @@ public interface ManufacturerService {
 
     /**
      *厂家管理-查询-条件：厂家类型
-     * @param thingType1Code
+     * @param typeCode
      * @param pageNum
      * @param pageSize
      * @return
      */
-    public PageHelpInfo getManufacturerByType(String thingType1Code, int pageNum, int pageSize);
+    public PageHelpInfo getManufacturerByType(String typeCode, int pageNum, int pageSize);
 
     /**
      *厂家管理-查询-条件：厂家类型&&（编码或名称）
-     * @param thingType1Code
+     * @param typeCode
      * @param codeOrName
      * @param pageNum
      * @param pageSize
      * @return
      */
-    public PageHelpInfo getManufacturerByCodeOrName(String thingType1Code,String codeOrName, int pageNum, int pageSize);
+    public PageHelpInfo getManufacturerByCodeOrName(String typeCode,String codeOrName, int pageNum, int pageSize);
+
+    /**
+     * 厂家管理-查询-判断名字是否重复
+     * @param manufacturerName
+     * @return
+     */
+    public boolean isNameRepeat(String manufacturerName);
+
+    /**
+     *厂家管理-获取编码
+     * @param codePrefix
+     * @return
+     */
+    public String getManufacturerCodeByCode(String codePrefix);
 }

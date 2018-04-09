@@ -7,9 +7,9 @@ public class Manufacturer {
     private Long id;
 
     /**
-     * DEVICE设备,METER仪表,PARTS部件,VALVE阀门,PIPE管道,FLASHBOARD闸板,CHUTE溜槽,TRANSFORMER变压器
+     * SB设备,YB仪表,BJ部件,FM阀门,GD管道,ZB闸板,LC溜槽,BYQ变压器
      */
-    private String thingType1Code;
+    private String typeCode;
 
     /**
      * 厂家编号
@@ -54,12 +54,12 @@ public class Manufacturer {
         this.id = id;
     }
 
-    public String getThingType1Code() {
-        return thingType1Code;
+    public String getTypeCode() {
+        return typeCode;
     }
 
-    public void setThingType1Code(String thingType1Code) {
-        this.thingType1Code = thingType1Code;
+    public void setTypeCode(String typeCode) {
+        this.typeCode = typeCode;
     }
 
     public String getManufacturerCode() {

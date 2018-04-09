@@ -88,5 +88,25 @@ public class ManufacturerController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
+    /**
+     * 厂家管理-查询-判断名字是否重复
+     * @param manufacturerName
+     * @return
+     */
+    @RequestMapping(value = "/isNameRepeat/{manufacturerName}", method = RequestMethod.GET)
+    public ResponseEntity<String> isNameRepeat(@PathVariable("manufacturerName") String manufacturerName) {
+        boolean flag = manufacturerService.isNameRepeat(manufacturerName);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(flag), HttpStatus.OK);
+    }
 
+    /**
+     * 厂家管理-获取编码
+     * @param typeCode
+     * @return
+     */
+    @RequestMapping(value = "/getManufacturerCode/{typeCode}", method = RequestMethod.GET)
+    public ResponseEntity<String> getManufacturerCodeByCode(@PathVariable("typeCode") String typeCode) {
+        String manufacturerCode = manufacturerService.getManufacturerCodeByCode(typeCode);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(manufacturerCode), HttpStatus.OK);
+    }
 }
