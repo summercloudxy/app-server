@@ -21,7 +21,7 @@ public interface ThingTagManagementMapper {
             "SELECT id FROM tb_thing_tag " +
             "WHERE parent_id in ( " +
             "SELECT id FROM tb_thing_tag " +
-            "WHERE parent_id = 0)))")
+            "WHERE parent_id = 1)))")
     List<ThingTag> getAllEquipmentType();
 
     /**
@@ -33,6 +33,9 @@ public interface ThingTagManagementMapper {
     List<ThingTag> getThingTagByParentId(@Param("id") Long id);
 
     @Select("SELECT * FROM tb_thing_tag WHERE id = #{id}")
-    ThingTag getThingTagById(Long id);
+    ThingTag getThingTagById(@Param("id") Long id);
+
+    @Select("SELECT * FROM tb_thing_tag WHERE tag_name = #{tagName}")
+    ThingTag getThingTagByTagName(@Param("tagName") String tagName);
 
 }

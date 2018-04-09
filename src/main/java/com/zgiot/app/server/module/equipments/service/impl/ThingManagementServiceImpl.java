@@ -22,6 +22,8 @@ public class ThingManagementServiceImpl implements ThingManagementService {
     @Autowired
     private ThingManagementMapper thingMapper;
     @Autowired
+    private ThingTagManagementMapper thingTagManagementMapper;
+    @Autowired
     private ThingPositionMapper thingPositionMapper;
     @Autowired
     private ThingPropertiesMapper thingPropertiesMapper;
@@ -36,8 +38,9 @@ public class ThingManagementServiceImpl implements ThingManagementService {
      * @return
      */
     public List<String> getThingCodeListByRelThingtagThing(List<RelThingtagThing> relThingtagThingList){
-        List<String> thingCodeList = new ArrayList<>();
+        List<String> thingCodeList = null;
         if (relThingtagThingList != null && relThingtagThingList.size() > 0) {
+            thingCodeList = new ArrayList<>();
             for (int i = 0; i < relThingtagThingList.size(); i++) {
                 thingCodeList.add(relThingtagThingList.get(i).getThingCode());
             }
@@ -47,38 +50,41 @@ public class ThingManagementServiceImpl implements ThingManagementService {
 
     public PageHelpInfo getDeviceInfoByThingCode(List<String> thingCodeList, int pageNum, int pageSize) {
         Page<Object> page = PageHelper.startPage(pageNum, pageSize);
-        List<DeviceInfo> deviceInfoList = thingMapper.getDeviceInfoByThingcode(thingCodeList);
-        List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
-        if (deviceInfoList != null && deviceInfoList.size() > 0) {
-            for (int i = 0; i < deviceInfoList.size(); i++) {
-                for (int j = 0; j < thingPropertiesList.size(); j++) {
-                    if (deviceInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(ENABLE_DATE)) {
-                        deviceInfoList.get(i).setEnableDate(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (deviceInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(DISABLE_DATE)) {
-                        deviceInfoList.get(i).setDisableDate(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (deviceInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(SPECIFICATION)) {
-                        deviceInfoList.get(i).setSpecification(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (deviceInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(POWER_PROPERTIES)) {
-                        deviceInfoList.get(i).setPowerProperties(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (deviceInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(ANGLE)) {
-                        deviceInfoList.get(i).setAngle(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (deviceInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(GRANULARITY)) {
-                        deviceInfoList.get(i).setGranularity(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (deviceInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(IMAGE_NAME)) {
-                        deviceInfoList.get(i).setImageName(thingPropertiesList.get(j).getPropValue());
+        List<DeviceInfo> deviceInfoList = new ArrayList<>();
+        if(thingCodeList != null && thingCodeList.size() > 0){
+            deviceInfoList = thingMapper.getDeviceInfoByThingcode(thingCodeList);
+            List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
+            if (deviceInfoList != null && deviceInfoList.size() > 0) {
+                for (int i = 0; i < deviceInfoList.size(); i++) {
+                    for (int j = 0; j < thingPropertiesList.size(); j++) {
+                        if (deviceInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(ENABLE_DATE)) {
+                            deviceInfoList.get(i).setEnableDate(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (deviceInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(DISABLE_DATE)) {
+                            deviceInfoList.get(i).setDisableDate(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (deviceInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(SPECIFICATION)) {
+                            deviceInfoList.get(i).setSpecification(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (deviceInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(POWER_PROPERTIES)) {
+                            deviceInfoList.get(i).setPowerProperties(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (deviceInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(ANGLE)) {
+                            deviceInfoList.get(i).setAngle(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (deviceInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(GRANULARITY)) {
+                            deviceInfoList.get(i).setGranularity(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (deviceInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(IMAGE_NAME)) {
+                            deviceInfoList.get(i).setImageName(thingPropertiesList.get(j).getPropValue());
+                        }
                     }
                 }
             }
@@ -92,74 +98,77 @@ public class ThingManagementServiceImpl implements ThingManagementService {
 
     public PageHelpInfo getPartsInfoByThingCode(List<String> thingCodeList, int pageNum, int pageSize) {
         Page<Object> page = PageHelper.startPage(pageNum, pageSize);
-        List<PartsInfo> partsInfoList = thingMapper.getPartsInfoByThingcode(thingCodeList);
-        List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
-        if (partsInfoList != null && partsInfoList.size() > 0) {
-            for (int i = 0; i < partsInfoList.size(); i++) {
-                for (int j = 0; j < thingPropertiesList.size(); j++) {
-                    if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(PARENT_THING_CODE)) {
-                        partsInfoList.get(i).setParentThingCode(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(PARENT_THING_NAME)) {
-                        partsInfoList.get(i).setParentThingName(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(ENABLE_DATE)) {
-                        partsInfoList.get(i).setEnableDate(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(DISABLE_DATE)) {
-                        partsInfoList.get(i).setDisableDate(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(SPECIFICATION)) {
-                        partsInfoList.get(i).setSpecification(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(MANUFACTURER)) {
-                        partsInfoList.get(i).setManufacturer(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(THING_TYPE)) {
-                        partsInfoList.get(i).setThingType(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(COMPONENT_TYPE_CODE_RULE)) {
-                        partsInfoList.get(i).setThingTypeName(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(START_TYPE)) {
-                        partsInfoList.get(i).setStartType(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(RATED_POWER)) {
-                        partsInfoList.get(i).setRatedPower(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(VOLTAGE_LEVEL)) {
-                        partsInfoList.get(i).setVoltageLevel(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(EXPLOSION_PROOF)) {
-                        partsInfoList.get(i).setExplosionProof(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(Grade)) {
-                        partsInfoList.get(i).setGrade(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(INSULATION_GRADE)) {
-                        partsInfoList.get(i).setInsulationGrade(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(PROTECTION_GRADE)) {
-                        partsInfoList.get(i).setProtectionGrade(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(RATED_CURRENT)) {
-                        partsInfoList.get(i).setRatedCurrent(thingPropertiesList.get(j).getPropValue());
+        List<PartsInfo> partsInfoList = new ArrayList<>();
+        if(thingCodeList != null && thingCodeList.size() > 0){
+            partsInfoList = thingMapper.getPartsInfoByThingcode(thingCodeList);
+            List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
+            if (partsInfoList != null && partsInfoList.size() > 0) {
+                for (int i = 0; i < partsInfoList.size(); i++) {
+                    for (int j = 0; j < thingPropertiesList.size(); j++) {
+                        if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(PARENT_THING_CODE)) {
+                            partsInfoList.get(i).setParentThingCode(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(PARENT_THING_NAME)) {
+                            partsInfoList.get(i).setParentThingName(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(ENABLE_DATE)) {
+                            partsInfoList.get(i).setEnableDate(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(DISABLE_DATE)) {
+                            partsInfoList.get(i).setDisableDate(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(SPECIFICATION)) {
+                            partsInfoList.get(i).setSpecification(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(MANUFACTURER)) {
+                            partsInfoList.get(i).setManufacturer(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(THING_TYPE)) {
+                            partsInfoList.get(i).setThingType(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(COMPONENT_TYPE_CODE_RULE)) {
+                            partsInfoList.get(i).setThingTypeName(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(START_TYPE)) {
+                            partsInfoList.get(i).setStartType(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(RATED_POWER)) {
+                            partsInfoList.get(i).setRatedPower(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(VOLTAGE_LEVEL)) {
+                            partsInfoList.get(i).setVoltageLevel(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(EXPLOSION_PROOF)) {
+                            partsInfoList.get(i).setExplosionProof(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(Grade)) {
+                            partsInfoList.get(i).setGrade(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(INSULATION_GRADE)) {
+                            partsInfoList.get(i).setInsulationGrade(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(PROTECTION_GRADE)) {
+                            partsInfoList.get(i).setProtectionGrade(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(RATED_CURRENT)) {
+                            partsInfoList.get(i).setRatedCurrent(thingPropertiesList.get(j).getPropValue());
+                        }
                     }
                 }
             }
@@ -197,7 +206,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
      */
     @Override
     public PageHelpInfo getDeviceInfoByThingTagId(Long id, int pageNum, int pageSize) {
-        List<RelThingtagThing> relThingtagThingList = relThingtagThingMapper.getRelThingtagThingByThingTagCode(id);
+        List<RelThingtagThing> relThingtagThingList = relThingtagThingMapper.getRelThingtagThingByThreeLevelId(id);
         List<String> thingCodeList = getThingCodeListByRelThingtagThing(relThingtagThingList);
         PageHelpInfo pageHelpInfo = getDeviceInfoByThingCode(thingCodeList, pageNum, pageSize);
         return pageHelpInfo;
@@ -938,42 +947,45 @@ public class ThingManagementServiceImpl implements ThingManagementService {
 
     private PageHelpInfo getPipeInfoByThingCode(List<String> thingCodeList, int pageNum, int pageSize) {
         Page<Object> page = PageHelper.startPage(pageNum, pageSize);
-        List<PipeInfo> pipeInfoList = thingMapper.getPipeInfoByThingcode(thingCodeList);
-        List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
-        if (pipeInfoList != null && pipeInfoList.size() > 0) {
-            for (int i = 0; i < pipeInfoList.size(); i++) {
-                for (int j = 0; j < thingPropertiesList.size(); j++) {
-                    if (pipeInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(START_THING_NAME)) {
-                        pipeInfoList.get(i).setStartThingName(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (pipeInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(START_THING_CODE)) {
-                        pipeInfoList.get(i).setStartThingCode(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (pipeInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(TERMINAL_THING_NAME)) {
-                        pipeInfoList.get(i).setTerminalThingName(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (pipeInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(TERMINAL_THING_CODE)) {
-                        pipeInfoList.get(i).setTerminalThingCode(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (pipeInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(ENABLE_DATE)) {
-                        pipeInfoList.get(i).setEnableDate(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (pipeInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(DISABLE_DATE)) {
-                        pipeInfoList.get(i).setDisableDate(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (pipeInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(MANUFACTURER)) {
-                        pipeInfoList.get(i).setManufacturer(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (pipeInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(NOMINAL_DIAMETER)) {
-                        pipeInfoList.get(i).setNominalDiameter(thingPropertiesList.get(j).getPropValue());
+        List<PipeInfo> pipeInfoList = new ArrayList<>();
+        if(thingCodeList != null && thingCodeList.size() > 0){
+            pipeInfoList = thingMapper.getPipeInfoByThingcode(thingCodeList);
+            List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
+            if (pipeInfoList != null && pipeInfoList.size() > 0) {
+                for (int i = 0; i < pipeInfoList.size(); i++) {
+                    for (int j = 0; j < thingPropertiesList.size(); j++) {
+                        if (pipeInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(START_THING_NAME)) {
+                            pipeInfoList.get(i).setStartThingName(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (pipeInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(START_THING_CODE)) {
+                            pipeInfoList.get(i).setStartThingCode(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (pipeInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(TERMINAL_THING_NAME)) {
+                            pipeInfoList.get(i).setTerminalThingName(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (pipeInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(TERMINAL_THING_CODE)) {
+                            pipeInfoList.get(i).setTerminalThingCode(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (pipeInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(ENABLE_DATE)) {
+                            pipeInfoList.get(i).setEnableDate(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (pipeInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(DISABLE_DATE)) {
+                            pipeInfoList.get(i).setDisableDate(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (pipeInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(MANUFACTURER)) {
+                            pipeInfoList.get(i).setManufacturer(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (pipeInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(NOMINAL_DIAMETER)) {
+                            pipeInfoList.get(i).setNominalDiameter(thingPropertiesList.get(j).getPropValue());
+                        }
                     }
                 }
             }
@@ -1030,58 +1042,61 @@ public class ThingManagementServiceImpl implements ThingManagementService {
 
     private PageHelpInfo getValveInfoByThingCode(List<String> thingCodeList, int pageNum, int pageSize) {
         Page<Object> page = PageHelper.startPage(pageNum, pageSize);
-        List<ValveInfo> valveInfoList = thingMapper.getValveInfoByThingcode(thingCodeList);
-        List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
-        if (valveInfoList != null && valveInfoList.size() > 0) {
-            for (int i = 0; i < valveInfoList.size(); i++) {
-                for (int j = 0; j < thingPropertiesList.size(); j++) {
-                    if (valveInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(PARENT_THING_CODE)) {
-                        valveInfoList.get(i).setParentThingCode(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (valveInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(PARENT_THING_NAME)) {
-                        valveInfoList.get(i).setParentThingName(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (valveInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(ENABLE_DATE)) {
-                        valveInfoList.get(i).setEnableDate(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (valveInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(DISABLE_DATE)) {
-                        valveInfoList.get(i).setDisableDate(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (valveInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(SUBJECT_TYPE)) {
-                        valveInfoList.get(i).setSubjectType(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (valveInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(VALVE_TYPE)) {
-                        valveInfoList.get(i).setValveType(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (valveInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(MANUFACTURER)) {
-                        valveInfoList.get(i).setManufacturer(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (valveInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(SPECIFICATION)) {
-                        valveInfoList.get(i).setSpecification(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (valveInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(VALVE_EXECUTION_MODE)) {
-                        valveInfoList.get(i).setValveExecutionMode(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (valveInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(VALVE_CONTROL_MODE)) {
-                        valveInfoList.get(i).setValveControlMode(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (valveInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(VALVE_PURPOSE)) {
-                        valveInfoList.get(i).setValvePurpose(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (valveInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(NOMINAL_DIAMETER)) {
-                        valveInfoList.get(i).setNominalDiameter(thingPropertiesList.get(j).getPropValue());
+        List<ValveInfo> valveInfoList = new ArrayList<>();
+        if(thingCodeList != null && thingCodeList.size() > 0){
+            valveInfoList = thingMapper.getValveInfoByThingcode(thingCodeList);
+            List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
+            if (valveInfoList != null && valveInfoList.size() > 0) {
+                for (int i = 0; i < valveInfoList.size(); i++) {
+                    for (int j = 0; j < thingPropertiesList.size(); j++) {
+                        if (valveInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(PARENT_THING_CODE)) {
+                            valveInfoList.get(i).setParentThingCode(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (valveInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(PARENT_THING_NAME)) {
+                            valveInfoList.get(i).setParentThingName(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (valveInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(ENABLE_DATE)) {
+                            valveInfoList.get(i).setEnableDate(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (valveInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(DISABLE_DATE)) {
+                            valveInfoList.get(i).setDisableDate(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (valveInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(SUBJECT_TYPE)) {
+                            valveInfoList.get(i).setSubjectType(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (valveInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(VALVE_TYPE)) {
+                            valveInfoList.get(i).setValveType(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (valveInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(MANUFACTURER)) {
+                            valveInfoList.get(i).setManufacturer(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (valveInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(SPECIFICATION)) {
+                            valveInfoList.get(i).setSpecification(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (valveInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(VALVE_EXECUTION_MODE)) {
+                            valveInfoList.get(i).setValveExecutionMode(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (valveInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(VALVE_CONTROL_MODE)) {
+                            valveInfoList.get(i).setValveControlMode(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (valveInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(VALVE_PURPOSE)) {
+                            valveInfoList.get(i).setValvePurpose(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (valveInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(NOMINAL_DIAMETER)) {
+                            valveInfoList.get(i).setNominalDiameter(thingPropertiesList.get(j).getPropValue());
+                        }
                     }
                 }
             }
@@ -1103,46 +1118,49 @@ public class ThingManagementServiceImpl implements ThingManagementService {
 
     private PageHelpInfo getFlashboardInfoByThingCode(List<String> thingCodeList, int pageNum, int pageSize) {
         Page<Object> page = PageHelper.startPage(pageNum, pageSize);
-        List<FlashboardInfo> flashboardInfoList = thingMapper.getFlashboardInfoByThingcode(thingCodeList);
-        List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
-        if (flashboardInfoList != null && flashboardInfoList.size() > 0) {
-            for (int i = 0; i < flashboardInfoList.size(); i++) {
-                for (int j = 0; j < thingPropertiesList.size(); j++) {
-                    if (flashboardInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(PARENT_THING_CODE)) {
-                        flashboardInfoList.get(i).setParentThingCode(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (flashboardInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(PARENT_THING_NAME)) {
-                        flashboardInfoList.get(i).setParentThingName(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (flashboardInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(ENABLE_DATE)) {
-                        flashboardInfoList.get(i).setEnableDate(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (flashboardInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(DISABLE_DATE)) {
-                        flashboardInfoList.get(i).setDisableDate(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (flashboardInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(SUBJECT_TYPE)) {
-                        flashboardInfoList.get(i).setSubjectType(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (flashboardInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(FLASHBOARD_TYPE)) {
-                        flashboardInfoList.get(i).setFlashboardType(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (flashboardInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(MANUFACTURER)) {
-                        flashboardInfoList.get(i).setManufacturer(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (flashboardInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(FLASHBOARD_EXECUTION_MODE)) {
-                        flashboardInfoList.get(i).setFlashboardExecutionMode(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (flashboardInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(FLASHBOARD_CONTROL_MODE)) {
-                        flashboardInfoList.get(i).setFlashboardControlMode(thingPropertiesList.get(j).getPropValue());
+        List<FlashboardInfo> flashboardInfoList = new ArrayList<>();
+        if(thingCodeList != null && thingCodeList.size() > 0){
+            flashboardInfoList = thingMapper.getFlashboardInfoByThingcode(thingCodeList);
+            List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
+            if (flashboardInfoList != null && flashboardInfoList.size() > 0) {
+                for (int i = 0; i < flashboardInfoList.size(); i++) {
+                    for (int j = 0; j < thingPropertiesList.size(); j++) {
+                        if (flashboardInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(PARENT_THING_CODE)) {
+                            flashboardInfoList.get(i).setParentThingCode(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (flashboardInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(PARENT_THING_NAME)) {
+                            flashboardInfoList.get(i).setParentThingName(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (flashboardInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(ENABLE_DATE)) {
+                            flashboardInfoList.get(i).setEnableDate(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (flashboardInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(DISABLE_DATE)) {
+                            flashboardInfoList.get(i).setDisableDate(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (flashboardInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(SUBJECT_TYPE)) {
+                            flashboardInfoList.get(i).setSubjectType(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (flashboardInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(FLASHBOARD_TYPE)) {
+                            flashboardInfoList.get(i).setFlashboardType(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (flashboardInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(MANUFACTURER)) {
+                            flashboardInfoList.get(i).setManufacturer(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (flashboardInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(FLASHBOARD_EXECUTION_MODE)) {
+                            flashboardInfoList.get(i).setFlashboardExecutionMode(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (flashboardInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(FLASHBOARD_CONTROL_MODE)) {
+                            flashboardInfoList.get(i).setFlashboardControlMode(thingPropertiesList.get(j).getPropValue());
+                        }
                     }
                 }
             }
@@ -1160,6 +1178,10 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         String thingType = meterInfo.getThingType();
         String thingCode = getThingCodeByInfo(parentThingCode, thingType, THING_TYPE1_CODE_METER);
         meterInfo.setThingCode(thingCode);
+
+        // 获取thingtagcode
+        ThingTag thingTag = thingTagManagementMapper.getThingTagByTagName(meterInfo.getThingTagName());
+
         //插入tb_thing表
         Thing thing = new Thing();
         thing.setThingCode(thingCode);
@@ -1177,7 +1199,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         // relThingtagThing
         RelThingtagThing relThingtagThing = new RelThingtagThing();
         relThingtagThing.setThingCode(meterInfo.getThingCode());
-        relThingtagThing.setThingTagCode(meterInfo.getThingTagCode());
+        relThingtagThing.setThingTagCode(thingTag.getCode());
         relThingtagThing.setCreateDate(new Date());
         relThingtagThingMapper.addRelThingtagThing(relThingtagThing);
 
@@ -1220,7 +1242,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         thingPropertiesMapper.addThingProperties(tp);
 
         tp.setPropKey(INSTRUMENT_TYPE);
-        tp.setPropValue(meterInfo.getMeterType());
+        tp.setPropValue(meterInfo.getThingType());
         tp.setPropType(PROP_TYPE_PROP);
         thingPropertiesMapper.addThingProperties(tp);
 
@@ -1271,46 +1293,49 @@ public class ThingManagementServiceImpl implements ThingManagementService {
 
     private PageHelpInfo getMeterInfoByThingCode(List<String> thingCodeList, int pageNum, int pageSize) {
         Page<Object> page = PageHelper.startPage(pageNum, pageSize);
-        List<MeterInfo> meterInfoList = thingMapper.getMeterInfoByThingcode(thingCodeList);
-        List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
-        if (meterInfoList != null && meterInfoList.size() > 0) {
-            for (int i = 0; i < meterInfoList.size(); i++) {
-                for (int j = 0; j < thingPropertiesList.size(); j++) {
-                    if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(PARENT_THING_CODE)) {
-                        meterInfoList.get(i).setParentThingCode(thingPropertiesList.get(j).getPropValue());
-                    }
-                    else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(PARENT_THING_NAME)) {
-                        meterInfoList.get(i).setParentThingName(thingPropertiesList.get(j).getPropValue());
-                    }
-                    else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(ENABLE_DATE)) {
-                        meterInfoList.get(i).setEnableDate(thingPropertiesList.get(j).getPropValue());
-                    }
-                    else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(DISABLE_DATE)) {
-                        meterInfoList.get(i).setDisableDate(thingPropertiesList.get(j).getPropValue());
-                    }
-                    else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(SUBJECT_TYPE)) {
-                        meterInfoList.get(i).setSubjectType(thingPropertiesList.get(j).getPropValue());
-                    }
-                    else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(INSTRUMENT_TYPE)) {
-                        meterInfoList.get(i).setMeterType(thingPropertiesList.get(j).getPropValue());
-                    }
-                    else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(MANUFACTURER)) {
-                        meterInfoList.get(i).setManufacturer(thingPropertiesList.get(j).getPropValue());
-                    }
-                    else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(SPECIFICATION)) {
-                        meterInfoList.get(i).setSpecification(thingPropertiesList.get(j).getPropValue());
-                    }
-                    else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())) {
-                        meterInfoList.get(i).getConfigKeyList().add(thingPropertiesList.get(j).getPropKey());
-                        meterInfoList.get(i).getConfigValueList().add(thingPropertiesList.get(j).getPropValue());
+        List<MeterInfo> meterInfoList = new ArrayList<>();
+        if(thingCodeList != null && thingCodeList.size() > 0){
+            meterInfoList = thingMapper.getMeterInfoByThingcode(thingCodeList);
+            List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
+            if (meterInfoList != null && meterInfoList.size() > 0) {
+                for (int i = 0; i < meterInfoList.size(); i++) {
+                    for (int j = 0; j < thingPropertiesList.size(); j++) {
+                        if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(PARENT_THING_CODE)) {
+                            meterInfoList.get(i).setParentThingCode(thingPropertiesList.get(j).getPropValue());
+                        }
+                        else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(PARENT_THING_NAME)) {
+                            meterInfoList.get(i).setParentThingName(thingPropertiesList.get(j).getPropValue());
+                        }
+                        else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(ENABLE_DATE)) {
+                            meterInfoList.get(i).setEnableDate(thingPropertiesList.get(j).getPropValue());
+                        }
+                        else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(DISABLE_DATE)) {
+                            meterInfoList.get(i).setDisableDate(thingPropertiesList.get(j).getPropValue());
+                        }
+                        else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(SUBJECT_TYPE)) {
+                            meterInfoList.get(i).setSubjectType(thingPropertiesList.get(j).getPropValue());
+                        }
+                        else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(INSTRUMENT_TYPE)) {
+                            meterInfoList.get(i).setThingType(thingPropertiesList.get(j).getPropValue());
+                        }
+                        else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(MANUFACTURER)) {
+                            meterInfoList.get(i).setManufacturer(thingPropertiesList.get(j).getPropValue());
+                        }
+                        else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(SPECIFICATION)) {
+                            meterInfoList.get(i).setSpecification(thingPropertiesList.get(j).getPropValue());
+                        }
+                        else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())) {
+                            meterInfoList.get(i).getConfigKeyList().add(thingPropertiesList.get(j).getPropKey());
+                            meterInfoList.get(i).getConfigValueList().add(thingPropertiesList.get(j).getPropValue());
+                        }
                     }
                 }
             }
