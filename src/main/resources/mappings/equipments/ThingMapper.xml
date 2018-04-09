@@ -18,15 +18,17 @@
     </resultMap>
     <select id="getDeviceInfoByThingcode" resultMap="deviceInfo"
             resultType="com.zgiot.app.server.module.equipments.controller.DeviceInfo">
-        SELECT t1.id,t1.thing_code,t1.thing_name,t3.system_id,t2.system_name,t4.create_date,t5.tag_name,
-          t7.building_name,t6.building_id,t6.floor,t6.location_x,t6.location_y,t6.location_area
-        FROM `tb_thing` t1,tb_system t2,rel_thing_system t3,rel_thingtag_thing t4,tb_thing_tag t5,
-          tb_thing_position t6,tb_building t7
-        WHERE 1
-        AND t1.thing_code = t3.thing_code AND t2.id = t3.system_id
-        AND t4.thing_code = t1.thing_code AND t5.code = t4.thing_tag_code
-        AND t1.thing_code = t6.thing_code AND t6.building_id = t7.id
-        AND t1.thing_code in
+        SELECT t1.id,t1.thing_code,t1.thing_name,t2.create_date,t3.tag_name,
+        t4.building_id,t4.floor,t4.location_x,t4.location_y,t4.location_area,
+        t5.building_name,t6.system_id,t7.system_name
+        FROM `tb_thing` t1
+        LEFT JOIN rel_thingtag_thing t2 ON t1.thing_code = t2.thing_code
+        LEFT JOIN tb_thing_tag t3 ON t2.thing_code = t3.`code`
+        LEFT JOIN tb_thing_position t4 ON t1.thing_code = t4.thing_code
+        LEFT JOIN tb_building t5 ON t4.building_id = t5.id
+        LEFT JOIN rel_thing_system t6 ON t1.thing_code = t6.thing_code
+        LEFT JOIN tb_system t7 ON t6.system_id = t7.id
+        WHERE t1.thing_code in
         <foreach collection="thingCodeList" item="thingCode" index="index"
                  open="(" close=")" separator=",">
             #{thingCode}

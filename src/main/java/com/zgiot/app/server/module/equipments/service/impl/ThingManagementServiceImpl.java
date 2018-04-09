@@ -249,8 +249,16 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         thingPosition.setBuildingId(Long.parseLong(deviceInfo.getBuildingId()));
         thingPosition.setFloor(Integer.parseInt(deviceInfo.getFloor()));
         thingPosition.setLocationArea(deviceInfo.getLocationArea());
-        thingPosition.setLocationX(Double.parseDouble(deviceInfo.getLocationX()));
-        thingPosition.setLocationY(Double.parseDouble(deviceInfo.getLocationY()));
+        Double locationX = null;
+        if(deviceInfo.getLocationX() != null && !"".equals(deviceInfo.getLocationX())){
+            locationX = Double.parseDouble(deviceInfo.getLocationX());
+        }
+        thingPosition.setLocationX(locationX);
+        Double locationY = null;
+        if(deviceInfo.getLocationY() != null && !"".equals(deviceInfo.getLocationY())){
+            locationY = Double.parseDouble(deviceInfo.getLocationY());
+        }
+        thingPosition.setLocationY(locationY);
         thingPositionMapper.addThingPosition(thingPosition);
 
         // relThingtagThing
