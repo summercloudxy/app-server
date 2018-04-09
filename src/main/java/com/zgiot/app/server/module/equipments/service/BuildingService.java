@@ -52,9 +52,8 @@ public interface BuildingService {
     public PageHelpInfo getBuildingByBuildingName(int pageNum,int pageSize,String buildingName);
 
     /**
-     * 生产车间-根据区域id获取车间列表
-     * @param id
+     * getAllBuilding
      * @return
      */
-    public List<Building> getBuildingByAreaId(Long id);
+    public List<Building> getAllBuilding();
 }

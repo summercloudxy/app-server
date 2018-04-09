@@ -628,13 +628,12 @@ public class EquipmentManagementController {
     }
 
     /**
-     * 根据地区id获取车间信息
-     * @param id
+     * 获取所有车间信息
      * @return
      */
-    @RequestMapping(value = "/building/getBuildingByAreaId/{id}", method = RequestMethod.GET)
-    public ResponseEntity<String> getBuildingByAreaId(@PathVariable("id") Long id){
-        List<Building> buildingList = buildingService.getBuildingByAreaId(id);
+    @RequestMapping(value = "/building/getAllBuilding", method = RequestMethod.GET)
+    public ResponseEntity<String> getBuildingByAreaId(){
+        List<Building> buildingList = buildingService.getAllBuilding();
         return new ResponseEntity<>(ServerResponse.buildOkJson(buildingList), HttpStatus.OK);
     }
 

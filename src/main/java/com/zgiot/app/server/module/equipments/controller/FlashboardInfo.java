@@ -66,6 +66,11 @@ public class FlashboardInfo {
     private Long buildingId;
 
     /**
+     * 车间名称
+     */
+    private String buildingName;
+
+    /**
      *楼层
      */
     private Integer floor;
@@ -79,11 +84,6 @@ public class FlashboardInfo {
      *控制方式
      */
     private String flashboardControlMode;
-
-    /**
-     *类型名称
-     */
-    private String thingTypeName;
 
     /**
      *类型简称
@@ -215,14 +215,6 @@ public class FlashboardInfo {
         this.flashboardControlMode = flashboardControlMode;
     }
 
-    public String getThingTypeName() {
-        return thingTypeName;
-    }
-
-    public void setThingTypeName(String thingTypeName) {
-        this.thingTypeName = thingTypeName;
-    }
-
     public String getThingType() {
         return thingType;
     }
@@ -237,5 +229,13 @@ public class FlashboardInfo {
 
     public void setThingTagCode(String thingTagCode) {
         this.thingTagCode = thingTagCode;
+    }
+
+    public String getBuildingName() {
+        return buildingName;
+    }
+
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
     }
 }

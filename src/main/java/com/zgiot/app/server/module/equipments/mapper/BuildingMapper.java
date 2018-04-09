@@ -28,7 +28,6 @@ public interface BuildingMapper {
             "WHERE t.building_name LIKE #{buildingName} ORDER BY t.building_name")
     List<Building> getBuildingByBuildingName(@Param("buildingName") String buildingName);
 
-    @Select("SELECT t1.* FROM tb_building t1,tb_thing_position t2 " +
-            "WHERE t1.id = t2.building_id AND t2.location_area = #{id}")
-    List<Building> getBuildingByAreaId(@Param("id") Long id);
+    @Select("SELECT * FROM tb_building")
+    List<Building> getAllBuilding();
 }

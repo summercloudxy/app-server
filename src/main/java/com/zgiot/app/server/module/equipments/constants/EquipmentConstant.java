@@ -238,13 +238,18 @@ public class EquipmentConstant {
     public static final String RATED_CURRENT = "RATED_CURRENT";
 
     /**
-     * 更新时间
-     */
-    public static final String UPDATE_TIME = "UPDATE_TIME";
-
-    /**
      * 部件类型
      */
     public static final String COMPONENT_TYPE_CODE_RULE = "COMPONENT_TYPE_CODE_RULE";
+
+    /**
+     * 类型编号
+     */
+    public static final String THING_TYPE = "THING_TYPE";
+
+    /**
+     * 仪表类型
+     */
+    public static final String INSTRUMENT_TYPE = "INSTRUMENT_TYPE";
 
 }

@@ -23,7 +23,7 @@ public class PartsInfo {
     private String insulationGrade;// 绝缘等级
     private String protectionGrade;// 防护等级
     private String ratedCurrent;// 额定电流
-    private Date updateTime;// 更新时间
+    private Date updateDate;// 更新时间
     private String thingTagCode;// 菜单id
 
     public Long getId() {
@@ -72,6 +72,14 @@ public class PartsInfo {
 
     public void setThingName(String thingName) {
         this.thingName = thingName;
+    }
+
+    public String getThingCode() {
+        return thingCode;
+    }
+
+    public void setThingCode(String thingCode) {
+        this.thingCode = thingCode;
     }
 
     public String getSpecification() {
@@ -170,12 +178,12 @@ public class PartsInfo {
         this.ratedCurrent = ratedCurrent;
     }
 
-    public Date getUpdateTime() {
-        return updateTime;
+    public Date getUpdateDate() {
+        return updateDate;
     }
 
-    public void setUpdateTime(Date updateTime) {
-        this.updateTime = updateTime;
+    public void setUpdateDate(Date updateDate) {
+        this.updateDate = updateDate;
     }
 
     public String getThingTagCode() {
@@ -184,13 +192,5 @@ public class PartsInfo {
 
     public void setThingTagCode(String thingTagCode) {
         this.thingTagCode = thingTagCode;
-    }
-
-    public String getThingCode() {
-        return thingCode;
-    }
-
-    public void setThingCode(String thingCode) {
-        this.thingCode = thingCode;
     }
 }

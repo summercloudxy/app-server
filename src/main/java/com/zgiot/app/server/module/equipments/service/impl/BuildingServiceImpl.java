@@ -61,7 +61,7 @@ public class BuildingServiceImpl implements BuildingService {
     }
 
     @Override
-    public List<Building> getBuildingByAreaId(Long id) {
-        return buildingMapper.getBuildingByAreaId(id);
+    public List<Building> getAllBuilding() {
+        return buildingMapper.getAllBuilding();
     }
 }
