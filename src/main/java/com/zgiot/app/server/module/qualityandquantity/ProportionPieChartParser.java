@@ -9,6 +9,8 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.Optional;
 
 @Component
@@ -17,6 +19,7 @@ public class ProportionPieChartParser implements CardParser {
     private DataService dataService;
     private String parserName = "ProportionPieChartParser";
     private static final Double INVALID_VALUE = 0.0;
+    private static final DecimalFormat df = new DecimalFormat("######0.00");
 
     @Override
     public String getParserName() {
@@ -86,11 +89,13 @@ public class ProportionPieChartParser implements CardParser {
             double partOneValue = Double.parseDouble(partOneData.getValue());
             double partTwoValue = Double.parseDouble(partTwoData.getValue());
             if (partOneValue<partTwoValue){
-                double ratio = partTwoValue/partOneValue;
+                BigDecimal bigDecimal = BigDecimal.valueOf(partTwoValue/partOneValue);
+                double ratio = bigDecimal.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue();
                 proportionPieChartData.setRatioOne(1);
                 proportionPieChartData.setRatioTwo(ratio);
             }else {
-                double ratio = partOneValue/partTwoValue;
+                BigDecimal bigDecimal = BigDecimal.valueOf(partOneValue/partTwoValue);
+                double ratio = bigDecimal.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue();
                 proportionPieChartData.setRatioTwo(1);
                 proportionPieChartData.setRatioOne(ratio);
             }
