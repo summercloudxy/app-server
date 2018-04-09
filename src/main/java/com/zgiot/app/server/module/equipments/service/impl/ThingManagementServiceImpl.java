@@ -122,6 +122,10 @@ public class ThingManagementServiceImpl implements ThingManagementService {
                         partsInfoList.get(i).setManufacturer(thingPropertiesList.get(j).getPropValue());
                     }
                     if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                            && thingPropertiesList.get(j).getPropKey().equals(THING_TYPE)) {
+                        partsInfoList.get(i).setThingType(thingPropertiesList.get(j).getPropValue());
+                    }
+                    if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
                             && thingPropertiesList.get(j).getPropKey().equals(COMPONENT_TYPE_CODE_RULE)) {
                         partsInfoList.get(i).setThingTypeName(thingPropertiesList.get(j).getPropValue());
                     }
@@ -193,7 +197,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
      */
     @Override
     public PageHelpInfo getDeviceInfoByThingTagId(Long id, int pageNum, int pageSize) {
-        List<RelThingtagThing> relThingtagThingList = relThingtagThingMapper.getRelThingtagThingByThreeLevelId(id);
+        List<RelThingtagThing> relThingtagThingList = relThingtagThingMapper.getRelThingtagThingByThingTagCode(id);
         List<String> thingCodeList = getThingCodeListByRelThingtagThing(relThingtagThingList);
         PageHelpInfo pageHelpInfo = getDeviceInfoByThingCode(thingCodeList, pageNum, pageSize);
         return pageHelpInfo;
@@ -451,6 +455,11 @@ public class ThingManagementServiceImpl implements ThingManagementService {
 
         tp.setPropKey(EquipmentConstant.MANUFACTURER);
         tp.setPropValue(partsInfo.getManufacturer());
+        tp.setPropType(EquipmentConstant.PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp);
+
+        tp.setPropKey(EquipmentConstant.THING_TYPE);
+        tp.setPropValue(partsInfo.getThingType());
         tp.setPropType(EquipmentConstant.PROP_TYPE_PROP);
         thingPropertiesMapper.addThingProperties(tp);
 
@@ -1202,6 +1211,11 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         tp.setPropType(PROP_TYPE_PROP);
         thingPropertiesMapper.addThingProperties(tp);
 
+        tp.setPropKey(INSTRUMENT_TYPE);
+        tp.setPropValue(meterInfo.getMeterType());
+        tp.setPropType(PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp);
+
         List<String> configKeyList = meterInfo.getConfigKeyList();
         List<String> configValueList = meterInfo.getConfigValueList();
         if (configKeyList != null && configKeyList.size() > 0) {
@@ -1233,7 +1247,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
 
     @Override
     public PageHelpInfo getAllMeterInfo(Long id, int pageNum, int pageSize) {
-        List<RelThingtagThing> relThingtagThingList = relThingtagThingMapper.getRelThingtagThingByTwoLevelId(id);
+        List<RelThingtagThing> relThingtagThingList = relThingtagThingMapper.getRelThingtagThingByThreeLevelId(id);
         List<String> thingCodeList = getThingCodeListByRelThingtagThing(relThingtagThingList);
         PageHelpInfo pageHelpInfo = getMeterInfoByThingCode(thingCodeList, pageNum, pageSize);
         return pageHelpInfo;
@@ -1241,7 +1255,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
 
     @Override
     public PageHelpInfo getMeterInfoByThingTagId(Long id, int pageNum, int pageSize) {
-        List<RelThingtagThing> relThingtagThingList = relThingtagThingMapper.getRelThingtagThingByThreeLevelId(id);
+        List<RelThingtagThing> relThingtagThingList = relThingtagThingMapper.getRelThingtagThingByThingTagCode(id);
         List<String> thingCodeList = getThingCodeListByRelThingtagThing(relThingtagThingList);
         PageHelpInfo pageHelpInfo = getMeterInfoByThingCode(thingCodeList, pageNum, pageSize);
         return pageHelpInfo;
@@ -1258,29 +1272,37 @@ public class ThingManagementServiceImpl implements ThingManagementService {
                             && thingPropertiesList.get(j).getPropKey().equals(PARENT_THING_CODE)) {
                         meterInfoList.get(i).setParentThingCode(thingPropertiesList.get(j).getPropValue());
                     }
-                    if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                    else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
                             && thingPropertiesList.get(j).getPropKey().equals(PARENT_THING_NAME)) {
                         meterInfoList.get(i).setParentThingName(thingPropertiesList.get(j).getPropValue());
                     }
-                    if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                    else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
                             && thingPropertiesList.get(j).getPropKey().equals(ENABLE_DATE)) {
                         meterInfoList.get(i).setEnableDate(thingPropertiesList.get(j).getPropValue());
                     }
-                    if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                    else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
                             && thingPropertiesList.get(j).getPropKey().equals(DISABLE_DATE)) {
                         meterInfoList.get(i).setDisableDate(thingPropertiesList.get(j).getPropValue());
                     }
-                    if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                    else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
                             && thingPropertiesList.get(j).getPropKey().equals(SUBJECT_TYPE)) {
                         meterInfoList.get(i).setSubjectType(thingPropertiesList.get(j).getPropValue());
                     }
-                    if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                    else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
                             && thingPropertiesList.get(j).getPropKey().equals(INSTRUMENT_TYPE)) {
                         meterInfoList.get(i).setMeterType(thingPropertiesList.get(j).getPropValue());
                     }
-                    if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                    else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
                             && thingPropertiesList.get(j).getPropKey().equals(MANUFACTURER)) {
                         meterInfoList.get(i).setManufacturer(thingPropertiesList.get(j).getPropValue());
+                    }
+                    else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                            && thingPropertiesList.get(j).getPropKey().equals(SPECIFICATION)) {
+                        meterInfoList.get(i).setSpecification(thingPropertiesList.get(j).getPropValue());
+                    }
+                    else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())) {
+                        meterInfoList.get(i).getConfigKeyList().add(thingPropertiesList.get(j).getPropKey());
+                        meterInfoList.get(i).getConfigValueList().add(thingPropertiesList.get(j).getPropValue());
                     }
                 }
             }

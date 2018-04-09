@@ -1,5 +1,6 @@
 package com.zgiot.app.server.module.equipments.controller;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -63,6 +64,11 @@ public class MeterInfo {
     private String buildingId;
 
     /**
+     * 车间名称
+     */
+    private String buildingName;
+
+    /**
      * 楼层
      */
     private String floor;
@@ -90,12 +96,12 @@ public class MeterInfo {
     /**
      * 参数名集合
      */
-    private List<String> configKeyList;
+    private List<String> configKeyList = new ArrayList<>();
 
     /**
      * 参数值集合
      */
-    private List<String> configValueList;
+    private List<String> configValueList = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -247,5 +253,13 @@ public class MeterInfo {
 
     public void setConfigValueList(List<String> configValueList) {
         this.configValueList = configValueList;
+    }
+
+    public String getBuildingName() {
+        return buildingName;
+    }
+
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
     }
 }
