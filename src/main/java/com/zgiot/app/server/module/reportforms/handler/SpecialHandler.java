@@ -29,7 +29,6 @@ public class SpecialHandler implements ReportFormsHandler {
     private CommonHandler commonHandler;
     private Set<String> specialSample = new HashSet<>();
     private static final String SPECIAL_THING_CODE = "703";
-    public static final String SPECIAL_TARGET = "703生产洗混煤";
     private static final String SOURCE_THING_CODE1 = "1552";
     private static final String SOURCE_THING_CODE2 = "2552";
     private static final Integer VALID_INTERVAL = 60 * 60 * 1000;

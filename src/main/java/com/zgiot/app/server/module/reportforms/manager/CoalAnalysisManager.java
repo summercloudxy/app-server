@@ -30,7 +30,7 @@ public class CoalAnalysisManager implements ReportFormsManager {
 
     @Override
     public Integer getExistRecordId(ReportFormsRecord record) {
-            return coalAnalysisMapper.getExistRecordId((CoalAnalysisRecord) record);
+        return coalAnalysisMapper.getExistRecordId((CoalAnalysisRecord) record);
     }
 
     @Override

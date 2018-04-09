@@ -28,10 +28,21 @@ public class DoubleBunkerCardParser implements CardParser {
         MetricDataValue outerValue = dataManager.getValueWithRule(biaxialCircularDiagramParam.getThingCode(), biaxialCircularDiagramParam.getOuterCurveMetricCode());
         MetricDataValue innerValue = dataManager.getValueWithRule(biaxialCircularDiagramParam.getThingCode(), biaxialCircularDiagramParam.getInnerCurveMetricCode());
         MetricDataValue extraValue = dataManager.getValueWithRule(biaxialCircularDiagramParam.getThingCode(), biaxialCircularDiagramParam.getExtraMetricCode());
+        formatValue(extraValue);
         biaxialCircularDiagramData.setValueThree(extraValue);
         biaxialCircularDiagramData.setValueTwo(innerValue);
         biaxialCircularDiagramData.setValueOne(outerValue);
         return biaxialCircularDiagramData;
+    }
+
+    private void formatValue(MetricDataValue extraValue) {
+        String value = extraValue.getValue();
+        if (value != null) {
+            double doubleValue = Double.parseDouble(value);
+            long longValue = Math.round(doubleValue);
+            String formatValue = String.valueOf(longValue);
+            extraValue.setValue(formatValue);
+        }
     }
 
     @Override
