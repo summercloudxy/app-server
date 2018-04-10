@@ -7,7 +7,7 @@ public class FindSignalWrapperRes {
     private String tagName;
     private String metricName;
     private String editor;
-    private Date createDate;
+    private Date createDate = new Date();
     private String comment;
 
     public int getId() {
