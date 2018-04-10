@@ -30,8 +30,8 @@ public class ProportionPieChartParser implements CardParser {
     public ProportionPieChartData parse(String paramValueJson) {
         ProportionPieChartData proportionPieChartData = new ProportionPieChartData();
         ProportionPieChartParam param = JSON.parseObject(paramValueJson, ProportionPieChartParam.class);
-        MetricDataValue partOneCoalValue = getCoalValue(param.getThingCode(),param.getPartOneThingMetricCode(),param.getPartOneCoalMetricCode());
-        MetricDataValue partTwoCoalValue = getCoalValue(param.getThingCode(),param.getPartTwoThingMetricCode(),param.getPartTwoCoalMetricCode());
+        MetricDataValue partOneCoalValue = getCoalValue(param.getThingCode(), param.getPartOneThingMetricCode(), param.getPartOneCoalMetricCode());
+        MetricDataValue partTwoCoalValue = getCoalValue(param.getThingCode(), param.getPartTwoThingMetricCode(), param.getPartTwoCoalMetricCode());
         proportionPieChartData.setTitle(param.getTitle());
         proportionPieChartData.setRatioThingCode(param.getThingCode());
         proportionPieChartData.setRatioMetricCode(param.getRatioMetricCode());
@@ -39,22 +39,21 @@ public class ProportionPieChartParser implements CardParser {
             proportionPieChartData.setPartOneThingCode(partOneCoalValue.getThingCode());
             proportionPieChartData.setPartOneValue(partOneCoalValue.getValue());
         }
-        if (partTwoCoalValue != null){
+        if (partTwoCoalValue != null) {
             proportionPieChartData.setPartTwoThingCode(partTwoCoalValue.getThingCode());
             proportionPieChartData.setPartTwoValue(partTwoCoalValue.getValue());
         }
-        countRatio(proportionPieChartData,partOneCoalValue,partTwoCoalValue);
+        countRatio(proportionPieChartData, partOneCoalValue, partTwoCoalValue);
         return proportionPieChartData;
 
     }
 
     /**
-     *
      * @param thingCode
      * @param thingMetricCode
      * @return
      */
-    private MetricDataValue getCoalValue(String thingCode, String thingMetricCode,String coalMetricCode) {
+    private MetricDataValue getCoalValue(String thingCode, String thingMetricCode, String coalMetricCode) {
         MetricDataValue metricDataValue = null;
         //根据该thing、metric查到的值是一个设备号
         Optional<DataModelWrapper> coalThingCodeData = dataService.getData(thingCode, thingMetricCode);
@@ -65,7 +64,7 @@ public class ProportionPieChartParser implements CardParser {
             if (coalData.isPresent()) {
                 String coalValueStr = coalData.get().getValue();
                 if (StringUtils.isNotEmpty(coalValueStr)) {
-                    if (Double.valueOf(coalValueStr)<INVALID_VALUE){
+                    if (Double.valueOf(coalValueStr) < INVALID_VALUE) {
                         return null;
                     }
                     metricDataValue = new MetricDataValue();
@@ -77,25 +76,25 @@ public class ProportionPieChartParser implements CardParser {
         return metricDataValue;
     }
 
-    private void countRatio(ProportionPieChartData proportionPieChartData,MetricDataValue partOneData,MetricDataValue partTwoData){
-        if (partOneData == null && partTwoData == null){
+    private void countRatio(ProportionPieChartData proportionPieChartData, MetricDataValue partOneData, MetricDataValue partTwoData) {
+        if (partOneData == null && partTwoData == null || INVALID_VALUE.equals(partOneData) && INVALID_VALUE.equals(partTwoData)) {
             return;
         }
-        if (partOneData == null||Double.parseDouble(partOneData.getValue())<0){
+        if (partOneData == null || Double.parseDouble(partOneData.getValue()) <= 0) {
             proportionPieChartData.setRatioTwo(1);
-        }else if (partTwoData == null||Double.parseDouble(partTwoData.getValue())<0){
+        } else if (partTwoData == null || Double.parseDouble(partTwoData.getValue()) <= 0) {
             proportionPieChartData.setRatioOne(1);
-        }else {
+        } else {
             double partOneValue = Double.parseDouble(partOneData.getValue());
             double partTwoValue = Double.parseDouble(partTwoData.getValue());
-            if (partOneValue<partTwoValue){
-                BigDecimal bigDecimal = BigDecimal.valueOf(partTwoValue/partOneValue);
-                double ratio = bigDecimal.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue();
+            if (partOneValue < partTwoValue) {
+                BigDecimal bigDecimal = BigDecimal.valueOf(partTwoValue / partOneValue);
+                double ratio = bigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
                 proportionPieChartData.setRatioOne(1);
                 proportionPieChartData.setRatioTwo(ratio);
-            }else {
-                BigDecimal bigDecimal = BigDecimal.valueOf(partOneValue/partTwoValue);
-                double ratio = bigDecimal.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue();
+            } else {
+                BigDecimal bigDecimal = BigDecimal.valueOf(partOneValue / partTwoValue);
+                double ratio = bigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
                 proportionPieChartData.setRatioTwo(1);
                 proportionPieChartData.setRatioOne(ratio);
             }
