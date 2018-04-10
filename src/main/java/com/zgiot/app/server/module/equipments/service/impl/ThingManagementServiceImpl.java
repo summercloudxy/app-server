@@ -1246,12 +1246,11 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         tp.setPropType(PROP_TYPE_PROP);
         thingPropertiesMapper.addThingProperties(tp);
 
-        List<String> configKeyList = meterInfo.getConfigKeyList();
-        List<String> configValueList = meterInfo.getConfigValueList();
-        if (configKeyList != null && configKeyList.size() > 0) {
-            for (int i = 0; i < configKeyList.size(); i++) {
-                tp.setPropKey(configKeyList.get(i));
-                tp.setPropValue(configValueList.get(i));
+        List<ConfigInfo> configList = meterInfo.getConfigList();
+        if (configList != null && configList.size() > 0) {
+            for (int i = 0; i < configList.size(); i++) {
+                tp.setPropKey(configList.get(i).getKey());
+                tp.setPropValue(configList.get(i).getValue());
                 tp.setPropType(PROP_TYPE_PROP);
                 thingPropertiesMapper.addThingProperties(tp);
             }
@@ -1333,8 +1332,10 @@ public class ThingManagementServiceImpl implements ThingManagementService {
                             meterInfoList.get(i).setSpecification(thingPropertiesList.get(j).getPropValue());
                         }
                         else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())) {
-                            meterInfoList.get(i).getConfigKeyList().add(thingPropertiesList.get(j).getPropKey());
-                            meterInfoList.get(i).getConfigValueList().add(thingPropertiesList.get(j).getPropValue());
+                            ConfigInfo configInfo = new ConfigInfo();
+                            configInfo.setKey(thingPropertiesList.get(j).getPropKey());
+                            configInfo.setValue(thingPropertiesList.get(j).getPropValue());
+                            meterInfoList.get(i).getConfigList().add(configInfo);
                         }
                     }
                 }

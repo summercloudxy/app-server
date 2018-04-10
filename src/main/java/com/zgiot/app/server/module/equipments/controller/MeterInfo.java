@@ -94,14 +94,9 @@ public class MeterInfo {
     private Date updateDate;
 
     /**
-     * 参数名集合
+     * 参数集合
      */
-    private List<String> configKeyList = new ArrayList<>();
-
-    /**
-     * 参数值集合
-     */
-    private List<String> configValueList = new ArrayList<>();
+    private List<ConfigInfo> configList = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -199,6 +194,14 @@ public class MeterInfo {
         this.buildingId = buildingId;
     }
 
+    public String getBuildingName() {
+        return buildingName;
+    }
+
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
+    }
+
     public String getFloor() {
         return floor;
     }
@@ -239,27 +242,11 @@ public class MeterInfo {
         this.updateDate = updateDate;
     }
 
-    public List<String> getConfigKeyList() {
-        return configKeyList;
+    public List<ConfigInfo> getConfigList() {
+        return configList;
     }
 
-    public void setConfigKeyList(List<String> configKeyList) {
-        this.configKeyList = configKeyList;
-    }
-
-    public List<String> getConfigValueList() {
-        return configValueList;
-    }
-
-    public void setConfigValueList(List<String> configValueList) {
-        this.configValueList = configValueList;
-    }
-
-    public String getBuildingName() {
-        return buildingName;
-    }
-
-    public void setBuildingName(String buildingName) {
-        this.buildingName = buildingName;
+    public void setConfigList(List<ConfigInfo> configList) {
+        this.configList = configList;
     }
 }
