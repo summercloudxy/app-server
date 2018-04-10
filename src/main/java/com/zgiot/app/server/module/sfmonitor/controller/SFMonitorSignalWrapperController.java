@@ -414,7 +414,7 @@ public class SFMonitorSignalWrapperController {
     private String addOrEditSignalWrapperStyle(int wrapperAndStyleRelId, RelSFMonMetricTagStyle relSFMonMetricTagStyle) {
         String code = null;
         if (wrapperAndStyleRelId == 0) {//add
-            String wrapperCode = relSFMonMetricTagStyleMapper.getWrapperCode(relSFMonMetricTagStyle.getMetricTagCode());
+            String wrapperCode = relSFMonMetricTagStyleMapper.getWrapperCode(relSFMonMetricTagStyle.getMetricTagCode(),relSFMonMetricTagStyle.getStyleCode());
             if(StringUtils.isBlank(wrapperCode)){
                 relSFMonMetricTagStyleMapper.addStyle(relSFMonMetricTagStyle);
             }else{
