@@ -76,6 +76,11 @@ public class ValveInfo {
     private Integer floor;
 
     /**
+     * 最大楼层
+     */
+    private Integer maxFloor;
+
+    /**
      *执行方式
      */
     private String valveExecutionMode;
@@ -275,5 +280,13 @@ public class ValveInfo {
 
     public void setBuildingName(String buildingName) {
         this.buildingName = buildingName;
+    }
+
+    public Integer getMaxFloor() {
+        return maxFloor;
+    }
+
+    public void setMaxFloor(Integer maxFloor) {
+        this.maxFloor = maxFloor;
     }
 }

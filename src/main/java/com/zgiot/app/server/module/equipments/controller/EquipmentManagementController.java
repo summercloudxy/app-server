@@ -642,9 +642,9 @@ public class EquipmentManagementController {
      * @param thingCode
      * @return
      */
-    @RequestMapping(value = "/thing/getPartsInfoByThingCode", method = RequestMethod.GET)
-    public ResponseEntity<String> getPartsInfoByThingId(@PathVariable("thingCode") String thingCode){
-        List<PartsInfo> partsInfoList = thingService.getPartsInfoByThingId(thingCode);
+    @RequestMapping(value = "/thing/getPartsInfoByThingCode/{thingCode}", method = RequestMethod.GET)
+    public ResponseEntity<String> getPartsInfoByThingCode(@PathVariable("thingCode") String thingCode){
+        List<PartsInfo> partsInfoList = thingService.getPartsInfoByThingCode(thingCode);
         return new ResponseEntity<>(ServerResponse.buildOkJson(partsInfoList), HttpStatus.OK);
     }
 
@@ -672,6 +672,14 @@ public class EquipmentManagementController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(thingList), HttpStatus.OK);
     }
 
+    /**
+     * 根据设备编号和类型获取设备信息列表(列表搜索用)
+     * @param thingCode
+     * @param type
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
     @RequestMapping(value = "/thing/thingCode/{thingCode}/type/{type}/pageNum/{pageNum}/pageSize/{pageSize}",
             method = RequestMethod.GET)
     public ResponseEntity<String> getThingInfoByThingCode(

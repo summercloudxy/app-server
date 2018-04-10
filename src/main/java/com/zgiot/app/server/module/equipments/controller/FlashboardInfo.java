@@ -76,6 +76,11 @@ public class FlashboardInfo {
     private Integer floor;
 
     /**
+     * 最大楼层
+     */
+    private Integer maxFloor;
+
+    /**
      *执行方式
      */
     private String flashboardExecutionMode;
@@ -237,5 +242,13 @@ public class FlashboardInfo {
 
     public void setBuildingName(String buildingName) {
         this.buildingName = buildingName;
+    }
+
+    public Integer getMaxFloor() {
+        return maxFloor;
+    }
+
+    public void setMaxFloor(Integer maxFloor) {
+        this.maxFloor = maxFloor;
     }
 }

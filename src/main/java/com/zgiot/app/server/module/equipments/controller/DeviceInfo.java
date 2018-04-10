@@ -17,12 +17,13 @@ public class DeviceInfo {
     private String enableDate;// 投用日期
     private String disableDate;// 停用日期
     private String powerProperties;// 动力属性
-    private String locationArea;// 所处位置名称
+    private Integer locationArea;// 所处位置id
     private String locationX;// 位置x坐标
     private String locationY;// 位置y坐标
-    private String buildingId;// 车间id
+    private Integer buildingId;// 车间id
     private String buildingName;// 车间名称
-    private String floor;// 楼层
+    private Integer floor;// 楼层
+    private Integer maxFloor;// 最大楼层
     private String angle;// 角度
     private String granularity;// 给料粒度
     private String imageName;// 图片名
@@ -132,11 +133,11 @@ public class DeviceInfo {
         this.powerProperties = powerProperties;
     }
 
-    public String getLocationArea() {
+    public Integer getLocationArea() {
         return locationArea;
     }
 
-    public void setLocationArea(String locationArea) {
+    public void setLocationArea(Integer locationArea) {
         this.locationArea = locationArea;
     }
 
@@ -156,20 +157,36 @@ public class DeviceInfo {
         this.locationY = locationY;
     }
 
-    public String getBuildingId() {
+    public Integer getBuildingId() {
         return buildingId;
     }
 
-    public void setBuildingId(String buildingId) {
+    public void setBuildingId(Integer buildingId) {
         this.buildingId = buildingId;
     }
 
-    public String getFloor() {
+    public String getBuildingName() {
+        return buildingName;
+    }
+
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
+    }
+
+    public Integer getFloor() {
         return floor;
     }
 
-    public void setFloor(String floor) {
+    public void setFloor(Integer floor) {
         this.floor = floor;
+    }
+
+    public Integer getMaxFloor() {
+        return maxFloor;
+    }
+
+    public void setMaxFloor(Integer maxFloor) {
+        this.maxFloor = maxFloor;
     }
 
     public String getAngle() {
@@ -202,13 +219,5 @@ public class DeviceInfo {
 
     public void setUpdateDate(Date updateDate) {
         this.updateDate = updateDate;
-    }
-
-    public String getBuildingName() {
-        return buildingName;
-    }
-
-    public void setBuildingName(String buildingName) {
-        this.buildingName = buildingName;
     }
 }

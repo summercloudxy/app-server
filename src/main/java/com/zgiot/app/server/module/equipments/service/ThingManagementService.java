@@ -15,7 +15,12 @@ public interface ThingManagementService {
      */
     public List<Thing> getThingByCode(String thingCode, String thingType1Code);
 
-
+    /**
+     * 判断是否有此设备编号
+     * true有此编号,false没有
+     * @param thingCode
+     * @return
+     */
     public boolean getThingByThingCode(String thingCode);
 
     /**
@@ -48,10 +53,31 @@ public interface ThingManagementService {
      */
     public void editDevice(DeviceInfo deviceInfo);
 
+    /**
+     * 分页-获取所有设备列表
+     * @param id
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
     public PageHelpInfo getAllDeviceInfo(Long id, int pageNum, int pageSize);
 
+    /**
+     * 分页-获取某一类型设备列表
+     * @param id
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
     public PageHelpInfo getDeviceInfoByThingTagId(Long id, int pageNum, int pageSize);
 
+    /**
+     * 分页-获取部件列表
+     * @param id
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
     public PageHelpInfo getPartsInfoByThingTagId(Long id, int pageNum, int pageSize);
 
     /**
@@ -90,6 +116,13 @@ public interface ThingManagementService {
      */
     public void editParts(PartsInfo partsInfo);
 
+    /**
+     * 分页-获取管道列表
+     * @param id
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
     public PageHelpInfo getPipeInfoByThingTagId(Long id, int pageNum, int pageSize);
 
     /**
@@ -122,25 +155,91 @@ public interface ThingManagementService {
      */
     public void editValve(ValveInfo valveInfo);
 
+    /**
+     * 分页-获取溜槽列表
+     * @param id
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
     public PageHelpInfo getChuteInfoByThingTagId(Long id, int pageNum, int pageSize);
 
+    /**
+     * 分页-获取阀门列表
+     * @param id
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
     public PageHelpInfo getValveInfoByThingTagId(Long id, int pageNum, int pageSize);
 
+    /**
+     * 分页-获取闸板列表
+     * @param id
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
     public PageHelpInfo getFlashboardInfoByThingTagId(Long id, int pageNum, int pageSize);
 
+    /**
+     * 电气设备-仪表-添加
+     * @param meterInfo
+     */
     public void addMeter(MeterInfo meterInfo);
 
+    /**
+     * 电气设备-仪表-删除
+     * @param id
+     */
     public void deleteMeter(Long id);
 
+    /**
+     * 电气设备-仪表-编辑
+     * @param meterInfo
+     */
     public void editMeter(MeterInfo meterInfo);
 
+    /**
+     * 分页-获取所有类型仪表列表
+     * @param id
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
     public PageHelpInfo getAllMeterInfo(Long id, int pageNum, int pageSize);
 
+    /**
+     * 分页-获取某一类型仪表列表
+     * @param id
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
     public PageHelpInfo getMeterInfoByThingTagId(Long id, int pageNum, int pageSize);
 
-    public List<PartsInfo> getPartsInfoByThingId(String thingCode);
+    /**
+     * 根据设备编号获取部件信息
+     * @param thingCode
+     * @return
+     */
+    public List<PartsInfo> getPartsInfoByThingCode(String thingCode);
 
+    /**
+     * 根据设备编号或名称查询设备
+     * @param codeOrName
+     * @param type
+     * @return
+     */
     public List<Thing> getThingByCodeOrName(String codeOrName, String type);
 
+    /**
+     * 根据设备编号和类型获取设备信息列表(列表搜索用)
+     * @param thingCode
+     * @param type
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
     public PageHelpInfo getThingInfoByThingCode(String thingCode, String type, int pageNum, int pageSize);
 }

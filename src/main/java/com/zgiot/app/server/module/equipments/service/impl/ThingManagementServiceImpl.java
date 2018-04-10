@@ -70,6 +70,10 @@ public class ThingManagementServiceImpl implements ThingManagementService {
                             deviceInfoList.get(i).setSpecification(thingPropertiesList.get(j).getPropValue());
                         }
                         if (deviceInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                                && thingPropertiesList.get(j).getPropKey().equals(MANUFACTURER)) {
+                            deviceInfoList.get(i).setManufacturer(thingPropertiesList.get(j).getPropValue());
+                        }
+                        if (deviceInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
                                 && thingPropertiesList.get(j).getPropKey().equals(POWER_PROPERTIES)) {
                             deviceInfoList.get(i).setPowerProperties(thingPropertiesList.get(j).getPropValue());
                         }
@@ -255,9 +259,9 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         // thingPosition
         ThingPosition thingPosition = new ThingPosition();
         thingPosition.setThingCode(deviceInfo.getThingCode());
-        thingPosition.setBuildingId(Long.parseLong(deviceInfo.getBuildingId()));
-        thingPosition.setFloor(Integer.parseInt(deviceInfo.getFloor()));
-        thingPosition.setLocationArea(deviceInfo.getLocationArea());
+        thingPosition.setBuildingId(Long.parseLong(deviceInfo.getBuildingId().toString()));
+        thingPosition.setFloor(Integer.parseInt(deviceInfo.getFloor().toString()));
+        thingPosition.setLocationArea(deviceInfo.getLocationArea().toString());
         Double locationX = null;
         if(deviceInfo.getLocationX() != null && !"".equals(deviceInfo.getLocationX())){
             locationX = Double.parseDouble(deviceInfo.getLocationX());
@@ -290,6 +294,10 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         tp.setPropKey(EquipmentConstant.SPECIFICATION);
         tp.setPropValue(deviceInfo.getSpecification());
         tp.setPropType(EquipmentConstant.PROP_TYPE_PROP);
+        thingPropertiesMapper.addThingProperties(tp);
+
+        tp.setPropKey(EquipmentConstant.MANUFACTURER);
+        tp.setPropValue(deviceInfo.getManufacturer());
         thingPropertiesMapper.addThingProperties(tp);
 
         tp.setPropKey(EquipmentConstant.POWER_PROPERTIES);
@@ -1192,8 +1200,8 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         // thingPosition
         ThingPosition thingPosition = new ThingPosition();
         thingPosition.setThingCode(meterInfo.getThingCode());
-        thingPosition.setBuildingId(Long.parseLong(meterInfo.getBuildingId()));
-        thingPosition.setFloor(Integer.parseInt(meterInfo.getFloor()));
+        thingPosition.setBuildingId(Long.parseLong(meterInfo.getBuildingId().toString()));
+        thingPosition.setFloor(Integer.parseInt(meterInfo.getFloor().toString()));
         thingPositionMapper.addThingPosition(thingPosition);
 
         // relThingtagThing
@@ -1349,7 +1357,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
     }
 
     @Override
-    public List<PartsInfo> getPartsInfoByThingId(String thingCode) {
+    public List<PartsInfo> getPartsInfoByThingCode(String thingCode) {
         String where = thingCode + ".%";
         List<PartsInfo> partsInfoList = thingMapper.getPartsInfoByThingId(where);
 

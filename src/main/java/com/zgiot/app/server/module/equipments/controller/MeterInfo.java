@@ -61,7 +61,7 @@ public class MeterInfo {
     /**
      * 车间id
      */
-    private String buildingId;
+    private Integer buildingId;
 
     /**
      * 车间名称
@@ -71,7 +71,12 @@ public class MeterInfo {
     /**
      * 楼层
      */
-    private String floor;
+    private Integer floor;
+
+    /**
+     * 最大楼层
+     */
+    private Integer maxFloor;
 
     /**
      * 仪表类型code
@@ -186,11 +191,11 @@ public class MeterInfo {
         this.meterType = meterType;
     }
 
-    public String getBuildingId() {
+    public Integer getBuildingId() {
         return buildingId;
     }
 
-    public void setBuildingId(String buildingId) {
+    public void setBuildingId(Integer buildingId) {
         this.buildingId = buildingId;
     }
 
@@ -202,12 +207,20 @@ public class MeterInfo {
         this.buildingName = buildingName;
     }
 
-    public String getFloor() {
+    public Integer getFloor() {
         return floor;
     }
 
-    public void setFloor(String floor) {
+    public void setFloor(Integer floor) {
         this.floor = floor;
+    }
+
+    public Integer getMaxFloor() {
+        return maxFloor;
+    }
+
+    public void setMaxFloor(Integer maxFloor) {
+        this.maxFloor = maxFloor;
     }
 
     public String getThingTagCode() {
