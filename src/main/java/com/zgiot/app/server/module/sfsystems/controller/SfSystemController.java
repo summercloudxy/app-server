@@ -1,6 +1,5 @@
 package com.zgiot.app.server.module.sfsystems.controller;
 
-import com.zgiot.app.server.module.equipments.controller.DeviceInfo;
 import com.zgiot.app.server.module.equipments.controller.PageHelpInfo;
 import com.zgiot.app.server.module.sfsystems.service.SfSystemService;
 import com.zgiot.app.server.module.equipments.pojo.RelThingSystem;
@@ -16,8 +15,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.util.List;
-
 @Controller
 @RequestMapping(value = GlobalConstants.API  + GlobalConstants.API_VERSION + "/sfsystems")
 public class SfSystemController {
@@ -27,11 +24,33 @@ public class SfSystemController {
     @Autowired
     private RelThingSystemService relThingSystemService;
 
+    /**
+     * 根据系统id查找对应设备
+     * @param systemId
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
     @RequestMapping(value = "/getDeviceInfoBySystemId/{systemId}/pageNum/{pageNum}/pageSize/{pageSize}",
             method = RequestMethod.GET)
     public ResponseEntity<String> getDeviceInfoBySystemId(@PathVariable("systemId") int systemId, @PathVariable int pageNum,
                                                           @PathVariable int pageSize) {
         PageHelpInfo pageHelpInfo = sfSystemService.getDeviceInfoBySystemId(systemId, pageNum, pageSize);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
+    }
+
+    /**
+     * 根据thingCode查询没有所属系统的设备
+     * @param thingCode
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    @RequestMapping(value = "/getFreeDeviceInfoByThingCode/{thingCode}/pageNum/{pageNum}/pageSize/{pageSize}",
+            method = RequestMethod.GET)
+    public ResponseEntity<String> getFreeDeviceInfoByThingCode(@PathVariable("thingCode") String thingCode,
+                                                               @PathVariable int pageNum, @PathVariable int pageSize) {
+        PageHelpInfo pageHelpInfo = sfSystemService.getFreeDeviceInfoByThingCode(thingCode, pageNum, pageSize);
         return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 

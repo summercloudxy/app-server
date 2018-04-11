@@ -20,4 +20,11 @@ public interface TBSystemMapper {
 
    @Select("SELECT * FROM tb_system WHERE parent_system_id = #{id}")
     List<TBSystem> getSystemByParentId(@Param("id") Long id);
+
+   @Select("SELECT * FROM tb_thing" +
+           "WHERE thing_code NOT IN (SELECT thing_code FROM rel_thing_system )" +
+           "AND thing_type1_code = 'DEVICE'" +
+           "AND thing_code LIKE #{thingCode}")
+    List<DeviceInfo> getFreeDeviceInfoByThingCode(String thingCode);
+
 }

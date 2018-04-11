@@ -27,4 +27,17 @@ public class SfSystemServiceImpl implements SfSystemService {
         pageHelpInfo.setSum(page.getTotal());
         return pageHelpInfo;
     }
+
+    @Override
+    public PageHelpInfo getFreeDeviceInfoByThingCode(String thingCode, int pageNum, int pageSize) {
+        thingCode = "%" + thingCode + "%";
+        Page<Object> page = PageHelper.startPage(pageNum, pageSize);
+        List<DeviceInfo> deviceInfoList = tbSystemMapper.getFreeDeviceInfoByThingCode(thingCode);
+
+        PageHelpInfo pageHelpInfo = new PageHelpInfo();
+        pageHelpInfo.setList(deviceInfoList);
+        pageHelpInfo.setSum(page.getTotal());
+        return pageHelpInfo;
+    }
+
 }
