@@ -22,8 +22,9 @@ public interface ThingTagManagementService {
     /**
      * 获取菜单
      * @param id
+     * @param level
      * @return
      */
-    public ThingTag getMenu(Long id);
+    public ThingTag getMenu(Long id, int level);
 
 }

@@ -2,6 +2,7 @@ package com.zgiot.app.server.module.sfsystems.controller;
 
 import com.zgiot.app.server.module.equipments.controller.DeviceInfo;
 import com.zgiot.app.server.module.equipments.controller.PageHelpInfo;
+import com.zgiot.app.server.module.equipments.pojo.TBSystem;
 import com.zgiot.app.server.module.sfsystems.service.SfSystemService;
 import com.zgiot.app.server.module.equipments.pojo.RelThingSystem;
 import com.zgiot.app.server.module.equipments.service.RelThingSystemService;
@@ -36,9 +37,24 @@ public class SfSystemController {
      */
     @RequestMapping(value = "/getDeviceInfoBySystemId/{systemId}/pageNum/{pageNum}/pageSize/{pageSize}",
             method = RequestMethod.GET)
-    public ResponseEntity<String> getDeviceInfoBySystemId(@PathVariable("systemId") int systemId, @PathVariable int pageNum,
+    public ResponseEntity<String> getDeviceInfoBySystemId(@PathVariable("systemId") Long systemId, @PathVariable int pageNum,
                                                           @PathVariable int pageSize) {
         PageHelpInfo pageHelpInfo = sfSystemService.getDeviceInfoBySystemId(systemId, pageNum, pageSize);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
+    }
+
+    /**
+     * 根据区域id查找对应设备
+     * @param areaId
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    @RequestMapping(value = "/getDeviceInfoByAreaId/{areaId}/pageNum/{pageNum}/pageSize/{pageSize}",
+            method = RequestMethod.GET)
+    public ResponseEntity<String> getDeviceInfoByAreaId(@PathVariable("areaId") Long areaId, @PathVariable int pageNum,
+                                                          @PathVariable int pageSize) {
+        PageHelpInfo pageHelpInfo = sfSystemService.getDeviceInfoByAreaId(areaId, pageNum, pageSize);
         return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
@@ -85,6 +101,17 @@ public class SfSystemController {
     public ResponseEntity<String> getFreeDeviceInfo(@PathVariable("thingCode") String thingCode, @PathVariable("areaId") Long areaId) {
         List<DeviceInfo> deviceInfoList = sfSystemService.getFreeDeviceInfo(thingCode, areaId);
         return new ResponseEntity<>(ServerResponse.buildOkJson(deviceInfoList), HttpStatus.OK);
+    }
+
+    /**
+     * 菜单
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/getMenu/id/{id}/level/{level}", method = RequestMethod.GET)
+    public ResponseEntity<String> getMenu(@PathVariable("id") Long id, @PathVariable("level") int level){
+        TBSystem tbSystem = sfSystemService.getMenu(id, level);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(tbSystem), HttpStatus.OK);
     }
 
 }

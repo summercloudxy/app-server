@@ -1,5 +1,8 @@
 package com.zgiot.app.server.module.equipments.pojo;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TBSystem {
 
     /**
@@ -21,6 +24,11 @@ public class TBSystem {
      *level
      */
     private Integer level;
+
+    /**
+     * 用于菜单
+     */
+    private List nodeList = new ArrayList();
 
     public Long getId() {
         return id;
@@ -52,5 +60,13 @@ public class TBSystem {
 
     public void setLevel(Integer level) {
         this.level = level;
+    }
+
+    public List getNodeList() {
+        return nodeList;
+    }
+
+    public void setNodeList(List nodeList) {
+        this.nodeList = nodeList;
     }
 }

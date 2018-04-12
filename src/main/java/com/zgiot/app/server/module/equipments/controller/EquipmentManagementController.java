@@ -656,11 +656,12 @@ public class EquipmentManagementController {
     /**
      * 菜单
      * @param id
+     * @param level
      * @return
      */
-    @RequestMapping(value = "/thingTag/getMenu/thingTagId/{id}", method = RequestMethod.GET)
-    public ResponseEntity<String> getMenu(@PathVariable("id") Long id){
-        ThingTag thingTag = thingTagService.getMenu(id);
+    @RequestMapping(value = "/thingTag/getMenu/thingTagId/{id}/level/{level}", method = RequestMethod.GET)
+    public ResponseEntity<String> getMenu(@PathVariable("id") Long id, @PathVariable("level") int level){
+        ThingTag thingTag = thingTagService.getMenu(id, level);
         return new ResponseEntity<>(ServerResponse.buildOkJson(thingTag), HttpStatus.OK);
     }
 
