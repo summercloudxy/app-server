@@ -10,6 +10,10 @@ public interface RelThingSystemMapper {
             "VALUES(#{thingCode},#{systemId},NOW())")
     void addRelThingSystem(RelThingSystem relThingSystem);
 
-    @Delete("DELETE FROM rel_thing_system where thing_code = #{thingCode}")
+    @Delete("DELETE FROM rel_thing_system WHERE thing_code = #{thingCode}")
     void deleteRelThingSystemByThingCode(@Param("thingCode") String thingCode);
+
+    @Update("UPDATE rel_thing_system SET system_id = {systemId} WHERE thing_code = #{thingCode}")
+    void updateRelThingSystemByThingCode(@Param("systemId") Long systemId, @Param("thingCode") String thingCode);
+
 }

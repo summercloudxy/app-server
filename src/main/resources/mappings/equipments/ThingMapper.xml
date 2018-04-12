@@ -136,14 +136,18 @@
         <result column="building_name" property="buildingName"/>
         <result column="floor" property="floor"/>
         <result column="max_floor" property="maxFloor"/>
+        <result column="code" property="thingTagCode"/>
+        <result column="tag_name" property="thingTagName"/>
     </resultMap>
     <select id="getMeterInfoByThingcode" resultMap="meterInfo"
             resultType="com.zgiot.app.server.module.equipments.controller.MeterInfo">
-        SELECT t1.id,t1.thing_code,t1.thing_name,t2.create_date,t4.building_name,t3.building_id,t3.floor,t4.max_floor
-        FROM tb_thing t1, rel_thingtag_thing t2, tb_thing_position t3, tb_building t4
+        SELECT t1.id,t1.thing_code,t1.thing_name,t2.create_date,t4.building_name,t3.building_id,t3.floor,
+          t4.max_floor,t5.code,t5.tag_name
+        FROM tb_thing t1, rel_thingtag_thing t2, tb_thing_position t3, tb_building t4, tb_thing_tag t5
         WHERE t1.thing_code = t2.thing_code
         AND t1.thing_code = t3.thing_code
         AND t3.building_id = t4.id
+        AND t2.thing_tag_code = t5.code
         AND t1.thing_code in
         <foreach collection="thingCodeList" item="thingCode" index="index"
                  open="(" close=")" separator=",">

@@ -245,7 +245,6 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         return false;
     }
 
-    @Override
     @Transactional
     public void addDevice(DeviceInfo deviceInfo) {
         // thing
@@ -327,7 +326,6 @@ public class ThingManagementServiceImpl implements ThingManagementService {
 
     }
 
-    @Override
     @Transactional
     public void deleteDevice(Long id) {
         Thing thing = thingMapper.getThingById(id);
@@ -349,7 +347,6 @@ public class ThingManagementServiceImpl implements ThingManagementService {
 
     }
 
-    @Override
     @Transactional
     public void editDevice(DeviceInfo deviceInfo) {
         deleteDevice(deviceInfo.getId());
@@ -451,7 +448,6 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         addChute(chuteInfo);
     }
 
-    @Override
     @Transactional
     public void addParts(PartsInfo partsInfo) {
         // thing
@@ -554,7 +550,6 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         thingPropertiesMapper.addThingProperties(tp);
     }
 
-    @Override
     @Transactional
     public void deleteParts(Long id) {
         Thing thing = thingMapper.getThingById(id);
@@ -570,7 +565,6 @@ public class ThingManagementServiceImpl implements ThingManagementService {
 
     }
 
-    @Override
     @Transactional
     public void editParts(PartsInfo partsInfo) {
         deleteParts(partsInfo.getId());
@@ -1180,7 +1174,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         return pageHelpInfo;
     }
 
-    @Override
+    @Transactional
     public void addMeter(MeterInfo meterInfo) {
         String parentThingCode = meterInfo.getParentThingCode();
         String thingType = meterInfo.getThingType();
@@ -1266,7 +1260,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
 
     }
 
-    @Override
+    @Transactional
     public void deleteMeter(Long id) {
         Thing thing = thingMapper.getThingById(id);
         String thingCode = thing.getThingCode();
@@ -1276,7 +1270,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         thingPropertiesMapper.deleteThingPropertiesByThingCode(thingCode);
     }
 
-    @Override
+    @Transactional
     public void editMeter(MeterInfo meterInfo) {
         deleteMeter(meterInfo.getId());
         addMeter(meterInfo);
@@ -1357,29 +1351,19 @@ public class ThingManagementServiceImpl implements ThingManagementService {
     }
 
     @Override
-    public List<PartsInfo> getPartsInfoByThingCode(String thingCode) {
+    public PageHelpInfo getPartsInfoByThingCode(String thingCode, int pageNum, int pageSize) {
         String where = thingCode + ".%";
         List<PartsInfo> partsInfoList = thingMapper.getPartsInfoByThingId(where);
 
         List<String> thingCodeList = new ArrayList<>();
-        thingCodeList.add(thingCode);
-        List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
-        if (partsInfoList != null && partsInfoList.size() > 0) {
-            for (int i = 0; i < partsInfoList.size(); i++) {
-                for (int j = 0; j < thingPropertiesList.size(); j++) {
-                    if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(SPECIFICATION)) {
-                        partsInfoList.get(i).setSpecification(thingPropertiesList.get(j).getPropValue());
-                    }
-                    if (partsInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
-                            && thingPropertiesList.get(j).getPropKey().equals(COMPONENT_TYPE_CODE_RULE)) {
-                        partsInfoList.get(i).setThingTypeName(thingPropertiesList.get(j).getPropValue());
-                    }
-                }
+        if(partsInfoList != null && partsInfoList.size() >0){
+            for(int i=0;i<partsInfoList.size();i++){
+                thingCodeList.add(partsInfoList.get(i).getThingCode());
             }
         }
 
-        return partsInfoList;
+        PageHelpInfo pageHelpInfo = getPartsInfoByThingCode(thingCodeList, pageNum, pageSize);
+        return pageHelpInfo;
     }
 
     @Override

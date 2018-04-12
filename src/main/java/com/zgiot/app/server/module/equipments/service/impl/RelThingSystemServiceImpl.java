@@ -12,14 +12,15 @@ public class RelThingSystemServiceImpl implements RelThingSystemService {
     @Autowired
     private RelThingSystemMapper relThingSystemMapper;
 
-
     @Override
     public void addRelThingSystem(RelThingSystem relThingSystem) {
-        relThingSystemMapper.addRelThingSystem(relThingSystem);
+        String thingCode = relThingSystem.getThingCode();
+        Long systemId = relThingSystem.getSystemId();
+        relThingSystemMapper.updateRelThingSystemByThingCode(systemId, thingCode);
     }
 
     @Override
     public void deleteRelThingSystemByThingCode(String thing_code) {
-        relThingSystemMapper.deleteRelThingSystemByThingCode(thing_code);
+        relThingSystemMapper.updateRelThingSystemByThingCode(-1L, thing_code);
     }
 }

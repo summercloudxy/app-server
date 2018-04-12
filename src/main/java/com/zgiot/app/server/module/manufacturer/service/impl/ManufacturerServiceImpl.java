@@ -68,7 +68,7 @@ public class ManufacturerServiceImpl implements ManufacturerService {
 
     @Override
     public String getManufacturerCodeByCode(String codePrefix) {
-        String code = "%" + codePrefix;
+        String code = codePrefix + "%";
         String mCode = codePrefix + "001";
         List<String> codeList = manufacturerMapper.getManufacturerCodeByCode(code);
         if (null != codeList && codeList.size() > 0) {

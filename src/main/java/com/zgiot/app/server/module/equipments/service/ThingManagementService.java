@@ -221,9 +221,11 @@ public interface ThingManagementService {
     /**
      * 根据设备编号获取部件信息
      * @param thingCode
+     * @param pageNum
+     * @param pageSize
      * @return
      */
-    public List<PartsInfo> getPartsInfoByThingCode(String thingCode);
+    public PageHelpInfo getPartsInfoByThingCode(String thingCode, int pageNum, int pageSize);
 
     /**
      * 根据设备编号或名称查询设备
@@ -242,4 +244,14 @@ public interface ThingManagementService {
      * @return
      */
     public PageHelpInfo getThingInfoByThingCode(String thingCode, String type, int pageNum, int pageSize);
+
+    /**
+     * 根据设备编号集合获取设备信息列表
+     * @param thingCodeList
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    public PageHelpInfo getDeviceInfoByThingCode(List<String> thingCodeList, int pageNum, int pageSize);
+
 }

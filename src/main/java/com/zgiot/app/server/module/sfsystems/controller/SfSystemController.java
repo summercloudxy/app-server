@@ -1,5 +1,6 @@
 package com.zgiot.app.server.module.sfsystems.controller;
 
+import com.zgiot.app.server.module.equipments.controller.DeviceInfo;
 import com.zgiot.app.server.module.equipments.controller.PageHelpInfo;
 import com.zgiot.app.server.module.sfsystems.service.SfSystemService;
 import com.zgiot.app.server.module.equipments.pojo.RelThingSystem;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import java.util.List;
 
 @Controller
 @RequestMapping(value = GlobalConstants.API  + GlobalConstants.API_VERSION + "/sfsystems")
@@ -40,18 +43,15 @@ public class SfSystemController {
     }
 
     /**
-     * 根据thingCode查询没有所属系统的设备
+     * 根据thingCode查询该设备信息
      * @param thingCode
-     * @param pageNum
-     * @param pageSize
      * @return
      */
-    @RequestMapping(value = "/getFreeDeviceInfoByThingCode/{thingCode}/pageNum/{pageNum}/pageSize/{pageSize}",
+    @RequestMapping(value = "/getDeviceInfoByThingCode/{thingCode}",
             method = RequestMethod.GET)
-    public ResponseEntity<String> getFreeDeviceInfoByThingCode(@PathVariable("thingCode") String thingCode,
-                                                               @PathVariable int pageNum, @PathVariable int pageSize) {
-        PageHelpInfo pageHelpInfo = sfSystemService.getFreeDeviceInfoByThingCode(thingCode, pageNum, pageSize);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
+    public ResponseEntity<String> getDeviceInfoByThingCode(@PathVariable("thingCode") String thingCode) {
+        List<DeviceInfo> deviceInfoList = sfSystemService.getDeviceInfoByThingCode(thingCode);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(deviceInfoList), HttpStatus.OK);
     }
 
     /**
@@ -74,6 +74,17 @@ public class SfSystemController {
     public ResponseEntity<String> delBuilding(@PathVariable("thingCode") String thingCode) {
         relThingSystemService.deleteRelThingSystemByThingCode(thingCode);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+    /**
+     * 根据设备编号和所属区域查询没有所属系统的设备
+     * @param thingCode
+     * @return
+     */
+    @RequestMapping(value = "/getFreeDeviceInfo/thingCode/{thingCode}/areaId/{areaId}", method = RequestMethod.GET)
+    public ResponseEntity<String> getFreeDeviceInfo(@PathVariable("thingCode") String thingCode, @PathVariable("areaId") Long areaId) {
+        List<DeviceInfo> deviceInfoList = sfSystemService.getFreeDeviceInfo(thingCode, areaId);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(deviceInfoList), HttpStatus.OK);
     }
 
 }

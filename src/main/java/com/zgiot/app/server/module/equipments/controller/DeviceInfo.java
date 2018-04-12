@@ -16,7 +16,7 @@ public class DeviceInfo {
     private String systemName;// 所属系统名称
     private String enableDate;// 投用日期
     private String disableDate;// 停用日期
-    private String powerProperties;// 动力属性
+    private String powerProperties;// 动力属性:1动力,0非动力
     private Integer locationArea;// 所处位置id
     private String locationX;// 位置x坐标
     private String locationY;// 位置y坐标
