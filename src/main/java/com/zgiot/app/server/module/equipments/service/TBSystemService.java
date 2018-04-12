@@ -22,4 +22,12 @@ public interface TBSystemService {
      */
     List<TBSystem> getSystemByParentId(Long id);
 
+    /**
+     * 系统-列表-根据id查询
+     *
+     * @param id
+     * @return
+     */
+    List<TBSystem> getSystemById(Long id);
+
 }

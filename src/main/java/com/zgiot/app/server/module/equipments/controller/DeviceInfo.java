@@ -12,7 +12,7 @@ public class DeviceInfo {
     private String thingTagCode;// 设备类型-3级类型code
     private String thingTagName;// 设备类型-3级类型名称
     private String manufacturer;// 生产厂家
-    private String systemId;// 所属系统id
+    private Integer systemId;// 所属系统id
     private String systemName;// 所属系统名称
     private String enableDate;// 投用日期
     private String disableDate;// 停用日期
@@ -93,11 +93,11 @@ public class DeviceInfo {
         this.manufacturer = manufacturer;
     }
 
-    public String getSystemId() {
+    public Integer getSystemId() {
         return systemId;
     }
 
-    public void setSystemId(String systemId) {
+    public void setSystemId(Integer systemId) {
         this.systemId = systemId;
     }
 

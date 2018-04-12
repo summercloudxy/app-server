@@ -680,6 +680,18 @@ public class EquipmentManagementController {
     }
 
     /**
+     * 根据id获取系统表信息
+     *
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/system/getSystemById/{id}", method = RequestMethod.GET)
+    public ResponseEntity<String> getSystemById(@PathVariable("id") Long id) {
+        List<TBSystem> tbSystemList = tbSystemService.getSystemById(id);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(tbSystemList), HttpStatus.OK);
+    }
+
+    /**
      * 获取所有车间信息
      *
      * @return

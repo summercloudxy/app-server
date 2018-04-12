@@ -280,7 +280,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
 
         // relThingSystem
         RelThingSystem relThingSystem = new RelThingSystem();
-        relThingSystem.setSystemId(Long.parseLong(deviceInfo.getSystemId()));
+        relThingSystem.setSystemId(Long.parseLong(deviceInfo.getSystemId().toString()));
         relThingSystem.setThingCode(deviceInfo.getThingCode());
         relThingSystem.setUpdateTime(new Date());
         relThingSystemMapper.addRelThingSystem(relThingSystem);
