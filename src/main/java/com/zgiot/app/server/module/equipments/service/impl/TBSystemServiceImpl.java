@@ -11,9 +11,9 @@ import java.util.List;
 @Service
 public class TBSystemServiceImpl implements TBSystemService {
 
-
     @Autowired
     private TBSystemMapper tbSystemMapper;
+
     @Override
     public List<TBSystem> getTBSystemByLevel(int level) {
         return tbSystemMapper.getTBSystemALL(level);

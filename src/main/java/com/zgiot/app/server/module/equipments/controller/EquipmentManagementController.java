@@ -33,6 +33,7 @@ public class EquipmentManagementController {
 
     /**
      * 生产车间列表
+     *
      * @param pageNum
      * @param pageSize
      * @return
@@ -40,13 +41,14 @@ public class EquipmentManagementController {
     @RequestMapping(value = "/building/list/pageNum/{pageNum}/pageSize/{pageSize}", method = RequestMethod.GET)
     public ResponseEntity<String> getBuildingList(@PathVariable int pageNum, @PathVariable int pageSize) {
 
-        PageHelpInfo pageHelpInfo = buildingService.getBuildingAll(pageNum,pageSize);
+        PageHelpInfo pageHelpInfo = buildingService.getBuildingAll(pageNum, pageSize);
 
         return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
     /**
      * 生产车间添加
+     *
      * @param building
      * @return
      */
@@ -58,6 +60,7 @@ public class EquipmentManagementController {
 
     /**
      * 生产车间编辑
+     *
      * @param building
      * @return
      */
@@ -69,6 +72,7 @@ public class EquipmentManagementController {
 
     /**
      * 生产车间删除
+     *
      * @param id
      * @return
      */
@@ -80,6 +84,7 @@ public class EquipmentManagementController {
 
     /**
      * 生产车间-获取指定生产车间
+     *
      * @param id
      * @return
      */
@@ -91,6 +96,7 @@ public class EquipmentManagementController {
 
     /**
      * 生产车间-查询
+     *
      * @param buildingName
      * @param pageNum
      * @param pageSize
@@ -101,12 +107,13 @@ public class EquipmentManagementController {
             method = RequestMethod.GET)
     public ResponseEntity<String> queryBuildingByBuildingName(@PathVariable String buildingName,
                                                               @PathVariable int pageNum, @PathVariable int pageSize) {
-        PageHelpInfo pageHelpInfo = buildingService.getBuildingByBuildingName(pageNum,pageSize,buildingName);
+        PageHelpInfo pageHelpInfo = buildingService.getBuildingByBuildingName(pageNum, pageSize, buildingName);
         return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
     /**
      * 获取所有设备类型
+     *
      * @return
      */
     @RequestMapping(value = "/thingTag/getAllEquipmentType", method = RequestMethod.GET)
@@ -117,28 +124,31 @@ public class EquipmentManagementController {
 
     /**
      * 根据父节点获取其所有子节点
+     *
      * @param id
      * @return
      */
     @RequestMapping(value = "/thingTag/getThingTagByParentId/{id}", method = RequestMethod.GET)
-    public ResponseEntity<String> getThingTagByParentId(@PathVariable("id") Long id){
+    public ResponseEntity<String> getThingTagByParentId(@PathVariable("id") Long id) {
         List<ThingTag> thingTagList = thingTagService.getThingTagByParentId(id);
         return new ResponseEntity<>(ServerResponse.buildOkJson(thingTagList), HttpStatus.OK);
     }
 
     /**
      * 根据key查找基础数据字典
+     *
      * @param key
      * @return
      */
     @RequestMapping(value = "/thingBaseDict/getThingBaseDictListByKey/{key}", method = RequestMethod.GET)
-    public ResponseEntity<String> getThingBaseDictListByKey(@PathVariable("key") String key){
+    public ResponseEntity<String> getThingBaseDictListByKey(@PathVariable("key") String key) {
         List<ThingBaseDict> thingBaseDictList = thingBaseDictService.getThingBaseDictListByKey(key);
         return new ResponseEntity<>(ServerResponse.buildOkJson(thingBaseDictList), HttpStatus.OK);
     }
 
     /**
      * 所有设备信息列表
+     *
      * @param id
      * @param pageNum
      * @param pageSize
@@ -147,13 +157,14 @@ public class EquipmentManagementController {
     @RequestMapping(value = "/thing/getAllDeviceInfo/{id}/pageNum/{pageNum}/pageSize/{pageSize}",
             method = RequestMethod.GET)
     public ResponseEntity<String> getAllDeviceInfo(@PathVariable("id") Long id, @PathVariable int pageNum,
-                                                            @PathVariable int pageSize){
+                                                   @PathVariable int pageSize) {
         PageHelpInfo pageHelpInfo = thingService.getAllDeviceInfo(id, pageNum, pageSize);
         return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
     /**
      * 根据当前节点id获取设备信息列表
+     *
      * @param id
      * @param pageNum
      * @param pageSize
@@ -162,13 +173,14 @@ public class EquipmentManagementController {
     @RequestMapping(value = "/thing/getDeviceInfoByThingTagId/{id}/pageNum/{pageNum}/pageSize/{pageSize}",
             method = RequestMethod.GET)
     public ResponseEntity<String> getDeviceInfoByThingTagId(@PathVariable("id") Long id, @PathVariable int pageNum,
-                                                            @PathVariable int pageSize){
+                                                            @PathVariable int pageSize) {
         PageHelpInfo pageHelpInfo = thingService.getDeviceInfoByThingTagId(id, pageNum, pageSize);
         return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
     /**
      * 根据当前节点id获取部件信息列表
+     *
      * @param id
      * @param pageNum
      * @param pageSize
@@ -177,14 +189,16 @@ public class EquipmentManagementController {
     @RequestMapping(value = "/thing/getPartsInfoByThingTagId/{id}/pageNum/{pageNum}/pageSize/{pageSize}",
             method = RequestMethod.GET)
     public ResponseEntity<String> getPartsInfoByThingTagId(@PathVariable("id") Long id, @PathVariable int pageNum,
-                                                           @PathVariable int pageSize){
+                                                           @PathVariable int pageSize) {
         PageHelpInfo pageHelpInfo = thingService.getPartsInfoByThingTagId(id, pageNum, pageSize);
         return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
     /*3.29 begin*/
+
     /**
      * 下拉框根据thingCode模糊搜索设备
+     *
      * @param thingCode
      * @return 集合
      */
@@ -196,6 +210,7 @@ public class EquipmentManagementController {
 
     /**
      * 下拉框-所属系统
+     *
      * @param sysLevel,系统层级，分为1,2,3,4
      * @return 集合
      */
@@ -208,6 +223,7 @@ public class EquipmentManagementController {
 
     /**
      * 添加设备
+     *
      * @param deviceInfo
      * @return
      */
@@ -219,6 +235,7 @@ public class EquipmentManagementController {
 
     /**
      * 删除设备
+     *
      * @param id
      * @return
      */
@@ -230,6 +247,7 @@ public class EquipmentManagementController {
 
     /**
      * 编辑设备
+     *
      * @param deviceInfo
      * @return
      */
@@ -241,6 +259,7 @@ public class EquipmentManagementController {
 
     /**
      * 是否有此thingCode
+     *
      * @param thingCode
      * @return
      */
@@ -252,6 +271,7 @@ public class EquipmentManagementController {
 
     /**
      * 添加溜槽
+     *
      * @param chuteInfo
      * @return
      */
@@ -263,6 +283,7 @@ public class EquipmentManagementController {
 
     /**
      * 编辑溜槽
+     *
      * @param chuteInfo
      * @return
      */
@@ -274,6 +295,7 @@ public class EquipmentManagementController {
 
     /**
      * 删除溜槽
+     *
      * @param id
      * @return
      */
@@ -287,6 +309,7 @@ public class EquipmentManagementController {
 
     /**
      * 添加管道
+     *
      * @param pipeInfo
      * @return
      */
@@ -298,6 +321,7 @@ public class EquipmentManagementController {
 
     /**
      * 编辑管道
+     *
      * @param pipeInfo
      * @return
      */
@@ -309,6 +333,7 @@ public class EquipmentManagementController {
 
     /**
      * 删除管道
+     *
      * @param id
      * @return
      */
@@ -321,6 +346,7 @@ public class EquipmentManagementController {
 
     /**
      * 储煤仓列表
+     *
      * @param pageNum
      * @param pageSize
      * @return
@@ -328,13 +354,14 @@ public class EquipmentManagementController {
     @RequestMapping(value = "/coalStorageDepot/list/pageNum/{pageNum}/pageSize/{pageSize}", method = RequestMethod.GET)
     public ResponseEntity<String> getCoalStorageDepotList(@PathVariable int pageNum, @PathVariable int pageSize) {
 
-        PageHelpInfo pageHelpInfo = coalStorageDepotService.getCoalStorageDepotAll(pageNum,pageSize);
+        PageHelpInfo pageHelpInfo = coalStorageDepotService.getCoalStorageDepotAll(pageNum, pageSize);
 
         return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
     /**
      * 储煤仓添加
+     *
      * @param coalStorageDepot
      * @return
      */
@@ -346,6 +373,7 @@ public class EquipmentManagementController {
 
     /**
      * 储煤仓编辑
+     *
      * @param coalStorageDepot
      * @return
      */
@@ -357,6 +385,7 @@ public class EquipmentManagementController {
 
     /**
      * 储煤仓删除
+     *
      * @param id
      * @return
      */
@@ -368,6 +397,7 @@ public class EquipmentManagementController {
 
     /**
      * 储煤仓-获取指定储煤仓
+     *
      * @param id
      * @return
      */
@@ -378,8 +408,10 @@ public class EquipmentManagementController {
     }
     /*3.30 end*/
     /*4.2 begin*/
+
     /**
      * 储煤仓-查询
+     *
      * @param name
      * @param pageNum
      * @param pageSize
@@ -390,12 +422,14 @@ public class EquipmentManagementController {
             method = RequestMethod.GET)
     public ResponseEntity<String> querycoalStorageDepotByName(@PathVariable String name,
                                                               @PathVariable int pageNum, @PathVariable int pageSize) {
-        PageHelpInfo pageHelpInfo = coalStorageDepotService.getCoalStorageDepotByName(pageNum,pageSize,name);
+        PageHelpInfo pageHelpInfo = coalStorageDepotService.getCoalStorageDepotByName(pageNum, pageSize, name);
         return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
     /*4.2 end*/
+
     /**
      * 添加部件
+     *
      * @param partsInfo
      * @return
      */
@@ -407,6 +441,7 @@ public class EquipmentManagementController {
 
     /**
      * 删除部件
+     *
      * @param id
      * @return
      */
@@ -418,6 +453,7 @@ public class EquipmentManagementController {
 
     /**
      * 编辑部件
+     *
      * @param partsInfo
      * @return
      */
@@ -429,6 +465,7 @@ public class EquipmentManagementController {
 
     /**
      * 根据当前节点id获取管道信息列表
+     *
      * @param id
      * @param pageNum
      * @param pageSize
@@ -437,13 +474,14 @@ public class EquipmentManagementController {
     @RequestMapping(value = "/thing/getPipeInfoByThingTagId/{id}/pageNum/{pageNum}/pageSize/{pageSize}",
             method = RequestMethod.GET)
     public ResponseEntity<String> getPipeInfoByThingTagId(@PathVariable("id") Long id, @PathVariable int pageNum,
-                                                          @PathVariable int pageSize){
+                                                          @PathVariable int pageSize) {
         PageHelpInfo pageHelpInfo = thingService.getPipeInfoByThingTagId(id, pageNum, pageSize);
         return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
     /**
      * 添加阀门
+     *
      * @param valveInfo
      * @return
      */
@@ -455,6 +493,7 @@ public class EquipmentManagementController {
 
     /**
      * 删除阀门
+     *
      * @param id
      * @return
      */
@@ -466,6 +505,7 @@ public class EquipmentManagementController {
 
     /**
      * 编辑阀门
+     *
      * @param valveInfo
      * @return
      */
@@ -477,6 +517,7 @@ public class EquipmentManagementController {
 
     /**
      * 添加闸板
+     *
      * @param flashboardInfo
      * @return
      */
@@ -488,6 +529,7 @@ public class EquipmentManagementController {
 
     /**
      * 删除闸板
+     *
      * @param id
      * @return
      */
@@ -499,6 +541,7 @@ public class EquipmentManagementController {
 
     /**
      * 编辑闸板
+     *
      * @param flashboardInfo
      * @return
      */
@@ -510,6 +553,7 @@ public class EquipmentManagementController {
 
     /**
      * 根据当前节点id获取溜槽信息列表
+     *
      * @param id
      * @param pageNum
      * @param pageSize
@@ -518,13 +562,14 @@ public class EquipmentManagementController {
     @RequestMapping(value = "/thing/getChuteInfoByThingTagId/{id}/pageNum/{pageNum}/pageSize/{pageSize}",
             method = RequestMethod.GET)
     public ResponseEntity<String> getChuteInfoByThingTagId(@PathVariable("id") Long id, @PathVariable int pageNum,
-                                                          @PathVariable int pageSize){
+                                                           @PathVariable int pageSize) {
         PageHelpInfo pageHelpInfo = thingService.getChuteInfoByThingTagId(id, pageNum, pageSize);
         return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
     /**
      * 根据当前节点id获取阀门信息列表
+     *
      * @param id
      * @param pageNum
      * @param pageSize
@@ -533,13 +578,14 @@ public class EquipmentManagementController {
     @RequestMapping(value = "/thing/getValveInfoByThingTagId/{id}/pageNum/{pageNum}/pageSize/{pageSize}",
             method = RequestMethod.GET)
     public ResponseEntity<String> getValveInfoByThingTagId(@PathVariable("id") Long id, @PathVariable int pageNum,
-                                                           @PathVariable int pageSize){
+                                                           @PathVariable int pageSize) {
         PageHelpInfo pageHelpInfo = thingService.getValveInfoByThingTagId(id, pageNum, pageSize);
         return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
     /**
      * 根据当前节点id获取闸板信息列表
+     *
      * @param id
      * @param pageNum
      * @param pageSize
@@ -548,13 +594,14 @@ public class EquipmentManagementController {
     @RequestMapping(value = "/thing/getFlashboardInfoByThingTagId/{id}/pageNum/{pageNum}/pageSize/{pageSize}",
             method = RequestMethod.GET)
     public ResponseEntity<String> getFlashboardInfoByThingTagId(@PathVariable("id") Long id, @PathVariable int pageNum,
-                                                           @PathVariable int pageSize){
+                                                                @PathVariable int pageSize) {
         PageHelpInfo pageHelpInfo = thingService.getFlashboardInfoByThingTagId(id, pageNum, pageSize);
         return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
     /**
      * 添加仪表
+     *
      * @param meterInfo
      * @return
      */
@@ -566,6 +613,7 @@ public class EquipmentManagementController {
 
     /**
      * 删除仪表
+     *
      * @param id
      * @return
      */
@@ -577,6 +625,7 @@ public class EquipmentManagementController {
 
     /**
      * 编辑仪表
+     *
      * @param meterInfo
      * @return
      */
@@ -588,6 +637,7 @@ public class EquipmentManagementController {
 
     /**
      * 电气设备列表
+     *
      * @param id
      * @param pageNum
      * @param pageSize
@@ -596,13 +646,14 @@ public class EquipmentManagementController {
     @RequestMapping(value = "/thing/getAllMeterInfo/{id}/pageNum/{pageNum}/pageSize/{pageSize}",
             method = RequestMethod.GET)
     public ResponseEntity<String> getAllMeterInfo(@PathVariable("id") Long id, @PathVariable int pageNum,
-                                                                @PathVariable int pageSize){
+                                                  @PathVariable int pageSize) {
         PageHelpInfo pageHelpInfo = thingService.getAllMeterInfo(id, pageNum, pageSize);
         return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
     /**
      * 根据当前节点id获取电气设备列表
+     *
      * @param id
      * @param pageNum
      * @param pageSize
@@ -611,34 +662,37 @@ public class EquipmentManagementController {
     @RequestMapping(value = "/thing/getMeterInfoByThingTagId/{id}/pageNum/{pageNum}/pageSize/{pageSize}",
             method = RequestMethod.GET)
     public ResponseEntity<String> getMeterInfoByThingTagId(@PathVariable("id") Long id, @PathVariable int pageNum,
-                                                            @PathVariable int pageSize){
+                                                           @PathVariable int pageSize) {
         PageHelpInfo pageHelpInfo = thingService.getMeterInfoByThingTagId(id, pageNum, pageSize);
         return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
     /**
      * 根据父节点获取系统表信息
+     *
      * @param id
      * @return
      */
     @RequestMapping(value = "/system/getSystemByParentId/{id}", method = RequestMethod.GET)
-    public ResponseEntity<String> getSystemByParentId(@PathVariable("id") Long id){
+    public ResponseEntity<String> getSystemByParentId(@PathVariable("id") Long id) {
         List<TBSystem> tbSystemList = tbSystemService.getSystemByParentId(id);
         return new ResponseEntity<>(ServerResponse.buildOkJson(tbSystemList), HttpStatus.OK);
     }
 
     /**
      * 获取所有车间信息
+     *
      * @return
      */
     @RequestMapping(value = "/building/getAllBuilding", method = RequestMethod.GET)
-    public ResponseEntity<String> getBuildingByAreaId(){
+    public ResponseEntity<String> getBuildingByAreaId() {
         List<Building> buildingList = buildingService.getAllBuilding();
         return new ResponseEntity<>(ServerResponse.buildOkJson(buildingList), HttpStatus.OK);
     }
 
     /**
      * 根据设备code获取部件信息
+     *
      * @param thingCode
      * @param pageNum
      * @param pageSize
@@ -648,25 +702,27 @@ public class EquipmentManagementController {
             method = RequestMethod.GET)
     public ResponseEntity<String> getPartsInfoByThingCode(@PathVariable("thingCode") String thingCode,
                                                           @PathVariable("pageNum") int pageNum,
-                                                          @PathVariable("pageSize") int pageSize){
+                                                          @PathVariable("pageSize") int pageSize) {
         PageHelpInfo pageHelpInfo = thingService.getPartsInfoByThingCode(thingCode, pageNum, pageSize);
         return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
     /**
      * 菜单
+     *
      * @param id
      * @param level
      * @return
      */
     @RequestMapping(value = "/thingTag/getMenu/thingTagId/{id}/level/{level}", method = RequestMethod.GET)
-    public ResponseEntity<String> getMenu(@PathVariable("id") Long id, @PathVariable("level") int level){
+    public ResponseEntity<String> getMenu(@PathVariable("id") Long id, @PathVariable("level") int level) {
         ThingTag thingTag = thingTagService.getMenu(id, level);
         return new ResponseEntity<>(ServerResponse.buildOkJson(thingTag), HttpStatus.OK);
     }
 
     /**
      * 根据设备编号或设备名称查询设备
+     *
      * @param codeOrName
      * @param type
      * @return
@@ -680,6 +736,7 @@ public class EquipmentManagementController {
 
     /**
      * 根据设备编号和类型获取设备信息列表(列表搜索用)
+     *
      * @param thingCode
      * @param type
      * @param pageNum

@@ -60,10 +60,7 @@ public class ManufacturerServiceImpl implements ManufacturerService {
 
     @Override
     public boolean isNameRepeat(String manufacturerName) {
-        if (null != manufacturerMapper.getManufacturerByName(manufacturerName)) {
-            return true;
-        }
-        return false;
+        return null != manufacturerMapper.getManufacturerByName(manufacturerName);
     }
 
     @Override
@@ -72,23 +69,19 @@ public class ManufacturerServiceImpl implements ManufacturerService {
         String mCode = codePrefix + "001";
         List<String> codeList = manufacturerMapper.getManufacturerCodeByCode(code);
         if (null != codeList && codeList.size() > 0) {
-            List<Integer> fff = new ArrayList<Integer>();
+            List<Integer> fff = new ArrayList<>();
             for (String s : codeList) {
                 fff.add(Integer.parseInt(StringUtils.substringAfter(s, codePrefix)));
             }
             int maxCode = Collections.max(fff);
             String codeNumStr = String.valueOf(maxCode + 1);
             int codeLength = codeNumStr.length();
-            switch (codeLength) {
-                case 1:
-                    mCode = codePrefix + "00" + codeNumStr;
-                    break;
-                case 2:
-                    mCode = codePrefix + "0" + codeNumStr;
-                    break;
-                case 3:
-                    mCode = codePrefix + codeNumStr;
-                    break;
+            if (codeLength == 1) {
+                mCode = codePrefix + "00" + codeNumStr;
+            } else if (codeLength == 2) {
+                mCode = codePrefix + "0" + codeNumStr;
+            } else if (codeLength == 3) {
+                mCode = codePrefix + codeNumStr;
             }
         }
         return mCode;

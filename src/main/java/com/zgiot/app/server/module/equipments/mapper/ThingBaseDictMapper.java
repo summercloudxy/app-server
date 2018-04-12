@@ -12,6 +12,7 @@ public interface ThingBaseDictMapper {
 
     /**
      * 根据key获取对象集合
+     *
      * @return
      */
     @Select("SELECT * FROM tb_thing_base_dict AS t WHERE t.key = #{key}")

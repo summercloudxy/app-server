@@ -11,12 +11,14 @@ public interface BuildingService {
 
     /**
      * 生产车间-添加
+     *
      * @param building
      */
     public void addBuilding(Building building);
 
     /**
      * 生产车间-查找指定
+     *
      * @param id
      * @return
      */
@@ -24,18 +26,21 @@ public interface BuildingService {
 
     /**
      * 生产车间-编辑
+     *
      * @param building
      */
     public void editBuilding(Building building);
 
     /**
      * 生产车间-删除
+     *
      * @param id
      */
     public void deleteBuilding(Long id);
 
     /**
      * 生产车间-列表-全部
+     *
      * @param pageNum
      * @param pageSize
      * @return
@@ -44,16 +49,19 @@ public interface BuildingService {
 
     /**
      * 生产车间-列表-按名称查询
+     *
      * @param pageNum
      * @param pageSize
      * @param buildingName
      * @return
      */
-    public PageHelpInfo getBuildingByBuildingName(int pageNum,int pageSize,String buildingName);
+    public PageHelpInfo getBuildingByBuildingName(int pageNum, int pageSize, String buildingName);
 
     /**
      * getAllBuilding
+     *
      * @return
      */
     public List<Building> getAllBuilding();
+
 }

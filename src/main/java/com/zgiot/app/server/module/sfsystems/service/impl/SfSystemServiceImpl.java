@@ -1,7 +1,5 @@
 package com.zgiot.app.server.module.sfsystems.service.impl;
 
-import com.github.pagehelper.Page;
-import com.github.pagehelper.PageHelper;
 import com.zgiot.app.server.module.equipments.controller.DeviceInfo;
 import com.zgiot.app.server.module.equipments.controller.PageHelpInfo;
 import com.zgiot.app.server.module.equipments.mapper.TBSystemMapper;
@@ -38,8 +36,8 @@ public class SfSystemServiceImpl implements SfSystemService {
 
         List<Long> systemIdList = new ArrayList<>();
         if (systemList != null && systemList.size() > 0) {
-            for (int i=0;i<systemList.size();i++ ){
-                systemIdList.add(systemList.get(i).getId());
+            for (TBSystem aSystemList : systemList) {
+                systemIdList.add(aSystemList.getId());
             }
         }
         List<String> thingCodeList = tbSystemMapper.getThingCodeBySystemId(systemIdList);
@@ -50,7 +48,7 @@ public class SfSystemServiceImpl implements SfSystemService {
 
     @Override
     public List<DeviceInfo> getDeviceInfoByThingCode(String thingCode) {
-        List<String> thingCodeList = new ArrayList<String>();
+        List<String> thingCodeList = new ArrayList<>();
         thingCodeList.add(thingCode);
         PageHelpInfo pageHelpInfo = thingManagementService.getDeviceInfoByThingCode(thingCodeList, 1, 10);
         return pageHelpInfo.getList();
@@ -73,8 +71,8 @@ public class SfSystemServiceImpl implements SfSystemService {
         // 子节点
         List<TBSystem> tbSystemList = tbSystemMapper.getSystemByParentId(id);
         if (tbSystemList != null && tbSystemList.size() > 0) {
-            for (int i = 0; i < tbSystemList.size(); i++) {
-                TBSystem system = getMenu(tbSystemList.get(i).getId(), level);// 递归
+            for (TBSystem aTbSystemList : tbSystemList) {
+                TBSystem system = getMenu(aTbSystemList.getId(), level);// 递归
                 // 将子节点添加至父节点list中
                 tbSystem.getNodeList().add(system);
             }

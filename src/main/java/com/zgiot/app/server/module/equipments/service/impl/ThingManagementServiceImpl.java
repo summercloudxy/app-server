@@ -34,10 +34,11 @@ public class ThingManagementServiceImpl implements ThingManagementService {
 
     /**
      * 根据RelThingtagThing获取thingCode
+     *
      * @param relThingtagThingList
      * @return
      */
-    public List<String> getThingCodeListByRelThingtagThing(List<RelThingtagThing> relThingtagThingList){
+    public List<String> getThingCodeListByRelThingtagThing(List<RelThingtagThing> relThingtagThingList) {
         List<String> thingCodeList = null;
         if (relThingtagThingList != null && relThingtagThingList.size() > 0) {
             thingCodeList = new ArrayList<>();
@@ -51,7 +52,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
     public PageHelpInfo getDeviceInfoByThingCode(List<String> thingCodeList, int pageNum, int pageSize) {
         Page<Object> page = PageHelper.startPage(pageNum, pageSize);
         List<DeviceInfo> deviceInfoList = new ArrayList<>();
-        if(thingCodeList != null && thingCodeList.size() > 0){
+        if (thingCodeList != null && thingCodeList.size() > 0) {
             deviceInfoList = thingMapper.getDeviceInfoByThingcode(thingCodeList);
             List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
             if (deviceInfoList != null && deviceInfoList.size() > 0) {
@@ -103,7 +104,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
     public PageHelpInfo getPartsInfoByThingCode(List<String> thingCodeList, int pageNum, int pageSize) {
         Page<Object> page = PageHelper.startPage(pageNum, pageSize);
         List<PartsInfo> partsInfoList = new ArrayList<>();
-        if(thingCodeList != null && thingCodeList.size() > 0){
+        if (thingCodeList != null && thingCodeList.size() > 0) {
             partsInfoList = thingMapper.getPartsInfoByThingcode(thingCodeList);
             List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
             if (partsInfoList != null && partsInfoList.size() > 0) {
@@ -239,10 +240,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
     @Override
     public boolean getThingByThingCode(String thingCode) {
         List<Thing> thingList = thingMapper.getThingByThingCode(thingCode);
-        if (thingList != null && thingList.size() > 0) {
-            return true;
-        }
-        return false;
+        return thingList != null && thingList.size() > 0;
     }
 
     @Transactional
@@ -262,12 +260,12 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         thingPosition.setFloor(Integer.parseInt(deviceInfo.getFloor().toString()));
         thingPosition.setLocationArea(deviceInfo.getLocationArea().toString());
         Double locationX = null;
-        if(deviceInfo.getLocationX() != null && !"".equals(deviceInfo.getLocationX())){
+        if (deviceInfo.getLocationX() != null && !"".equals(deviceInfo.getLocationX())) {
             locationX = Double.parseDouble(deviceInfo.getLocationX());
         }
         thingPosition.setLocationX(locationX);
         Double locationY = null;
-        if(deviceInfo.getLocationY() != null && !"".equals(deviceInfo.getLocationY())){
+        if (deviceInfo.getLocationY() != null && !"".equals(deviceInfo.getLocationY())) {
             locationY = Double.parseDouble(deviceInfo.getLocationY());
         }
         thingPosition.setLocationY(locationY);
@@ -432,7 +430,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
     @Transactional
     public void delChuteOrPipe(Long id) {
         Thing t = thingMapper.getThingById(id);
-        if(null != t) {
+        if (null != t) {
             String thingCode = t.getThingCode();
             thingMapper.deleteThingById(id);
             thingPropertiesMapper.deleteThingPropertiesByThingCode(thingCode);
@@ -796,7 +794,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
     @Transactional
     public void delFlashboardOrValve(Long id) {
         Thing t = thingMapper.getThingById(id);
-        if(null != t) {
+        if (null != t) {
             String thingCode = t.getThingCode();
             thingMapper.deleteThingById(id);
             thingPropertiesMapper.deleteThingPropertiesByThingCode(thingCode);
@@ -950,7 +948,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
     private PageHelpInfo getPipeInfoByThingCode(List<String> thingCodeList, int pageNum, int pageSize) {
         Page<Object> page = PageHelper.startPage(pageNum, pageSize);
         List<PipeInfo> pipeInfoList = new ArrayList<>();
-        if(thingCodeList != null && thingCodeList.size() > 0){
+        if (thingCodeList != null && thingCodeList.size() > 0) {
             pipeInfoList = thingMapper.getPipeInfoByThingcode(thingCodeList);
             List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
             if (pipeInfoList != null && pipeInfoList.size() > 0) {
@@ -1045,7 +1043,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
     private PageHelpInfo getValveInfoByThingCode(List<String> thingCodeList, int pageNum, int pageSize) {
         Page<Object> page = PageHelper.startPage(pageNum, pageSize);
         List<ValveInfo> valveInfoList = new ArrayList<>();
-        if(thingCodeList != null && thingCodeList.size() > 0){
+        if (thingCodeList != null && thingCodeList.size() > 0) {
             valveInfoList = thingMapper.getValveInfoByThingcode(thingCodeList);
             List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
             if (valveInfoList != null && valveInfoList.size() > 0) {
@@ -1121,7 +1119,7 @@ public class ThingManagementServiceImpl implements ThingManagementService {
     private PageHelpInfo getFlashboardInfoByThingCode(List<String> thingCodeList, int pageNum, int pageSize) {
         Page<Object> page = PageHelper.startPage(pageNum, pageSize);
         List<FlashboardInfo> flashboardInfoList = new ArrayList<>();
-        if(thingCodeList != null && thingCodeList.size() > 0){
+        if (thingCodeList != null && thingCodeList.size() > 0) {
             flashboardInfoList = thingMapper.getFlashboardInfoByThingcode(thingCodeList);
             List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
             if (flashboardInfoList != null && flashboardInfoList.size() > 0) {
@@ -1295,51 +1293,42 @@ public class ThingManagementServiceImpl implements ThingManagementService {
     private PageHelpInfo getMeterInfoByThingCode(List<String> thingCodeList, int pageNum, int pageSize) {
         Page<Object> page = PageHelper.startPage(pageNum, pageSize);
         List<MeterInfo> meterInfoList = new ArrayList<>();
-        if(thingCodeList != null && thingCodeList.size() > 0){
+        if (thingCodeList != null && thingCodeList.size() > 0) {
             meterInfoList = thingMapper.getMeterInfoByThingcode(thingCodeList);
             List<ThingProperties> thingPropertiesList = thingPropertiesMapper.getThingPropertiesByThingCode(thingCodeList);
             if (meterInfoList != null && meterInfoList.size() > 0) {
                 for (int i = 0; i < meterInfoList.size(); i++) {
-                    for (int j = 0; j < thingPropertiesList.size(); j++) {
+                    for (int j = 0; j < thingPropertiesList.size(); j++)
                         if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
                                 && thingPropertiesList.get(j).getPropKey().equals(PARENT_THING_CODE)) {
                             meterInfoList.get(i).setParentThingCode(thingPropertiesList.get(j).getPropValue());
-                        }
-                        else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                        } else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
                                 && thingPropertiesList.get(j).getPropKey().equals(PARENT_THING_NAME)) {
                             meterInfoList.get(i).setParentThingName(thingPropertiesList.get(j).getPropValue());
-                        }
-                        else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                        } else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
                                 && thingPropertiesList.get(j).getPropKey().equals(ENABLE_DATE)) {
                             meterInfoList.get(i).setEnableDate(thingPropertiesList.get(j).getPropValue());
-                        }
-                        else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                        } else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
                                 && thingPropertiesList.get(j).getPropKey().equals(DISABLE_DATE)) {
                             meterInfoList.get(i).setDisableDate(thingPropertiesList.get(j).getPropValue());
-                        }
-                        else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                        } else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
                                 && thingPropertiesList.get(j).getPropKey().equals(SUBJECT_TYPE)) {
                             meterInfoList.get(i).setSubjectType(thingPropertiesList.get(j).getPropValue());
-                        }
-                        else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                        } else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
                                 && thingPropertiesList.get(j).getPropKey().equals(INSTRUMENT_TYPE)) {
                             meterInfoList.get(i).setThingType(thingPropertiesList.get(j).getPropValue());
-                        }
-                        else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                        } else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
                                 && thingPropertiesList.get(j).getPropKey().equals(MANUFACTURER)) {
                             meterInfoList.get(i).setManufacturer(thingPropertiesList.get(j).getPropValue());
-                        }
-                        else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
+                        } else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())
                                 && thingPropertiesList.get(j).getPropKey().equals(SPECIFICATION)) {
                             meterInfoList.get(i).setSpecification(thingPropertiesList.get(j).getPropValue());
-                        }
-                        else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())) {
+                        } else if (meterInfoList.get(i).getThingCode().equals(thingPropertiesList.get(j).getThingCode())) {
                             ConfigInfo configInfo = new ConfigInfo();
                             configInfo.setKey(thingPropertiesList.get(j).getPropKey());
                             configInfo.setValue(thingPropertiesList.get(j).getPropValue());
                             meterInfoList.get(i).getConfigList().add(configInfo);
                         }
-                    }
                 }
             }
         }
@@ -1356,9 +1345,9 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         List<PartsInfo> partsInfoList = thingMapper.getPartsInfoByThingId(where);
 
         List<String> thingCodeList = new ArrayList<>();
-        if(partsInfoList != null && partsInfoList.size() >0){
-            for(int i=0;i<partsInfoList.size();i++){
-                thingCodeList.add(partsInfoList.get(i).getThingCode());
+        if (partsInfoList != null && partsInfoList.size() > 0) {
+            for (PartsInfo aPartsInfoList : partsInfoList) {
+                thingCodeList.add(aPartsInfoList.getThingCode());
             }
         }
 
@@ -1377,19 +1366,19 @@ public class ThingManagementServiceImpl implements ThingManagementService {
         List<String> thingCodeList = new ArrayList<>();
         thingCodeList.add(thingCode);
         PageHelpInfo pageHelpInfo = null;
-        if(THING_TYPE1_CODE_DEVICE.equals(type)){
+        if (THING_TYPE1_CODE_DEVICE.equals(type)) {
             pageHelpInfo = getDeviceInfoByThingCode(thingCodeList, pageNum, pageSize);
-        } else if (THING_TYPE1_CODE_PARTS.equals(type)){
+        } else if (THING_TYPE1_CODE_PARTS.equals(type)) {
             pageHelpInfo = getPartsInfoByThingCode(thingCodeList, pageNum, pageSize);
-        } else if (THING_TYPE1_CODE_PIPE.equals(type)){
+        } else if (THING_TYPE1_CODE_PIPE.equals(type)) {
             pageHelpInfo = getPipeInfoByThingCode(thingCodeList, pageNum, pageSize);
-        } else if (THING_TYPE1_CODE_CHUTE.equals(type)){
+        } else if (THING_TYPE1_CODE_CHUTE.equals(type)) {
             pageHelpInfo = getChuteInfoByThingCode(thingCodeList, pageNum, pageSize);
-        } else if (THING_TYPE1_CODE_VALVE.equals(type)){
+        } else if (THING_TYPE1_CODE_VALVE.equals(type)) {
             pageHelpInfo = getValveInfoByThingCode(thingCodeList, pageNum, pageSize);
-        } else if (THING_TYPE1_CODE_FLASHBOARD.equals(type)){
+        } else if (THING_TYPE1_CODE_FLASHBOARD.equals(type)) {
             pageHelpInfo = getFlashboardInfoByThingCode(thingCodeList, pageNum, pageSize);
-        } else if (THING_TYPE1_CODE_METER.equals(type)){
+        } else if (THING_TYPE1_CODE_METER.equals(type)) {
             pageHelpInfo = getMeterInfoByThingCode(thingCodeList, pageNum, pageSize);
         }
         return pageHelpInfo;

@@ -20,7 +20,7 @@ public class RelThingSystemServiceImpl implements RelThingSystemService {
     }
 
     @Override
-    public void deleteRelThingSystemByThingCode(String thing_code) {
-        relThingSystemMapper.updateRelThingSystemByThingCode(-1L, thing_code);
+    public void deleteRelThingSystemByThingCode(String thingCode) {
+        relThingSystemMapper.updateRelThingSystemByThingCode(-1L, thingCode);
     }
 }

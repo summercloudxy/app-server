@@ -12,6 +12,7 @@ public interface ThingTagManagementMapper {
 
     /**
      * 获取所有设备类型
+     *
      * @return
      */
     @Select("SELECT * FROM tb_thing_tag " +
@@ -26,6 +27,7 @@ public interface ThingTagManagementMapper {
 
     /**
      * 根据parentId获取一级子节点
+     *
      * @param id
      * @return
      */

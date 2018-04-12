@@ -28,14 +28,14 @@ public class ThingTagManagementServiceImpl implements ThingTagManagementService 
         level--;
         // 当前节点
         ThingTag thingTag = thingTagMapper.getThingTagById(id);
-        if(level <= 0){
+        if (level <= 0) {
             return thingTag;
         }
         // 子节点
         List<ThingTag> thingTagList = thingTagMapper.getThingTagByParentId(id);
         if (thingTagList != null && thingTagList.size() > 0) {
-            for (int i = 0; i < thingTagList.size(); i++) {
-                ThingTag tt = getMenu(thingTagList.get(i).getId(), level);// 递归
+            for (ThingTag aThingTagList : thingTagList) {
+                ThingTag tt = getMenu(aThingTagList.getId(), level);// 递归
                 // 将子节点添加至父节点list中
                 thingTag.getNodeList().add(tt);
             }

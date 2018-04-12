@@ -21,9 +21,9 @@ public class ManufacturerController {
     @Autowired
     private ManufacturerService manufacturerService;
 
-
     /**
-     *厂家管理-添加
+     * 厂家管理-添加
+     *
      * @param manufacturer
      * @return
      */
@@ -34,7 +34,8 @@ public class ManufacturerController {
     }
 
     /**
-     *厂家管理-编辑
+     * 厂家管理-编辑
+     *
      * @param manufacturer
      * @return
      */
@@ -45,7 +46,8 @@ public class ManufacturerController {
     }
 
     /**
-     *厂家管理-删除
+     * 厂家管理-删除
+     *
      * @param id
      * @return
      */
@@ -56,7 +58,8 @@ public class ManufacturerController {
     }
 
     /**
-     *厂家管理-查询-条件：厂家类型&&（编码或名称）
+     * 厂家管理-查询-条件：厂家类型&&（编码或名称）
+     *
      * @param typeCode
      * @param codeOrName
      * @param pageNum
@@ -69,12 +72,13 @@ public class ManufacturerController {
                                                                 @PathVariable String codeOrName,
                                                                 @PathVariable int pageNum,
                                                                 @PathVariable int pageSize) {
-        PageHelpInfo pageHelpInfo = manufacturerService.getManufacturerByCodeOrName(typeCode,codeOrName,pageNum,pageSize);
+        PageHelpInfo pageHelpInfo = manufacturerService.getManufacturerByCodeOrName(typeCode, codeOrName, pageNum, pageSize);
         return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
     /**
-     *厂家管理-查询-条件：厂家类型
+     * 厂家管理-查询-条件：厂家类型
+     *
      * @param typeCode
      * @param pageNum
      * @param pageSize
@@ -82,14 +86,15 @@ public class ManufacturerController {
      */
     @RequestMapping(value = "/query/{typeCode}/pageNum/{pageNum}/pageSize/{pageSize}",
             method = RequestMethod.GET)
-    public ResponseEntity<String> queryManufacturerByType(@PathVariable String typeCode,@PathVariable int pageNum,
-                                                                @PathVariable int pageSize) {
-        PageHelpInfo pageHelpInfo = manufacturerService.getManufacturerByType(typeCode,pageNum,pageSize);
+    public ResponseEntity<String> queryManufacturerByType(@PathVariable String typeCode, @PathVariable int pageNum,
+                                                          @PathVariable int pageSize) {
+        PageHelpInfo pageHelpInfo = manufacturerService.getManufacturerByType(typeCode, pageNum, pageSize);
         return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
     /**
      * 厂家管理-查询-判断名字是否重复
+     *
      * @param manufacturerName
      * @return
      */
@@ -101,6 +106,7 @@ public class ManufacturerController {
 
     /**
      * 厂家管理-获取编码
+     *
      * @param typeCode
      * @return
      */

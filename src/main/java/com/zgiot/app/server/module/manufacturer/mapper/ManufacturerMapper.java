@@ -39,7 +39,7 @@ public interface ManufacturerMapper {
             ")")
     List<Manufacturer> getManufacturerByCodeOrName(@Param("typeCode") String typeCode,
                                                    @Param("manufacturerCode") String manufacturerCode,
-                                                    @Param("manufacturerName") String manufacturerName);
+                                                   @Param("manufacturerName") String manufacturerName);
 
     @Select("SELECT t.manufacturer_name FROM tb_Manufacturer t " +
             "WHERE t.manufacturer_name = #{manufacturerName}")

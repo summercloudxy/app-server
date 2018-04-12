@@ -2,7 +2,6 @@ package com.zgiot.app.server.module.equipments.mapper;
 
 import com.zgiot.app.server.module.equipments.controller.DeviceInfo;
 import com.zgiot.app.server.module.equipments.pojo.TBSystem;
-import com.zgiot.app.server.module.equipments.pojo.Thing;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;

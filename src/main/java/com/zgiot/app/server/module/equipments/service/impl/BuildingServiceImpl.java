@@ -40,7 +40,7 @@ public class BuildingServiceImpl implements BuildingService {
     }
 
     @Override
-    public PageHelpInfo getBuildingAll(int pageNum,int pageSize) {
+    public PageHelpInfo getBuildingAll(int pageNum, int pageSize) {
         Page page = PageHelper.startPage(pageNum, pageSize);
         List<Building> buildingList = buildingMapper.getBuildingAll();
         PageHelpInfo pageHelpInfo = new PageHelpInfo();
@@ -50,7 +50,7 @@ public class BuildingServiceImpl implements BuildingService {
     }
 
     @Override
-    public PageHelpInfo getBuildingByBuildingName(int pageNum,int pageSize,String buildingName) {
+    public PageHelpInfo getBuildingByBuildingName(int pageNum, int pageSize, String buildingName) {
         buildingName = "%" + buildingName + "%";
         Page page = PageHelper.startPage(pageNum, pageSize);
         List<Building> buildingList = buildingMapper.getBuildingByBuildingName(buildingName);

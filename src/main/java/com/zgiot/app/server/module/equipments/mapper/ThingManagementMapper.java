@@ -30,6 +30,7 @@ public interface ThingManagementMapper {
 
     /**
      * 获取设备信息列表
+     *
      * @param thingCodeList
      * @return
      */
@@ -38,7 +39,7 @@ public interface ThingManagementMapper {
     @Select("SELECT t.id,t.thing_code,t.thing_name,t.thing_type1_code,t.thing_shortname FROM tb_thing t " +
             "WHERE t.thing_code like #{thingCode} AND t.thing_type1_code = #{thingType1Code} " +
             "ORDER BY t.thing_code")
-    List<Thing> getThingByCode(@Param("thingCode") String thingCode,@Param("thingType1Code") String thingType1Code);
+    List<Thing> getThingByCode(@Param("thingCode") String thingCode, @Param("thingType1Code") String thingType1Code);
 
     @Select("select * from tb_thing where thing_code = #{thingCode}")
     List<Thing> getThingByThingCode(@Param("thingCode") String thingCode);
@@ -48,6 +49,7 @@ public interface ThingManagementMapper {
 
     /**
      * 获取部件信息列表
+     *
      * @param thingCodeList
      * @return
      */
@@ -55,6 +57,7 @@ public interface ThingManagementMapper {
 
     /**
      * 获取阀门信息列表
+     *
      * @param thingCodeList
      * @return
      */
@@ -62,6 +65,7 @@ public interface ThingManagementMapper {
 
     /**
      * 获取闸板信息列表
+     *
      * @param thingCodeList
      * @return
      */
@@ -69,6 +73,7 @@ public interface ThingManagementMapper {
 
     /**
      * 获取管道信息列表
+     *
      * @param thingCodeList
      * @return
      */
@@ -76,6 +81,7 @@ public interface ThingManagementMapper {
 
     /**
      * 获取仪表信息列表
+     *
      * @param thingCodeList
      * @return
      */
@@ -83,6 +89,7 @@ public interface ThingManagementMapper {
 
     /**
      * 根据设备code
+     *
      * @param thingCode
      * @return
      */

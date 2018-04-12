@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import java.util.List;
 
 @Controller
-@RequestMapping(value = GlobalConstants.API  + GlobalConstants.API_VERSION + "/sfsystems")
+@RequestMapping(value = GlobalConstants.API + GlobalConstants.API_VERSION + "/sfsystems")
 public class SfSystemController {
 
     @Autowired
@@ -30,6 +30,7 @@ public class SfSystemController {
 
     /**
      * 根据系统id查找对应设备
+     *
      * @param systemId
      * @param pageNum
      * @param pageSize
@@ -45,6 +46,7 @@ public class SfSystemController {
 
     /**
      * 根据区域id查找对应设备
+     *
      * @param areaId
      * @param pageNum
      * @param pageSize
@@ -53,13 +55,14 @@ public class SfSystemController {
     @RequestMapping(value = "/getDeviceInfoByAreaId/{areaId}/pageNum/{pageNum}/pageSize/{pageSize}",
             method = RequestMethod.GET)
     public ResponseEntity<String> getDeviceInfoByAreaId(@PathVariable("areaId") Long areaId, @PathVariable int pageNum,
-                                                          @PathVariable int pageSize) {
+                                                        @PathVariable int pageSize) {
         PageHelpInfo pageHelpInfo = sfSystemService.getDeviceInfoByAreaId(areaId, pageNum, pageSize);
         return new ResponseEntity<>(ServerResponse.buildOkJson(pageHelpInfo), HttpStatus.OK);
     }
 
     /**
      * 根据thingCode查询该设备信息
+     *
      * @param thingCode
      * @return
      */
@@ -72,6 +75,7 @@ public class SfSystemController {
 
     /**
      * 添加系统设备
+     *
      * @param relThingSystem
      * @return
      */
@@ -83,6 +87,7 @@ public class SfSystemController {
 
     /**
      * 系统设备删除
+     *
      * @param thingCode
      * @return
      */
@@ -94,6 +99,7 @@ public class SfSystemController {
 
     /**
      * 根据设备编号和所属区域查询没有所属系统的设备
+     *
      * @param thingCode
      * @return
      */
@@ -105,11 +111,12 @@ public class SfSystemController {
 
     /**
      * 菜单
+     *
      * @param id
      * @return
      */
     @RequestMapping(value = "/getMenu/id/{id}/level/{level}", method = RequestMethod.GET)
-    public ResponseEntity<String> getMenu(@PathVariable("id") Long id, @PathVariable("level") int level){
+    public ResponseEntity<String> getMenu(@PathVariable("id") Long id, @PathVariable("level") int level) {
         TBSystem tbSystem = sfSystemService.getMenu(id, level);
         return new ResponseEntity<>(ServerResponse.buildOkJson(tbSystem), HttpStatus.OK);
     }
