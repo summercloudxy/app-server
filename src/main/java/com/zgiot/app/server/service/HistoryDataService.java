@@ -101,6 +101,7 @@ public interface HistoryDataService {
      * @param metricCodes
      * @param queryTime
      * @param queryType
+     * @see com.zgiot.app.server.service.HistoryDataService QUERY_TIME_TYPE_*
      * @return
      */
     DataModel findClosestHistoryDataInDuration(List<String> thingCodes, List<String> metricCodes, Date queryTime, String queryType);

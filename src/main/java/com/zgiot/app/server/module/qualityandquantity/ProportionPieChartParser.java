@@ -2,7 +2,6 @@ package com.zgiot.app.server.module.qualityandquantity;
 
 import com.alibaba.fastjson.JSON;
 import com.zgiot.app.server.module.qualityandquantity.pojo.*;
-import com.zgiot.app.server.module.qualityandquantity.CardParser;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.common.pojo.DataModelWrapper;
 import org.apache.commons.lang.StringUtils;
@@ -77,9 +76,7 @@ public class ProportionPieChartParser implements CardParser {
     }
 
     private void countRatio(ProportionPieChartData proportionPieChartData, MetricDataValue partOneData, MetricDataValue partTwoData) {
-        if (partOneData == null && partTwoData == null || INVALID_VALUE.equals(partOneData) && INVALID_VALUE.equals(partTwoData)) {
-            return;
-        }
+        if (isInvalidValue(partOneData, partTwoData)) return;
         if (partOneData == null || Double.parseDouble(partOneData.getValue()) <= 0) {
             proportionPieChartData.setRatioTwo(1);
         } else if (partTwoData == null || Double.parseDouble(partTwoData.getValue()) <= 0) {
@@ -87,19 +84,35 @@ public class ProportionPieChartParser implements CardParser {
         } else {
             double partOneValue = Double.parseDouble(partOneData.getValue());
             double partTwoValue = Double.parseDouble(partTwoData.getValue());
-            if (partOneValue < partTwoValue) {
+            if (partOneValue<100 && partTwoValue >=100){
+                proportionPieChartData.setRatioTwo(1);
+            }
+            else if (partOneValue>= 100&& partTwoValue <100){
+                proportionPieChartData.setRatioOne(1);
+            }
+            else if (partOneValue < partTwoValue) {
                 BigDecimal bigDecimal = BigDecimal.valueOf(partTwoValue / partOneValue);
-                double ratio = bigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+                double ratio = bigDecimal.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
                 proportionPieChartData.setRatioOne(1);
                 proportionPieChartData.setRatioTwo(ratio);
             } else {
                 BigDecimal bigDecimal = BigDecimal.valueOf(partOneValue / partTwoValue);
-                double ratio = bigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+                double ratio = bigDecimal.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
                 proportionPieChartData.setRatioTwo(1);
                 proportionPieChartData.setRatioOne(ratio);
             }
 
         }
+    }
+
+    private boolean isInvalidValue(MetricDataValue partOneData, MetricDataValue partTwoData) {
+        if (partOneData == null && partTwoData == null) {
+            return true;
+        }
+        if (partOneData != null && partTwoData != null && INVALID_VALUE.equals(Double.parseDouble(partOneData.getValue())) && INVALID_VALUE.equals(Double.parseDouble(partTwoData.getValue()))) {
+            return true;
+        }
+        return false;
     }
 
     @Override
