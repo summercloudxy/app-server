@@ -648,13 +648,18 @@ public class SFMonitorSignalWrapperController {
     public ResponseEntity<String> findEquipmentMonitorInfo(@RequestBody String bodyStr){
         ControllerUtil.validateBodyRequired(bodyStr);
         EquipmentMonFindReq equipmentMonFindReq = JSON.parseObject(bodyStr,EquipmentMonFindReq.class);
+        List<SFMonEquipMonitorInfo> sfMonEquipMonitorInfos = new ArrayList<>();
         String configProgress = equipmentMonFindReq.getConfigProgress();
         String thingCode = equipmentMonFindReq.getThingCode();
         SFMonEquipMonitorInfo sfMonEquipMonitorInfo = new SFMonEquipMonitorInfo();
         if(!StringUtils.isBlank(thingCode)){
             sfMonEquipMonitorInfo.setConfigProgress(null);
             sfMonEquipMonitorInfo.setThingCode(thingCode + SFMonitorConstant.FUZZY_QUERY_TAG);
-            return new ResponseEntity<>(ServerResponse.buildOkJson(sfMonEquipMonitorInfoMapper.getEquipmentMonitorInfo(sfMonEquipMonitorInfo)), HttpStatus.OK);
+            sfMonEquipMonitorInfos = sfMonEquipMonitorInfoMapper.getEquipmentMonitorInfo(sfMonEquipMonitorInfo);
+            sfMonEquipMonitorInfo.setThingCode(null);
+            sfMonEquipMonitorInfo.setThingName(thingCode + SFMonitorConstant.FUZZY_QUERY_TAG);
+            sfMonEquipMonitorInfos.addAll(sfMonEquipMonitorInfoMapper.getEquipmentMonitorInfo(sfMonEquipMonitorInfo));
+            return new ResponseEntity<>(ServerResponse.buildOkJson(sfMonEquipMonitorInfos), HttpStatus.OK);
         }
         if(!StringUtils.isBlank(configProgress)){
             sfMonEquipMonitorInfo.setConfigProgress(configProgress);
