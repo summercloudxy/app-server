@@ -27,14 +27,14 @@ import static com.zgiot.app.server.module.tcs.pojo.FilterCondition.FilterConditi
  * @author jys
  */
 @Component
-public class ChemicalTestsDataDetailHandler {
+public class CoalAnalysisDataDetailHandler {
     @Autowired
     private SubscCardTypeService subscCardTypeService;
 
     @Autowired
     private CoalAnalysisMapper coalAnalysisMapper;
 
-    public ResponseEntity<String> getChemicalTestsDataDetail(String cardCode, String dateType, String chartType) {
+    public ResponseEntity<String> getCoalAnalysisDataChartDetail(String cardCode, String dateType, String chartType) {
         SubscCardTypeDO cardTypeDO = subscCardTypeService.getCardTypeByCardCode(cardCode);
         String[] cardParamValue = cardTypeDO.getCardParamValue().split(",");
         Date startDate = null;
@@ -63,10 +63,10 @@ public class ChemicalTestsDataDetailHandler {
             endDate = new Date();
         }
         if (SubscriptionConstants.CHART_TYPE.equals(chartType)) {
-            ChemicalTestsDataChartDetailVO chemicalTestsDataChartDetailVO = getChemicalTestsDataChartDetail(cardParamValue, startDate, endDate);
+            ChemicalTestsDataChartDetailVO chemicalTestsDataChartDetailVO = getCoalAnalysisDataChartDetail(cardParamValue, startDate, endDate);
             return new ResponseEntity<>(ServerResponse.buildOkJson(chemicalTestsDataChartDetailVO), HttpStatus.OK);
         } else if (SubscriptionConstants.LIST_TYPE.equals(chartType)) {
-            List<ChemicalTestsDataListDetailVO> chemicalTestsDataLIstDetailVOList = getChemicalTestsDataListDetail(cardParamValue, startDate, endDate);
+            List<ChemicalTestsDataListDetailVO> chemicalTestsDataLIstDetailVOList = getCoalAnalysisDataListDetail(cardParamValue, startDate, endDate);
             return new ResponseEntity<>(ServerResponse.buildOkJson(chemicalTestsDataLIstDetailVOList), HttpStatus.OK);
         }
         return new ResponseEntity<>(ServerResponse.buildOkJson(""), HttpStatus.FORBIDDEN);
@@ -79,7 +79,7 @@ public class ChemicalTestsDataDetailHandler {
      * @param startDate
      * @param endDate
      */
-    private List<ChemicalTestsDataListDetailVO> getChemicalTestsDataListDetail(String[] cardParamValue, Date startDate, Date endDate) {
+    private List<ChemicalTestsDataListDetailVO> getCoalAnalysisDataListDetail(String[] cardParamValue, Date startDate, Date endDate) {
 
         List<CoalAnalysisRecord> allAnalysisRecords = new ArrayList<>();
         FilterCondition cleanCoalfilterCondition = newFilterCondition().startTime(startDate).endTime(endDate).addTarget(SubscriptionConstants.CLEAN_COAL_551).build();
@@ -134,7 +134,7 @@ public class ChemicalTestsDataDetailHandler {
      * @param startDate
      * @param endDate
      */
-    private ChemicalTestsDataChartDetailVO getChemicalTestsDataChartDetail(String[] cardParamValue, Date
+    private ChemicalTestsDataChartDetailVO getCoalAnalysisDataChartDetail(String[] cardParamValue, Date
             startDate, Date endDate) {
 
         ChemicalTestsDataChartDetailVO chemicalTestsDataChartDetailVO = new ChemicalTestsDataChartDetailVO();

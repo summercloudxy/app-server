@@ -113,11 +113,22 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
      */
     @Override
     public Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetric(List<String> thingCodes, String metricCode, Date startDate, Date endDate) {
+        return findMultiThingsHistoryDataOfMetric(thingCodes, metricCode, startDate, endDate, AccuracyEnum.SECOND);
+    }
+
+    @Override
+    public Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetric(List<String> thingCodes, String metricCode, Date startDate, Date endDate, AccuracyEnum accuracy) {
+        MongoCollection<Document> mongoCollection = null;
+        if (AccuracyEnum.SECOND.equals(accuracy)) {
+            mongoCollection = collection;
+        } else if (AccuracyEnum.MINUTE.equals(accuracy)) {
+            mongoCollection = mincollection;
+        }
         if (!checkEnabled()) {
             return new HashMap<>();
         }
 
-        if (collection == null) {
+        if (mongoCollection == null) {
             logger.warn("mongo disabled");
             return new HashMap<>();
         }
@@ -132,7 +143,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
 
         //query
         Bson criteria = and(gte(DataModel.DATA_TIMESTAMP, startTime), lt(DataModel.DATA_TIMESTAMP, endTime), eq(DataModel.METRIC_CODE, metricCode), in(DataModel.THING_CODE, thingCodes));
-        FindIterable<Document> iterable = collection.find(criteria).sort(Sorts.ascending(DataModel.DATA_TIMESTAMP));
+        FindIterable<Document> iterable = mongoCollection.find(criteria).sort(Sorts.ascending(DataModel.DATA_TIMESTAMP));
 
         //generate result map
         Map<String, List<DataModel>> result = new LinkedHashMap<>(thingCodes.size());

@@ -126,12 +126,12 @@ public class SFMonitorSignalWrapperController {
     }
 
     @RequestMapping(value = "/signalWrapper", method = RequestMethod.POST)
-    public ResponseEntity<String> addOrEditSignalWrapper(@RequestBody String bodyStr) {
+    public ResponseEntity<String> addOrEditSignalWrapper(@RequestBody String bodyStr,@RequestHeader String userLoginName) {
         ControllerUtil.validateBodyRequired(bodyStr);
         SignalWrapperReq signalWrapperReq = JSON.parseObject(bodyStr, SignalWrapperReq.class);
         MetricTag metricTag = signalWrapperReq.getMetricTag();
         int zoneId = signalWrapperReq.getZoneId();
-        String editor = signalWrapperReq.getUserName();
+        String editor = userLoginName;
         String name = metricTag.getTagName();
         if (StringUtils.isBlank(name)) {
             return new ResponseEntity<>(ServerResponse.buildOkJson(false), HttpStatus.OK);
@@ -233,7 +233,7 @@ public class SFMonitorSignalWrapperController {
     }
 
     @RequestMapping(value = "/signalWrapper/metric", method = RequestMethod.POST)
-    public ResponseEntity<String> addOrEditMetricToSignalWrapper(@RequestBody String bodyStr) {
+    public ResponseEntity<String> addOrEditMetricToSignalWrapper(@RequestBody String bodyStr,@RequestHeader String userLoginName) {
         ControllerUtil.validateBodyRequired(bodyStr);
         SignalWrapperRelateMetric signalWrapperRelateMetric = JSON.parseObject(bodyStr, SignalWrapperRelateMetric.class);
         String wrapperName = signalWrapperRelateMetric.getWrapperName();
@@ -254,7 +254,7 @@ public class SFMonitorSignalWrapperController {
                     } else {
                         metricTagRelation.setComment(signalWrapperRelateMetric.getComment());
                         metricTagRelation.setCreateDate(new Date());
-                        metricTagRelation.setUserName(signalWrapperRelateMetric.getUserName());
+                        metricTagRelation.setUserName(userLoginName);
                         addOrEditSignalWrapperAndMetric(wrapperId, metricTagRelation);
                     }
                 }
@@ -298,7 +298,43 @@ public class SFMonitorSignalWrapperController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
     }
 
+    @GetMapping("/signalWrapper/fuzzyFind/findSignalWrapperByName/{wrapperName}")
+    public ResponseEntity<String> findSignalWrapperByWrapperName(@PathVariable String wrapperName){
+        List<FindSignalWrapperRes> findSignalWrapperRes = null;
+        Set<String> warpperNames = new HashSet<>();
+        Set<String> wrapperNameAndSignalName = new HashSet<>();
+        if(wrapperName.equals(SFMonitorConstant.ALL_PARAMETER)){
+            findSignalWrapperRes = metricTagRelationMapper.findAllSignalWrapper();
+            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
+                warpperNames.add(signalWrapper.getTagName());
+            }
+        }else{
+            findSignalWrapperRes = metricTagRelationMapper.fuzzyFindSignalWrapperByWrapperName(wrapperName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
+                warpperNames.add(signalWrapper.getTagName());
+            }
+        }
 
+        return new ResponseEntity<>(ServerResponse.buildOkJson(new ArrayList<>(warpperNames)), HttpStatus.OK);
+    }
+    @GetMapping("/signalWrapper/fuzzyFind/findSignalWrapperBySignal/{signalName}")
+    public ResponseEntity<String> findSignalWrapperBySignalName(@PathVariable String signalName) {
+        List<FindSignalWrapperRes> findSignalWrapperRes = null;
+        Set<String> signalNames = new HashSet<>();
+        if (signalName.equals(SFMonitorConstant.ALL_PARAMETER)) {
+            findSignalWrapperRes = metricTagRelationMapper.findAllSignalWrapper();
+            for (FindSignalWrapperRes signalWrapper : findSignalWrapperRes) {
+                signalNames.add(signalWrapper.getMetricName());
+            }
+        } else {
+            findSignalWrapperRes = metricTagRelationMapper.fuzzyFindSignalWrapperByMetricName(signalName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            for (FindSignalWrapperRes signalWrapper : findSignalWrapperRes) {
+                signalNames.add(signalWrapper.getMetricName());
+            }
+        }
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(new ArrayList<>(signalNames)), HttpStatus.OK);
+    }
     @GetMapping("/signalWrapper/fuzzyFind/findSignalWrapper/{wrapperNameOrSignalName}")
     public ResponseEntity<String> findSignalWrapperByName(@PathVariable String wrapperNameOrSignalName){
         List<FindSignalWrapperRes> findSignalWrapperRes = null;
@@ -378,13 +414,13 @@ public class SFMonitorSignalWrapperController {
     }
 
     @RequestMapping(value = "/signalWrapper/style", method = RequestMethod.POST)
-    public ResponseEntity<String> addOrEditSignalWrapperStyle(@RequestBody String bodyStr) {
+    public ResponseEntity<String> addOrEditSignalWrapperStyle(@RequestBody String bodyStr,@RequestHeader String userLoginName) {
         ControllerUtil.validateBodyRequired(bodyStr);
         SignalWrapperStyleReq signalWrapperStyleReq = JSON.parseObject(bodyStr, SignalWrapperStyleReq.class);
         int id = signalWrapperStyleReq.getId();
         String styleName = signalWrapperStyleReq.getStyleName();
         List<String> signalWrapperNames = signalWrapperStyleReq.getSignalWrapperNames();
-        String userName = signalWrapperStyleReq.getUserName();
+        String userName = userLoginName;
         List<String> existStyleNames = new ArrayList<>();
         if (!StringUtils.isBlank(styleName) && (signalWrapperNames != null) && (signalWrapperNames.size() != 0)) {
             String styleCode = sfMonStyleMapper.getCodeByName(styleName);
@@ -414,7 +450,7 @@ public class SFMonitorSignalWrapperController {
     private String addOrEditSignalWrapperStyle(int wrapperAndStyleRelId, RelSFMonMetricTagStyle relSFMonMetricTagStyle) {
         String code = null;
         if (wrapperAndStyleRelId == 0) {//add
-            String wrapperCode = relSFMonMetricTagStyleMapper.getWrapperCode(relSFMonMetricTagStyle.getMetricTagCode());
+            String wrapperCode = relSFMonMetricTagStyleMapper.getWrapperCode(relSFMonMetricTagStyle.getMetricTagCode(),relSFMonMetricTagStyle.getStyleCode());
             if(StringUtils.isBlank(wrapperCode)){
                 relSFMonMetricTagStyleMapper.addStyle(relSFMonMetricTagStyle);
             }else{
@@ -459,6 +495,43 @@ public class SFMonitorSignalWrapperController {
         }
 
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+    @GetMapping("/signalWrapper/style/fuzzyFind/findAllSignalWrapperStyleByName/{wrapperName}")
+    public ResponseEntity<String> findAllSignalWrapperStyleByWrapperName(@PathVariable String wrapperName){
+        List<FindSignalWrapperRes> findSignalWrapperRes = null;
+        Set<String> wrapperNames = new HashSet<>();
+        if(wrapperName.equals(SFMonitorConstant.ALL_PARAMETER)){
+            findSignalWrapperRes = relSFMonMetricTagStyleMapper.getAllSignalWrapperStyle();
+            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
+                wrapperNames.add(signalWrapper.getTagName());
+            }
+        }else{
+            findSignalWrapperRes = relSFMonMetricTagStyleMapper.fuzzyGetSiganlWrapperStyleByWrapperName(wrapperName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
+                wrapperNames.add(signalWrapper.getTagName());
+            }
+        }
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(new ArrayList<>(wrapperNames)), HttpStatus.OK);
+    }
+    @GetMapping("/signalWrapper/style/fuzzyFind/findAllSignalWrapperStyleByStyle/{styleName}")
+    public ResponseEntity<String> findAllSignalWrapperStyleByStyleName(@PathVariable String styleName){
+        List<FindSignalWrapperRes> findSignalWrapperRes = null;
+        Set<String> styleNames = new HashSet<>();
+        if(styleName.equals(SFMonitorConstant.ALL_PARAMETER)){
+            findSignalWrapperRes = relSFMonMetricTagStyleMapper.getAllSignalWrapperStyle();
+            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
+                styleNames.add(signalWrapper.getMetricName());
+            }
+        }else{
+            findSignalWrapperRes = relSFMonMetricTagStyleMapper.fuzzyGetSiganlWrapperStyleByStyleName(styleName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
+                styleNames.add(signalWrapper.getMetricName());
+            }
+        }
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(new ArrayList<>(styleNames)), HttpStatus.OK);
     }
 
 
@@ -513,11 +586,12 @@ public class SFMonitorSignalWrapperController {
     }
 
     @RequestMapping(value = "/equipmentConfig/addEquipment", method = RequestMethod.POST)
-    public ResponseEntity<String> addEquipmentConfig(@RequestBody String bodyStr) {
+    public ResponseEntity<String> addEquipmentConfig(@RequestBody String bodyStr,@RequestHeader String userLoginName) {
         ControllerUtil.validateBodyRequired(bodyStr);
         SFMonEquipMonitorInfo sfMonEquipMonitorInfo = JSON.parseObject(bodyStr, SFMonEquipMonitorInfo.class);
         sfMonEquipMonitorInfo.setConfigProgress(SFMonitorConstant.NOT_CONFIG);
         sfMonEquipMonitorInfo.setCreateDate(new Date());
+        sfMonEquipMonitorInfo.setEditor(userLoginName);
         String thingCode = sfMonEquipMonitorInfo.getThingCode();
         SFMonEquipMonitorInfo equipmentInfo = sfMonEquipMonitorInfoMapper.getEquiupmentInfo(thingCode);
         boolean isExist = false;
@@ -548,10 +622,11 @@ public class SFMonitorSignalWrapperController {
     }
 
     @RequestMapping(value="/equipmentConfig/editEquipmentMonitorInfo",method=RequestMethod.POST)
-    public ResponseEntity<String> editEquipmentMonitorInfo(@RequestBody String bodyStr){
+    public ResponseEntity<String> editEquipmentMonitorInfo(@RequestBody String bodyStr,@RequestHeader String userLoginName){
         ControllerUtil.validateBodyRequired(bodyStr);
         EquipmentRelateToSignalWrapperReq equipmentRelateToSignalWrapperReq = JSON.parseObject(bodyStr,EquipmentRelateToSignalWrapperReq.class);
         if(equipmentRelateToSignalWrapperReq !=  null){
+            equipmentRelateToSignalWrapperReq.setEditor(userLoginName);
             monitorService.editEquipmentMonitorInfo(equipmentRelateToSignalWrapperReq);
         }
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
@@ -576,12 +651,13 @@ public class SFMonitorSignalWrapperController {
         String configProgress = equipmentMonFindReq.getConfigProgress();
         String thingCode = equipmentMonFindReq.getThingCode();
         SFMonEquipMonitorInfo sfMonEquipMonitorInfo = new SFMonEquipMonitorInfo();
-        if(!StringUtils.isBlank(configProgress)){
-            sfMonEquipMonitorInfo.setConfigProgress(configProgress);
+        if(!StringUtils.isBlank(thingCode)){
+            sfMonEquipMonitorInfo.setConfigProgress(null);
+            sfMonEquipMonitorInfo.setThingCode(thingCode + SFMonitorConstant.FUZZY_QUERY_TAG);
             return new ResponseEntity<>(ServerResponse.buildOkJson(sfMonEquipMonitorInfoMapper.getEquipmentMonitorInfo(sfMonEquipMonitorInfo)), HttpStatus.OK);
         }
-        if(!StringUtils.isBlank(thingCode)){
-            sfMonEquipMonitorInfo.setThingCode(thingCode + SFMonitorConstant.FUZZY_QUERY_TAG);
+        if(!StringUtils.isBlank(configProgress)){
+            sfMonEquipMonitorInfo.setConfigProgress(configProgress);
             return new ResponseEntity<>(ServerResponse.buildOkJson(sfMonEquipMonitorInfoMapper.getEquipmentMonitorInfo(sfMonEquipMonitorInfo)), HttpStatus.OK);
         }
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);

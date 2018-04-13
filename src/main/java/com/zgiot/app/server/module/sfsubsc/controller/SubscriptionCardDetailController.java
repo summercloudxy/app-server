@@ -1,7 +1,7 @@
 package com.zgiot.app.server.module.sfsubsc.controller;
 
 
-import com.zgiot.app.server.module.sfsubsc.controller.handler.ChemicalTestsDataDetailHandler;
+import com.zgiot.app.server.module.sfsubsc.controller.handler.CoalAnalysisDataDetailHandler;
 import com.zgiot.app.server.module.sfsubsc.controller.handler.InstantProductDetailHandler;
 import com.zgiot.app.server.module.sfsubsc.service.SubscCardTypeService;
 import com.zgiot.common.constants.GlobalConstants;
@@ -27,7 +27,7 @@ public class SubscriptionCardDetailController {
     @Autowired
     private InstantProductDetailHandler instantProductDetailHandler;
     @Autowired
-    private ChemicalTestsDataDetailHandler chemicalTestsDataDetailHandler;
+    private CoalAnalysisDataDetailHandler coalAnalysisDataDetailHandler;
 
 
     /**
@@ -49,9 +49,9 @@ public class SubscriptionCardDetailController {
      * @param chartType
      * @return
      */
-    @RequestMapping(value = "/getChemicalTestsDataChartDetail", method = RequestMethod.GET)
-    public ResponseEntity<String> getChemicalTestsDataChartDetail(@RequestParam("cardCode") String cardCode, @RequestParam("dateType") String dateType, @RequestParam("chartType") String chartType) {
-        return chemicalTestsDataDetailHandler.getChemicalTestsDataDetail(cardCode, dateType, chartType);
+    @RequestMapping(value = "/getCoalAnalysisDataChartDetail", method = RequestMethod.GET)
+    public ResponseEntity<String> getCoalAnalysisDataChartDetail(@RequestParam("cardCode") String cardCode, @RequestParam("dateType") String dateType, @RequestParam("chartType") String chartType) {
+        return coalAnalysisDataDetailHandler.getCoalAnalysisDataChartDetail(cardCode, dateType, chartType);
     }
 
     /**
@@ -62,9 +62,9 @@ public class SubscriptionCardDetailController {
      * @param chartType
      * @return
      */
-    @RequestMapping(value = "/getChemicalTestsDataListDetail", method = RequestMethod.GET)
-    public ResponseEntity<String> getChemicalTestsDataListDetail(@RequestParam("cardCode") String cardCode, @RequestParam("dateType") String dateType, @RequestParam("chartType") String chartType) {
-        return chemicalTestsDataDetailHandler.getChemicalTestsDataDetail(cardCode, dateType, chartType);
+    @RequestMapping(value = "/getCoalAnalysisDataListDetail", method = RequestMethod.GET)
+    public ResponseEntity<String> getCoalAnalysisDataListDetail(@RequestParam("cardCode") String cardCode, @RequestParam("dateType") String dateType, @RequestParam("chartType") String chartType) {
+        return coalAnalysisDataDetailHandler.getCoalAnalysisDataChartDetail(cardCode, dateType, chartType);
     }
 
 
