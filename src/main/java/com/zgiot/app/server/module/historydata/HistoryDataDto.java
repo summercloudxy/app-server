@@ -18,6 +18,8 @@ public class HistoryDataDto {
 
     private boolean isTimeCorrection;
 
+    private String accuracy;
+
     public Date getStartTime() {
         return startTime;
     }
@@ -56,5 +58,13 @@ public class HistoryDataDto {
 
     public void setTimeCorrection(boolean timeCorrection) {
         isTimeCorrection = timeCorrection;
+    }
+
+    public String getAccuracy() {
+        return accuracy;
+    }
+
+    public void setAccuracy(String accuracy) {
+        this.accuracy = accuracy;
     }
 }

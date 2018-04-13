@@ -1,6 +1,7 @@
 package com.zgiot.app.server.module.historydata;
 
 import com.alibaba.fastjson.JSON;
+import com.zgiot.app.server.module.historydata.enums.AccuracyEnum;
 import com.zgiot.app.server.service.HistoryDataService;
 import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.DataModel;
@@ -62,11 +63,22 @@ public class HistoryDataController {
         Map<String, List<DataModel>> result;
         if (historyDataDto.getSegment() != null) {
             // by segment
-            result = historyDataService.findMultiThingsHistoryDataOfMetricBySegment(historyDataDto.getThingCodes(), metricCode,
-                    historyDataDto.getStartTime(), historyDataDto.getEndTime(), historyDataDto.getSegment(),historyDataDto.isTimeCorrection());
+            if (historyDataDto.getAccuracy() == null) {
+                result = historyDataService.findMultiThingsHistoryDataOfMetricBySegment(historyDataDto.getThingCodes(), metricCode,
+                        historyDataDto.getStartTime(), historyDataDto.getEndTime(), historyDataDto.getSegment(), historyDataDto.isTimeCorrection());
+            }else {
+                AccuracyEnum accuracyEnum = AccuracyEnum.valueOf(historyDataDto.getAccuracy());
+                result = historyDataService.findMultiThingsHistoryDataOfMetricBySegment(historyDataDto.getThingCodes(), metricCode,
+                        historyDataDto.getStartTime(), historyDataDto.getEndTime(), historyDataDto.getSegment(), historyDataDto.isTimeCorrection(),accuracyEnum);
+            }
         } else {
             // all data in time range
-            result = historyDataService.findMultiThingsHistoryDataOfMetric(historyDataDto.getThingCodes(), metricCode, historyDataDto.getStartTime(), historyDataDto.getEndTime());
+            if (historyDataDto.getAccuracy() == null) {
+                result = historyDataService.findMultiThingsHistoryDataOfMetric(historyDataDto.getThingCodes(), metricCode, historyDataDto.getStartTime(), historyDataDto.getEndTime());
+            }else {
+                AccuracyEnum accuracyEnum = AccuracyEnum.valueOf(historyDataDto.getAccuracy());
+                result = historyDataService.findMultiThingsHistoryDataOfMetric(historyDataDto.getThingCodes(), metricCode, historyDataDto.getStartTime(), historyDataDto.getEndTime(),accuracyEnum);
+            }
         }
         return new ResponseEntity<>(ServerResponse.buildOkJson(result), HttpStatus.OK);
     }
