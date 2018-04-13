@@ -18,6 +18,9 @@ public class ProportionPieChartParser implements CardParser {
     private DataService dataService;
     private String parserName = "ProportionPieChartParser";
     private static final Double INVALID_VALUE = 0.0;
+    private static final String VALUE_ONE = "1";
+
+    private static final String VALUE_ZERO = "0";
     private static final DecimalFormat df = new DecimalFormat("######0.00");
 
     @Override
@@ -78,38 +81,47 @@ public class ProportionPieChartParser implements CardParser {
     private void countRatio(ProportionPieChartData proportionPieChartData, MetricDataValue partOneData, MetricDataValue partTwoData) {
         if (isInvalidValue(partOneData, partTwoData)) return;
         if (partOneData == null || Double.parseDouble(partOneData.getValue()) <= 0) {
-            proportionPieChartData.setRatioTwo(1);
+            proportionPieChartData.setRatioTwo(VALUE_ONE);
         } else if (partTwoData == null || Double.parseDouble(partTwoData.getValue()) <= 0) {
-            proportionPieChartData.setRatioOne(1);
+            proportionPieChartData.setRatioOne(VALUE_ONE);
         } else {
             double partOneValue = Double.parseDouble(partOneData.getValue());
             double partTwoValue = Double.parseDouble(partTwoData.getValue());
-            if (partOneValue<100 && partTwoValue >=100){
-                proportionPieChartData.setRatioTwo(1);
-            }
-            else if (partOneValue>= 100&& partTwoValue <100){
-                proportionPieChartData.setRatioOne(1);
-            }
-            else if (partOneValue < partTwoValue) {
+            if (partOneValue < 100 && partTwoValue >= 100) {
+                proportionPieChartData.setRatioTwo(VALUE_ONE);
+            } else if (partOneValue >= 100 && partTwoValue < 100) {
+                proportionPieChartData.setRatioOne(VALUE_ONE);
+            } else if (partOneValue < partTwoValue) {
                 BigDecimal bigDecimal = BigDecimal.valueOf(partTwoValue / partOneValue);
-                double ratio = bigDecimal.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
-                proportionPieChartData.setRatioOne(1);
+                String ratio = getFormatValue(bigDecimal);
+                proportionPieChartData.setRatioOne(VALUE_ONE);
                 proportionPieChartData.setRatioTwo(ratio);
             } else {
                 BigDecimal bigDecimal = BigDecimal.valueOf(partOneValue / partTwoValue);
-                double ratio = bigDecimal.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
-                proportionPieChartData.setRatioTwo(1);
+                String ratio = getFormatValue(bigDecimal);
+                proportionPieChartData.setRatioTwo(VALUE_ONE);
                 proportionPieChartData.setRatioOne(ratio);
             }
 
         }
     }
 
+    public String getFormatValue(BigDecimal bigDecimal){
+        String ratio  ;
+        if(new BigDecimal(bigDecimal.intValue()).compareTo(bigDecimal)==0){
+            ratio = bigDecimal.setScale(0, BigDecimal.ROUND_HALF_UP).toString();
+        }else{
+
+            ratio = bigDecimal.setScale(1, BigDecimal.ROUND_HALF_UP).toString();
+        }
+        return ratio;
+    }
+
     private boolean isInvalidValue(MetricDataValue partOneData, MetricDataValue partTwoData) {
         if (partOneData == null && partTwoData == null) {
             return true;
         }
-        if (partOneData != null && partTwoData != null && INVALID_VALUE.equals(Double.parseDouble(partOneData.getValue())) && INVALID_VALUE.equals(Double.parseDouble(partTwoData.getValue()))) {
+        if (partOneData != null && partTwoData != null && Double.parseDouble(partOneData.getValue()) < 100 && Double.parseDouble(partTwoData.getValue()) < 100) {
             return true;
         }
         return false;

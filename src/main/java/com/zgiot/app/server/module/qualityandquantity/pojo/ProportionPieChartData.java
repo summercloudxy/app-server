@@ -6,8 +6,8 @@ public class ProportionPieChartData {
     private String partOneValue;
     private String partTwoThingCode;
     private String partTwoValue;
-    private double ratioOne;
-    private double ratioTwo;
+    private String ratioOne;
+    private String ratioTwo;
     private String ratioThingCode;
     private String ratioMetricCode;
 
@@ -53,19 +53,19 @@ public class ProportionPieChartData {
         this.partTwoValue = partTwoValue;
     }
 
-    public double getRatioOne() {
+    public String getRatioOne() {
         return ratioOne;
     }
 
-    public void setRatioOne(double ratioOne) {
+    public void setRatioOne(String ratioOne) {
         this.ratioOne = ratioOne;
     }
 
-    public double getRatioTwo() {
+    public String getRatioTwo() {
         return ratioTwo;
     }
 
-    public void setRatioTwo(double ratioTwo) {
+    public void setRatioTwo(String ratioTwo) {
         this.ratioTwo = ratioTwo;
     }
 
