@@ -35,6 +35,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
     private static final Map<String, Map<String, Object>> WHITE_MAP = new HashMap();
 
     private static final String COLLECTION_NAME = "metricdata";
+    private static final String MIN_COLLECTION_NAME = "metricdata_min";
 
     private static final String KEY_ARRAY = "array";
     private static final String KEY_SIZE = "size";
@@ -44,7 +45,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
     @Autowired
     private MongoDatabase database;
     private MongoCollection<Document> collection;
-
+    private MongoCollection<Document> mincollection;
     @Autowired
     TMLMapper tmlMapper;
 
