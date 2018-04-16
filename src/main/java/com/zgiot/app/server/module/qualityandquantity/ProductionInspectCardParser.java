@@ -1,6 +1,7 @@
 package com.zgiot.app.server.module.qualityandquantity;
 
 import com.alibaba.fastjson.JSON;
+import com.zgiot.app.server.module.qualityandquantity.pojo.MetricDataValue;
 import com.zgiot.app.server.module.qualityandquantity.pojo.ProductionInspectData;
 import com.zgiot.app.server.module.qualityandquantity.pojo.ReportFormsParam;
 import com.zgiot.app.server.module.qualityandquantity.service.QualityAndQuantityDataManager;
@@ -18,6 +19,8 @@ public class ProductionInspectCardParser implements CardParser {
     private DataService dataService;
     @Autowired
     private QualityAndQuantityDataManager dataManager;
+    @Autowired
+    private CoalAnalysisCardParser coalAnalysisCardParser;
     private String parserName = "ProductionInspectCardParser";
 
     @Override
@@ -29,7 +32,6 @@ public class ProductionInspectCardParser implements CardParser {
     public ProductionInspectData parse(String paramValueJson) {
         ProductionInspectData productionInspectData = new ProductionInspectData();
         ReportFormsParam thingMetricParam = JSON.parseObject(paramValueJson, ReportFormsParam.class);
-
         String metricCode = thingMetricParam.getMetricCode();
         String target = thingMetricParam.getThingCode();
         Optional<DataModelWrapper> data = dataService.getData(target, metricCode);
@@ -40,11 +42,19 @@ public class ProductionInspectCardParser implements CardParser {
                 productionInspectData = dataManager.transProductionInspectRecordToData(productionInspectRecord);
                 productionInspectData.setType(thingMetricParam.getType());
                 productionInspectData.setShowBit(thingMetricParam.getShowBit());
+                formatDensity(productionInspectData);
             }
         }
         return productionInspectData;
     }
 
+    private void formatDensity(ProductionInspectData productionInspectData) {
+        MetricDataValue avgDensity = productionInspectData.getAvgDensity();
+        if (avgDensity != null) {
+            String formatValue = coalAnalysisCardParser.getFormatValue(avgDensity.getValue());
+            avgDensity.setValue(formatValue);
+        }
+    }
 
     @Override
     public ProductionInspectData parseTest(String paramValueJson) {
