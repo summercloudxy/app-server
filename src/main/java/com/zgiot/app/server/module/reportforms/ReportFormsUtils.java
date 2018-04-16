@@ -89,8 +89,8 @@ public class ReportFormsUtils {
             cumulateValue(densityCumulativeData,densityAndFlowValue.getDensity());
             cumulateValue(flowCumulativeData,densityAndFlowValue.getFlow());
         }
-        record.setAvgDensity(densityCumulativeData.getAvgValue(true,2));
-        record.setAvgFlow(flowCumulativeData.getAvgValue(true,2));
+        record.setAvgDensity(densityCumulativeData.getAvgValue(true,3));
+        record.setAvgFlow(flowCumulativeData.getAvgValue(true,3));
     }
 
 
