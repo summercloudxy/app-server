@@ -64,14 +64,17 @@ public class CardDataManager {
                 cardDataDTOS.add(cardDataDTO);
             }
         }
+        logger.info("开始卡片历史10S数据上传CloudServer");
         try {
             ServerResponse serverResponse = cloudServerFeignClient.saveAllCardDatas(cardDataDTOS, AUTHORIZATION_PRIFIX + authorization);
+            logger.info("10s,clouserver的请求响应：" + serverResponse.getCode());
             if (serverResponse.getCode() == 0) {
-                logger.debug("卡片历史数据上传CloudServer完成");
+                logger.info("10s数据，卡片历史数据上传CloudServer完成");
             }
 
         } catch (Exception e) {
-            logger.error("连接cloudserver异常.URL:" + cloudServiceUrl + cloudServerPath);
+            logger.error(e.getMessage());
+            logger.error("10s数据，连接cloudserver异常.URL:" + cloudServiceUrl + cloudServerPath);
 
         }
 
@@ -107,13 +110,16 @@ public class CardDataManager {
                 cardDataDTOS.add(cardDataDTO);
             }
         }
+        logger.info("开始卡片历史5S数据上传CloudServer");
         try {
             ServerResponse serverResponse = cloudServerFeignClient.saveAllCardDatas(cardDataDTOS, AUTHORIZATION_PRIFIX + authorization);
             if (serverResponse.getCode() == 0) {
-                logger.debug("卡片实时数据上传CloudServer完成");
+                logger.info("5s,clouserver的请求响应：" + serverResponse.getCode());
+                logger.info("5s卡片实时数据上传CloudServer完成");
             }
         } catch (Exception e) {
-            logger.error("连接cloudserver异常.URL:" + cloudServiceUrl + cloudServerPath);
+            logger.error(e.getMessage());
+            logger.error("5s连接cloudserver异常.URL:" + cloudServiceUrl + cloudServerPath);
         }
 
     }
