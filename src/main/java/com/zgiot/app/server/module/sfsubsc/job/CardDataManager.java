@@ -6,9 +6,6 @@ import com.zgiot.app.server.module.sfsubsc.enums.CardTypeEnum;
 import com.zgiot.app.server.module.sfsubsc.service.SubscCardTypeService;
 import com.zgiot.app.server.module.sfsubsc.service.feign.CloudServerFeignClient;
 import com.zgiot.common.restcontroller.ServerResponse;
-import feign.Feign;
-import feign.jackson.JacksonDecoder;
-import feign.jackson.JacksonEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +29,16 @@ public class CardDataManager {
 
     @Value("${cloud.serviceaccount.token}")
     private String authorization;
+
     @Value("${cloud.service.url}")
     private String cloudServiceUrl;
     @Value("${cloud.service.path}")
     private String cloudServerPath;
+
+
+    @Autowired
+    private CloudServerFeignClient cloudServerFeignClient;
+
 
 
     @Autowired
@@ -61,14 +64,18 @@ public class CardDataManager {
                 cardDataDTOS.add(cardDataDTO);
             }
         }
-        CloudServerFeignClient cloudServerFeignClient = Feign.builder().encoder(new JacksonEncoder())
-                .decoder(new JacksonDecoder()).requestInterceptor(requestTemplate -> requestTemplate.header("Authorization", AUTHORIZATION_PRIFIX + authorization))
-                .target(CloudServerFeignClient.class,
-                        cloudServiceUrl + cloudServerPath);
-        ServerResponse serverResponse = cloudServerFeignClient.saveAllCardDatas(cardDataDTOS);
-        if (serverResponse.getCode() == 0) {
-            logger.debug("卡片历史数据上传CloudServer完成");
+        try {
+            ServerResponse serverResponse = cloudServerFeignClient.saveAllCardDatas(cardDataDTOS, AUTHORIZATION_PRIFIX + authorization);
+            if (serverResponse.getCode() == 0) {
+                logger.debug("卡片历史数据上传CloudServer完成");
+            }
+
+        } catch (Exception e) {
+            logger.error("连接cloudserver异常.URL:" + cloudServiceUrl + cloudServerPath);
+
         }
+
+
     }
 
     /**
@@ -100,14 +107,15 @@ public class CardDataManager {
                 cardDataDTOS.add(cardDataDTO);
             }
         }
-        CloudServerFeignClient cloudServerFeignClient = Feign.builder().encoder(new JacksonEncoder())
-                .decoder(new JacksonDecoder()).requestInterceptor(requestTemplate -> requestTemplate.header("Authorization", authorization))
-                .target(CloudServerFeignClient.class,
-                        cloudServiceUrl + cloudServerPath);
-        ServerResponse serverResponse = cloudServerFeignClient.saveAllCardDatas(cardDataDTOS);
-        if (serverResponse.getCode() == 0) {
-            logger.debug("卡片实时数据上传CloudServer完成");
+        try {
+            ServerResponse serverResponse = cloudServerFeignClient.saveAllCardDatas(cardDataDTOS, AUTHORIZATION_PRIFIX + authorization);
+            if (serverResponse.getCode() == 0) {
+                logger.debug("卡片实时数据上传CloudServer完成");
+            }
+        } catch (Exception e) {
+            logger.error("连接cloudserver异常.URL:" + cloudServiceUrl + cloudServerPath);
         }
+
     }
 
 

@@ -1,0 +1,10 @@
+UPDATE `tb_metric` SET `metric_code`='MD', `metric_type1_code`='PR', `metric_type2_code`='DENSITY', `metric_type3_code`=NULL, `value_type`='FLT', `value_unit`='kg/L' WHERE (`metric_code`='MD');
+UPDATE `tb_metric` SET `metric_code`='MD_SET', `metric_type1_code`='PS', `metric_type2_code`=NULL, `metric_type3_code`=NULL, `value_type`='FLT', `value_unit`='kg/L' WHERE (`metric_code`='MD_SET');
+UPDATE `tb_metric` SET `metric_code`='MD_USE', `metric_type1_code`='PR', `metric_type2_code`='DENSITY', `metric_type3_code`=NULL, `value_type`='FLT', `value_unit`='kg/L' WHERE (`metric_code`='MD_USE');
+UPDATE `tb_metric` SET `metric_code`='MD1', `metric_type1_code`='PR', `metric_type2_code`='DENSITY', `metric_type3_code`=NULL, `value_type`='FLT', `value_unit`='kg/L' WHERE (`metric_code`='MD1');
+UPDATE `tb_metric` SET `metric_code`='MD_SET_REAL', `metric_type1_code`='PR', `metric_type2_code`=NULL, `metric_type3_code`=NULL, `value_type`='FLT', `value_unit`='kg/L' WHERE (`metric_code`='MD_SET_REAL');
+UPDATE `tb_metric` SET `metric_code`='AVG_DENSITY', `metric_type1_code`=NULL, `metric_type2_code`=NULL, `metric_type3_code`=NULL, `value_type`=NULL, `value_unit`='kg/L' WHERE (`metric_code`='AVG_DENSITY');
+UPDATE `tb_metric` SET `metric_code`='ASSAY_DENSITY', `metric_type1_code`=NULL, `metric_type2_code`=NULL, `metric_type3_code`=NULL, `value_type`=NULL, `value_unit`='kg/L' WHERE (`metric_code`='ASSAY_DENSITY');
+UPDATE `tb_metric` SET `metric_code`='PRODUCT_INSPECT_DENSITY', `metric_type1_code`=NULL, `metric_type2_code`=NULL, `metric_type3_code`=NULL, `value_type`=NULL, `value_unit`='kg/L' WHERE (`metric_code`='PRODUCT_INSPECT_DENSITY');
+UPDATE `tb_metric` SET `metric_code`='PRODUCT_INSPECT_DENSITY_AVG', `metric_type1_code`=NULL, `metric_type2_code`=NULL, `metric_type3_code`=NULL, `value_type`=NULL, `value_unit`='kg/L' WHERE (`metric_code`='PRODUCT_INSPECT_DENSITY_AVG');
+UPDATE `tb_metric` SET `metric_code`='ASSAY_DENSITY_AVG', `metric_type1_code`=NULL, `metric_type2_code`=NULL, `metric_type3_code`=NULL, `value_type`=NULL, `value_unit`='kg/L' WHERE (`metric_code`='ASSAY_DENSITY_AVG');

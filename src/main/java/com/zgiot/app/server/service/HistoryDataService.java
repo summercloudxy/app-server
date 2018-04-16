@@ -1,6 +1,6 @@
 package com.zgiot.app.server.service;
 
-import com.zgiot.app.server.service.impl.HistoryDataServiceImpl;
+import com.zgiot.app.server.module.historydata.enums.AccuracyEnum;
 import com.zgiot.common.pojo.DataModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +57,7 @@ public interface HistoryDataService {
      * @param segment
      * @return {"2492":[{"dt":1508833769000,"v":"1.3"},{"dt":1508833769001,"v":"1.4"}],"2493":[{"dt":1508833769000,"v":"1.3"},{"dt":1508833769001,"v":"1.4"}]}
      */
-    Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment,boolean isTimeCorrection);
+    Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment, boolean isTimeCorrection);
 
 
     /**
@@ -70,6 +70,17 @@ public interface HistoryDataService {
      * @return {"2492":[{"dt":1508833769000,"v":"1.3"},{"dt":1508833769001,"v":"1.4"}],"2493":[{"dt":1508833769000,"v":"1.3"},{"dt":1508833769001,"v":"1.4"}]}
      */
     Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetric(List<String> thingCodes, String metricCode, Date startDate, Date endDate);
+
+    /**
+     * find all history data of one metricCode of multi thingCodes in a time range
+     *
+     * @param thingCodes thingCode list
+     * @param metricCode
+     * @param startDate
+     * @param endDate
+     * @return {"2492":[{"dt":1508833769000,"v":"1.3"},{"dt":1508833769001,"v":"1.4"}],"2493":[{"dt":1508833769000,"v":"1.3"},{"dt":1508833769001,"v":"1.4"}]}
+     */
+    Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetric(List<String> thingCodes, String metricCode, Date startDate, Date endDate, AccuracyEnum accuracy);
 
     /**
      * @param list MongoData use MongoData directly to avoid another loop to convert obj.
@@ -101,12 +112,14 @@ public interface HistoryDataService {
      * @param metricCodes
      * @param queryTime
      * @param queryType
+     * @see com.zgiot.app.server.service.HistoryDataService QUERY_TIME_TYPE_*
      * @return
      */
     DataModel findClosestHistoryDataInDuration(List<String> thingCodes, List<String> metricCodes, Date queryTime, String queryType);
 
     /**
      * find the history data which has the max value in duration
+     *
      * @param thingCode
      * @param metricCode
      * @param startDate
@@ -117,4 +130,59 @@ public interface HistoryDataService {
 
     Double findAvgValueDataInDuration(String thingCode, String metricCode, Date startDate, Date endDate);
 
+
+    /**
+     * find history data of one metricCode of multi thingCodes in a time range by segment
+     *
+     * @param thingCodes
+     * @param metricCode
+     * @param startDate
+     * @param endDate
+     * @param segment
+     * @param isTimeCorrection
+     * @param accuracy
+     * @return
+     */
+    Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment, boolean isTimeCorrection, AccuracyEnum accuracy);
+
+    /**
+     * @param list MongoData use MongoData directly to avoid another loop to convert obj.
+     * @return count of success.
+     */
+    int insertMinDataBatch(List<DataModel> list);
+
+    /**
+     * 查询某thingCode某metricCode 的信号值 数量
+     *
+     * @param thingCode
+     * @param metricCode
+     * @param accuracy
+     * @return
+     */
+    Long getDataBatchCount(Date startTime, Date endTime, String thingCode, String metricCode, AccuracyEnum accuracy);
+
+    /**
+     * 根据精度查询信号值数据
+     *
+     * @param thingCodes
+     * @param metricCodes
+     * @param startDate
+     * @param endDate
+     * @param accuracy
+     * @return
+     */
+    List<DataModel> findHistoryDataList(List<String> thingCodes, List<String> metricCodes
+            , Date startDate, Date endDate, AccuracyEnum accuracy);
+
+    /**
+     * 根据精度查询信号值数据平均值
+     *
+     * @param thingCode
+     * @param metricCode
+     * @param startDate
+     * @param endDate
+     * @param accuracyEnum
+     * @return
+     */
+    Double findAvgValueDataInDuration(String thingCode, String metricCode, Date startDate, Date endDate, AccuracyEnum accuracyEnum);
 }

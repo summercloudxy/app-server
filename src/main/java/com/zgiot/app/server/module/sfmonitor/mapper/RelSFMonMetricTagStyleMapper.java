@@ -18,6 +18,9 @@ public interface RelSFMonMetricTagStyleMapper {
             "values(#{metricTagCode},#{styleCode},#{createDate},#{comment},#{editor})")
     public void addStyle(RelSFMonMetricTagStyle relSFMonMetricTagStyle);
 
+    @Select("select metric_tag_code from rel_sfmon_metrictag_style where metric_tag_code=#{metricTagCode} and style_code=#{styleCode} ")
+    public String getWrapperCode(@Param("metricTagCode") String metricTagCode,@Param("styleCode") String styleCode);
+
     @Update("update rel_sfmon_metrictag_style set metric_tag_code=#{metricTagCode},style_code=#{styleCode},create_date=#{createDate}," +
             "comment=#{comment},editor=#{editor} where id=#{id}")
     public void updateStyle(RelSFMonMetricTagStyle relSFMonMetricTagStyle);

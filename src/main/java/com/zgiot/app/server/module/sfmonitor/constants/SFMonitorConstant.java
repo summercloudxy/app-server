@@ -20,7 +20,7 @@ public class SFMonitorConstant {
     public static final String ALL_PARAMETER = "all";
     public static final String MONITOR_GROUP = "智能监控";
     public static final String FUZZY_QUERY_TAG = "%";
-    public static final String STATE = "state";
+    public static final String STATE = "STATE";
     public static final int SECOND_TO_MILLSECOND = 1000;
 //    rule描述：
 //            1:不同部件所有点放到一个信号包中

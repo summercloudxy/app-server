@@ -71,35 +71,35 @@ public class WebConfig extends WebMvcConfigurerAdapter {
         };
     }
 
-    //跨域设置
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("*")
-                .allowCredentials(true)
-                .allowedMethods("GET", "POST", "DELETE", "PUT")
-                .maxAge(3600);
-    }
-
-    private CorsConfiguration buildConfig() {
-        CorsConfiguration corsConfiguration = new CorsConfiguration();
-        List<String> list = new ArrayList<>();
-        list.add("*");
-        corsConfiguration.setAllowedOrigins(list);
-    /*
-    // 请求常用的三种配置，*代表允许所有，当时你也可以自定义属性（比如header只能带什么，只能是post方式等等）
-    */
-        corsConfiguration.addAllowedOrigin("*");// 设置访问源地址
-        corsConfiguration.addAllowedHeader("*");//设置访问源请求头
-        corsConfiguration.addAllowedMethod("*");//设置访问源请求方法
-        return corsConfiguration;
-    }
-
-    @Bean
-    public CorsFilter corsFilter() {
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", buildConfig());
-        return new CorsFilter(source);
-    }
+//    //跨域设置
+//    @Override
+//    public void addCorsMappings(CorsRegistry registry) {
+//        registry.addMapping("/**")
+//                .allowedOrigins("*")
+//                .allowCredentials(true)
+//                .allowedMethods("GET", "POST", "DELETE", "PUT")
+//                .maxAge(3600);
+//    }
+//
+//    private CorsConfiguration buildConfig() {
+//        CorsConfiguration corsConfiguration = new CorsConfiguration();
+//        List<String> list = new ArrayList<>();
+//        list.add("*");
+//        corsConfiguration.setAllowedOrigins(list);
+//    /*
+//    // 请求常用的三种配置，*代表允许所有，当时你也可以自定义属性（比如header只能带什么，只能是post方式等等）
+//    */
+//        corsConfiguration.addAllowedOrigin("*");// 设置访问源地址
+//        corsConfiguration.addAllowedHeader("*");//设置访问源请求头
+//        corsConfiguration.addAllowedMethod("*");//设置访问源请求方法
+//        return corsConfiguration;
+//    }
+//
+//    @Bean
+//    public CorsFilter corsFilter() {
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", buildConfig());
+//        return new CorsFilter(source);
+//    }
 }
 

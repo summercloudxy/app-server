@@ -10,11 +10,12 @@ import com.zgiot.app.server.module.bellows.BellowsDataListener;
 import com.zgiot.app.server.module.bellows.compressor.CompressorManager;
 import com.zgiot.app.server.module.bellows.valve.ValveIntelligentJob;
 import com.zgiot.app.server.module.bellows.valve.ValveManager;
-import com.zgiot.app.server.module.reportforms.listener.ReportFormsCompleter;
 import com.zgiot.app.server.module.demo.DemoBusiness;
 import com.zgiot.app.server.module.demo.DemoDataCompleter;
 import com.zgiot.app.server.module.densitycontrol.DensityControlListener;
 import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
+import com.zgiot.app.server.module.historydata.job.HistoryMinDataJob;
+import com.zgiot.app.server.module.reportforms.listener.ReportFormsCompleter;
 import com.zgiot.app.server.module.sfsubsc.job.UploadHistorySubscCardDatas;
 import com.zgiot.app.server.module.sfsubsc.job.UploadSubscCardDatas;
 import com.zgiot.app.server.service.impl.HistoryDataPersistDaemon;
@@ -24,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -70,12 +70,15 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
 
     private static final int FAULT_SCAN_RATE = 20;
 
-    @Value("${subscriptioncarddata.quartz.upload.flag}")
-    private Boolean subscriptioncarddataQuartzUploadFlag;
+    private static boolean initFlag = false;
 
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+        if (initFlag){
+            return;
+        }
+        initFlag = true;
         if (applicationContext == null) {
             applicationContext = contextRefreshedEvent.getApplicationContext();
         }
@@ -86,9 +89,13 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
             logger.error("error", throwable);
             return null;
         });
+
+
     }
 
     void installModules(DataProcessor processor) {
+
+
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
                 || moduleListConfig.containModule(ModuleListConfig.MODULE_COAL_ANALYSIS)) {
             completerDataListener.addCompleter(reportFormsCompleter);
@@ -101,6 +108,8 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
                 || moduleListConfig.containModule(ModuleListConfig.MODULE_HIST_PERSIST)) {
             historyDataPersistDaemon.start();
+            QuartzManager.addJob("historyMinData", ModuleListConfig.MODULE_SUBSCRIPTION, "historyMinData",
+                    ModuleListConfig.MODULE_HIST_PERSIST, HistoryMinDataJob.class, "0 0/1 * * * ?");
         }
 
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
@@ -146,13 +155,11 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
 
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
                 || moduleListConfig.containModule(ModuleListConfig.MODULE_SUBSCRIPTION)) {
-            if (subscriptioncarddataQuartzUploadFlag) {
                 QuartzManager.addJob("uploadsubscCardDatasOf5s", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf5s",
                         ModuleListConfig.MODULE_SUBSCRIPTION, UploadSubscCardDatas.class, "0/5 * * * * ?");
 
                 QuartzManager.addJob("uploadsubscCardDatasOf10s", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf10s",
                         ModuleListConfig.MODULE_SUBSCRIPTION, UploadHistorySubscCardDatas.class, "0/10 * * * * ?");
-            }
 
         }
 
@@ -161,6 +168,7 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
             completerDataListener.addCompleter(new DemoDataCompleter());
             processor.addListener(demoBusiness);
             }
+
 
     }
 

@@ -35,10 +35,12 @@ public class DashboardCardParser implements CardParser {
         dashboardData.setThingCode(thingCode);
         dashboardData.setThingName(thingName);
         dashboardData.setMetricDataValues(getMetricDataValue(thingMetricParam, thingCode));
-        if (thingMetricParam.isIgnoreTc()){
-            dashboardData.setThingCode(null);
+        if (thingMetricParam.isIgnoreTc()) {
+            dashboardData.setIgnoreTc(thingMetricParam.isIgnoreTc());
             dashboardData.setThingName(thingMetricParam.getTitle());
         }
+        dashboardData.setModule(thingMetricParam.getModule());
+        dashboardData.setSystem(thingMetricParam.getSystem());
         return dashboardData;
     }
 
@@ -48,11 +50,23 @@ public class DashboardCardParser implements CardParser {
         int index = 0;
         for (String metricCode : metricCodes) {
             MetricDataValue valueWithRule = dataManager.getValueWithRule(thingCode, metricCode);
+            if (index == 0) {
+                formatValue(valueWithRule);
+            }
             valueWithRule.setIndex(index);
             index++;
             metricDataValues.add(valueWithRule);
         }
         return metricDataValues;
+    }
+
+    private void formatValue(MetricDataValue metricDataValue) {
+        String value = metricDataValue.getValue();
+        if (value != null) {
+            double doubleValue = Double.parseDouble(value);
+            String formatValue = String.format("%.3f", doubleValue);
+            metricDataValue.setValue(formatValue);
+        }
     }
 
     @Override

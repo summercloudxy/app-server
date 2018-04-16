@@ -9,6 +9,7 @@ import com.zgiot.app.server.module.sfsubsc.entity.vo.*;
 import com.zgiot.app.server.module.sfsubsc.enums.CardTypeEnum;
 import com.zgiot.app.server.module.sfsubsc.mapper.SubscCardTypeMapper;
 import com.zgiot.app.server.module.sfsubsc.service.SubscCardTypeService;
+import com.zgiot.app.server.module.sfsubsc.util.MetricValueUtil;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.service.HistoryDataService;
 import com.zgiot.common.constants.*;
@@ -68,7 +69,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             HistoryWashingQuantityVO.MetricData metricData = historyWashingQuantityVO.new MetricData();
             //指标标题
             metricData.setMetricIndex(getMetricIndex(metrictype));
-            //代煤量指标值
+            //带煤量指标值
             getBeltMetricValueByCT(cardParamValues, metricDatas, metrictype, metricData);
         }
         historyWashingQuantityVO.setMetricDatas(metricDatas);
@@ -122,11 +123,11 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         if (firstMetirc.isPresent()) {
             if (metrictype.equals(MetricCodes.CT_C) || metrictype.equals(MetricCodes.CT_D)) {
                 firstMetric = firstMetirc.get().getValue();
-                metricData.setFirstMetricValue(firstMetirc.get().getValue() + SubscriptionConstants.UNIT_T);
+                metricData.setFirstMetricValue(MetricValueUtil.formart(firstMetirc.get().getValue()) + SubscriptionConstants.UNIT_T);
             } else {
                 BigDecimal metricValue = new BigDecimal(firstMetirc.get().getValue()).divide(new BigDecimal(10000), 3, BigDecimal.ROUND_HALF_UP);
                 firstMetric = String.valueOf(metricValue);
-                metricData.setFirstMetricValue(firstMetirc.get().getValue() + SubscriptionConstants.UNIT_THOUSAND_T);
+                metricData.setFirstMetricValue(firstMetric + SubscriptionConstants.UNIT_THOUSAND_T);
             }
         } else {
             metricData.setFirstMetricValue("");
@@ -135,11 +136,11 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         if (secondMetirc.isPresent()) {
             if (metrictype.equals(MetricCodes.CT_C) || metrictype.equals(MetricCodes.CT_D)) {
                 secondMetric = secondMetirc.get().getValue();
-                metricData.setSecondMetricValue(secondMetirc.get().getValue() + SubscriptionConstants.UNIT_T);
+                metricData.setSecondMetricValue(MetricValueUtil.formart(secondMetirc.get().getValue()) + SubscriptionConstants.UNIT_T);
             } else {
                 BigDecimal metricValue = new BigDecimal(secondMetirc.get().getValue()).divide(new BigDecimal(10000), 3, BigDecimal.ROUND_HALF_UP);
                 secondMetric = String.valueOf(metricValue);
-                metricData.setSecondMetricValue(secondMetirc.get().getValue() + SubscriptionConstants.UNIT_THOUSAND_T);
+                metricData.setSecondMetricValue(secondMetric + SubscriptionConstants.UNIT_THOUSAND_T);
             }
         } else {
             metricData.setSecondMetricValue("");
@@ -189,7 +190,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
                 BigDecimal secondPrecent = new BigDecimal(mixedCoalValue).divide(totalValue, 3, BigDecimal.ROUND_HALF_UP);
                 metricData.setMixedCoalPrecent((secondPrecent).multiply(new BigDecimal(100)).setScale(1) + "%");
 
-                BigDecimal thirdPrecent = new BigDecimal(wasteRockValue).divide(totalValue, 3, BigDecimal.ROUND_HALF_UP);
+                BigDecimal thirdPrecent = BigDecimal.valueOf(1.00).subtract(fistPrecent).subtract(secondPrecent);
                 metricData.setWasteRockPrecent((thirdPrecent).multiply(new BigDecimal(100)).setScale(1) + "%");
 
             } else {
@@ -222,10 +223,10 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             if (thirdMetirc.isPresent()) {
                 if (metrictype.equals(MetricCodes.CT_C) || metrictype.equals(MetricCodes.CT_D)) {
                     wasteRockValue = wasteRockValue.add(new BigDecimal(thirdMetirc.get().getValue()));
-                    metricData.setWasteRockValue(wasteRockValue + SubscriptionConstants.UNIT_T);
+                    metricData.setWasteRockValue(MetricValueUtil.formart(wasteRockValue) + SubscriptionConstants.UNIT_T);
                 } else {
                     wasteRockValue = wasteRockValue.add(new BigDecimal(thirdMetirc.get().getValue()).divide(new BigDecimal(10000), 3, BigDecimal.ROUND_HALF_UP));
-                    metricData.setWasteRockValue(wasteRockValue + SubscriptionConstants.UNIT_THOUSAND_T);
+                    metricData.setWasteRockValue(MetricValueUtil.formart(wasteRockValue) + SubscriptionConstants.UNIT_THOUSAND_T);
                 }
             } else {
                 metricData.setWasteRockValue("");
@@ -249,10 +250,10 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         if (secondMetirc.isPresent()) {
             if (metrictype.equals(MetricCodes.CT_C) || metrictype.equals(MetricCodes.CT_D)) {
                 mixedCoalValue = secondMetirc.get().getValue();
-                metricData.setMixedCoalValue(mixedCoalValue + SubscriptionConstants.UNIT_T);
+                metricData.setMixedCoalValue(MetricValueUtil.formart(mixedCoalValue) + SubscriptionConstants.UNIT_T);
             } else {
                 mixedCoalValue = String.valueOf(new BigDecimal(secondMetirc.get().getValue()).divide(new BigDecimal(10000), 3, BigDecimal.ROUND_HALF_UP));
-                metricData.setMixedCoalValue(mixedCoalValue + SubscriptionConstants.UNIT_THOUSAND_T);
+                metricData.setMixedCoalValue(MetricValueUtil.formart(mixedCoalValue) + SubscriptionConstants.UNIT_THOUSAND_T);
             }
         } else {
             metricData.setMixedCoalValue("");
@@ -274,10 +275,10 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         if (firstMetirc.isPresent()) {
             if (metrictype.equals(MetricCodes.CT_C) || metrictype.equals(MetricCodes.CT_D)) {
                 cleanCoalValue = firstMetirc.get().getValue();
-                metricData.setCleanCoalValue(cleanCoalValue + SubscriptionConstants.UNIT_T);
+                metricData.setCleanCoalValue(MetricValueUtil.formart(cleanCoalValue) + SubscriptionConstants.UNIT_T);
             } else {
                 cleanCoalValue = String.valueOf(new BigDecimal(firstMetirc.get().getValue()).divide(new BigDecimal(10000), 3, BigDecimal.ROUND_HALF_UP));
-                metricData.setCleanCoalValue(cleanCoalValue + SubscriptionConstants.UNIT_THOUSAND_T);
+                metricData.setCleanCoalValue(MetricValueUtil.formart(cleanCoalValue) + SubscriptionConstants.UNIT_THOUSAND_T);
             }
         } else {
             metricData.setCleanCoalValue("");
@@ -358,7 +359,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
                 metricData.setThingCode(thingCode);
                 DataModelWrapper instantDataMode = dataService.getData(thingCode, MetricCodes.CT_C).orElse(null);
                 if (instantDataMode != null) {
-                    metricData.setMetricValue(instantDataMode.getValue());
+                    metricData.setMetricValue(MetricValueUtil.formart(instantDataMode.getValue()));
                 }
             } else {
                 metricData.setThingCode("");
@@ -408,7 +409,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
                 metricData.setThingCode(thingCode);
                 DataModelWrapper instantDataMode = dataService.getData(thingCode, MetricCodes.COAL_CAP).orElse(null);
                 if (instantDataMode != null) {
-                    metricData.setMetricValue(instantDataMode.getValue());
+                    metricData.setMetricValue(MetricValueUtil.formart(instantDataMode.getValue()));
                 }
             } else {
                 metricData.setThingCode("");
@@ -428,14 +429,14 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
     private List<String> getMixtureOfRawCoalThingCodes(String cardParamValue) {
         List<String> thingCodes = new ArrayList<>();
         DataModelWrapper coal8DataModel = dataService.getData(cardParamValue, MetricCodes.COAL_8_DEVICE).orElse(null);
-        if (coal8DataModel != null) {
+        if (coal8DataModel != null && (!"-1".equals(coal8DataModel.getValue())) && (!"0".equals(coal8DataModel.getValue()))) {
             thingCodes.add(coal8DataModel.getValue());
         } else {
             thingCodes.add("");
         }
 
         DataModelWrapper coal13DataModel = dataService.getData(cardParamValue, MetricCodes.COAL_13_DEVICE).orElse(null);
-        if (coal13DataModel != null) {
+        if (coal13DataModel != null && (!"-1".equals(coal13DataModel.getValue())) && (!"0".equals(coal13DataModel.getValue()))) {
             thingCodes.add(coal13DataModel.getValue());
         } else {
             thingCodes.add("");
@@ -462,12 +463,12 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         String thingCoalCap2 = "";
         DataModelWrapper instantaneousWash1 = dataService.getData(cardParamValues[0], MetricCodes.COAL_CAP).orElse(null);
         if (instantaneousWash1 != null) {
-            thingCoalCap1 = instantaneousWash1.getValue();
+            thingCoalCap1 = MetricValueUtil.formart(instantaneousWash1.getValue());
         }
 
         DataModelWrapper instantaneousWash2 = dataService.getData(cardParamValues[1], MetricCodes.COAL_CAP).orElse(null);
         if (instantaneousWash2 != null) {
-            thingCoalCap2 = instantaneousWash2.getValue();
+            thingCoalCap2 = MetricValueUtil.formart(instantaneousWash2.getValue());
         }
 
         BigDecimal instantaneousWashTotal = new BigDecimal(StringUtils.isEmpty(thingCoalCap1) ? "0" : thingCoalCap1).add(new BigDecimal(StringUtils.isEmpty(thingCoalCap1) ? "0" : thingCoalCap2));
@@ -478,14 +479,14 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         String thingCtc1 = "";
         String thingCtc2 = "";
 
-        DataModelWrapper team1 = dataService.getData(cardParamValues[0], MetricCodes.COAL_CAP).orElse(null);
+        DataModelWrapper team1 = dataService.getData(cardParamValues[0], MetricCodes.CT_C).orElse(null);
         if (team1 != null) {
-            thingCtc1 = team1.getValue();
+            thingCtc1 = MetricValueUtil.formart(team1.getValue());
         }
 
-        DataModelWrapper team2 = dataService.getData(cardParamValues[1], MetricCodes.COAL_CAP).orElse(null);
+        DataModelWrapper team2 = dataService.getData(cardParamValues[1], MetricCodes.CT_C).orElse(null);
         if (team2 != null) {
-            thingCtc2 = team2.getValue();
+            thingCtc2 = MetricValueUtil.formart(team2.getValue());
         }
         BigDecimal teamTatol = new BigDecimal(StringUtils.isEmpty(thingCtc1) ? "0" : thingCtc1).add(new BigDecimal(StringUtils.isEmpty(thingCtc2) ? "0" : thingCtc2));
         instantaneousWashVo.setTeamValue1(thingCtc1);
@@ -507,16 +508,16 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         instantaneousProductQuantityVO.setWasteRockName(SubscriptionConstants.WASTE_ROCK);
         String[] cardParamValues = subscCardTypeDO.getCardParamValue().split(",");
         DataModelWrapper cleanCoalInstantaneousWash = dataService.getData(cardParamValues[0], MetricCodes.COAL_CAP).orElse(null);
-        instantaneousProductQuantityVO.setCleanCoalInstantaneousValue(cleanCoalInstantaneousWash == null ? "" : cleanCoalInstantaneousWash.getValue());
+        instantaneousProductQuantityVO.setCleanCoalInstantaneousValue(cleanCoalInstantaneousWash == null ? "" : MetricValueUtil.formart(cleanCoalInstantaneousWash.getValue()));
 
         DataModelWrapper cleanCoalTeamWash = dataService.getData(cardParamValues[0], MetricCodes.CT_C).orElse(null);
-        instantaneousProductQuantityVO.setCleanCoalTeamValue(cleanCoalTeamWash == null ? "" : cleanCoalTeamWash.getValue());
+        instantaneousProductQuantityVO.setCleanCoalTeamValue(cleanCoalTeamWash == null ? "" : MetricValueUtil.formart(cleanCoalTeamWash.getValue()));
 
         DataModelWrapper mixedCoalInstantaneousWash = dataService.getData(cardParamValues[1], MetricCodes.COAL_CAP).orElse(null);
-        instantaneousProductQuantityVO.setMixedCoalInstantaneousValue(mixedCoalInstantaneousWash == null ? "" : mixedCoalInstantaneousWash.getValue());
+        instantaneousProductQuantityVO.setMixedCoalInstantaneousValue(mixedCoalInstantaneousWash == null ? "" : MetricValueUtil.formart(mixedCoalInstantaneousWash.getValue()));
 
-        DataModelWrapper mixedCoalTeamWash = dataService.getData(cardParamValues[0], MetricCodes.CT_C).orElse(null);
-        instantaneousProductQuantityVO.setMixedCoalTeamValue(mixedCoalTeamWash == null ? "" : mixedCoalTeamWash.getValue());
+        DataModelWrapper mixedCoalTeamWash = dataService.getData(cardParamValues[1], MetricCodes.CT_C).orElse(null);
+        instantaneousProductQuantityVO.setMixedCoalTeamValue(mixedCoalTeamWash == null ? "" : MetricValueUtil.formart(mixedCoalTeamWash.getValue()));
         String[] wasteRocks = cardParamValues[2].split("\\+");
 
 
@@ -525,13 +526,13 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         String wasteRockInsValue1 = "";
         String wasteRockInsValue2 = "";
         if (wasteRockInstantaneousWash1 != null) {
-            wasteRockInsValue1 = wasteRockInstantaneousWash1.getValue();
+            wasteRockInsValue1 = MetricValueUtil.formart(wasteRockInstantaneousWash1.getValue());
         }
         if (wasteRockInstantaneousWash2 != null) {
-            wasteRockInsValue2 = wasteRockInstantaneousWash2.getValue();
+            wasteRockInsValue2 = MetricValueUtil.formart(wasteRockInstantaneousWash2.getValue());
         }
         BigDecimal wasteRockInstantaneousWash = new BigDecimal(StringUtils.isEmpty(wasteRockInsValue1) ? "0" : wasteRockInsValue1).add(new BigDecimal(StringUtils.isEmpty(wasteRockInsValue2) ? "0" : wasteRockInsValue2));
-        instantaneousProductQuantityVO.setWasteRockInstantaneousValue(String.valueOf(wasteRockInstantaneousWash).equals("0") ? "" : String.valueOf(wasteRockInstantaneousWash));
+        instantaneousProductQuantityVO.setWasteRockInstantaneousValue(String.valueOf(wasteRockInstantaneousWash).equals("0") ? "" : MetricValueUtil.formart(wasteRockInstantaneousWash));
 
 
         DataModelWrapper wasteRockTeamWash1 = dataService.getData(wasteRocks[0], MetricCodes.CT_C).orElse(null);
@@ -539,13 +540,13 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         String wasteRockTeamValue1 = "";
         String wasteRockTeamValue2 = "";
         if (wasteRockTeamWash1 != null) {
-            wasteRockTeamValue1 = wasteRockTeamWash1.getValue();
+            wasteRockTeamValue1 = MetricValueUtil.formart(wasteRockTeamWash1.getValue());
         }
         if (wasteRockTeamWash2 != null) {
-            wasteRockTeamValue2 = wasteRockTeamWash2.getValue();
+            wasteRockTeamValue2 = MetricValueUtil.formart(wasteRockTeamWash2.getValue());
         }
         BigDecimal wasteRockTeamWash = new BigDecimal(StringUtils.isEmpty(wasteRockTeamValue1) ? "0" : wasteRockTeamValue1).add(new BigDecimal(StringUtils.isEmpty(wasteRockTeamValue2) ? "0" : wasteRockTeamValue2));
-        instantaneousProductQuantityVO.setWasteRockTeamValue(String.valueOf(wasteRockTeamWash).equals("0") ? "" : String.valueOf(wasteRockTeamWash));
+        instantaneousProductQuantityVO.setWasteRockTeamValue(String.valueOf(wasteRockTeamWash).equals("0") ? "" : MetricValueUtil.formart(wasteRockTeamWash));
         cardDataDTO.setCardCode(subscCardTypeDO.getCardCode());
         cardDataDTO.setCardData(JSON.toJSONString(instantaneousProductQuantityVO));
 
@@ -581,31 +582,36 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
      */
     private void getProductYieldOfMetricCAP(ProductYieldVO productYieldVO, String[] cardParamValues, String[] rawCoals) {
         //原煤瞬时量
-        String rawCoalCapValue = "";
-        DataModel rawCoalCap = historyDataService.findClosestHistoryData(Lists.newArrayList(rawCoals[0], rawCoals[1]), Lists.newArrayList(MetricCodes.COAL_CAP), new Date(System.currentTimeMillis() - 240000));
-        if (rawCoalCap != null) {
-            rawCoalCapValue = rawCoalCap.getValue();
+        BigDecimal rawCoalCapValue = BigDecimal.ZERO;
+        long millis = System.currentTimeMillis();
+        DataModel rawCoalCap1 = historyDataService.findClosestHistoryData(Lists.newArrayList(rawCoals[0]), Lists.newArrayList(MetricCodes.COAL_CAP), new Date(millis - 240000));
+        if (rawCoalCap1 != null) {
+            rawCoalCapValue = rawCoalCapValue.add(new BigDecimal(rawCoalCap1.getValue()));
+        }
+        DataModel rawCoalCap2 = historyDataService.findClosestHistoryData(Lists.newArrayList(rawCoals[1]), Lists.newArrayList(MetricCodes.COAL_CAP), new Date(millis - 240000));
+        if (rawCoalCap2 != null) {
+            rawCoalCapValue = rawCoalCapValue.add(new BigDecimal(rawCoalCap2.getValue()));
         }
         //精煤瞬时量
         String cleanCoalCapValue = "";
         DataModelWrapper cleanCoalCap = dataService.getData(cardParamValues[1], MetricCodes.COAL_CAP).orElse(null);
         if (cleanCoalCap != null) {
-            cleanCoalCapValue = cleanCoalCap.getValue();
+            cleanCoalCapValue = MetricValueUtil.formart(cleanCoalCap.getValue());
         }
         //混煤瞬时量
         String mixedCoalCapValue = "";
-        DataModel mixedCoalCap = historyDataService.findClosestHistoryData(Lists.newArrayList(cardParamValues[2]), Lists.newArrayList(MetricCodes.COAL_CAP), new Date(System.currentTimeMillis() - 60000));
+        DataModel mixedCoalCap = historyDataService.findClosestHistoryData(Lists.newArrayList(cardParamValues[2]), Lists.newArrayList(MetricCodes.COAL_CAP), new Date(millis - 60000));
         if (mixedCoalCap != null) {
-            mixedCoalCapValue = mixedCoalCap.getValue();
+            mixedCoalCapValue = MetricValueUtil.formart(mixedCoalCap.getValue());
         }
         //煤泥瞬时量
         String slurryCoalCapValue = "";
-        DataModel slurryCoalCap = historyDataService.findClosestHistoryData(Lists.newArrayList(cardParamValues[3]), Lists.newArrayList(MetricCodes.COAL_CAP), new Date(System.currentTimeMillis() - 10000));
+        DataModel slurryCoalCap = historyDataService.findClosestHistoryData(Lists.newArrayList(cardParamValues[3]), Lists.newArrayList(MetricCodes.COAL_CAP), new Date(millis - 10000));
         if (slurryCoalCap != null) {
-            slurryCoalCapValue = slurryCoalCap.getValue();
+            slurryCoalCapValue = MetricValueUtil.formart(slurryCoalCap.getValue());
         }
         //矸石瞬时量
-        BigDecimal wasteRockCapVale = new BigDecimal(StringUtils.isEmpty(rawCoalCapValue) ? "0" : rawCoalCapValue).
+        BigDecimal wasteRockCapVale = rawCoalCapValue.
                 subtract(new BigDecimal(StringUtils.isEmpty(cleanCoalCapValue) ? "0" : cleanCoalCapValue)).
                 subtract(new BigDecimal(StringUtils.isEmpty(mixedCoalCapValue) ? "0" : mixedCoalCapValue)).
                 subtract(new BigDecimal(StringUtils.isEmpty(slurryCoalCapValue) ? "0" : slurryCoalCapValue));
@@ -613,7 +619,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         if (wasteRockCapVale.compareTo(BigDecimal.ZERO) > -1) {
             wasteRockCapValue = String.valueOf(wasteRockCapVale);
         }
-        productYieldVO.setRawCoalCapValue(rawCoalCapValue);
+        productYieldVO.setRawCoalCapValue(MetricValueUtil.formart(rawCoalCapValue));
         productYieldVO.setCleanCoalCapValue(cleanCoalCapValue);
         productYieldVO.setMixedCoalCapValue(mixedCoalCapValue);
         productYieldVO.setSlurryCapValue(slurryCoalCapValue);
@@ -634,10 +640,10 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         String rawCoalValue1 = "";
         String rawCoalValue2 = "";
         if (rawCoaldata1 != null) {
-            rawCoalValue1 = rawCoaldata1.getValue();
+            rawCoalValue1 = MetricValueUtil.formart(rawCoaldata1.getValue());
         }
         if (rawCoaldata2 != null) {
-            rawCoalValue2 = rawCoaldata2.getValue();
+            rawCoalValue2 = MetricValueUtil.formart(rawCoaldata2.getValue());
         }
         //原煤班累计总计
         BigDecimal rawCoalTotalValue = new BigDecimal(StringUtils.isEmpty(rawCoalValue1) ? "0" : rawCoalValue1).add(new BigDecimal(StringUtils.isEmpty(rawCoalValue2) ? "0" : rawCoalValue2));
@@ -727,7 +733,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
      */
     private List<ChemicalTestsDataVO.MetricData> getChemicalTestsDataOf552(ChemicalTestsDataVO chemicalTestsDataVO, String[] cardParamValue) {
         List<ChemicalTestsDataVO.MetricData> metricDataList2 = new ArrayList<>();
-        List<CoalAnalysisRecord> top2CoalAnalysisRecords2 = coalAnalysisMapper.getTop2CoalAnalysisRecord(cardParamValue[1], SubscriptionConstants.MIXE_COAL_551);
+        List<CoalAnalysisRecord> top2CoalAnalysisRecords2 = coalAnalysisMapper.getTop2CoalAnalysisRecord(cardParamValue[1], SubscriptionConstants.MIXE_COAL_552);
         if (CollectionUtils.isNotEmpty(top2CoalAnalysisRecords2)) {
             chemicalTestsDataVO.setMixedCoalSamplingTime(new SimpleDateFormat("HH:mm").format(top2CoalAnalysisRecords2.get(0).getTime()));
             CoalAnalysisRecord coalAnalysisRecord = top2CoalAnalysisRecords2.get(0);
@@ -769,12 +775,12 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
     private ChemicalTestsDataVO.MetricData get552MtMetricValue(ChemicalTestsDataVO chemicalTestsDataVO, CoalAnalysisRecord coalAnalysisRecord, CoalAnalysisRecord preCoalAnalysisRecord) {
         ChemicalTestsDataVO.MetricData metricData4 = chemicalTestsDataVO.new MetricData();
         metricData4.setMetricName(SubscriptionConstants.MOISTURE_CONTENT);
-        metricData4.setMetricValue(String.valueOf(coalAnalysisRecord.getMt()));
+        metricData4.setMetricValue(String.valueOf(coalAnalysisRecord.getMt() == null ? "-" : coalAnalysisRecord.getMt()));
         String startScope = SubscriptionConstants.MOISTURE_CONTENT_SCOPE.split("-")[0];
         String endScope = SubscriptionConstants.MOISTURE_CONTENT_SCOPE.split("-")[1];
         metricData4.setStartScope(startScope);
         metricData4.setEndScope(endScope);
-        if (preCoalAnalysisRecord.getMt() != null) {
+        if (coalAnalysisRecord.getMt() != null) {
             if (coalAnalysisRecord.getMt().compareTo(preCoalAnalysisRecord.getMt()) > 0) {
                 metricData4.setPercent(String.valueOf(BigDecimal.valueOf(coalAnalysisRecord.getMt()).subtract(BigDecimal.valueOf(preCoalAnalysisRecord.getMt())).setScale(2)));
                 metricData4.setFlag(SubscriptionConstants.FLAG_UP);
@@ -786,10 +792,17 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
                 metricData4.setFlag(SubscriptionConstants.FLAG_UP);
 
             }
+        } else {
+            metricData4.setPercent("-");
+            metricData4.setFlag(SubscriptionConstants.FLAG_UP);
         }
         //计算是否是异常数据
-        if (new BigDecimal(metricData4.getMetricValue()).compareTo(new BigDecimal(startScope)) > 0 && new BigDecimal(endScope).compareTo(new BigDecimal(metricData4.getMetricValue())) > 0) {
-            metricData4.setUnusual("0");
+        if (coalAnalysisRecord.getMt() != null) {
+            if (new BigDecimal(metricData4.getMetricValue()).compareTo(new BigDecimal(startScope)) > -1 && new BigDecimal(endScope).compareTo(new BigDecimal(metricData4.getMetricValue())) > -1) {
+                metricData4.setUnusual("0");
+            } else {
+                metricData4.setUnusual("1");
+            }
         } else {
             metricData4.setUnusual("1");
         }
@@ -808,7 +821,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         //精煤灰分
         ChemicalTestsDataVO.MetricData metricData3 = chemicalTestsDataVO.new MetricData();
         metricData3.setMetricName(SubscriptionConstants.ASH_CONTENT);
-        metricData3.setMetricValue(String.valueOf(coalAnalysisRecord.getAad()));
+        metricData3.setMetricValue(String.valueOf(coalAnalysisRecord.getAad() == null ? "-" : coalAnalysisRecord.getAad()));
 
         String startScope = SubscriptionConstants.ASH_CONTENT_MIXED_COAL_SCOPE.split("-")[0];
         String endScope = SubscriptionConstants.ASH_CONTENT_MIXED_COAL_SCOPE.split("-")[1];
@@ -827,15 +840,21 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
                 metricData3.setFlag(SubscriptionConstants.FLAG_UP);
 
             }
+        } else {
+            metricData3.setPercent("-");
+            metricData3.setFlag(SubscriptionConstants.FLAG_UP);
         }
 
-        //计算是否是异常数据
-        if (new BigDecimal(metricData3.getMetricValue()).compareTo(new BigDecimal(startScope)) > 0 && new BigDecimal(endScope).compareTo(new BigDecimal(metricData3.getMetricValue())) > 0) {
-            metricData3.setUnusual("0");
+        if (coalAnalysisRecord.getAad() != null) {
+            //计算是否是异常数据
+            if (new BigDecimal(metricData3.getMetricValue()).compareTo(new BigDecimal(startScope)) > -1 && new BigDecimal(endScope).compareTo(new BigDecimal(metricData3.getMetricValue())) > -1) {
+                metricData3.setUnusual("0");
+            } else {
+                metricData3.setUnusual("1");
+            }
         } else {
             metricData3.setUnusual("1");
         }
-
         return metricData3;
     }
 
@@ -890,12 +909,12 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         //精煤硫分
         ChemicalTestsDataVO.MetricData metricData2 = chemicalTestsDataVO.new MetricData();
         metricData2.setMetricName(SubscriptionConstants.SULFUR_CONTENT);
-        metricData2.setMetricValue(String.valueOf(coalAnalysisRecord.getStad()));
+        metricData2.setMetricValue(String.valueOf(coalAnalysisRecord.getStad() == null ? "-" : coalAnalysisRecord.getStad()));
         String startScope2 = SubscriptionConstants.SULFUR_CONTENT_SCOPE.split("-")[0];
         String endScope2 = SubscriptionConstants.SULFUR_CONTENT_SCOPE.split("-")[1];
         metricData2.setStartScope(startScope2);
         metricData2.setEndScope(endScope2);
-        if (preCoalAnalysisRecord.getStad() != null) {
+        if (coalAnalysisRecord.getStad() != null) {
             if (coalAnalysisRecord.getStad().compareTo(preCoalAnalysisRecord.getStad()) > 0) {
                 metricData2.setPercent(String.valueOf(BigDecimal.valueOf(coalAnalysisRecord.getStad()).subtract(BigDecimal.valueOf(preCoalAnalysisRecord.getStad())).setScale(2)));
                 metricData2.setFlag(SubscriptionConstants.FLAG_UP);
@@ -907,13 +926,21 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
                 metricData2.setFlag(SubscriptionConstants.FLAG_UP);
 
             }
+        } else {
+            metricData2.setPercent("-");
+            metricData2.setFlag(SubscriptionConstants.FLAG_UP);
         }
         //计算是否是异常数据
-        if (new BigDecimal(metricData2.getMetricValue()).compareTo(new BigDecimal(startScope2)) > 0 && new BigDecimal(endScope2).compareTo(new BigDecimal(metricData2.getMetricValue())) > 0) {
-            metricData2.setUnusual("0");
+        if (coalAnalysisRecord.getStad() != null) {
+            if (new BigDecimal(metricData2.getMetricValue()).compareTo(new BigDecimal(startScope2)) > -1 && new BigDecimal(endScope2).compareTo(new BigDecimal(metricData2.getMetricValue())) > -1) {
+                metricData2.setUnusual("0");
+            } else {
+                metricData2.setUnusual("1");
+            }
         } else {
             metricData2.setUnusual("1");
         }
+
         return metricData2;
     }
 
@@ -929,7 +956,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         //精煤灰分
         ChemicalTestsDataVO.MetricData metricData1 = chemicalTestsDataVO.new MetricData();
         metricData1.setMetricName(SubscriptionConstants.ASH_CONTENT);
-        metricData1.setMetricValue(String.valueOf(coalAnalysisRecord.getAad()));
+        metricData1.setMetricValue(String.valueOf(coalAnalysisRecord.getAad() == null ? "-" : coalAnalysisRecord.getAad()));
         String startScope1 = SubscriptionConstants.ASH_CONTENT_CLEAN_COAL_SCOPE.split("-")[0];
         String endScope1 = SubscriptionConstants.ASH_CONTENT_CLEAN_COAL_SCOPE.split("-")[1];
         metricData1.setStartScope(startScope1);
@@ -947,11 +974,19 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
                 metricData1.setFlag(SubscriptionConstants.FLAG_UP);
 
             }
+        } else {
+            metricData1.setPercent("-");
+            metricData1.setFlag(SubscriptionConstants.FLAG_UP);
+
         }
 
         //计算是否是异常数据
-        if (new BigDecimal(metricData1.getMetricValue()).compareTo(new BigDecimal(startScope1)) > 0 && new BigDecimal(endScope1).compareTo(new BigDecimal(metricData1.getMetricValue())) > 0) {
-            metricData1.setUnusual("0");
+        if (coalAnalysisRecord.getAad() != null) {
+            if (new BigDecimal(metricData1.getMetricValue()).compareTo(new BigDecimal(startScope1)) > -1 && new BigDecimal(endScope1).compareTo(new BigDecimal(metricData1.getMetricValue())) > -1) {
+                metricData1.setUnusual("0");
+            } else {
+                metricData1.setUnusual("1");
+            }
         } else {
             metricData1.setUnusual("1");
         }
@@ -970,10 +1005,10 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
 
         IntelligentFilterVO.ThickenerMetric thickenerMetric1 = intelligentFilterVO.new ThickenerMetric();
-        thickenerMetric1.setThingCode(cardParamValues[0]);
+        thickenerMetric1.setThingCode(cardParamValues[0].split("\\.")[0]);
         DataModelWrapper thickenerDataModelWrapper1 = dataService.getData(cardParamValues[0], FilterPressMetricConstants.FEED_PUMP_CURRENT).orElse(null);
         if (thickenerDataModelWrapper1 != null) {
-            thickenerMetric1.setCurrentValue(thickenerDataModelWrapper1.getValue());
+            thickenerMetric1.setCurrentValue(MetricValueUtil.formart(thickenerDataModelWrapper1.getValue()));
         } else {
             thickenerMetric1.setCurrentValue("");
         }
@@ -981,10 +1016,10 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
 
         IntelligentFilterVO.ThickenerMetric thickenerMetric2 = intelligentFilterVO.new ThickenerMetric();
-        thickenerMetric2.setThingCode(cardParamValues[1]);
+        thickenerMetric2.setThingCode(cardParamValues[1].split("\\.")[0]);
         DataModelWrapper thickenerDataModelWrapper2 = dataService.getData(cardParamValues[1], FilterPressMetricConstants.FEED_PUMP_CURRENT).orElse(null);
         if (thickenerDataModelWrapper2 != null) {
-            thickenerMetric2.setCurrentValue(thickenerDataModelWrapper2.getValue());
+            thickenerMetric2.setCurrentValue(MetricValueUtil.formart(thickenerDataModelWrapper2.getValue()));
         } else {
             thickenerMetric2.setCurrentValue("");
         }
@@ -993,10 +1028,10 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
         if (StringUtils.isNotEmpty(cardParamValues[2])) {
             IntelligentFilterVO.ThickenerMetric thickenerMetric3 = intelligentFilterVO.new ThickenerMetric();
-            thickenerMetric3.setThingCode(cardParamValues[2]);
+            thickenerMetric3.setThingCode(cardParamValues[2].split("\\.")[0]);
             DataModelWrapper thickenerDataModelWrapper3 = dataService.getData(cardParamValues[2], FilterPressMetricConstants.FEED_PUMP_CURRENT).orElse(null);
             if (thickenerDataModelWrapper3 != null) {
-                thickenerMetric3.setCurrentValue(thickenerDataModelWrapper3.getValue());
+                thickenerMetric3.setCurrentValue(MetricValueUtil.formart(thickenerDataModelWrapper3.getValue()));
             } else {
                 thickenerMetric3.setCurrentValue("");
             }
@@ -1144,7 +1179,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
                 //空压机加载，卸载状态
                 getMompressorLoadStates(mompressor, mompressorMetric);
             } else if (SubscriptionConstants.RUN_STATE_STOP_0.equals(runStates)) {
-                mompressorMetric.setRunState(SubscriptionConstants.RUN_STATE_STOP_0);
+                mompressorMetric.setRunState("0");
                 mompressorMetric.setRunStateName(SubscriptionConstants.RUN_STATE_STOP);
             } else {
                 mompressorMetric.setRunState("");
@@ -1214,4 +1249,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
     public SubscCardTypeDO getCardTypeByCardCode(String cardCode) {
         return subscCardTypeMapper.getCardTypeByCardCode(cardCode);
     }
+
+
 }
+

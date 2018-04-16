@@ -1,13 +1,13 @@
 package com.zgiot.app.server.module.reportforms.manager;
 
 import com.alibaba.fastjson.JSON;
+import com.zgiot.app.server.module.reportforms.MetricCodeEnum;
 import com.zgiot.app.server.module.reportforms.ReportFormsUtils;
 import com.zgiot.app.server.module.coalanalysis.mapper.CoalAnalysisMapper;
 import com.zgiot.app.server.module.reportforms.pojo.CumulativeData;
 import com.zgiot.app.server.module.tcs.pojo.FilterCondition;
 import com.zgiot.common.constants.MetricCodes;
 import com.zgiot.common.pojo.*;
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -33,48 +34,41 @@ public class CoalAnalysisManager implements ReportFormsManager {
     }
 
     @Override
-    public void updateRecord(ReportFormsRecord record) {
+    public void updateRecordWithOutDensityAndFlow(ReportFormsRecord record) {
         logger.debug("该化验数据已经存在，进行更新");
         coalAnalysisMapper.updateRecordWithOutDensityAndFlow((CoalAnalysisRecord) record);
     }
 
 
     @Override
-    public void updateAvgRecord(ReportFormsRecord record) {
-        logger.debug("该化验数据已经存在，进行更新");
-        coalAnalysisMapper.updateRecordWithOutDensityAndFlow((CoalAnalysisRecord) record);
-            coalAnalysisMapper.updateRecordDensityAndFlow((CoalAnalysisRecord) record);
+    public void updateRecordDensityAndFlow(ReportFormsRecord record) {
+        logger.debug("该化验数据已经存在，更新其密度和顶水流量");
+        coalAnalysisMapper.updateRecordDensityAndFlow((CoalAnalysisRecord) record);
     }
+
 
     @Override
     public void insertRecord(ReportFormsRecord record) {
         logger.debug("新增一条煤质化验数据");
         coalAnalysisMapper.insertRecord((CoalAnalysisRecord) record);
-        List<DensityAndFlowInfo> densityAndFlowValues = reportFormsUtils.getDensityAndFlowValues(record);
-        if (!CollectionUtils.isEmpty(densityAndFlowValues)) {
-            densityAndFlowValues.forEach(t -> t.setAnalysisId(record.getId()));
-            disposeCoalAnalysisDensityAndFlow(densityAndFlowValues, (CoalAnalysisRecord) record);
-        }
-
     }
+
+    /**
+     * 记录每条记录对应的多个设备的密度和流量
+     *
+     * @param record
+     */
+    public void insertDetailDensityAndFlow(ReportFormsRecord record) {
+        coalAnalysisMapper.updateRecordDensityAndFlow((CoalAnalysisRecord) record);
+        coalAnalysisMapper.insertDetailDensityAndFlowValues(record.getDensityAndFlowInfos(), record.getId());
+    }
+
 
 
     @Override
-    public void insertAvgRecord(ReportFormsRecord record) {
-        logger.debug("新增一条煤质化验平均数据");
-        coalAnalysisMapper.insertRecord((CoalAnalysisRecord) record);
-    }
-
-    private void disposeCoalAnalysisDensityAndFlow(List<DensityAndFlowInfo> densityAndFlowValues, CoalAnalysisRecord record) {
-        reportFormsUtils.countAvgValue(densityAndFlowValues, record);
-        coalAnalysisMapper.updateRecordDensityAndFlow(record);
-        coalAnalysisMapper.insertDensityAndFlowValues(densityAndFlowValues);
-    }
-
-    @Override
-    public List<DataModel> getDataForCache(ReportFormsRecord record) {
-        List<DataModel> targetSampleModels = reportFormsUtils.getTargetSampleModel(record);
-        List<DataModel> paramModels = parseToParamDataModel(record);
+    public List<DataModel> getDataForCache(ReportFormsRecord record, boolean avgFlag) {
+        List<DataModel> targetSampleModels = reportFormsUtils.getTargetSampleModel(record, MetricCodeEnum.COAL_ANALYSIS);
+        List<DataModel> paramModels = parseToParamDataModel(record, avgFlag);
         targetSampleModels.addAll(paramModels);
         return targetSampleModels;
 
@@ -86,40 +80,38 @@ public class CoalAnalysisManager implements ReportFormsManager {
      * @param record
      * @return
      */
-    private List<DataModel> parseToParamDataModel(ReportFormsRecord record) {
+    private List<DataModel> parseToParamDataModel(ReportFormsRecord record, boolean avgFlag) {
         CoalAnalysisRecord coalAnalysisRecord = (CoalAnalysisRecord) record;
-        boolean avgFlag = false;
-        if (record.getTarget().contains(ReportFormsUtils.AVG_RECORD_KEYWORD)) {
-            avgFlag = true;
-        }
         List<DataModel> dataModels = new ArrayList<>();
         if (coalAnalysisRecord.getAad() != null) {
-            getParamModel(avgFlag, dataModels, coalAnalysisRecord, MetricCodes.ASSAY_AAD_AVG, MetricCodes.ASSAY_AAD, coalAnalysisRecord.getAad());
+            dataModels.add(getParamModel(avgFlag, coalAnalysisRecord, MetricCodes.ASSAY_AAD_AVG, MetricCodes.ASSAY_AAD, coalAnalysisRecord.getAad()));
         }
         if (coalAnalysisRecord.getMt() != null) {
-            getParamModel(avgFlag, dataModels, coalAnalysisRecord, MetricCodes.ASSAY_MT_AVG, MetricCodes.ASSAY_MT, coalAnalysisRecord.getMt());
+            dataModels.add(getParamModel(avgFlag, coalAnalysisRecord, MetricCodes.ASSAY_MT_AVG, MetricCodes.ASSAY_MT, coalAnalysisRecord.getMt()));
         }
         if (coalAnalysisRecord.getStad() != null) {
-            getParamModel(avgFlag, dataModels, coalAnalysisRecord, MetricCodes.ASSAY_STAD_AVG, MetricCodes.ASSAY_STAD, coalAnalysisRecord.getStad());
+            dataModels.add(getParamModel(avgFlag, coalAnalysisRecord, MetricCodes.ASSAY_STAD_AVG, MetricCodes.ASSAY_STAD, coalAnalysisRecord.getStad()));
         }
         if (coalAnalysisRecord.getQnetar() != null) {
-            getParamModel(avgFlag, dataModels, coalAnalysisRecord, MetricCodes.ASSAY_QNETAR_AVG, MetricCodes.ASSAY_QNETAR, coalAnalysisRecord.getQnetar());
+            dataModels.add(getParamModel(avgFlag, coalAnalysisRecord, MetricCodes.ASSAY_QNETAR_AVG, MetricCodes.ASSAY_QNETAR, coalAnalysisRecord.getQnetar()));
         }
         if (coalAnalysisRecord.getAvgDensity() != null) {
-            getParamModel(avgFlag, dataModels, coalAnalysisRecord, MetricCodes.ASSAY_DENSITY_AVG, MetricCodes.ASSAY_DENSITY, coalAnalysisRecord.getAvgDensity());
+            dataModels.add(getParamModel(avgFlag, coalAnalysisRecord, MetricCodes.ASSAY_DENSITY_AVG, MetricCodes.ASSAY_DENSITY, coalAnalysisRecord.getAvgDensity()));
         }
         if (coalAnalysisRecord.getAvgFlow() != null) {
-            getParamModel(avgFlag, dataModels, coalAnalysisRecord, MetricCodes.ASSAY_FLOW_AVG, MetricCodes.ASSAY_FLOW, coalAnalysisRecord.getAvgFlow());
+            dataModels.add(getParamModel(avgFlag, coalAnalysisRecord, MetricCodes.ASSAY_FLOW_AVG, MetricCodes.ASSAY_FLOW, coalAnalysisRecord.getAvgFlow()));
         }
         return dataModels;
     }
 
-    private void getParamModel(boolean avgFlag, List<DataModel> dataModels, CoalAnalysisRecord coalAnalysisRecord, String avgParamMetricCode, String paramMetricCode, Double metricValue) {
+    private DataModel getParamModel(boolean avgFlag, CoalAnalysisRecord coalAnalysisRecord, String avgParamMetricCode, String paramMetricCode, Double metricValue) {
+        DataModel paramModel;
         if (avgFlag) {
-            reportFormsUtils.getParamModel(dataModels, coalAnalysisRecord, avgParamMetricCode, metricValue);
+            paramModel = reportFormsUtils.getParamModel(coalAnalysisRecord, avgParamMetricCode, metricValue,MetricCodeEnum.COAL_ANALYSIS);
         } else {
-            reportFormsUtils.getParamModel(dataModels, coalAnalysisRecord, paramMetricCode, metricValue);
+            paramModel = reportFormsUtils.getParamModel(coalAnalysisRecord, paramMetricCode, metricValue,MetricCodeEnum.COAL_ANALYSIS);
         }
+        return paramModel;
     }
 
     @Override
@@ -159,7 +151,7 @@ public class CoalAnalysisManager implements ReportFormsManager {
         Double avgStad = stadCumulativeData.getAvgValue(true, 2);
         return Objects.equals(avgAad, record.getAad()) &&
                 Objects.equals(avgMt, record.getMt()) &&
-                Objects.equals(avgStad, record.getStad()) ;
+                Objects.equals(avgStad, record.getStad());
 
     }
 
@@ -168,4 +160,18 @@ public class CoalAnalysisManager implements ReportFormsManager {
         return coalAnalysisMapper.getRecordsMatchCondition(filterCondition);
     }
 
+    @Override
+    public ReportFormsRecord getExistRecord(ReportFormsRecord record) {
+        return coalAnalysisMapper.getExistRecord((CoalAnalysisRecord)record);
+    }
+
+    @Override
+    public ReportFormsRecord getRecentRecord(ReportFormsRecord record) {
+        return coalAnalysisMapper.getRecentRecord((CoalAnalysisRecord)record);
+    }
+
+    @Override
+    public ReportFormsRecord getLastRecordOnDuty(ReportFormsRecord record, Date dutyEndTime) {
+        return coalAnalysisMapper.getLastRecordOnDuty((CoalAnalysisRecord)record,dutyEndTime);
+    }
 }

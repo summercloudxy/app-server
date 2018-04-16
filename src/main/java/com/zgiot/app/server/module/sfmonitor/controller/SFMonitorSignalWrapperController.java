@@ -100,7 +100,12 @@ public class SFMonitorSignalWrapperController {
 
     @GetMapping("/signalWrapper/fuzzyFind/{wrapperName}")
     public ResponseEntity<String> getWrapperNames(@PathVariable String wrapperName ){
-        List<MetricTag> metricTags = metricTagMapper.getMetricTag(wrapperName + SFMonitorConstant.FUZZY_QUERY_TAG);
+        List<MetricTag> metricTags = null;
+        if(wrapperName.equals(SFMonitorConstant.ALL_PARAMETER)){
+            metricTags = metricTagMapper.getAllMetricTag();
+        }else{
+            metricTags = metricTagMapper.getMetricTag(wrapperName + SFMonitorConstant.FUZZY_QUERY_TAG);
+        }
         List<String> wrapperNames = new ArrayList<>();
         for(MetricTag metricTag:metricTags){
             wrapperNames.add(metricTag.getTagName());
@@ -121,12 +126,12 @@ public class SFMonitorSignalWrapperController {
     }
 
     @RequestMapping(value = "/signalWrapper", method = RequestMethod.POST)
-    public ResponseEntity<String> addOrEditSignalWrapper(@RequestBody String bodyStr) {
+    public ResponseEntity<String> addOrEditSignalWrapper(@RequestBody String bodyStr,@RequestHeader String userLoginName) {
         ControllerUtil.validateBodyRequired(bodyStr);
         SignalWrapperReq signalWrapperReq = JSON.parseObject(bodyStr, SignalWrapperReq.class);
         MetricTag metricTag = signalWrapperReq.getMetricTag();
         int zoneId = signalWrapperReq.getZoneId();
-        String editor = signalWrapperReq.getUserName();
+        String editor = userLoginName;
         String name = metricTag.getTagName();
         if (StringUtils.isBlank(name)) {
             return new ResponseEntity<>(ServerResponse.buildOkJson(false), HttpStatus.OK);
@@ -228,7 +233,7 @@ public class SFMonitorSignalWrapperController {
     }
 
     @RequestMapping(value = "/signalWrapper/metric", method = RequestMethod.POST)
-    public ResponseEntity<String> addOrEditMetricToSignalWrapper(@RequestBody String bodyStr) {
+    public ResponseEntity<String> addOrEditMetricToSignalWrapper(@RequestBody String bodyStr,@RequestHeader String userLoginName) {
         ControllerUtil.validateBodyRequired(bodyStr);
         SignalWrapperRelateMetric signalWrapperRelateMetric = JSON.parseObject(bodyStr, SignalWrapperRelateMetric.class);
         String wrapperName = signalWrapperRelateMetric.getWrapperName();
@@ -249,7 +254,7 @@ public class SFMonitorSignalWrapperController {
                     } else {
                         metricTagRelation.setComment(signalWrapperRelateMetric.getComment());
                         metricTagRelation.setCreateDate(new Date());
-                        metricTagRelation.setUserName(signalWrapperRelateMetric.getUserName());
+                        metricTagRelation.setUserName(userLoginName);
                         addOrEditSignalWrapperAndMetric(wrapperId, metricTagRelation);
                     }
                 }
@@ -273,29 +278,85 @@ public class SFMonitorSignalWrapperController {
             return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
         }
         if (!StringUtils.isBlank(metricName)) {
-            findSignalWrapperRes = metricTagRelationMapper.findSignalWrapperByMetricName(metricName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            if(metricName.equals(SFMonitorConstant.ALL_PARAMETER)){
+                findSignalWrapperRes = metricTagRelationMapper.findAllSignalWrapper();
+            }else{
+                findSignalWrapperRes = metricTagRelationMapper.findSignalWrapperByMetricName(metricName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            }
+
             return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
         }
         if (!StringUtils.isBlank(wrapperName)) {
-            findSignalWrapperRes = metricTagRelationMapper.findSignalWrapperByWrapperName(wrapperName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            if(wrapperName.equals(SFMonitorConstant.ALL_PARAMETER)){
+                findSignalWrapperRes = metricTagRelationMapper.findAllSignalWrapper();
+            }else{
+                findSignalWrapperRes = metricTagRelationMapper.findSignalWrapperByWrapperName(wrapperName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            }
+
             return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
         }
         return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
     }
 
+    @GetMapping("/signalWrapper/fuzzyFind/findSignalWrapperByName/{wrapperName}")
+    public ResponseEntity<String> findSignalWrapperByWrapperName(@PathVariable String wrapperName){
+        List<FindSignalWrapperRes> findSignalWrapperRes = null;
+        Set<String> warpperNames = new HashSet<>();
+        Set<String> wrapperNameAndSignalName = new HashSet<>();
+        if(wrapperName.equals(SFMonitorConstant.ALL_PARAMETER)){
+            findSignalWrapperRes = metricTagRelationMapper.findAllSignalWrapper();
+            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
+                warpperNames.add(signalWrapper.getTagName());
+            }
+        }else{
+            findSignalWrapperRes = metricTagRelationMapper.fuzzyFindSignalWrapperByWrapperName(wrapperName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
+                warpperNames.add(signalWrapper.getTagName());
+            }
+        }
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(new ArrayList<>(warpperNames)), HttpStatus.OK);
+    }
+    @GetMapping("/signalWrapper/fuzzyFind/findSignalWrapperBySignal/{signalName}")
+    public ResponseEntity<String> findSignalWrapperBySignalName(@PathVariable String signalName) {
+        List<FindSignalWrapperRes> findSignalWrapperRes = null;
+        Set<String> signalNames = new HashSet<>();
+        if (signalName.equals(SFMonitorConstant.ALL_PARAMETER)) {
+            findSignalWrapperRes = metricTagRelationMapper.findAllSignalWrapper();
+            for (FindSignalWrapperRes signalWrapper : findSignalWrapperRes) {
+                signalNames.add(signalWrapper.getMetricName());
+            }
+        } else {
+            findSignalWrapperRes = metricTagRelationMapper.fuzzyFindSignalWrapperByMetricName(signalName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            for (FindSignalWrapperRes signalWrapper : findSignalWrapperRes) {
+                signalNames.add(signalWrapper.getMetricName());
+            }
+        }
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(new ArrayList<>(signalNames)), HttpStatus.OK);
+    }
     @GetMapping("/signalWrapper/fuzzyFind/findSignalWrapper/{wrapperNameOrSignalName}")
     public ResponseEntity<String> findSignalWrapperByName(@PathVariable String wrapperNameOrSignalName){
         List<FindSignalWrapperRes> findSignalWrapperRes = null;
-        List<String> wrapperNameAndSignalName = new ArrayList<>();
-        findSignalWrapperRes = metricTagRelationMapper.fuzzyFindSignalWrapperByWrapperName(wrapperNameOrSignalName + SFMonitorConstant.FUZZY_QUERY_TAG);
-        for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
-            wrapperNameAndSignalName.add(signalWrapper.getTagName());
+        Set<String> wrapperNameAndSignalName = new HashSet<>();
+        if(wrapperNameOrSignalName.equals(SFMonitorConstant.ALL_PARAMETER)){
+            findSignalWrapperRes = metricTagRelationMapper.findAllSignalWrapper();
+            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
+                wrapperNameAndSignalName.add(signalWrapper.getTagName());
+                wrapperNameAndSignalName.add(signalWrapper.getMetricName());
+            }
+        }else{
+            findSignalWrapperRes = metricTagRelationMapper.fuzzyFindSignalWrapperByWrapperName(wrapperNameOrSignalName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
+                wrapperNameAndSignalName.add(signalWrapper.getTagName());
+            }
+            findSignalWrapperRes = metricTagRelationMapper.fuzzyFindSignalWrapperByMetricName(wrapperNameOrSignalName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
+                wrapperNameAndSignalName.add(signalWrapper.getMetricName());
+            }
         }
-        findSignalWrapperRes = metricTagRelationMapper.fuzzyFindSignalWrapperByMetricName(wrapperNameOrSignalName + SFMonitorConstant.FUZZY_QUERY_TAG);
-        for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
-            wrapperNameAndSignalName.add(signalWrapper.getMetricName());
-        }
-        return new ResponseEntity<>(ServerResponse.buildOkJson(wrapperNameAndSignalName), HttpStatus.OK);
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(new ArrayList<>(wrapperNameAndSignalName)), HttpStatus.OK);
     }
 
     @GetMapping(value = "/signalWrapper/findSignalWrapper/{id}")
@@ -353,13 +414,13 @@ public class SFMonitorSignalWrapperController {
     }
 
     @RequestMapping(value = "/signalWrapper/style", method = RequestMethod.POST)
-    public ResponseEntity<String> addOrEditSignalWrapperStyle(@RequestBody String bodyStr) {
+    public ResponseEntity<String> addOrEditSignalWrapperStyle(@RequestBody String bodyStr,@RequestHeader String userLoginName) {
         ControllerUtil.validateBodyRequired(bodyStr);
         SignalWrapperStyleReq signalWrapperStyleReq = JSON.parseObject(bodyStr, SignalWrapperStyleReq.class);
         int id = signalWrapperStyleReq.getId();
         String styleName = signalWrapperStyleReq.getStyleName();
         List<String> signalWrapperNames = signalWrapperStyleReq.getSignalWrapperNames();
-        String userName = signalWrapperStyleReq.getUserName();
+        String userName = userLoginName;
         List<String> existStyleNames = new ArrayList<>();
         if (!StringUtils.isBlank(styleName) && (signalWrapperNames != null) && (signalWrapperNames.size() != 0)) {
             String styleCode = sfMonStyleMapper.getCodeByName(styleName);
@@ -375,7 +436,10 @@ public class SFMonitorSignalWrapperController {
                     relSFMonMetricTagStyle.setEditor(userName);
                     relSFMonMetricTagStyle.setCreateDate(new Date());
                     relSFMonMetricTagStyle.setComment(signalWrapperStyleReq.getComment());
-                    addOrEditSignalWrapperStyle(id, relSFMonMetricTagStyle);
+                    String code = addOrEditSignalWrapperStyle(id, relSFMonMetricTagStyle);
+                    if(!StringUtils.isBlank(code)){
+                        existStyleNames.add(name);
+                    }
                 }
             }
         }
@@ -383,13 +447,20 @@ public class SFMonitorSignalWrapperController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(existStyleNames), HttpStatus.OK);
     }
 
-    private void addOrEditSignalWrapperStyle(int wrapperAndStyleRelId, RelSFMonMetricTagStyle relSFMonMetricTagStyle) {
+    private String addOrEditSignalWrapperStyle(int wrapperAndStyleRelId, RelSFMonMetricTagStyle relSFMonMetricTagStyle) {
+        String code = null;
         if (wrapperAndStyleRelId == 0) {//add
-            relSFMonMetricTagStyleMapper.addStyle(relSFMonMetricTagStyle);
+            String wrapperCode = relSFMonMetricTagStyleMapper.getWrapperCode(relSFMonMetricTagStyle.getMetricTagCode(),relSFMonMetricTagStyle.getStyleCode());
+            if(StringUtils.isBlank(wrapperCode)){
+                relSFMonMetricTagStyleMapper.addStyle(relSFMonMetricTagStyle);
+            }else{
+                code = relSFMonMetricTagStyle.getMetricTagCode();
+            }
         } else {//edit
             relSFMonMetricTagStyle.setId(wrapperAndStyleRelId);
             relSFMonMetricTagStyleMapper.updateStyle(relSFMonMetricTagStyle);
         }
+        return code;
     }
 
     @RequestMapping(value = "/signalWrapper/style/findAllSignalWrapperStyle", method = RequestMethod.PUT)
@@ -406,30 +477,86 @@ public class SFMonitorSignalWrapperController {
             return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
         }
         if (!StringUtils.isBlank(styleName)) {
-            findSignalWrapperRes = relSFMonMetricTagStyleMapper.getSiganlWrapperStyleByStyleName(styleName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            if(styleName.equals(SFMonitorConstant.ALL_PARAMETER)){
+                findSignalWrapperRes = relSFMonMetricTagStyleMapper.getAllSignalWrapperStyle();
+            }else{
+                findSignalWrapperRes = relSFMonMetricTagStyleMapper.getSiganlWrapperStyleByStyleName(styleName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            }
             return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
         }
         if (!StringUtils.isBlank(wrapperName)) {
-            findSignalWrapperRes = relSFMonMetricTagStyleMapper.getSiganlWrapperStyleByWrapperName(wrapperName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            if(wrapperName.equals(SFMonitorConstant.ALL_PARAMETER)){
+                findSignalWrapperRes = relSFMonMetricTagStyleMapper.getAllSignalWrapperStyle();
+            }else{
+                findSignalWrapperRes = relSFMonMetricTagStyleMapper.getSiganlWrapperStyleByWrapperName(wrapperName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            }
+
             return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
         }
 
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
+    @GetMapping("/signalWrapper/style/fuzzyFind/findAllSignalWrapperStyleByName/{wrapperName}")
+    public ResponseEntity<String> findAllSignalWrapperStyleByWrapperName(@PathVariable String wrapperName){
+        List<FindSignalWrapperRes> findSignalWrapperRes = null;
+        Set<String> wrapperNames = new HashSet<>();
+        if(wrapperName.equals(SFMonitorConstant.ALL_PARAMETER)){
+            findSignalWrapperRes = relSFMonMetricTagStyleMapper.getAllSignalWrapperStyle();
+            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
+                wrapperNames.add(signalWrapper.getTagName());
+            }
+        }else{
+            findSignalWrapperRes = relSFMonMetricTagStyleMapper.fuzzyGetSiganlWrapperStyleByWrapperName(wrapperName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
+                wrapperNames.add(signalWrapper.getTagName());
+            }
+        }
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(new ArrayList<>(wrapperNames)), HttpStatus.OK);
+    }
+    @GetMapping("/signalWrapper/style/fuzzyFind/findAllSignalWrapperStyleByStyle/{styleName}")
+    public ResponseEntity<String> findAllSignalWrapperStyleByStyleName(@PathVariable String styleName){
+        List<FindSignalWrapperRes> findSignalWrapperRes = null;
+        Set<String> styleNames = new HashSet<>();
+        if(styleName.equals(SFMonitorConstant.ALL_PARAMETER)){
+            findSignalWrapperRes = relSFMonMetricTagStyleMapper.getAllSignalWrapperStyle();
+            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
+                styleNames.add(signalWrapper.getMetricName());
+            }
+        }else{
+            findSignalWrapperRes = relSFMonMetricTagStyleMapper.fuzzyGetSiganlWrapperStyleByStyleName(styleName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
+                styleNames.add(signalWrapper.getMetricName());
+            }
+        }
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(new ArrayList<>(styleNames)), HttpStatus.OK);
+    }
+
+
     @GetMapping("/signalWrapper/style/fuzzyFind/findAllSignalWrapperStyle/{wrapperNameOrStyleName}")
     public ResponseEntity<String> findAllSignalWrapperStyleByName(@PathVariable String wrapperNameOrStyleName){
         List<FindSignalWrapperRes> findSignalWrapperRes = null;
-        List<String> wrapperNameAndStyleNames = new ArrayList<>();
-        findSignalWrapperRes = relSFMonMetricTagStyleMapper.fuzzyGetSiganlWrapperStyleByWrapperName(wrapperNameOrStyleName + SFMonitorConstant.FUZZY_QUERY_TAG);
-        for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
-            wrapperNameAndStyleNames.add(signalWrapper.getTagName());
+        Set<String> wrapperNameAndStyleNames = new HashSet<>();
+        if(wrapperNameOrStyleName.equals(SFMonitorConstant.ALL_PARAMETER)){
+            findSignalWrapperRes = relSFMonMetricTagStyleMapper.getAllSignalWrapperStyle();
+            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
+                wrapperNameAndStyleNames.add(signalWrapper.getTagName());
+                wrapperNameAndStyleNames.add(signalWrapper.getMetricName());
+            }
+        }else{
+            findSignalWrapperRes = relSFMonMetricTagStyleMapper.fuzzyGetSiganlWrapperStyleByWrapperName(wrapperNameOrStyleName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
+                wrapperNameAndStyleNames.add(signalWrapper.getTagName());
+            }
+            findSignalWrapperRes = relSFMonMetricTagStyleMapper.fuzzyGetSiganlWrapperStyleByStyleName(wrapperNameOrStyleName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
+                wrapperNameAndStyleNames.add(signalWrapper.getMetricName());
+            }
         }
-        findSignalWrapperRes = relSFMonMetricTagStyleMapper.fuzzyGetSiganlWrapperStyleByStyleName(wrapperNameOrStyleName + SFMonitorConstant.FUZZY_QUERY_TAG);
-        for(FindSignalWrapperRes signalWrapper:findSignalWrapperRes){
-            wrapperNameAndStyleNames.add(signalWrapper.getMetricName());
-        }
-        return new ResponseEntity<>(ServerResponse.buildOkJson(wrapperNameAndStyleNames), HttpStatus.OK);
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(new ArrayList<>(wrapperNameAndStyleNames)), HttpStatus.OK);
     }
 
     @GetMapping(value = "/signalWrapper/style/findAllSignalWrapperStyle/pageNum/{pageNum}/pageSize/{pageSize}")
@@ -459,11 +586,12 @@ public class SFMonitorSignalWrapperController {
     }
 
     @RequestMapping(value = "/equipmentConfig/addEquipment", method = RequestMethod.POST)
-    public ResponseEntity<String> addEquipmentConfig(@RequestBody String bodyStr) {
+    public ResponseEntity<String> addEquipmentConfig(@RequestBody String bodyStr,@RequestHeader String userLoginName) {
         ControllerUtil.validateBodyRequired(bodyStr);
         SFMonEquipMonitorInfo sfMonEquipMonitorInfo = JSON.parseObject(bodyStr, SFMonEquipMonitorInfo.class);
         sfMonEquipMonitorInfo.setConfigProgress(SFMonitorConstant.NOT_CONFIG);
         sfMonEquipMonitorInfo.setCreateDate(new Date());
+        sfMonEquipMonitorInfo.setEditor(userLoginName);
         String thingCode = sfMonEquipMonitorInfo.getThingCode();
         SFMonEquipMonitorInfo equipmentInfo = sfMonEquipMonitorInfoMapper.getEquiupmentInfo(thingCode);
         boolean isExist = false;
@@ -494,10 +622,11 @@ public class SFMonitorSignalWrapperController {
     }
 
     @RequestMapping(value="/equipmentConfig/editEquipmentMonitorInfo",method=RequestMethod.POST)
-    public ResponseEntity<String> editEquipmentMonitorInfo(@RequestBody String bodyStr){
+    public ResponseEntity<String> editEquipmentMonitorInfo(@RequestBody String bodyStr,@RequestHeader String userLoginName){
         ControllerUtil.validateBodyRequired(bodyStr);
         EquipmentRelateToSignalWrapperReq equipmentRelateToSignalWrapperReq = JSON.parseObject(bodyStr,EquipmentRelateToSignalWrapperReq.class);
         if(equipmentRelateToSignalWrapperReq !=  null){
+            equipmentRelateToSignalWrapperReq.setEditor(userLoginName);
             monitorService.editEquipmentMonitorInfo(equipmentRelateToSignalWrapperReq);
         }
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
@@ -519,30 +648,47 @@ public class SFMonitorSignalWrapperController {
     public ResponseEntity<String> findEquipmentMonitorInfo(@RequestBody String bodyStr){
         ControllerUtil.validateBodyRequired(bodyStr);
         EquipmentMonFindReq equipmentMonFindReq = JSON.parseObject(bodyStr,EquipmentMonFindReq.class);
+        List<SFMonEquipMonitorInfo> sfMonEquipMonitorInfos = new ArrayList<>();
         String configProgress = equipmentMonFindReq.getConfigProgress();
         String thingCode = equipmentMonFindReq.getThingCode();
         SFMonEquipMonitorInfo sfMonEquipMonitorInfo = new SFMonEquipMonitorInfo();
+        if(!StringUtils.isBlank(thingCode)){
+            sfMonEquipMonitorInfo.setConfigProgress(null);
+            sfMonEquipMonitorInfo.setThingCode(thingCode + SFMonitorConstant.FUZZY_QUERY_TAG);
+            sfMonEquipMonitorInfos = sfMonEquipMonitorInfoMapper.getEquipmentMonitorInfo(sfMonEquipMonitorInfo);
+            sfMonEquipMonitorInfo.setThingCode(null);
+            sfMonEquipMonitorInfo.setThingName(thingCode + SFMonitorConstant.FUZZY_QUERY_TAG);
+            sfMonEquipMonitorInfos.addAll(sfMonEquipMonitorInfoMapper.getEquipmentMonitorInfo(sfMonEquipMonitorInfo));
+            return new ResponseEntity<>(ServerResponse.buildOkJson(sfMonEquipMonitorInfos), HttpStatus.OK);
+        }
         if(!StringUtils.isBlank(configProgress)){
             sfMonEquipMonitorInfo.setConfigProgress(configProgress);
             return new ResponseEntity<>(ServerResponse.buildOkJson(sfMonEquipMonitorInfoMapper.getEquipmentMonitorInfo(sfMonEquipMonitorInfo)), HttpStatus.OK);
         }
-        if(!StringUtils.isBlank(thingCode)){
-            sfMonEquipMonitorInfo.setThingCode(thingCode + SFMonitorConstant.FUZZY_QUERY_TAG);
-            return new ResponseEntity<>(ServerResponse.buildOkJson(sfMonEquipMonitorInfoMapper.getEquipmentMonitorInfo(sfMonEquipMonitorInfo)), HttpStatus.OK);
-        }
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
+
+
     @GetMapping("/equipmentConfig/fuzzyFind/thing/{thingCode}")
     public ResponseEntity<String> findEquipmentMonitorInfoByThingCode(@PathVariable String thingCode){
         SFMonEquipMonitorInfo sfMonEquipMonitorInfo = new SFMonEquipMonitorInfo();
-        List<String> thingCodes = new ArrayList<>();
-        sfMonEquipMonitorInfo.setThingCode(thingCode + SFMonitorConstant.FUZZY_QUERY_TAG);
-        List<SFMonEquipMonitorInfo> sfMonEquipMonitorInfos = sfMonEquipMonitorInfoMapper.getEquipmentMonitorInfo(sfMonEquipMonitorInfo);
-        for(SFMonEquipMonitorInfo data:sfMonEquipMonitorInfos){
-            thingCodes.add(data.getThingCode());
+        Set<String> thingCodes = new HashSet<>();
+        if(thingCode.equals(SFMonitorConstant.ALL_PARAMETER)){
+            List<SFMonEquipMonitorInfo> sfMonEquipMonitorInfos = sfMonEquipMonitorInfoMapper.getEquipmentMonitorInfo(sfMonEquipMonitorInfo);
+            for(SFMonEquipMonitorInfo data:sfMonEquipMonitorInfos){
+                thingCodes.add(data.getThingCode());
+                thingCodes.add(data.getThingName());
+            }
+        }else{
+            sfMonEquipMonitorInfo.setThingCode(thingCode + SFMonitorConstant.FUZZY_QUERY_TAG);
+            List<SFMonEquipMonitorInfo> sfMonEquipMonitorInfos = sfMonEquipMonitorInfoMapper.getEquipmentMonitorInfo(sfMonEquipMonitorInfo);
+            for(SFMonEquipMonitorInfo data:sfMonEquipMonitorInfos){
+                thingCodes.add(data.getThingCode());
+            }
+            thingCodes.addAll(sfMonEquipMonitorInfoMapper.getEquipmentNames(thingCode + SFMonitorConstant.FUZZY_QUERY_TAG));
         }
-        thingCodes.addAll(sfMonEquipMonitorInfoMapper.getEquipmentNames(thingCode + SFMonitorConstant.FUZZY_QUERY_TAG));
-        return new ResponseEntity<>(ServerResponse.buildOkJson(thingCodes), HttpStatus.OK);
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(new ArrayList<>(thingCodes)), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/monitorData",method = RequestMethod.PUT)
@@ -576,25 +722,38 @@ public class SFMonitorSignalWrapperController {
             }
         }
         List<SFMonPadAuxiliaryZoneInfo> sfMonPadAuxiliaryZoneInfoList = new ArrayList<>();
-        List<SFMonPadAuxiliaryZoneMetricInfo> sfMonPadAuxiliaryZoneMetricInfoList = new ArrayList<>();
-        for(SFMonPadAuxiliaryZoneInfo sfMonPadAuxiliaryZoneInfo:sfMonPadAuxiliaryZoneInfos){
+        int i = 0;
+        while(i < sfMonPadAuxiliaryZoneInfos.size()){
+            List<SFMonPadAuxiliaryZoneMetricInfo> sfMonPadAuxiliaryZoneMetricInfoList = new ArrayList<>();
+            SFMonPadAuxiliaryZoneInfo data = sfMonPadAuxiliaryZoneInfos.get(i);
             SFMonPadAuxiliaryZoneInfo compositionInfo = new SFMonPadAuxiliaryZoneInfo();
             SFMonPadAuxiliaryZoneInfo remoteValve = new SFMonPadAuxiliaryZoneInfo();
             List<SFMonPadAuxiliaryZoneMetricInfo> remoteValveInfoList = new ArrayList<>();
-            if(sfMonPadAuxiliaryZoneInfo.getRule() == SFMonitorConstant.SINGLE_PARTION
-                    || (sfMonPadAuxiliaryZoneInfo.getRule() == 0)){
-                sfMonPadAuxiliaryZoneInfoList.add(sfMonPadAuxiliaryZoneInfo);
+            if(data.getRule() == SFMonitorConstant.SINGLE_PARTION
+                    || (data.getRule() == 0)){
+                sfMonPadAuxiliaryZoneInfoList.add(data);
+                sfMonPadAuxiliaryZoneInfos.remove(i);
+                continue;
             }
-            specialRuleOperate(sfMonPadAuxiliaryZoneInfos,sfMonPadAuxiliaryZoneInfo,sfMonPadAuxiliaryZoneMetricInfoList,remoteValveInfoList);
+            specialRuleOperate(sfMonPadAuxiliaryZoneInfos,data,sfMonPadAuxiliaryZoneMetricInfoList,remoteValveInfoList,sfMonPadAuxiliaryZoneInfoList);
 
             if((sfMonPadAuxiliaryZoneMetricInfoList != null) && (sfMonPadAuxiliaryZoneMetricInfoList.size() > 0)){
+                removeEquipmentData(sfMonPadAuxiliaryZoneMetricInfoList);
                 compositionInfo.setSfMonPadAuxiliaryZoneMetricInfoList(sfMonPadAuxiliaryZoneMetricInfoList);
+                compositionInfo.setWrapperName(data.getWrapperName());
+                compositionInfo.setStyleName(data.getStyleName());
                 sfMonPadAuxiliaryZoneInfoList.add(compositionInfo);
+                i--;
             }
             if((remoteValveInfoList != null) && (remoteValveInfoList.size() > 0)){
+                removeEquipmentData(remoteValveInfoList);
                 remoteValve.setSfMonPadAuxiliaryZoneMetricInfoList(remoteValveInfoList);
+                remoteValve.setWrapperName(data.getWrapperName());
+                remoteValve.setStyleName(data.getStyleName());
                 sfMonPadAuxiliaryZoneInfoList.add(remoteValve);
+                i--;
             }
+            i++;
             if(sfMonPadAuxiliaryZoneInfos.size() == 0){
                 break;
             }
@@ -603,21 +762,44 @@ public class SFMonitorSignalWrapperController {
         return sfMonPadAuxiliaryZoneInfoList;
     }
 
+    private void removeEquipmentData(List<SFMonPadAuxiliaryZoneMetricInfo> sfMonPadAuxiliaryZoneMetricInfoList){
+        int i = 0;
+        while(i < sfMonPadAuxiliaryZoneMetricInfoList.size()){
+            if(sfMonPadAuxiliaryZoneMetricInfoList.get(i).getThingCode().split("\\.").length < 2){
+                sfMonPadAuxiliaryZoneMetricInfoList.remove(i);
+            }else{
+                i++;
+            }
+        }
+    }
+
+
     private void specialRuleOperate(List<SFMonPadAuxiliaryZoneInfo> sfMonPadAuxiliaryZoneInfos,SFMonPadAuxiliaryZoneInfo sfMonPadAuxiliaryZoneInfo,
                                     List<SFMonPadAuxiliaryZoneMetricInfo> sfMonPadAuxiliaryZoneMetricInfoList,
-                                    List<SFMonPadAuxiliaryZoneMetricInfo> remoteValveInfoList){
+                                    List<SFMonPadAuxiliaryZoneMetricInfo> remoteValveInfoList,
+                                    List<SFMonPadAuxiliaryZoneInfo> sfMonPadAuxiliaryZoneInfoList){
         int i = 0;
         while(i < sfMonPadAuxiliaryZoneInfos.size()){
             if((sfMonPadAuxiliaryZoneInfo.getRule() == SFMonitorConstant.COMPOSITION_ALL_PARTION)
                     && sfMonPadAuxiliaryZoneInfo.getWrapperName().equals(sfMonPadAuxiliaryZoneInfos.get(i).getWrapperName())){
-                sfMonPadAuxiliaryZoneMetricInfoList.addAll(sfMonPadAuxiliaryZoneInfos.get(i).getSfMonPadAuxiliaryZoneMetricInfoList());
-                sfMonPadAuxiliaryZoneInfos.remove(i);
-                continue;
+                if(sfMonPadAuxiliaryZoneInfo.getSfMonPadAuxiliaryZoneMetricInfoList().get(0).getThingCode().split("\\.").length > 1){
+                    sfMonPadAuxiliaryZoneMetricInfoList.addAll(sfMonPadAuxiliaryZoneInfos.get(i).getSfMonPadAuxiliaryZoneMetricInfoList());
+                    sfMonPadAuxiliaryZoneInfos.remove(i);
+                    continue;
+                }else{
+                    sfMonPadAuxiliaryZoneInfoList.add(sfMonPadAuxiliaryZoneInfo);
+                    break;
+                }
             }else if((sfMonPadAuxiliaryZoneInfo.getRule() == SFMonitorConstant.REMOTE_VALVE)
                     && (sfMonPadAuxiliaryZoneInfo.getWrapperName().equals(sfMonPadAuxiliaryZoneInfos.get(i).getWrapperName()))){//远程阀门
-                remoteValveInfoList.addAll(sfMonPadAuxiliaryZoneInfos.get(i).getSfMonPadAuxiliaryZoneMetricInfoList());
-                sfMonPadAuxiliaryZoneInfos.remove(i);
-                continue;
+                if(sfMonPadAuxiliaryZoneInfo.getSfMonPadAuxiliaryZoneMetricInfoList().get(0).getThingCode().split("\\.").length > 1){
+                    remoteValveInfoList.addAll(sfMonPadAuxiliaryZoneInfos.get(i).getSfMonPadAuxiliaryZoneMetricInfoList());
+                    sfMonPadAuxiliaryZoneInfos.remove(i);
+                    continue;
+                }else{
+                    sfMonPadAuxiliaryZoneInfoList.add(sfMonPadAuxiliaryZoneInfo);
+                    break;
+                }
             }
             i++;
         }
@@ -653,6 +835,16 @@ public class SFMonitorSignalWrapperController {
         && sfMonPadStateControlMetricInfos.get(0).getMetricName().equals(SFMonitorConstant.EQUIPMENT_STATE))){
             sfMonPadStateControlInfo.setPowerEquipment(false);
         }
+        for(SFMonPadStateControlMetricInfo sfMonPadStateControlMetricInfo:sfMonPadStateControlMetricInfos){
+            MetricModel metric = metricMapper.getMetric(sfMonPadStateControlMetricInfo.getMetricName());
+            if(metric != null){
+                Optional<DataModelWrapper> wrapper = dataService.getData(thingCode,metric.getMetricCode());
+                if((wrapper.isPresent()) && (!wrapper.get().isEmpty()) && (!StringUtils.isBlank(wrapper.get().getValue()))){
+                    String value = wrapper.get().getValue();
+                    sfMonPadStateControlMetricInfo.setValue(value);
+                }
+            }
+        }
         sfMonPadStateControlInfo.setSfMonPadStateControlMetricInfos(sfMonPadStateControlMetricInfos);
         return sfMonPadStateControlInfo;
     }
@@ -681,25 +873,38 @@ public class SFMonitorSignalWrapperController {
     }
 
     private List<SFMonPadJumpZoneInfo> getJumpZoneData(String thingCode){
-        List<SFMonPadJumpZoneInfo> sfMonPadJumpZoneInfoList = sfMonEquipMonitorConfigMapper.getJumpZoneData(thingCode,SFMonitorConstant.KEY_CHANNEL);
-        createJumpZoneData(sfMonPadJumpZoneInfoList,SFMonitorConstant.KEY_CHANNEL);
-        List<SFMonPadJumpZoneInfo> sfMonPadFromJumpZoneInfoList = sfMonEquipMonitorConfigMapper.getJumpZoneData(thingCode,SFMonitorConstant.FROM);
-        createJumpZoneData(sfMonPadFromJumpZoneInfoList,SFMonitorConstant.FROM);
-        sfMonPadJumpZoneInfoList.addAll(sfMonPadFromJumpZoneInfoList);
-        List<SFMonPadJumpZoneInfo> sfMonPadToJumpZoneInfoList = sfMonEquipMonitorConfigMapper.getJumpZoneData(thingCode,SFMonitorConstant.TO);
-        createJumpZoneData(sfMonPadToJumpZoneInfoList,SFMonitorConstant.TO);
-        sfMonPadJumpZoneInfoList.addAll(sfMonPadToJumpZoneInfoList);
-        List<SFMonPadJumpZoneInfo> sfMonPadSimilarJumpZoneInfoList = sfMonEquipMonitorConfigMapper.getJumpZoneData(thingCode,SFMonitorConstant.SIMILAR);
-        createJumpZoneData(sfMonPadSimilarJumpZoneInfoList,SFMonitorConstant.SIMILAR);
-        sfMonPadJumpZoneInfoList.addAll(sfMonPadSimilarJumpZoneInfoList);
-        return sfMonPadJumpZoneInfoList;
+        List<SFMonPadJumpZoneInfo> sfMonPadJumpZoneInfos = new ArrayList<>();
+        List<SFMonPadJumpZoneEquipmentInfo> jumpZoneData = sfMonEquipMonitorConfigMapper.getJumpZoneData(thingCode,SFMonitorConstant.KEY_CHANNEL);
+        SFMonPadJumpZoneInfo sfMonPadChannelZoneInfo = new SFMonPadJumpZoneInfo();
+        sfMonPadChannelZoneInfo.setZoneCode(SFMonitorConstant.KEY_CHANNEL);
+        sfMonPadChannelZoneInfo.setSfMonPadJumpZoneEquipmentInfos(jumpZoneData);
+        sfMonPadJumpZoneInfos.add(sfMonPadChannelZoneInfo);
+
+        jumpZoneData = sfMonEquipMonitorConfigMapper.getJumpZoneData(thingCode,SFMonitorConstant.FROM);
+        SFMonPadJumpZoneInfo sfMonPadFromZoneInfo = new SFMonPadJumpZoneInfo();
+        sfMonPadFromZoneInfo.setZoneCode(SFMonitorConstant.FROM);
+        sfMonPadFromZoneInfo.setSfMonPadJumpZoneEquipmentInfos(jumpZoneData);
+        sfMonPadJumpZoneInfos.add(sfMonPadFromZoneInfo);
+        jumpZoneData = sfMonEquipMonitorConfigMapper.getJumpZoneData(thingCode,SFMonitorConstant.TO);
+        SFMonPadJumpZoneInfo sfMonPadToZoneInfo = new SFMonPadJumpZoneInfo();
+        sfMonPadToZoneInfo.setZoneCode(SFMonitorConstant.TO);
+        sfMonPadToZoneInfo.setSfMonPadJumpZoneEquipmentInfos(jumpZoneData);
+        sfMonPadJumpZoneInfos.add(sfMonPadToZoneInfo);
+        jumpZoneData = sfMonEquipMonitorConfigMapper.getJumpZoneData(thingCode,SFMonitorConstant.SIMILAR);
+        SFMonPadJumpZoneInfo sfMonPadSimilarZoneInfo = new SFMonPadJumpZoneInfo();
+        sfMonPadSimilarZoneInfo.setZoneCode(SFMonitorConstant.SIMILAR);
+        sfMonPadSimilarZoneInfo.setSfMonPadJumpZoneEquipmentInfos(jumpZoneData);
+        sfMonPadJumpZoneInfos.add(sfMonPadSimilarZoneInfo);
+        createJumpZoneData(sfMonPadJumpZoneInfos);
+        return sfMonPadJumpZoneInfos;
     }
 
-    private void createJumpZoneData(List<SFMonPadJumpZoneInfo> sfMonPadJumpZoneInfos,String zoneCode){
+    private void createJumpZoneData(List<SFMonPadJumpZoneInfo> sfMonPadJumpZoneInfos){
+        List<SFMonPadJumpZoneEquipmentInfo> sfMonPadJumpZoneEquipmentInfos = new ArrayList<>();
         for(SFMonPadJumpZoneInfo sfMonPadJumpZoneInfo:sfMonPadJumpZoneInfos){
-            sfMonPadJumpZoneInfo.setZoneCode(zoneCode);
-            List<SFMonPadJumpZoneEquipmentInfo> sfMonPadJumpZoneEquipmentInfos = sfMonPadJumpZoneInfo.getSfMonPadJumpZoneEquipmentInfos();
-            for(SFMonPadJumpZoneEquipmentInfo sfMonPadJumpZoneEquipmentInfo:sfMonPadJumpZoneEquipmentInfos){
+            List<SFMonPadJumpZoneEquipmentInfo> sfMonPadJumpZoneEquipmentInfoList = sfMonPadJumpZoneInfo.getSfMonPadJumpZoneEquipmentInfos();
+            sfMonPadJumpZoneEquipmentInfos.addAll(sfMonPadJumpZoneEquipmentInfoList);
+            for(SFMonPadJumpZoneEquipmentInfo sfMonPadJumpZoneEquipmentInfo:sfMonPadJumpZoneEquipmentInfoList){
                 String thingCode = sfMonPadJumpZoneEquipmentInfo.getThingCode();
                 Optional<DataModelWrapper> wrapper = dataService.getData(thingCode,SFMonitorConstant.STATE);
                 if((wrapper.isPresent()) && (!wrapper.get().isEmpty()) && (!StringUtils.isBlank(wrapper.get().getValue()))){

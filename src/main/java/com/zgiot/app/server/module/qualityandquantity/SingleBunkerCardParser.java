@@ -25,7 +25,7 @@ public class SingleBunkerCardParser implements CardParser {
         UniaxialCircularDiagramParam param = JSON.parseObject(paramValueJson,UniaxialCircularDiagramParam.class);
         BiaxialCircularDiagramData data = new BiaxialCircularDiagramData();
         data.setTitle(param.getTitle());
-        MetricDataValue value = dataManager.getValueWithRule(param.getThingCode(), param.getThingCode());
+        MetricDataValue value = dataManager.getValueWithRule(param.getThingCode(), param.getMetricCode());
         data.setValueOne(value);
         return data;
     }

@@ -15,6 +15,7 @@
         <result column="tag_name" property="warpperName"/>
         <result column="selected" property="selected"/>
         <result column="zone" property="zone"/>
+        <result column="thing_code" property="thingCode"/>
         <collection property="signalWrapperMetrics"
                     ofType="com.zgiot.app.server.module.sfmonitor.pojo.SignalWrapperMetric">
             <result column="metric_name" property="metricName"/>
@@ -28,12 +29,13 @@
         <result column="model" property="model"/>
     </resultMap>
 
-    <resultMap id="jumpZoneData" type="com.zgiot.app.server.module.sfmonitor.controller.SFMonPadJumpZoneInfo">
-        <collection property="sfMonPadJumpZoneEquipmentInfos"
-                    ofType="com.zgiot.app.server.module.sfmonitor.controller.SFMonPadJumpZoneEquipmentInfo">
+    <!--resultMap id="jumpZoneData" type="com.zgiot.app.server.module.sfmonitor.controller.SFMonPadJumpZoneInfo"-->
+    <resultMap id="jumpZoneData" type="com.zgiot.app.server.module.sfmonitor.controller.SFMonPadJumpZoneEquipmentInfo">
+        <!--collection property="sfMonPadJumpZoneEquipmentInfos"
+                    ofType="com.zgiot.app.server.module.sfmonitor.controller.SFMonPadJumpZoneEquipmentInfo"-->
             <result column="thing_shortname" property="thingName"/>
             <result column="value" property="thingCode"/>
-        </collection>
+        <!--/collection-->
 
     </resultMap>
 
@@ -50,7 +52,7 @@
         <result column="rule" property="rule"/>
     </resultMap-->
     <resultMap id="stateControlZoneRule" type="com.zgiot.app.server.module.sfmonitor.controller.SFMonPadStateControlMetricInfo">
-        <result column="value" property="metricCode"/>
+        <result column="metric_code" property="metricCode"/>
         <result column="metric_name" property="metricName"/>
         <result column="model" property="model"/>
         <result column="sort" property="sort"/>
@@ -100,11 +102,11 @@
         and a.metric_tag_name=e.tag_name
         and e.code=f.metric_tag_code
         and a.selected = 1
-        order by b.sort asc
+        order by b.sort asc,e.create_date,f.create_date
     </select>
 
     <select id="getStateControlZoneData" resultMap="stateControlZoneRule">
-        select a.value as value,c.metric_name as metric_name,a.model as model,b.sort as sort
+        select c.metric_code as metric_code,c.metric_name as metric_name,a.model as model,b.sort as sort
         from tb_sfmon_equipmonitor_config a,rel_sfmon_metrictag_metric_sort b,tb_metric c
         where
         a.thing_code=#{thingCode}
@@ -120,11 +122,11 @@
 
     <select id="getJumpZoneData" resultMap="jumpZoneData">
         select b.thing_shortname as thing_shortname ,a.value as value from tb_sfmon_equipmonitor_config a,tb_thing b where
-        a.thing_code=#{thingCode} and a.key=#{zoneCode} and a.thing_code= b.thing_code
+        a.thing_code=#{thingCode} and a.key=#{zoneCode} and a.thing_code= b.thing_code order by a.value asc
     </select>
 
     <select id="getParameterData" resultMap="parameterZoneData">
-        select a.value,b.metric_code,b.value_unit from tb_sfmon_equipmonitor_config a,tb_metric b
+        select a.value,b.metric_name,b.metric_code,b.value_unit from tb_sfmon_equipmonitor_config a,tb_metric b
         where a.thing_code=#{thingCode} and a.key=#{zoneCode} and a.value=b.metric_name
     </select>
 
@@ -136,7 +138,7 @@
     </select>
 
     <select id="getEquipmentRelateToSignalWrapperByThingCode" resultMap="signalWrapperBaseInfoFind">
-        select distinct(a.metric_tag_name) as tag_name,a.value as metric_name,a.model as model,a.key as zone,a.selected
+        select distinct(a.metric_tag_name) as tag_name,a.thing_code as thing_code,a.value as metric_name,a.model as model,a.key as zone,a.selected
         as selected
         from tb_sfmon_equipmonitor_config a
         where a.key=#{zoneCode} and a.thing_code=#{thingCode}
@@ -154,17 +156,8 @@
         <if test="thingCode != null">
             AND thing_code = #{thingCode}
         </if>
-        <if test="metricTagName != null">
-            AND metric_tag_name = #{metricTagName}
-        </if>
         <if test="key != null">
             AND `key` = #{key}
-        </if>
-        <if test="value != null">
-            AND `value` = #{value}
-        </if>
-        <if test="selected != null">
-            AND selected = #{selected}
         </if>
     </delete>
 

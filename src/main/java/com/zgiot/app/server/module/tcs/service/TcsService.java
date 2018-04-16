@@ -19,8 +19,6 @@ import org.springframework.stereotype.Service;
 
 
 import java.text.DecimalFormat;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -240,7 +238,7 @@ public class TcsService {
         CoalAnalysisRecord recentRecord = null;
         if (!concentrateRecords.isEmpty()) {
             recentRecord = concentrateRecords.get(0);
-            recentRecord.setDensityAndFlowInfos(coalAnalysisMapper.getDensityAndFlowInfo(recentRecord.getId()));
+            recentRecord.setDensityAndFlowInfos(coalAnalysisMapper.getDetailDensityAndFlowInfo(recentRecord.getId()));
         }
         return recentRecord;
     }
