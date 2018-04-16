@@ -18,6 +18,7 @@ public class DeviceInfo {
     private String disableDate;// 停用日期
     private String powerProperties;// 动力属性:1动力,0非动力
     private Integer locationArea;// 所处位置id
+    private String locationAreaName;// 所处位置名称
     private String locationX;// 位置x坐标
     private String locationY;// 位置y坐标
     private Integer buildingId;// 车间id
@@ -139,6 +140,14 @@ public class DeviceInfo {
 
     public void setLocationArea(Integer locationArea) {
         this.locationArea = locationArea;
+    }
+
+    public String getLocationAreaName() {
+        return locationAreaName;
+    }
+
+    public void setLocationAreaName(String locationAreaName) {
+        this.locationAreaName = locationAreaName;
     }
 
     public String getLocationX() {
