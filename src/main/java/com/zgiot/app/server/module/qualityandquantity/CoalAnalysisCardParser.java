@@ -2,6 +2,7 @@ package com.zgiot.app.server.module.qualityandquantity;
 
 import com.alibaba.fastjson.JSON;
 import com.zgiot.app.server.module.qualityandquantity.pojo.CoalAnalysisData;
+import com.zgiot.app.server.module.qualityandquantity.pojo.MetricDataValue;
 import com.zgiot.app.server.module.qualityandquantity.pojo.ReportFormsParam;
 import com.zgiot.app.server.module.qualityandquantity.service.QualityAndQuantityDataManager;
 import com.zgiot.app.server.module.reportforms.ReportFormsUtils;
@@ -11,6 +12,7 @@ import com.zgiot.common.pojo.DataModelWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @Component
@@ -41,14 +43,34 @@ public class CoalAnalysisCardParser implements CardParser {
                 coalAnalysisData = dataManager.transCoalAnalysisRecordToData(coalAnalysisRecord);
                 coalAnalysisData.setType(thingMetricParam.getType());
                 coalAnalysisData.setShowBit(thingMetricParam.getShowBit());
-                if (thingMetricParam.isAvg()){
-                    coalAnalysisData.setThingName(coalAnalysisData.getThingCode()+ ReportFormsUtils.AVG_RECORD_KEYWORD);
+                if (thingMetricParam.isAvg()) {
+                    coalAnalysisData.setThingName(coalAnalysisData.getThingCode() + ReportFormsUtils.AVG_RECORD_KEYWORD);
                     coalAnalysisData.setThingCode(null);
                 }
+
+                formatDensity(coalAnalysisData);
             }
+
         }
 
         return coalAnalysisData;
+    }
+
+    private void formatDensity(CoalAnalysisData coalAnalysisData) {
+        MetricDataValue avgDensity = coalAnalysisData.getAvgDensity();
+        if (avgDensity != null) {
+            String formatValue = getFormatValue(avgDensity.getValue());
+            avgDensity.setValue(formatValue);
+        }
+    }
+
+    public String getFormatValue(String value) {
+        String formatValueStr = null;
+        if (value != null) {
+            BigDecimal bigDecimal = new BigDecimal(value);
+            formatValueStr = bigDecimal.setScale(3, BigDecimal.ROUND_HALF_UP).toString();
+        }
+        return formatValueStr;
     }
 
     @Override
