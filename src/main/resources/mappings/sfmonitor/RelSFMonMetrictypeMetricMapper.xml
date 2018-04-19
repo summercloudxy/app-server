@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.sfmonitor.mapper.RelSFMonMetrictypeMetricMapper">
+    <resultMap id="relSFMonMetrictypeMetricResultMap"
+               type="com.zgiot.app.server.module.sfmonitor.pojo.RelSFMonMetrictypeMetric">
+        <result column="id"  property="id"/>
+        <result column="metric_code" property="metricCode"/>
+        <result column="sfmon_metrictype" property="sfmonMetrictype"/>
+        <result column="create_dt" property="createDt"/>
+        <result column="update_dt" property="updateDt"/>
+    </resultMap>
+
+    <select id="getRelSFMonMetrictypeMetricByThingCode" resultMap="relSFMonMetrictypeMetricResultMap">
+        SELECT * FROM rel_sfmon_metrictype_metric
+        WHERE metric_code IN
+        (SELECT DISTINCT metric_code
+        FROM rel_thing_metric_label
+        WHERE thing_code IN
+        <foreach collection="thingCodeList" item="thingCode" index="index"
+                 open="(" close=")" separator=",">
+            #{thingCode}
+        </foreach>
+        AND enabled = 1)
+    </select>
+
+</mapper>
+ 
