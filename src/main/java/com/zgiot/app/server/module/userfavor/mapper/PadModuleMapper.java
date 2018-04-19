@@ -27,7 +27,7 @@ public interface PadModuleMapper {
     @Select("select max(sort) from rel_user_favor where user_uuid=#{userUuid}")
     Float getMaxSort(@Param("userUuid") String userUuid);
 
-    @Select("select * from rel_user_favor where user_uuid=#{userUuid}")
+    @Select("select * from rel_user_favor where user_uuid=#{userUuid} order by sort")
     List<UserFavor> getUserFavor(@Param("userUuid") String userUuid);
 
     @Select("select * from rel_user_favor where user_uuid=#{userUuid} and pad_module_id=#{padModuleId}")
