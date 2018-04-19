@@ -752,7 +752,6 @@ public class AlertManager {
     }
 
 
-
     /**
      * 复位（调度）
      *
@@ -854,7 +853,6 @@ public class AlertManager {
     }
 
 
-
     /**
      * 消息已读
      *
@@ -883,7 +881,7 @@ public class AlertManager {
             filterCondition.setStartTime(startTime);
         }
         if (page != null && count != null) {
-            offset = page*count;
+            offset = page * count;
             filterCondition.setOffset(offset);
         }
         String excluStage = null;
@@ -907,13 +905,20 @@ public class AlertManager {
     }
 
 
-    public List<AlertRecord> getAlertDataByThingCode(AlertFilterCondition filterCondition){
-        if (filterCondition.getStages()==null||filterCondition.getStages().isEmpty()){
+    public List<AlertRecord> getAlertDataByThingCode(AlertFilterCondition filterCondition) {
+        if (filterCondition.getStages() == null || filterCondition.getStages().isEmpty()) {
             filterCondition.setExcluStage(AlertConstants.STAGE_RELEASE);
         }
         List<AlertRecord> alertDataByThingCode = alertMapper.getAlertDataByThingCode(filterCondition);
         if (filterCondition.getPage() != null && filterCondition.getCount() != null) {
             alertDataByThingCode = pagingRecords(filterCondition.getPage(), filterCondition.getCount(), alertDataByThingCode);
+        }
+        for (AlertRecord alertRecord : alertDataByThingCode) {
+            String thingCode = alertRecord.getThingCode();
+            ThingModel thing = thingService.getThing(thingCode);
+            if (thing != null) {
+                alertRecord.setThingName(thing.getThingName());
+            }
         }
         return alertDataByThingCode;
     }
@@ -1056,7 +1061,6 @@ public class AlertManager {
             alertData.setFeedBackImageList(imageList);
         }
     }
-
 
 
     /**
