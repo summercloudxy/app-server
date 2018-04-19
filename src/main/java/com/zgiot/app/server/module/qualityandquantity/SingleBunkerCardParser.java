@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 public class SingleBunkerCardParser implements CardParser {
     @Autowired
     private QualityAndQuantityDataManager dataManager;
+    @Autowired
+    private DoubleBunkerCardParser bunkerCardParser;
     private String parserName = "SingleBunkerCardParser";
 
     @Override
@@ -26,6 +28,7 @@ public class SingleBunkerCardParser implements CardParser {
         BiaxialCircularDiagramData data = new BiaxialCircularDiagramData();
         data.setTitle(param.getTitle());
         MetricDataValue value = dataManager.getValueWithRule(param.getThingCode(), param.getMetricCode());
+        bunkerCardParser.formatValue(value);
         data.setValueOne(value);
         return data;
     }
