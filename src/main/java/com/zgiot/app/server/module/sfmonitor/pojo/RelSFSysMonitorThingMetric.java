@@ -12,6 +12,16 @@ public class RelSFSysMonitorThingMetric {
     private short isShowMetric;
     private short isJoinSystem;
 
+    public String getMetricValue() {
+        return metricValue;
+    }
+
+    public void setMetricValue(String metricValue) {
+        this.metricValue = metricValue;
+    }
+
+    private String metricValue;
+
     public int getId() {
         return id;
     }
