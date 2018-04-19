@@ -3,6 +3,7 @@ package com.zgiot.app.server.module.alert.mapper;
 import com.zgiot.app.server.module.alert.pojo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.Date;
 import java.util.List;
@@ -116,4 +117,7 @@ public interface AlertMapper {
     void insertParamThreshold(AlertRule alertRule);
 
     void setParamThreshold(AlertRule alertRule);
+
+    @Select("select * from rel_nopower_thing where thing_code=#{thingCode}")
+    List<NoPowerThing> getNoPowerThingByThingCode(@Param("thingCode") String thingCode);
 }

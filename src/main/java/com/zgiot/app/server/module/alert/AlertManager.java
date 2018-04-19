@@ -1524,5 +1524,14 @@ public class AlertManager {
         return alertMaskInfo;
     }
 
+    /**
+     * 查询非动力设备
+     *
+     * @param thingCode
+     * @return
+     */
+    public List<NoPowerThing> getNoPowerThingByThingCode(String thingCode) {
+        return alertMapper.getNoPowerThingByThingCode(thingCode);
+    }
 
 }
