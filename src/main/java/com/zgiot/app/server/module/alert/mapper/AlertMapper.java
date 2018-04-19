@@ -48,13 +48,17 @@ public interface AlertMapper {
 
     void saveAlertShield(List<AlertMask> alertMasks);
 
-    List<AlertRecord> getAlertDataListGroupByThing(@Param("stage") String stage, @Param("excluStage") String excluStage,
-                                                   @Param("levels") List<Integer> levels, @Param("types") List<Short> types,
-                                                   @Param("buildingIds") List<Integer> buildingIds, @Param("floors") List<Integer> floors,
-                                                   @Param("systems") List<Integer> systems, @Param("assetType") String assetType,
-                                                   @Param("category") String category, @Param("sortType") Integer sortType, @Param("startTime") Date startTime,
-                                                   @Param("endTime") Date endTime, @Param("thingCode") String thingCode, @Param("offset") Integer offset,
-                                                   @Param("count") Integer count);
+//    List<AlertRecord> getAlertDataListGroupByThing(@Param("stage") String stage, @Param("excluStage") String excluStage,
+//                                                   @Param("levels") List<Integer> levels, @Param("types") List<Short> types,
+//                                                   @Param("buildingIds") List<Integer> buildingIds, @Param("floors") List<Integer> floors,
+//                                                   @Param("systems") List<Integer> systems, @Param("assetType") String assetType,
+//                                                   @Param("category") String category, @Param("sortType") Integer sortType, @Param("startTime") Date startTime,
+//                                                   @Param("endTime") Date endTime, @Param("thingCode") String thingCode, @Param("offset") Integer offset,
+//                                                   @Param("count") Integer count);
+
+    List<AlertRecord> getAlertDataListGroupByThing(FilterCondition filterCondition);
+
+    List<AlertRecord> getAlertDataByThingCode(AlertFilterCondition filterCondition);
 
     Integer getAlertDataListCount(FilterCondition filterCondition);
 
