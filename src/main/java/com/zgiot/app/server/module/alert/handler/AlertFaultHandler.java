@@ -139,7 +139,7 @@ public class AlertFaultHandler implements AlertHandler {
         for (NoPowerThing noPowerThing : noPowerThings) {
             DataModelWrapper stateData = dataService.getData(noPowerThing.getSubThingCode(), MetricCodes.STATE).orElse(null);
             if (stateData != null && STATE_RUN.equals(stateData.getValue())) {
-                return null;
+                return AlertConstants.LEVEL_30;
             }
         }
         return AlertConstants.LEVEL_20;
