@@ -30,26 +30,8 @@ public class PadModuleController {
 
     @GetMapping("/userFavor/user/{userUuid}")
     public ResponseEntity<String> getPadModule(@PathVariable String userUuid) {
-        List<PadModule> padModuleList = padModuleMapper.getCommonPadModule();
-        List<PadModule> padModules = padModuleMapper.getPadModuleByUuid(userUuid);
-        if (padModules.size() == 0) {
-            Float sort = padModuleMapper.getMaxSort(userUuid);
-            if (sort == null) {
-                sort = 0f;
-            }
-            for (PadModule padModule : padModuleList) {
-                UserFavor userFavor = new UserFavor();
-                userFavor.setUserUuid(userUuid);
-                userFavor.setPadModuleId(padModule.getId());
-                userFavor.setSort(++sort);
-                UserFavor favor = padModuleMapper.getUserFavorById(userUuid, padModule.getId());
-                if (favor == null) {
-                    padModuleMapper.addUserFavor(userFavor);
-                }
-            }
-        }
-        padModules = padModuleMapper.getPadModuleByUuid(userUuid);
-        return new ResponseEntity(ServerResponse.buildOkJson(padModules), HttpStatus.OK);
+        List<UserFavor> userFavorList = padModuleMapper.getUserFavor(userUuid);
+        return new ResponseEntity(ServerResponse.buildOkJson(userFavorList), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/userFavor", method = RequestMethod.POST)
