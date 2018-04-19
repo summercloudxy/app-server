@@ -9,8 +9,11 @@ public class RelSFSysMonitorThingMetric {
     private String thingName;
     private String metricCode;
     private String metricName;
-    private short isShowMetric;
-    private short isJoinSystem;
+    private Short isShowMetric;
+    private Short isJoinSystem;
+    private String metricValue;
+    private Date createDate;
+    private Date updateDate;
 
     public String getMetricValue() {
         return metricValue;
@@ -19,8 +22,6 @@ public class RelSFSysMonitorThingMetric {
     public void setMetricValue(String metricValue) {
         this.metricValue = metricValue;
     }
-
-    private String metricValue;
 
     public int getId() {
         return id;
@@ -70,19 +71,19 @@ public class RelSFSysMonitorThingMetric {
         this.metricName = metricName;
     }
 
-    public short getIsShowMetric() {
+    public Short getIsShowMetric() {
         return isShowMetric;
     }
 
-    public void setIsShowMetric(short isShowMetric) {
+    public void setIsShowMetric(Short isShowMetric) {
         this.isShowMetric = isShowMetric;
     }
 
-    public short getIsJoinSystem() {
+    public Short getIsJoinSystem() {
         return isJoinSystem;
     }
 
-    public void setIsJoinSystem(short isJoinSystem) {
+    public void setIsJoinSystem(Short isJoinSystem) {
         this.isJoinSystem = isJoinSystem;
     }
 
@@ -101,8 +102,5 @@ public class RelSFSysMonitorThingMetric {
     public void setUpdateDate(Date updateDate) {
         this.updateDate = updateDate;
     }
-
-    private Date createDate;
-    private Date updateDate;
 
 }

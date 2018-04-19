@@ -10,6 +10,6 @@ import java.util.List;
 @Mapper
 public interface RelSFSysMonitorThingMetricMapper {
 
-    @Select("SELECT * FROM rel_sfsysmon_thing_metric WHERE thing_code = #{thingCode}")
+    @Select("SELECT id,thing_code,thing_name,metric_code,metric_name,is_show_metric,is_join_system FROM rel_sfsysmon_thing_metric WHERE thing_code = #{thingCode}")
     List<RelSFSysMonitorThingMetric> getThingMetricByThingCode(@Param("thingCode") String thingCode);
 }

@@ -5,7 +5,7 @@ import org.springframework.boot.actuate.metrics.Metric;
 import java.util.Date;
 import java.util.List;
 
-public class SFSysMonitorThing {
+public class RelSFSysMonitorTermThing {
     private int id;
     private String thingCode;
     private String thingTagCode;
@@ -13,7 +13,24 @@ public class SFSysMonitorThing {
     private Short termId;
     private Date createDate;
     private Date updateDate;
-    private List<Metric> metricList;
+    private Short showType;
+    private List<RelSFSysMonitorThingMetric> thingMetricList;
+
+    public Short getShowType() {
+        return showType;
+    }
+
+    public void setShowType(Short showType) {
+        this.showType = showType;
+    }
+
+    public List<RelSFSysMonitorThingMetric> getThingMetricList() {
+        return thingMetricList;
+    }
+
+    public void setThingMetricList(List<RelSFSysMonitorThingMetric> thingMetricList) {
+        this.thingMetricList = thingMetricList;
+    }
 
     public int getId() {
         return id;
@@ -71,11 +88,4 @@ public class SFSysMonitorThing {
         this.updateDate = updateDate;
     }
 
-    public List<Metric> getMetricList() {
-        return metricList;
-    }
-
-    public void setMetricList(List<Metric> metricList) {
-        this.metricList = metricList;
-    }
 }

@@ -13,4 +13,15 @@ public interface BusinessService {
      * @return 一期  二期 配比
      */
     Map<String, String> getRowCoalCapPercent();
+
+    /**
+     * 液位计算
+     *LEH_SET , LEL_SET两个信号点：
+     * 00：低液位
+     * 01：正常
+     * 11：高液位
+     * 10：未知
+     * @return 液位高低
+     */
+    String getLevelByThingCode(String thingCode);
 }

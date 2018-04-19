@@ -38,6 +38,24 @@ public class BusinessServiceImpl implements BusinessService {
         return map;
     }
 
+    @Override
+    public String getLevelByThingCode(String thingCode) {
+        DataModelWrapper levelHighData = dataService.getData(thingCode, MetricCodes.SETTED_HIGH_LEVEL).orElse(null);
+        DataModelWrapper levelLowData = dataService.getData(thingCode, MetricCodes.SETTED_HIGH_LEVEL).orElse(null);
+        String level =GlobalConstants.LEVEL_UNKNOWN;
+        // (高液位在前)00：低液位 01：正常 11：高液位
+        if(levelHighData != null && levelLowData != null){
+            if ("1".equals(levelHighData.getValue()) && "1".equals(levelLowData.getValue())){
+                return GlobalConstants.LEVEL_HIGH;
+            }else if ("0".equals(levelHighData.getValue()) && "0".equals(levelLowData.getValue())){
+                return GlobalConstants.LEVEL_LOW;
+            }else if ("0".equals(levelHighData.getValue()) && "1".equals(levelLowData.getValue())){
+                return GlobalConstants.LEVEL_NORMAL;
+            }
+        }
+        return level;
+    }
+
     /**
      * 计算皮带的设备号以及瞬时带煤量
      *

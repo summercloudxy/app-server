@@ -1,14 +1,30 @@
 package com.zgiot.app.server.module.sfmonitor.controller;
 
-import com.zgiot.app.server.module.sfmonitor.pojo.SFSysMonitorThing;
+import com.zgiot.app.server.module.sfmonitor.pojo.RelSFSysMonitorTermThing;
 import com.zgiot.app.server.module.sfmonitor.pojo.ThingTag;
 
 import java.util.List;
 
 public class SystemMonitorDetailInfo {
     private Short termCount;
-    private List<ThingTag> thingTag;
-    List<SFSysMonitorThing> sFSysMonitorThingList;
+    private List<ThingTag> thingTagList;
+    private List<RelSFSysMonitorTermThing> relSFSysMonitorTermThingList;
+
+    public List<RelSFSysMonitorTermThing> getRelSFSysMonitorTermThingList() {
+        return relSFSysMonitorTermThingList;
+    }
+
+    public void setRelSFSysMonitorTermThingList(List<RelSFSysMonitorTermThing> relSFSysMonitorTermThingList) {
+        this.relSFSysMonitorTermThingList = relSFSysMonitorTermThingList;
+    }
+
+    public List<ThingTag> getThingTagList() {
+        return thingTagList;
+    }
+
+    public void setThingTagList(List<ThingTag> thingTagList) {
+        this.thingTagList = thingTagList;
+    }
 
     public Short getTermCount() {
         return termCount;
@@ -18,19 +34,4 @@ public class SystemMonitorDetailInfo {
         this.termCount = termCount;
     }
 
-    public List<ThingTag> getThingTag() {
-        return thingTag;
-    }
-
-    public void setThingTag(List<ThingTag> thingTag) {
-        this.thingTag = thingTag;
-    }
-
-    public List<SFSysMonitorThing> getSFSysMonitorThingList() {
-        return sFSysMonitorThingList;
-    }
-
-    public void setSfThingList(List<SFSysMonitorThing> SFSysMonitorThingList) {
-        this.sFSysMonitorThingList = SFSysMonitorThingList;
-    }
 }

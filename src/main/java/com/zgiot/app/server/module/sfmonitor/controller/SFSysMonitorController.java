@@ -6,16 +6,16 @@ import com.zgiot.app.server.module.sfmonitor.mapper.RelSFSysMonitorThingMetricMa
 import com.zgiot.app.server.module.sfmonitor.mapper.SFSysMonitorThingTagMapper;
 import com.zgiot.app.server.module.sfmonitor.monitorservice.SFSysMonitorThingTagService;
 import com.zgiot.app.server.module.sfmonitor.pojo.RelSFSysMonitorThingMetric;
-import com.zgiot.app.server.module.sfmonitor.pojo.SFSysMonitorThing;
+import com.zgiot.app.server.module.sfmonitor.pojo.RelSFSysMonitorTermThing;
 import com.zgiot.app.server.module.sfmonitor.pojo.ThingTag;
 import com.zgiot.app.server.module.thingtag.pojo.ThingTagGroup;
+import com.zgiot.app.server.service.BusinessService;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.service.impl.mapper.ThingTagGroupMapper;
 import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.constants.MetricCodes;
 import com.zgiot.common.pojo.DataModelWrapper;
 import com.zgiot.common.restcontroller.ServerResponse;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -46,6 +47,8 @@ public class SFSysMonitorController {
     private RelSFSysMonitorTermThingMapper termThingMapper;
     @Autowired
     private RelSFSysMonitorThingMetricMapper monitorThingMetricMapper;
+    @Autowired
+    private BusinessService businessService;
     /**
      * 获取系统监控首页数据
      */
@@ -83,14 +86,14 @@ public class SFSysMonitorController {
      * 统计二级系统节点下的设备运行情况
      */
     public void getThingTagMetricCount(ThingTag thingTag2,List<ThingTag> ThingTagList){
-        SFSysMonitorThing monitorThing = new SFSysMonitorThing();
+        RelSFSysMonitorTermThing monitorThing = new RelSFSysMonitorTermThing();
         int thingRunCount =0;//运行中设备数量
         int thingFaultCount =0;//故障中设备数量
         int thingStopCount =0;//待机中设备数量
         for(ThingTag thingTag:ThingTagList) {
             monitorThing.setThingTagCode(thingTag.getCode());
-            List<SFSysMonitorThing> monitorThingList = monitorTermThingMapper.getSFSysMonitorThing(monitorThing);
-            for (SFSysMonitorThing mt : monitorThingList) {
+            List<RelSFSysMonitorTermThing> monitorThingList = monitorTermThingMapper.getSFSysMonitorThing(monitorThing);
+            for (RelSFSysMonitorTermThing mt : monitorThingList) {
                 Optional<DataModelWrapper> data = dataService.getData(mt.getThingCode(),MetricCodes.STATE);
                 if (data.isPresent()) {
                     if (data.get().getValue().equals(String.valueOf(GlobalConstants.STATE_RUNNING))) {
@@ -113,49 +116,64 @@ public class SFSysMonitorController {
      * 获取系统监控系统详情页数据
      */
     @GetMapping("/getSystemMonitorDetail")
-    public ResponseEntity<String> getSystemMonitorDetail(@RequestParam String thingTagId1,@RequestParam String thingTagId2,@RequestParam String term) {
-        SystemMonitorDetailInfo systemMonitorDetailInfo =new SystemMonitorDetailInfo();
-        List<SFSysMonitorThing> sfThingList= new ArrayList<>();
-        short termCount =0;
-        if(StringUtils.isEmpty(thingTagId2)){
-            ThingTag thingTag = thingTagMapper.getThingTagById(Long.parseLong(thingTagId1));
-            List<ThingTag> thingTags =thingTagMapper.getThingTagByParentId(Long.parseLong(thingTagId1));
-            SFSysMonitorThing monitorThing = new SFSysMonitorThing();
-            if(thingTags !=null && thingTags.size()>0){
-                systemMonitorDetailInfo.setThingTag(thingTags);
-                //获取一共有多少期
-               termCount = termThingMapper.getTermCountByThingTagCode(thingTags.get(0).getCode());
-               monitorThing.setThingTagCode(thingTags.get(0).getCode());
-               if(termCount > 0){
-                   monitorThing.setTermId(term ==null?SFSysMonitorConstant.TERM_ONE:Short.valueOf(term));
-               }
-               sfThingList = monitorTermThingMapper.getSFSysMonitorThing(monitorThing);
-               for(SFSysMonitorThing mt:sfThingList){
-                   List<RelSFSysMonitorThingMetric> thingMetrics = monitorThingMetricMapper.getThingMetricByThingCode(mt.getThingCode());
-                   for(RelSFSysMonitorThingMetric thingMetric:thingMetrics){
-                       String[] metrics =thingMetric.getMetricCode().split(",");
-                       if(metrics.length ==1 &&thingMetric.getIsShowMetric() ==1){
-                           Optional<DataModelWrapper> data = dataService.getData(thingMetric.getThingCode(),thingMetric.getMetricCode());
-                           if (data.isPresent()) {
-                               thingMetric.setMetricValue(data.get().getValue());
-                           }
-                       }else if(metrics.length >1){//目前只有液位需要存两个code组合判断液位值
-
-                       }
-                   }
-               }
-            }else{
-                termCount = termThingMapper.getTermCountByThingTagCode(thingTag.getCode());
-                monitorThing.setThingTagCode(thingTags.get(0).getCode());
-                if(termCount > 0){
-                    monitorThing.setTermId(term ==null?SFSysMonitorConstant.TERM_ONE:Short.valueOf(term));
-                }
+    public ResponseEntity<String> getSystemMonitorDetail(@RequestParam String thingTagId1,@RequestParam(required = false)  String thingTagId2,@RequestParam(required = false) String term) {
+        SystemMonitorDetailInfo systemMonitorDetailInfo = new SystemMonitorDetailInfo();
+        List<RelSFSysMonitorTermThing> sfThingList;
+        short termCount = 0;
+        Long thingTagId = Long.parseLong(thingTagId2 == null ? thingTagId1 : thingTagId2);
+        ThingTag thingTag = thingTagMapper.getThingTagById(thingTagId);
+        List<ThingTag> thingTags = thingTagMapper.getThingTagByParentId(thingTagId);
+        RelSFSysMonitorTermThing monitorThing = new RelSFSysMonitorTermThing();
+        if (thingTags != null && thingTags.size() > 0) {
+            systemMonitorDetailInfo.setThingTagList(thingTags);
+            //获取一共有多少期
+            termCount = termThingMapper.getTermCountByThingTagCode(thingTags.get(0).getCode());
+            monitorThing.setThingTagCode(thingTags.get(0).getCode());
+            if (termCount > 0) {
+                monitorThing.setTermId(term == null ? SFSysMonitorConstant.TERM_ONE : Short.valueOf(term));
             }
+            sfThingList = monitorTermThingMapper.getSFSysMonitorThing(monitorThing);
+            getThingMetric(sfThingList);
+        } else {
+            termCount = termThingMapper.getTermCountByThingTagCode(thingTag.getCode());
+            monitorThing.setThingTagCode(thingTag.getCode());
+            if (termCount > 0) {
+                monitorThing.setTermId(term == null ? SFSysMonitorConstant.TERM_ONE : Short.valueOf(term));
+            }
+            sfThingList = monitorTermThingMapper.getSFSysMonitorThing(monitorThing);
+            getThingMetric(sfThingList);
         }
         systemMonitorDetailInfo.setTermCount(termCount);
-        systemMonitorDetailInfo.setSfThingList(sfThingList);
+        systemMonitorDetailInfo.setRelSFSysMonitorTermThingList(sfThingList);
         return new ResponseEntity<>(ServerResponse.buildOkJson(systemMonitorDetailInfo), HttpStatus.OK);
     }
 
+    public void getThingMetric(List<RelSFSysMonitorTermThing> sfThingList){
+        for(RelSFSysMonitorTermThing mt:sfThingList){
+            if(mt.getShowType() !=SFSysMonitorConstant.SHOW_TYPE_2){
+                List<RelSFSysMonitorThingMetric> thingMetrics = monitorThingMetricMapper.getThingMetricByThingCode(mt.getThingCode());
+                for(RelSFSysMonitorThingMetric thingMetric:thingMetrics){
+                    getMetricValue(thingMetric,mt);
+                }
+                mt.setThingMetricList(thingMetrics);
+            }
+        }
+    }
+
+    public void getMetricValue(RelSFSysMonitorThingMetric thingMetric,RelSFSysMonitorTermThing mt){
+        if(thingMetric.getIsShowMetric() ==1){
+            Optional<DataModelWrapper> data = dataService.getData(thingMetric.getThingCode(),thingMetric.getMetricCode());
+            if (data.isPresent()) {
+                thingMetric.setMetricValue(data.get().getValue());
+            }
+        }else if(MetricCodes.CURRENT_LEVEL_M.equals(thingMetric.getMetricCode())){  //液位查询
+            thingMetric.setMetricValue(businessService.getLevelByThingCode(mt.getThingCode()));
+        }else if(SFSysMonitorConstant.THING_CODE_QUIT_SYS_RAW.equals(mt.getThingCode())){   //配煤比查询
+            Map<String, String> coalRatioMap = businessService.getRowCoalCapPercent();
+            String coalRatioOne =GlobalConstants.SYSTEM_ONE+coalRatioMap.get(GlobalConstants.SYSTEM_ONE);
+            String coalRatioTwo =GlobalConstants.SYSTEM_TWO+coalRatioMap.get(GlobalConstants.SYSTEM_TWO);
+            thingMetric.setMetricValue(coalRatioOne+","+coalRatioTwo);
+        }
+    }
 
 }
