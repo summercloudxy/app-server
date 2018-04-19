@@ -1,6 +1,7 @@
 package com.zgiot.app.server.module.alert.pojo;
 
 import java.util.Date;
+import java.util.List;
 
 public class FilterCondition {
     private String assetType;
@@ -23,7 +24,13 @@ public class FilterCondition {
     private Long duration;
     private Date startTime;
     private Date endTime;
-
+    private List<Short> levels;
+    private List<Short> types;
+    private List<Integer> buildingIds;
+    private List<Integer> floors;
+    private List<Integer> systems;
+    private List<String> stages;
+    private List<String> thingCodes;
 
     public String getAlertType() {
         return alertType;
@@ -32,8 +39,6 @@ public class FilterCondition {
     public void setAlertType(String alertType) {
         this.alertType = alertType;
     }
-
-
 
     public String getCategory() {
         return category;
@@ -188,4 +193,59 @@ public class FilterCondition {
         this.endTime = endTime;
     }
 
+    public List<Short> getLevels() {
+        return levels;
+    }
+
+    public void setLevels(List<Short> levels) {
+        this.levels = levels;
+    }
+
+    public List<Short> getTypes() {
+        return types;
+    }
+
+    public void setTypes(List<Short> types) {
+        this.types = types;
+    }
+
+    public List<Integer> getBuildingIds() {
+        return buildingIds;
+    }
+
+    public void setBuildingIds(List<Integer> buildingIds) {
+        this.buildingIds = buildingIds;
+    }
+
+    public List<Integer> getFloors() {
+        return floors;
+    }
+
+    public void setFloors(List<Integer> floors) {
+        this.floors = floors;
+    }
+
+    public List<Integer> getSystems() {
+        return systems;
+    }
+
+    public void setSystems(List<Integer> systems) {
+        this.systems = systems;
+    }
+
+    public List<String> getStages() {
+        return stages;
+    }
+
+    public void setStages(List<String> stages) {
+        this.stages = stages;
+    }
+
+    public List<String> getThingCodes() {
+        return thingCodes;
+    }
+
+    public void setThingCodes(List<String> thingCodes) {
+        this.thingCodes = thingCodes;
+    }
 }
