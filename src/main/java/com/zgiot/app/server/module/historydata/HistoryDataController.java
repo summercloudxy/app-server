@@ -62,14 +62,17 @@ public class HistoryDataController {
 
         Map<String, List<DataModel>> result;
         if (historyDataDto.getSegment() != null) {
+            if (historyDataDto.getTimeCorrection() == null){
+                historyDataDto.setTimeCorrection(true);
+            }
             // by segment
             if (historyDataDto.getAccuracy() == null) {
                 result = historyDataService.findMultiThingsHistoryDataOfMetricBySegment(historyDataDto.getThingCodes(), metricCode,
-                        historyDataDto.getStartTime(), historyDataDto.getEndTime(), historyDataDto.getSegment(), historyDataDto.isTimeCorrection());
+                        historyDataDto.getStartTime(), historyDataDto.getEndTime(), historyDataDto.getSegment(), historyDataDto.getTimeCorrection());
             }else {
                 AccuracyEnum accuracyEnum = AccuracyEnum.valueOf(historyDataDto.getAccuracy());
                 result = historyDataService.findMultiThingsHistoryDataOfMetricBySegment(historyDataDto.getThingCodes(), metricCode,
-                        historyDataDto.getStartTime(), historyDataDto.getEndTime(), historyDataDto.getSegment(), historyDataDto.isTimeCorrection(),accuracyEnum);
+                        historyDataDto.getStartTime(), historyDataDto.getEndTime(), historyDataDto.getSegment(), historyDataDto.getTimeCorrection(),accuracyEnum);
             }
         } else {
             // all data in time range
