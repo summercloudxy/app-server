@@ -14,6 +14,7 @@ import com.zgiot.app.server.module.demo.DemoBusiness;
 import com.zgiot.app.server.module.demo.DemoDataCompleter;
 import com.zgiot.app.server.module.densitycontrol.DensityControlListener;
 import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
+import com.zgiot.app.server.module.filterpress.FilterPressManager;
 import com.zgiot.app.server.module.historydata.job.HistoryMinDataJob;
 import com.zgiot.app.server.module.reportforms.listener.ReportFormsCompleter;
 import com.zgiot.app.server.module.sfsubsc.job.UploadHistorySubscCardDatas;
@@ -67,6 +68,8 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
     private ReportFormsCompleter reportFormsCompleter;
     @Autowired
     private AlertManager alertManager;
+    @Autowired
+    private FilterPressManager filterPressManager;
 
     private static final int FAULT_SCAN_RATE = 20;
 
@@ -114,6 +117,7 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
 
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
                 || moduleListConfig.containModule(ModuleListConfig.MODULE_FILTERPRESS)) {
+            filterPressManager.initFilterPress();
             processor.addListener(filterPressListener);
         }
 
