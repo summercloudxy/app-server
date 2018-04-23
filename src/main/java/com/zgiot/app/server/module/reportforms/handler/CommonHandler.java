@@ -1,5 +1,7 @@
 package com.zgiot.app.server.module.reportforms.handler;
 
+import com.zgiot.app.server.config.ModuleListConfig;
+import com.zgiot.app.server.module.alert.AlertListener;
 import com.zgiot.app.server.module.reportforms.ReportFormsUtils;
 import com.zgiot.app.server.module.reportforms.manager.ReportFormsManager;
 import com.zgiot.common.pojo.DataModel;
@@ -14,11 +16,17 @@ import java.util.List;
 public class CommonHandler implements ReportFormsHandler {
     @Autowired
     private ReportFormsUtils reportFormsUtils;
+    @Autowired
+    private AlertListener alertListener;
 
     @Override
     public List<DataModel> handle(ReportFormsManager manager, ReportFormsRecord record) {
         persistRecord(manager,record);
-        return manager.getDataForCache(record,false);
+        List<DataModel> dataForCaches = manager.getDataForCache(record, false);
+        for (DataModel dataForCache:dataForCaches){
+            alertListener.onDataChange(dataForCache);
+        }
+        return dataForCaches;
     }
 
     public boolean isMatch(ReportFormsRecord record){
