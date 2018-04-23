@@ -264,8 +264,8 @@ public class FilterPress {
             } else {
                 filterPressLogBean.setDayShift(FilterPressLogConstants.IS_DAY_SHIFT_NO);
             }
-            int term = manager.getFilterPressTerm().get(code);
-            filterPressLogBean.setPeriod(term);
+
+            filterPressLogBean.setPeriod(FilterPressLogConstants.PERIOD_TWO);
             if((feedDuration == 0) && (unloadDuration == 0) && (proceedingTime == 0)){
                 return;
             }
@@ -275,75 +275,72 @@ public class FilterPress {
 
     public void onLocal() {
         logger.trace("{} on local", code);
-        int term = manager.getFilterPressTerm().get(code);
         int position = -1;
-//        if (manager != null && (!manager.getUnloadSequence(term).isEmpty()) && (!StringUtils.isBlank(this.getCode())) && (manager.getUnloadSequence(term).contains(this.getCode()))) {
-//            //position = manager.getUnloadSequence(term).get(this.getCode());
-//        }
+        if (manager != null && (!manager.getUnloadSequence().isEmpty()) && (!StringUtils.isBlank(this.getCode())) && (manager.getUnloadSequence().containsKey(this.getCode()))) {
+            position = manager.getUnloadSequence().get(this.getCode());
+        }
         //manager.getUnloadManager().getQueue().remove(this);
-        removeFilterPress(manager.getUnloadManager().getQueue(term),this);
-        manager.getUnloadSequence(term).remove(this.getCode());
+        removeFilterPress(manager.getUnloadManager().getQueue(),this);
+        manager.getUnloadSequence().remove(this.getCode());
         logger.debug("local remove unloadSequence,filterpress:" + this.getCode());
         try {
-            manager.getUnConfirmedUnload(term).remove(this.getCode());
+            manager.getUnConfirmedUnload().remove(this.getCode());
         } catch (NullPointerException e) {
             throw new SysException("未确定卸料set中不存在这台压滤机thingCode", SysException.EC_UNKNOWN);
         }
-//        if (position > 0) {
-//            //manager.getUnloadManager().reSort(position,term);
-//            logger.debug("local resort");
-//        }
+        if (position > 0) {
+            manager.getUnloadManager().reSort(position);
+            logger.debug("local resort");
+        }
     }
 
     public void onLoosen() {
         logger.debug("{} on loosen", code);
-        int term = manager.getFilterPressTerm().get(code);
         isFilterPressUnloading = true;
         looseStartTime = System.currentTimeMillis();
         this.startUnload();
-//        int position = -1;
-//        if (manager != null && (!manager.getUnloadSequence(term).isEmpty())
-//                && (!StringUtils.isBlank(this.getCode()))
-//                && manager.getUnloadSequence(term).containsKey(this.getCode())) {
-//            position = manager.getUnloadSequence(term).get(this.getCode());
-//        }
+        int position = -1;
+        if (manager != null && (!manager.getUnloadSequence().isEmpty())
+                && (!StringUtils.isBlank(this.getCode()))
+                && manager.getUnloadSequence().containsKey(this.getCode())) {
+            position = manager.getUnloadSequence().get(this.getCode());
+        }
         //manager.getUnloadManager().getQueue().remove(this);
-        removeFilterPress(manager.getUnloadManager().getQueue(term),this);
-        manager.printQueueData(manager.getUnloadManager().getQueue(term));
-        manager.getUnloadSequence(term).remove(this.getCode());
+        removeFilterPress(manager.getUnloadManager().getQueue(),this);
+        manager.printQueueData(manager.getUnloadManager().getQueue());
+        manager.getUnloadSequence().remove(this.getCode());
         logger.debug("loose remove unloadSequence,filterpress:" + this.getCode());
         try {
-            HashSet unConfirm = new HashSet(manager.getUnConfirmedUnload(term));
-            manager.getUnConfirmedUnload(term).clear();
-            manager.getUnConfirmedUnload(term).addAll(unConfirm);
-            manager.getUnConfirmedUnload(term).remove(this.getCode());
+            HashSet unConfirm = new HashSet(manager.getUnConfirmedUnload());
+            manager.getUnConfirmedUnload().clear();
+            manager.getUnConfirmedUnload().addAll(unConfirm);
+            manager.getUnConfirmedUnload().remove(this.getCode());
         } catch (NullPointerException e) {
             throw new SysException("未确定卸料set中不存在这台压滤机thingCode", SysException.EC_UNKNOWN);
         }
-//        if (position > 0) {
-//           // manager.getUnloadManager().reSort(position,term);
-//            logger.debug("loose resort");
-//        }
+        if (position > 0) {
+            manager.getUnloadManager().reSort(position);
+            logger.debug("loose resort");
+        }
     }
 
     private void deleteFilterPressInQueue(){
-//        int position = -1;
-        int term = manager.getFilterPressTerm().get(code);
-//        if (manager != null && (!manager.getUnloadSequence(term).isEmpty())
-//                && (!StringUtils.isBlank(this.getCode()))
-//                && manager.getUnloadSequence(term).containsKey(this.getCode())) {
-//            position = manager.getUnloadSequence(term).get(this.getCode());
-//        }
-        manager.getUnloadSequence(term).remove(this.getCode());
-//        if (position > 0) {
-//           // manager.getUnloadManager().reSort(position,term);
-//            logger.debug("resort");
-//        }
-        removeFilterPress(manager.getUnloadManager().getQueue(term),this);
-        if (manager != null && (!manager.getUnConfirmedUnload(term).isEmpty())
+        int position = -1;
+        if (manager != null && (!manager.getUnloadSequence().isEmpty())
                 && (!StringUtils.isBlank(this.getCode()))
-                && manager.getUnConfirmedUnload(term).contains(this.getCode())) {
-            manager.getUnConfirmedUnload(term).remove(this.getCode());
+                && manager.getUnloadSequence().containsKey(this.getCode())) {
+            position = manager.getUnloadSequence().get(this.getCode());
+        }
+        manager.getUnloadSequence().remove(this.getCode());
+        if (position > 0) {
+            manager.getUnloadManager().reSort(position);
+            logger.debug("resort");
+        }
+        removeFilterPress(manager.getUnloadManager().getQueue(),this);
+        if (manager != null && (!manager.getUnConfirmedUnload().isEmpty())
+                && (!StringUtils.isBlank(this.getCode()))
+                && manager.getUnConfirmedUnload().contains(this.getCode())) {
+            manager.getUnConfirmedUnload().remove(this.getCode());
         }
     }
 
@@ -412,13 +409,12 @@ public class FilterPress {
         logger.debug("take and pull count:", filterPressTakeAndPullCount.get());
         isFilterPressUnloading = false;
         this.deleteFilterPressInQueue();
-        int term = manager.getFilterPressTerm().get(code);
         //压紧后通知下一台
-        if((manager.getUnloadManager().getUnloadingCount(code,term) < manager.getMaxUnloadParallel(term)) && (filterPressTakeAndPullCount.get() < 16)){
-            unloadManager.notifyNext(term);
+        if((manager.getUnloadManager().getUnloadingCount(code) < manager.getMaxUnloadParallel()) && (filterPressTakeAndPullCount.get() < 16)){
+            unloadManager.notifyNext();
             if(logger.isDebugEnabled()){
                 logger.debug("notify next filterpress unload cause by press!");
-                logger.debug("press state unloading filterpress count:" + manager.getUnloadManager().getUnloadingCount(code,term));
+                logger.debug("press state unloading filterpress count:" + manager.getUnloadManager().getUnloadingCount(code));
             }
         }
         filterPressTakeAndPullCount.set(0);
@@ -734,8 +730,7 @@ public class FilterPress {
                     break;
                 default:
             }
-            int term = manager.getFilterPressTerm().get(code);
-            manager.calculatePlateAndSave(term);
+            manager.calculatePlateAndSave();
         }
     }
 
@@ -791,12 +786,11 @@ public class FilterPress {
         private void scheduleTimer() {
             unloadTimer = new Timer("unload timer");
             latestStartTime = System.currentTimeMillis();
-            int term = manager.getFilterPressTerm().get(code);
             unloadTimer.schedule(new TimerTask() {
                 @Override
                 public void run() {
                     logger.debug("{} unload time up", code);
-                    notifyNext(term);
+                    notifyNext();
                     unloadTimedDuration = 0;
                     latestStartTime = null;
                 }
@@ -834,10 +828,10 @@ public class FilterPress {
         /**
          * 通知下一台卸料
          */
-        private void notifyNext(int term) {
+        private void notifyNext() {
             if (!notifiedNext) {
                 notifiedNext = true;
-                manager.unloadNext(term);
+                manager.unloadNext();
                 logger.debug("{} unload enough to notify next", code);
             }
         }
@@ -860,7 +854,6 @@ public class FilterPress {
             long startGetValueTime = System.currentTimeMillis();
             DataModel dataModel = new DataModel();
             dataModel.setThingCode(code);
-            int term = manager.getFilterPressTerm().get(code);
             dataModel.setMetricCode(FilterPressMetricConstants.RO_PRESS);
             String readValue = manager.cmdControlService.getDataSync(dataModel);
             if(logger.isTraceEnabled()){
@@ -872,17 +865,17 @@ public class FilterPress {
             }
 
             if (pullAndTakeCount == UNLOAD_EXCHANGE_COUNT ) {
-                    cancelTimer();
-                    if(logger.isDebugEnabled()){
-                        logger.debug("{} take and pull enough", code);
-                        logger.debug("take and pull state unloading filterpress count:" + manager.getUnloadManager().getUnloadingCount(code,term));
-                    }
-                    isFilterPressUnloading = false;
-                    if(manager.getUnloadManager().getUnloadingCount(code,term) < manager.getMaxUnloadParallel(term)){
-                        notifyNext(term);
-                    }
-                    takeAndPullCount.set(0);
-                    //filterPressTakeAndPullCount.set(0);
+                cancelTimer();
+                if(logger.isDebugEnabled()){
+                    logger.debug("{} take and pull enough", code);
+                    logger.debug("take and pull state unloading filterpress count:" + manager.getUnloadManager().getUnloadingCount(code));
+                }
+                isFilterPressUnloading = false;
+                if(manager.getUnloadManager().getUnloadingCount(code) < manager.getMaxUnloadParallel()){
+                    notifyNext();
+                }
+                takeAndPullCount.set(0);
+                //filterPressTakeAndPullCount.set(0);
             }
         }
     }
