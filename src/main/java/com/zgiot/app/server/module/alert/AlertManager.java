@@ -76,7 +76,7 @@ public class AlertManager {
                     Thread.sleep(10);
                     AlertData alertData = verifyDelayQueue.take().getAlertData();
                     if (AlertConstants.STAGE_VERIFIED.equals(alertData.getAlertStage())) {
-                        alertData.setAlertStage(AlertConstants.STAGE_UNTREATED);
+                        alertData.setAlertStage(AlertConstants.STAGE_UNHANDLED);
                         updateAlert(alertData);
                     }
                 } catch (Exception e) {
@@ -752,7 +752,6 @@ public class AlertManager {
     }
 
 
-
     /**
      * 复位（调度）
      *
@@ -854,7 +853,6 @@ public class AlertManager {
     }
 
 
-
     /**
      * 消息已读
      *
@@ -870,45 +868,59 @@ public class AlertManager {
     /**
      * 获取报警记录，按设备进行分组
      *
-     * @param stage
-     * @param levels
-     * @param types
-     * @param buildingIds
-     * @param floors
-     * @param systems
-     * @param sortType
      * @return
      */
-    public List<AlertRecord> getAlertDataListGroupByThing(String stage, List<Integer> levels, List<Short> types,
-                                                          List<Integer> buildingIds, List<Integer> floors, List<Integer> systems, String assetType, String category,
-                                                          Integer sortType, Long duration, String thingCode, Integer page, Integer count, Date endTime) {
+    public List<AlertRecord> getAlertDataListGroupByThing(FilterCondition filterCondition) {
 
         Date startTime = null;
         Integer offset = null;
-        if (duration != null) {
-            startTime = new Date(endTime.getTime() - duration);
+        Integer page = filterCondition.getPage();
+        Integer count = filterCondition.getCount();
+        if (filterCondition.getDuration() != null) {
+            startTime = new Date(filterCondition.getEndTime().getTime() - filterCondition.getDuration());
+            filterCondition.setStartTime(startTime);
         }
         if (page != null && count != null) {
             offset = page * count;
+            filterCondition.setOffset(offset);
         }
         String excluStage = null;
-        if (stage == null) {
+        if (filterCondition.getStage() == null) {
             excluStage = AlertConstants.STAGE_RELEASE;
+            filterCondition.setExcluStage(excluStage);
         }
-        if (types != null) {
-            types.add(AlertConstants.TYPE_USER);
+        if (filterCondition.getTypes() != null) {
+            filterCondition.getTypes().add(AlertConstants.TYPE_USER);
         }
         List<AlertRecord> alertRecords =
-                alertMapper.getAlertDataListGroupByThing(stage, excluStage, levels, types, buildingIds, floors, systems,
-                        assetType, category, sortType, startTime, endTime, thingCode, offset, count);
-        sortRecords(sortType, alertRecords);
+                alertMapper.getAlertDataListGroupByThing(filterCondition);
+        sortRecords(filterCondition.getSortType(), alertRecords);
         if (page != null && count != null) {
             List<AlertRecord> alertRecordsPaged = pagingRecords(page, count, alertRecords);
-            disposeImageAndMessage(stage, alertRecordsPaged);
+            disposeImageAndMessage(filterCondition.getStage(), alertRecordsPaged);
             return alertRecordsPaged;
         }
-        disposeImageAndMessage(stage, alertRecords);
+        disposeImageAndMessage(filterCondition.getStage(), alertRecords);
         return alertRecords;
+    }
+
+
+    public List<AlertRecord> getAlertDataByThingCode(AlertFilterCondition filterCondition) {
+        if (filterCondition.getStages() == null || filterCondition.getStages().isEmpty()) {
+            filterCondition.setExcluStage(AlertConstants.STAGE_RELEASE);
+        }
+        List<AlertRecord> alertDataByThingCode = alertMapper.getAlertDataByThingCode(filterCondition);
+        if (filterCondition.getPage() != null && filterCondition.getCount() != null) {
+            alertDataByThingCode = pagingRecords(filterCondition.getPage(), filterCondition.getCount(), alertDataByThingCode);
+        }
+        for (AlertRecord alertRecord : alertDataByThingCode) {
+            String thingCode = alertRecord.getThingCode();
+            ThingModel thing = thingService.getThing(thingCode);
+            if (thing != null) {
+                alertRecord.setThingName(thing.getThingName());
+            }
+        }
+        return alertDataByThingCode;
     }
 
     private void disposeImageAndMessage(String stage, List<AlertRecord> alertRecordsPaged) {
@@ -945,7 +957,6 @@ public class AlertManager {
             for (AlertData alertData : alertDataList) {
                 List<AlertMessage> alertMessage = alertMapper.getAlertMessage(alertData.getId());
                 alertData.setAlertMessageList(alertMessage);
-
             }
         }
     }
@@ -1050,7 +1061,6 @@ public class AlertManager {
             alertData.setFeedBackImageList(imageList);
         }
     }
-
 
 
     /**
@@ -1524,5 +1534,14 @@ public class AlertManager {
         return alertMaskInfo;
     }
 
+    /**
+     * 查询非动力设备
+     *
+     * @param thingCode
+     * @return
+     */
+    public List<NoPowerThing> getNoPowerThingByThingCode(String thingCode) {
+        return alertMapper.getNoPowerThingByThingCode(thingCode);
+    }
 
 }

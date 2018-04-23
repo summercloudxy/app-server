@@ -16,7 +16,7 @@ public class HistoryDataDto {
 
     private Integer segment;
 
-    private boolean isTimeCorrection;
+    private Boolean isTimeCorrection;
 
     private String accuracy;
 
@@ -52,11 +52,12 @@ public class HistoryDataDto {
         this.segment = segment;
     }
 
-    public boolean isTimeCorrection() {
+
+    public Boolean getTimeCorrection() {
         return isTimeCorrection;
     }
 
-    public void setTimeCorrection(boolean timeCorrection) {
+    public void setTimeCorrection(Boolean timeCorrection) {
         isTimeCorrection = timeCorrection;
     }
 

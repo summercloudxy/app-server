@@ -7,9 +7,19 @@ import java.util.List;
  */
 public class AlertRecord {
     private String thingCode;
+    private String thingName;
     private List<AlertData> alertDataList;
     private Integer pageCount;
     private Long queryTime;
+
+
+    public String getThingName() {
+        return thingName;
+    }
+
+    public void setThingName(String thingName) {
+        this.thingName = thingName;
+    }
 
     public String getThingCode() {
         return thingCode;
