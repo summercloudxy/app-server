@@ -9,7 +9,6 @@ import org.apache.ibatis.annotations.Select;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Filter;
 
 /**
  * Created by lulansong on 2017/10/31.
@@ -28,7 +27,7 @@ public interface FilterPressLogMapper {
      * @param endTime
      * @return
      */
-    List<FilterPressLogBean> queryLogByDate(@Param("startTime") String startTime, @Param("endTime") String endTime, @Param("term") int term);
+    List<FilterPressLogBean> queryLogByDate(@Param("startTime") String startTime,@Param("endTime") String endTime);
 
     /**
      * 查询各压滤机压板信息
@@ -37,7 +36,7 @@ public interface FilterPressLogMapper {
      * @param endTime
      * @return
      */
-    List<FilterPressSinglePlateCountBean> queryPlateInfos(@Param("isDayShift") boolean isDayShift, @Param("startTime") String startTime, @Param("endTime") String endTime, @Param("term") int term);
+    List<FilterPressSinglePlateCountBean> queryPlateInfos(@Param("isDayShift") boolean isDayShift, @Param("startTime") String startTime, @Param("endTime") String endTime);
 
     /**
      * 查询各压滤机压板总数信息
@@ -46,7 +45,7 @@ public interface FilterPressLogMapper {
      * @param endTime
      * @return
      */
-    List<FilterPressPlateAndTimeBean> queryTotalPlateInfos(@Param("isDayShift") boolean isDayShift, @Param("startTime") String startTime, @Param("endTime") String endTime, @Param("term") int term);
+    List<FilterPressPlateAndTimeBean> queryTotalPlateInfos(@Param("isDayShift") boolean isDayShift,@Param("startTime") String startTime,@Param("endTime") String endTime);
 
     /**
      * 查询上一班次历史压板信息
@@ -54,7 +53,7 @@ public interface FilterPressLogMapper {
      * @param endTime
      * @return
      */
-    List<FilterPressHisPlateCountBean> queryHisPlateCount(@Param("startTime") String startTime, @Param("endTime") String endTime, @Param("term") int term);
+    List<FilterPressHisPlateCountBean> queryHisPlateCount(@Param("startTime") String startTime, @Param("endTime") String endTime);
 
     /**
      * 人工清零前查询上一班次所属对组
@@ -63,21 +62,8 @@ public interface FilterPressLogMapper {
      * @param endTime
      * @return
      */
-    Integer getPriorTeam(@Param("isDayShift") boolean isDayShift, @Param("startTime") String startTime, @Param("endTime") String endTime, @Param("term") int term);
+    Integer getPriorTeam(@Param("isDayShift") boolean isDayShift, @Param("startTime") String startTime, @Param("endTime") String endTime);
 
 
-    FilterPressRatedStartTimeBean getFilterPressRatedStartTime(@Param("thingCode") String thingCode, @Param("dayOrNightRatedTime") String dayOrNightRatedTime);
-
-    void insertPlateStatistic(FilterPressPlateStatistic filterPressPlateStatistic);
-
-    @Select("select * from tb_filterpress_plate_statistics where is_day_shift=#{isDayShift} and term=#{term}\n" +
-            "        and datetime >str_to_date(#{startTime},'%Y-%m-%d %H:%i:%s')\n" +
-            "        and datetime < str_to_date(#{endTime},'%Y-%m-%d %H:%i:%s')")
-    List<FilterPressPlateStatistic> getPlateStatistic(@Param("isDayShift") boolean isDayShift, @Param("startTime") String startTime, @Param("endTime") String endTime, @Param("term") int term);
-
-    int selectMaxPlate(@Param("isDayShift") boolean isDayShift, @Param("startTime") String startTime, @Param("endTime") String endTime, @Param("term") int term, @Param("team") int team);
-
-    Integer selectTotalPlate(@Param("isDayShift") boolean isDayShift, @Param("startTime") String startTime, @Param("endTime") String endTime, @Param("term") int term, @Param("team") int team);
-
-    List<FilterPressLogBean> queryLog(@Param("startTime") String startTime, @Param("endTime") String endTime, @Param("term") int term, @Param("isDayShift") boolean isDayShift);
+    FilterPressRatedStartTimeBean getFilterPressRatedStartTime(@Param("thingCode") String thingCode,@Param("dayOrNightRatedTime") String dayOrNightRatedTime);
 }
