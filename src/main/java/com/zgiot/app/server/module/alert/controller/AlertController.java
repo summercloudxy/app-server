@@ -35,7 +35,7 @@ public class AlertController {
 
     @ApiOperation("获取参数类报警规则")
     @PostMapping(value = "rule/param/show")
-    public ResponseEntity<String> getParamRule(@RequestBody FilterCondition filterCondition,HttpServletRequest request) {
+    public ResponseEntity<String> getParamRule(@RequestBody FilterCondition filterCondition, HttpServletRequest request) {
         AlertRuleRsp alertRules = alertManager.getParamAlertRuleList(filterCondition);
         return new ResponseEntity<>(ServerResponse.buildOkJson(alertRules), HttpStatus.OK);
     }
@@ -48,14 +48,12 @@ public class AlertController {
     }
 
 
-
     @ApiOperation("更新报警规则")
     @PostMapping(value = "rule")
     public ResponseEntity<String> updateRule(@RequestBody List<AlertRule> alertRules, @RequestParam int type) {
         List<AlertRule> alertRulesRsp = alertManager.updateRule(alertRules, type);
         return new ResponseEntity<>(ServerResponse.buildOkJson(alertRulesRsp), HttpStatus.OK);
     }
-
 
 
     @ApiOperation("删除报警规则")
@@ -75,20 +73,26 @@ public class AlertController {
 
     @ApiOperation("获取报警记录,按设备分组")
     @GetMapping(value = "record/group")
-    public ResponseEntity<String> getAlertRecordGroupByThing(@RequestParam(required = false) String stage,
-                                                             @RequestParam(required = false) List<Integer> levels, @RequestParam(required = false) List<Short> types,
-                                                             @RequestParam(required = false) List<Integer> buildingIds,
-                                                             @RequestParam(required = false) List<Integer> floors, @RequestParam(required = false) List<Integer> systems,
-                                                             @RequestParam(required = false) String assetType, @RequestParam(required = false) String category,
-                                                             @RequestParam(required = false) Integer sortType, @RequestParam(required = false) Long duration,
-                                                             @RequestParam(required = false) String thingCode, @RequestParam(required = false) Integer page,
-                                                             @RequestParam(required = false) Integer count, @RequestParam(required = false) Date timeStamp) {
+    public ResponseEntity<String> getAlertRecordGroupByThing(@ModelAttribute FilterCondition filterCondition, @RequestParam(required = false) Date timeStamp) {
         if (timeStamp == null) {
             timeStamp = new Date();
         }
+        filterCondition.setEndTime(timeStamp);
         List<AlertRecord> alertDataListGroupByThing =
-                alertManager.getAlertDataListGroupByThing(stage, levels, types, buildingIds, floors, systems, assetType,
-                        category, sortType, duration, thingCode, page, count, timeStamp);
+                alertManager.getAlertDataListGroupByThing(filterCondition);
+        AlertRecordRsp alertRecordRsp = new AlertRecordRsp(alertDataListGroupByThing, timeStamp);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(alertRecordRsp), HttpStatus.OK);
+    }
+
+    @ApiOperation("获取指定设备的报警记录,按设备分组")
+    @GetMapping(value = "recordByThing/group", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<String> getAlertDataByThingCode(@ModelAttribute AlertFilterCondition filterCondition, @RequestParam(required = false) Date timeStamp) {
+        if (timeStamp == null) {
+            timeStamp = new Date();
+        }
+        filterCondition.setEndTime(timeStamp);
+        List<AlertRecord> alertDataListGroupByThing =
+                alertManager.getAlertDataByThingCode(filterCondition);
         AlertRecordRsp alertRecordRsp = new AlertRecordRsp(alertDataListGroupByThing, timeStamp);
         return new ResponseEntity<>(ServerResponse.buildOkJson(alertRecordRsp), HttpStatus.OK);
     }
@@ -225,9 +229,9 @@ public class AlertController {
 
     @ApiOperation("获取一批设备中报警等级最严重、时间最新的报警")
     @GetMapping(value = "seriousAlert")
-    public ResponseEntity<String> getAlertSeriousLevelInList(@RequestParam List<String> thingCodeList,@RequestParam int count){
+    public ResponseEntity<String> getAlertSeriousLevelInList(@RequestParam List<String> thingCodeList, @RequestParam int count) {
         List<AlertData> seriousAlertLevelInList = alertManager.getSeriousAlertLevelInList(thingCodeList, count);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(seriousAlertLevelInList),HttpStatus.OK);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(seriousAlertLevelInList), HttpStatus.OK);
     }
 
 
@@ -241,8 +245,8 @@ public class AlertController {
     @ApiOperation("获取所有参数列表")
     @GetMapping(value = "param/list")
     public ResponseEntity<String> getParamConfigurationList(@RequestParam(required = false) String assetType, @RequestParam(required = false) String category, @RequestParam String metricCode,
-                                                            @RequestParam(required = false) String metricType,@RequestParam(required = false)String thingStartCode) {
-        List<ConfigurableAlertRule> paramConfigurationList = alertManager.getParamConfigurationList(assetType, category, metricCode, metricType,thingStartCode);
+                                                            @RequestParam(required = false) String metricType, @RequestParam(required = false) String thingStartCode) {
+        List<ConfigurableAlertRule> paramConfigurationList = alertManager.getParamConfigurationList(assetType, category, metricCode, metricType, thingStartCode);
         return new ResponseEntity<>(ServerResponse.buildOkJson(paramConfigurationList), HttpStatus.OK);
     }
 

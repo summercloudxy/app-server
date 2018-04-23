@@ -6,6 +6,7 @@ import com.zgiot.app.server.module.qualityandquantity.pojo.*;
 import com.zgiot.app.server.module.produtioninspect.mapper.ProductionInspectMapper;
 import com.zgiot.app.server.module.qualityandquantity.CardParser;
 import com.zgiot.app.server.module.qualityandquantity.CardParserSelector;
+import com.zgiot.app.server.module.reportforms.ReportFormsUtils;
 import com.zgiot.app.server.module.tcs.pojo.FilterCondition;
 import com.zgiot.app.server.service.HistoryDataService;
 import com.zgiot.common.pojo.*;
@@ -14,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class QualityAndQuantityServiceImp implements QualityAndQuantityService {
@@ -31,10 +34,6 @@ public class QualityAndQuantityServiceImp implements QualityAndQuantityService {
     private CardParserSelector cardParserSelector;
     @Autowired
     private QualityAndQuantityMapper qualityAndQuantityMapper;
-
-
-
-
 
 
     @Override
@@ -56,19 +55,19 @@ public class QualityAndQuantityServiceImp implements QualityAndQuantityService {
 
     }
 
-    private List<DutyInfoInOneDay> mergeDayAndNightData(List<DutyInfo> dutyInfos){
-        Map<Date,DutyInfoInOneDay> mergeDateMap = new TreeMap<>();
-        for (DutyInfo dutyInfo:dutyInfos){
+    private List<DutyInfoInOneDay> mergeDayAndNightData(List<DutyInfo> dutyInfos) {
+        Map<Date, DutyInfoInOneDay> mergeDateMap = new TreeMap<>();
+        for (DutyInfo dutyInfo : dutyInfos) {
             Date dayTime = DateUtils.truncate(dutyInfo.getDutyStartTime(), java.util.Calendar.DATE);
-            if (mergeDateMap.containsKey(dayTime)){
+            if (mergeDateMap.containsKey(dayTime)) {
                 DutyInfoInOneDay dutyInfoInOneDay = mergeDateMap.get(dayTime);
-                setDutyInfo(dutyInfoInOneDay,dutyInfo);
-            }else {
+                setDutyInfo(dutyInfoInOneDay, dutyInfo);
+            } else {
                 DutyInfoInOneDay dutyInfoInOneDay = new DutyInfoInOneDay();
                 dutyInfoInOneDay.setDayTime(dayTime);
 
-                setDutyInfo(dutyInfoInOneDay,dutyInfo);
-                mergeDateMap.put(dayTime,dutyInfoInOneDay);
+                setDutyInfo(dutyInfoInOneDay, dutyInfo);
+                mergeDateMap.put(dayTime, dutyInfoInOneDay);
             }
         }
         return new ArrayList<>(mergeDateMap.values());
@@ -76,31 +75,37 @@ public class QualityAndQuantityServiceImp implements QualityAndQuantityService {
     }
 
 
-    public void setDutyInfo( DutyInfoInOneDay dutyInfoInOneDay,DutyInfo dutyInfo){
+    public void setDutyInfo(DutyInfoInOneDay dutyInfoInOneDay, DutyInfo dutyInfo) {
         if (QualityAndQuantityDateUtils.DUTY_TYPE_DAY.equals(dutyInfo.getDutyType())) {
             dutyInfoInOneDay.setDayValue(dutyInfo.getMaxValue());
-        }else {
+        } else {
             dutyInfoInOneDay.setNightValue(dutyInfo.getMaxValue());
         }
     }
 
 
-
-
     @Override
     public List<CoalAnalysisData> getCoalAnalysisHistoryData(FilterCondition filterCondition) {
-        if (filterCondition.getPage()!=null&&filterCondition.getCount()!=null){
+        if (filterCondition.getPage() != null && filterCondition.getCount() != null) {
             filterCondition.setOffset(filterCondition.getPage() * filterCondition.getCount());
         }
+        boolean isAvg = false;
+        List<String> targetList = filterCondition.getTargetList();
+        if (targetList != null && !targetList.isEmpty() && targetList.get(0).contains(ReportFormsUtils.AVG_RECORD_KEYWORD)) {
+            isAvg = true;
+        }
         List<CoalAnalysisRecord> recordsMatchCondition = coalAnalysisMapper.getRecordsMatchCondition(filterCondition);
-        List<CoalAnalysisData> coalAnalysisDataList = dataManager.transCoalAnalysisRecordToData(recordsMatchCondition);
-        return coalAnalysisDataList;
+        //剔除掉班平均数据
+        if (!isAvg) {
+            recordsMatchCondition = recordsMatchCondition.stream().filter(t -> !t.getTarget().contains(ReportFormsUtils.AVG_RECORD_KEYWORD)).collect(Collectors.toList());
+        }
+        return dataManager.transCoalAnalysisRecordToData(recordsMatchCondition);
     }
 
 
     @Override
-    public List<ProductionInspectData> getProductionInspectData(FilterCondition filterCondition){
-        if (filterCondition.getPage()!=null&&filterCondition.getCount()!=null){
+    public List<ProductionInspectData> getProductionInspectData(FilterCondition filterCondition) {
+        if (filterCondition.getPage() != null && filterCondition.getCount() != null) {
             filterCondition.setOffset(filterCondition.getPage() * filterCondition.getCount());
         }
         List<ProductionInspectRecord> recordsMatchCondition = productionInspectMapper.getRecordsMatchCondition(filterCondition);
@@ -108,11 +113,11 @@ public class QualityAndQuantityServiceImp implements QualityAndQuantityService {
         return productionInspectDataList;
     }
 
-    
+
     @Override
-    public List<AreaInfo> getAreaInfos(List<Integer> areaIds){
+    public List<AreaInfo> getAreaInfos(List<Integer> areaIds) {
         List<AreaInfo> areaInfos = new ArrayList<>();
-        for (Integer areaId:areaIds){
+        for (Integer areaId : areaIds) {
             AreaInfo areaInfo = qualityAndQuantityMapper.getAreaInfo(areaId);
             List<CardInfo> cardInfosInArea = getCardInfosInArea(areaId);
             areaInfo.setCardInfos(cardInfosInArea);
@@ -122,13 +127,11 @@ public class QualityAndQuantityServiceImp implements QualityAndQuantityService {
     }
 
 
-
-    
-    private List<CardInfo> getCardInfosInArea(int areaId){
+    private List<CardInfo> getCardInfosInArea(int areaId) {
         List<CardInfo> cardInfos = qualityAndQuantityMapper.getCardInfosInArea(areaId);
-        for (CardInfo cardInfo:cardInfos){
+        for (CardInfo cardInfo : cardInfos) {
             CardParser cardParser = cardParserSelector.getParserByName(cardInfo.getParserName());
-            if (cardParser!= null) {
+            if (cardParser != null) {
                 Object parse = cardParser.parse(cardInfo.getCardParamValue());
                 cardInfo.setCardDetailInfo(parse);
             }
@@ -136,8 +139,6 @@ public class QualityAndQuantityServiceImp implements QualityAndQuantityService {
         return cardInfos;
 
     }
-
-
 
 
 }
