@@ -1,5 +1,6 @@
 package com.zgiot.app.server.service.impl;
 
+import com.zgiot.app.server.common.constants.AppServerConstant;
 import com.zgiot.app.server.service.BusinessService;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.common.constants.GlobalConstants;
@@ -41,16 +42,16 @@ public class BusinessServiceImpl implements BusinessService {
     @Override
     public String getLevelByThingCode(String thingCode) {
         DataModelWrapper levelHighData = dataService.getData(thingCode, MetricCodes.SETTED_HIGH_LEVEL).orElse(null);
-        DataModelWrapper levelLowData = dataService.getData(thingCode, MetricCodes.SETTED_HIGH_LEVEL).orElse(null);
-        String level =GlobalConstants.LEVEL_UNKNOWN;
+        DataModelWrapper levelLowData = dataService.getData(thingCode, MetricCodes.SETTED_LOW_LEVEL).orElse(null);
+        String level =AppServerConstant.LEVEL_UNKNOWN;
         // (高液位在前)00：低液位 01：正常 11：高液位
         if(levelHighData != null && levelLowData != null){
             if ("1".equals(levelHighData.getValue()) && "1".equals(levelLowData.getValue())){
-                return GlobalConstants.LEVEL_HIGH;
+                return AppServerConstant.LEVEL_HIGH;
             }else if ("0".equals(levelHighData.getValue()) && "0".equals(levelLowData.getValue())){
-                return GlobalConstants.LEVEL_LOW;
+                return AppServerConstant.LEVEL_LOW;
             }else if ("0".equals(levelHighData.getValue()) && "1".equals(levelLowData.getValue())){
-                return GlobalConstants.LEVEL_NORMAL;
+                return AppServerConstant.LEVEL_NORMAL;
             }
         }
         return level;

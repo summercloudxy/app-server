@@ -6,5 +6,6 @@ public class SFSysMonitorConstant {
     public static final short TERM_TWO=2;//二期
     public static final String THING_CODE_QUIT_SYS_RAW="Quit_SYS_RAW";//原煤数质量thingCode
     public static final short SHOW_TYPE_2=2;//设备显示类型2代表空白
+    public static final String THING_TAG_CODE_SEWAGE="SEWAGE";//污水系统thingTagCode
 }
                                                   
