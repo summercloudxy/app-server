@@ -368,7 +368,7 @@
         alert_level,
         lower_limit,
         upper_limit,
-        delayTime,
+        delay_time,
         enable
         FROM
         tb_alert_rule
