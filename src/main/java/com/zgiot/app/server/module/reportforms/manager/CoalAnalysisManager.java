@@ -35,21 +35,21 @@ public class CoalAnalysisManager implements ReportFormsManager {
 
     @Override
     public void updateRecordWithOutDensityAndFlow(ReportFormsRecord record) {
-        logger.debug("该化验数据已经存在，进行更新");
+        logger.debug("化验数据项目-{},样本-{},时间-{}，该化验数据已经存在，对应数据库id为{}，进行更新",record.getTarget(),record.getSample(),record.getTime(),record.getId());
         coalAnalysisMapper.updateRecordWithOutDensityAndFlow((CoalAnalysisRecord) record);
     }
 
 
     @Override
     public void updateRecordDensityAndFlow(ReportFormsRecord record) {
-        logger.debug("该化验数据已经存在，更新其密度和顶水流量");
+        logger.debug("化验数据项目-{},样本-{},时间-{}，该化验数据已经存在，对应数据库id为{}，更新其密度和顶水流量",record.getTarget(),record.getSample(),record.getTime(),record.getId());
         coalAnalysisMapper.updateRecordDensityAndFlow((CoalAnalysisRecord) record);
     }
 
 
     @Override
     public void insertRecord(ReportFormsRecord record) {
-        logger.debug("新增一条煤质化验数据");
+        logger.debug("化验数据项目-{},样本-{},时间-{}，该化验数据不存在,新增一条煤质化验数据",record.getTarget(),record.getSample(),record.getTime());
         coalAnalysisMapper.insertRecord((CoalAnalysisRecord) record);
     }
 
@@ -62,7 +62,6 @@ public class CoalAnalysisManager implements ReportFormsManager {
         coalAnalysisMapper.updateRecordDensityAndFlow((CoalAnalysisRecord) record);
         coalAnalysisMapper.insertDetailDensityAndFlowValues(record.getDensityAndFlowInfos(), record.getId());
     }
-
 
 
     @Override
@@ -107,9 +106,9 @@ public class CoalAnalysisManager implements ReportFormsManager {
     private DataModel getParamModel(boolean avgFlag, CoalAnalysisRecord coalAnalysisRecord, String avgParamMetricCode, String paramMetricCode, Double metricValue) {
         DataModel paramModel;
         if (avgFlag) {
-            paramModel = reportFormsUtils.getParamModel(coalAnalysisRecord, avgParamMetricCode, metricValue,MetricCodeEnum.COAL_ANALYSIS);
+            paramModel = reportFormsUtils.getParamModel(coalAnalysisRecord, avgParamMetricCode, metricValue, MetricCodeEnum.COAL_ANALYSIS);
         } else {
-            paramModel = reportFormsUtils.getParamModel(coalAnalysisRecord, paramMetricCode, metricValue,MetricCodeEnum.COAL_ANALYSIS);
+            paramModel = reportFormsUtils.getParamModel(coalAnalysisRecord, paramMetricCode, metricValue, MetricCodeEnum.COAL_ANALYSIS);
         }
         return paramModel;
     }
@@ -128,6 +127,8 @@ public class CoalAnalysisManager implements ReportFormsManager {
         List<CoalAnalysisRecord> recordsOnDuty = getRecordsOnDuty(filterCondition);
         //确认平均记录之前的所有记录已经读取到，再取所有记录计算平均密度
         if (!hasAllRecordBeforeAvgRecord((CoalAnalysisRecord) record, recordsOnDuty)) {
+            logger.debug("平均报表记录:项目-{},样本-{},时间-{}，班次内的记录并未全部读取到，先不存储该平均报表记录"
+                    , record.getTarget(), record.getSample(), record.getTime());
             return false;
         }
         reportFormsUtils.getAvgDensityAndFlowOnDuty(record, getRecordsOnDuty(filterCondition));
@@ -149,6 +150,8 @@ public class CoalAnalysisManager implements ReportFormsManager {
         Double avgAad = aadCumulativeData.getAvgValue(true, 2);
         Double avgMt = mtCumulativeData.getAvgValue(true, 1);
         Double avgStad = stadCumulativeData.getAvgValue(true, 2);
+        logger.debug("计算平均报表记录班次内的所有记录是否都已经读取到，平均报表数据为:项目-{},样本-{},时间-{},aad-{},mt-{},stad-{}，计算已存入数据库中的当前班次的平均值为aad-{}，mt-{}，stad-{}"
+                , record.getTarget(), record.getSample(), record.getTime(), record.getAad(), record.getMt(), record.getStad(), avgAad, avgMt, avgStad);
         return Objects.equals(avgAad, record.getAad()) &&
                 Objects.equals(avgMt, record.getMt()) &&
                 Objects.equals(avgStad, record.getStad());
@@ -162,16 +165,16 @@ public class CoalAnalysisManager implements ReportFormsManager {
 
     @Override
     public ReportFormsRecord getExistRecord(ReportFormsRecord record) {
-        return coalAnalysisMapper.getExistRecord((CoalAnalysisRecord)record);
+        return coalAnalysisMapper.getExistRecord((CoalAnalysisRecord) record);
     }
 
     @Override
     public ReportFormsRecord getRecentRecord(ReportFormsRecord record) {
-        return coalAnalysisMapper.getRecentRecord((CoalAnalysisRecord)record);
+        return coalAnalysisMapper.getRecentRecord((CoalAnalysisRecord) record);
     }
 
     @Override
     public ReportFormsRecord getLastRecordOnDuty(ReportFormsRecord record, Date dutyEndTime) {
-        return coalAnalysisMapper.getLastRecordOnDuty((CoalAnalysisRecord)record,dutyEndTime);
+        return coalAnalysisMapper.getLastRecordOnDuty((CoalAnalysisRecord) record, dutyEndTime);
     }
 }
