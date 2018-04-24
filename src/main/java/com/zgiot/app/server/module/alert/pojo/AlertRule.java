@@ -8,6 +8,7 @@ public class AlertRule {
     private Short alertLevel;
     private Double lowerLimit;
     private Double upperLimit;
+    private Integer delayTime;  //报警延迟时间 2018/04/20
     private Boolean enable;
 
     public Long getId() {
@@ -74,5 +75,11 @@ public class AlertRule {
         this.enable = enable;
     }
 
+    public Integer getDelayTime() {
+        return delayTime;
+    }
 
+    public void setDelayTime(Integer delayTime) {
+        this.delayTime = delayTime;
+    }
 }

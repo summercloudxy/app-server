@@ -64,6 +64,9 @@ public class AlertManager {
     private static final int SORT_DESC = 0;
     private static final int SORT_ASC = 1;
 
+    //待解除
+    private Map<String, Map<String, AlertData>> relieveAlertDataCache = new ConcurrentHashMap<>();
+
 
     public void init() {
         initMetricAlertType();
@@ -357,11 +360,13 @@ public class AlertManager {
 
     private void insertParamRule(AlertRule alertRule) {
         Map<String, List<AlertRule>> metricAlertRuleMap;
+        //包含
         if (paramRuleMap.containsKey(alertRule.getThingCode())) {
             metricAlertRuleMap = paramRuleMap.get(alertRule.getThingCode());
             if (!metricAlertRuleMap.containsKey(alertRule.getMetricCode())) {
                 metricAlertRuleMap.put(alertRule.getMetricCode(), new CopyOnWriteArrayList<>());
             }
+            //不包含
         } else {
             metricAlertRuleMap = new ConcurrentHashMap<>();
             paramRuleMap.put(alertRule.getThingCode(), metricAlertRuleMap);
@@ -538,6 +543,7 @@ public class AlertManager {
                 }
                 metricParamAlertData.put(alertData.getMetricCode(), alertData);
             }
+            //这是讲数据已处理，已评级的数据放入到延时队列中
             if (AlertConstants.STAGE_VERIFIED.equals(alertData.getAlertStage())) {
                 verifyDelayQueue.put(new VerifyDelayed(alertData, VERIFY_TO_UNTREATED_PERIOD));
             }
@@ -810,6 +816,12 @@ public class AlertManager {
         alertData.setSceneConfirmTime(new Date());
         alertData.setSceneConfirmUser(alertMessage.getUserId());
         releaseAlert(alertData);
+
+        //报警之后需要设置Map缓存
+        clearParamDataMap(alertData.getThingCode(),alertData.getMetricCode());
+
+        clearRelieveAlertDataCache(alertData.getThingCode(),alertData.getMetricCode());
+
         alertMapper.saveAlertMessage(alertMessage);
         messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
         logger.debug("推送报警消息，报警设备{}，报警内容{}，现场确认报警解除状态：{}", alertData.getThingCode(), alertData.getMetricCode(),
@@ -1524,5 +1536,30 @@ public class AlertManager {
         return alertMaskInfo;
     }
 
+    /**
+     * 获取待解除报警Map
+     * @return
+     */
+    public Map<String, Map<String, AlertData>> getRelieveAlertDataCache() {
+        return relieveAlertDataCache;
+    }
+
+    /**
+     * 清除报警Map中的对象
+     */
+    public void clearParamDataMap(String thingCode,String metriCode){
+        if(alertParamDataMap.containsKey(thingCode) && alertParamDataMap.get(thingCode).containsKey(metriCode)){
+            alertParamDataMap.get(thingCode).remove(metriCode);
+        }
+    }
+
+    /**
+     * 清除待解除报警map中的对象
+     */
+    public void clearRelieveAlertDataCache(String thingCode,String metriCode){
+        if(relieveAlertDataCache.containsKey(thingCode) && relieveAlertDataCache.get(thingCode).containsKey(metriCode)){
+            relieveAlertDataCache.get(thingCode).remove(metriCode);
+        }
+    }
 
 }
