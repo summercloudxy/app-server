@@ -26,7 +26,7 @@ public class CoalAnalysisManager implements ReportFormsManager {
     private CoalAnalysisMapper coalAnalysisMapper;
     @Autowired
     private ReportFormsUtils reportFormsUtils;
-    private final Logger logger = LoggerFactory.getLogger(CoalAnalysisMapper.class);
+    private final Logger logger = LoggerFactory.getLogger(CoalAnalysisManager.class);
 
     @Override
     public Integer getExistRecordId(ReportFormsRecord record) {
@@ -117,7 +117,7 @@ public class CoalAnalysisManager implements ReportFormsManager {
     public ReportFormsRecord parseDataModelToRecord(DataModel dataModel) {
         String value = dataModel.getValue();
         CoalAnalysisRecord record = JSON.parseObject(value, CoalAnalysisRecord.class);
-        logger.debug("接收到煤质化验数据：化验项目{}，化验样本{}，化验时间{}，灰分{}，水份{}，硫份{}，发热量{}", record.getTarget(), record.getSample(), record.getTime(), record.getAad(), record.getMt(), record.getStad(), record.getQnetar());
+        logger.debug("接收到煤质化验数据：化验项目-{}，化验样本-{}，化验时间-{}，灰分-{}，水份-{}，硫份-{}，发热量-{}", record.getTarget(), record.getSample(), record.getTime(), record.getAad(), record.getMt(), record.getStad(), record.getQnetar());
         return record;
     }
 

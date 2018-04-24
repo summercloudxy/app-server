@@ -35,6 +35,7 @@ public class AlertManager {
     private Map<String, Map<String, AlertData>> alertDataMap = new ConcurrentHashMap<>();
     private Map<String, Map<String, List<AlertRule>>> paramRuleMap = new ConcurrentHashMap<>();
     private Map<String, Map<String, AlertRule>> protectRuleMap = new ConcurrentHashMap<>();
+    private Map<String, Map<String, List<AlertRule>>> targetRuleMap = new ConcurrentHashMap<>();
     private Map<String, Short> metricAlertTypeMap = new HashMap<>();
     private Map<String, Map<String, AlertData>> alertParamDataMap = new ConcurrentHashMap<>();
     private DelayQueue<VerifyDelayed> verifyDelayQueue = new DelayQueue<>();
@@ -69,6 +70,7 @@ public class AlertManager {
         initMetricAlertType();
         initParamRuleMap();
         initProtectRuleMap();
+        initTargetRuleMap();
         initAlertDataMap();
         Thread thread = new Thread(() -> {
             while (true) {
@@ -187,6 +189,10 @@ public class AlertManager {
         return paramRuleMap;
     }
 
+    public Map<String, Map<String, List<AlertRule>>> getTargetRuleMap() {
+        return targetRuleMap;
+    }
+
     public List<AlertRule> getParamRules(String thingCode, String metricCode) {
         if (paramRuleMap.containsKey(thingCode)) {
             Map<String, List<AlertRule>> metricRuleMap = paramRuleMap.get(thingCode);
@@ -224,13 +230,13 @@ public class AlertManager {
         if (alertRule.getEnable()) {
             if (type == AlertConstants.TYPE_PARAM) {
                 updateParamRule(alertRule);
-            } else {
+            } else if (type == AlertConstants.TYPE_PROTECT){
                 updateProtectRule(alertRule);
             }
         } else {
             if (type == AlertConstants.TYPE_PARAM) {
                 removeParamRule(alertRule.getId());
-            } else {
+            } else if (type == AlertConstants.TYPE_PROTECT) {
                 removeProtectRule(alertRule.getId());
             }
         }
@@ -241,7 +247,7 @@ public class AlertManager {
         if (alertRule.getEnable()) {
             if (type == AlertConstants.TYPE_PARAM) {
                 insertParamRule(alertRule);
-            } else {
+            } else if (type == AlertConstants.TYPE_PROTECT){
                 insertProtectRule(alertRule);
             }
         }
@@ -252,7 +258,7 @@ public class AlertManager {
         for (Long id : ids) {
             if (type == AlertConstants.TYPE_PARAM) {
                 removeParamRule(id);
-            } else {
+            } else if (type == AlertConstants.TYPE_PROTECT) {
                 removeProtectRule(id);
             }
         }
@@ -356,15 +362,23 @@ public class AlertManager {
     }
 
     private void insertParamRule(AlertRule alertRule) {
+        insertRuleList(alertRule,paramRuleMap);
+    }
+
+    private void insertTargetRule(AlertRule alertRule) {
+        insertRuleList(alertRule,targetRuleMap);
+    }
+
+    private void insertRuleList(AlertRule alertRule,Map<String, Map<String, List<AlertRule>>> ruleMap) {
         Map<String, List<AlertRule>> metricAlertRuleMap;
-        if (paramRuleMap.containsKey(alertRule.getThingCode())) {
-            metricAlertRuleMap = paramRuleMap.get(alertRule.getThingCode());
+        if (ruleMap.containsKey(alertRule.getThingCode())) {
+            metricAlertRuleMap = ruleMap.get(alertRule.getThingCode());
             if (!metricAlertRuleMap.containsKey(alertRule.getMetricCode())) {
                 metricAlertRuleMap.put(alertRule.getMetricCode(), new CopyOnWriteArrayList<>());
             }
         } else {
             metricAlertRuleMap = new ConcurrentHashMap<>();
-            paramRuleMap.put(alertRule.getThingCode(), metricAlertRuleMap);
+            ruleMap.put(alertRule.getThingCode(), metricAlertRuleMap);
             metricAlertRuleMap.put(alertRule.getMetricCode(), new CopyOnWriteArrayList<>());
         }
         List<AlertRule> alertRules = metricAlertRuleMap.get(alertRule.getMetricCode());
@@ -389,7 +403,6 @@ public class AlertManager {
         List<AlertRule> wholeAlertRuleList = alertMapper.getWholeAlertRuleList(AlertConstants.TYPE_PARAM);
         for (AlertRule alertRule : wholeAlertRuleList) {
             insertParamRule(alertRule);
-
         }
     }
 
@@ -400,6 +413,13 @@ public class AlertManager {
         List<AlertRule> wholeAlertRuleList = alertMapper.getWholeAlertRuleList(AlertConstants.TYPE_PROTECT);
         for (AlertRule alertRule : wholeAlertRuleList) {
             insertProtectRule(alertRule);
+        }
+    }
+
+    private void initTargetRuleMap(){
+        List<AlertRule> wholeAlertRuleList = alertMapper.getWholeAlertRuleList(AlertConstants.TYPE_TARGET);
+        for (AlertRule alertRule : wholeAlertRuleList) {
+            insertTargetRule(alertRule);
         }
     }
 

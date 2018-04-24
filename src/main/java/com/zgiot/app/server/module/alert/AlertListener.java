@@ -4,6 +4,7 @@ import com.zgiot.app.server.dataprocessor.DataListener;
 import com.zgiot.app.server.module.alert.handler.AlertFaultHandler;
 import com.zgiot.app.server.module.alert.handler.AlertParamHandler;
 import com.zgiot.app.server.module.alert.handler.AlertProtectHandler;
+import com.zgiot.app.server.module.alert.handler.AlertTargetHandler;
 import com.zgiot.common.constants.AlertConstants;
 import com.zgiot.common.constants.MetricCodes;
 import com.zgiot.common.pojo.DataModel;
@@ -26,6 +27,8 @@ public class AlertListener implements DataListener {
     private AlertProtectHandler protectHandler;
     @Autowired
     private AlertManager alertManager;
+    @Autowired
+    private AlertTargetHandler targetHandler;
     private static org.slf4j.Logger logger = LoggerFactory.getLogger(AlertListener.class);
 
     @Override
@@ -41,6 +44,9 @@ public class AlertListener implements DataListener {
                     break;
                 case AlertConstants.TYPE_PROTECT:
                     protectHandler.check(dataModel);
+                    break;
+                case AlertConstants.TYPE_TARGET:
+                    targetHandler.check(dataModel);
                     break;
                 default:
                     break;
