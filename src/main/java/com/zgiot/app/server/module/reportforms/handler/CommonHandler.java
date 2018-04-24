@@ -23,8 +23,6 @@ public class CommonHandler implements ReportFormsHandler {
 
     public static final Logger logger = LoggerFactory.getLogger(CommonHandler.class);
 
-    public static final Logger logger = LoggerFactory.getLogger(CommonHandler.class);
-
     @Override
     public List<DataModel> handle(ReportFormsManager manager, ReportFormsRecord record) {
         logger.debug("收到一条普通报表数据，内容为:{}",record);
