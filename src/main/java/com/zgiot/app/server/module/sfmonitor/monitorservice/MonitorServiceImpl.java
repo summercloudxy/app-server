@@ -336,7 +336,7 @@ public class MonitorServiceImpl implements MonitorService {
 
                 String thingCode = relSFMonRolePermission.getThingCode();
                 thingCodeList.add(thingCode);
-                if (thingMap.get(thingCode) != null) {
+                if (thingMap.containsKey(thingCode)) {
                     Map<String, Boolean> maxAuthMap = getMaxAuth(permissionMap, (Map<String, Boolean>) thingMap.get(thingCode));
                     thingMap.put(thingCode, maxAuthMap);
                     continue;
@@ -348,8 +348,11 @@ public class MonitorServiceImpl implements MonitorService {
         map.put(THINGAUTHZ, thingMap);
 
         Map<String, Object> metricTypeMap = new HashMap<>();
-        List<RelSFMonMetrictypeMetric> relSFMonMetrictypeMetricList =
-                relSFMonMetrictypeMetricMapper.getRelSFMonMetrictypeMetricByThingCode(thingCodeList);
+        List<RelSFMonMetrictypeMetric> relSFMonMetrictypeMetricList = new ArrayList<>();
+        if(!thingCodeList.isEmpty()){
+            relSFMonMetrictypeMetricList =
+                    relSFMonMetrictypeMetricMapper.getRelSFMonMetrictypeMetricByThingCode(thingCodeList);
+        }
         if (relSFMonMetrictypeMetricList != null && !relSFMonMetrictypeMetricList.isEmpty()) {
             for (RelSFMonMetrictypeMetric relSFMonMetrictypeMetric : relSFMonMetrictypeMetricList) {
                 metricTypeMap.put(relSFMonMetrictypeMetric.getMetricCode(), relSFMonMetrictypeMetric.getSfmonMetrictype());
