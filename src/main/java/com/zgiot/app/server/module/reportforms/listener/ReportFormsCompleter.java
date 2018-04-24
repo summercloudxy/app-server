@@ -46,6 +46,7 @@ public class ReportFormsCompleter implements DataCompleter {
         List<DataModel> result = new ArrayList<>();
         for (ReportFormsHandler handler:handlers){
             if (handler.isMatch(record)){
+                logger.debug("采用{}处理指标数据：项目-{},样本-{},时间-{}",handler.getClass().getName(),record.getTarget(),record.getSample(),record.getTime());
                 List<DataModel> handle = handler.handle(reportFormsManager, record);
                 result.addAll(handle);
             }
