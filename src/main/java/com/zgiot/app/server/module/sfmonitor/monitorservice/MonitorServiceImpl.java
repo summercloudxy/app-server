@@ -139,10 +139,10 @@ public class MonitorServiceImpl implements MonitorService {
         List<String> keyChannels = equipmentRelateToSignalWrapperReq.getKeyChannels();
         SFMonEquipMonitorConfig sfMonEquipMonitorConfig = null;
         sfMonEquipMonitorConfig = new SFMonEquipMonitorConfig();
+        sfMonEquipMonitorConfig.setThingCode(thingCode);
         //保存页面”关键通道”数据
         if(keyChannels != null && keyChannels.size() != 0){
             List<SFMonEquipMonitorConfig> keyChannelEquipments = createEquipmentMonitorConfig(keyChannels,thingCode, SFMonitorConstant.KEY_CHANNEL);
-            sfMonEquipMonitorConfig.setThingCode(thingCode);
             sfMonEquipMonitorConfig.setKey(SFMonitorConstant.KEY_CHANNEL);
             sfMonEquipMonitorConfigMapper.deleteEquipmentConfig(sfMonEquipMonitorConfig);
             saveEquipmentMonitorConfigInfo(keyChannelEquipments);
@@ -175,6 +175,7 @@ public class MonitorServiceImpl implements MonitorService {
         List<String> selectedparameters = equipmentRelateToSignalWrapperReq.getSelectedparameters();
         if(selectedparameters != null && selectedparameters.size() != 0){
             List<SFMonEquipMonitorConfig> selectedparameterInfos = createEquipmentMonitorConfig(selectedparameters,thingCode, SFMonitorConstant.SELECTED_PARAMETER);
+            sfMonEquipMonitorConfig.setThingCode(thingCode);
             sfMonEquipMonitorConfig.setKey(SFMonitorConstant.SELECTED_PARAMETER);
             sfMonEquipMonitorConfigMapper.deleteEquipmentConfig(sfMonEquipMonitorConfig);
             saveEquipmentMonitorConfigInfo(selectedparameterInfos);
