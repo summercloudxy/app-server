@@ -26,6 +26,7 @@ public class AverageHandler implements ReportFormsHandler {
     }
 
     private synchronized void persistRecord(ReportFormsManager reportFormsManager, ReportFormsRecord record) {
+        logger.debug("存储平均报表数据，内容为:{}",record);
         Integer existRecordId = reportFormsManager.getExistRecordId(record);
         if (existRecordId != null) {
             record.setId(existRecordId);
