@@ -13,11 +13,11 @@ import java.util.List;
 @Service
 public interface FilterPressLogService {
     public void saveFilterPressLog(FilterPressLogBean filterPressLogBean);
-    public List<FilterPressLogBean> getLogByDate(String date, int term);
-    public FilterPressPlateCountWrapper getPlateInfos(int term);
-    public FilterPressTotalPlateCountBean getTotalPlateInfos(int term);
-    public List<FilterPressHisPlateCountWrapper> getHisPlateInfos(int term);
-    public Integer getPriorShiftTeam(int term);
-    public List<DataModel> getDataModelAllFilterPressByMetricCode(String metricCode, int term);
-    public List<ManualResetBean> getResetInfo(int term);
+    public List<FilterPressLogBean> getLogByDate(String date);
+    public FilterPressPlateCountWrapper getPlateInfos();
+    public FilterPressTotalPlateCountBean getTotalPlateInfos();
+    public List<FilterPressHisPlateCountWrapper> getHisPlateInfos();
+    public Integer getPriorShiftTeam();
+    public List<DataModel> getDataModelAllFilterPressByMetricCode(String metricCode);
+    public List<ManualResetBean> getResetInfo();
 }
