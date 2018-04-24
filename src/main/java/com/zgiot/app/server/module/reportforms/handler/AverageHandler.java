@@ -16,7 +16,7 @@ public class AverageHandler implements ReportFormsHandler {
     public static final Logger logger = LoggerFactory.getLogger(AverageHandler.class);
     @Override
     public List<DataModel> handle(ReportFormsManager manager, ReportFormsRecord record) {
-        logger.debug("收到一条平均报表数据，内容为:{}",record.toString());
+        logger.debug("收到一条平均报表数据，内容为:{}",record);
         if (!manager.hasAllRecordsBeforeAvgRecord(record)){
             return Collections.emptyList();
         }
@@ -26,7 +26,7 @@ public class AverageHandler implements ReportFormsHandler {
     }
 
     private synchronized void persistRecord(ReportFormsManager reportFormsManager, ReportFormsRecord record) {
-        logger.debug("存储平均报表数据，内容为:{}",record.toString());
+        logger.debug("存储平均报表数据，内容为:{}",record);
         Integer existRecordId = reportFormsManager.getExistRecordId(record);
         if (existRecordId != null) {
             record.setId(existRecordId);
