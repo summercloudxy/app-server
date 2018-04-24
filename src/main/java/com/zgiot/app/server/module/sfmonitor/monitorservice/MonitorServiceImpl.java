@@ -133,7 +133,7 @@ public class MonitorServiceImpl implements MonitorService {
 
     @Override
     @Transactional
-    public void editEquipmentMonitorInfo(EquipmentRelateToSignalWrapperReq equipmentRelateToSignalWrapperReq) {
+    public synchronized void editEquipmentMonitorInfo(EquipmentRelateToSignalWrapperReq equipmentRelateToSignalWrapperReq) {
         String thingCode = equipmentRelateToSignalWrapperReq.getThingCode();
         String editor = equipmentRelateToSignalWrapperReq.getEditor();
         List<String> keyChannels = equipmentRelateToSignalWrapperReq.getKeyChannels();
@@ -263,6 +263,7 @@ public class MonitorServiceImpl implements MonitorService {
         return sfMonEquipMonitorConfigs;
     }
 
+    @Transactional
     private void saveEquipmentMonitorConfigInfo( List<SFMonEquipMonitorConfig> equipmentInfos){
         for(SFMonEquipMonitorConfig sfMonEquipMonitorConfig:equipmentInfos){
             sfMonEquipMonitorConfigMapper.addEquipmentMonitorInfo(sfMonEquipMonitorConfig);
