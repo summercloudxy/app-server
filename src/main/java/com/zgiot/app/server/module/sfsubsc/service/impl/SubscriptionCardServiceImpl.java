@@ -147,10 +147,13 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         }
         if (StringUtils.isNotBlank(firstMetric) && StringUtils.isNotBlank(secondMetric)) {
             BigDecimal totalValue = new BigDecimal(firstMetric).add(new BigDecimal(secondMetric));
-            BigDecimal fistPrecent = new BigDecimal(firstMetric).divide(totalValue, 3, BigDecimal.ROUND_HALF_UP);
-            metricData.setFirstMetricPecent((fistPrecent).multiply(new BigDecimal(100)).setScale(1) + "%");
-            BigDecimal secondPrecent = (new BigDecimal(secondMetric).divide(totalValue, 3, BigDecimal.ROUND_HALF_UP));
-            metricData.setSecondMetricPecent(secondPrecent.multiply(new BigDecimal(100)).setScale(1) + "%");
+            if (totalValue.compareTo(BigDecimal.ZERO) != 0) {
+                BigDecimal fistPrecent = new BigDecimal(firstMetric).divide(totalValue, 3, BigDecimal.ROUND_HALF_UP);
+                metricData.setFirstMetricPecent((fistPrecent).multiply(new BigDecimal(100)).setScale(1) + "%");
+                BigDecimal secondPrecent = (new BigDecimal(secondMetric).divide(totalValue, 3, BigDecimal.ROUND_HALF_UP));
+                metricData.setSecondMetricPecent(secondPrecent.multiply(new BigDecimal(100)).setScale(1) + "%");
+            }
+
         } else {
             metricData.setSecondMetricPecent("");
             metricData.setFirstMetricPecent("");
@@ -184,14 +187,17 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             if (StringUtils.isNotBlank(cleanCoalValue) && StringUtils.isNotBlank(mixedCoalValue) && StringUtils.isNotBlank(wasteRockValue)) {
 
                 BigDecimal totalValue = new BigDecimal(cleanCoalValue).add(new BigDecimal(mixedCoalValue)).add(new BigDecimal(wasteRockValue));
-                BigDecimal fistPrecent = new BigDecimal(cleanCoalValue).divide(totalValue, 3, BigDecimal.ROUND_HALF_UP);
-                metricData.setCleanCoalPrecent((fistPrecent).multiply(new BigDecimal(100)).setScale(1) + "%");
+                if (totalValue.compareTo(BigDecimal.ZERO) != 0) {
+                    BigDecimal fistPrecent = new BigDecimal(cleanCoalValue).divide(totalValue, 3, BigDecimal.ROUND_HALF_UP);
+                    metricData.setCleanCoalPrecent((fistPrecent).multiply(new BigDecimal(100)).setScale(1) + "%");
 
-                BigDecimal secondPrecent = new BigDecimal(mixedCoalValue).divide(totalValue, 3, BigDecimal.ROUND_HALF_UP);
-                metricData.setMixedCoalPrecent((secondPrecent).multiply(new BigDecimal(100)).setScale(1) + "%");
+                    BigDecimal secondPrecent = new BigDecimal(mixedCoalValue).divide(totalValue, 3, BigDecimal.ROUND_HALF_UP);
+                    metricData.setMixedCoalPrecent((secondPrecent).multiply(new BigDecimal(100)).setScale(1) + "%");
 
-                BigDecimal thirdPrecent = BigDecimal.valueOf(1.00).subtract(fistPrecent).subtract(secondPrecent);
-                metricData.setWasteRockPrecent((thirdPrecent).multiply(new BigDecimal(100)).setScale(1) + "%");
+                    BigDecimal thirdPrecent = BigDecimal.valueOf(1.00).subtract(fistPrecent).subtract(secondPrecent);
+                    metricData.setWasteRockPrecent((thirdPrecent).multiply(new BigDecimal(100)).setScale(1) + "%");
+                }
+
 
             } else {
                 metricData.setCleanCoalPrecent("");
@@ -617,7 +623,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
                 subtract(new BigDecimal(StringUtils.isEmpty(slurryCoalCapValue) ? "0" : slurryCoalCapValue));
         String wasteRockCapValue = "";
         if (wasteRockCapVale.compareTo(BigDecimal.ZERO) > -1) {
-            wasteRockCapValue = String.valueOf(wasteRockCapVale);
+            wasteRockCapValue = String.valueOf(MetricValueUtil.formart(wasteRockCapVale));
         }
         productYieldVO.setRawCoalCapValue(MetricValueUtil.formart(rawCoalCapValue));
         productYieldVO.setCleanCoalCapValue(cleanCoalCapValue);
@@ -672,21 +678,21 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         ProductYieldVO.MetricData metricData4 = productYieldVO.new MetricData();
         //精煤
         metricData1.setThingName(SubscriptionConstants.CLEAN_COAL);
-        if (cleanCoalTeamValue.compareTo(BigDecimal.ZERO) != 0) {
+        if (cleanCoalTeamValue.compareTo(BigDecimal.ZERO) != 0 && rawCoalTotalValue.compareTo(BigDecimal.ZERO) != 0) {
             metricData1.setThingCodeMetricPercent(cleanCoalTeamValue.divide(rawCoalTotalValue, 1, BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal(100).setScale(0)) + "%");
         } else {
             metricData1.setThingCodeMetricPercent("");
         }
         //混煤
         metricData2.setThingName(SubscriptionConstants.MIXED_COAL);
-        if (mixedCoalTeamValue.compareTo(BigDecimal.ZERO) != 0) {
+        if (mixedCoalTeamValue.compareTo(BigDecimal.ZERO) != 0 && rawCoalTotalValue.compareTo(BigDecimal.ZERO) != 0) {
             metricData2.setThingCodeMetricPercent(mixedCoalTeamValue.divide(rawCoalTotalValue, 1, BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal(100).setScale(0)) + "%");
         } else {
             metricData2.setThingCodeMetricPercent("");
         }
         //煤泥
         metricData3.setThingName(SubscriptionConstants.SLURRY);
-        if (slurryTeamValue.compareTo(BigDecimal.ZERO) != 0) {
+        if (slurryTeamValue.compareTo(BigDecimal.ZERO) != 0 && rawCoalTotalValue.compareTo(BigDecimal.ZERO) != 0) {
             metricData3.setThingCodeMetricPercent(slurryTeamValue.divide(rawCoalTotalValue, 1, BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal(100).setScale(0)) + "%");
         } else {
             metricData3.setThingCodeMetricPercent("");
@@ -694,7 +700,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
         //矸石
         metricData4.setThingName(SubscriptionConstants.WASTE_ROCK);
-        if ((rawCoalTotalValue.subtract(cleanCoalTeamValue).subtract(mixedCoalTeamValue).subtract(slurryTeamValue)).compareTo(BigDecimal.ZERO) > 0) {
+        if ((rawCoalTotalValue.subtract(cleanCoalTeamValue).subtract(mixedCoalTeamValue).subtract(slurryTeamValue)).compareTo(BigDecimal.ZERO) > 0 && rawCoalTotalValue.compareTo(BigDecimal.ZERO) != 0) {
             metricData4.setThingCodeMetricPercent((rawCoalTotalValue.subtract(cleanCoalTeamValue).subtract(mixedCoalTeamValue).subtract(slurryTeamValue)).divide(rawCoalTotalValue, 1, BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal(100).setScale(0)) + "%");
         } else {
             metricData4.setThingCodeMetricPercent("");
@@ -1111,7 +1117,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             DataModelWrapper pipelineData = dataService.getData(pipeline, BellowsConstants.METRIC_PRESSURE).orElse(null);
             if (pipelineData != null) {
                 String pipelineMetricValue = pipelineData.getValue();
-                pipelineMetrics.add(pipelineMetricValue);
+                pipelineMetrics.add(MetricValueUtil.formart(pipelineMetricValue));
             } else {
                 pipelineMetrics.add("");
             }
