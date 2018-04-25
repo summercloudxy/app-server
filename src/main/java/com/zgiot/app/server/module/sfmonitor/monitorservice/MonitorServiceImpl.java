@@ -179,6 +179,10 @@ public class MonitorServiceImpl implements MonitorService {
             sfMonEquipMonitorConfig.setKey(SFMonitorConstant.SELECTED_PARAMETER);
             sfMonEquipMonitorConfigMapper.deleteEquipmentConfig(sfMonEquipMonitorConfig);
             saveEquipmentMonitorConfigInfo(selectedparameterInfos);
+        }else {
+            sfMonEquipMonitorConfig.setThingCode(thingCode);
+            sfMonEquipMonitorConfig.setKey(SFMonitorConstant.SELECTED_PARAMETER);
+            sfMonEquipMonitorConfigMapper.deleteEquipmentConfig(sfMonEquipMonitorConfig);
         }
         //保存页面“辅助操作区”设备数据
         List<EquipmentRelateToSignalWrapper> equipmentRelateToSignalWrappers = equipmentRelateToSignalWrapperReq.getEquipmentRelateToSignalWrappers();
