@@ -47,7 +47,8 @@ public class AlertParamHandler implements AlertHandler {
         Double value = Double.parseDouble(dataModel.getValue());
 
         //根据参数获取报警级别
-        AlertRule alertRule = getAlertLevel(thingCode, metricCode, value);
+        Map<String, Map<String, List<AlertRule>>> alertRuleMap = alertManager.getParamRuleMap();
+        AlertRule alertRule = getAlertRule(alertRuleMap,thingCode, metricCode, value);
         //获取当前报警信息
         AlertData alertData = alertManager.getAlertDataByThingAndMetricCode(thingCode, metricCode);
         if(alertData!=null){
@@ -135,7 +136,8 @@ public class AlertParamHandler implements AlertHandler {
                 String metricCode=metricEntry.getKey();
                 AlertData waitAlertData=metricEntry.getValue();
                 //待报警转为报警
-                AlertRule alertLevel = getAlertLevel(thingCode, metricCode, waitAlertData.getParamValue());
+                Map<String, Map<String, List<AlertRule>>> alertRuleMap = alertManager.getParamRuleMap();
+                AlertRule alertLevel = getAlertRule(alertRuleMap,thingCode, metricCode, waitAlertData.getParamValue());
                 if(alertLevel!=null && System.currentTimeMillis()-waitAlertData.getStartDelayTime().getTime()>alertLevel.getDelayTime()*1000){
                     addAlertData(thingCode,metricCode,waitAlertData);
                 }
@@ -151,8 +153,8 @@ public class AlertParamHandler implements AlertHandler {
      * @param value
      * @return
      */
-    private AlertRule getAlertLevel(String thingCode, String metricCode, double value) {
-        Map<String, Map<String, List<AlertRule>>> alertRuleMap = alertManager.getParamRuleMap();
+    public AlertRule getAlertRule(Map<String, Map<String, List<AlertRule>>> alertRuleMap,String thingCode, String metricCode, double value) {
+
         if (alertRuleMap.containsKey(thingCode) && alertRuleMap.get(thingCode).containsKey(metricCode)) {
             //根据设备编码和信号编码都存在报警规则对象进行数据处理
             List<AlertRule> alertRuleList = alertRuleMap.get(thingCode).get(metricCode);
@@ -243,12 +245,7 @@ public class AlertParamHandler implements AlertHandler {
      */
     public AlertData createAlertData(DataModel dataModel,AlertRule alertRule,Double value){
         //根据信号获取信号模型
-        MetricModel metricModel = metricService.getMetric(dataModel.getMetricCode());
-        BigDecimal valueStr = new BigDecimal(dataModel.getValue());
-        //精确到两位小数
-        valueStr = valueStr.setScale(2, BigDecimal.ROUND_HALF_UP);
-        //描述信息
-        String alertInfo = metricModel.getMetricName() + "-" + valueStr + metricModel.getValueUnit();
+        String alertInfo = getAlertInfo(dataModel);
 
         AlertData alertData=new AlertData(dataModel, AlertConstants.TYPE_PARAM, alertRule.getAlertLevel(), alertInfo,
                 AlertConstants.SOURCE_SYSTEM, AlertConstants.REPORTER_SYSTEM);
@@ -258,6 +255,15 @@ public class AlertParamHandler implements AlertHandler {
         alertData.setLastUpdateTime(new Date());
         alertData.setParamValue(value);
         return alertData;
+    }
+
+    public String getAlertInfo(DataModel dataModel) {
+        MetricModel metricModel = metricService.getMetric(dataModel.getMetricCode());
+        BigDecimal valueStr = new BigDecimal(dataModel.getValue());
+        //精确到两位小数
+        valueStr = valueStr.setScale(2, BigDecimal.ROUND_HALF_UP);
+        //描述信息
+        return metricModel.getMetricName() + "-" + valueStr + metricModel.getValueUnit();
     }
 
 
