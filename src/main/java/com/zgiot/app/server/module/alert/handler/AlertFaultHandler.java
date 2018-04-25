@@ -51,7 +51,7 @@ public class AlertFaultHandler implements AlertHandler {
         if (ENABLE_VALUE.equalsIgnoreCase(dataModel.getValue()) && alertData == null) {
             //判断是否是桶
             List<NoPowerThing> noPowerThings = alertManager.getNoPowerThingByThingCode(thingCode);
-            Short level = null;
+            Short level;
             if (CollectionUtils.isNotEmpty(noPowerThings)) {
                 level = getLevelWithOutState(noPowerThings);
             } else {
@@ -87,7 +87,6 @@ public class AlertFaultHandler implements AlertHandler {
                 dataModels.clear();
             }
         }
-
     }
 
     public void updateCache() {

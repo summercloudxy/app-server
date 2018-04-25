@@ -40,11 +40,9 @@ public class AlertParamHandler implements AlertHandler {
         String thingCode = dataModel.getThingCode();
         String metricCode = dataModel.getMetricCode();
         Double value = Double.parseDouble(dataModel.getValue());
-        MetricModel metricModel = metricService.getMetric(metricCode);
-        BigDecimal valueStr = new BigDecimal(dataModel.getValue());
-        valueStr = valueStr.setScale(2, BigDecimal.ROUND_HALF_UP);
-        String alertInfo = metricModel.getMetricName() + "-" + valueStr + metricModel.getValueUnit();
-        AlertRule alertRule = getAlertLevel(thingCode, metricCode, value);
+        String alertInfo = getAlertInfo(dataModel, metricCode);
+        Map<String, Map<String, List<AlertRule>>> alertRuleMap = alertManager.getParamRuleMap();
+        AlertRule alertRule = getAlertRule(alertRuleMap,thingCode, metricCode, value);
         AlertData alertData = alertManager.getAlertDataByThingAndMetricCode(thingCode, metricCode);
         if (alertData == null && alertRule != null) {
             alertData = new AlertData(dataModel, AlertConstants.TYPE_PARAM, alertRule.getAlertLevel(), alertInfo,
@@ -69,6 +67,13 @@ public class AlertParamHandler implements AlertHandler {
 
     }
 
+    public String getAlertInfo(DataModel dataModel, String metricCode) {
+        MetricModel metricModel = metricService.getMetric(metricCode);
+        BigDecimal valueStr = new BigDecimal(dataModel.getValue());
+        valueStr = valueStr.setScale(2, BigDecimal.ROUND_HALF_UP);
+        return metricModel.getMetricName() + "-" + valueStr + metricModel.getValueUnit();
+    }
+
     @Scheduled(cron = "0/10 * * * * ?")
     public void updateAlertLevel() {
         alertDataCache = alertManager.getAlertParamDataMap();
@@ -86,7 +91,8 @@ public class AlertParamHandler implements AlertHandler {
     }
 
     private void disposeTimeOutParamAlertData(String thingCode, Map<String, AlertData> metricAlertDataMap, String metricCode, AlertData alertData) {
-        AlertRule alertRule = getAlertLevel(thingCode, metricCode, alertData.getParamValue());
+        Map<String, Map<String, List<AlertRule>>> alertRuleMap = alertManager.getParamRuleMap();
+        AlertRule alertRule = getAlertRule(alertRuleMap,thingCode, metricCode, alertData.getParamValue());
         if (alertRule == null) {
             alertData.setRecovery(true);
             if (!alertData.isManualIntervention()) {
@@ -108,8 +114,7 @@ public class AlertParamHandler implements AlertHandler {
         }
     }
 
-    private AlertRule getAlertLevel(String thingCode, String metricCode, double value) {
-        Map<String, Map<String, List<AlertRule>>> alertRuleMap = alertManager.getParamRuleMap();
+    public AlertRule getAlertRule(Map<String, Map<String, List<AlertRule>>> alertRuleMap , String thingCode, String metricCode, double value) {
         if (alertRuleMap.containsKey(thingCode) && alertRuleMap.get(thingCode).containsKey(metricCode)) {
             List<AlertRule> alertRuleList = alertRuleMap.get(thingCode).get(metricCode);
             for (AlertRule alertRule : alertRuleList) {
@@ -117,7 +122,6 @@ public class AlertParamHandler implements AlertHandler {
                     return alertRule;
                 }
             }
-
         }
         return null;
     }

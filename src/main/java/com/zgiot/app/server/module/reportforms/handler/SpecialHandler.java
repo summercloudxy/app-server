@@ -222,6 +222,7 @@ public class SpecialHandler implements ReportFormsHandler {
         double classCoal1 = getAvgClassCoal(manager, avgRecord);
         double classCoal2 = getAvgClassCoal(manager, anotherAvgRecord);
         setParamByCount(resultRecord, avgRecord, classCoal1, anotherAvgRecord, classCoal2);
+        avgRecord.setTarget(avgRecord.getTarget()+ReportFormsUtils.AVG_RECORD_KEYWORD);
 
     }
 
