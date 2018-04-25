@@ -116,4 +116,6 @@ public interface AlertMapper {
     void insertParamThreshold(AlertRule alertRule);
 
     void setParamThreshold(AlertRule alertRule);
+
+    List<AlertRelieveTime> getWholeAlertRelieveTimeList();
 }

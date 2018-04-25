@@ -1101,4 +1101,17 @@
         INSERT INTO tb_param_range (thing_code,metric_code,lower_limit,upper_limit) VALUES (#{thingCode},#{metricCode},#{lowerLimit},#{upperLimit})
     </insert>
 
+    <select id="getWholeAlertRelieveTimeList" resultType="com.zgiot.app.server.module.alert.pojo.AlertRelieveTime">
+        SELECT
+            id,
+            thing_code,
+            metric_code,
+            delay_time,
+            enable
+        FROM
+            tb_alert_relieve_time
+        WHERE
+            enable = true;
+    </select>
+
 </mapper>

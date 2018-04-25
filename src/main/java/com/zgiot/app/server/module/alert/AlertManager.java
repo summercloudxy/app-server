@@ -67,12 +67,17 @@ public class AlertManager {
     //待解除
     private Map<String, Map<String, AlertData>> relieveAlertDataCache = new ConcurrentHashMap<>();
 
+    //解除报警Map
+    private Map<String,Map<String,AlertRelieveTime>> paramRelieveTimeMap=new ConcurrentHashMap<>();
+
 
     public void init() {
         initMetricAlertType();
         initParamRuleMap();
         initProtectRuleMap();
         initAlertDataMap();
+        initParamRelieveTimeMap();
+
         Thread thread = new Thread(() -> {
             while (true) {
                 try {
@@ -1562,4 +1567,32 @@ public class AlertManager {
         }
     }
 
+    /**
+     *初始化报警解除时间Map
+     */
+    private void initParamRelieveTimeMap() {
+        List<AlertRelieveTime> wholeAlertRelieveTime=alertMapper.getWholeAlertRelieveTimeList();
+        for (AlertRelieveTime alertRelieveTime:wholeAlertRelieveTime) {
+            insertRelieveTime(alertRelieveTime);
+        }
+    }
+
+    /**
+     * 向Map集合中放入参数
+     * @param alertRelieveTime
+     */
+    private void insertRelieveTime(AlertRelieveTime alertRelieveTime) {
+        Map<String,AlertRelieveTime> metricRelieveTimeMap;
+        if(paramRelieveTimeMap.containsKey(alertRelieveTime.getThingCode())){
+            metricRelieveTimeMap = paramRelieveTimeMap.get(alertRelieveTime.getThingCode());
+        }else{
+            metricRelieveTimeMap=new ConcurrentHashMap<>();
+            paramRelieveTimeMap.put(alertRelieveTime.getThingCode(),metricRelieveTimeMap);
+        }
+        metricRelieveTimeMap.put(alertRelieveTime.getMetricCode(),alertRelieveTime);
+    }
+
+    public Map<String, Map<String, AlertRelieveTime>> getParamRelieveTimeMap() {
+        return paramRelieveTimeMap;
+    }
 }
