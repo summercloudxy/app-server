@@ -52,13 +52,13 @@
 
     <select id="queryLogByDate" resultMap="filterPressLog">
         SELECT thing_code,feed_start_time,feed_duration,feed_current,
-                unload_start_time,unload_duration,feed_state,unload_state,
-                plate_count,total_plate_count,
-                waiting_time,proceeding_time,save_time,is_day_shift,plate_start_time
-                FROM `tb_filterpress_log`
-                where save_time>str_to_date(#{startTime},'%Y-%m-%d %H:%i:%s')
-                and save_time &lt;str_to_date(#{endTime},'%Y-%m-%d %H:%i:%s')
-                order by save_time asc
+        unload_start_time,unload_duration,feed_state,unload_state,
+        plate_count,total_plate_count,
+        waiting_time,proceeding_time,save_time,is_day_shift,plate_start_time
+        FROM `tb_filterpress_log`
+        where save_time>str_to_date(#{startTime},'%Y-%m-%d %H:%i:%s')
+        and save_time &lt;str_to_date(#{endTime},'%Y-%m-%d %H:%i:%s')
+        order by save_time asc
     </select>
 
     <select id="queryPlateInfos"  resultMap="filterPressPlateInfo">
@@ -100,7 +100,7 @@
     </select>
 
     <select id="getPriorTeam"  resultType="Integer">
-      select distinct team from `tb_filterpress_log`
+        select distinct team from `tb_filterpress_log`
         <where>
             is_day_shift=#{isDayShift}
             <if test="startTime !=null ">

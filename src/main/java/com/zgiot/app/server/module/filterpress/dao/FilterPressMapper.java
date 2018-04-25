@@ -11,7 +11,7 @@ public interface FilterPressMapper {
     Double selectParamValue(@Param("thingCode") String thingCode, @Param("paramName") String paramName);
 
     void updateFilterParamValue(@Param("thingCode") String thingCode, @Param("paramName") String paramName,
-            @Param("paramValue") Double paramValue);
+                                @Param("paramValue") Double paramValue);
 
 //    @MapKey("deviceCode")
 //    Map<String, FilterPressElectricity> getCurrentInfoInDuration(Date startTime, Date endTime);

@@ -851,7 +851,7 @@ public class FilterPressManager {
             for(String thingCode:queuePosition.keySet()){
                 if(queuePosition.get(thingCode) > position)
                     queuePosition.put(thingCode, queuePosition.get(thingCode) - 1);
-                    logger.debug("resort filterpress:" + thingCode + " and afterresortposition:" + (queuePosition.get(thingCode)));
+                logger.debug("resort filterpress:" + thingCode + " and afterresortposition:" + (queuePosition.get(thingCode)));
             }
         }
 

@@ -584,11 +584,6 @@
         <if test="stage == 'RELEASE'">
             ,ABS(ad.release_time-ad.alert_datetime) as alertDuration
         </if>
-        <!--<if test="thingCode != null"> -->
-        <!--<if test="stage != 'RELEASE'">-->
-        <!--,am.id as message_id,am.user_id,am.time,am.info,am.alert_id,am.is_read,am.permission,am.type-->
-        <!--</if>-->
-        <!--</if>-->
         <if test="stage == 'RELEASE'">
             ,rts.system_id
         </if>
@@ -601,18 +596,7 @@
                 ,tb_thing_position ttp
             </if>
         </if>
-        <!--<if test="thingCode != null"> -->
-        <!--<if test="stage != 'RELEASE'">-->
-        <!--,tb_alert_message am-->
-        <!--</if>-->
-        <!--</if>-->
         <trim prefix="where" prefixOverrides="AND">
-            <!--<if test="thingCode != null"> -->
-            <!--<if test="stage != 'RELEASE'">-->
-            <!--AND-->
-            <!--ad.id = am.alert_id-->
-            <!--</if>-->
-            <!--</if>-->
             <if test="thingCode == null">
                 <if test="systems != null or stage == 'RELEASE'">
                     AND ad.thing_code = rts.thing_code
@@ -686,6 +670,50 @@
         <!--limit #{offset},#{count}-->
         <!--</if>-->
     </select>
+
+    <select id="getAlertDataByThingCode" resultMap="alertRecordMap">
+        SELECT
+        ad.id,ad.thing_code,ad.metric_code,ad.alert_source,ad.alert_type,ad.alert_level,ad.alert_datetime,ad.alert_info,ad.reporter,
+        ad.alert_stage,ad.is_repair,ad.repair_confirm_user,ad.repair_start_time,ad.repair_end_time,
+        ad.is_manual_intervention,ad.feedback_image,ad.feedback_video,ad.scene_confirm_state,ad.scene_confirm_time,
+        ad.scene_confirm_user,ad.is_recovery,ad.param_value,ad.param_lower,ad.param_upper,ad.last_update_time,ad.verify_time,
+        ad.post_worker,ad.dispatcher,ad.release_time
+        FROM tb_alert_data ad
+        WHERE 1=1
+        <if test="thingCodes != null">
+            and ad.thing_code IN
+            <foreach collection="thingCodes" item="thingCode" index="index" open="(" close=")" separator=",">
+                #{thingCode}
+            </foreach>
+        </if>
+        <if test="stages !=null">
+            AND
+            ad.alert_stage in
+            <foreach collection="stages" item="alertStage" index="index" open="(" close=")" separator=",">
+                #{alertStage}
+            </foreach>
+        </if>
+        <if test="excluStage != null">
+            AND
+            ad.alert_stage != #{excluStage}
+        </if>
+        <if test="levels != null">
+            AND ad.alert_level in
+            <foreach collection="levels" item="level" index="index" open="(" close=")"
+                     separator=",">
+                #{level}
+            </foreach>
+        </if>
+        <if test="types != null">
+            AND ad.alert_type in
+            <foreach collection="types" item="type" index="index" open="(" close=")"
+                     separator=",">
+                #{type}
+            </foreach>
+        </if>
+        ORDER BY ad.alert_level is not null,ad.alert_level desc,ad.alert_datetime desc
+    </select>
+
 
     <update id="setRead" parameterType="java.lang.Integer">
         UPDATE tb_alert_message SET is_read = #{state} WHERE id IN

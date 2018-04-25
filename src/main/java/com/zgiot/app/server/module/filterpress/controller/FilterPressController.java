@@ -137,7 +137,7 @@ public class FilterPressController {
     @ApiOperation("给压滤机内部plc发送长/短脉冲信号及电平信号")
     @RequestMapping(value = "/filterpress/cmd/send",method = RequestMethod.POST)
     public ResponseEntity<String> sendFilterPressPulseCmd(@RequestBody String data, @RequestParam(required = false,defaultValue = "5000") Integer retryPeriod,
-                                               @RequestParam(required = false,defaultValue = "3") Integer retryCount, HttpServletRequest request) {
+                                                          @RequestParam(required = false,defaultValue = "3") Integer retryCount, HttpServletRequest request) {
         DataModel dataModel = JSON.parseObject(data,DataModel.class);
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
         int position = -1;

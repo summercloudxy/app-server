@@ -14,6 +14,7 @@ import com.zgiot.app.server.module.demo.DemoBusiness;
 import com.zgiot.app.server.module.demo.DemoDataCompleter;
 import com.zgiot.app.server.module.densitycontrol.DensityControlListener;
 import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
+import com.zgiot.app.server.module.filterpress.FilterPressManager;
 import com.zgiot.app.server.module.historydata.job.HistoryMinDataJob;
 import com.zgiot.app.server.module.reportforms.listener.ReportFormsCompleter;
 import com.zgiot.app.server.module.sfsubsc.job.UploadHistorySubscCardDatas;

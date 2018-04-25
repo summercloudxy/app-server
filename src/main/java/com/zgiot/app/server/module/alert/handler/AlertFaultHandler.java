@@ -2,6 +2,7 @@ package com.zgiot.app.server.module.alert.handler;
 
 import com.zgiot.app.server.module.alert.AlertManager;
 import com.zgiot.app.server.module.alert.pojo.AlertData;
+import com.zgiot.app.server.module.alert.pojo.NoPowerThing;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.service.MetricService;
 import com.zgiot.app.server.service.ThingService;
@@ -9,11 +10,15 @@ import com.zgiot.common.constants.AlertConstants;
 import com.zgiot.common.constants.MetricCodes;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import java.util.*;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -44,8 +49,12 @@ public class AlertFaultHandler implements AlertHandler {
         String metricCode = dataModel.getMetricCode();
         AlertData alertData = alertManager.getAlertDataByThingAndMetricCode(thingCode, metricCode);
         if (ENABLE_VALUE.equalsIgnoreCase(dataModel.getValue()) && alertData == null) {
-            Short level = getLevelWithOutState(thingCode);
-            if (level == null) {
+            //判断是否是桶
+            List<NoPowerThing> noPowerThings = alertManager.getNoPowerThingByThingCode(thingCode);
+            Short level;
+            if (CollectionUtils.isNotEmpty(noPowerThings)) {
+                level = getLevelWithOutState(noPowerThings);
+            } else {
                 level = getAlertLevelWithState(dataModel, true);
             }
             if (level == null) {
@@ -78,7 +87,6 @@ public class AlertFaultHandler implements AlertHandler {
                 dataModels.clear();
             }
         }
-
     }
 
     public void updateCache() {
@@ -126,12 +134,14 @@ public class AlertFaultHandler implements AlertHandler {
         faultModels.add(dataModel);
     }
 
-    private Short getLevelWithOutState(String thingCode) {
-        Set<String> metricCodeSet = thingService.findMetricsOfThing(thingCode);
-        if (!metricCodeSet.contains(MetricCodes.STATE)) {
-            return AlertConstants.LEVEL_20;
+    private Short getLevelWithOutState(List<NoPowerThing> noPowerThings) {
+        for (NoPowerThing noPowerThing : noPowerThings) {
+            DataModelWrapper stateData = dataService.getData(noPowerThing.getSubThingCode(), MetricCodes.STATE).orElse(null);
+            if (stateData != null && STATE_RUN.equals(stateData.getValue())) {
+                return AlertConstants.LEVEL_30;
+            }
         }
-        return null;
+        return AlertConstants.LEVEL_20;
     }
 
     private Short getAlertLevelWithState(DataModel dataModel, Boolean checkInterval) {

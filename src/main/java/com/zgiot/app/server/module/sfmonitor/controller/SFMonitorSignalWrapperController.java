@@ -832,7 +832,7 @@ public class SFMonitorSignalWrapperController {
         List<SFMonPadStateControlMetricInfo> sfMonPadStateControlMetricInfos = sfMonEquipMonitorConfigMapper.getStateControlZoneData(thingCode,zoneCode,SFMonitorConstant.STATE_CONTRL,SFMonitorConstant.DIRECTION);
         sfMonPadStateControlInfo.setPowerEquipment(true);
         if((sfMonPadStateControlMetricInfos != null) && (sfMonPadStateControlMetricInfos.size() == 1
-        && sfMonPadStateControlMetricInfos.get(0).getMetricName().equals(SFMonitorConstant.EQUIPMENT_STATE))){
+                && sfMonPadStateControlMetricInfos.get(0).getMetricName().equals(SFMonitorConstant.EQUIPMENT_STATE))){
             sfMonPadStateControlInfo.setPowerEquipment(false);
         }
         for(SFMonPadStateControlMetricInfo sfMonPadStateControlMetricInfo:sfMonPadStateControlMetricInfos){

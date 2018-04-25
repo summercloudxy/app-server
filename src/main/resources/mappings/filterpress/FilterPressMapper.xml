@@ -5,9 +5,9 @@
     <select id="selectParamValue" resultType="java.lang.Double">
         SELECT param_value
         FROM
-            tb_filterpress_config
+        tb_filterpress_config
         WHERE
-            thing_code = #{thingCode} AND param_name = #{paramName}
+        thing_code = #{thingCode} AND param_name = #{paramName}
     </select>
 
     <update id="updateFilterParamValue">

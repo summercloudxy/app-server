@@ -3,6 +3,7 @@ package com.zgiot.app.server.module.alert.mapper;
 import com.zgiot.app.server.module.alert.pojo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.Date;
 import java.util.List;
@@ -48,13 +49,17 @@ public interface AlertMapper {
 
     void saveAlertShield(List<AlertMask> alertMasks);
 
-    List<AlertRecord> getAlertDataListGroupByThing(@Param("stage") String stage, @Param("excluStage") String excluStage,
-                                                   @Param("levels") List<Integer> levels, @Param("types") List<Short> types,
-                                                   @Param("buildingIds") List<Integer> buildingIds, @Param("floors") List<Integer> floors,
-                                                   @Param("systems") List<Integer> systems, @Param("assetType") String assetType,
-                                                   @Param("category") String category, @Param("sortType") Integer sortType, @Param("startTime") Date startTime,
-                                                   @Param("endTime") Date endTime, @Param("thingCode") String thingCode, @Param("offset") Integer offset,
-                                                   @Param("count") Integer count);
+//    List<AlertRecord> getAlertDataListGroupByThing(@Param("stage") String stage, @Param("excluStage") String excluStage,
+//                                                   @Param("levels") List<Integer> levels, @Param("types") List<Short> types,
+//                                                   @Param("buildingIds") List<Integer> buildingIds, @Param("floors") List<Integer> floors,
+//                                                   @Param("systems") List<Integer> systems, @Param("assetType") String assetType,
+//                                                   @Param("category") String category, @Param("sortType") Integer sortType, @Param("startTime") Date startTime,
+//                                                   @Param("endTime") Date endTime, @Param("thingCode") String thingCode, @Param("offset") Integer offset,
+//                                                   @Param("count") Integer count);
+
+    List<AlertRecord> getAlertDataListGroupByThing(FilterCondition filterCondition);
+
+    List<AlertRecord> getAlertDataByThingCode(AlertFilterCondition filterCondition);
 
     Integer getAlertDataListCount(FilterCondition filterCondition);
 
@@ -117,5 +122,8 @@ public interface AlertMapper {
 
     void setParamThreshold(AlertRule alertRule);
 
+    @Select("select * from rel_nopower_thing where thing_code=#{thingCode}")
+    List<NoPowerThing> getNoPowerThingByThingCode(@Param("thingCode") String thingCode);
     List<AlertRelieveTime> getWholeAlertRelieveTimeList();
+
 }

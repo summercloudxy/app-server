@@ -35,6 +35,7 @@ public class AlertManager {
     private Map<String, Map<String, AlertData>> alertDataMap = new ConcurrentHashMap<>();
     private Map<String, Map<String, List<AlertRule>>> paramRuleMap = new ConcurrentHashMap<>();
     private Map<String, Map<String, AlertRule>> protectRuleMap = new ConcurrentHashMap<>();
+    private Map<String, Map<String, List<AlertRule>>> targetRuleMap = new ConcurrentHashMap<>();
     private Map<String, Short> metricAlertTypeMap = new HashMap<>();
     private Map<String, Map<String, AlertData>> alertParamDataMap = new ConcurrentHashMap<>();
     private DelayQueue<VerifyDelayed> verifyDelayQueue = new DelayQueue<>();
@@ -75,6 +76,7 @@ public class AlertManager {
         initMetricAlertType();
         initParamRuleMap();
         initProtectRuleMap();
+        initTargetRuleMap();
         initAlertDataMap();
         initParamRelieveTimeMap();
 
@@ -84,7 +86,7 @@ public class AlertManager {
                     Thread.sleep(10);
                     AlertData alertData = verifyDelayQueue.take().getAlertData();
                     if (AlertConstants.STAGE_VERIFIED.equals(alertData.getAlertStage())) {
-                        alertData.setAlertStage(AlertConstants.STAGE_UNTREATED);
+                        alertData.setAlertStage(AlertConstants.STAGE_UNHANDLED);
                         updateAlert(alertData);
                     }
                 } catch (Exception e) {
@@ -195,6 +197,10 @@ public class AlertManager {
         return paramRuleMap;
     }
 
+    public Map<String, Map<String, List<AlertRule>>> getTargetRuleMap() {
+        return targetRuleMap;
+    }
+
     public List<AlertRule> getParamRules(String thingCode, String metricCode) {
         if (paramRuleMap.containsKey(thingCode)) {
             Map<String, List<AlertRule>> metricRuleMap = paramRuleMap.get(thingCode);
@@ -232,13 +238,13 @@ public class AlertManager {
         if (alertRule.getEnable()) {
             if (type == AlertConstants.TYPE_PARAM) {
                 updateParamRule(alertRule);
-            } else {
+            } else if (type == AlertConstants.TYPE_PROTECT){
                 updateProtectRule(alertRule);
             }
         } else {
             if (type == AlertConstants.TYPE_PARAM) {
                 removeParamRule(alertRule.getId());
-            } else {
+            } else if (type == AlertConstants.TYPE_PROTECT) {
                 removeProtectRule(alertRule.getId());
             }
         }
@@ -249,7 +255,7 @@ public class AlertManager {
         if (alertRule.getEnable()) {
             if (type == AlertConstants.TYPE_PARAM) {
                 insertParamRule(alertRule);
-            } else {
+            } else if (type == AlertConstants.TYPE_PROTECT){
                 insertProtectRule(alertRule);
             }
         }
@@ -260,7 +266,7 @@ public class AlertManager {
         for (Long id : ids) {
             if (type == AlertConstants.TYPE_PARAM) {
                 removeParamRule(id);
-            } else {
+            } else if (type == AlertConstants.TYPE_PROTECT) {
                 removeProtectRule(id);
             }
         }
@@ -364,17 +370,23 @@ public class AlertManager {
     }
 
     private void insertParamRule(AlertRule alertRule) {
+        insertRuleList(alertRule,paramRuleMap);
+    }
+
+    private void insertTargetRule(AlertRule alertRule) {
+        insertRuleList(alertRule,targetRuleMap);
+    }
+
+    private void insertRuleList(AlertRule alertRule,Map<String, Map<String, List<AlertRule>>> ruleMap) {
         Map<String, List<AlertRule>> metricAlertRuleMap;
-        //包含
-        if (paramRuleMap.containsKey(alertRule.getThingCode())) {
-            metricAlertRuleMap = paramRuleMap.get(alertRule.getThingCode());
+        if (ruleMap.containsKey(alertRule.getThingCode())) {
+            metricAlertRuleMap = ruleMap.get(alertRule.getThingCode());
             if (!metricAlertRuleMap.containsKey(alertRule.getMetricCode())) {
                 metricAlertRuleMap.put(alertRule.getMetricCode(), new CopyOnWriteArrayList<>());
             }
-            //不包含
         } else {
             metricAlertRuleMap = new ConcurrentHashMap<>();
-            paramRuleMap.put(alertRule.getThingCode(), metricAlertRuleMap);
+            ruleMap.put(alertRule.getThingCode(), metricAlertRuleMap);
             metricAlertRuleMap.put(alertRule.getMetricCode(), new CopyOnWriteArrayList<>());
         }
         List<AlertRule> alertRules = metricAlertRuleMap.get(alertRule.getMetricCode());
@@ -399,7 +411,6 @@ public class AlertManager {
         List<AlertRule> wholeAlertRuleList = alertMapper.getWholeAlertRuleList(AlertConstants.TYPE_PARAM);
         for (AlertRule alertRule : wholeAlertRuleList) {
             insertParamRule(alertRule);
-
         }
     }
 
@@ -410,6 +421,13 @@ public class AlertManager {
         List<AlertRule> wholeAlertRuleList = alertMapper.getWholeAlertRuleList(AlertConstants.TYPE_PROTECT);
         for (AlertRule alertRule : wholeAlertRuleList) {
             insertProtectRule(alertRule);
+        }
+    }
+
+    private void initTargetRuleMap(){
+        List<AlertRule> wholeAlertRuleList = alertMapper.getWholeAlertRuleList(AlertConstants.TYPE_TARGET);
+        for (AlertRule alertRule : wholeAlertRuleList) {
+            insertTargetRule(alertRule);
         }
     }
 
@@ -548,7 +566,6 @@ public class AlertManager {
                 }
                 metricParamAlertData.put(alertData.getMetricCode(), alertData);
             }
-            //这是讲数据已处理，已评级的数据放入到延时队列中
             if (AlertConstants.STAGE_VERIFIED.equals(alertData.getAlertStage())) {
                 verifyDelayQueue.put(new VerifyDelayed(alertData, VERIFY_TO_UNTREATED_PERIOD));
             }
@@ -896,36 +913,57 @@ public class AlertManager {
      * @param sortType
      * @return
      */
-    public List<AlertRecord> getAlertDataListGroupByThing(String stage, List<Integer> levels, List<Short> types,
-                                                          List<Integer> buildingIds, List<Integer> floors, List<Integer> systems, String assetType, String category,
-                                                          Integer sortType, Long duration, String thingCode, Integer page, Integer count, Date endTime) {
+    public List<AlertRecord> getAlertDataListGroupByThing(FilterCondition filterCondition) {
 
         Date startTime = null;
         Integer offset = null;
-        if (duration != null) {
-            startTime = new Date(endTime.getTime() - duration);
+        Integer page = filterCondition.getPage();
+        Integer count = filterCondition.getCount();
+        if (filterCondition.getDuration() != null) {
+            startTime = new Date(filterCondition.getEndTime().getTime() - filterCondition.getDuration());
+            filterCondition.setStartTime(startTime);
         }
         if (page != null && count != null) {
             offset = page * count;
+            filterCondition.setOffset(offset);
         }
         String excluStage = null;
-        if (stage == null) {
+        if (filterCondition.getStage() == null) {
             excluStage = AlertConstants.STAGE_RELEASE;
+            filterCondition.setExcluStage(excluStage);
         }
-        if (types != null) {
-            types.add(AlertConstants.TYPE_USER);
+        if (filterCondition.getTypes() != null) {
+            filterCondition.getTypes().add(AlertConstants.TYPE_USER);
         }
         List<AlertRecord> alertRecords =
-                alertMapper.getAlertDataListGroupByThing(stage, excluStage, levels, types, buildingIds, floors, systems,
-                        assetType, category, sortType, startTime, endTime, thingCode, offset, count);
-        sortRecords(sortType, alertRecords);
+                alertMapper.getAlertDataListGroupByThing(filterCondition);
+        sortRecords(filterCondition.getSortType(), alertRecords);
         if (page != null && count != null) {
             List<AlertRecord> alertRecordsPaged = pagingRecords(page, count, alertRecords);
-            disposeImageAndMessage(stage, alertRecordsPaged);
+            disposeImageAndMessage(filterCondition.getStage(), alertRecordsPaged);
             return alertRecordsPaged;
         }
-        disposeImageAndMessage(stage, alertRecords);
+        disposeImageAndMessage(filterCondition.getStage(), alertRecords);
         return alertRecords;
+    }
+
+
+    public List<AlertRecord> getAlertDataByThingCode(AlertFilterCondition filterCondition) {
+        if (filterCondition.getStages() == null || filterCondition.getStages().isEmpty()) {
+            filterCondition.setExcluStage(AlertConstants.STAGE_RELEASE);
+        }
+        List<AlertRecord> alertDataByThingCode = alertMapper.getAlertDataByThingCode(filterCondition);
+        if (filterCondition.getPage() != null && filterCondition.getCount() != null) {
+            alertDataByThingCode = pagingRecords(filterCondition.getPage(), filterCondition.getCount(), alertDataByThingCode);
+        }
+        for (AlertRecord alertRecord : alertDataByThingCode) {
+            String thingCode = alertRecord.getThingCode();
+            ThingModel thing = thingService.getThing(thingCode);
+            if (thing != null) {
+                alertRecord.setThingName(thing.getThingName());
+            }
+        }
+        return alertDataByThingCode;
     }
 
     private void disposeImageAndMessage(String stage, List<AlertRecord> alertRecordsPaged) {
@@ -1539,6 +1577,16 @@ public class AlertManager {
         List<AlertMaskInfo> alertMaskInfo = alertMapper.getAlertMaskInfo(filterCondition);
         alertMaskInfo.sort(Comparator.comparingInt((AlertMaskInfo t) -> t.getAlertMasks().size()).reversed());
         return alertMaskInfo;
+    }
+
+    /**
+     * 查询非动力设备
+     *
+     * @param thingCode
+     * @return
+     */
+    public List<NoPowerThing> getNoPowerThingByThingCode(String thingCode) {
+        return alertMapper.getNoPowerThingByThingCode(thingCode);
     }
 
     /**
