@@ -2,6 +2,7 @@ package com.zgiot.app.server.module.alert.handler;
 
 import com.zgiot.app.server.module.alert.AlertManager;
 import com.zgiot.app.server.module.alert.pojo.AlertData;
+import com.zgiot.app.server.module.alert.pojo.AlertRelieveTime;
 import com.zgiot.app.server.module.alert.pojo.AlertRule;
 import com.zgiot.app.server.service.MetricService;
 import com.zgiot.common.constants.AlertConstants;
@@ -32,7 +33,7 @@ public class AlertParamHandler implements AlertHandler {
     private Map<String, Map<String, AlertData>> alertDataCache;
 
     @Value("${alert.param.period}")
-    private Long paramAlertUpdatePeriod;
+    private Long relieveAlertTime;
     private final Logger logger = LoggerFactory.getLogger(AlertParamHandler.class);
 
     //待报警
@@ -96,10 +97,22 @@ public class AlertParamHandler implements AlertHandler {
             for (Map.Entry<String,AlertData> metricEntry:relieveMetricAlertDataMap.entrySet()) {
                 String metricCode = metricEntry.getKey();
                 AlertData relieveAlertDate = metricEntry.getValue();
-                if(System.currentTimeMillis()-relieveAlertDate.getStartDelayTime().getTime()>paramAlertUpdatePeriod){
+                //获取解除报警延迟时间
+                Long delayTime=getAlertDelayTime(thingCode,metricCode);
+                if(System.currentTimeMillis()-relieveAlertDate.getStartDelayTime().getTime()>delayTime){
                     clearAlertData(thingCode,metricCode);
                 }
             }
+        }
+    }
+
+    private Long getAlertDelayTime(String thingCode, String metricCode) {
+        Map<String, Map<String, AlertRelieveTime>> paramRelieveTimeMap = alertManager.getParamRelieveTimeMap();
+        if(paramRelieveTimeMap.containsKey(thingCode) && paramRelieveTimeMap.get(thingCode).containsKey(metricCode)){
+            Long delayTime = paramRelieveTimeMap.get(thingCode).get(metricCode).getDelayTime();
+            return delayTime * 1000;
+        }else{
+            return relieveAlertTime;
         }
     }
 
