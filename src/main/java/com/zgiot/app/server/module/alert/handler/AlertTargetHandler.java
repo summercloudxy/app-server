@@ -36,7 +36,7 @@ public class AlertTargetHandler implements AlertHandler {
                 alertManager.releaseAlert(alertData);
             }
             if (alertRule != null) {
-                alertData = new AlertData(dataModel, AlertConstants.TYPE_TARGET, alertRule.getAlertLevel(), alertParamHandler.getAlertInfo(dataModel, metricCode),
+                alertData = new AlertData(dataModel, AlertConstants.TYPE_TARGET, alertRule.getAlertLevel(), alertParamHandler.getAlertInfo(dataModel),
                         AlertConstants.SOURCE_SYSTEM, AlertConstants.REPORTER_SYSTEM);
                 alertData.setAlertDateTime(dataModel.getDataTimeStamp());
                 alertData.setParamValue(value);
