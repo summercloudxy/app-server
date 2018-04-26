@@ -36,19 +36,19 @@ public class ProductionInspectManager implements ReportFormsManager {
 
     @Override
     public void updateRecordWithOutDensityAndFlow(ReportFormsRecord record) {
-        logger.debug("该生产检查数据已经存在，进行更新");
+        logger.debug("生产检查数据项目-{},样本-{},时间-{}，该生产检查数据已经存在，对应数据库id为{}，进行更新", record.getTarget(), record.getSample(), record.getTime(), record.getId());
         productionInspectMapper.updateRecordWithOutDensityAndFlow((ProductionInspectRecord) record);
     }
 
     public void updateRecordDensityAndFlow(ReportFormsRecord record) {
-        logger.debug("该生产检查数据已经存在，更新其分选密度和顶水流量");
+        logger.debug("生产检查数据项目-{},样本-{},时间-{}，该生产检查数据已经存在，对应数据库id为{}，更新其分选密度和顶水流量", record.getTarget(), record.getSample(), record.getTime(), record.getId());
         productionInspectMapper.updateRecordDensityAndFlow((ProductionInspectRecord) record);
     }
 
 
     @Override
     public void insertRecord(ReportFormsRecord record) {
-        logger.debug("新增一条生产检查数据");
+        logger.debug("生产检查数据项目-{},样本-{},时间-{}，新增一条生产检查数据", record.getTarget(), record.getSample(), record.getTime());
         productionInspectMapper.insertRecord((ProductionInspectRecord) record);
     }
 
@@ -120,6 +120,8 @@ public class ProductionInspectManager implements ReportFormsManager {
         FilterCondition filterCondition = reportFormsUtils.getDutyFilterCondition(record);
         List<ProductionInspectRecord> recordsOnDuty = getRecordsOnDuty(filterCondition);
         if (!hasAllRecordBeforeAvgRecord((ProductionInspectRecord) record, recordsOnDuty)) {
+            logger.debug("平均报表记录:项目-{},样本-{},时间-{}，班次内的记录并未全部读取到，先不存储该平均报表记录"
+                    , record.getTarget(), record.getSample(), record.getTime());
             return false;
         }
         reportFormsUtils.getAvgDensityAndFlowOnDuty(record, getRecordsOnDuty(filterCondition));
@@ -151,6 +153,8 @@ public class ProductionInspectManager implements ReportFormsManager {
         Double avgOnePoint45To1Point8 = onePoint45To1Point8Data.getAvgValue(true, 2);
         Double avgPositive50mm = positive50mm.getAvgValue(true, 2);
         Double avgNegative50mm = negative50mmData.getAvgValue(true, 2);
+        logger.debug("计算平均报表记录班次内的所有记录是否都已经读取到，平均报表数据为:项目-{},样本-{},时间-{},`+1.45`-{},`-1.45`-{},`+1.8`-{}，`-1.8`-{},`1.45-1.8`-{},`+50`-{},`-50`-{}，计算已存入数据库中的当前班次的平均值为,`+1.45`-{},`-1.45`-{},`+1.8`-{}，`-1.8`-{},`1.45-1.8`-{},`+50`-{},`-50`-{}"
+                , record.getTarget(), record.getSample(), record.getTime(), record.getPositive1Point45(), record.getNegative1Point45(), record.getPositive1Point8(), record.getNegative1Point8(), record.getOnePoint45To1Point8(), record.getPositive50mm(), record.getNegative50mm(), avgPositive1Point45, avgNegative1Point45, avgPositive1Point8, avgNegative1Point8, avgOnePoint45To1Point8, avgPositive50mm, avgNegative50mm);
 
         return Objects.equals(avgPositive1Point45, record.getPositive1Point45()) &&
                 Objects.equals(avgNegative1Point45, record.getNegative1Point45()) &&
@@ -167,16 +171,16 @@ public class ProductionInspectManager implements ReportFormsManager {
 
     @Override
     public ReportFormsRecord getExistRecord(ReportFormsRecord record) {
-        return productionInspectMapper.getExistRecord((ProductionInspectRecord)record);
+        return productionInspectMapper.getExistRecord((ProductionInspectRecord) record);
     }
 
     @Override
     public ReportFormsRecord getRecentRecord(ReportFormsRecord record) {
-        return productionInspectMapper.getRecentRecord((ProductionInspectRecord)record);
+        return productionInspectMapper.getRecentRecord((ProductionInspectRecord) record);
     }
 
     @Override
-    public ReportFormsRecord getLastRecordOnDuty(ReportFormsRecord record,Date dutyEndTime) {
-        return  productionInspectMapper.getLastRecordOnDuty((ProductionInspectRecord)record, dutyEndTime);
+    public ReportFormsRecord getLastRecordOnDuty(ReportFormsRecord record, Date dutyEndTime) {
+        return productionInspectMapper.getLastRecordOnDuty((ProductionInspectRecord) record, dutyEndTime);
     }
 }

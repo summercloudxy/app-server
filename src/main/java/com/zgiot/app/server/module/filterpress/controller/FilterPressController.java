@@ -48,7 +48,7 @@ public class FilterPressController {
 
     @ApiOperation("切换进料/卸料结束确认模式：弹窗确认/系统自动")
     @PostMapping(value = "api/filterPress/param/autoManuConfirmState")
-    public ResponseEntity<String> setAutoManuState(Boolean state, String type,int term) {
+    public ResponseEntity<String> setAutoManuState(@RequestParam Boolean state, @RequestParam String type,@RequestParam int term) {
         if (TYPE_FEED.equals(type)) {
             filterPressManager.feedAutoManuConfirmChange(null, state,term);
         } else if (TYPE_UNLOAD.equals(type)) {
@@ -60,7 +60,7 @@ public class FilterPressController {
 
     @ApiOperation("切换进料/卸料结束判断模式：智能/手动")
     @PostMapping(value = "api/filterPress/param/intelligentManuState")
-    public ResponseEntity<String> setIntelligentManuState(String thingCode, Boolean state, String type,int term) {
+    public ResponseEntity<String> setIntelligentManuState(@RequestParam String thingCode, @RequestParam Boolean state, @RequestParam String type,@RequestParam int term) {
         if (TYPE_FEED.equals(type)) {
             filterPressManager.feedIntelligentManuChange(thingCode, state,term);
         } else if (TYPE_UNLOAD.equals(type)) {
