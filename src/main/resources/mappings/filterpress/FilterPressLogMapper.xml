@@ -52,13 +52,14 @@
 
     <select id="queryLogByDate" resultMap="filterPressLog">
         SELECT thing_code,feed_start_time,feed_duration,feed_current,
-        unload_start_time,unload_duration,feed_state,unload_state,
-        plate_count,total_plate_count,
-        waiting_time,proceeding_time,save_time,is_day_shift,plate_start_time
-        FROM `tb_filterpress_log`
-        where save_time>str_to_date(#{startTime},'%Y-%m-%d %H:%i:%s')
-        and save_time &lt;str_to_date(#{endTime},'%Y-%m-%d %H:%i:%s')
-        order by save_time asc
+                unload_start_time,unload_duration,feed_state,unload_state,
+                plate_count,total_plate_count,
+                waiting_time,proceeding_time,save_time,is_day_shift,plate_start_time
+                FROM `tb_filterpress_log`
+                where save_time>str_to_date(#{startTime},'%Y-%m-%d %H:%i:%s')
+                and save_time &lt;str_to_date(#{endTime},'%Y-%m-%d %H:%i:%s')
+                and period=#{term}
+                order by save_time asc
     </select>
 
     <select id="queryPlateInfos"  resultMap="filterPressPlateInfo">
@@ -71,6 +72,7 @@
             <if test="endTime !=null ">
                 and save_time &lt; str_to_date(#{endTime},'%Y-%m-%d %H:%i:%s')
             </if>
+            and period=#{term}
         </where>
     </select>
 
@@ -84,6 +86,7 @@
             <if test="endTime !=null ">
                 and save_time &lt; str_to_date(#{endTime},'%Y-%m-%d %H:%i:%s')
             </if>
+            and period=#{term}
         </where> order by save_time asc
     </select>
 
@@ -96,11 +99,12 @@
             <if test="endTime !=null ">
                 and save_time &lt; str_to_date(#{endTime},'%Y-%m-%d %H:%i:%s')
             </if>
+            and period=#{term}
         </where>) as t group by is_day_shift,thing_code
     </select>
 
     <select id="getPriorTeam"  resultType="Integer">
-        select distinct team from `tb_filterpress_log`
+      select distinct team from `tb_filterpress_log`
         <where>
             is_day_shift=#{isDayShift}
             <if test="startTime !=null ">
@@ -109,10 +113,43 @@
             <if test="endTime !=null ">
                 and save_time &lt; str_to_date(#{endTime},'%Y-%m-%d %H:%i:%s')
             </if>
+            and period=#{term}
         </where>
     </select>
 
     <select id="getFilterPressRatedStartTime" resultMap="filterPressRatedStartTime">
         select param_name,param_value from tb_filterpress_config where thing_code=#{thingCode} and param_name=#{dayOrNightRatedTime}
+    </select>
+
+    <insert id="insertPlateStatistic" parameterType="com.zgiot.app.server.module.filterpress.pojo.FilterPressPlateStatistic">
+        insert into tb_filterpress_plate_statistics(is_day_shift,term,total_plate_count,team,datetime)
+        values(#{isDayShift},#{term},#{totalPlateCount},#{team},#{dateTime})
+    </insert>
+
+    <select id="selectMaxPlate" resultType="java.lang.Integer">
+        select max(total_plate_count) from tb_filterpress_log
+        where is_day_shift=#{isDayShift} and save_time>str_to_date(#{startTime},'%Y-%m-%d %H:%i:%s')
+        and save_time &lt; str_to_date(#{endTime},'%Y-%m-%d %H:%i:%s') and period=#{term}
+        and team=#{team}
+    </select>
+
+    <select id="selectTotalPlate" resultType="java.lang.Integer">
+        select total_plate_count from tb_filterpress_plate_statistics
+        where is_day_shift=#{isDayShift} and term=#{term} and team=#{team}
+        and datetime >str_to_date(#{startTime},'%Y-%m-%d %H:%i:%s')
+        and datetime &lt; str_to_date(#{endTime},'%Y-%m-%d %H:%i:%s')
+    </select>
+
+    <select id="queryLog" resultMap="filterPressLog">
+        SELECT thing_code,feed_start_time,feed_duration,feed_current,
+        unload_start_time,unload_duration,feed_state,unload_state,
+        plate_count,total_plate_count,
+        waiting_time,proceeding_time,save_time,is_day_shift,plate_start_time
+        FROM `tb_filterpress_log`
+        where save_time>str_to_date(#{startTime},'%Y-%m-%d %H:%i:%s')
+        and save_time &lt;str_to_date(#{endTime},'%Y-%m-%d %H:%i:%s')
+        and period=#{term}
+        and is_day_shift=#{isDayShift}
+        order by save_time asc
     </select>
 </mapper>
