@@ -6,7 +6,7 @@ import com.zgiot.app.server.module.qualityandquantity.pojo.*;
 import com.zgiot.app.server.module.produtioninspect.mapper.ProductionInspectMapper;
 import com.zgiot.app.server.module.qualityandquantity.CardParser;
 import com.zgiot.app.server.module.qualityandquantity.CardParserSelector;
-import com.zgiot.app.server.module.reportforms.ReportFormsUtils;
+import com.zgiot.app.server.module.reportforms.input.ReportFormsUtils;
 import com.zgiot.app.server.module.tcs.pojo.FilterCondition;
 import com.zgiot.app.server.service.HistoryDataService;
 import com.zgiot.common.pojo.*;
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class QualityAndQuantityServiceImp implements QualityAndQuantityService {

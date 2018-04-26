@@ -1,6 +1,6 @@
 package com.zgiot.app.server.module.produtioninspect.mapper;
 
-import com.zgiot.app.server.module.reportforms.pojo.DensityAndFlowSourceInfo;
+import com.zgiot.app.server.module.reportforms.input.pojo.DensityAndFlowSourceInfo;
 import com.zgiot.app.server.module.tcs.pojo.FilterCondition;
 import com.zgiot.common.pojo.DensityAndFlowInfo;
 import com.zgiot.common.pojo.ProductionInspectRecord;

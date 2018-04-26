@@ -1,4 +1,4 @@
-package com.zgiot.app.server.module.reportforms;
+package com.zgiot.app.server.module.reportforms.input;
 
 import com.zgiot.common.constants.MetricCodes;
 import com.zgiot.common.pojo.MetricModel;
