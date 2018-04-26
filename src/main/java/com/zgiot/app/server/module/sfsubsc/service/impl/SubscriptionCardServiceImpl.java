@@ -197,7 +197,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         HistoricalProductRateVO historicalProductRateVO = new HistoricalProductRateVO();
         historicalProductRateVO.setCardTitle(subscCardTypeDO.getCardName());
         String[] cardParamValues = subscCardTypeDO.getCardParamValue().split(",");
-        historicalProductRateVO.setLegend(new String[]{SubscriptionConstants.RAW_COAL, SubscriptionConstants.MIXED_COAL, SubscriptionConstants.WASTE_ROCK});
+        historicalProductRateVO.setLegend(new String[]{SubscriptionConstants.CLEAN_COAL, SubscriptionConstants.MIXED_COAL, SubscriptionConstants.WASTE_ROCK});
 
         List<HistoricalProductRateVO.MetricData> metricDataList = new ArrayList<>();
         String[] metricTypes = {MetricCodes.CT_C, MetricCodes.CT_D, MetricCodes.CT_M, MetricCodes.CT_Y, MetricCodes.CT_T};
