@@ -1,7 +1,7 @@
-package com.zgiot.app.server.module.reportforms.handler;
+package com.zgiot.app.server.module.reportforms.input.handler;
 
-import com.zgiot.app.server.module.reportforms.ReportFormsUtils;
-import com.zgiot.app.server.module.reportforms.manager.ReportFormsManager;
+import com.zgiot.app.server.module.reportforms.input.ReportFormsUtils;
+import com.zgiot.app.server.module.reportforms.input.manager.ReportFormsManager;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.ReportFormsRecord;
 import org.slf4j.Logger;

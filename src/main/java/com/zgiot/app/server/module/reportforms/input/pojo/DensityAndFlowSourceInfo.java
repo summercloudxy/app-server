@@ -1,4 +1,4 @@
-package com.zgiot.app.server.module.reportforms.pojo;
+package com.zgiot.app.server.module.reportforms.input.pojo;
 
 import java.util.List;
 

@@ -5,7 +5,7 @@ import com.zgiot.app.server.module.alert.pojo.AlertRule;
 import com.zgiot.app.server.module.qualityandquantity.pojo.CoalAnalysisData;
 import com.zgiot.app.server.module.qualityandquantity.pojo.MetricDataValue;
 import com.zgiot.app.server.module.qualityandquantity.pojo.ProductionInspectData;
-import com.zgiot.app.server.module.reportforms.ReportFormsUtils;
+import com.zgiot.app.server.module.reportforms.input.ReportFormsUtils;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.service.MetricService;
 import com.zgiot.app.server.service.ThingService;
@@ -14,6 +14,7 @@ import com.zgiot.common.pojo.CoalAnalysisRecord;
 import com.zgiot.common.pojo.DataModelWrapper;
 import com.zgiot.common.pojo.MetricModel;
 import com.zgiot.common.pojo.ProductionInspectRecord;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,17 +30,17 @@ public class QualityAndQuantityDataManager {
     private DataService dataService;
     @Autowired
     private MetricService metricService;
-    private Map<String,AlertRule> paramThresholdMap = new HashMap<>();
+    private Map<String, AlertRule> paramThresholdMap = new HashMap<>();
 
     private CoalAnalysisData getCoalAnalysisDataFromRecord(CoalAnalysisRecord coalAnalysisRecord) {
         boolean isAvg = false;
-        if (coalAnalysisRecord.getTarget().contains(ReportFormsUtils.AVG_RECORD_KEYWORD)){
+        if (coalAnalysisRecord.getTarget().contains(ReportFormsUtils.AVG_RECORD_KEYWORD)) {
             isAvg = true;
         }
         CoalAnalysisData coalAnalysisData = new CoalAnalysisData(coalAnalysisRecord);
         String thingCode = coalAnalysisRecord.getSample();
         coalAnalysisData.setThingName(thingService.getThing(thingCode).getThingName());
-        setCoalParamData(coalAnalysisData, coalAnalysisRecord,isAvg);
+        setCoalParamData(coalAnalysisData, coalAnalysisRecord, isAvg);
         return coalAnalysisData;
     }
 
@@ -62,27 +63,27 @@ public class QualityAndQuantityDataManager {
     private void setCoalParamData(CoalAnalysisData data, CoalAnalysisRecord record, boolean isAvg) {
         String thingCode = record.getSample();
         if (record.getMt() != null) {
-            MetricDataValue mt = addRuleForValue(record.getMt(), thingCode, MetricCodes.ASSAY_MT, MetricCodes.ASSAY_MT_AVG,isAvg);
+            MetricDataValue mt = addRuleForValue(record.getMt(), thingCode, MetricCodes.ASSAY_MT, MetricCodes.ASSAY_MT_AVG, isAvg);
             data.setMt(mt);
         }
         if (record.getAad() != null) {
-            MetricDataValue aad = addRuleForValue(record.getAad(), thingCode, MetricCodes.ASSAY_AAD, MetricCodes.ASSAY_AAD_AVG,isAvg);
+            MetricDataValue aad = addRuleForValue(record.getAad(), thingCode, MetricCodes.ASSAY_AAD, MetricCodes.ASSAY_AAD_AVG, isAvg);
             data.setAad(aad);
         }
         if (record.getStad() != null) {
-            MetricDataValue stad = addRuleForValue(record.getStad(), thingCode, MetricCodes.ASSAY_STAD, MetricCodes.ASSAY_STAD_AVG,isAvg);
+            MetricDataValue stad = addRuleForValue(record.getStad(), thingCode, MetricCodes.ASSAY_STAD, MetricCodes.ASSAY_STAD_AVG, isAvg);
             data.setStad(stad);
         }
         if (record.getQnetar() != null) {
-            MetricDataValue qnetar = addRuleForValue(record.getQnetar(), thingCode, MetricCodes.ASSAY_QNETAR, MetricCodes.ASSAY_QNETAR_AVG,isAvg);
+            MetricDataValue qnetar = addRuleForValue(record.getQnetar(), thingCode, MetricCodes.ASSAY_QNETAR, MetricCodes.ASSAY_QNETAR_AVG, isAvg);
             data.setQnetar(qnetar);
         }
         if (record.getAvgFlow() != null) {
-            MetricDataValue avgFlow = addRuleForValue(record.getAvgFlow(), thingCode, MetricCodes.ASSAY_FLOW, MetricCodes.ASSAY_FLOW,isAvg);
+            MetricDataValue avgFlow = addRuleForValue(record.getAvgFlow(), thingCode, MetricCodes.ASSAY_FLOW, MetricCodes.ASSAY_FLOW, isAvg);
             data.setAvgFlow(avgFlow);
         }
         if (record.getAvgDensity() != null) {
-            MetricDataValue avgDensity = addRuleForValue(record.getAvgDensity(), thingCode, MetricCodes.ASSAY_DENSITY,MetricCodes.ASSAY_FLOW,isAvg);
+            MetricDataValue avgDensity = addRuleForValue(record.getAvgDensity(), thingCode, MetricCodes.ASSAY_DENSITY, MetricCodes.ASSAY_FLOW, isAvg);
             data.setAvgDensity(avgDensity);
         }
 
@@ -90,20 +91,20 @@ public class QualityAndQuantityDataManager {
 
     private ProductionInspectData getProductionInspectDateFromRecord(ProductionInspectRecord productionInspectRecord) {
         boolean isAvg = false;
-        if (productionInspectRecord.getTarget().contains(ReportFormsUtils.AVG_RECORD_KEYWORD)){
+        if (productionInspectRecord.getTarget().contains(ReportFormsUtils.AVG_RECORD_KEYWORD)) {
             isAvg = true;
         }
         ProductionInspectData productionInspectData = new ProductionInspectData(productionInspectRecord);
         String thingCode = productionInspectRecord.getSample();
         productionInspectData.setThingName(thingService.getThing(thingCode).getThingName());
-        setProductionParamData(productionInspectData, productionInspectRecord,isAvg);
+        setProductionParamData(productionInspectData, productionInspectRecord, isAvg);
         return productionInspectData;
     }
 
 
-    public List<ProductionInspectData> transProductionInspectRecordToData(List<ProductionInspectRecord> productionInspectRecords){
+    public List<ProductionInspectData> transProductionInspectRecordToData(List<ProductionInspectRecord> productionInspectRecords) {
         List<ProductionInspectData> productionInspectDataList = new ArrayList<>(productionInspectRecords.size());
-        for (ProductionInspectRecord record:productionInspectRecords){
+        for (ProductionInspectRecord record : productionInspectRecords) {
             ProductionInspectData data = getProductionInspectDateFromRecord(record);
             productionInspectDataList.add(data);
         }
@@ -111,46 +112,45 @@ public class QualityAndQuantityDataManager {
         return productionInspectDataList;
     }
 
-    public ProductionInspectData transProductionInspectRecordToData(ProductionInspectRecord record){
-         ProductionInspectData data = getProductionInspectDateFromRecord(record);
+    public ProductionInspectData transProductionInspectRecordToData(ProductionInspectRecord record) {
+        ProductionInspectData data = getProductionInspectDateFromRecord(record);
         paramThresholdMap.clear();
         return data;
     }
 
 
-
-    private void setProductionParamData(ProductionInspectData data, ProductionInspectRecord record,boolean isAvg) {
+    private void setProductionParamData(ProductionInspectData data, ProductionInspectRecord record, boolean isAvg) {
         String thingCode = record.getSample();
         if (record.getNegative1Point8() != null) {
-            MetricDataValue negative1Point8 = addRuleForValue(record.getNegative1Point8(), thingCode, MetricCodes.PRODUCT_INSPECT_NEGATIVE1_POINT8,MetricCodes.PRODUCT_INSPECT_NEGATIVE1_POINT8_AVG,isAvg );
+            MetricDataValue negative1Point8 = addRuleForValue(record.getNegative1Point8(), thingCode, MetricCodes.PRODUCT_INSPECT_NEGATIVE1_POINT8, MetricCodes.PRODUCT_INSPECT_NEGATIVE1_POINT8_AVG, isAvg);
             data.setNegative1Point8(negative1Point8);
         }
         if (record.getPositive1Point8() != null) {
-            MetricDataValue positive1Point8 = addRuleForValue(record.getPositive1Point8(), thingCode, MetricCodes.PRODUCT_INSPECT_POSITIVE1_POINT8,MetricCodes.PRODUCT_INSPECT_POSITIVE1_POINT8_AVG,isAvg);
+            MetricDataValue positive1Point8 = addRuleForValue(record.getPositive1Point8(), thingCode, MetricCodes.PRODUCT_INSPECT_POSITIVE1_POINT8, MetricCodes.PRODUCT_INSPECT_POSITIVE1_POINT8_AVG, isAvg);
             data.setPositive1Point8(positive1Point8);
         }
         if (record.getNegative1Point45() != null) {
-            MetricDataValue negative1Point45 = addRuleForValue(record.getNegative1Point45(), thingCode, MetricCodes.PRODUCT_INSPECT_NEGATIVE1_POINT45, MetricCodes.PRODUCT_INSPECT_NEGATIVE1_POINT45_AVG,isAvg);
+            MetricDataValue negative1Point45 = addRuleForValue(record.getNegative1Point45(), thingCode, MetricCodes.PRODUCT_INSPECT_NEGATIVE1_POINT45, MetricCodes.PRODUCT_INSPECT_NEGATIVE1_POINT45_AVG, isAvg);
             data.setNegative1Point45(negative1Point45);
         }
         if (record.getPositive1Point45() != null) {
-            MetricDataValue positive1Point45 = addRuleForValue(record.getPositive1Point45(), thingCode, MetricCodes.PRODUCT_INSPECT_POSITIVE1_POINT45, MetricCodes.PRODUCT_INSPECT_POSITIVE1_POINT45_AVG,isAvg);
+            MetricDataValue positive1Point45 = addRuleForValue(record.getPositive1Point45(), thingCode, MetricCodes.PRODUCT_INSPECT_POSITIVE1_POINT45, MetricCodes.PRODUCT_INSPECT_POSITIVE1_POINT45_AVG, isAvg);
             data.setPositive1Point45(positive1Point45);
         }
         if (record.getOnePoint45To1Point8() != null) {
-            MetricDataValue onePoint45To1Point8 = addRuleForValue(record.getOnePoint45To1Point8(), thingCode, MetricCodes.PRODUCT_INSPECT_ONE_POINT45_TO1_POINT8, MetricCodes.PRODUCT_INSPECT_ONE_POINT45_TO1_POINT8_AVG,isAvg);
+            MetricDataValue onePoint45To1Point8 = addRuleForValue(record.getOnePoint45To1Point8(), thingCode, MetricCodes.PRODUCT_INSPECT_ONE_POINT45_TO1_POINT8, MetricCodes.PRODUCT_INSPECT_ONE_POINT45_TO1_POINT8_AVG, isAvg);
             data.setOnePoint45To1Point8(onePoint45To1Point8);
         }
         if (record.getNegative50mm() != null) {
-            MetricDataValue negative50mm = addRuleForValue(record.getNegative50mm(), thingCode, MetricCodes.PRODUCT_INSPECT_NEGATIVE50MM, MetricCodes.PRODUCT_INSPECT_NEGATIVE50MM_AVG,isAvg);
+            MetricDataValue negative50mm = addRuleForValue(record.getNegative50mm(), thingCode, MetricCodes.PRODUCT_INSPECT_NEGATIVE50MM, MetricCodes.PRODUCT_INSPECT_NEGATIVE50MM_AVG, isAvg);
             data.setNegative50mm(negative50mm);
         }
         if (record.getPositive50mm() != null) {
-            MetricDataValue positive50mm = addRuleForValue(record.getPositive50mm(), thingCode, MetricCodes.PRODUCT_INSPECT_POSITIVE50MM, MetricCodes.PRODUCT_INSPECT_POSITIVE50MM_AVG,isAvg);
+            MetricDataValue positive50mm = addRuleForValue(record.getPositive50mm(), thingCode, MetricCodes.PRODUCT_INSPECT_POSITIVE50MM, MetricCodes.PRODUCT_INSPECT_POSITIVE50MM_AVG, isAvg);
             data.setPositive50mm(positive50mm);
         }
         if (record.getAvgDensity() != null) {
-            MetricDataValue avgDensity = addRuleForValue(record.getAvgDensity(), thingCode, MetricCodes.PRODUCT_INSPECT_DENSITY, MetricCodes.PRODUCT_INSPECT_DENSITY_AVG,isAvg);
+            MetricDataValue avgDensity = addRuleForValue(record.getAvgDensity(), thingCode, MetricCodes.PRODUCT_INSPECT_DENSITY, MetricCodes.PRODUCT_INSPECT_DENSITY_AVG, isAvg);
             data.setAvgDensity(avgDensity);
         }
 
@@ -166,12 +166,21 @@ public class QualityAndQuantityDataManager {
         } else {
             paramCode = metricCode;
         }
-        dataValue.setAlertRules(alertManager.getParamRules(thingCode, paramCode));
-        String paramThresholdMapKey =thingCode+"-"+paramCode;
+        List<AlertRule> alertRules = new ArrayList<>();
+        List<AlertRule> paramRules = alertManager.getParamRules(thingCode, paramCode);
+        List<AlertRule> targetRules = alertManager.getTargetRules(thingCode, paramCode);
+        if (CollectionUtils.isNotEmpty(paramRules)) {
+            alertRules.addAll(paramRules);
+        }
+        if (CollectionUtils.isNotEmpty(targetRules)) {
+            alertRules.addAll(targetRules);
+        }
+        dataValue.setAlertRules(alertRules);
+        String paramThresholdMapKey = thingCode + "-" + paramCode;
         AlertRule paramThreshold;
-        if (paramThresholdMap.containsKey(paramThresholdMapKey)){
+        if (paramThresholdMap.containsKey(paramThresholdMapKey)) {
             paramThreshold = paramThresholdMap.get(paramThresholdMapKey);
-        }else {
+        } else {
             paramThreshold = alertManager.getParamThreshold(thingCode, paramCode);
         }
         dataValue.setParamRange(paramThreshold);

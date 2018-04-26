@@ -1,8 +1,8 @@
-package com.zgiot.app.server.module.reportforms.handler;
+package com.zgiot.app.server.module.reportforms.input.handler;
 
 import com.google.common.collect.Lists;
-import com.zgiot.app.server.module.reportforms.ReportFormsUtils;
-import com.zgiot.app.server.module.reportforms.manager.ReportFormsManager;
+import com.zgiot.app.server.module.reportforms.input.ReportFormsUtils;
+import com.zgiot.app.server.module.reportforms.input.manager.ReportFormsManager;
 import com.zgiot.app.server.service.HistoryDataService;
 import com.zgiot.common.constants.MetricCodes;
 import com.zgiot.common.pojo.CoalAnalysisRecord;

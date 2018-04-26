@@ -1,10 +1,10 @@
-package com.zgiot.app.server.module.reportforms.manager;
+package com.zgiot.app.server.module.reportforms.input.manager;
 
 import com.alibaba.fastjson.JSON;
-import com.zgiot.app.server.module.reportforms.MetricCodeEnum;
-import com.zgiot.app.server.module.reportforms.ReportFormsUtils;
+import com.zgiot.app.server.module.reportforms.input.MetricCodeEnum;
+import com.zgiot.app.server.module.reportforms.input.ReportFormsUtils;
 import com.zgiot.app.server.module.coalanalysis.mapper.CoalAnalysisMapper;
-import com.zgiot.app.server.module.reportforms.pojo.CumulativeData;
+import com.zgiot.app.server.module.reportforms.input.pojo.CumulativeData;
 import com.zgiot.app.server.module.tcs.pojo.FilterCondition;
 import com.zgiot.common.constants.MetricCodes;
 import com.zgiot.common.pojo.*;
