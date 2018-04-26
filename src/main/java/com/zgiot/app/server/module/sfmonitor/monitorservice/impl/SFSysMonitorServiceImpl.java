@@ -76,11 +76,10 @@ public class SFSysMonitorServiceImpl implements SFSysMonitorService {
         List<RelSFSysMonitorTermThing> sfThingList;
         short termCount = 0;
         Long thingTagId = Long.parseLong(thingTagId2 == null ? thingTagId1 : thingTagId2);
-        ThingTag thingTag = thingTagMapper.getThingTagById(thingTagId);
         List<ThingTag> thingTags = thingTagMapper.getThingTagByParentId(thingTagId);
+        ThingTag thingTag = thingTagMapper.getThingTagById(thingTagId);
         RelSFSysMonitorTermThing monitorThing = new RelSFSysMonitorTermThing();
         if (thingTags != null && thingTags.size() > 0) {
-            systemMonitorDetailInfo.setThingTagList(thingTags);
             monitorThing.setThingTagCode(thingTags.get(0).getCode());
         } else {
             monitorThing.setThingTagCode(thingTag.getCode());
@@ -94,6 +93,11 @@ public class SFSysMonitorServiceImpl implements SFSysMonitorService {
         getThingMetric(sfThingList);
         if(SFSysMonitorConstant.THING_TAG_CODE_SEWAGE.equals(monitorThing.getThingTagCode())){
             sortSfSysMonitorTermThingList(sfThingList);
+        }
+        //获取三级菜单
+        List<ThingTag> thingTagList = thingTagMapper.getThingTagByParentId(Long.parseLong(thingTagId1));
+        if (thingTagList != null && thingTagList.size() > 0) {
+            systemMonitorDetailInfo.setThingTagList(thingTagList);
         }
         systemMonitorDetailInfo.setTermCount(termCount);
         systemMonitorDetailInfo.setRelSFSysMonitorTermThingList(sfThingList);

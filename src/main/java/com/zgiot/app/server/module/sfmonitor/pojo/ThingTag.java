@@ -58,17 +58,17 @@ public class ThingTag {
     /**
      * 运行设备数量
      */
-    private int thingRunCount;
+    private Integer thingRunCount;
 
     /**
      * 故障设备数量
      */
-    private int thingFaultCount;
+    private Integer thingFaultCount;
 
     /**
      * 待机设备数量
      */
-    private int thingStopCount;
+    private Integer thingStopCount;
 
     /**
      * 系统图标
@@ -83,27 +83,27 @@ public class ThingTag {
         this.imageName = imageName;
     }
 
-    public int getThingRunCount() {
+    public Integer getThingRunCount() {
         return thingRunCount;
     }
 
-    public void setThingRunCount(int thingRunCount) {
+    public void setThingRunCount(Integer thingRunCount) {
         this.thingRunCount = thingRunCount;
     }
 
-    public int getThingFaultCount() {
+    public Integer getThingFaultCount() {
         return thingFaultCount;
     }
 
-    public void setThingFaultCount(int thingFaultCount) {
+    public void setThingFaultCount(Integer thingFaultCount) {
         this.thingFaultCount = thingFaultCount;
     }
 
-    public int getThingStopCount() {
+    public Integer getThingStopCount() {
         return thingStopCount;
     }
 
-    public void setThingStopCount(int thingStopCount) {
+    public void setThingStopCount(Integer thingStopCount) {
         this.thingStopCount = thingStopCount;
     }
 
