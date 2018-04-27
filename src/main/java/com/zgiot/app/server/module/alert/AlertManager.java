@@ -125,7 +125,7 @@ public class AlertManager {
             alertDataMetricMap = new ConcurrentHashMap<>();
             alertDataMap.put(alertData.getThingCode(), alertDataMetricMap);
         }
-        if(alertDataMetricMap.containsKey(alertData.getMetricCode())){
+        if(!alertDataMetricMap.containsKey(alertData.getMetricCode())){
             insertFlag = true;
             alertDataMetricMap.put(alertData.getMetricCode(), alertData);
         }
