@@ -1,0 +1,15 @@
+INSERT INTO `rel_metric_alert_type` ( `metric_code`, `alert_type`) VALUES ( 'SPEED', '1');
+INSERT INTO `rel_metric_alert_type` ( `metric_code`, `alert_type`) VALUES ( 'LE1', '1');
+INSERT INTO `rel_metric_alert_type` ( `metric_code`, `alert_type`) VALUES ( 'LE2', '1');
+INSERT INTO `rel_metric_alert_type` ( `metric_code`, `alert_type`) VALUES ( 'ETEMP1', '1');
+INSERT INTO `rel_metric_alert_type` ( `metric_code`, `alert_type`) VALUES ( 'ETEMP2', '1');
+INSERT INTO `rel_metric_alert_type` ( `metric_code`, `alert_type`) VALUES ( 'ETEMP3', '1');
+INSERT INTO `rel_metric_alert_type` ( `metric_code`, `alert_type`) VALUES ( 'ETEMP4', '1');
+INSERT INTO `rel_metric_alert_type` ( `metric_code`, `alert_type`) VALUES ( 'ETEMP5', '1');
+INSERT INTO `rel_metric_alert_type` ( `metric_code`, `alert_type`) VALUES ( 'TEMP_BE3', '1');
+INSERT INTO `rel_metric_alert_type` ( `metric_code`, `alert_type`) VALUES ( 'TEMP_BE4', '1');
+INSERT INTO `rel_metric_alert_type` ( `metric_code`, `alert_type`) VALUES ( 'F_GE', '1');
+INSERT INTO `rel_metric_alert_type` ( `metric_code`, `alert_type`) VALUES ( 'F_MD', '1');
+INSERT INTO `rel_metric_alert_type` ( `metric_code`, `alert_type`) VALUES ( 'TORQUE', '1');
+INSERT INTO `rel_metric_alert_type` ( `metric_code`, `alert_type`) VALUES ( 'TEMP5', '1');
+INSERT INTO `rel_metric_alert_type` ( `metric_code`, `alert_type`) VALUES ( 'AMOUNT', '1');
