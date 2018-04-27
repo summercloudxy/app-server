@@ -264,11 +264,11 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
                     wasteRockValue = wasteRockValue.add(new BigDecimal(thirdMetirc.get().getValue()).divide(new BigDecimal(10000), 3, BigDecimal.ROUND_HALF_UP));
                     metricData.setWasteRockValue(MetricValueUtil.formart(wasteRockValue) + SubscriptionConstants.UNIT_THOUSAND_T);
                 }
-            } else {
-                metricData.setWasteRockValue("");
             }
         }
-
+        if(wasteRockValue.compareTo(BigDecimal.ZERO)==0){
+            metricData.setWasteRockValue("");
+        }
         return String.valueOf(wasteRockValue);
     }
 
