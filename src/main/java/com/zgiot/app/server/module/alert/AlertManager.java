@@ -123,11 +123,11 @@ public class AlertManager {
             alertDataMetricMap = alertDataMap.get(alertData.getThingCode());
         } else {
             alertDataMetricMap = new ConcurrentHashMap<>();
-            alertDataMetricMap.put(alertData.getMetricCode(), alertData);
-        }
-        if (!alertDataMetricMap.containsKey(alertData.getMetricCode())) {
-            insertFlag = true;
             alertDataMap.put(alertData.getThingCode(), alertDataMetricMap);
+        }
+        if(alertDataMetricMap.containsKey(alertData.getMetricCode())){
+            insertFlag = true;
+            alertDataMetricMap.put(alertData.getMetricCode(), alertData);
         }
         if (insertFlag) {
             alertMapper.createAlertData(alertData);
