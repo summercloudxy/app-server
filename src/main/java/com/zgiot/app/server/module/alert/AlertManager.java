@@ -116,18 +116,23 @@ public class AlertManager {
      *
      * @param alertData
      */
-    public void generateAlert(AlertData alertData) {
+    public synchronized void generateAlert(AlertData alertData) {
         Map<String, AlertData> alertDataMetricMap;
+        boolean insertFlag = false;
         if (alertDataMap.containsKey(alertData.getThingCode())) {
             alertDataMetricMap = alertDataMap.get(alertData.getThingCode());
-            alertDataMetricMap.put(alertData.getMetricCode(), alertData);
         } else {
             alertDataMetricMap = new ConcurrentHashMap<>();
             alertDataMetricMap.put(alertData.getMetricCode(), alertData);
+        }
+        if (!alertDataMetricMap.containsKey(alertData.getMetricCode())) {
+            insertFlag = true;
             alertDataMap.put(alertData.getThingCode(), alertDataMetricMap);
         }
-        alertMapper.createAlertData(alertData);
-        alertMapper.createAlertDataBackup(alertData);
+        if (insertFlag) {
+            alertMapper.createAlertData(alertData);
+            alertMapper.createAlertDataBackup(alertData);
+        }
     }
 
     /**
