@@ -1,5 +1,4 @@
 ALTER TABLE tb_thing_tag ADD COLUMN web_path varchar(255) DEFAULT '' COMMENT '页面路由';
-INSERT INTO `tb_thing_tag` VALUES ('1', '1', '设备', null, null, '2', '2018-02-06 15:20:13', null, null, null, '');
 INSERT INTO `tb_thing_tag` VALUES ('100', '100', '机械设备', '1', null, '4', '2018-03-26 14:34:06', null, null, null, 'machine/');
 INSERT INTO `tb_thing_tag` VALUES ('101', '101', '设备信息', '100', null, '4', '2018-03-26 14:34:06', null, null, null, 'machine/deviceInfo');
 INSERT INTO `tb_thing_tag` VALUES ('102', '102', '破碎设备', '101', null, '4', '2018-03-26 14:34:06', null, null, null, '');
