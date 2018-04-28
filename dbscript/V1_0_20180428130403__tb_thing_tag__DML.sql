@@ -1,3 +1,4 @@
+ALTER TABLE tb_thing_tag ADD COLUMN web_path varchar(255) DEFAULT '' COMMENT '页面路由';
 INSERT INTO `tb_thing_tag_group` (`id`, `code`, `tag_group_name`, `create_date`) VALUES ('5', 'SFSYSMON', '系统监控', '2018-04-16 10:45:24');
 INSERT INTO `tb_thing_tag` (`id`, `code`, `tag_name`, `parent_id`, `code_path`, `thing_tag_group_id`, `create_date`, `update_date`, `comments`, `operator`, `web_path`) VALUES ('201', 'COAL', '原煤大区', NULL, NULL, '5', '2018-04-17 16:16:00', NULL, NULL, NULL, '');
 INSERT INTO `tb_thing_tag` (`id`, `code`, `tag_name`, `parent_id`, `code_path`, `thing_tag_group_id`, `create_date`, `update_date`, `comments`, `operator`, `web_path`) VALUES ('202', 'SAVECOAL', '原煤储运系统', '201', NULL, '5', '2018-04-17 16:16:00', NULL, NULL, NULL, '');
