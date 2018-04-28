@@ -64,8 +64,7 @@ INSERT INTO `tb_thing_tag` VALUES ('162', '162', '变压器信息', '148', null,
 INSERT INTO `tb_thing_tag` VALUES ('163', '163', '建筑设备', '1', null, '4', '2018-03-26 14:34:06', null, null, null, 'building/');
 INSERT INTO `tb_thing_tag` VALUES ('164', '164', '生产车间管理', '163', null, '4', '2018-03-26 14:34:06', null, null, null, 'building/workshop');
 INSERT INTO `tb_thing_tag` VALUES ('165', '165', '储煤仓总仓位管理', '163', null, '4', '2018-03-26 14:34:06', null, null, null, 'building/deport');
-INSERT INTO `tb_thing_tag` VALUES ('200', '200', '系统监控', null, null, '5', '2018-04-17 16:16:00', null, null, null, '');
-INSERT INTO `tb_thing_tag` VALUES ('201', 'COAL', '原煤大区', '200', null, '5', '2018-04-17 16:16:00', null, null, null, '');
+INSERT INTO `tb_thing_tag` VALUES ('201', 'COAL', '原煤大区', null, null, '5', '2018-04-17 16:16:00', null, null, null, '');
 INSERT INTO `tb_thing_tag` VALUES ('202', 'SAVECOAL', '原煤储运系统', '201', null, '5', '2018-04-17 16:16:00', null, null, null, '');
 INSERT INTO `tb_thing_tag` VALUES ('203', '8-COAL-1', '8#原煤1#仓', '202', null, '5', '2018-04-17 16:16:00', null, null, null, '');
 INSERT INTO `tb_thing_tag` VALUES ('204', '8-COAL-2', '8#原煤2#仓', '202', null, '5', '2018-04-17 16:16:00', null, null, null, '');
@@ -74,7 +73,7 @@ INSERT INTO `tb_thing_tag` VALUES ('206', '13-COAL-4', '13#原煤4#仓', '202', 
 INSERT INTO `tb_thing_tag` VALUES ('207', 'READYCOAL', '原煤准备系统', '201', null, '5', '2018-04-17 16:16:00', null, null, null, '');
 INSERT INTO `tb_thing_tag` VALUES ('208', 'READYCOAL-MAIN', '原煤准备系统', '207', null, '5', '2018-04-17 16:16:00', null, null, null, '');
 INSERT INTO `tb_thing_tag` VALUES ('209', 'READYCOAL-HELP', '辅助设备', '207', null, '5', '2018-04-17 16:16:00', null, null, null, '');
-INSERT INTO `tb_thing_tag` VALUES ('210', 'WASH', '洗选大区', '200', null, '5', '2018-04-17 16:16:00', null, null, null, '');
+INSERT INTO `tb_thing_tag` VALUES ('210', 'WASH', '洗选大区', null, null, '5', '2018-04-17 16:16:00', null, null, null, '');
 INSERT INTO `tb_thing_tag` VALUES ('211', 'SEDIMENTATION', '沉降系统', '210', null, '5', null, null, null, null, '');
 INSERT INTO `tb_thing_tag` VALUES ('212', 'PRODUCTION', '生产辅助系统', '210', null, '5', '2018-04-17 16:16:00', null, null, null, '');
 INSERT INTO `tb_thing_tag` VALUES ('213', 'CLEAR', '清水系统', '212', null, '5', '2018-04-17 16:16:00', null, null, null, '');
@@ -86,7 +85,7 @@ INSERT INTO `tb_thing_tag` VALUES ('218', 'CONCENTRATION', '浓缩系统', '210'
 INSERT INTO `tb_thing_tag` VALUES ('219', 'DOSING', '加药总览', '218', null, '5', '2018-04-17 16:16:00', null, null, null, '');
 INSERT INTO `tb_thing_tag` VALUES ('220', 'CONCENTRATION-MAIN', '浓缩系统', '218', null, '5', '2018-04-17 16:16:00', null, null, null, '');
 INSERT INTO `tb_thing_tag` VALUES ('221', 'CONCENTRATION-HELP', '辅助设备', '218', null, '5', '2018-04-17 16:16:00', null, null, null, '');
-INSERT INTO `tb_thing_tag` VALUES ('222', 'LOADCAR', '装车大区', '200', null, '5', '2018-04-17 16:16:00', null, null, null, '');
+INSERT INTO `tb_thing_tag` VALUES ('222', 'LOADCAR', '装车大区', null, null, '5', '2018-04-17 16:16:00', null, null, null, '');
 INSERT INTO `tb_thing_tag` VALUES ('223', 'FASTLOADING', '快速装车系统', '222', null, '5', '2018-04-17 16:16:00', null, null, null, '');
 INSERT INTO `tb_thing_tag` VALUES ('224', 'CLEAN-COAL-A', '精煤A仓', '223', null, '5', '2018-04-17 16:16:00', null, null, null, '');
 INSERT INTO `tb_thing_tag` VALUES ('225', 'CLEAN-COAL-B', '精煤B仓', '223', null, '5', '2018-04-17 16:16:00', null, null, null, '');
