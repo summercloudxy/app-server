@@ -327,10 +327,10 @@ public class MonitorServiceImpl implements MonitorService {
     }
 
     @Override
-    public Map<String, Object> byUser(String userUuid) {
+    public Map<String, Object> byUser(String loginName) {
         Map<String, Object> map = new HashMap<>();
         Map<String, Object> thingMap = new HashMap<>();
-        List<RelSFMonRolePermission> relSFMonRolePermissionList = relSFMonRolePermissionMapper.getRelSFMonRolePermissionByUser(userUuid);
+        List<RelSFMonRolePermission> relSFMonRolePermissionList = relSFMonRolePermissionMapper.getRelSFMonRolePermissionByUser(loginName);
         if (relSFMonRolePermissionList != null && !relSFMonRolePermissionList.isEmpty()) {
             for (RelSFMonRolePermission relSFMonRolePermission : relSFMonRolePermissionList) {
                 Map<String, Boolean> permissionMap = new HashMap<>();
