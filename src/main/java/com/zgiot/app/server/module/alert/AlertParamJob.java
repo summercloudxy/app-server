@@ -1,7 +1,10 @@
 package com.zgiot.app.server.module.alert;
 
 import com.zgiot.app.server.module.alert.handler.AlertParamHandler;
-import org.quartz.*;
+import org.quartz.Job;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +17,8 @@ public class AlertParamJob implements Job {
         logger.debug("执行参数类报警检查定时任务");
         JobDataMap jobDataMap = jobDetail.getJobDataMap();
         AlertParamHandler alertHandler = (AlertParamHandler) jobDataMap.get("handler");
-        alertHandler.updateAlertLevel();
+//        alertHandler.updateAlertLevel();
+        alertHandler.relieveAlertData();
+        alertHandler.waitChangeAlert();
     }
 }

@@ -65,6 +65,12 @@ public class AlertManager {
     private static final int SORT_DESC = 0;
     private static final int SORT_ASC = 1;
 
+    //待解除
+    private Map<String, Map<String, AlertData>> relieveAlertDataCache = new ConcurrentHashMap<>();
+
+    //解除报警Map
+    private Map<String, Map<String, AlertRelieveTime>> paramRelieveTimeMap = new ConcurrentHashMap<>();
+
 
     public void init() {
         initMetricAlertType();
@@ -72,6 +78,8 @@ public class AlertManager {
         initProtectRuleMap();
         initTargetRuleMap();
         initAlertDataMap();
+        initParamRelieveTimeMap();
+
         Thread thread = new Thread(() -> {
             while (true) {
                 try {
@@ -108,18 +116,23 @@ public class AlertManager {
      *
      * @param alertData
      */
-    public void generateAlert(AlertData alertData) {
+    public synchronized void generateAlert(AlertData alertData) {
         Map<String, AlertData> alertDataMetricMap;
+        boolean insertFlag = false;
         if (alertDataMap.containsKey(alertData.getThingCode())) {
             alertDataMetricMap = alertDataMap.get(alertData.getThingCode());
-            alertDataMetricMap.put(alertData.getMetricCode(), alertData);
         } else {
             alertDataMetricMap = new ConcurrentHashMap<>();
-            alertDataMetricMap.put(alertData.getMetricCode(), alertData);
             alertDataMap.put(alertData.getThingCode(), alertDataMetricMap);
         }
-        alertMapper.createAlertData(alertData);
-        alertMapper.createAlertDataBackup(alertData);
+        if(!alertDataMetricMap.containsKey(alertData.getMetricCode())){
+            insertFlag = true;
+            alertDataMetricMap.put(alertData.getMetricCode(), alertData);
+        }
+        if (insertFlag) {
+            alertMapper.createAlertData(alertData);
+            alertMapper.createAlertDataBackup(alertData);
+        }
     }
 
     /**
@@ -194,8 +207,17 @@ public class AlertManager {
     }
 
     public List<AlertRule> getParamRules(String thingCode, String metricCode) {
-        if (paramRuleMap.containsKey(thingCode)) {
-            Map<String, List<AlertRule>> metricRuleMap = paramRuleMap.get(thingCode);
+
+        return getRulesFromRuleMap(paramRuleMap, thingCode, metricCode);
+    }
+
+    public List<AlertRule> getTargetRules(String thingCode, String metricCode) {
+        return getRulesFromRuleMap(targetRuleMap, thingCode, metricCode);
+    }
+
+    private List<AlertRule> getRulesFromRuleMap(Map<String, Map<String, List<AlertRule>>> ruleMap, String thingCode, String metricCode) {
+        if (ruleMap.containsKey(thingCode)) {
+            Map<String, List<AlertRule>> metricRuleMap = ruleMap.get(thingCode);
             if (metricRuleMap.containsKey(metricCode)) {
                 List<AlertRule> alertRules = metricRuleMap.get(metricCode);
                 return alertRules;
@@ -230,7 +252,7 @@ public class AlertManager {
         if (alertRule.getEnable()) {
             if (type == AlertConstants.TYPE_PARAM) {
                 updateParamRule(alertRule);
-            } else if (type == AlertConstants.TYPE_PROTECT){
+            } else if (type == AlertConstants.TYPE_PROTECT) {
                 updateProtectRule(alertRule);
             }
         } else {
@@ -247,7 +269,7 @@ public class AlertManager {
         if (alertRule.getEnable()) {
             if (type == AlertConstants.TYPE_PARAM) {
                 insertParamRule(alertRule);
-            } else if (type == AlertConstants.TYPE_PROTECT){
+            } else if (type == AlertConstants.TYPE_PROTECT) {
                 insertProtectRule(alertRule);
             }
         }
@@ -362,14 +384,14 @@ public class AlertManager {
     }
 
     private void insertParamRule(AlertRule alertRule) {
-        insertRuleList(alertRule,paramRuleMap);
+        insertRuleList(alertRule, paramRuleMap);
     }
 
     private void insertTargetRule(AlertRule alertRule) {
-        insertRuleList(alertRule,targetRuleMap);
+        insertRuleList(alertRule, targetRuleMap);
     }
 
-    private void insertRuleList(AlertRule alertRule,Map<String, Map<String, List<AlertRule>>> ruleMap) {
+    private void insertRuleList(AlertRule alertRule, Map<String, Map<String, List<AlertRule>>> ruleMap) {
         Map<String, List<AlertRule>> metricAlertRuleMap;
         if (ruleMap.containsKey(alertRule.getThingCode())) {
             metricAlertRuleMap = ruleMap.get(alertRule.getThingCode());
@@ -416,7 +438,7 @@ public class AlertManager {
         }
     }
 
-    private void initTargetRuleMap(){
+    private void initTargetRuleMap() {
         List<AlertRule> wholeAlertRuleList = alertMapper.getWholeAlertRuleList(AlertConstants.TYPE_TARGET);
         for (AlertRule alertRule : wholeAlertRuleList) {
             insertTargetRule(alertRule);
@@ -829,6 +851,12 @@ public class AlertManager {
         alertData.setSceneConfirmTime(new Date());
         alertData.setSceneConfirmUser(alertMessage.getUserId());
         releaseAlert(alertData);
+
+        //报警之后需要设置Map缓存
+        clearParamDataMap(alertData.getThingCode(), alertData.getMetricCode());
+
+        clearRelieveAlertDataCache(alertData.getThingCode(), alertData.getMetricCode());
+
         alertMapper.saveAlertMessage(alertMessage);
         messagingTemplate.convertAndSend(MESSAGE_URI, alertMessage);
         logger.debug("推送报警消息，报警设备{}，报警内容{}，现场确认报警解除状态：{}", alertData.getThingCode(), alertData.getMetricCode(),
@@ -888,6 +916,13 @@ public class AlertManager {
     /**
      * 获取报警记录，按设备进行分组
      *
+     * @param stage
+     * @param levels
+     * @param types
+     * @param buildingIds
+     * @param floors
+     * @param systems
+     * @param sortType
      * @return
      */
     public List<AlertRecord> getAlertDataListGroupByThing(FilterCondition filterCondition) {
@@ -977,6 +1012,7 @@ public class AlertManager {
             for (AlertData alertData : alertDataList) {
                 List<AlertMessage> alertMessage = alertMapper.getAlertMessage(alertData.getId());
                 alertData.setAlertMessageList(alertMessage);
+
             }
         }
     }
@@ -1564,4 +1600,60 @@ public class AlertManager {
         return alertMapper.getNoPowerThingByThingCode(thingCode);
     }
 
+    /**
+     * 获取待解除报警Map
+     *
+     * @return
+     */
+    public Map<String, Map<String, AlertData>> getRelieveAlertDataCache() {
+        return relieveAlertDataCache;
+    }
+
+    /**
+     * 清除报警Map中的对象
+     */
+    public void clearParamDataMap(String thingCode, String metriCode) {
+        if (alertParamDataMap.containsKey(thingCode) && alertParamDataMap.get(thingCode).containsKey(metriCode)) {
+            alertParamDataMap.get(thingCode).remove(metriCode);
+        }
+    }
+
+    /**
+     * 清除待解除报警map中的对象
+     */
+    public void clearRelieveAlertDataCache(String thingCode, String metriCode) {
+        if (relieveAlertDataCache.containsKey(thingCode) && relieveAlertDataCache.get(thingCode).containsKey(metriCode)) {
+            relieveAlertDataCache.get(thingCode).remove(metriCode);
+        }
+    }
+
+    /**
+     * 初始化报警解除时间Map
+     */
+    private void initParamRelieveTimeMap() {
+        List<AlertRelieveTime> wholeAlertRelieveTime = alertMapper.getWholeAlertRelieveTimeList();
+        for (AlertRelieveTime alertRelieveTime : wholeAlertRelieveTime) {
+            insertRelieveTime(alertRelieveTime);
+        }
+    }
+
+    /**
+     * 向Map集合中放入参数
+     *
+     * @param alertRelieveTime
+     */
+    private void insertRelieveTime(AlertRelieveTime alertRelieveTime) {
+        Map<String, AlertRelieveTime> metricRelieveTimeMap;
+        if (paramRelieveTimeMap.containsKey(alertRelieveTime.getThingCode())) {
+            metricRelieveTimeMap = paramRelieveTimeMap.get(alertRelieveTime.getThingCode());
+        } else {
+            metricRelieveTimeMap = new ConcurrentHashMap<>();
+            paramRelieveTimeMap.put(alertRelieveTime.getThingCode(), metricRelieveTimeMap);
+        }
+        metricRelieveTimeMap.put(alertRelieveTime.getMetricCode(), alertRelieveTime);
+    }
+
+    public Map<String, Map<String, AlertRelieveTime>> getParamRelieveTimeMap() {
+        return paramRelieveTimeMap;
+    }
 }

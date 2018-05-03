@@ -1,9 +1,9 @@
-package com.zgiot.app.server.module.reportforms;
+package com.zgiot.app.server.module.reportforms.input;
 
 import com.alibaba.fastjson.JSON;
 import com.zgiot.app.server.module.coalanalysis.mapper.CoalAnalysisMapper;
-import com.zgiot.app.server.module.reportforms.pojo.CumulativeData;
-import com.zgiot.app.server.module.reportforms.pojo.DensityAndFlowSourceInfo;
+import com.zgiot.app.server.module.reportforms.input.pojo.CumulativeData;
+import com.zgiot.app.server.module.reportforms.input.pojo.DensityAndFlowSourceInfo;
 import com.zgiot.app.server.module.qualityandquantity.pojo.DutyInfo;
 import com.zgiot.app.server.module.qualityandquantity.service.QualityAndQuantityDateUtils;
 import com.zgiot.app.server.module.tcs.pojo.FilterCondition;

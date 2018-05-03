@@ -1,10 +1,10 @@
-package com.zgiot.app.server.module.reportforms.listener;
+package com.zgiot.app.server.module.reportforms.input.listener;
 
 import com.zgiot.app.server.dataprocessor.DataCompleter;
-import com.zgiot.app.server.module.reportforms.handler.ReportFormsHandler;
-import com.zgiot.app.server.module.reportforms.manager.CoalAnalysisManager;
-import com.zgiot.app.server.module.reportforms.manager.ProductionInspectManager;
-import com.zgiot.app.server.module.reportforms.manager.ReportFormsManager;
+import com.zgiot.app.server.module.reportforms.input.handler.ReportFormsHandler;
+import com.zgiot.app.server.module.reportforms.input.manager.CoalAnalysisManager;
+import com.zgiot.app.server.module.reportforms.input.manager.ProductionInspectManager;
+import com.zgiot.app.server.module.reportforms.input.manager.ReportFormsManager;
 import com.zgiot.common.constants.CoalAnalysisConstants;
 import com.zgiot.common.pojo.*;
 import org.slf4j.Logger;

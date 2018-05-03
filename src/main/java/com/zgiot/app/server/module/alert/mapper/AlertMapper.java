@@ -124,4 +124,6 @@ public interface AlertMapper {
 
     @Select("select * from rel_nopower_thing where thing_code=#{thingCode}")
     List<NoPowerThing> getNoPowerThingByThingCode(@Param("thingCode") String thingCode);
+    List<AlertRelieveTime> getWholeAlertRelieveTimeList();
+
 }

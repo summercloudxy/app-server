@@ -1,4 +1,4 @@
-package com.zgiot.app.server.module.reportforms.manager;
+package com.zgiot.app.server.module.reportforms.input.manager;
 
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.ReportFormsRecord;

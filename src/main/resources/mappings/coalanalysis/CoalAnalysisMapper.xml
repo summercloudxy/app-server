@@ -3,7 +3,7 @@
 <mapper namespace="com.zgiot.app.server.module.coalanalysis.mapper.CoalAnalysisMapper">
 
     <resultMap id="DensityAndFlowSourceInfoMap"
-               type="com.zgiot.app.server.module.reportforms.pojo.DensityAndFlowSourceInfo">
+               type="com.zgiot.app.server.module.reportforms.input.pojo.DensityAndFlowSourceInfo">
         <result property="coalSample" column="coal_sample"/>
         <result property="system" column="system"/>
         <result property="densityCode" column="density_code"/>
