@@ -55,6 +55,7 @@ public class AlertParamHandler implements AlertHandler {
         //获取当前报警信息
         AlertData alertData = alertManager.getAlertDataByThingAndMetricCode(thingCode, metricCode);
         if (alertData != null) {
+            alertData.setParamValue(value);
             if (alertRule != null) {
                 //1.有警报,报警级别不为空
                 //这种情况可能存在待解除报警数据,需要清除待解除报警中数据
@@ -63,7 +64,6 @@ public class AlertParamHandler implements AlertHandler {
                 updateAlertData(alertData, alertRule);
             } else {
                 //2.有警报，警报级别为空,改变待解除Map内容
-                alertData.setParamValue(value);
                 updateRelieveCache(thingCode, metricCode, alertData);
             }
         } else {
@@ -250,7 +250,9 @@ public class AlertParamHandler implements AlertHandler {
      */
     public void updateWaitCache(String thingCode, String metricCode, AlertData alertData) {
         if (waitAlertDataCache.containsKey(thingCode) && waitAlertDataCache.get(thingCode).containsKey(metricCode)) {
-            waitAlertDataCache.get(thingCode).get(metricCode).setParamValue(alertData.getParamValue());
+            AlertData existAlertData = waitAlertDataCache.get(thingCode).get(metricCode);
+            existAlertData.setParamValue(alertData.getParamValue());
+            existAlertData.setAlertInfo(alertData.getAlertInfo());
         } else {
             Map<String, AlertData> waitMetricAlertDataCache;
             if (waitAlertDataCache.containsKey(thingCode)) {
