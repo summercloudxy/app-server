@@ -327,11 +327,10 @@ public class MonitorServiceImpl implements MonitorService {
     }
 
     @Override
-    public Map<String, Object> byUser(String userUuid) {
+    public Map<String, Object> byUser(String loginName) {
         Map<String, Object> map = new HashMap<>();
         Map<String, Object> thingMap = new HashMap<>();
-        List<String> thingCodeList = new ArrayList<>();
-        List<RelSFMonRolePermission> relSFMonRolePermissionList = relSFMonRolePermissionMapper.getRelSFMonRolePermissionByUser(userUuid);
+        List<RelSFMonRolePermission> relSFMonRolePermissionList = relSFMonRolePermissionMapper.getRelSFMonRolePermissionByUser(loginName);
         if (relSFMonRolePermissionList != null && !relSFMonRolePermissionList.isEmpty()) {
             for (RelSFMonRolePermission relSFMonRolePermission : relSFMonRolePermissionList) {
                 Map<String, Boolean> permissionMap = new HashMap<>();
@@ -340,7 +339,6 @@ public class MonitorServiceImpl implements MonitorService {
                 permissionMap.put(METRICTYPE_CTL, relSFMonRolePermission.isOpControl());
 
                 String thingCode = relSFMonRolePermission.getThingCode();
-                thingCodeList.add(thingCode);
                 if (thingMap.containsKey(thingCode)) {
                     Map<String, Boolean> maxAuthMap = getMaxAuth(permissionMap, (Map<String, Boolean>) thingMap.get(thingCode));
                     thingMap.put(thingCode, maxAuthMap);
@@ -353,11 +351,8 @@ public class MonitorServiceImpl implements MonitorService {
         map.put(THINGAUTHZ, thingMap);
 
         Map<String, Object> metricTypeMap = new HashMap<>();
-        List<RelSFMonMetrictypeMetric> relSFMonMetrictypeMetricList = new ArrayList<>();
-        if(!thingCodeList.isEmpty()){
-            relSFMonMetrictypeMetricList =
-                    relSFMonMetrictypeMetricMapper.getRelSFMonMetrictypeMetricByThingCode(thingCodeList);
-        }
+        List<RelSFMonMetrictypeMetric> relSFMonMetrictypeMetricList =
+                relSFMonMetrictypeMetricMapper.getAllRelSFMonMetrictypeMetric();
         if (relSFMonMetrictypeMetricList != null && !relSFMonMetrictypeMetricList.isEmpty()) {
             for (RelSFMonMetrictypeMetric relSFMonMetrictypeMetric : relSFMonMetrictypeMetricList) {
                 metricTypeMap.put(relSFMonMetrictypeMetric.getMetricCode(), relSFMonMetrictypeMetric.getSfmonMetrictype());
