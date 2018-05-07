@@ -24,4 +24,9 @@ public interface BusinessService {
      * @return 液位高低
      */
     String getLevelByThingCode(String thingCode);
+
+    /**
+     * 开到位关到位计算
+     */
+    String getTagValueByThingCode(String thingCode);
 }

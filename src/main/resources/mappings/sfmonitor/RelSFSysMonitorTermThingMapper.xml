@@ -22,7 +22,48 @@
         <if test="termId != null">
             and term_id = #{termId}
         </if>
-        order by id,sort
+        <if test="thingCode != null">
+            and thing_code like CONCAT(#{thingCode},'%')
+        </if>
+        order by id,sort,thing_code
+        <if test="selectCount != null">
+            limit #{selectCount}
+        </if>
     </select>
 
+    <select id="getSFSpeMonitorThingProtect" resultMap="sfSysMonitorThing">
+        select t.id,t.thing_tag_code,t.thing_code,t.show_type from rel_sfsysmon_term_thing t,rel_sfspemon_thing_metric m
+        where t.thing_tag_code =m.thing_tag_code and t.thing_code = m.thing_code
+        <if test="thingTagCode != null">
+            and t.thing_tag_code = #{thingTagCode}
+        </if>
+        <if test="termId != null">
+            and t.term_id = #{termId}
+        </if>
+        <if test="thingCode != null">
+            and t.thing_code like CONCAT(#{thingCode},'%')
+        </if>
+        <if test="metricCode != null">
+            and m.metricCode = #{metricCode}
+        </if>
+        order by t.id,t.sort,t.thing_code
+        <if test="selectCount != null">
+            limit #{selectCount}
+        </if>
+    </select>
+
+    <select id="getThingCodeList" resultType="java.lang.String">
+        select thing_code
+        where
+        1 = 1
+        <if test="thingTagCode != null">
+            and thing_tag_code = #{thingTagCode}
+        </if>
+        <if test="termId != null">
+            and term_id = #{termId}
+        </if>
+        <if test="thingCode != null">
+            and thing_code like CONCAT(#{thingCode},'%')
+        </if>
+    </select>
 </mapper>

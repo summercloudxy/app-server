@@ -208,6 +208,7 @@ public class SFSysMonitorServiceImpl implements SFSysMonitorService {
             for (RelSFSysMonitorThingMetric relSFSysMonitorThingMetric : thingMetricList) {
                 if (MetricCodes.CURRENT_LEVEL_M.equals(relSFSysMonitorThingMetric.getMetricCode()) && (relSFSysMonitorThingMetric.getMetricValue() != null)) {
                     liquidLevel = relSFSysMonitorThingMetric.getMetricValue();
+                    break;
                 }
             }
         }

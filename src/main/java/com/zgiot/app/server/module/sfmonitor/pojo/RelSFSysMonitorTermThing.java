@@ -14,7 +14,34 @@ public class RelSFSysMonitorTermThing {
     private Date createDate;
     private Date updateDate;
     private Short showType;
-    private List<RelSFSysMonitorThingMetric> thingMetricList;
+    private List<RelSFSysMonitorThingMetric> thingMetricList;//主设备信号数据
+    private List<RelSfSpeMonThingSubthing> speMonThingSubthing;//附属设备数据
+    private Integer selectCount;//查询条数
+    private String metricCode;//信号code（查询条件）
+
+    public String getMetricCode() {
+        return metricCode;
+    }
+
+    public void setMetricCode(String metricCode) {
+        this.metricCode = metricCode;
+    }
+
+    public Integer getSelectCount() {
+        return selectCount;
+    }
+
+    public void setSelectCount(Integer selectCount) {
+        this.selectCount = selectCount;
+    }
+
+    public List<RelSfSpeMonThingSubthing> getSpeMonThingSubthing() {
+        return speMonThingSubthing;
+    }
+
+    public void setSpeMonThingSubthing(List<RelSfSpeMonThingSubthing> speMonThingSubthing) {
+        this.speMonThingSubthing = speMonThingSubthing;
+    }
 
     public Short getShowType() {
         return showType;

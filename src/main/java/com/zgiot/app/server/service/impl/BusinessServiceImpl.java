@@ -57,6 +57,21 @@ public class BusinessServiceImpl implements BusinessService {
         return level;
     }
 
+    @Override
+    public String getTagValueByThingCode(String thingCode) {
+        DataModelWrapper data1 = dataService.getData(thingCode, MetricCodes.TAP_OPEN).orElse(null);
+        DataModelWrapper data2 = dataService.getData(thingCode, MetricCodes.TAP_CLOSE).orElse(null);
+        String value =AppServerConstant.UNKNOWN;
+        if(data1 != null && data2 != null){
+            if ("1".equals(data1.getValue()) && "0".equals(data2.getValue())){
+                return AppServerConstant.TAP_OPEN;
+            }else if ("0".equals(data1.getValue()) && "1".equals(data2.getValue())){
+                return AppServerConstant.TAP_CLOSE;
+            }
+        }
+        return value;
+    }
+
     /**
      * 计算皮带的设备号以及瞬时带煤量
      *
