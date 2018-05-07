@@ -137,7 +137,7 @@ public class SFSysMonitorServiceImpl implements SFSysMonitorService {
         Map<String,String> thingMap =new HashMap<>();
         Map<Short,Integer> resultMap =new HashMap<>();
         //thingMap包含的设备已经计数
-        if(!thingMap.containsKey(mt.getThingCode())){
+        if(!StringUtils.isEmpty(mt.getThingCode()) && !thingMap.containsKey(mt.getThingCode())){
             thingMap.put(mt.getThingCode(),mt.getThingCode());
             Optional<DataModelWrapper> data = dataService.getData(mt.getThingCode(),MetricCodes.STATE);
             if (data.isPresent()) {
@@ -208,6 +208,7 @@ public class SFSysMonitorServiceImpl implements SFSysMonitorService {
             for (RelSFSysMonitorThingMetric relSFSysMonitorThingMetric : thingMetricList) {
                 if (MetricCodes.CURRENT_LEVEL_M.equals(relSFSysMonitorThingMetric.getMetricCode()) && (relSFSysMonitorThingMetric.getMetricValue() != null)) {
                     liquidLevel = relSFSysMonitorThingMetric.getMetricValue();
+                    break;
                 }
             }
         }
