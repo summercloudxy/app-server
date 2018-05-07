@@ -98,4 +98,8 @@ public interface TMLMapper {
     List<String> findRelateThing(@Param("thingCode") String thingCode);
 
 
+    @Select("SELECT * FROM `tb_thing_properties` where thing_code=#{thingCode} and prop_key=#{propKey}")
+    ThingPropertyModel findThingProperties(@Param("thingCode") String thingCode, @Param("propKey") String propKey);
+
+
 }
