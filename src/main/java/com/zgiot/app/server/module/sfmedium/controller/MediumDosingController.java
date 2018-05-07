@@ -452,7 +452,7 @@ public class MediumDosingController {
      * @param thingCode
      * @return
      */
-    @RequestMapping(value = "/getMediumDosing", method = RequestMethod.POST)
+    @RequestMapping(value = "/getMediumDosing", method = RequestMethod.GET)
     public ResponseEntity<String> mediumDosing(@RequestParam("mediumdosingvalueCode") String thingCode) {
         MediumDosingControlVO mediumDosingControlVO = new MediumDosingControlVO();
         //加介泵
@@ -464,25 +464,29 @@ public class MediumDosingController {
             MediumDosingControlVO.ValueControl valueControl = mediumDosingControlVO.new ValueControl();
             //切换阀
             getChangeValue(mediumDosingControlVO, mediumDosingConfigDO, valueControl);
+            valueControls.add(valueControl);
+        }
+        for (MediumDosingConfigDO mediumDosingConfigDO : changeValues) {
+            MediumDosingControlVO.ValueControl valueControl = mediumDosingControlVO.new ValueControl();
             //1号加介池 特殊处理title2 显示一期块煤加介桶 / 二期块煤加介桶
             if (mediumDosingConfigDO.getSystem().equals(GlobalConstants.SYSTEM_01)) {
                 if (mediumDosingConfigDO.getMediumdosingsystemId().equals(SfMediumConstants.MEDIUM_POOL_1)) {
-                    valueControl.setTitle2(mediumDosingConfigDO.getSystemName() + SfMediumConstants.COMBINEDBUCKET_THINGNAME);
+                    valueControl.setTitle(mediumDosingConfigDO.getSystemName() + SfMediumConstants.COMBINEDBUCKET_THINGNAME);
                 } else {
-                    valueControl.setTitle2(GlobalConstants.SYSTEM_ONE + SfMediumConstants.MEDIUMDOSINGVALUE_THINGNAME);
+                    valueControl.setTitle(GlobalConstants.SYSTEM_ONE + SfMediumConstants.MEDIUMDOSINGVALUE_THINGNAME);
                 }
             } else if (mediumDosingConfigDO.getSystem().equals(GlobalConstants.SYSTEM_02)) {
                 if (mediumDosingConfigDO.getMediumdosingsystemId().equals(SfMediumConstants.MEDIUM_POOL_1)) {
-                    valueControl.setTitle2(mediumDosingConfigDO.getSystemName() + SfMediumConstants.COMBINEDBUCKET_THINGNAME);
+                    valueControl.setTitle(mediumDosingConfigDO.getSystemName() + SfMediumConstants.COMBINEDBUCKET_THINGNAME);
                 } else {
-                    valueControl.setTitle2(GlobalConstants.SYSTEM_TWO + SfMediumConstants.MEDIUMDOSINGVALUE_THINGNAME);
+                    valueControl.setTitle(GlobalConstants.SYSTEM_TWO + SfMediumConstants.MEDIUMDOSINGVALUE_THINGNAME);
                 }
             }
-
             //加介阀  合介桶
             getMediumDosingValuesAndCombinedBuckets(thingCode, mediumDosingControlVO, mediumDosingConfigDO, valueControl);
             valueControls.add(valueControl);
         }
+
         mediumDosingControlVO.setValueControls(valueControls);
         return new ResponseEntity<>(ServerResponse.buildOkJson(mediumDosingControlVO), HttpStatus.OK);
     }
@@ -495,7 +499,7 @@ public class MediumDosingController {
      * @param mediumDosingConfigDO
      * @param valueControl
      */
-    private void getMediumDosingValuesAndCombinedBuckets(@RequestParam("mediumdosingvalueCode") String thingCode, MediumDosingControlVO mediumDosingControlVO, MediumDosingConfigDO mediumDosingConfigDO, MediumDosingControlVO.ValueControl valueControl) {
+    private void getMediumDosingValuesAndCombinedBuckets(String thingCode, MediumDosingControlVO mediumDosingControlVO, MediumDosingConfigDO mediumDosingConfigDO, MediumDosingControlVO.ValueControl valueControl) {
         List<MediumDosingControlVO.MediumDosingValue> mediumDosingValues = new ArrayList<>();
         List<MediumDosingControlVO.CombinedBucket> combinedBuckets = new ArrayList<>();
         List<MediumDosingConfigDO> mediumDosingConfigLists = mediumDosingService.getMediumdosingvalueAndCombinedbucketCode(thingCode, mediumDosingConfigDO.getChangevalueCode());
@@ -542,15 +546,15 @@ public class MediumDosingController {
      * @param valueControl
      */
     private void getChangeValue(MediumDosingControlVO mediumDosingControlVO, MediumDosingConfigDO mediumDosingConfigDO, MediumDosingControlVO.ValueControl valueControl) {
-        MediumDosingControlVO.ChangeValue changeValue = mediumDosingControlVO.new ChangeValue();
+        MediumDosingControlVO.MediumDosingValue changeValue = mediumDosingControlVO.new MediumDosingValue();
         changeValue.setThingCode(mediumDosingConfigDO.getChangevalueCode());
         changeValue.setThingName(SfMediumConstants.CHANGEVALUE_THINGNAME);
         changeValue.setStartMetricCode(MetricCodes.START_CMD);
         changeValue.setStopMetricCode(MetricCodes.STOP_CMD);
         if (mediumDosingConfigDO.getSystem().equals(GlobalConstants.SYSTEM_01)) {
-            valueControl.setTitle1(GlobalConstants.SYSTEM_ONE + SfMediumConstants.CHANGEVALUE_THINGNAME);
+            valueControl.setTitle(GlobalConstants.SYSTEM_ONE + SfMediumConstants.CHANGEVALUE_THINGNAME);
         } else if (mediumDosingConfigDO.getSystem().equals(GlobalConstants.SYSTEM_02)) {
-            valueControl.setTitle1(GlobalConstants.SYSTEM_TWO + SfMediumConstants.CHANGEVALUE_THINGNAME);
+            valueControl.setTitle(GlobalConstants.SYSTEM_TWO + SfMediumConstants.CHANGEVALUE_THINGNAME);
         }
         changeValue.setThingImageName(getThingImageName(mediumDosingConfigDO.getChangevalueCode()));
         changeValue.setTapOpenMetricCode(MetricCodes.TAP_OPEN);
@@ -559,7 +563,8 @@ public class MediumDosingController {
         changeValue.setTapCloseMetricCode(MetricCodes.TAP_CLOSE);
         changeValue.setTapCloseMetricName(SfMediumConstants.TAP_CLOSE_TRUE);
         changeValue.setTapCloseMetricValue(getMetricDataValue(mediumDosingConfigDO.getChangevalueCode(), MetricCodes.TAP_CLOSE));
-        valueControl.setChangeValue(changeValue);
+
+        valueControl.setMediumDosingValues(Lists.newArrayList(changeValue));
     }
 
     /**

@@ -30,22 +30,19 @@ public class MediumDosingControlVO {
 
     public class ValueControl {
 
-        private String title1;
-
-        private ChangeValue changeValue;
-
-        private String title2;
+        private String title;
 
         private List<MediumDosingValue> mediumDosingValues;
 
         private List<CombinedBucket> combinedBuckets;
 
-        public ChangeValue getChangeValue() {
-            return changeValue;
+
+        public String getTitle() {
+            return title;
         }
 
-        public void setChangeValue(ChangeValue changeValue) {
-            this.changeValue = changeValue;
+        public void setTitle(String title) {
+            this.title = title;
         }
 
         public List<MediumDosingValue> getMediumDosingValues() {
@@ -64,128 +61,8 @@ public class MediumDosingControlVO {
             this.combinedBuckets = combinedBuckets;
         }
 
-        public String getTitle1() {
-            return title1;
-        }
-
-        public void setTitle1(String title1) {
-            this.title1 = title1;
-        }
-
-        public String getTitle2() {
-            return title2;
-        }
-
-        public void setTitle2(String title2) {
-            this.title2 = title2;
-        }
     }
 
-    public class ChangeValue {
-
-        private String thingCode;
-        private String thingName;
-        private String thingImageName;
-
-        private String startMetricCode;
-        private String stopMetricCode;
-        private String tapOpenMetricCode;
-        private String tapOpenMetricValue;
-        private String tapOpenMetricName;
-
-        private String tapCloseMetricCode;
-        private String tapCloseMetricValue;
-        private String tapCloseMetricName;
-
-        public String getStartMetricCode() {
-            return startMetricCode;
-        }
-
-        public void setStartMetricCode(String startMetricCode) {
-            this.startMetricCode = startMetricCode;
-        }
-
-        public String getStopMetricCode() {
-            return stopMetricCode;
-        }
-
-        public void setStopMetricCode(String stopMetricCode) {
-            this.stopMetricCode = stopMetricCode;
-        }
-
-        public String getThingCode() {
-            return thingCode;
-        }
-
-        public void setThingCode(String thingCode) {
-            this.thingCode = thingCode;
-        }
-
-        public String getThingName() {
-            return thingName;
-        }
-
-        public void setThingName(String thingName) {
-            this.thingName = thingName;
-        }
-
-        public String getThingImageName() {
-            return thingImageName;
-        }
-
-        public void setThingImageName(String thingImageName) {
-            this.thingImageName = thingImageName;
-        }
-
-
-        public String getTapOpenMetricCode() {
-            return tapOpenMetricCode;
-        }
-
-        public void setTapOpenMetricCode(String tapOpenMetricCode) {
-            this.tapOpenMetricCode = tapOpenMetricCode;
-        }
-
-        public String getTapOpenMetricValue() {
-            return tapOpenMetricValue;
-        }
-
-        public void setTapOpenMetricValue(String tapOpenMetricValue) {
-            this.tapOpenMetricValue = tapOpenMetricValue;
-        }
-
-        public String getTapOpenMetricName() {
-            return tapOpenMetricName;
-        }
-
-        public void setTapOpenMetricName(String tapOpenMetricName) {
-            this.tapOpenMetricName = tapOpenMetricName;
-        }
-
-        public String getTapCloseMetricCode() {
-            return tapCloseMetricCode;
-        }
-
-        public void setTapCloseMetricCode(String tapCloseMetricCode) {
-            this.tapCloseMetricCode = tapCloseMetricCode;
-        }
-
-        public String getTapCloseMetricValue() {
-            return tapCloseMetricValue;
-        }
-
-        public void setTapCloseMetricValue(String tapCloseMetricValue) {
-            this.tapCloseMetricValue = tapCloseMetricValue;
-        }
-
-        public String getTapCloseMetricName() {
-            return tapCloseMetricName;
-        }
-
-        public void setTapCloseMetricName(String tapCloseMetricName) {
-            this.tapCloseMetricName = tapCloseMetricName;
-        }
-    }
 
     public class MediumDosingValue {
         private String thingCode;
