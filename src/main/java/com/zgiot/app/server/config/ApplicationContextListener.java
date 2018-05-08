@@ -17,6 +17,7 @@ import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
 import com.zgiot.app.server.module.filterpress.FilterPressManager;
 import com.zgiot.app.server.module.historydata.job.HistoryMinDataJob;
 import com.zgiot.app.server.module.reportforms.input.listener.ReportFormsCompleter;
+import com.zgiot.app.server.module.sfstart.*;
 import com.zgiot.app.server.module.sfsubsc.job.UploadHistorySubscCardDatas;
 import com.zgiot.app.server.module.sfsubsc.job.UploadSubscCardDatas;
 import com.zgiot.app.server.service.impl.HistoryDataPersistDaemon;
@@ -69,8 +70,11 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
     @Autowired
     private AlertManager alertManager;
     @Autowired
+    private StartStopManager startStopManager;
+    @Autowired
+    private StartBrowseListener startBrowseListener;
+    @Autowired
     private FilterPressManager filterPressManager;
-
     private static final int FAULT_SCAN_RATE = 20;
 
     private static boolean initFlag = false;
@@ -78,7 +82,7 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-        if (initFlag){
+        if (initFlag) {
             return;
         }
         initFlag = true;
@@ -117,7 +121,6 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
 
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
                 || moduleListConfig.containModule(ModuleListConfig.MODULE_FILTERPRESS)) {
-            filterPressManager.initFilterPress();
             processor.addListener(filterPressListener);
         }
 
@@ -147,7 +150,6 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
         }
 
 
-
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
                 || moduleListConfig.containModule(ModuleListConfig.MODULE_BELLOWS)) {
             valveManager.init();
@@ -159,11 +161,27 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
 
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
                 || moduleListConfig.containModule(ModuleListConfig.MODULE_SUBSCRIPTION)) {
-                QuartzManager.addJob("uploadsubscCardDatasOf5s", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf5s",
-                        ModuleListConfig.MODULE_SUBSCRIPTION, UploadSubscCardDatas.class, "0/5 * * * * ?");
+            QuartzManager.addJob("uploadsubscCardDatasOf5s", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf5s",
+                    ModuleListConfig.MODULE_SUBSCRIPTION, UploadSubscCardDatas.class, "0/5 * * * * ?");
 
-                QuartzManager.addJob("uploadsubscCardDatasOf10s", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf10s",
-                        ModuleListConfig.MODULE_SUBSCRIPTION, UploadHistorySubscCardDatas.class, "0/10 * * * * ?");
+            QuartzManager.addJob("uploadsubscCardDatasOf10s", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf10s",
+                    ModuleListConfig.MODULE_SUBSCRIPTION, UploadHistorySubscCardDatas.class, "0/10 * * * * ?");
+
+        }
+
+        if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
+                || moduleListConfig.containModule(ModuleListConfig.MODULE_STARTSTOP)) {
+            startStopManager.init();
+            processor.addListener(startBrowseListener);
+            QuartzManager.addJob("startDeviceByRequirement", ModuleListConfig.MODULE_STARTSTOP, "startDeviceByRequirement",
+                    ModuleListConfig.MODULE_STARTSTOP, SartDeviceByRequirementJob.class, "0/20 * * * * ?");
+
+            QuartzManager.addJob("sendCoalCapacity", ModuleListConfig.MODULE_STARTSTOP, "sendCoalCapacity",
+                    ModuleListConfig.MODULE_STARTSTOP, SendCoalCapacityJob.class, "0/30 * * * * ?");
+
+            QuartzManager.addJob("sendCoalDeport", ModuleListConfig.MODULE_STARTSTOP, "sendCoalDeport",
+                    ModuleListConfig.MODULE_STARTSTOP, SendCoalDeportJob.class, "0/30 * * * * ?");
+
 
         }
 
@@ -171,7 +189,7 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
         if (false) {
             completerDataListener.addCompleter(new DemoDataCompleter());
             processor.addListener(demoBusiness);
-            }
+        }
 
 
     }

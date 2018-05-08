@@ -21,19 +21,19 @@ public class ModuleListConfig {
     public static final String MODULE_DENSITY_CONTROL = "DENSITY_CONTROL";
     public static final String MODULE_COAL_ANALYSIS = "COAL_ANALYSIS";
     public static final String MODULE_SUBSCRIPTION = "SUBSCRIPTION";
-
+    public static final String MODULE_STARTSTOP = "STARTSTOP";
     @Value("${sf.modules.list}")
     private String moduleListStr;
     private Set configedModules = new HashSet();
 
     @PostConstruct
     void init() {
-        if (StringUtils.isBlank(this.moduleListStr)) {
+        if (StringUtils.isBlank(moduleListStr)) {
             logger.error("Module list is required. ");
             return;
         }
 
-        String[] arr = this.moduleListStr.split(",");
+        String[] arr = moduleListStr.split(",");
         for (String str : arr) {
             str = str.trim().toUpperCase();
             configedModules.add(str);
