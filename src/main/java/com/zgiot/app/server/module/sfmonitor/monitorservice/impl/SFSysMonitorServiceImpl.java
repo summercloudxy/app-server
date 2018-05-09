@@ -136,8 +136,9 @@ public class SFSysMonitorServiceImpl implements SFSysMonitorService {
         int thingFaultCount =0;//故障中设备数量
         int thingStopCount =0;//待机中设备数量
         Map<Short,Integer> resultMap =new HashMap<>();
-        //thingMap包含的设备已经计数
-        if(!org.apache.commons.lang.StringUtils.isEmpty(mt.getThingCode()) && !thingMap.containsKey(mt.getThingCode())){
+        //thingMap包含的设备已经计数(并且thingCode不是原煤配比)
+        if(!org.apache.commons.lang.StringUtils.isEmpty(mt.getThingCode()) && !thingMap.containsKey(mt.getThingCode())
+                && !SFSysMonitorConstant.THING_CODE_QUIT_SYS_RAW.equals(mt.getThingCode())){
             thingMap.put(mt.getThingCode(),mt.getThingCode());
             Optional<DataModelWrapper> data = dataService.getData(mt.getThingCode(),MetricCodes.STATE);
             if (data.isPresent()) {
