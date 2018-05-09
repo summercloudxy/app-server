@@ -5,10 +5,8 @@ import com.google.common.collect.Lists;
 import com.zgiot.app.server.module.alert.AlertManager;
 import com.zgiot.app.server.module.alert.pojo.AlertData;
 import com.zgiot.app.server.module.sfmedium.constants.SfMediumConstants;
-import com.zgiot.app.server.module.sfmedium.entity.po.MediumCompoundingConfigDO;
 import com.zgiot.app.server.module.sfmedium.entity.po.MediumDosingConfigDO;
 import com.zgiot.app.server.module.sfmedium.entity.vo.*;
-import com.zgiot.app.server.module.sfmedium.service.MediumCompoundingService;
 import com.zgiot.app.server.module.sfmedium.service.MediumDosingService;
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.DataService;
@@ -58,8 +56,7 @@ public class MediumDosingController {
     private AlertManager alertManager;
     @Autowired
     private TMLMapper tmlMapper;
-    @Autowired
-    private MediumCompoundingService mediumCompoundingService;
+
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
     @Autowired
@@ -148,9 +145,9 @@ public class MediumDosingController {
         mediumDosingPump.setCurrentMetricCode(MetricCodes.CURRENT);
         mediumDosingPump.setCurrentMetricName(SfMediumConstants.CURRENT_NAME);
         mediumDosingPump.setCurrentMetricValue(getMetricDataValue(mediumDosingConfig.getMediumdosingpumpCode(), MetricCodes.CURRENT));
-        mediumDosingPump.setIntelligentMetricCode(MetricCodes.INTELLIGENT);
+        mediumDosingPump.setIntelligentMetricCode(MetricCodes.INTELLIGENT_CONTROL);
         mediumDosingPump.setIntelligentMetricName(SfMediumConstants.INTELLIGENT);
-        mediumDosingPump.setIntelligentMetricValue(getMetricDataValue(mediumDosingConfig.getMediumdosingpumpCode(), MetricCodes.INTELLIGENT));
+        mediumDosingPump.setIntelligentMetricValue(getMetricDataValue(mediumDosingConfig.getMediumdosingpumpCode(), MetricCodes.INTELLIGENT_CONTROL));
         mediumDosingPump.setLocalMetricCode(MetricCodes.LOCAL);
         mediumDosingPump.setLocalMetricName(SfMediumConstants.LOCAL_METRIC_NAME);
         mediumDosingPump.setLocalMetricValue(getMetricDataValue(mediumDosingConfig.getMediumdosingpumpCode(), MetricCodes.LOCAL));
@@ -188,9 +185,9 @@ public class MediumDosingController {
 
 
         MediumDosingSystemVO.MetricData metricData2 = mediumDosingSystem.new MetricData();
-        metricData2.setMetricCode(MetricCodes.POOL_STATE);
+        metricData2.setMetricCode(MetricCodes.STATE);
         metricData2.setMetricName(SfMediumConstants.MEDIUM_COMPOUNDING_STATE);
-        String metricDataValue = getMetricDataValue(mediumDosingConfig.getMediumpoolCode(), MetricCodes.POOL_STATE);
+        String metricDataValue = getMetricDataValue(mediumDosingConfig.getMediumpoolCode(), MetricCodes.STATE);
         metricData2.setMetricValue(metricDataValue);
         if (StringUtils.isNotEmpty(metricDataValue)) {
             if ("1".equals(metricDataValue)) {
@@ -299,35 +296,32 @@ public class MediumDosingController {
     /**
      * 介质池配介控制
      *
-     * @param thingCode
+     * @param mediumPoolThingCode
      * @return
      */
     @RequestMapping(value = "/getMediumCompounding", method = RequestMethod.GET)
-    public ResponseEntity<String> getMediumCompounding(@RequestParam("mediumPoolThingCode") String thingCode) {
+    public ResponseEntity<String> getMediumCompounding(@RequestParam("mediumPoolThingCode") String mediumPoolThingCode) {
         MediumCompoundingVO mediumCompoundingVO = new MediumCompoundingVO();
         //配介液位  最低液位
         //TODO 配介液位由设备新增的信号点决定 plc提供 不从表中查询
-        MediumCompoundingConfigDO mediumCompoundingConfig = mediumCompoundingService.getMediumCompoundingConfigByPoolCode(thingCode);
-        if (mediumCompoundingConfig != null) {
-            mediumCompoundingVO.setMediumCompoundingLevel(mediumCompoundingConfig.getMediumCompoundingLevel());
-            mediumCompoundingVO.setLowLevel(mediumCompoundingConfig.getLowLevel());
-        } else {
-            mediumCompoundingVO.setMediumCompoundingLevel("");
-            mediumCompoundingVO.setLowLevel("");
+        List<MediumDosingConfigDO> mediumDosingConfigByMediumPoolCode = mediumDosingService.getMediumDosingConfigByMediumPoolCode(mediumPoolThingCode);
+        if (CollectionUtils.isNotEmpty(mediumDosingConfigByMediumPoolCode)) {
+            mediumCompoundingVO.setMediumCompoundingLevel(getMetricDataValue(mediumDosingConfigByMediumPoolCode.get(0).getWatersupplementvalveCode(), MetricCodes.LE_PJ_SET));
+            mediumCompoundingVO.setLowLevel(getMetricDataValue(mediumDosingConfigByMediumPoolCode.get(0).getWatersupplementvalveCode(), MetricCodes.LE_ZD_SET));
+            //加介状态
+            mediumCompoundingVO.setMediumCompoundingState(getMetricDataValue(mediumPoolThingCode, MetricCodes.STATE));
+            List<MediumDosingConfigDO> mediumDosingConfigs = mediumDosingService.getMediumDosingConfigByMediumPoolCode(mediumPoolThingCode);
+            if (CollectionUtils.isNotEmpty(mediumDosingConfigs)) {
+                //补水阀门
+                getWaterSupplementValve(mediumCompoundingVO, mediumDosingConfigs);
+                //鼓风阀门
+                getBlowerValve(mediumCompoundingVO, mediumDosingConfigs);
+            }
+            mediumCompoundingVO.setMediumPoolThingCode(mediumPoolThingCode);
+            mediumCompoundingVO.setMediumCompoundingMetricCode(MetricCodes.STATE);
+            return new ResponseEntity<>(ServerResponse.buildOkJson(mediumCompoundingVO), HttpStatus.OK);
         }
-
-        //加介状态
-        mediumCompoundingVO.setMediumCompoundingState(getMetricDataValue(thingCode, MetricCodes.POOL_STATE));
-        List<MediumDosingConfigDO> mediumDosingConfigs = mediumDosingService.getMediumDosingConfigByMediumPoolCode(thingCode);
-        if (CollectionUtils.isNotEmpty(mediumDosingConfigs)) {
-            //补水阀门
-            getWaterSupplementValve(mediumCompoundingVO, mediumDosingConfigs);
-            //鼓风阀门
-            getBlowerValve(mediumCompoundingVO, mediumDosingConfigs);
-        }
-        mediumCompoundingVO.setMediumPoolThingCode(thingCode);
-        mediumCompoundingVO.setMediumCompoundingMetricCode(MetricCodes.POOL_STATE);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(mediumCompoundingVO), HttpStatus.OK);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
     /**
@@ -394,9 +388,9 @@ public class MediumDosingController {
             } else if (metricDataValue.equals("1")) {
                 DataModel dataModel = new DataModel();
                 dataModel.setThingCode(mediumDosingConfigDOList.get(0).getMediumpoolCode());
-                dataModel.setMetricCode(MetricCodes.MEDIUM_COMPOUNDING_POOL);
+                dataModel.setMetricCode(MetricCodes.QUICKMIX);
                 dataModel.setValue("1");
-                logger.info("下发信号 thingCode：{},metricCode：{},value：1 ", mediumDosingConfigDOList.get(0).getMediumpoolCode(), MetricCodes.MEDIUM_COMPOUNDING_POOL);
+                logger.info("下发信号 thingCode：{},metricCode：{},value：1 ", mediumDosingConfigDOList.get(0).getMediumpoolCode(), MetricCodes.QUICKMIX);
                 CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(dataModel, SessionContext.getCurrentUser().getRequestId());
                 if (cmdSendResponseData.getOkCount() == 0) {
                     logger.error(cmdSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
@@ -585,9 +579,9 @@ public class MediumDosingController {
         mediumDosingPump.setStopCmdMetricCode(MetricCodes.STOP_CMD);
         mediumDosingPump.setStopCmdMetricName(SfMediumConstants.STOP_CMD_METRIC_NAME);
         //智能集控就地
-        mediumDosingPump.setIntelligentMetricCode(MetricCodes.INTELLIGENT);
+        mediumDosingPump.setIntelligentMetricCode(MetricCodes.INTELLIGENT_CONTROL);
         mediumDosingPump.setIntelligentMetricName(SfMediumConstants.INTELLIGENT);
-        mediumDosingPump.setIntelligentMetricValue(getMetricDataValue(mediumPoolThingCode, MetricCodes.INTELLIGENT));
+        mediumDosingPump.setIntelligentMetricValue(getMetricDataValue(mediumPoolThingCode, MetricCodes.INTELLIGENT_CONTROL));
         mediumDosingPump.setLocalMetricCode(MetricCodes.LOCAL);
         mediumDosingPump.setLocalMetricName(SfMediumConstants.LOCAL_METRIC_NAME);
         mediumDosingPump.setLocalMetricValue(getMetricDataValue(mediumPoolThingCode, MetricCodes.LOCAL));
@@ -663,9 +657,9 @@ public class MediumDosingController {
             //密度
             separatingSystem.setCombinedBucketDensity(getMetricDataValue(mediumDosingConfigDO.getCombinedbucketCode(), MetricCodes.CURRENT_DENSITY));
             //已加介时间
-            separatingSystem.setElapsedTime(getMetricDataValue(mediumDosingConfigDO.getMediumpoolCode(), MetricCodes.MEDIUMDOSING_ELAPSEDTIME));
+            separatingSystem.setElapsedTime(getMetricDataValue(mediumDosingConfigDO.getMediumpoolCode(), MetricCodes.JJ_TIME));
             //加介剩余时间
-            separatingSystem.setRemainingTime(getMetricDataValue(mediumDosingConfigDO.getMediumpoolCode(), MetricCodes.MEDIUMDOSING_REMAININGTIME));
+            separatingSystem.setRemainingTime(getMetricDataValue(mediumDosingConfigDO.getMediumpoolCode(), MetricCodes.JJ_RE_TIME));
             //加介状态
             getMediumDosingState(mediumDosingConfigDO, separatingSystem);
             separatingSystemList.add(separatingSystem);
@@ -709,7 +703,7 @@ public class MediumDosingController {
             mediumDosingState = "1";
         }
         String mediumDosing = getMetricDataValue(mediumDosingConfigDO.getCombinedbucketCode(), MetricCodes.MEDIUM_DOSING);
-        String poolState = getMetricDataValue(mediumDosingConfigDO.getMediumpoolCode(), MetricCodes.POOL_STATE);
+        String poolState = getMetricDataValue(mediumDosingConfigDO.getMediumpoolCode(), MetricCodes.STATE);
         if (StringUtils.isNotEmpty(runState) && StringUtils.isNotEmpty(poolState) && StringUtils.isEmpty(mediumDosing) && runState.equals("1") && poolState.equals("0") && mediumDosing.equals("1")) {
             mediumDosingState = "0";
         }
@@ -730,9 +724,9 @@ public class MediumDosingController {
         mediumDosingPump.setThingName(SfMediumConstants.MEDIUM_DOSING_PUMP_NAME);
         mediumDosingPump.setRunState(getMetricDataValue(separatingSystems.get(0).getMediumdosingpumpCode(), MetricCodes.STATE));
 
-        mediumDosingPump.setIntelligentMetricCode(MetricCodes.INTELLIGENT);
+        mediumDosingPump.setIntelligentMetricCode(MetricCodes.INTELLIGENT_CONTROL);
         mediumDosingPump.setIntelligentMetricName(SfMediumConstants.INTELLIGENT);
-        mediumDosingPump.setIntelligentMetricValue(getMetricDataValue(separatingSystems.get(0).getMediumdosingpumpCode(), MetricCodes.INTELLIGENT));
+        mediumDosingPump.setIntelligentMetricValue(getMetricDataValue(separatingSystems.get(0).getMediumdosingpumpCode(), MetricCodes.INTELLIGENT_CONTROL));
         mediumDosingPump.setLocalMetricCode(MetricCodes.LOCAL);
         mediumDosingPump.setLocalMetricName(SfMediumConstants.LOCAL_METRIC_NAME);
         mediumDosingPump.setLocalMetricValue(getMetricDataValue(separatingSystems.get(0).getMediumdosingpumpCode(), MetricCodes.LOCAL));
@@ -792,7 +786,7 @@ public class MediumDosingController {
      */
     private void getMediumCompoundingMetricValue(List<MediumDosingConfigDO> separatingSystems, SeparatingSystemVO.MediumPool mediumPool) {
         //配介状态
-        String metricDataValue = getMetricDataValue(separatingSystems.get(0).getMediumpoolCode(), MetricCodes.POOL_STATE);
+        String metricDataValue = getMetricDataValue(separatingSystems.get(0).getMediumpoolCode(), MetricCodes.STATE);
         mediumPool.setMediumCompoundingMetricValue(metricDataValue);
         if (StringUtils.isNotEmpty(metricDataValue)) {
             if ("1".equals(metricDataValue)) {

@@ -1,14 +1,3 @@
-CREATE TABLE `tb_medium_compounding_config`  (
-  `id` bigint(20) NOT NULL COMMENT '主键',
-  `medium_pool_code` int(11) NULL DEFAULT NULL COMMENT '介质池Code',
-  `medium_compounding_level` varchar(10) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '配介液位',
-  `low_level` varchar(10) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '最低液位',
-  `medium_compounding_state` tinyint(1) NULL DEFAULT NULL COMMENT '配介状态',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
-
-
-
 CREATE TABLE `tb_medium_dosing_config`  (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
   `system` varchar(2) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '一期二期',

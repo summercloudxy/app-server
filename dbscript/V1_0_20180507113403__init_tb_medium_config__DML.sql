@@ -1,9 +1,3 @@
-INSERT INTO `tb_medium_compounding_config` VALUES (1, 1547, '0', '0', NULL);
-INSERT INTO `tb_medium_compounding_config` VALUES (2, 1548, '0', '0', NULL);
-INSERT INTO `tb_medium_compounding_config` VALUES (3, 1549, '0', '0', NULL);
-
-
-
 INSERT INTO `tb_medium_dosing_config` VALUES (1, '01', '一期主洗', '主洗1', '1358', '2', '2号加介系统（一期主洗二期再洗）', '1541.JJ-1', '1541.FM-1', '1541', '1548', '1548.FM-1', '1548.FM-2');
 INSERT INTO `tb_medium_dosing_config` VALUES (2, '01', '一期主洗', '主洗2', '1359', '2', '2号加介系统（一期主洗二期再洗）', '1541.JJ-2', '1541.FM-1', '1541', '1548', '1548.FM-1', '1548.FM-2');
 INSERT INTO `tb_medium_dosing_config` VALUES (3, '01', '一期主洗', '主洗3', '1360', '2', '2号加介系统（一期主洗二期再洗）', '1541.JJ-3', '1541.FM-1', '1541', '1548', '1548.FM-1', '1548.FM-2');
