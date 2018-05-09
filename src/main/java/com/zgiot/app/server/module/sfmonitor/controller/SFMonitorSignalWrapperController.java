@@ -196,15 +196,15 @@ public class SFMonitorSignalWrapperController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(signalCount), HttpStatus.OK);
     }
 
-    @GetMapping("/signalWrapper/{name}")
-    public ResponseEntity<String> getSignalWrapper(@PathVariable String name) {
+    @GetMapping("/signalWrapper/{name}/pageNum/{pageNum}/pageSize/{pageSize}")
+    public ResponseEntity<String> getSignalWrapper(@PathVariable String name,@PathVariable int pageNum, @PathVariable int pageSize) {
         List<SignalWrapperInfo> signalWrapperInfos = new ArrayList<>();
         List<MetricTag> metricTags = null;
-        if(SFMonitorConstant.ALL_PARAMETER.equals(name)){
-            metricTags = metricTagMapper.findMetricTag(new MetricTag());
-        }else{
-            metricTags = metricTagMapper.getMetricTag(name + SFMonitorConstant.FUZZY_QUERY_TAG);
-        }
+        SignalWrapperRes signalWrapperRes = new SignalWrapperRes();
+        List<MetricTag> metricTagList = metricTagMapper.getMetricTag(name + SFMonitorConstant.FUZZY_QUERY_TAG);
+        signalWrapperRes.setCount(metricTagList.size());
+        PageHelper.startPage(pageNum, pageSize);
+        metricTags = metricTagMapper.getMetricTag(name + SFMonitorConstant.FUZZY_QUERY_TAG);
 
         for(MetricTag tag:metricTags){
             SignalWrapperInfo signalWrapperInfo = new SignalWrapperInfo();
@@ -213,7 +213,9 @@ public class SFMonitorSignalWrapperController {
             signalWrapperInfo.setZone(zone);
             signalWrapperInfos.add(signalWrapperInfo);
         }
-        return new ResponseEntity<>(ServerResponse.buildOkJson(signalWrapperInfos), HttpStatus.OK);
+
+        signalWrapperRes.setSignalWrapperInfoList(signalWrapperInfos);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(signalWrapperRes), HttpStatus.OK);
     }
 
     @GetMapping("/signalWrapper/zone")
@@ -271,31 +273,43 @@ public class SFMonitorSignalWrapperController {
         String wrapperName = findSignalWrapperReq.getWrapperName();
         String metricName = findSignalWrapperReq.getMetricName();
         String combineName = findSignalWrapperReq.getCombineName();
+        int pageNum = findSignalWrapperReq.getPageNum();
+        int pageSize = findSignalWrapperReq.getPageSize();
+        SignalWrapperPage signalWrapperPage = new SignalWrapperPage();
         List<FindSignalWrapperRes> findSignalWrapperRes = null;
+        List<FindSignalWrapperRes> findSignalWrapperResList = new ArrayList<>();
         if (!StringUtils.isBlank(combineName)) {
             findSignalWrapperRes = metricTagRelationMapper.findSignalWrapperByMetricName(combineName + SFMonitorConstant.FUZZY_QUERY_TAG);
             findSignalWrapperRes.addAll(metricTagRelationMapper.findSignalWrapperByWrapperName(combineName + SFMonitorConstant.FUZZY_QUERY_TAG));
-            return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
+            signalWrapperPage.setCount(findSignalWrapperRes.size());
+            for(int i = (pageNum - 1) * pageSize;i < pageNum * pageSize;i++){
+                if(i < findSignalWrapperRes.size()){
+                    findSignalWrapperResList.add(findSignalWrapperRes.get(i));
+                }
+            }
+            signalWrapperPage.setFindSignalWrapperRes(findSignalWrapperResList);
+
+            return new ResponseEntity<>(ServerResponse.buildOkJson(signalWrapperPage), HttpStatus.OK);
         }
         if (!StringUtils.isBlank(metricName)) {
-            if(metricName.equals(SFMonitorConstant.ALL_PARAMETER)){
-                findSignalWrapperRes = metricTagRelationMapper.findAllSignalWrapper();
-            }else{
-                findSignalWrapperRes = metricTagRelationMapper.findSignalWrapperByMetricName(metricName + SFMonitorConstant.FUZZY_QUERY_TAG);
-            }
+            findSignalWrapperRes = metricTagRelationMapper.findSignalWrapperByMetricName(metricName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            signalWrapperPage.setCount(findSignalWrapperRes.size());
+            PageHelper.startPage(pageNum, pageSize);
+            findSignalWrapperRes = metricTagRelationMapper.findSignalWrapperByMetricName(metricName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            signalWrapperPage.setFindSignalWrapperRes(findSignalWrapperRes);
 
-            return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
+            return new ResponseEntity<>(ServerResponse.buildOkJson(signalWrapperPage), HttpStatus.OK);
         }
         if (!StringUtils.isBlank(wrapperName)) {
-            if(wrapperName.equals(SFMonitorConstant.ALL_PARAMETER)){
-                findSignalWrapperRes = metricTagRelationMapper.findAllSignalWrapper();
-            }else{
-                findSignalWrapperRes = metricTagRelationMapper.findSignalWrapperByWrapperName(wrapperName + SFMonitorConstant.FUZZY_QUERY_TAG);
-            }
+            findSignalWrapperRes = metricTagRelationMapper.findSignalWrapperByWrapperName(wrapperName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            signalWrapperPage.setCount(findSignalWrapperRes.size());
+            PageHelper.startPage(pageNum, pageSize);
+            findSignalWrapperRes = metricTagRelationMapper.findSignalWrapperByWrapperName(wrapperName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            signalWrapperPage.setFindSignalWrapperRes(findSignalWrapperRes);
 
-            return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
+            return new ResponseEntity<>(ServerResponse.buildOkJson(signalWrapperPage), HttpStatus.OK);
         }
-        return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(signalWrapperPage), HttpStatus.OK);
     }
 
     @GetMapping("/signalWrapper/fuzzyFind/findSignalWrapperByName/{wrapperName}")
@@ -470,28 +484,39 @@ public class SFMonitorSignalWrapperController {
         String wrapperName = findSignalWrapperReq.getWrapperName();
         String styleName = findSignalWrapperReq.getMetricName();
         String combineName = findSignalWrapperReq.getCombineName();
+        int pageNum = findSignalWrapperReq.getPageNum();
+        int pageSize = findSignalWrapperReq.getPageSize();
+        SignalWrapperStylePage signalWrapperStylePage = new SignalWrapperStylePage();
         List<FindSignalWrapperRes> findSignalWrapperRes = null;
+        List<FindSignalWrapperRes> findSignalWrapperResList = new ArrayList<>();
         if (!StringUtils.isBlank(combineName)) {
             findSignalWrapperRes = relSFMonMetricTagStyleMapper.getSiganlWrapperStyleByStyleName(combineName + SFMonitorConstant.FUZZY_QUERY_TAG);
             findSignalWrapperRes.addAll(relSFMonMetricTagStyleMapper.getSiganlWrapperStyleByWrapperName(combineName + SFMonitorConstant.FUZZY_QUERY_TAG));
-            return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
+            signalWrapperStylePage.setCount(findSignalWrapperRes.size());
+            for(int i = (pageNum - 1) * pageSize;i <  pageNum * pageSize;i++){
+                if(i < findSignalWrapperRes.size()){
+                    findSignalWrapperResList.add(findSignalWrapperRes.get(i));
+                }
+            }
+            signalWrapperStylePage.setFindSignalWrapperRes(findSignalWrapperResList);
+            return new ResponseEntity<>(ServerResponse.buildOkJson(signalWrapperStylePage), HttpStatus.OK);
         }
         if (!StringUtils.isBlank(styleName)) {
-            if(styleName.equals(SFMonitorConstant.ALL_PARAMETER)){
-                findSignalWrapperRes = relSFMonMetricTagStyleMapper.getAllSignalWrapperStyle();
-            }else{
-                findSignalWrapperRes = relSFMonMetricTagStyleMapper.getSiganlWrapperStyleByStyleName(styleName + SFMonitorConstant.FUZZY_QUERY_TAG);
-            }
-            return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
+            findSignalWrapperRes = relSFMonMetricTagStyleMapper.getSiganlWrapperStyleByStyleName(styleName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            signalWrapperStylePage.setCount(findSignalWrapperRes.size());
+            PageHelper.startPage(pageNum, pageSize);
+            findSignalWrapperRes = relSFMonMetricTagStyleMapper.getSiganlWrapperStyleByStyleName(styleName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            signalWrapperStylePage.setFindSignalWrapperRes(findSignalWrapperRes);
+            return new ResponseEntity<>(ServerResponse.buildOkJson(signalWrapperStylePage), HttpStatus.OK);
         }
         if (!StringUtils.isBlank(wrapperName)) {
-            if(wrapperName.equals(SFMonitorConstant.ALL_PARAMETER)){
-                findSignalWrapperRes = relSFMonMetricTagStyleMapper.getAllSignalWrapperStyle();
-            }else{
-                findSignalWrapperRes = relSFMonMetricTagStyleMapper.getSiganlWrapperStyleByWrapperName(wrapperName + SFMonitorConstant.FUZZY_QUERY_TAG);
-            }
+            findSignalWrapperRes = relSFMonMetricTagStyleMapper.getSiganlWrapperStyleByWrapperName(wrapperName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            signalWrapperStylePage.setCount(findSignalWrapperRes.size());
+            PageHelper.startPage(pageNum, pageSize);
+            findSignalWrapperRes = relSFMonMetricTagStyleMapper.getSiganlWrapperStyleByWrapperName(wrapperName + SFMonitorConstant.FUZZY_QUERY_TAG);
+            signalWrapperStylePage.setFindSignalWrapperRes(findSignalWrapperRes);
 
-            return new ResponseEntity<>(ServerResponse.buildOkJson(findSignalWrapperRes), HttpStatus.OK);
+            return new ResponseEntity<>(ServerResponse.buildOkJson(signalWrapperStylePage), HttpStatus.OK);
         }
 
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
@@ -649,8 +674,13 @@ public class SFMonitorSignalWrapperController {
         ControllerUtil.validateBodyRequired(bodyStr);
         EquipmentMonFindReq equipmentMonFindReq = JSON.parseObject(bodyStr,EquipmentMonFindReq.class);
         List<SFMonEquipMonitorInfo> sfMonEquipMonitorInfos = new ArrayList<>();
+        List<SFMonEquipMonitorInfo> data = new ArrayList<>();
         String configProgress = equipmentMonFindReq.getConfigProgress();
         String thingCode = equipmentMonFindReq.getThingCode();
+        int pageNum = equipmentMonFindReq.getPageNum();
+        int pageSize = equipmentMonFindReq.getPageSize();
+        EquipmentMonitorPageRes equipmentMonitorPageRes = new EquipmentMonitorPageRes();
+        List<SFMonEquipMonitorInfo> sfMonEquipMonitorInfoList = null;
         SFMonEquipMonitorInfo sfMonEquipMonitorInfo = new SFMonEquipMonitorInfo();
         if(!StringUtils.isBlank(thingCode)){
             sfMonEquipMonitorInfo.setConfigProgress(null);
@@ -659,11 +689,23 @@ public class SFMonitorSignalWrapperController {
             sfMonEquipMonitorInfo.setThingCode(null);
             sfMonEquipMonitorInfo.setThingName(thingCode + SFMonitorConstant.FUZZY_QUERY_TAG);
             sfMonEquipMonitorInfos.addAll(sfMonEquipMonitorInfoMapper.getEquipmentMonitorInfo(sfMonEquipMonitorInfo));
-            return new ResponseEntity<>(ServerResponse.buildOkJson(sfMonEquipMonitorInfos), HttpStatus.OK);
+            equipmentMonitorPageRes.setCount(sfMonEquipMonitorInfos.size());
+            for(int i = (pageNum - 1) * pageSize;i < pageNum * pageSize;i++){
+                if(i < sfMonEquipMonitorInfos.size()){
+                    data.add(sfMonEquipMonitorInfos.get(i));
+                }
+            }
+            equipmentMonitorPageRes.setSfMonEquipMonitorInfos(data);
+            return new ResponseEntity<>(ServerResponse.buildOkJson(equipmentMonitorPageRes), HttpStatus.OK);
         }
         if(!StringUtils.isBlank(configProgress)){
             sfMonEquipMonitorInfo.setConfigProgress(configProgress);
-            return new ResponseEntity<>(ServerResponse.buildOkJson(sfMonEquipMonitorInfoMapper.getEquipmentMonitorInfo(sfMonEquipMonitorInfo)), HttpStatus.OK);
+            sfMonEquipMonitorInfoList = sfMonEquipMonitorInfoMapper.getEquipmentMonitorInfo(sfMonEquipMonitorInfo);
+            equipmentMonitorPageRes.setCount(sfMonEquipMonitorInfoList.size());
+            PageHelper.startPage(pageNum, pageSize);
+            sfMonEquipMonitorInfoList = sfMonEquipMonitorInfoMapper.getEquipmentMonitorInfo(sfMonEquipMonitorInfo);
+            equipmentMonitorPageRes.setSfMonEquipMonitorInfos(sfMonEquipMonitorInfoList);
+            return new ResponseEntity<>(ServerResponse.buildOkJson(equipmentMonitorPageRes), HttpStatus.OK);
         }
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
