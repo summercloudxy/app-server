@@ -18,3 +18,5 @@ update tb_thing_tag set sort =10 where code ='WASHINGPUBLIC';
 update tb_thing_tag set sort =11 where code ='COALBYPASS';
 update tb_thing_tag set sort =1 where code ='FASTLOADING';
 update tb_thing_tag set sort =2 where code ='TRANSPORTATION';
+
+update rel_sfsysmon_term_thing set thing_code ='Quit_SYS_RAW' where thing_code='Quit_SYS';
