@@ -8,9 +8,7 @@ CREATE TABLE `tb_start_area_record`  (
   `create_date` datetime(0) NULL DEFAULT NULL,
   `is_delete` tinyint(2) NULL DEFAULT NULL COMMENT '是否删除(0:未删除,1:已删除)',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 0 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
-
-
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
 
 
 CREATE TABLE `tb_start_area_setting_condition`  (
@@ -27,8 +25,7 @@ CREATE TABLE `tb_start_area_setting_condition`  (
   `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
   `parent_state` tinyint(1) NULL DEFAULT 0 COMMENT '是否区域id1为开始启车',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '区域间设定条件表' ROW_FORMAT = Compact;
-
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '区域间设定条件表' ROW_FORMAT = Compact;
 
 
 CREATE TABLE `tb_start_assets`  (
@@ -47,10 +44,7 @@ CREATE TABLE `tb_start_assets`  (
   `state` tinyint(1) NULL DEFAULT NULL,
   PRIMARY KEY (`object_id`) USING BTREE,
   UNIQUE INDEX `aobjid`(`object_id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '资产基础类' ROW_FORMAT = Dynamic;
-
-
-
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '资产基础类' ROW_FORMAT = Compact;
 
 CREATE TABLE `tb_start_assets_params`  (
   `object_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '保留字段',
@@ -58,10 +52,20 @@ CREATE TABLE `tb_start_assets_params`  (
   `param_value` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `assets_object_id` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`object_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 10625 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '设备、部件等参数' ROW_FORMAT = Compact;
+) ENGINE = InnoDB AUTO_INCREMENT = 10626 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '设备、部件等参数' ROW_FORMAT = Compact;
 
-
-
+CREATE TABLE `tb_start_building`  (
+  `building_id` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '建筑id',
+  `building_name` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '建筑名称',
+  `seqno` int(11) NULL DEFAULT NULL COMMENT '索引序号',
+  `create_user` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '创建人',
+  `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+  `update_user` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '更新人',
+  `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+  `state` tinyint(1) NULL DEFAULT NULL COMMENT '是否逻辑删除',
+  PRIMARY KEY (`building_id`) USING BTREE,
+  UNIQUE INDEX `Index_name`(`building_name`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '车间、建筑信息' ROW_FORMAT = Compact;
 
 CREATE TABLE `tb_start_device_area`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '数据主键',
@@ -77,15 +81,11 @@ CREATE TABLE `tb_start_device_area`  (
   `number` int(30) NULL DEFAULT NULL COMMENT '哪个大区第几个区域编号',
   `position` int(11) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '启车区域配置—区域表' ROW_FORMAT = Dynamic;
-
-
-
-
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '启车区域配置—区域表' ROW_FORMAT = Compact;
 
 CREATE TABLE `tb_start_device_bag`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '数据主键',
-  `bag_name` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `bag_name` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '包名称',
   `area_id` bigint(20) NULL DEFAULT NULL,
   `is_deleted` tinyint(1) NOT NULL DEFAULT 0,
   `create_user` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
@@ -93,11 +93,10 @@ CREATE TABLE `tb_start_device_bag`  (
   `update_user` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `update_time` datetime(0) NULL DEFAULT NULL,
   `number` int(30) NULL DEFAULT NULL,
+  `delay_time` bigint(20) NULL DEFAULT NULL,
+  `start_line_id` bigint(20) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 29 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '启停区域配置包—包下' ROW_FORMAT = Dynamic;
-
-
-
+) ENGINE = InnoDB AUTO_INCREMENT = 30 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '启停区域配置包—包下' ROW_FORMAT = Compact;
 
 CREATE TABLE `tb_start_device_region`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -110,10 +109,7 @@ CREATE TABLE `tb_start_device_region`  (
   `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否删除',
   `number` int(30) NULL DEFAULT NULL COMMENT '第几个大区编号',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '启车区域设置—大区表' ROW_FORMAT = Dynamic;
-
-
-
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '启车区域设置—大区表' ROW_FORMAT = Compact;
 
 CREATE TABLE `tb_start_device_signal`  (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -129,9 +125,6 @@ CREATE TABLE `tb_start_device_signal`  (
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1564 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '设备信号名称表' ROW_FORMAT = Compact;
 
-
-
-
 CREATE TABLE `tb_start_device_state_record`  (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
   `operate_id` bigint(11) NULL DEFAULT NULL,
@@ -141,8 +134,7 @@ CREATE TABLE `tb_start_device_state_record`  (
   `update_time` datetime(0) NULL DEFAULT NULL,
   `is_delete` tinyint(2) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 0 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Dynamic;
-
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
 
 CREATE TABLE `tb_start_examine_record`  (
   `examine_id` int(11) NOT NULL AUTO_INCREMENT,
@@ -155,10 +147,7 @@ CREATE TABLE `tb_start_examine_record`  (
   `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
   `is_delete` tinyint(2) NULL DEFAULT NULL COMMENT '是否删除（0:不删除，1:删除）',
   PRIMARY KEY (`examine_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 0 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
-
-
-
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
 
 CREATE TABLE `tb_start_examine_rule`  (
   `rule_id` int(11) NOT NULL AUTO_INCREMENT,
@@ -172,9 +161,7 @@ CREATE TABLE `tb_start_examine_rule`  (
   `create_date` datetime(0) NULL DEFAULT NULL,
   `is_delete` tinyint(2) NULL DEFAULT NULL COMMENT '是否删除（0:不删除，1:删除）',
   PRIMARY KEY (`rule_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 405 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
-
-
+) ENGINE = InnoDB AUTO_INCREMENT = 405 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
 
 CREATE TABLE `tb_start_examine_type`  (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -185,9 +172,7 @@ CREATE TABLE `tb_start_examine_type`  (
   `create_date` datetime(0) NULL DEFAULT NULL,
   `is_delete` tinyint(2) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
-
-
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
 
 CREATE TABLE `tb_start_information`  (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -210,10 +195,19 @@ CREATE TABLE `tb_start_information`  (
   `update_user` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `bag_id` bigint(20) NULL DEFAULT NULL COMMENT '所属包id',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 363 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 363 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
 
-
-
+CREATE TABLE `tb_start_line`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `line_name` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '启车线名称',
+  `area_id` bigint(20) NULL DEFAULT NULL COMMENT '区域id',
+  `is_deleted` tinyint(1) NULL DEFAULT 0 COMMENT '逻辑删除',
+  `create_user` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '创建人id',
+  `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+  `update_user` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '更新的用户id',
+  `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 21 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '启车线表' ROW_FORMAT = Compact;
 
 CREATE TABLE `tb_start_location`  (
   `object_id` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '对象唯一ID，保留字段',
@@ -226,9 +220,6 @@ CREATE TABLE `tb_start_location`  (
   UNIQUE INDEX `lobj`(`object_id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '定位信息' ROW_FORMAT = Compact;
 
-
-
-
 CREATE TABLE `tb_start_manual_intervention`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `device_id` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
@@ -238,11 +229,7 @@ CREATE TABLE `tb_start_manual_intervention`  (
   `update_user` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '更新人',
   `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 358 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '人工预设' ROW_FORMAT = Dynamic;
-
-
-
-
+) ENGINE = InnoDB AUTO_INCREMENT = 358 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '人工预设' ROW_FORMAT = Compact;
 
 CREATE TABLE `tb_start_manual_intervention_record`  (
   `manual_intervention_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '人工干预主键id',
@@ -254,9 +241,7 @@ CREATE TABLE `tb_start_manual_intervention_record`  (
   `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
   `is_delete` tinyint(2) NULL DEFAULT NULL COMMENT '是否删除（0:不删除，1:删除）',
   PRIMARY KEY (`manual_intervention_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1017 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
-
-
+) ENGINE = InnoDB AUTO_INCREMENT = 1017 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
 
 CREATE TABLE `tb_start_operation_record`  (
   `operate_id` bigint(11) NOT NULL AUTO_INCREMENT COMMENT '操作记录id',
@@ -267,11 +252,7 @@ CREATE TABLE `tb_start_operation_record`  (
   `created_time` datetime(0) NULL DEFAULT NULL COMMENT '操作时间',
   `is_delete` tinyint(2) NULL DEFAULT NULL COMMENT '是否无效(0有效1无效)',
   PRIMARY KEY (`operate_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 763 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '启车操作记录' ROW_FORMAT = Dynamic;
-
-
-
-
+) ENGINE = InnoDB AUTO_INCREMENT = 763 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '启车操作记录' ROW_FORMAT = Compact;
 
 CREATE TABLE `tb_start_preset_startandcoal_pararmeter`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -286,11 +267,7 @@ CREATE TABLE `tb_start_preset_startandcoal_pararmeter`  (
   `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
   `start_type` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '0正常 1带载',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 108 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '启车预设参数启动和带煤参数表' ROW_FORMAT = Dynamic;
-
-
-
-
+) ENGINE = InnoDB AUTO_INCREMENT = 109 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '启车预设参数启动和带煤参数表' ROW_FORMAT = Compact;
 
 CREATE TABLE `tb_start_production_location`  (
   `object_id` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
@@ -316,28 +293,7 @@ CREATE TABLE `tb_start_production_location`  (
   UNIQUE INDEX `OBJID`(`object_id`) USING BTREE,
   INDEX `index_system_id`(`system_id`) USING BTREE,
   INDEX `object_id`(`object_id`, `location_serial_num`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '生产线位置表' ROW_FORMAT = Dynamic;
-
-
-
-
-
-CREATE TABLE `tb_start_production_system`  (
-  `object_id` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `system_name` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '生产线名称',
-  `parent_system_id` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '上一级系统id',
-  `level` int(11) NULL DEFAULT NULL COMMENT '系统层级',
-  `description` tinytext CHARACTER SET utf8 COLLATE utf8_general_ci NULL,
-  `node_level` int(11) NULL DEFAULT NULL,
-  `seqno` int(11) NULL DEFAULT NULL COMMENT '排序索引',
-  `create_user` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
-  `create_date` datetime(0) NULL DEFAULT NULL,
-  `update_user` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
-  `update_date` datetime(0) NULL DEFAULT NULL,
-  `state` tinyint(4) NULL DEFAULT NULL,
-  PRIMARY KEY (`object_id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '生产系统' ROW_FORMAT = Compact;
-
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '生产线位置表' ROW_FORMAT = Compact;
 
 CREATE TABLE `tb_start_signal`  (
   `id` int(32) NOT NULL AUTO_INCREMENT,
@@ -363,9 +319,31 @@ CREATE TABLE `tb_start_signal`  (
   INDEX `FK_Reference_6`(`typeId`) USING BTREE,
   INDEX `datalabel`(`dataLabel`) USING BTREE,
   INDEX `signal_id`(`name`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 18751 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '信号表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 18751 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '信号表' ROW_FORMAT = Compact;
 
+CREATE TABLE `tb_start_startline_rale_bag_device`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `start_line_id` bigint(20) NULL DEFAULT NULL COMMENT '启车线id',
+  `bag_id` bigint(20) NULL DEFAULT NULL COMMENT '包id',
+  `delay_time` bigint(20) NULL DEFAULT NULL COMMENT '延时时间',
+  `is_deleted` tinyint(1) NULL DEFAULT 0 COMMENT '逻辑删除',
+  `create_user` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '创建人id',
+  `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+  `update_user` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '更新的用户id',
+  `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 30 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '启车线和包关系表' ROW_FORMAT = Compact;
 
+CREATE TABLE `tb_start_sys_parameter`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `parameter_class` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '字典属性',
+  `parameter_key` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '字典key值',
+  `parameter_value` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '字典key对应值',
+  `parameter_mark` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '字段说明',
+  `note` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '预留字段',
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 22 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '系统字典表' ROW_FORMAT = Compact;
 
 CREATE TABLE `tb_start_system`  (
   `id` bigint(11) NOT NULL AUTO_INCREMENT COMMENT '系统id',
@@ -376,10 +354,7 @@ CREATE TABLE `tb_start_system`  (
   `system_category` tinyint(4) NULL DEFAULT NULL COMMENT '系统大类（1:启车选择系统，2:启车中系统，3:总览页面系统，4:仓库页面系统）',
   `system_sequence` tinyint(4) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 206 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
-
-
-
+) ENGINE = InnoDB AUTO_INCREMENT = 206 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
 
 CREATE TABLE `tb_start_system_device_relation`  (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -391,11 +366,7 @@ CREATE TABLE `tb_start_system_device_relation`  (
   `update_date` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
   `is_delete` tinyint(1) NULL DEFAULT 1 COMMENT '是否启用',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1184 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '启车系统和设备关联表' ROW_FORMAT = Dynamic;
-
-
-
-
+) ENGINE = InnoDB AUTO_INCREMENT = 1184 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '启车系统和设备关联表' ROW_FORMAT = Compact;
 
 CREATE TABLE `tb_start_system_synergic_relation`  (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -403,9 +374,7 @@ CREATE TABLE `tb_start_system_synergic_relation`  (
   `synergic_system` bigint(11) NULL DEFAULT NULL,
   `is_delete` tinyint(2) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 57 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
-
-
+) ENGINE = InnoDB AUTO_INCREMENT = 58 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
 
 CREATE TABLE `tb_start_transformer_information`  (
   `id` tinyint(2) NOT NULL AUTO_INCREMENT,
@@ -424,10 +393,7 @@ CREATE TABLE `tb_start_transformer_information`  (
   `update_user` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `update_time` datetime(0) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 21 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
-
-
-
+) ENGINE = InnoDB AUTO_INCREMENT = 21 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
 
 CREATE TABLE `tb_start_type_set_delay`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -441,11 +407,7 @@ CREATE TABLE `tb_start_type_set_delay`  (
   `update_user` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '更新的用户id',
   `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 593 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '启车启动条件设定延时表' ROW_FORMAT = Dynamic;
-
-
-
-
+) ENGINE = InnoDB AUTO_INCREMENT = 593 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '启车启动条件设定延时表' ROW_FORMAT = Compact;
 
 CREATE TABLE `tb_start_type_set_pararmeter`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -461,9 +423,4 @@ CREATE TABLE `tb_start_type_set_pararmeter`  (
   `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
   `start_type` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '0正常 1带载',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 111 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '启车启动条件设定参数表' ROW_FORMAT = Dynamic;
-
-
-
-
-
+) ENGINE = InnoDB AUTO_INCREMENT = 111 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '启车启动条件设定参数表' ROW_FORMAT = Compact;
