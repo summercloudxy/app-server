@@ -18,6 +18,7 @@ SET FOREIGN_KEY_CHECKS=0;
 -- ----------------------------
 -- Table structure for rel_sfmon_role_permission
 -- ----------------------------
+DROP TABLE IF EXISTS `rel_sfmon_role_permission`;
 CREATE TABLE `rel_sfmon_role_permission` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
   `role_id` bigint(20) DEFAULT NULL COMMENT '角色id',

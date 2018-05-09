@@ -18,6 +18,7 @@ SET FOREIGN_KEY_CHECKS=0;
 -- ----------------------------
 -- Table structure for s_role
 -- ----------------------------
+DROP TABLE IF EXISTS `s_role`;
 CREATE TABLE `s_role` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
