@@ -75,6 +75,19 @@ public class ThingTag {
      */
     private String imageName;
 
+    /**
+     * 排序序号
+     */
+    private Float sort;
+
+    public Float getSort() {
+        return sort;
+    }
+
+    public void setSort(Float sort) {
+        this.sort = sort;
+    }
+
     public String getImageName() {
         return imageName;
     }
