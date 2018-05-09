@@ -15,3 +15,17 @@ INSERT INTO `s_role` VALUES ('14', '产品仓上', null, null, '2018-04-26 10:24
 INSERT INTO `s_role` VALUES ('15', '浓缩池', null, null, '2018-04-26 10:24:26');
 INSERT INTO `s_role` VALUES ('16', '队长', null, null, '2018-04-26 10:24:26');
 INSERT INTO `s_role` VALUES ('17', '驱动站', null, null, '2018-04-26 10:24:26');
+INSERT INTO `s_role` VALUES ('18', '原煤仓下收集皮带', null, null, '2018-05-08 17:24:04');
+INSERT INTO `s_role` VALUES ('19', '711-774给煤机', null, null, '2018-05-08 17:24:04');
+INSERT INTO `s_role` VALUES ('20', '775、776皮带', null, null, '2018-05-08 17:24:04');
+INSERT INTO `s_role` VALUES ('21', '791、792皮带', null, null, '2018-05-08 17:24:04');
+INSERT INTO `s_role` VALUES ('22', '795-797皮带', null, null, '2018-05-08 17:24:04');
+INSERT INTO `s_role` VALUES ('23', '一期201皮带', null, null, '2018-05-08 17:24:04');
+INSERT INTO `s_role` VALUES ('24', '手选皮带', null, null, '2018-05-08 17:24:04');
+INSERT INTO `s_role` VALUES ('25', '203刮板', null, null, '2018-05-08 17:24:04');
+INSERT INTO `s_role` VALUES ('26', '215皮带', null, null, '2018-05-08 17:24:04');
+INSERT INTO `s_role` VALUES ('27', '二期201皮带', null, null, '2018-05-08 17:24:04');
+INSERT INTO `s_role` VALUES ('28', '介质库', null, null, '2018-05-08 17:24:04');
+INSERT INTO `s_role` VALUES ('29', '矸石队', null, null, '2018-05-08 17:24:04');
+INSERT INTO `s_role` VALUES ('30', '930刮板', null, null, '2018-05-08 17:24:04');
+INSERT INTO `s_role` VALUES ('31', '901', null, null, '2018-05-08 17:24:04');
