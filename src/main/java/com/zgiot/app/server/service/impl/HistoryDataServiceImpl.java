@@ -154,10 +154,8 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
         }
 
         //query
-        Bson criteria = and(gte(DataModel.DATA_TIMESTAMP, startTime), lt(DataModel.DATA_TIMESTAMP, endTime),
-                eq(DataModel.METRIC_CODE, metricCode), in(DataModel.THING_CODE, thingCodes));
-        FindIterable<Document> iterable = mongoCollection.find(criteria)
-                .sort(Sorts.ascending(DataModel.DATA_TIMESTAMP)).limit(DEFAUTL_LIMIT);
+        Bson criteria = and(gte(DataModel.DATA_TIMESTAMP, startTime), lt(DataModel.DATA_TIMESTAMP, endTime), eq(DataModel.METRIC_CODE, metricCode), in(DataModel.THING_CODE, thingCodes));
+        FindIterable<Document> iterable = mongoCollection.find(criteria).sort(Sorts.ascending(DataModel.DATA_TIMESTAMP));
 
         //generate result map
         Map<String, List<DataModel>> result = new LinkedHashMap<>(thingCodes.size());
@@ -232,9 +230,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
         } else if (AccuracyEnum.MINUTE.equals(accuracy)) {
             mongoCollection = mincollection;
         }
-        Bson criteria = and(gte(DataModel.DATA_TIMESTAMP, endTime - DEFAUTL_MAX_TIMERANGE),
-                lte(DataModel.DATA_TIMESTAMP, endTime), eq(DataModel.METRIC_CODE, metricCode), eq(DataModel.THING_CODE, thingCode));
-
+        Bson criteria = and(gte(DataModel.DATA_TIMESTAMP, endTime - 3600 * 24 * 1000), lte(DataModel.DATA_TIMESTAMP, endTime), eq(DataModel.METRIC_CODE, metricCode), eq(DataModel.THING_CODE, thingCode));
         FindIterable<Document> iterable = mongoCollection.find(criteria).sort(Sorts.descending(DataModel.DATA_TIMESTAMP)).limit(1);
         for (Document document : iterable) {
             DataModel model = new DataModel();
@@ -263,12 +259,10 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
             throw new IllegalArgumentException("query time required.");
         }
         if (QUERY_TIME_TYPE_BEFORE.equals(queryType)) {
-            criteria = and(gte(DataModel.DATA_TIMESTAMP, queryTime.getTime() - DEFAUTL_MAX_TIMERANGE),
-                    lte(DataModel.DATA_TIMESTAMP, queryTime.getTime()));
+            criteria = and(lte(DataModel.DATA_TIMESTAMP, queryTime.getTime()));
             sortBson = Sorts.descending(DataModel.DATA_TIMESTAMP);
         } else {
-            criteria = and(gte(DataModel.DATA_TIMESTAMP, queryTime.getTime()),
-                    lte(DataModel.DATA_TIMESTAMP, queryTime.getTime() + DEFAUTL_MAX_TIMERANGE));
+            criteria = and(gte(DataModel.DATA_TIMESTAMP, queryTime.getTime()));
             sortBson = Sorts.ascending(DataModel.DATA_TIMESTAMP);
         }
         // for tc
@@ -387,9 +381,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
         if (startTime.after(endTime)) {
             throw new IllegalArgumentException("StartDate must be earlier than endDate");
         }
-        criteria = and(gte(DataModel.DATA_TIMESTAMP, startTime.getTime()),
-                lt(DataModel.DATA_TIMESTAMP, endTime.getTime()), eq(DataModel.METRIC_CODE, metricCode),
-                eq(DataModel.THING_CODE, thingCode));
+        criteria = and(gte(DataModel.DATA_TIMESTAMP, startTime.getTime()), lt(DataModel.DATA_TIMESTAMP, endTime.getTime()), eq(DataModel.METRIC_CODE, metricCode), eq(DataModel.THING_CODE, thingCode));
         List<DataModel> result = new LinkedList<>();
         if (mongoCollection != null) {
             mongoCollection.find(criteria)
@@ -525,8 +517,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
         } else {
             interval = (endTime - startTime) / (segment - 1);
             //query
-            Bson criteria = and(gte(DataModel.DATA_TIMESTAMP, startTime), lt(DataModel.DATA_TIMESTAMP, endTime),
-                    eq(DataModel.METRIC_CODE, metricCode), in(DataModel.THING_CODE, thingCodes));
+            Bson criteria = and(gte(DataModel.DATA_TIMESTAMP, startTime), lt(DataModel.DATA_TIMESTAMP, endTime), eq(DataModel.METRIC_CODE, metricCode), in(DataModel.THING_CODE, thingCodes));
             iterable = mongoCollection.find(criteria).sort(Sorts.descending(DataModel.DATA_TIMESTAMP));
         }
 
@@ -615,8 +606,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
             mongoCollection = mincollection;
         }
 
-        Bson criteria = and(gte(DataModel.DATA_TIMESTAMP, startTime.getTime()),
-                lt(DataModel.DATA_TIMESTAMP, endTime.getTime()), eq(DataModel.METRIC_CODE, metricCode), in(DataModel.THING_CODE, thingCode));
+        Bson criteria = and(gte(DataModel.DATA_TIMESTAMP, startTime.getTime()), lt(DataModel.DATA_TIMESTAMP, endTime.getTime()), eq(DataModel.METRIC_CODE, metricCode), in(DataModel.THING_CODE, thingCode));
         return mongoCollection.count(criteria);
     }
 
