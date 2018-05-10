@@ -801,6 +801,7 @@ public class StartHandler {
         StartDeviceSignal startDeviceSignal = startService.getStartDeviceSignalById(startSignal.getName());
         MetricModel metricModel = tmlMapper.findMetricByMetricName(startDeviceSignal.getName());
         dataModel.setMetricCode(metricModel.getMetricCode());
+        dataModel.setValue(String.valueOf(value));
         CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(dataModel, SessionContext.getCurrentUser().getRequestId());
         if (cmdSendResponseData.getOkCount() == 0) {
             logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage());
