@@ -19,6 +19,7 @@ import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +27,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+
+import static com.zgiot.common.constants.SubscriptionConstants.*;
 
 /**
  * @author
@@ -1310,6 +1310,111 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
     @Override
     public List<SFSubscriptionCard> getSubCardTypeByUuid(String userUuid) {
         return subscCardTypeMapper.getSubCardTypeByUuid(userUuid);
+    }
+
+    @Override
+    public CardDataDTO getCoalQuality(SubscCardTypeDO subscCardTypeDO) {
+        logger.debug("当班煤质统计：thingCode{}", subscCardTypeDO.getCardParamValue());
+
+        CoalQualityVO coalQualityVO = new CoalQualityVO();
+        coalQualityVO.setCardTitle(subscCardTypeDO.getCardName());
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        int year = calendar.get(Calendar.YEAR);// 获取年份
+        int month = calendar.get(Calendar.MONTH);// 获取月份
+        int day = calendar.get(Calendar.DATE);// 获取日
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);// 获取小时
+
+        coalQualityVO.setDate("" + year + "-" + month + "-" + day);
+
+        if (hour == 6) {
+            coalQualityVO.setShift(NIGHT_SHIFT);
+
+            Date timeBegin = DateUtils.addDays(new Date(), -1);
+            calendar.setTime(timeBegin);
+            calendar.set(Calendar.HOUR_OF_DAY, NIGHT_SHIFT_BEGIN);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            timeBegin = calendar.getTime();
+
+            calendar.setTime(new Date());
+            calendar.set(Calendar.HOUR_OF_DAY, NIGHT_SHIFT_END);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            Date timeEnd = calendar.getTime();
+
+            setTimeRange(coalQualityVO, timeBegin, timeEnd);
+        }
+        if (hour == 18) {
+            coalQualityVO.setShift(WHITE_SHIFT);
+
+            calendar.setTime(new Date());
+            calendar.set(Calendar.HOUR_OF_DAY, WHITE_SHIFT_BEGIN);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            Date timeBegin = calendar.getTime();
+
+            calendar.setTime(new Date());
+            calendar.set(Calendar.HOUR_OF_DAY, WHITE_SHIFT_END);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            Date timeEnd = calendar.getTime();
+
+            setTimeRange(coalQualityVO, timeBegin, timeEnd);
+        }
+
+        String[] cardParamValueArr = subscCardTypeDO.getCardParamValue().split(";");
+        List<CoalQualityVO.MetricData> metricDataList1 = getCoalQualityData(coalQualityVO, cardParamValueArr[0]);
+        List<CoalQualityVO.MetricData> metricDataList2 = getCoalQualityData(coalQualityVO, cardParamValueArr[1]);
+        coalQualityVO.setTermOne(metricDataList1);
+        coalQualityVO.setTermTwo(metricDataList2);
+
+        CardDataDTO cardDataDTO = new CardDataDTO();
+        cardDataDTO.setCardCode(subscCardTypeDO.getCardCode());
+        cardDataDTO.setCardData(JSON.toJSONString(coalQualityVO));
+
+        return cardDataDTO;
+    }
+
+    /**
+     * 设置班次开始和结束时间
+     * @param coalQualityVO
+     * @param timeBegin
+     * @param timeEnd
+     */
+    private void setTimeRange(CoalQualityVO coalQualityVO, Date timeBegin, Date timeEnd) {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        List<Date> dateList = coalAnalysisMapper.getTimeRangeCoalAnalysisRecord(CLEAN_COAL_551, timeBegin, timeEnd);
+        if(dateList != null && !dateList.isEmpty()){
+            coalQualityVO.setTimeBegin(sdf.format(dateList.get(0)));
+            coalQualityVO.setTimeEnd(sdf.format(dateList.get(dateList.size() - 1)));
+        }
+    }
+
+    /**
+     * 获取煤质数据
+     * @param coalQualityVO
+     * @param param
+     * @return
+     */
+    private List<CoalQualityVO.MetricData> getCoalQualityData(CoalQualityVO coalQualityVO, String param) {
+        String[] thingCodeList = param.split(",");
+        CoalAnalysisRecord coalAnalysisClean = coalAnalysisMapper.getTopCoalAnalysisRecord(thingCodeList[0], CLEAN_COAL_AVG_551, new Date());
+        CoalAnalysisRecord coalAnalysisMixed = coalAnalysisMapper.getTopCoalAnalysisRecord(thingCodeList[1], MIXED_COAL_AVG_552, new Date());
+
+        List<CoalQualityVO.MetricData> list = new ArrayList<>();
+        CoalQualityVO.MetricData metricData = coalQualityVO.new MetricData();
+        metricData.setCleanCoalAad(Math.round(coalAnalysisClean.getAad() * 100) / 100 + "");
+        metricData.setMixedCoalQar(Math.round(coalAnalysisMixed.getQnetar()) + "");
+        list.add(metricData);
+
+        return list;
+    }
+
+    @Override
+    public CardDataDTO getProduction(SubscCardTypeDO subscCardTypeDO) {
+        return null;
     }
 
 }
