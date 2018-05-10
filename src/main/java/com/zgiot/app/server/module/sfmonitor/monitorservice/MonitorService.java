@@ -18,4 +18,6 @@ public interface MonitorService {
 
     public Map<String, Boolean> getWrapperMatchRule(String zoneCode);
 
+    public Map<String,Object> byUser(String loginName);
+
 }

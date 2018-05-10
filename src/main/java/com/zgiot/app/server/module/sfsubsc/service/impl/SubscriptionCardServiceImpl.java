@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.zgiot.app.server.module.coalanalysis.mapper.CoalAnalysisMapper;
 import com.zgiot.app.server.module.sfsubsc.entity.dto.CardDataDTO;
+import com.zgiot.app.server.module.sfsubsc.entity.pojo.SFSubscriptionCard;
 import com.zgiot.app.server.module.sfsubsc.entity.pojo.SubscCardTypeDO;
 import com.zgiot.app.server.module.sfsubsc.entity.vo.*;
 import com.zgiot.app.server.module.sfsubsc.enums.CardTypeEnum;
@@ -1301,6 +1302,15 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         return subscCardTypeMapper.getCardTypeByCardCode(cardCode);
     }
 
+    @Override
+    public List<SubscCardTypeDO> getCardTypeByUuid(String userUuid) {
+        return subscCardTypeMapper.getCardTypeByUuid(userUuid);
+    }
+
+    @Override
+    public List<SFSubscriptionCard> getSubCardTypeByUuid(String userUuid) {
+        return subscCardTypeMapper.getSubCardTypeByUuid(userUuid);
+    }
 
 }
 
