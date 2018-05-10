@@ -77,6 +77,9 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
 
     @Override
     public List<DataModel> findHistoryDataList(List<String> thingCodes, List<String> metricCodes, Date startDate, Date endDate) {
+        if (!checkEnabled()) {
+            return Lists.newArrayList();
+        }
         return findHistoryDataList(thingCodes, metricCodes, startDate, endDate, AccuracyEnum.SECOND);
     }
 
@@ -94,7 +97,6 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
         if (!checkEnabled()) {
             return Lists.newArrayList();
         }
-
         Date endDate = new Date(startDate.getTime() + durationMs);
         return findHistoryDataList(thingCodes, metricCodes, startDate, endDate);
     }
@@ -104,6 +106,9 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
      */
     @Override
     public Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment, boolean isTimeCorrection) {
+        if (!checkEnabled()) {
+            return new HashMap<>();
+        }
         return findMultiThingsHistoryDataOfMetricBySegment(thingCodes, metricCode, startDate, endDate, segment, isTimeCorrection, AccuracyEnum.SECOND);
     }
 
@@ -113,6 +118,9 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
      */
     @Override
     public Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetric(List<String> thingCodes, String metricCode, Date startDate, Date endDate) {
+        if (!checkEnabled()) {
+            return new HashMap<>();
+        }
         return findMultiThingsHistoryDataOfMetric(thingCodes, metricCode, startDate, endDate, AccuracyEnum.SECOND);
     }
 
@@ -218,7 +226,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
         } else if (AccuracyEnum.MINUTE.equals(accuracy)) {
             mongoCollection = mincollection;
         }
-        Bson criteria = and(lte(DataModel.DATA_TIMESTAMP, endTime), eq(DataModel.METRIC_CODE, metricCode), eq(DataModel.THING_CODE, thingCode));
+        Bson criteria = and(gte(DataModel.DATA_TIMESTAMP, endTime - 3600 * 24 * 1000), lte(DataModel.DATA_TIMESTAMP, endTime), eq(DataModel.METRIC_CODE, metricCode), eq(DataModel.THING_CODE, thingCode));
         FindIterable<Document> iterable = mongoCollection.find(criteria).sort(Sorts.descending(DataModel.DATA_TIMESTAMP)).limit(1);
         for (Document document : iterable) {
             DataModel model = new DataModel();
@@ -279,6 +287,9 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
 
     @Override
     public DataModel findClosestHistoryData(List<String> thingCodes, List<String> metricCodes, Date queryTime) {
+        if (!checkEnabled()) {
+            return null;
+        }
         DataModel closestHistoryDataBeforeTime = findClosestHistoryDataInDuration(thingCodes, metricCodes, queryTime, QUERY_TIME_TYPE_BEFORE);
         DataModel closestHistoryDataAfterTime = findClosestHistoryDataInDuration(thingCodes, metricCodes, queryTime, QUERY_TIME_TYPE_AFTER);
         if (closestHistoryDataAfterTime != null && closestHistoryDataBeforeTime != null) {
@@ -298,6 +309,9 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
 
     @Override
     public DataModel findMaxValueDataInDuration(String thingCode, String metricCode, Date startTime, Date endTime) {
+        if (!checkEnabled()) {
+            return null;
+        }
         List<DataModel> result = getDataListInDuration(thingCode, metricCode, startTime, endTime, AccuracyEnum.SECOND);
         if (!result.isEmpty()) {
             Optional<DataModel> max = result.stream().max((o1, o2) -> {
@@ -316,6 +330,9 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
 
     @Override
     public Double findAvgValueDataInDuration(String thingCode, String metricCode, Date startTime, Date endTime) {
+        if (!checkEnabled()) {
+            return null;
+        }
         List<DataModel> resultList = getDataListInDuration(thingCode, metricCode, startTime, endTime, AccuracyEnum.SECOND);
         if (CollectionUtils.isEmpty(resultList)) {
             return null;
@@ -575,6 +592,9 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
 
     @Override
     public Long getDataBatchCount(Date startTime, Date endTime, String thingCode, String metricCode, AccuracyEnum accuracy) {
+        if (!checkEnabled()) {
+            return null;
+        }
         MongoCollection<Document> mongoCollection = null;
         if (AccuracyEnum.SECOND.equals(accuracy)) {
             mongoCollection = collection;
@@ -588,7 +608,9 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
 
     @Override
     public List<DataModel> findHistoryDataList(List<String> thingCodes, List<String> metricCodes, Date startDate, Date endDate, AccuracyEnum accuracy) {
-
+        if (!checkEnabled()) {
+            return Lists.newArrayList();
+        }
         MongoCollection<Document> mongoCollection = null;
         if (AccuracyEnum.SECOND.equals(accuracy)) {
             mongoCollection = collection;
@@ -634,6 +656,9 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
 
     @Override
     public Double findAvgValueDataInDuration(String thingCode, String metricCode, Date startDate, Date endDate, AccuracyEnum accuracyEnum) {
+        if (!checkEnabled()) {
+            return null;
+        }
         List<DataModel> resultList = getDataListInDuration(thingCode, metricCode, startDate, endDate, accuracyEnum);
         if (CollectionUtils.isEmpty(resultList)) {
             return null;
