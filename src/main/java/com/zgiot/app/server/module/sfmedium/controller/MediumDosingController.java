@@ -423,9 +423,9 @@ public class MediumDosingController {
             } else if (metricDataValue.equals("1")) {
                 DataModel dataModel = new DataModel();
                 dataModel.setThingCode(mediumDosingConfigDO.getMediumdosingpumpCode());
-                dataModel.setMetricCode(MetricCodes.MEDIUM_DOSING);
+                dataModel.setMetricCode(MetricCodes.JJ_ADD);
                 dataModel.setValue("1");
-                logger.info("下发信号 thingCode：{},metricCode：{},value：1 ", mediumDosingConfigDO.getMediumdosingpumpCode(), MetricCodes.MEDIUM_DOSING);
+                logger.info("下发信号 thingCode：{},metricCode：{},value：1 ", mediumDosingConfigDO.getMediumdosingpumpCode(), MetricCodes.JJ_ADD);
                 CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(dataModel, SessionContext.getCurrentUser().getRequestId());
                 if (cmdSendResponseData.getOkCount() == 0) {
                     logger.error(cmdSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
@@ -696,15 +696,12 @@ public class MediumDosingController {
      */
     private String getSeparatingSystemMediumDosingState(MediumDosingConfigDO mediumDosingConfigDO) {
         String mediumDosingState = "";
-        String runState = getMetricDataValue(mediumDosingConfigDO.getMediumdosingpumpCode(), MetricCodes.RUN_STATE);
-        String tapOpen = getMetricDataValue(mediumDosingConfigDO.getChangevalueCode(), MetricCodes.TAP_OPEN);
-        String tapClose = getMetricDataValue(mediumDosingConfigDO.getChangevalueCode(), MetricCodes.TAP_CLOSE);
-        if (StringUtils.isNotEmpty(runState) && StringUtils.isNotEmpty(tapClose) && StringUtils.isNotEmpty(tapOpen) && runState.equals("2") && tapOpen.equals("1") && tapClose.equals("0")) {
+        String addingMetricDataValue = getMetricDataValue(mediumDosingConfigDO.getCombinedbucketCode(), MetricCodes.ADDING);
+        String mixingMetricDataValue = getMetricDataValue(mediumDosingConfigDO.getCombinedbucketCode(), MetricCodes.MIXING);
+        if (StringUtils.isNotEmpty(addingMetricDataValue) && "1".equals(addingMetricDataValue)) {
             mediumDosingState = "1";
         }
-        String mediumDosing = getMetricDataValue(mediumDosingConfigDO.getCombinedbucketCode(), MetricCodes.MEDIUM_DOSING);
-        String poolState = getMetricDataValue(mediumDosingConfigDO.getMediumpoolCode(), MetricCodes.STATE);
-        if (StringUtils.isNotEmpty(runState) && StringUtils.isNotEmpty(poolState) && StringUtils.isEmpty(mediumDosing) && runState.equals("1") && poolState.equals("0") && mediumDosing.equals("1")) {
+        if (StringUtils.isNotEmpty(mixingMetricDataValue) && "1".equals(mixingMetricDataValue)) {
             mediumDosingState = "0";
         }
         return mediumDosingState;
