@@ -18,6 +18,7 @@ SET FOREIGN_KEY_CHECKS=0;
 -- ----------------------------
 -- Table structure for s_user_role
 -- ----------------------------
+DROP TABLE IF EXISTS `s_user_role`;
 CREATE TABLE `s_user_role` (
   `role_id` bigint(20) NOT NULL,
   `user_id` bigint(20) NOT NULL,

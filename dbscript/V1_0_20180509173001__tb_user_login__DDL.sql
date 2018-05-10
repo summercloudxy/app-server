@@ -10,20 +10,20 @@ Target Server Type    : MYSQL
 Target Server Version : 50528
 File Encoding         : 65001
 
-Date: 2018-04-26 13:42:46
+Date: 2018-05-09 17:24:01
 */
 
 SET FOREIGN_KEY_CHECKS=0;
 
 -- ----------------------------
--- Table structure for s_role
+-- Table structure for tb_user_login
 -- ----------------------------
-CREATE TABLE `s_role` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `alias` varchar(200) DEFAULT NULL,
-  `remark` varchar(255) DEFAULT NULL,
+CREATE TABLE `tb_user_login` (
+  `user_uuid` varchar(50) NOT NULL,
+  `platclient_id` int(11) DEFAULT NULL COMMENT '终端:1-web;2-pad;3-手机',
+  `token` varchar(300) DEFAULT NULL,
   `update_date` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8;
+  `ip_address` varchar(16) DEFAULT NULL COMMENT 'pad端ip地址',
+  `mac_address` varchar(32) DEFAULT NULL COMMENT 'mac地址'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 SET FOREIGN_KEY_CHECKS=1;
