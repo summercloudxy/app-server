@@ -255,10 +255,10 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
             throw new IllegalArgumentException("query time required.");
         }
         if (QUERY_TIME_TYPE_BEFORE.equals(queryType)) {
-            criteria = and(lte(DataModel.DATA_TIMESTAMP, queryTime.getTime()));
+            criteria = and(gte(DataModel.DATA_TIMESTAMP, queryTime.getTime() - 3600 * 24 * 1000), lte(DataModel.DATA_TIMESTAMP, queryTime.getTime()));
             sortBson = Sorts.descending(DataModel.DATA_TIMESTAMP);
         } else {
-            criteria = and(gte(DataModel.DATA_TIMESTAMP, queryTime.getTime()));
+            criteria = and(gte(DataModel.DATA_TIMESTAMP, queryTime.getTime()), lte(DataModel.DATA_TIMESTAMP, queryTime.getTime() + 3600 * 24 * 1000));
             sortBson = Sorts.ascending(DataModel.DATA_TIMESTAMP);
         }
         // for tc
