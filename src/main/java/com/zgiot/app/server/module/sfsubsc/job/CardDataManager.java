@@ -3,6 +3,7 @@ package com.zgiot.app.server.module.sfsubsc.job;
 import com.zgiot.app.server.module.sfsubsc.entity.dto.CardDataDTO;
 import com.zgiot.app.server.module.sfsubsc.entity.pojo.SubscCardTypeDO;
 import com.zgiot.app.server.module.sfsubsc.enums.CardTypeEnum;
+import com.zgiot.app.server.module.sfsubsc.service.SFSubscriptionCardService;
 import com.zgiot.app.server.module.sfsubsc.service.SubscCardTypeService;
 import com.zgiot.app.server.module.sfsubsc.service.feign.CloudServerFeignClient;
 import com.zgiot.common.restcontroller.ServerResponse;
@@ -38,11 +39,10 @@ public class CardDataManager {
 
     @Autowired
     private CloudServerFeignClient cloudServerFeignClient;
-
-
-
     @Autowired
     private SubscCardTypeService subscCardTypeService;
+    @Autowired
+    private SFSubscriptionCardService sfSubscriptionCardService;
 
     /**
      * 历史入洗量，历史产品量，仓位信息，化验数据 10s刷新
@@ -78,6 +78,8 @@ public class CardDataManager {
 
         }
 
+        logger.info("开始卡片历史10S数据同步AppServer");
+        sfSubscriptionCardService.updateSubCard(cardDataDTOS);
 
     }
 
@@ -110,7 +112,7 @@ public class CardDataManager {
                 cardDataDTOS.add(cardDataDTO);
             }
         }
-        logger.info("开始卡片历史5S数据上传CloudServer");
+        logger.info("开始卡片实时5S数据上传CloudServer");
         try {
             ServerResponse serverResponse = cloudServerFeignClient.saveAllCardDatas(cardDataDTOS, AUTHORIZATION_PRIFIX + authorization);
             if (serverResponse.getCode() == 0) {
@@ -121,6 +123,9 @@ public class CardDataManager {
             logger.error(e.getMessage());
             logger.error("5s连接cloudserver异常.URL:" + cloudServiceUrl + cloudServerPath);
         }
+
+        logger.info("开始卡片实时5S数据同步AppServer");
+        sfSubscriptionCardService.updateSubCard(cardDataDTOS);
 
     }
 

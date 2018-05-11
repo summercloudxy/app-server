@@ -1,0 +1,17 @@
+INSERT INTO `tb_pad_module` VALUES ('13', '看板', 'ZGIOT_PAD_PORTAL', 'kb', 'pad_kanban', 'kb', 'self');
+INSERT INTO `tb_pad_module` VALUES ('14', '报警', 'ZGIOT_PAD_PORTAL', 'bj', 'pad_alert', 'bj', 'self');
+INSERT INTO `tb_pad_module` VALUES ('15', '启停', 'ZGIOT_PAD_PORTAL', 'qt', 'pad_startstop', 'qt', 'self');
+INSERT INTO `tb_pad_module` VALUES ('16', '压滤', 'ZGIOT_PAD_PORTAL', 'yl', 'pad_filterpress', 'yl', 'self');
+INSERT INTO `tb_pad_module` VALUES ('17', '鼓风', 'ZGIOT_PAD_PORTAL', 'gf', 'pad_bellows', 'gf', 'self');
+INSERT INTO `tb_pad_module` VALUES ('18', 'TCS', 'ZGIOT_PAD_PORTAL', 'tcs', 'pad_tcs', 'tcs', 'self');
+INSERT INTO `tb_pad_module` VALUES ('19', '任务', 'ZGIOT_PAD_PORTAL', 'rw', 'pad_task', 'rw', 'self');
+INSERT INTO `tb_pad_module` VALUES ('20', '煤质化检', 'ZGIOT_PAD_PORTAL', 'mzhj', 'pad_mzhj', 'mzhj', 'self');
+INSERT INTO `tb_pad_module` VALUES ('21', '加介', 'ZGIOT_PAD_PORTAL', 'jj', 'pad_jiajie', 'jj', 'self');
+INSERT INTO `tb_pad_module` VALUES ('22', '系统', 'ZGIOT_PAD_BACKEND', 'xt', 'pad_system', 'xt', 'blank');
+INSERT INTO `tb_pad_module` VALUES ('23', '审批', 'ZGZX_SERVER', 'sp', 'pad_approval', 'sp', '');
+INSERT INTO `tb_pad_module` VALUES ('24', '汇报', 'ZGZX_SERVER', 'hb', 'pad_report', 'hb', null);
+INSERT INTO `tb_pad_module` VALUES ('25', '会议', 'ZGZX_SERVER', 'hy', 'pad_meeting', 'hy', null);
+INSERT INTO `tb_pad_module` VALUES ('26', '浅槽', 'ZGIOT_PAD_PORTAL', 'qc', 'pad_shallowgroove', 'qc', null);
+INSERT INTO `tb_pad_module` VALUES ('27', '旋流器', 'ZGIOT_PAD_PORTAL', 'xlq', 'pad_whirlcone', 'xlq', null);
+INSERT INTO `tb_pad_module` VALUES ('28', '监控', 'ZGIOT_PAD_PORTAL', 'jk', 'pad_monitor', 'jk', null);
+INSERT INTO `tb_pad_module` VALUES ('29', '数质量', 'ZGIOT_PAD_PORTAL', 'szl', 'pad_product', 'szl', null);

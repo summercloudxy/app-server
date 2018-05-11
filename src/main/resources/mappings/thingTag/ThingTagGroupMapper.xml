@@ -20,16 +20,16 @@
         WHERE
         1 = 1
         <if test="thingTagGroupId != null">
-            id = #{thingTagGroupId}
+            AND id = #{thingTagGroupId}
         </if>
         <if test="code != null">
-            code = #{code}
+            AND code = #{code}
         </if>
         <if test="tagGroupName != null">
-            tag_group_name = #{tagGroupName}
+            AND tag_group_name = #{tagGroupName}
         </if>
         <if test="createDate != null">
-            create_date = #{createDate}
+            AND create_date = #{createDate}
         </if>
     </select>
 
