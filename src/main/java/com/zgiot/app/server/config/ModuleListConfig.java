@@ -28,12 +28,12 @@ public class ModuleListConfig {
 
     @PostConstruct
     void init() {
-        if (StringUtils.isBlank(moduleListStr)) {
+        if (StringUtils.isBlank(this.moduleListStr)) {
             logger.error("Module list is required. ");
             return;
         }
 
-        String[] arr = moduleListStr.split(",");
+        String[] arr = this.moduleListStr.split(",");
         for (String str : arr) {
             str = str.trim().toUpperCase();
             configedModules.add(str);
@@ -41,7 +41,7 @@ public class ModuleListConfig {
     }
 
     public boolean containModule(String moduleName) {
-        if (configedModules.contains(MODULE_ALL)){
+        if (configedModules.contains(MODULE_ALL)) {
             return true;
         }
 
