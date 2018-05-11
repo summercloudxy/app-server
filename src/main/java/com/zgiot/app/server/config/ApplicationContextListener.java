@@ -121,8 +121,10 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
 
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
                 || moduleListConfig.containModule(ModuleListConfig.MODULE_FILTERPRESS)) {
+            filterPressManager.initFilterPress();
             processor.addListener(filterPressListener);
         }
+
 
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
                 || moduleListConfig.containModule(ModuleListConfig.MODULE_DENSITY_CONTROL)) {
