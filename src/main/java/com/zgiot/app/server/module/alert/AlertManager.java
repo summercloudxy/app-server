@@ -944,9 +944,9 @@ public class AlertManager {
             excluStage = AlertConstants.STAGE_RELEASE;
             filterCondition.setExcluStage(excluStage);
         }
-        if (filterCondition.getTypes() != null) {
-            filterCondition.getTypes().add(AlertConstants.TYPE_USER);
-        }
+//        if (filterCondition.getTypes() != null) {
+//            filterCondition.getTypes().add(AlertConstants.TYPE_USER);
+//        }
         List<AlertRecord> alertRecords =
                 alertMapper.getAlertDataListGroupByThing(filterCondition);
         sortRecords(filterCondition.getSortType(), alertRecords);
