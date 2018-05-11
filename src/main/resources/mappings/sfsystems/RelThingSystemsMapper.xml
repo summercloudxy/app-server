@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.equipments.mapper.TBSystemMapper">
+    <resultMap id="relThingSystem" type="com.zgiot.app.server.module.equipments.pojo.RelThingSystem">
+        <result column="id" property="id"/>
+        <result column="thing_code" property="thingCode"/>
+        <result column="system_id" property="systemId"/>
+        <result column="update_time" property="updateDate"/>
+    </resultMap>
+    <select id="getThingCodeBySystemId" resultType="java.lang.String">
+        SELECT t1.thing_code
+        FROM rel_thing_system t1,tb_thing t2
+        WHERE t1.thing_code = t2.thing_code
+        AND t2.thing_type1_code = 'DEVICE'
+        AND t1.system_id IN
+        <foreach collection="systemIdList" item="systemId" index="index"
+                 open="(" close=")" separator=",">
+            #{systemId}
+        </foreach>
+    </select>
+
+</mapper>
