@@ -424,3 +424,19 @@ CREATE TABLE `tb_start_type_set_pararmeter`  (
   `start_type` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '0正常 1带载',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 111 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '启车启动条件设定参数表' ROW_FORMAT = Compact;
+
+CREATE TABLE `tb_start_production_system`  (
+  `object_id` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `system_name` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '生产线名称',
+  `parent_system_id` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '上一级系统id',
+  `level` int(11) NULL DEFAULT NULL COMMENT '系统层级',
+  `description` tinytext CHARACTER SET utf8 COLLATE utf8_general_ci NULL,
+  `node_level` int(11) NULL DEFAULT NULL,
+  `seqno` int(11) NULL DEFAULT NULL COMMENT '排序索引',
+  `create_user` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `create_date` datetime(0) NULL DEFAULT NULL,
+  `update_user` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `update_date` datetime(0) NULL DEFAULT NULL,
+  `state` tinyint(4) NULL DEFAULT NULL,
+  PRIMARY KEY (`object_id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '生产系统' ROW_FORMAT = Compact;
