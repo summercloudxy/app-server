@@ -143,7 +143,7 @@ public class CardDataManager {
                 cardDataDTO = subscCardTypeService.getCoalQuality(subscCardTypeDO);
                 cardDataDTOS.add(cardDataDTO);
             } else if (subscCardTypeDO.getCardType().equals(CardTypeEnum.PRODUCTION.getCardCode())) {
-                // TODO 当班生产统计
+                // 当班生产统计
                 cardDataDTO = subscCardTypeService.getProduction(subscCardTypeDO);
                 cardDataDTOS.add(cardDataDTO);
             }

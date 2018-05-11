@@ -81,14 +81,14 @@ public enum CardTypeEnum {
     INTELLIGENT_ALARM("zngj", "智能告警"),
 
     /**
-     * 当班煤质统计
+     * 班累计煤质统计
      */
-    COAL_QUALITY("dbmz", "当班煤质"),
+    COAL_QUALITY("mztj", "班累计煤质统计"),
 
     /**
-     * 当班生产统计
+     * 班累计生产统计
      */
-    PRODUCTION("dbsc", "当班生产");
+    PRODUCTION("sctj", "班累计生产统计");
 
 
     private String cardCode;

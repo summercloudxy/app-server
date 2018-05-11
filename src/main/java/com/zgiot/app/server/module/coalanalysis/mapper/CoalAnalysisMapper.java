@@ -49,13 +49,13 @@ public interface CoalAnalysisMapper {
     /**
      * 查询某个设备某个时间内的最新的化验数据
      *
-     * @param sample
+     * @param system
      * @param target
      * @param time
      * @return
      */
-    @Select("select * from tb_coal_analysis where sample = #{sample} and target = #{target} and time <= #{time} ORDER BY time DESC LIMIT 1")
-    CoalAnalysisRecord getTopCoalAnalysisRecord(@Param("sample") String sample, @Param("target") String target, @Param("time") Date time);
+    @Select("select * from tb_coal_analysis where system = #{system} and target = #{target} and time <= #{time} ORDER BY time DESC LIMIT 1")
+    CoalAnalysisRecord getTopCoalAnalysisRecord(@Param("system") int system, @Param("target") String target, @Param("time") Date time);
 
     /**
      * 查询某个时间段内的所有时间
@@ -65,7 +65,21 @@ public interface CoalAnalysisMapper {
      * @param timeEnd
      * @return
      */
-    @Select("select * from tb_coal_analysis where target = #{target} and time >= #{timeBegin} and time <= #{timeEnd} ORDER BY time")
-    List<Date> getTimeRangeCoalAnalysisRecord(@Param("target") String target, @Param("timeBegin") Date timeBegin, @Param("timeEnd") Date timeEnd);
+    @Select("select time from tb_coal_analysis where target = #{target} and time >= #{timeBegin} and time <= #{timeEnd} ORDER BY time")
+    List<Date> getTimeRangeTime(@Param("target") String target, @Param("timeBegin") Date timeBegin, @Param("timeEnd") Date timeEnd);
+
+    /**
+     * 查询某个时间段内记录的平均值
+     *
+     * @param system
+     * @param target
+     * @param timeBegin
+     * @param timeEnd
+     * @return
+     */
+    @Select("select AVG(aad) as aad,AVG(mt) as mt,AVG(stad) as stad,AVG(qnetar) as qnetar from tb_coal_analysis " +
+            "where system = #{system} and target = #{target} and time >= #{timeBegin} and time <= #{timeEnd} ORDER BY time")
+    CoalAnalysisRecord getTimeRangeCoalAnalysisRecordAVG(@Param("system") Integer system, @Param("target") String target,
+                                                         @Param("timeBegin") Date timeBegin, @Param("timeEnd") Date timeEnd);
 
 }

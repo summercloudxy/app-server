@@ -1315,7 +1315,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
     @Override
     public CardDataDTO getCoalQuality(SubscCardTypeDO subscCardTypeDO) {
-        logger.debug("当班煤质统计：thingCode{}", subscCardTypeDO.getCardParamValue());
+        logger.debug("班累计煤质统计：thingCode{}", subscCardTypeDO.getCardParamValue());
 
         CoalQualityVO coalQualityVO = new CoalQualityVO();
         coalQualityVO.setCardTitle(subscCardTypeDO.getCardName());
@@ -1329,7 +1329,9 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
         coalQualityVO.setDate("" + year + "-" + month + "-" + day);
 
-        if (hour == 6) {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        List<Date> dateList = null;
+        if (hour == 6) {// 夜班
             coalQualityVO.setShift(NIGHT_SHIFT);
 
             Date timeBegin = DateUtils.addDays(new Date(), -1);
@@ -1345,9 +1347,10 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             calendar.set(Calendar.SECOND, 0);
             Date timeEnd = calendar.getTime();
 
-            setTimeRange(coalQualityVO, timeBegin, timeEnd);
+            // 获取班次所有时间
+            dateList = coalAnalysisMapper.getTimeRangeTime(MIXE_COAL_552, timeBegin, timeEnd);
         }
-        if (hour == 18) {
+        if (hour == 18) {// 白班
             coalQualityVO.setShift(WHITE_SHIFT);
 
             calendar.setTime(new Date());
@@ -1362,12 +1365,17 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             calendar.set(Calendar.SECOND, 0);
             Date timeEnd = calendar.getTime();
 
-            setTimeRange(coalQualityVO, timeBegin, timeEnd);
+            // 获取班次所有时间
+            dateList = coalAnalysisMapper.getTimeRangeTime(MIXE_COAL_552, timeBegin, timeEnd);
+        }
+        // 设置班次时间
+        if(dateList != null && !dateList.isEmpty()){
+            coalQualityVO.setTimeBegin(sdf.format(dateList.get(0)));
+            coalQualityVO.setTimeEnd(sdf.format(dateList.get(dateList.size() - 1)));
         }
 
-        String[] cardParamValueArr = subscCardTypeDO.getCardParamValue().split(";");
-        List<CoalQualityVO.MetricData> metricDataList1 = getCoalQualityData(coalQualityVO, cardParamValueArr[0]);
-        List<CoalQualityVO.MetricData> metricDataList2 = getCoalQualityData(coalQualityVO, cardParamValueArr[1]);
+        List<CoalQualityVO.MetricData> metricDataList1 = getCoalQualityData(coalQualityVO, SYSTEM_ONE);
+        List<CoalQualityVO.MetricData> metricDataList2 = getCoalQualityData(coalQualityVO, SYSTEM_TWO);
         coalQualityVO.setTermOne(metricDataList1);
         coalQualityVO.setTermTwo(metricDataList2);
 
@@ -1379,36 +1387,30 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
     }
 
     /**
-     * 设置班次开始和结束时间
-     * @param coalQualityVO
-     * @param timeBegin
-     * @param timeEnd
-     */
-    private void setTimeRange(CoalQualityVO coalQualityVO, Date timeBegin, Date timeEnd) {
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-        List<Date> dateList = coalAnalysisMapper.getTimeRangeCoalAnalysisRecord(CLEAN_COAL_551, timeBegin, timeEnd);
-        if(dateList != null && !dateList.isEmpty()){
-            coalQualityVO.setTimeBegin(sdf.format(dateList.get(0)));
-            coalQualityVO.setTimeEnd(sdf.format(dateList.get(dateList.size() - 1)));
-        }
-    }
-
-    /**
      * 获取煤质数据
      * @param coalQualityVO
-     * @param param
+     * @param system
      * @return
      */
-    private List<CoalQualityVO.MetricData> getCoalQualityData(CoalQualityVO coalQualityVO, String param) {
-        String[] thingCodeList = param.split(",");
-        CoalAnalysisRecord coalAnalysisClean = coalAnalysisMapper.getTopCoalAnalysisRecord(thingCodeList[0], CLEAN_COAL_AVG_551, new Date());
-        CoalAnalysisRecord coalAnalysisMixed = coalAnalysisMapper.getTopCoalAnalysisRecord(thingCodeList[1], MIXED_COAL_AVG_552, new Date());
+    private List<CoalQualityVO.MetricData> getCoalQualityData(CoalQualityVO coalQualityVO, int system) {
+        CoalAnalysisRecord coalAnalysisClean = coalAnalysisMapper.getTopCoalAnalysisRecord(system, CLEAN_COAL_AVG_551, new Date());
+        CoalAnalysisRecord coalAnalysisMixed = coalAnalysisMapper.getTopCoalAnalysisRecord(system, MIXED_COAL_AVG_552, new Date());
 
         List<CoalQualityVO.MetricData> list = new ArrayList<>();
         CoalQualityVO.MetricData metricData = coalQualityVO.new MetricData();
         DecimalFormat df = new DecimalFormat("#0.00");
-        metricData.setCleanCoalAad(df.format(coalAnalysisClean.getAad()));
+
+        Double aad = coalAnalysisClean.getAad();
+        metricData.setCleanCoalAad(df.format(aad == null ? 0.0 : aad));
         metricData.setMixedCoalQar(Math.round(coalAnalysisMixed.getQnetar()) + "");
+
+        // 判断精煤灰分是否异常
+        String[] aadArr = ASH_CONTENT_CLEAN_COAL_SCOPE.split("-");
+        if(aad >= new Double(aadArr[0]) && aad <= new Double(aadArr[1])){
+            metricData.setUnusual("0");// 正常
+        } else {
+            metricData.setUnusual("1");// 异常
+        }
         list.add(metricData);
 
         return list;
@@ -1416,7 +1418,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
     @Override
     public CardDataDTO getProduction(SubscCardTypeDO subscCardTypeDO) {
-        logger.debug("当班生产统计：thingCode{}", subscCardTypeDO.getCardParamValue());
+        logger.debug("班累计生产统计：thingCode{}", subscCardTypeDO.getCardParamValue());
 
         ProductionVO productionVO = new ProductionVO();
         productionVO.setCardTitle(subscCardTypeDO.getCardName());
@@ -1456,14 +1458,20 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         productionVO.setRawCoal(Math.round(rawCoal) + "");
 
         DecimalFormat df = new DecimalFormat("#0.00");
+
+        String cleanCoalYield = "0";
+        String mixedCoalYield = "0";
+        String coalMudYield = "0";
+        if(rawCoal != 0){
+            cleanCoalYield = df.format(cleanCoal / rawCoal * 100);
+            mixedCoalYield = df.format(mixedCoal / rawCoal * 100);
+            coalMudYield = df.format(coalMud / rawCoal * 100);
+        }
         // 精煤产率
-        String cleanCoalYield = df.format(cleanCoal / rawCoal * 100);
         productionVO.setCleanCoalYield(cleanCoalYield);
         // 混煤产率
-        String mixedCoalYield = df.format(mixedCoal / rawCoal * 100);
         productionVO.setMixedCoalYield(mixedCoalYield);
         // 煤泥产率
-        String coalMudYield = df.format(coalMud / rawCoal * 100);
         productionVO.setCoalMudYield(coalMudYield);
         // 综合产率
         productionVO.setTotalYield(cleanCoalYield + mixedCoalYield + coalMudYield);

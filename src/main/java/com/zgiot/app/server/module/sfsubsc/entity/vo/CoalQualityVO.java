@@ -48,6 +48,10 @@ public class CoalQualityVO {
          * 混煤发热量
          */
         private String mixedCoalQar;
+        /**
+         * 是否异常:0正常,1异常
+         */
+        private String unusual;
 
         public String getCleanCoalAad() {
             return cleanCoalAad;
@@ -63,6 +67,14 @@ public class CoalQualityVO {
 
         public void setMixedCoalQar(String mixedCoalQar) {
             this.mixedCoalQar = mixedCoalQar;
+        }
+
+        public String getUnusual() {
+            return unusual;
+        }
+
+        public void setUnusual(String unusual) {
+            this.unusual = unusual;
         }
     }
 
