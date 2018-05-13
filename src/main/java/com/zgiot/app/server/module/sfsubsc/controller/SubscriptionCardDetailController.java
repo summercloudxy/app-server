@@ -67,5 +67,28 @@ public class SubscriptionCardDetailController {
         return coalAnalysisDataDetailHandler.getCoalAnalysisDataChartDetail(cardCode, dateType, chartType);
     }
 
+    /**
+     * 班累计煤质统计详情
+     *
+     * @param date 日期
+     * @param shift 班次
+     * @return
+     */
+    @RequestMapping(value = "/getCoalQualityDetail", method = RequestMethod.GET)
+    public ResponseEntity<String> getCoalQualityDetail(@RequestParam("date") String date, @RequestParam("shift") String shift) {
+        return new ResponseEntity<>(ServerResponse.buildOkJson(coalAnalysisDataDetailHandler.getCoalQualityDetail(date, shift)), HttpStatus.OK);
+    }
+
+    /**
+     * 班累计生产统计详情
+     *
+     * @param date 日期
+     * @param shift 班次
+     * @return
+     */
+    @RequestMapping(value = "/getProductionDetail", method = RequestMethod.GET)
+    public ResponseEntity<String> getProductionDetail(@RequestParam("date") String date, @RequestParam("shift") String shift) {
+        return new ResponseEntity<>(ServerResponse.buildOkJson(coalAnalysisDataDetailHandler.getProductionDetail(date, shift)), HttpStatus.OK);
+    }
 
 }

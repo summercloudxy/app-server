@@ -111,6 +111,14 @@ public class SubscriptionController {
                 MixtureOfRawCoalVO mixtureOfRawCoalVO =
                         JSON.parseObject(SFSubscriptionCard.getCardData(), MixtureOfRawCoalVO.class);
                 list.add(new CardDataBeanDTO(cardCode, mixtureOfRawCoalVO));
+            } else if (CardTypeEnum.COAL_QUALITY.getCardCode().equals(cardType)) {
+                CoalQualityVO coalQualityVO =
+                        JSON.parseObject(SFSubscriptionCard.getCardData(), CoalQualityVO.class);
+                list.add(new CardDataBeanDTO(cardCode, coalQualityVO));
+            } else if (CardTypeEnum.PRODUCTION.getCardCode().equals(cardType)) {
+                ProductionVO productionVO =
+                        JSON.parseObject(SFSubscriptionCard.getCardData(), ProductionVO.class);
+                list.add(new CardDataBeanDTO(cardCode, productionVO));
             }
         }
         return new ResponseEntity<>(ServerResponse.buildOkJson(list), HttpStatus.OK);

@@ -18,6 +18,7 @@ import com.zgiot.app.server.module.filterpress.FilterPressManager;
 import com.zgiot.app.server.module.historydata.job.HistoryMinDataJob;
 import com.zgiot.app.server.module.reportforms.input.listener.ReportFormsCompleter;
 import com.zgiot.app.server.module.sfsubsc.job.UploadHistorySubscCardDatas;
+import com.zgiot.app.server.module.sfsubsc.job.UploadProductionSubscCardDatas;
 import com.zgiot.app.server.module.sfsubsc.job.UploadSubscCardDatas;
 import com.zgiot.app.server.service.impl.HistoryDataPersistDaemon;
 import com.zgiot.app.server.service.impl.QuartzManager;
@@ -164,6 +165,9 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
 
                 QuartzManager.addJob("uploadsubscCardDatasOf10s", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf10s",
                         ModuleListConfig.MODULE_SUBSCRIPTION, UploadHistorySubscCardDatas.class, "0/10 * * * * ?");
+
+            QuartzManager.addJob("uploadsubscCardDatasOf6oclock", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf6oclock",
+                    ModuleListConfig.MODULE_SUBSCRIPTION, UploadProductionSubscCardDatas.class, "0 0 6,18 * * ?");
 
         }
 

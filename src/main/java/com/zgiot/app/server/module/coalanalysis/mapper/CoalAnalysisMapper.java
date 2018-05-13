@@ -19,7 +19,7 @@ public interface CoalAnalysisMapper {
 
     CoalAnalysisRecord getRecentRecord(CoalAnalysisRecord record);
 
-    CoalAnalysisRecord getLastRecordOnDuty(@Param("record") CoalAnalysisRecord record,@Param("endTime") Date dutyEndTime);
+    CoalAnalysisRecord getLastRecordOnDuty(@Param("record") CoalAnalysisRecord record, @Param("endTime") Date dutyEndTime);
 
     void updateRecordWithOutDensityAndFlow(@Param("record") CoalAnalysisRecord record);
 
@@ -27,7 +27,7 @@ public interface CoalAnalysisMapper {
 
     void updateRecordDensityAndFlow(CoalAnalysisRecord record);
 
-    void insertDetailDensityAndFlowValues(@Param("list") List<DensityAndFlowInfo> densityAndFlowValues,@Param("analysisId")Integer id);
+    void insertDetailDensityAndFlowValues(@Param("list") List<DensityAndFlowInfo> densityAndFlowValues, @Param("analysisId") Integer id);
 
     List<DensityAndFlowSourceInfo> getDensityAndFlowSourceInfo();
 
@@ -46,6 +46,40 @@ public interface CoalAnalysisMapper {
     @Select("select * from tb_coal_analysis where sample =#{sample} and  target =#{target} ORDER BY time DESC  LIMIT 0,2")
     List<CoalAnalysisRecord> getTop2CoalAnalysisRecord(@Param("sample") String sample, @Param("target") String target);
 
+    /**
+     * 查询某个设备某个时间内的最新的化验数据
+     *
+     * @param system
+     * @param target
+     * @param time
+     * @return
+     */
+    @Select("select * from tb_coal_analysis where system = #{system} and target = #{target} and time <= #{time} ORDER BY time DESC LIMIT 1")
+    CoalAnalysisRecord getTopCoalAnalysisRecord(@Param("system") int system, @Param("target") String target, @Param("time") Date time);
 
+    /**
+     * 查询某个时间段内的所有时间
+     *
+     * @param target
+     * @param timeBegin
+     * @param timeEnd
+     * @return
+     */
+    @Select("select time from tb_coal_analysis where target = #{target} and time >= #{timeBegin} and time <= #{timeEnd} ORDER BY time")
+    List<Date> getTimeRangeTime(@Param("target") String target, @Param("timeBegin") Date timeBegin, @Param("timeEnd") Date timeEnd);
+
+    /**
+     * 查询某个时间段内记录的平均值
+     *
+     * @param system
+     * @param target
+     * @param timeBegin
+     * @param timeEnd
+     * @return
+     */
+    @Select("select AVG(aad) as aad,AVG(mt) as mt,AVG(stad) as stad,AVG(qnetar) as qnetar from tb_coal_analysis " +
+            "where system = #{system} and target = #{target} and time >= #{timeBegin} and time <= #{timeEnd} ORDER BY time")
+    CoalAnalysisRecord getTimeRangeCoalAnalysisRecordAVG(@Param("system") Integer system, @Param("target") String target,
+                                                         @Param("timeBegin") Date timeBegin, @Param("timeEnd") Date timeEnd);
 
 }

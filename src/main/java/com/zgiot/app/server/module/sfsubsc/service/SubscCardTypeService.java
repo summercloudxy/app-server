@@ -131,4 +131,20 @@ public interface SubscCardTypeService {
      */
     List<SFSubscriptionCard> getSubCardTypeByUuid(String userUuid);
 
+    /**
+     * 获取当班煤质统计
+     *
+     * @param subscCardTypeDO
+     * @return
+     */
+    CardDataDTO getCoalQuality(SubscCardTypeDO subscCardTypeDO);
+
+    /**
+     * 获取当班生产统计
+     *
+     * @param subscCardTypeDO
+     * @return
+     */
+    CardDataDTO getProduction(SubscCardTypeDO subscCardTypeDO);
+
 }

@@ -129,5 +129,42 @@ public class CardDataManager {
 
     }
 
+    /**
+     * 生产卡片数据 6/18点刷新
+     */
+    public void getProductionCardDatas() {
+        logger.debug("生产卡片数据开始上传");
+        List<CardDataDTO> cardDataDTOS = new ArrayList<>();
+        List<SubscCardTypeDO> subscCardTypeDOS = subscCardTypeService.getAllSubscCardTypes();
+        for (SubscCardTypeDO subscCardTypeDO : subscCardTypeDOS) {
+            CardDataDTO cardDataDTO;
+            if (subscCardTypeDO.getCardType().equals(CardTypeEnum.COAL_QUALITY.getCardCode())) {
+                // 当班煤质统计
+                cardDataDTO = subscCardTypeService.getCoalQuality(subscCardTypeDO);
+                cardDataDTOS.add(cardDataDTO);
+            } else if (subscCardTypeDO.getCardType().equals(CardTypeEnum.PRODUCTION.getCardCode())) {
+                // 当班生产统计
+                cardDataDTO = subscCardTypeService.getProduction(subscCardTypeDO);
+                cardDataDTOS.add(cardDataDTO);
+            }
+        }
+        logger.info("开始生产卡片数据上传CloudServer");
+        try {
+            ServerResponse serverResponse = cloudServerFeignClient.saveAllCardDatas(cardDataDTOS, AUTHORIZATION_PRIFIX + authorization);
+            logger.info("clouserver的请求响应：" + serverResponse.getCode());
+            if (serverResponse.getCode() == 0) {
+                logger.info("生产卡片数据上传CloudServer完成");
+            }
+
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.error("连接cloudserver异常.URL:" + cloudServiceUrl + cloudServerPath);
+
+        }
+
+        logger.info("开始生产卡片数据同步AppServer");
+        sfSubscriptionCardService.updateSubCard(cardDataDTOS);
+
+    }
 
 }

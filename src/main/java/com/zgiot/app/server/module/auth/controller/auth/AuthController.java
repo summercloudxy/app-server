@@ -85,7 +85,7 @@ public class AuthController {
         if (!ControllerUtil.md5Hex(loginReq.getPassword()).equals(user.getPassword())) {
             return new ResponseEntity<>(ServerResponse.buildJson("Login failed", AppServerConstants.ERR_USER_OR_PASS_WRONG
                     , null)
-                    , HttpStatus.UNAUTHORIZED);
+                    , HttpStatus.OK);
         }
 
         // logic validation

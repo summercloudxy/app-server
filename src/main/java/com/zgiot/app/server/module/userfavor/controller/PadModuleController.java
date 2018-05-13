@@ -46,6 +46,8 @@ public class PadModuleController {
             }
             padModuleMapper.deleteUserFavor(userUuid);
             addUserFavor(userFavorReq, userUuid, sort, userFavors);
+        } else {
+            padModuleMapper.deleteUserFavor(userUuid);
         }
 
         return new ResponseEntity(ServerResponse.buildOkJson(null), HttpStatus.OK);
