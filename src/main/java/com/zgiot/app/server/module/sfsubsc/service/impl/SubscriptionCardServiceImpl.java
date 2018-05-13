@@ -1329,7 +1329,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
         coalQualityVO.setDate("" + year + "-" + month + "-" + day);
 
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
         List<Date> dateList = null;
         if (hour == 6) {// 夜班
             coalQualityVO.setShift(NIGHT_SHIFT);

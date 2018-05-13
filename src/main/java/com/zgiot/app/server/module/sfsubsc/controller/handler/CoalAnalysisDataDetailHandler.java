@@ -2,13 +2,15 @@ package com.zgiot.app.server.module.sfsubsc.controller.handler;
 
 import com.zgiot.app.server.module.coalanalysis.mapper.CoalAnalysisMapper;
 import com.zgiot.app.server.module.sfsubsc.entity.pojo.SubscCardTypeDO;
-import com.zgiot.app.server.module.sfsubsc.entity.vo.ChemicalTestsDataChartDetailVO;
-import com.zgiot.app.server.module.sfsubsc.entity.vo.ChemicalTestsDataListDetailVO;
-import com.zgiot.app.server.module.sfsubsc.entity.vo.CoalQualityDetailVO;
+import com.zgiot.app.server.module.sfsubsc.entity.vo.*;
+import com.zgiot.app.server.module.sfsubsc.mapper.SubscCardTypeMapper;
 import com.zgiot.app.server.module.sfsubsc.service.SubscCardTypeService;
 import com.zgiot.app.server.module.tcs.pojo.FilterCondition;
+import com.zgiot.app.server.service.HistoryDataService;
+import com.zgiot.common.constants.MetricCodes;
 import com.zgiot.common.constants.SubscriptionConstants;
 import com.zgiot.common.pojo.CoalAnalysisRecord;
+import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.restcontroller.ServerResponse;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.time.DateUtils;
@@ -26,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.zgiot.app.server.module.sfsubsc.enums.CardTypeEnum.COAL_QUALITY;
+import static com.zgiot.app.server.module.sfsubsc.enums.CardTypeEnum.PRODUCTION;
 import static com.zgiot.app.server.module.tcs.pojo.FilterCondition.FilterConditionBuilder.newFilterCondition;
 import static com.zgiot.common.constants.SubscriptionConstants.*;
 import static com.zgiot.common.constants.SubscriptionConstants.MIXE_COAL_552;
@@ -43,6 +46,10 @@ public class CoalAnalysisDataDetailHandler {
     private SubscCardTypeService subscCardTypeService;
     @Autowired
     private CoalAnalysisMapper coalAnalysisMapper;
+    @Autowired
+    private SubscCardTypeMapper subscCardTypeMapper;
+    @Autowired
+    private HistoryDataService historyDataService;
 
     public ResponseEntity<String> getCoalAnalysisDataChartDetail(String cardCode, String dateType, String chartType) {
         SubscCardTypeDO cardTypeDO = subscCardTypeService.getCardTypeByCardCode(cardCode);
@@ -240,6 +247,10 @@ public class CoalAnalysisDataDetailHandler {
         // 1.设置班次开始和结束时间
         setShiftTime(coalQualityDetailVO);
 
+        if(coalQualityDetailVO.getShiftTimeBegin().getTime() > new Date().getTime()){
+            return null;
+        }
+
         // 2.一期生产指标
         CoalAnalysisRecord p11 = coalAnalysisMapper.getTimeRangeCoalAnalysisRecordAVG(
                 SYSTEM_ONE, WASH_RAW_COAL, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());// 原煤
@@ -311,60 +322,71 @@ public class CoalAnalysisDataDetailHandler {
      * @param coalQualityDetailVO
      */
     private void setShiftTime(CoalQualityDetailVO coalQualityDetailVO) {
-        Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
-
         List<Date> dateList = null;
         if (WHITE_SHIFT.equals(coalQualityDetailVO.getShift())) {// 白班
-            try {
-                calendar.setTime(sdf1.parse(coalQualityDetailVO.getDate()));
-            } catch (ParseException e) {
-                logger.error("班累计煤质统计详情-白班日期转换异常", e);
-            }
-            calendar.set(Calendar.HOUR_OF_DAY, WHITE_SHIFT_BEGIN);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
-            coalQualityDetailVO.setShiftTimeBegin(calendar.getTime());
-
-            calendar.set(Calendar.HOUR_OF_DAY, WHITE_SHIFT_END);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
-            coalQualityDetailVO.setShiftTimeEnd(calendar.getTime());
+            setWhiteShiftTime(coalQualityDetailVO);
 
             // 获取该班次所有时间
             dateList = coalAnalysisMapper.getTimeRangeTime(MIXE_COAL_552, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());
         }
         if (NIGHT_SHIFT.equals(coalQualityDetailVO.getShift())) {// 夜班
-            try {
-                calendar.setTime(sdf1.parse(coalQualityDetailVO.getDate()));
-            } catch (ParseException e) {
-                logger.error("班累计煤质统计详情-夜班日期转换异常1", e);
-            }
-            calendar.set(Calendar.HOUR_OF_DAY, NIGHT_SHIFT_BEGIN);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
-            coalQualityDetailVO.setShiftTimeBegin(calendar.getTime());
-
-
-            try {
-                calendar.setTime(DateUtils.addDays(sdf1.parse(coalQualityDetailVO.getDate()), 1));
-            } catch (ParseException e) {
-                logger.error("班累计煤质统计详情-夜班日期转换异常2", e);
-            }
-            calendar.set(Calendar.HOUR_OF_DAY, NIGHT_SHIFT_END);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
-            coalQualityDetailVO.setShiftTimeEnd(calendar.getTime());
+            setNightShiftTime(coalQualityDetailVO);
 
             // 获取该班次所有时间
             dateList = coalAnalysisMapper.getTimeRangeTime(MIXE_COAL_552, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());
         }
         // 设置班次时间
         if (dateList != null && !dateList.isEmpty()) {
-            SimpleDateFormat sdf2 = new SimpleDateFormat("HH:mm:ss");
-            coalQualityDetailVO.setTimeBegin(sdf2.format(dateList.get(0)));
-            coalQualityDetailVO.setTimeEnd(sdf2.format(dateList.get(dateList.size() - 1)));
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+            coalQualityDetailVO.setTimeBegin(sdf.format(dateList.get(0)));
+            coalQualityDetailVO.setTimeEnd(sdf.format(dateList.get(dateList.size() - 1)));
         }
+    }
+
+    private void setWhiteShiftTime(DetailParent detailParent){
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+        try {
+            calendar.setTime(sdf.parse(detailParent.getDate()));
+        } catch (ParseException e) {
+            logger.error("班累计煤质统计详情-白班日期转换异常", e);
+        }
+        calendar.set(Calendar.HOUR_OF_DAY, WHITE_SHIFT_BEGIN);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        detailParent.setShiftTimeBegin(calendar.getTime());
+
+        calendar.set(Calendar.HOUR_OF_DAY, WHITE_SHIFT_END);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        detailParent.setShiftTimeEnd(calendar.getTime());
+    }
+
+    private void setNightShiftTime(DetailParent detailParent){
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+        try {
+            calendar.setTime(sdf.parse(detailParent.getDate()));
+        } catch (ParseException e) {
+            logger.error("班累计详情-夜班日期转换异常1", e);
+        }
+        calendar.set(Calendar.HOUR_OF_DAY, NIGHT_SHIFT_BEGIN);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        detailParent.setShiftTimeBegin(calendar.getTime());
+
+
+        try {
+            calendar.setTime(DateUtils.addDays(sdf.parse(detailParent.getDate()), 1));
+        } catch (ParseException e) {
+            logger.error("班累计详情-夜班日期转换异常2", e);
+        }
+        calendar.set(Calendar.HOUR_OF_DAY, NIGHT_SHIFT_END);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        detailParent.setShiftTimeEnd(calendar.getTime());
     }
 
     private void getMetricData(List<CoalQualityDetailVO.MetricData> list, CoalQualityDetailVO coalQualityDetailVO,
@@ -377,6 +399,215 @@ public class CoalAnalysisDataDetailHandler {
         metricData.setStad(df.format(car.getStad() == null ? 0 : car.getStad()));
         metricData.setQar(df.format(car.getQnetar() == null ? 0 : car.getQnetar()));
         list.add(metricData);
+    }
+
+    /**
+     * 班累计生产统计详情
+     *
+     * @param date
+     * @param shift
+     * @return
+     */
+    public ProductionDetailVO getProductionDetail(String date, String shift) {
+        ProductionDetailVO productionDetailVO = new ProductionDetailVO();
+        productionDetailVO.setCardTitle(PRODUCTION.getCardTypeName());
+        productionDetailVO.setDate(date);
+        productionDetailVO.setShift(shift);
+
+        if (WHITE_SHIFT.equals(productionDetailVO.getShift())) {// 白班
+            setWhiteShiftTime(productionDetailVO);
+        }
+        if (NIGHT_SHIFT.equals(productionDetailVO.getShift())) {// 夜班
+            setNightShiftTime(productionDetailVO);
+        }
+
+        if(productionDetailVO.getShiftTimeBegin().getTime() > new Date().getTime()){
+            return null;
+        }
+
+        // 获取相关设备编号
+        SubscCardTypeDO subscCardTypeDO = subscCardTypeMapper.getCardTypeByCardCode(PRODUCTION.getCardCode());
+        String[] thingCodesArr = subscCardTypeDO.getCardParamValue().split(";");
+
+        String metricCode = MetricCodes.CT_C;
+        Date startDate = productionDetailVO.getShiftTimeBegin();
+        Date endDate = productionDetailVO.getShiftTimeEnd();
+
+        // 1.生产量
+        List<ProductionDetailVO.MetricData> productionQuantity = new ArrayList<>();
+        DecimalFormat df = new DecimalFormat("#0.00");
+
+        // 原煤
+        Map<String, List<DataModel>> totalMap = historyDataService.findMultiThingsHistoryDataOfMetric(
+                Arrays.asList(thingCodesArr[0].split(",")), metricCode, startDate, endDate);
+        ProductionDetailVO.MetricData rawCoal = productionDetailVO.new MetricData();
+        rawCoal.setName(RAW_COAL);
+        double total = getDataValue(totalMap);
+        rawCoal.setValue1(df.format(total));
+
+        // 精煤
+        Map<String, List<DataModel>> cleanCoalMap = historyDataService.findMultiThingsHistoryDataOfMetric(
+                Arrays.asList(thingCodesArr[1].split(",")), metricCode, startDate, endDate);
+        ProductionDetailVO.MetricData cleanCoal = productionDetailVO.new MetricData();
+        cleanCoal.setName(CLEAN_COAL);
+        double clean = getDataValue(cleanCoalMap);
+        double cleanYield = total == 0 ? 0 : (clean / total * 100);
+        cleanCoal.setValue1(df.format(clean));
+        cleanCoal.setValue2(df.format(cleanYield));
+        productionQuantity.add(cleanCoal);
+
+        // 混煤
+        Map<String, List<DataModel>> mixedCoalMap = historyDataService.findMultiThingsHistoryDataOfMetric(
+                Arrays.asList(thingCodesArr[2].split(",")), metricCode, startDate, endDate);
+        ProductionDetailVO.MetricData mixedCoal = productionDetailVO.new MetricData();
+        mixedCoal.setName(MIXED_COAL);
+        double mixed = getDataValue(mixedCoalMap);
+        double mixedYield = total == 0 ? 0 : (mixed / total * 100);
+        mixedCoal.setValue1(df.format(mixed));
+        mixedCoal.setValue2(df.format(mixedYield));
+        productionQuantity.add(mixedCoal);
+
+        // 煤泥
+        Map<String, List<DataModel>> coalMudMap = historyDataService.findMultiThingsHistoryDataOfMetric(
+                Arrays.asList(thingCodesArr[3].split(",")), metricCode, startDate, endDate);
+        ProductionDetailVO.MetricData coalMud = productionDetailVO.new MetricData();
+        coalMud.setName(SLURRY);
+        double mud = getDataValue(coalMudMap);
+        double mudYield = total == 0 ? 0 : (mud / total * 100);
+        coalMud.setValue1(df.format(mud));
+        coalMud.setValue2(df.format(mudYield));
+        productionQuantity.add(coalMud);
+
+        // 综合产率
+        rawCoal.setValue2(df.format(cleanYield + mixedYield + mudYield));
+        productionQuantity.add(rawCoal);
+
+        productionDetailVO.setProductionQuantity(productionQuantity);
+
+        // 2.库存量
+        List<ProductionDetailVO.MetricData> stockQuantity = new ArrayList<>();
+        // 8#
+        ProductionDetailVO.MetricData coal8 = productionDetailVO.new MetricData();
+        coal8.setName(COAL_8);
+        coal8.setValue1("");
+        stockQuantity.add(coal8);
+
+        // 13#
+        ProductionDetailVO.MetricData coal13 = productionDetailVO.new MetricData();
+        coal13.setName(COAL_13);
+        coal13.setValue1("");
+        stockQuantity.add(coal13);
+
+        // 精煤仓
+        Map<String, List<DataModel>> cleanStockMap = historyDataService.findMultiThingsHistoryDataOfMetric(
+                Arrays.asList(thingCodesArr[4].split(",")), metricCode, startDate, endDate);
+        ProductionDetailVO.MetricData cleanStock = productionDetailVO.new MetricData();
+        cleanStock.setName(CLEAN_WAREHOUSE);
+        cleanStock.setValue1(df.format(getDataValue(cleanStockMap)));
+        stockQuantity.add(cleanStock);
+
+        // 混煤仓
+        Map<String, List<DataModel>> mixedStockMap = historyDataService.findMultiThingsHistoryDataOfMetric(
+                Arrays.asList(thingCodesArr[5].split(",")), metricCode, startDate, endDate);
+        ProductionDetailVO.MetricData mixedStock = productionDetailVO.new MetricData();
+        mixedStock.setName(MIXED_WAREHOUSE);
+        mixedStock.setValue1(df.format(getDataValue(mixedStockMap)));
+        stockQuantity.add(mixedStock);
+
+        // 煤泥库存
+        ProductionDetailVO.MetricData slurry = productionDetailVO.new MetricData();
+        slurry.setName(SLURRY_WAREHOUSE);
+        slurry.setValue1("");
+        stockQuantity.add(slurry);
+
+        productionDetailVO.setStockQuantity(stockQuantity);
+
+        // 3.水位
+        List<ProductionDetailVO.MetricData> waterLevel = new ArrayList<>();
+        // 一期
+        ProductionDetailVO.MetricData water1 = productionDetailVO.new MetricData();
+        water1.setName(TERM_ONE);
+        water1.setValue1("");
+        water1.setValue2("");
+        waterLevel.add(water1);
+
+        // 二期
+        ProductionDetailVO.MetricData water2 = productionDetailVO.new MetricData();
+        water2.setName(TERM_ONE);
+        water2.setValue1("");
+        water2.setValue2("");
+        waterLevel.add(water2);
+
+        productionDetailVO.setWaterLevel(waterLevel);
+
+        // 4.外运计划
+        List<ProductionDetailVO.MetricData> outboundPlan = new ArrayList<>();
+        // 精煤
+        ProductionDetailVO.MetricData cleanPlan = productionDetailVO.new MetricData();
+        cleanPlan.setName(CLEAN_COAL);
+        cleanPlan.setValue1("");
+        cleanPlan.setValue2("");
+        cleanPlan.setValue3("");
+        outboundPlan.add(cleanPlan);
+
+        // 混煤
+        ProductionDetailVO.MetricData mixedPlan = productionDetailVO.new MetricData();
+        mixedPlan.setName(MIXED_COAL);
+        mixedPlan.setValue1("");
+        mixedPlan.setValue2("");
+        mixedPlan.setValue3("");
+        outboundPlan.add(mixedPlan);
+
+        productionDetailVO.setOutboundPlan(outboundPlan);
+
+        // 5.实际外运
+        List<ProductionDetailVO.MetricData> outboundActual = new ArrayList<>();
+        // 精煤
+        ProductionDetailVO.MetricData cleanActual = productionDetailVO.new MetricData();
+        cleanActual.setName(CLEAN_COAL);
+        cleanActual.setValue1("");
+        cleanActual.setValue2("");
+        outboundActual.add(cleanActual);
+
+        // 混煤
+        ProductionDetailVO.MetricData mixedActual = productionDetailVO.new MetricData();
+        mixedActual.setName(MIXED_COAL);
+        mixedActual.setValue1("");
+        mixedActual.setValue2("");
+        outboundActual.add(mixedActual);
+
+        productionDetailVO.setOutboundActual(outboundActual);
+
+        // 6.月累积量
+        List<ProductionDetailVO.MetricData> outboundTotalMonth = new ArrayList<>();
+        // 精煤
+        ProductionDetailVO.MetricData cleanTotalMonth = productionDetailVO.new MetricData();
+        cleanTotalMonth.setName(CLEAN_COAL);
+        cleanTotalMonth.setValue1("");
+        cleanTotalMonth.setValue2("");
+        outboundTotalMonth.add(cleanTotalMonth);
+
+        // 混煤
+        ProductionDetailVO.MetricData mixedTotalMonth = productionDetailVO.new MetricData();
+        mixedTotalMonth.setName(MIXED_COAL);
+        mixedTotalMonth.setValue1("");
+        mixedTotalMonth.setValue2("");
+        outboundTotalMonth.add(mixedTotalMonth);
+
+        productionDetailVO.setOutboundTotalMonth(outboundTotalMonth);
+
+        return productionDetailVO;
+    }
+
+    private double getDataValue( Map<String, List<DataModel>> map){
+        double totalValue = 0.0;
+        for (List<DataModel> dataModelList : map.values()){
+            if(dataModelList != null && !dataModelList.isEmpty()){
+                String value = dataModelList.get(0).getValue();
+                totalValue += Double.parseDouble(value == null || value == "" ? "0" : value);
+            }
+        }
+        return totalValue;
     }
 
 }

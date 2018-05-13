@@ -1,134 +1,124 @@
 package com.zgiot.app.server.module.sfsubsc.entity.vo;
 
-public class ProductionDetailVO {
+import java.util.List;
+
+public class ProductionDetailVO extends DetailParent {
 
     /**
-     * 卡片标题
+     * 生产量
      */
-    private String cardTitle;
+    private List<MetricData> productionQuantity;
 
     /**
-     * 日期
+     * 库存量
      */
-    private String date;
+    private List<MetricData> stockQuantity;
 
     /**
-     * 班次
+     * 事故池水位
      */
-    private String shift;
+    private List<MetricData> waterLevel;
 
     /**
-     * 班次开始时间
+     * 外运计划
      */
-    private String timeBegin;
+    private List<MetricData> outboundPlan;
 
     /**
-     * 班次结束时间
+     * 实际外运
      */
-    private String timeEnd;
+    private List<MetricData> outboundActual;
 
     /**
-     * 入洗原煤
+     * 月累积量
      */
-    private String rawCoal;
+    private List<MetricData> outboundTotalMonth;
 
-    /**
-     * 综合产率
-     */
-    private String totalYield;
+    public class MetricData {
+        private String name;  // 名称, 类型, 一二期, 精混煤
+        private String value1;// 产量, 储量, 格    , 装车
+        private String value2;// 产率,     , 补水量, 待装
+        private String value3;//                   , 未到
 
-    /**
-     * 精煤产率
-     */
-    private String cleanCoalYield;
+        public String getName() {
+            return name;
+        }
 
-    /**
-     * 混煤产率
-     */
-    private String mixedCoalYield;
+        public void setName(String name) {
+            this.name = name;
+        }
 
-    /**
-     * 煤泥产率
-     */
-    private String coalMudYield;
+        public String getValue1() {
+            return value1;
+        }
 
-    public String getCardTitle() {
-        return cardTitle;
+        public void setValue1(String value1) {
+            this.value1 = value1;
+        }
+
+        public String getValue2() {
+            return value2;
+        }
+
+        public void setValue2(String value2) {
+            this.value2 = value2;
+        }
+
+        public String getValue3() {
+            return value3;
+        }
+
+        public void setValue3(String value3) {
+            this.value3 = value3;
+        }
     }
 
-    public void setCardTitle(String cardTitle) {
-        this.cardTitle = cardTitle;
+    public List<MetricData> getProductionQuantity() {
+        return productionQuantity;
     }
 
-    public String getDate() {
-        return date;
+    public void setProductionQuantity(List<MetricData> productionQuantity) {
+        this.productionQuantity = productionQuantity;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public List<MetricData> getStockQuantity() {
+        return stockQuantity;
     }
 
-    public String getShift() {
-        return shift;
+    public void setStockQuantity(List<MetricData> stockQuantity) {
+        this.stockQuantity = stockQuantity;
     }
 
-    public void setShift(String shift) {
-        this.shift = shift;
+    public List<MetricData> getWaterLevel() {
+        return waterLevel;
     }
 
-    public String getTimeBegin() {
-        return timeBegin;
+    public void setWaterLevel(List<MetricData> waterLevel) {
+        this.waterLevel = waterLevel;
     }
 
-    public void setTimeBegin(String timeBegin) {
-        this.timeBegin = timeBegin;
+    public List<MetricData> getOutboundPlan() {
+        return outboundPlan;
     }
 
-    public String getTimeEnd() {
-        return timeEnd;
+    public void setOutboundPlan(List<MetricData> outboundPlan) {
+        this.outboundPlan = outboundPlan;
     }
 
-    public void setTimeEnd(String timeEnd) {
-        this.timeEnd = timeEnd;
+    public List<MetricData> getOutboundActual() {
+        return outboundActual;
     }
 
-    public String getRawCoal() {
-        return rawCoal;
+    public void setOutboundActual(List<MetricData> outboundActual) {
+        this.outboundActual = outboundActual;
     }
 
-    public void setRawCoal(String rawCoal) {
-        this.rawCoal = rawCoal;
+    public List<MetricData> getOutboundTotalMonth() {
+        return outboundTotalMonth;
     }
 
-    public String getTotalYield() {
-        return totalYield;
+    public void setOutboundTotalMonth(List<MetricData> outboundTotalMonth) {
+        this.outboundTotalMonth = outboundTotalMonth;
     }
 
-    public void setTotalYield(String totalYield) {
-        this.totalYield = totalYield;
-    }
-
-    public String getCleanCoalYield() {
-        return cleanCoalYield;
-    }
-
-    public void setCleanCoalYield(String cleanCoalYield) {
-        this.cleanCoalYield = cleanCoalYield;
-    }
-
-    public String getMixedCoalYield() {
-        return mixedCoalYield;
-    }
-
-    public void setMixedCoalYield(String mixedCoalYield) {
-        this.mixedCoalYield = mixedCoalYield;
-    }
-
-    public String getCoalMudYield() {
-        return coalMudYield;
-    }
-
-    public void setCoalMudYield(String coalMudYield) {
-        this.coalMudYield = coalMudYield;
-    }
 }
