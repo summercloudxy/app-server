@@ -268,7 +268,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
                 }
             }
         }
-        if(wasteRockValue.compareTo(BigDecimal.ZERO)==0){
+        if (wasteRockValue.compareTo(BigDecimal.ZERO) == 0) {
             metricData.setWasteRockValue("");
         }
         return String.valueOf(wasteRockValue);
@@ -1327,11 +1327,11 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         int day = calendar.get(Calendar.DATE);// 获取日
         int hour = calendar.get(Calendar.HOUR_OF_DAY);// 获取小时
 
-        coalQualityVO.setDate("" + year + "-" + month + "-" + day);
+        coalQualityVO.setDate("" + year + "-" + (month + 1) + "-" + day);
 
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
         List<Date> dateList = null;
-        if (hour == 6) {// 夜班
+        if (hour == NIGHT_SHIFT_END) {// 夜班
             coalQualityVO.setShift(NIGHT_SHIFT);
 
             Date timeBegin = DateUtils.addDays(new Date(), -1);
@@ -1350,7 +1350,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             // 获取班次所有时间
             dateList = coalAnalysisMapper.getTimeRangeTime(MIXE_COAL_552, timeBegin, timeEnd);
         }
-        if (hour == 18) {// 白班
+        if (hour == WHITE_SHIFT_END) {// 白班
             coalQualityVO.setShift(WHITE_SHIFT);
 
             calendar.setTime(new Date());
@@ -1369,9 +1369,12 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             dateList = coalAnalysisMapper.getTimeRangeTime(MIXE_COAL_552, timeBegin, timeEnd);
         }
         // 设置班次时间
-        if(dateList != null && !dateList.isEmpty()){
+        if (dateList != null && !dateList.isEmpty()) {
             coalQualityVO.setTimeBegin(sdf.format(dateList.get(0)));
             coalQualityVO.setTimeEnd(sdf.format(dateList.get(dateList.size() - 1)));
+        } else {
+            coalQualityVO.setTimeBegin("");
+            coalQualityVO.setTimeEnd("");
         }
 
         List<CoalQualityVO.MetricData> metricDataList1 = getCoalQualityData(coalQualityVO, SYSTEM_ONE);
@@ -1388,6 +1391,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
     /**
      * 获取煤质数据
+     *
      * @param coalQualityVO
      * @param system
      * @return
@@ -1406,7 +1410,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
         // 判断精煤灰分是否异常
         String[] aadArr = ASH_CONTENT_CLEAN_COAL_SCOPE.split("-");
-        if(aad >= new Double(aadArr[0]) && aad <= new Double(aadArr[1])){
+        if (aad >= new Double(aadArr[0]) && aad <= new Double(aadArr[1])) {
             metricData.setUnusual("0");// 正常
         } else {
             metricData.setUnusual("1");// 异常
@@ -1430,23 +1434,23 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         int day = calendar.get(Calendar.DATE);// 获取日
         int hour = calendar.get(Calendar.HOUR_OF_DAY);// 获取小时
 
-        productionVO.setDate("" + year + "-" + month + "-" + day);
+        productionVO.setDate("" + year + "-" + (month + 1) + "-" + day);
 
-        if (hour == 6) {
+        if (hour == NIGHT_SHIFT_END) {
             productionVO.setShift(NIGHT_SHIFT);
         }
-        if (hour == 18) {
+        if (hour == WHITE_SHIFT_END) {
             productionVO.setShift(WHITE_SHIFT);
         }
 
         String[] cardParamValueArr = subscCardTypeDO.getCardParamValue().split(";");
 
         List<Double> dataValue = new ArrayList<>();
-        for (String thingCodes : cardParamValueArr){
-            String[] thingCodeArr = thingCodes.split(",");
-            for (String thingCode : thingCodeArr){
-                Optional<DataModelWrapper> data = dataService.getData(thingCode, MetricCodes.CT_C);
-                dataValue.add(Double.parseDouble(data.get().getValue()));
+        for (int i = 0; i < cardParamValueArr.length - 2; i++) {
+            String[] thingCodeArr = cardParamValueArr[i].split(",");
+            for (String thingCode : thingCodeArr) {
+                DataModelWrapper dataModelWrapper = dataService.getData(thingCode, MetricCodes.CT_C).orElse(null);
+                dataValue.add(Double.parseDouble(dataModelWrapper == null ? "0" : dataModelWrapper.getValue()));
             }
         }
 
@@ -1462,7 +1466,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         String cleanCoalYield = "0";
         String mixedCoalYield = "0";
         String coalMudYield = "0";
-        if(rawCoal != 0){
+        if (rawCoal != 0) {
             cleanCoalYield = df.format(cleanCoal / rawCoal * 100);
             mixedCoalYield = df.format(mixedCoal / rawCoal * 100);
             coalMudYield = df.format(coalMud / rawCoal * 100);
@@ -1474,7 +1478,8 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         // 煤泥产率
         productionVO.setCoalMudYield(coalMudYield);
         // 综合产率
-        productionVO.setTotalYield(cleanCoalYield + mixedCoalYield + coalMudYield);
+        productionVO.setTotalYield(Double.parseDouble(cleanCoalYield) +
+                Double.parseDouble(mixedCoalYield) + Double.parseDouble(coalMudYield) + "");
 
         CardDataDTO cardDataDTO = new CardDataDTO();
         cardDataDTO.setCardCode(subscCardTypeDO.getCardCode());
