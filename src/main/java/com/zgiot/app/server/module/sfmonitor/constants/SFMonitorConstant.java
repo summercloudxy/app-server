@@ -34,4 +34,9 @@ public class SFMonitorConstant {
     public static final int DIRECTION_LEFT = 1;
     public static final int DIRECTION_RIGHT = 2;
     public static final String EQUIPMENT_STATE = "设备状态";
+    public static final String METRICTYPE_VIEW = "view";
+    public static final String METRICTYPE_SS = "ss";
+    public static final String METRICTYPE_CTL = "ctl";
+    public static final String THINGAUTHZ = "thingAuthz";
+    public static final String METRICTYPERELATION = "metricTypeRelation";
 }

@@ -1,4 +1,3 @@
-
 INSERT INTO `tb_thing_base_dict` VALUES ('4', null, '设备厂家', 'manufacturer', '奥瑞（天津）工业技术有限公司', '天津奥瑞', null);
 INSERT INTO `tb_thing_base_dict` VALUES ('5', null, '设备厂家', 'manufacturer', '澳大利亚ABON（爱邦）工程有限公司', '爱邦', null);
 INSERT INTO `tb_thing_base_dict` VALUES ('6', null, '设备厂家', 'manufacturer', '澳大利亚LUDOWICI（卢德维琪）矿山设备有限公司', '卢德维琪', null);
