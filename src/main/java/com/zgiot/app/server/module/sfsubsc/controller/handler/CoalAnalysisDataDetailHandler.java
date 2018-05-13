@@ -533,7 +533,7 @@ public class CoalAnalysisDataDetailHandler {
 
         // 二期
         ProductionDetailVO.MetricData water2 = productionDetailVO.new MetricData();
-        water2.setName(TERM_ONE);
+        water2.setName(TERM_TWO);
         water2.setValue1("");
         water2.setValue2("");
         waterLevel.add(water2);
