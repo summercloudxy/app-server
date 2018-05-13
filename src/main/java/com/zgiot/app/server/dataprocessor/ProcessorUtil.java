@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 public class ProcessorUtil {
+
+    public static ThreadLocal<DataListener.ReturnData> dataContext = new ThreadLocal();
+
     public static void handleMessage(DataModel dataModel, ExecutorService executor,
                                      List<DataListener> listeners, Logger logger) {
         try {
@@ -31,8 +34,17 @@ public class ProcessorUtil {
                 for (DataListener listener : listeners) {
                     try {
                         listener.onDataChange(dataModel);
+                        DataListener.ReturnData rtn = dataContext.get();
+                        if (rtn != null && rtn.stopHere) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Stop at {}", listener.getClass().getName());
+                            }
+                            break;
+                        }
                     } catch (Throwable e) {
                         listener.onError(e);
+                    } finally {
+                        dataContext.remove();
                     }
                 }
             });

@@ -16,4 +16,8 @@ public interface DataListener {
      * @param error
      */
     void onError(Throwable error);
+
+    class ReturnData {
+        public boolean stopHere;
+    }
 }

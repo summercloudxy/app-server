@@ -1,6 +1,7 @@
 package com.zgiot.app.server.module.demo;
 
 import com.zgiot.app.server.dataprocessor.DataListener;
+import com.zgiot.app.server.dataprocessor.ProcessorUtil;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.service.HistoryDataService;
 import com.zgiot.app.server.service.ThingService;
@@ -64,6 +65,10 @@ public class DemoBusiness implements DataListener {
                 , dataModel.getThingCode(), dataModel.getMetricCategoryCode()
                 , "NEW_STATUS", sValue, dataModel.getDataTimeStamp()
         );
+
+//        ReturnData rtn = new ReturnData();
+//        rtn.stopHere = true;
+//        ProcessorUtil.dataContext.set(rtn);
 
         // save new status to cache
         // this.dataService.saveData(sData);
