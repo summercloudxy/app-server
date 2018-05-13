@@ -67,7 +67,7 @@ public class AlertData {
     private List<String> feedBackImageList;
     private ThingModel thingModel;
     private SystemModel systemModel;
-    private Date StartDelayTime;//开始延迟时间 2018/04/20
+    private Date startDelayTime;//开始延迟时间
 
     public List<AlertMessage> getAlertMessageList() {
         return alertMessageList;
@@ -374,10 +374,10 @@ public class AlertData {
     }
 
     public Date getStartDelayTime() {
-        return StartDelayTime;
+        return startDelayTime;
     }
 
     public void setStartDelayTime(Date startDelayTime) {
-        StartDelayTime = startDelayTime;
+        this.startDelayTime = startDelayTime;
     }
 }
