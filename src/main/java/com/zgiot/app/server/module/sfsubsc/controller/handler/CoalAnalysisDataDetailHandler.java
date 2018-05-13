@@ -5,7 +5,6 @@ import com.zgiot.app.server.module.sfsubsc.entity.pojo.SubscCardTypeDO;
 import com.zgiot.app.server.module.sfsubsc.entity.vo.*;
 import com.zgiot.app.server.module.sfsubsc.mapper.SubscCardTypeMapper;
 import com.zgiot.app.server.module.sfsubsc.service.SubscCardTypeService;
-import com.zgiot.app.server.module.sfsubsc.util.MetricValueUtil;
 import com.zgiot.app.server.module.tcs.pojo.FilterCondition;
 import com.zgiot.app.server.service.HistoryDataService;
 import com.zgiot.common.constants.MetricCodes;
@@ -23,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -247,17 +247,15 @@ public class CoalAnalysisDataDetailHandler {
         // 1.设置班次开始和结束时间
         setShiftTime(coalQualityDetailVO);
 
-        if (coalQualityDetailVO.getShiftTimeBegin().getTime() > new Date().getTime()) {
+        if(coalQualityDetailVO.getShiftTimeBegin().getTime() > new Date().getTime()){
             return null;
         }
 
         // 2.一期生产指标
         CoalAnalysisRecord p11 = coalAnalysisMapper.getTimeRangeCoalAnalysisRecordAVG(
                 SYSTEM_ONE, WASH_RAW_COAL, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());// 原煤
-        CoalAnalysisRecord p12 = coalAnalysisMapper.getTimeRangeCoalAnalysisRecordAVG(
-                SYSTEM_ONE, CLEAN_COAL_551, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());// 精煤
-        CoalAnalysisRecord p13 = coalAnalysisMapper.getTimeRangeCoalAnalysisRecordAVG(
-                SYSTEM_ONE, MIXE_COAL_552, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());// 混煤
+        CoalAnalysisRecord p12 = coalAnalysisMapper.getTopCoalAnalysisRecord(SYSTEM_ONE, CLEAN_COAL_AVG_551, coalQualityDetailVO.getShiftTimeEnd());// 精煤
+        CoalAnalysisRecord p13 = coalAnalysisMapper.getTopCoalAnalysisRecord(SYSTEM_ONE, MIXED_COAL_AVG_552, coalQualityDetailVO.getShiftTimeEnd());// 混煤
         CoalAnalysisRecord p14 = coalAnalysisMapper.getTimeRangeCoalAnalysisRecordAVG(
                 SYSTEM_ONE, FILTERPRESS_SLURRY, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());// 煤泥
         List<CoalQualityDetailVO.MetricData> production1 = new ArrayList<>();
@@ -270,10 +268,8 @@ public class CoalAnalysisDataDetailHandler {
         // 3.二期生产指标
         CoalAnalysisRecord p21 = coalAnalysisMapper.getTimeRangeCoalAnalysisRecordAVG(
                 SYSTEM_TWO, WASH_RAW_COAL, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());// 原煤
-        CoalAnalysisRecord p22 = coalAnalysisMapper.getTimeRangeCoalAnalysisRecordAVG(
-                SYSTEM_TWO, CLEAN_COAL_551, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());// 精煤
-        CoalAnalysisRecord p23 = coalAnalysisMapper.getTimeRangeCoalAnalysisRecordAVG(
-                SYSTEM_TWO, MIXE_COAL_552, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());// 混煤
+        CoalAnalysisRecord p22 = coalAnalysisMapper.getTopCoalAnalysisRecord(SYSTEM_TWO, CLEAN_COAL_AVG_551, coalQualityDetailVO.getShiftTimeEnd());// 精煤
+        CoalAnalysisRecord p23 = coalAnalysisMapper.getTopCoalAnalysisRecord(SYSTEM_TWO, MIXED_COAL_AVG_552, coalQualityDetailVO.getShiftTimeEnd());// 混煤
         CoalAnalysisRecord p24 = coalAnalysisMapper.getTimeRangeCoalAnalysisRecordAVG(
                 SYSTEM_TWO, FILTERPRESS_SLURRY, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());// 煤泥
         List<CoalQualityDetailVO.MetricData> production2 = new ArrayList<>();
@@ -307,9 +303,9 @@ public class CoalAnalysisDataDetailHandler {
 
         // 7.二期TCS
         CoalAnalysisRecord tcs21 = coalAnalysisMapper.getTimeRangeCoalAnalysisRecordAVG(
-                SYSTEM_TWO, TCS_ORE_FINE, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());// TCS精矿
+                SYSTEM_ONE, TCS_ORE_FINE, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());// TCS精矿
         CoalAnalysisRecord tcs22 = coalAnalysisMapper.getTimeRangeCoalAnalysisRecordAVG(
-                SYSTEM_TWO, TCS_ORE_CRUDE, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());// TCS尾矿
+                SYSTEM_ONE, TCS_ORE_CRUDE, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());// TCS尾矿
         List<CoalQualityDetailVO.MetricData> tcs2 = new ArrayList<>();
         getMetricData(tcs2, coalQualityDetailVO, tcs21, ORE_FINE);
         getMetricData(tcs2, coalQualityDetailVO, tcs22, ORE_CRUDE);
@@ -344,20 +340,17 @@ public class CoalAnalysisDataDetailHandler {
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
             coalQualityDetailVO.setTimeBegin(sdf.format(dateList.get(0)));
             coalQualityDetailVO.setTimeEnd(sdf.format(dateList.get(dateList.size() - 1)));
-        } else {
-            coalQualityDetailVO.setTimeBegin("");
-            coalQualityDetailVO.setTimeEnd("");
         }
     }
 
-    private void setWhiteShiftTime(DetailParent detailParent) {
+    private void setWhiteShiftTime(DetailParent detailParent){
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
         try {
             calendar.setTime(sdf.parse(detailParent.getDate()));
         } catch (ParseException e) {
-            logger.error("班累计详情-白班日期转换异常", e);
+            logger.error("班累计煤质统计详情-白班日期转换异常", e);
         }
         calendar.set(Calendar.HOUR_OF_DAY, WHITE_SHIFT_BEGIN);
         calendar.set(Calendar.MINUTE, 0);
@@ -370,7 +363,7 @@ public class CoalAnalysisDataDetailHandler {
         detailParent.setShiftTimeEnd(calendar.getTime());
     }
 
-    private void setNightShiftTime(DetailParent detailParent) {
+    private void setNightShiftTime(DetailParent detailParent){
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -397,19 +390,14 @@ public class CoalAnalysisDataDetailHandler {
     }
 
     private void getMetricData(List<CoalQualityDetailVO.MetricData> list, CoalQualityDetailVO coalQualityDetailVO,
-                               CoalAnalysisRecord car, String productionName) {
+            CoalAnalysisRecord car, String productionName) {
         CoalQualityDetailVO.MetricData metricData = coalQualityDetailVO.new MetricData();
         metricData.setProductionName(productionName);
-        metricData.setAad("");
-        metricData.setMt("");
-        metricData.setStad("");
-        metricData.setQar("");
-        if (null != car) {
-            metricData.setAad(MetricValueUtil.formartPoint2(car.getAad() == null ? 0 : car.getAad()));
-            metricData.setMt(MetricValueUtil.formartPoint2(car.getMt() == null ? 0 : car.getMt()));
-            metricData.setStad(MetricValueUtil.formartPoint2(car.getStad() == null ? 0 : car.getStad()));
-            metricData.setQar(MetricValueUtil.formartPoint2(car.getQnetar() == null ? 0 : car.getQnetar()));
-        }
+        DecimalFormat df = new DecimalFormat("#0.00");
+        metricData.setAad(df.format(car.getAad() == null ? 0 : car.getAad()));
+        metricData.setMt(df.format(car.getMt() == null ? 0 : car.getMt()));
+        metricData.setStad(df.format(car.getStad() == null ? 0 : car.getStad()));
+        metricData.setQar(df.format(car.getQnetar() == null ? 0 : car.getQnetar()));
         list.add(metricData);
     }
 
@@ -432,10 +420,8 @@ public class CoalAnalysisDataDetailHandler {
         if (NIGHT_SHIFT.equals(productionDetailVO.getShift())) {// 夜班
             setNightShiftTime(productionDetailVO);
         }
-        productionDetailVO.setTimeBegin("");
-        productionDetailVO.setTimeEnd("");
 
-        if (productionDetailVO.getShiftTimeBegin().getTime() > new Date().getTime()) {
+        if(productionDetailVO.getShiftTimeBegin().getTime() > new Date().getTime()){
             return null;
         }
 
@@ -449,25 +435,25 @@ public class CoalAnalysisDataDetailHandler {
 
         // 1.生产量
         List<ProductionDetailVO.MetricData> productionQuantity = new ArrayList<>();
+        DecimalFormat df = new DecimalFormat("#0.00");
 
         // 原煤
         Map<String, List<DataModel>> totalMap = historyDataService.findMultiThingsHistoryDataOfMetric(
                 Arrays.asList(thingCodesArr[0].split(",")), metricCode, startDate, endDate);
         ProductionDetailVO.MetricData rawCoal = productionDetailVO.new MetricData();
         rawCoal.setName(RAW_COAL);
-        BigDecimal total = getDataValue(totalMap);
-        rawCoal.setValue1(MetricValueUtil.formartPoint2(total));
-        productionQuantity.add(rawCoal);
+        double total = getDataValue(totalMap);
+        rawCoal.setValue1(df.format(total));
 
         // 精煤
         Map<String, List<DataModel>> cleanCoalMap = historyDataService.findMultiThingsHistoryDataOfMetric(
                 Arrays.asList(thingCodesArr[1].split(",")), metricCode, startDate, endDate);
         ProductionDetailVO.MetricData cleanCoal = productionDetailVO.new MetricData();
         cleanCoal.setName(CLEAN_COAL);
-        BigDecimal clean = getDataValue(cleanCoalMap);
-        BigDecimal cleanYield = total.compareTo(BigDecimal.ZERO) == 0 ? BigDecimal.ZERO : (new BigDecimal(100).multiply(clean).divide(total, 2, BigDecimal.ROUND_HALF_UP));
-        cleanCoal.setValue1(MetricValueUtil.formartPoint2(clean));
-        cleanCoal.setValue2(MetricValueUtil.formartPoint2(cleanYield));
+        double clean = getDataValue(cleanCoalMap);
+        double cleanYield = total == 0 ? 0 : (clean / total * 100);
+        cleanCoal.setValue1(df.format(clean));
+        cleanCoal.setValue2(df.format(cleanYield));
         productionQuantity.add(cleanCoal);
 
         // 混煤
@@ -475,10 +461,10 @@ public class CoalAnalysisDataDetailHandler {
                 Arrays.asList(thingCodesArr[2].split(",")), metricCode, startDate, endDate);
         ProductionDetailVO.MetricData mixedCoal = productionDetailVO.new MetricData();
         mixedCoal.setName(MIXED_COAL);
-        BigDecimal mixed = getDataValue(mixedCoalMap);
-        BigDecimal mixedYield = total.compareTo(BigDecimal.ZERO) == 0 ? BigDecimal.ZERO : (new BigDecimal(100).multiply(mixed).divide(total, 2, BigDecimal.ROUND_HALF_UP));
-        mixedCoal.setValue1(MetricValueUtil.formartPoint2(mixed));
-        mixedCoal.setValue2(MetricValueUtil.formartPoint2(mixedYield));
+        double mixed = getDataValue(mixedCoalMap);
+        double mixedYield = total == 0 ? 0 : (mixed / total * 100);
+        mixedCoal.setValue1(df.format(mixed));
+        mixedCoal.setValue2(df.format(mixedYield));
         productionQuantity.add(mixedCoal);
 
         // 煤泥
@@ -486,15 +472,15 @@ public class CoalAnalysisDataDetailHandler {
                 Arrays.asList(thingCodesArr[3].split(",")), metricCode, startDate, endDate);
         ProductionDetailVO.MetricData coalMud = productionDetailVO.new MetricData();
         coalMud.setName(SLURRY);
-        BigDecimal mud = getDataValue(coalMudMap);
-        BigDecimal mudYield = total.compareTo(BigDecimal.ZERO) == 0 ? BigDecimal.ZERO : (new BigDecimal(100).multiply(mud).divide(total, 2, BigDecimal.ROUND_HALF_UP));
-        coalMud.setValue1(MetricValueUtil.formartPoint2(mud));
-        coalMud.setValue2(MetricValueUtil.formartPoint2(mudYield));
+        double mud = getDataValue(coalMudMap);
+        double mudYield = total == 0 ? 0 : (mud / total * 100);
+        coalMud.setValue1(df.format(mud));
+        coalMud.setValue2(df.format(mudYield));
         productionQuantity.add(coalMud);
 
         // 综合产率
-        String totalYield = MetricValueUtil.formartPoint2(cleanYield.add(mixedYield).add(mudYield));
-        productionQuantity.get(0).setValue2(totalYield);
+        rawCoal.setValue2(df.format(cleanYield + mixedYield + mudYield));
+        productionQuantity.add(rawCoal);
 
         productionDetailVO.setProductionQuantity(productionQuantity);
 
@@ -514,18 +500,18 @@ public class CoalAnalysisDataDetailHandler {
 
         // 精煤仓
         Map<String, List<DataModel>> cleanStockMap = historyDataService.findMultiThingsHistoryDataOfMetric(
-                Arrays.asList(thingCodesArr[4].split(",")), MetricCodes.AMOUNT, startDate, endDate);
+                Arrays.asList(thingCodesArr[4].split(",")), metricCode, startDate, endDate);
         ProductionDetailVO.MetricData cleanStock = productionDetailVO.new MetricData();
         cleanStock.setName(CLEAN_WAREHOUSE);
-        cleanStock.setValue1(MetricValueUtil.formartPoint2(getDataValue(cleanStockMap)));
+        cleanStock.setValue1(df.format(getDataValue(cleanStockMap)));
         stockQuantity.add(cleanStock);
 
         // 混煤仓
         Map<String, List<DataModel>> mixedStockMap = historyDataService.findMultiThingsHistoryDataOfMetric(
-                Arrays.asList(thingCodesArr[5].split(",")), MetricCodes.AMOUNT, startDate, endDate);
+                Arrays.asList(thingCodesArr[5].split(",")), metricCode, startDate, endDate);
         ProductionDetailVO.MetricData mixedStock = productionDetailVO.new MetricData();
         mixedStock.setName(MIXED_WAREHOUSE);
-        mixedStock.setValue1(MetricValueUtil.formartPoint2(getDataValue(mixedStockMap)));
+        mixedStock.setValue1(df.format(getDataValue(mixedStockMap)));
         stockQuantity.add(mixedStock);
 
         // 煤泥库存
@@ -547,7 +533,7 @@ public class CoalAnalysisDataDetailHandler {
 
         // 二期
         ProductionDetailVO.MetricData water2 = productionDetailVO.new MetricData();
-        water2.setName(TERM_TWO);
+        water2.setName(TERM_ONE);
         water2.setValue1("");
         water2.setValue2("");
         waterLevel.add(water2);
@@ -613,14 +599,12 @@ public class CoalAnalysisDataDetailHandler {
         return productionDetailVO;
     }
 
-    private BigDecimal getDataValue(Map<String, List<DataModel>> map) {
-        BigDecimal totalValue = BigDecimal.ZERO;
-        for (List<DataModel> dataModelList : map.values()) {
-            if (dataModelList != null && !dataModelList.isEmpty()) {
-                for (DataModel dataModel : dataModelList){
-                    String value = dataModel.getValue();
-                    totalValue = totalValue.add(new BigDecimal(value == null || value == "" ? "0" : value));
-                }
+    private double getDataValue( Map<String, List<DataModel>> map){
+        double totalValue = 0.0;
+        for (List<DataModel> dataModelList : map.values()){
+            if(dataModelList != null && !dataModelList.isEmpty()){
+                String value = dataModelList.get(0).getValue();
+                totalValue += Double.parseDouble(value == null || value == "" ? "0" : value);
             }
         }
         return totalValue;
