@@ -350,7 +350,7 @@ public class CoalAnalysisDataDetailHandler {
         try {
             calendar.setTime(sdf.parse(detailParent.getDate()));
         } catch (ParseException e) {
-            logger.error("班累计煤质统计详情-白班日期转换异常", e);
+            logger.error("班累计详情-白班日期转换异常", e);
         }
         calendar.set(Calendar.HOUR_OF_DAY, WHITE_SHIFT_BEGIN);
         calendar.set(Calendar.MINUTE, 0);
@@ -420,6 +420,8 @@ public class CoalAnalysisDataDetailHandler {
         if (NIGHT_SHIFT.equals(productionDetailVO.getShift())) {// 夜班
             setNightShiftTime(productionDetailVO);
         }
+        productionDetailVO.setTimeBegin("");
+        productionDetailVO.setTimeEnd("");
 
         if(productionDetailVO.getShiftTimeBegin().getTime() > new Date().getTime()){
             return null;
