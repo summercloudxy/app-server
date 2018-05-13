@@ -247,7 +247,7 @@ public class CoalAnalysisDataDetailHandler {
         // 1.设置班次开始和结束时间
         setShiftTime(coalQualityDetailVO);
 
-        if(coalQualityDetailVO.getShiftTimeBegin().getTime() > new Date().getTime()){
+        if (coalQualityDetailVO.getShiftTimeBegin().getTime() > new Date().getTime()) {
             return null;
         }
 
@@ -340,10 +340,13 @@ public class CoalAnalysisDataDetailHandler {
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
             coalQualityDetailVO.setTimeBegin(sdf.format(dateList.get(0)));
             coalQualityDetailVO.setTimeEnd(sdf.format(dateList.get(dateList.size() - 1)));
+        } else {
+            coalQualityDetailVO.setTimeBegin("");
+            coalQualityDetailVO.setTimeEnd("");
         }
     }
 
-    private void setWhiteShiftTime(DetailParent detailParent){
+    private void setWhiteShiftTime(DetailParent detailParent) {
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -363,7 +366,7 @@ public class CoalAnalysisDataDetailHandler {
         detailParent.setShiftTimeEnd(calendar.getTime());
     }
 
-    private void setNightShiftTime(DetailParent detailParent){
+    private void setNightShiftTime(DetailParent detailParent) {
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -390,14 +393,20 @@ public class CoalAnalysisDataDetailHandler {
     }
 
     private void getMetricData(List<CoalQualityDetailVO.MetricData> list, CoalQualityDetailVO coalQualityDetailVO,
-            CoalAnalysisRecord car, String productionName) {
+                               CoalAnalysisRecord car, String productionName) {
         CoalQualityDetailVO.MetricData metricData = coalQualityDetailVO.new MetricData();
         metricData.setProductionName(productionName);
-        DecimalFormat df = new DecimalFormat("#0.00");
-        metricData.setAad(df.format(car.getAad() == null ? 0 : car.getAad()));
-        metricData.setMt(df.format(car.getMt() == null ? 0 : car.getMt()));
-        metricData.setStad(df.format(car.getStad() == null ? 0 : car.getStad()));
-        metricData.setQar(df.format(car.getQnetar() == null ? 0 : car.getQnetar()));
+        metricData.setAad("");
+        metricData.setMt("");
+        metricData.setStad("");
+        metricData.setQar("");
+        if (null != car) {
+            DecimalFormat df = new DecimalFormat("#0.00");
+            metricData.setAad(df.format(car.getAad() == null ? 0 : car.getAad()));
+            metricData.setMt(df.format(car.getMt() == null ? 0 : car.getMt()));
+            metricData.setStad(df.format(car.getStad() == null ? 0 : car.getStad()));
+            metricData.setQar(df.format(car.getQnetar() == null ? 0 : car.getQnetar()));
+        }
         list.add(metricData);
     }
 
@@ -423,7 +432,7 @@ public class CoalAnalysisDataDetailHandler {
         productionDetailVO.setTimeBegin("");
         productionDetailVO.setTimeEnd("");
 
-        if(productionDetailVO.getShiftTimeBegin().getTime() > new Date().getTime()){
+        if (productionDetailVO.getShiftTimeBegin().getTime() > new Date().getTime()) {
             return null;
         }
 
@@ -601,10 +610,10 @@ public class CoalAnalysisDataDetailHandler {
         return productionDetailVO;
     }
 
-    private double getDataValue( Map<String, List<DataModel>> map){
+    private double getDataValue(Map<String, List<DataModel>> map) {
         double totalValue = 0.0;
-        for (List<DataModel> dataModelList : map.values()){
-            if(dataModelList != null && !dataModelList.isEmpty()){
+        for (List<DataModel> dataModelList : map.values()) {
+            if (dataModelList != null && !dataModelList.isEmpty()) {
                 String value = dataModelList.get(0).getValue();
                 totalValue += Double.parseDouble(value == null || value == "" ? "0" : value);
             }
