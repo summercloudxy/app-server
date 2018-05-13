@@ -136,7 +136,7 @@ public class WebSocketProcessor implements DataProcessor {
             executor.submit(() -> {
                 for (DataListener listener : listeners) {
                     try {
-                        listener.onDataChange(dataModel);
+                        listener.onDataChange(dataModel); // TODO stop flag
                     } catch (Throwable e) {
                         listener.onError(e);
                     }
