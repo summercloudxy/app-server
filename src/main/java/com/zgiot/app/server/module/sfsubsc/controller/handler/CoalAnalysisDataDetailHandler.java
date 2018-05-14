@@ -307,9 +307,9 @@ public class CoalAnalysisDataDetailHandler {
 
         // 7.二期TCS
         CoalAnalysisRecord tcs21 = coalAnalysisMapper.getTimeRangeCoalAnalysisRecordAVG(
-                SYSTEM_ONE, TCS_ORE_FINE, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());// TCS精矿
+                SYSTEM_TWO, TCS_ORE_FINE, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());// TCS精矿
         CoalAnalysisRecord tcs22 = coalAnalysisMapper.getTimeRangeCoalAnalysisRecordAVG(
-                SYSTEM_ONE, TCS_ORE_CRUDE, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());// TCS尾矿
+                SYSTEM_TWO, TCS_ORE_CRUDE, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());// TCS尾矿
         List<CoalQualityDetailVO.MetricData> tcs2 = new ArrayList<>();
         getMetricData(tcs2, coalQualityDetailVO, tcs21, ORE_FINE);
         getMetricData(tcs2, coalQualityDetailVO, tcs22, ORE_CRUDE);
