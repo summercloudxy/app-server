@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -1402,18 +1401,24 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
      * @return
      */
     private List<CoalQualityVO.MetricData> getCoalQualityData(CoalQualityVO coalQualityVO, int system) {
-        CoalAnalysisRecord coalAnalysisClean = coalAnalysisMapper.getTopCoalAnalysisRecord(
-                system, CLEAN_COAL_AVG_551, coalQualityVO.getShiftTimeBegin(), coalQualityVO.getShiftTimeEnd());
-        CoalAnalysisRecord coalAnalysisMixed = coalAnalysisMapper.getTopCoalAnalysisRecord(
-                system, MIXED_COAL_AVG_552, coalQualityVO.getShiftTimeBegin(), coalQualityVO.getShiftTimeEnd());
+        CoalAnalysisRecord coalAnalysisClean = coalAnalysisMapper.getTimeRangeCoalAnalysisRecordAVG(
+                system, CLEAN_COAL_551, coalQualityVO.getShiftTimeBegin(), coalQualityVO.getShiftTimeEnd());
+        CoalAnalysisRecord coalAnalysisMixed = coalAnalysisMapper.getTimeRangeCoalAnalysisRecordAVG(
+                system, MIXE_COAL_552, coalQualityVO.getShiftTimeBegin(), coalQualityVO.getShiftTimeEnd());
 
         List<CoalQualityVO.MetricData> list = new ArrayList<>();
         CoalQualityVO.MetricData metricData = coalQualityVO.new MetricData();
-        DecimalFormat df = new DecimalFormat("#0.00");
 
-        Double aad = coalAnalysisClean.getAad();
-        metricData.setCleanCoalAad(df.format(aad == null ? 0.0 : aad));
-        metricData.setMixedCoalQar(Math.round(coalAnalysisMixed.getQnetar()) + "");
+        Double aad = 0.0;
+        if(null != coalAnalysisClean){
+            aad = coalAnalysisClean.getAad();
+        }
+        metricData.setCleanCoalAad(MetricValueUtil.formartPoint2(aad));
+        Double qar = 0.0;
+        if(null != coalAnalysisMixed){
+            qar = coalAnalysisMixed.getQnetar();
+        }
+        metricData.setMixedCoalQar(Math.round(qar) + "");
 
         // 判断精煤灰分是否异常
         String[] aadArr = ASH_CONTENT_CLEAN_COAL_SCOPE.split("-");
@@ -1456,31 +1461,30 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
         String[] cardParamValueArr = subscCardTypeDO.getCardParamValue().split(";");
 
-        List<Double> dataValue = new ArrayList<>();
+        List<String> dataValue = new ArrayList<>();
         for (int i = 0; i < cardParamValueArr.length - 2; i++) {
             String[] thingCodeArr = cardParamValueArr[i].split(",");
             for (String thingCode : thingCodeArr) {
                 DataModelWrapper dataModelWrapper = dataService.getData(thingCode, MetricCodes.CT_C).orElse(null);
-                dataValue.add(Double.parseDouble(dataModelWrapper == null ? "0" : dataModelWrapper.getValue()));
+                dataValue.add(dataModelWrapper == null ? "0" : dataModelWrapper.getValue());
             }
         }
 
-        double rawCoal = dataValue.get(0) + dataValue.get(1) + dataValue.get(2) + dataValue.get(3);
-        double cleanCoal = dataValue.get(4) + dataValue.get(5);
-        double mixedCoal = dataValue.get(6);
-        double coalMud = dataValue.get(7) + dataValue.get(8);
+        BigDecimal rawCoal = new BigDecimal(dataValue.get(0)).add(new BigDecimal(dataValue.get(1)))
+                .add(new BigDecimal(dataValue.get(2) + dataValue.get(3)));
+        BigDecimal cleanCoal = new BigDecimal(dataValue.get(4)).add(new BigDecimal(dataValue.get(5)));
+        BigDecimal mixedCoal = new BigDecimal(dataValue.get(6));
+        BigDecimal coalMud = new BigDecimal(dataValue.get(7)).add(new BigDecimal(dataValue.get(8)));
         // 入洗原煤
-        productionVO.setRawCoal(Math.round(rawCoal) + "");
-
-        DecimalFormat df = new DecimalFormat("#0.00");
+        productionVO.setRawCoal(MetricValueUtil.formartPoint2(rawCoal));
 
         String cleanCoalYield = "0";
         String mixedCoalYield = "0";
         String coalMudYield = "0";
-        if (rawCoal != 0) {
-            cleanCoalYield = df.format(cleanCoal / rawCoal * 100);
-            mixedCoalYield = df.format(mixedCoal / rawCoal * 100);
-            coalMudYield = df.format(coalMud / rawCoal * 100);
+        if (rawCoal != BigDecimal.ZERO) {
+            cleanCoalYield = MetricValueUtil.formartPoint2(new BigDecimal(100).multiply(cleanCoal.divide(rawCoal)));
+            mixedCoalYield = MetricValueUtil.formartPoint2(new BigDecimal(100).multiply(mixedCoal.divide(rawCoal)));
+            coalMudYield = MetricValueUtil.formartPoint2(new BigDecimal(100).multiply(coalMud.divide(rawCoal)));
         }
         // 精煤产率
         productionVO.setCleanCoalYield(cleanCoalYield);
@@ -1489,8 +1493,8 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         // 煤泥产率
         productionVO.setCoalMudYield(coalMudYield);
         // 综合产率
-        productionVO.setTotalYield(Double.parseDouble(cleanCoalYield) +
-                Double.parseDouble(mixedCoalYield) + Double.parseDouble(coalMudYield) + "");
+        productionVO.setTotalYield(MetricValueUtil.formartPoint2(new BigDecimal(cleanCoalYield)
+                .add(new BigDecimal(mixedCoalYield)).add(new BigDecimal(coalMudYield))));
 
         CardDataDTO cardDataDTO = new CardDataDTO();
         cardDataDTO.setCardCode(subscCardTypeDO.getCardCode());
