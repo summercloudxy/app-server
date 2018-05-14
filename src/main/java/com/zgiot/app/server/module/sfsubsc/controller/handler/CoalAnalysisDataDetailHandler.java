@@ -254,8 +254,10 @@ public class CoalAnalysisDataDetailHandler {
         // 2.一期生产指标
         CoalAnalysisRecord p11 = coalAnalysisMapper.getTimeRangeCoalAnalysisRecordAVG(
                 SYSTEM_ONE, WASH_RAW_COAL, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());// 原煤
-        CoalAnalysisRecord p12 = coalAnalysisMapper.getTopCoalAnalysisRecord(SYSTEM_ONE, CLEAN_COAL_AVG_551, coalQualityDetailVO.getShiftTimeEnd());// 精煤
-        CoalAnalysisRecord p13 = coalAnalysisMapper.getTopCoalAnalysisRecord(SYSTEM_ONE, MIXED_COAL_AVG_552, coalQualityDetailVO.getShiftTimeEnd());// 混煤
+        CoalAnalysisRecord p12 = coalAnalysisMapper.getTopCoalAnalysisRecord(
+                SYSTEM_ONE, CLEAN_COAL_AVG_551, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());// 精煤
+        CoalAnalysisRecord p13 = coalAnalysisMapper.getTopCoalAnalysisRecord(
+                SYSTEM_ONE, MIXED_COAL_AVG_552, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());// 混煤
         CoalAnalysisRecord p14 = coalAnalysisMapper.getTimeRangeCoalAnalysisRecordAVG(
                 SYSTEM_ONE, FILTERPRESS_SLURRY, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());// 煤泥
         List<CoalQualityDetailVO.MetricData> production1 = new ArrayList<>();
@@ -268,8 +270,10 @@ public class CoalAnalysisDataDetailHandler {
         // 3.二期生产指标
         CoalAnalysisRecord p21 = coalAnalysisMapper.getTimeRangeCoalAnalysisRecordAVG(
                 SYSTEM_TWO, WASH_RAW_COAL, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());// 原煤
-        CoalAnalysisRecord p22 = coalAnalysisMapper.getTopCoalAnalysisRecord(SYSTEM_TWO, CLEAN_COAL_AVG_551, coalQualityDetailVO.getShiftTimeEnd());// 精煤
-        CoalAnalysisRecord p23 = coalAnalysisMapper.getTopCoalAnalysisRecord(SYSTEM_TWO, MIXED_COAL_AVG_552, coalQualityDetailVO.getShiftTimeEnd());// 混煤
+        CoalAnalysisRecord p22 = coalAnalysisMapper.getTopCoalAnalysisRecord(
+                SYSTEM_TWO, CLEAN_COAL_AVG_551, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());// 精煤
+        CoalAnalysisRecord p23 = coalAnalysisMapper.getTopCoalAnalysisRecord(
+                SYSTEM_TWO, MIXED_COAL_AVG_552, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());// 混煤
         CoalAnalysisRecord p24 = coalAnalysisMapper.getTimeRangeCoalAnalysisRecordAVG(
                 SYSTEM_TWO, FILTERPRESS_SLURRY, coalQualityDetailVO.getShiftTimeBegin(), coalQualityDetailVO.getShiftTimeEnd());// 煤泥
         List<CoalQualityDetailVO.MetricData> production2 = new ArrayList<>();

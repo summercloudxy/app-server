@@ -1,5 +1,6 @@
 package com.zgiot.app.server.module.sfsubsc.entity.vo;
 
+import java.util.Date;
 import java.util.List;
 
 public class CoalQualityVO {
@@ -28,6 +29,16 @@ public class CoalQualityVO {
      * 班次结束时间
      */
     private String timeEnd;
+
+    /**
+     * 班次有效开始时间
+     */
+    private Date shiftTimeBegin;
+
+    /**
+     * 班次有效结束时间
+     */
+    private Date shiftTimeEnd;
 
     /**
      * 一期数据
@@ -116,6 +127,22 @@ public class CoalQualityVO {
 
     public void setTimeEnd(String timeEnd) {
         this.timeEnd = timeEnd;
+    }
+
+    public Date getShiftTimeBegin() {
+        return shiftTimeBegin;
+    }
+
+    public void setShiftTimeBegin(Date shiftTimeBegin) {
+        this.shiftTimeBegin = shiftTimeBegin;
+    }
+
+    public Date getShiftTimeEnd() {
+        return shiftTimeEnd;
+    }
+
+    public void setShiftTimeEnd(Date shiftTimeEnd) {
+        this.shiftTimeEnd = shiftTimeEnd;
     }
 
     public List<MetricData> getTermOne() {
