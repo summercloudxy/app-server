@@ -21,7 +21,7 @@ public class ModuleListConfig {
     public static final String MODULE_DENSITY_CONTROL = "DENSITY_CONTROL";
     public static final String MODULE_COAL_ANALYSIS = "COAL_ANALYSIS";
     public static final String MODULE_SUBSCRIPTION = "SUBSCRIPTION";
-    public static final String MODULE_STARTSTOP = "STARTSTOP";
+    public static final String MODULE_STARTSTOP = "START";
     @Value("${sf.modules.list}")
     private String moduleListStr;
     private Set configedModules = new HashSet();
