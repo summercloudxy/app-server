@@ -343,7 +343,9 @@
         rule_type,
         alert_level,
         lower_limit,
-        upper_limit
+        upper_limit,
+        enable,
+        delay_time
         FROM
         tb_alert_rule
         WHERE
@@ -876,16 +878,17 @@
 
     <insert id="insertAlertRules" useGeneratedKeys="true" keyProperty="id" keyColumn="id"
             parameterType="com.zgiot.app.server.module.alert.pojo.AlertRule">
-        INSERT INTO tb_alert_rule(id,thing_code,metric_code,rule_type,alert_level,lower_limit,upper_limit) VALUES
+        INSERT INTO tb_alert_rule(id,thing_code,metric_code,rule_type,alert_level,lower_limit,upper_limit,enable) VALUES
         <foreach collection="list" item="item" separator=",">
-            (#{item.id},#{item.thingCode},#{item.metricCode},#{item.ruleType},#{item.alertLevel},#{item.lowerLimit},#{item.upperLimit})
+            (#{item.id},#{item.thingCode},#{item.metricCode},#{item.ruleType},#{item.alertLevel},#{item.lowerLimit},#{item.upperLimit},#{item.enable})
         </foreach>
     </insert>
 
     <update id="updateAlertRules" parameterType="com.zgiot.app.server.module.alert.pojo.AlertRule">
         <foreach collection="list" item="item" separator=";">
             UPDATE tb_alert_rule SET thing_code = #{item.thingCode},metric_code=
-            #{item.metricCode},rule_type=#{item.ruleType},alert_level=#{item.alertLevel},lower_limit=#{item.lowerLimit},upper_limit=#{item.upperLimit}
+            #{item.metricCode},rule_type=#{item.ruleType},alert_level=#{item.alertLevel},lower_limit=#{item.lowerLimit},upper_limit=#{item.upperLimit},
+            delay_time = #{item.delayTime},enable = #{item.enable}
             WHERE id=#{item.id}
         </foreach>
     </update>
@@ -1082,16 +1085,17 @@
         UPDATE tb_alert_rule
         SET alert_level = #{alertRule.alertLevel},lower_limit = #{alertRule.lowerLimit},upper_limit =
         #{alertRule.upperLimit},
-        enable = #{alertRule.enable}
+        enable = #{alertRule.enable},
+        delay_time = #{alertRule.delayTime}
         WHERE id = #{alertRule.id};
     </update>
 
     <insert id="insertAlertRule" parameterType="com.zgiot.app.server.module.alert.pojo.AlertRule"
             useGeneratedKeys="true" keyColumn="id" keyProperty="alertRule.id">
-        INSERT INTO tb_alert_rule (thing_code, metric_code, rule_type, alert_level, lower_limit, upper_limit, enable)
+        INSERT INTO tb_alert_rule (thing_code, metric_code, rule_type, alert_level, lower_limit, upper_limit, enable,delay_time)
         VALUES
         (#{alertRule.thingCode}, #{alertRule.metricCode}, #{alertRule.ruleType}, #{alertRule.alertLevel},
-        #{alertRule.lowerLimit}, #{alertRule.upperLimit}, #{alertRule.enable})
+        #{alertRule.lowerLimit}, #{alertRule.upperLimit}, #{alertRule.enable},#{alertRule.delayTime})
     </insert>
 
     <insert id="setParamConfigurationList" parameterType="com.zgiot.app.server.module.alert.pojo.AlertRule">
