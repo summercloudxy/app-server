@@ -1349,8 +1349,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
             // 获取班次所有时间
             dateList = coalAnalysisMapper.getTimeRangeTime(MIXE_COAL_552, timeBegin, timeEnd);
-        }
-        if (hour == WHITE_SHIFT_END) {// 白班
+        } else if (hour == WHITE_SHIFT_END) {// 白班
             coalQualityVO.setShift(WHITE_SHIFT);
 
             calendar.setTime(new Date());
@@ -1367,6 +1366,8 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
             // 获取班次所有时间
             dateList = coalAnalysisMapper.getTimeRangeTime(MIXE_COAL_552, timeBegin, timeEnd);
+        } else {
+            coalQualityVO.setShift("");
         }
         // 设置班次时间
         if (dateList != null && !dateList.isEmpty()) {
@@ -1438,10 +1439,14 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
         if (hour == NIGHT_SHIFT_END) {
             productionVO.setShift(NIGHT_SHIFT);
-        }
-        if (hour == WHITE_SHIFT_END) {
+        } else if (hour == WHITE_SHIFT_END) {
             productionVO.setShift(WHITE_SHIFT);
+        } else {
+            productionVO.setShift("");
         }
+        // TODO 当班时间
+        productionVO.setTimeBegin("");
+        productionVO.setTimeEnd("");
 
         String[] cardParamValueArr = subscCardTypeDO.getCardParamValue().split(";");
 

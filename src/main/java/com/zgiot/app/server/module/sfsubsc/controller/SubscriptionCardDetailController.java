@@ -3,6 +3,8 @@ package com.zgiot.app.server.module.sfsubsc.controller;
 
 import com.zgiot.app.server.module.sfsubsc.controller.handler.CoalAnalysisDataDetailHandler;
 import com.zgiot.app.server.module.sfsubsc.controller.handler.InstantProductDetailHandler;
+import com.zgiot.app.server.module.sfsubsc.entity.vo.CoalQualityDetailVO;
+import com.zgiot.app.server.module.sfsubsc.entity.vo.ProductionDetailVO;
 import com.zgiot.app.server.module.sfsubsc.service.SubscCardTypeService;
 import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.restcontroller.ServerResponse;
@@ -76,7 +78,11 @@ public class SubscriptionCardDetailController {
      */
     @RequestMapping(value = "/getCoalQualityDetail", method = RequestMethod.GET)
     public ResponseEntity<String> getCoalQualityDetail(@RequestParam("date") String date, @RequestParam("shift") String shift) {
-        return new ResponseEntity<>(ServerResponse.buildOkJson(coalAnalysisDataDetailHandler.getCoalQualityDetail(date, shift)), HttpStatus.OK);
+        CoalQualityDetailVO coalQualityDetail = coalAnalysisDataDetailHandler.getCoalQualityDetail(date, shift);
+        if(null == coalQualityDetail){
+            coalQualityDetail = new CoalQualityDetailVO();
+        }
+        return new ResponseEntity<>(ServerResponse.buildOkJson(coalQualityDetail), HttpStatus.OK);
     }
 
     /**
@@ -88,7 +94,11 @@ public class SubscriptionCardDetailController {
      */
     @RequestMapping(value = "/getProductionDetail", method = RequestMethod.GET)
     public ResponseEntity<String> getProductionDetail(@RequestParam("date") String date, @RequestParam("shift") String shift) {
-        return new ResponseEntity<>(ServerResponse.buildOkJson(coalAnalysisDataDetailHandler.getProductionDetail(date, shift)), HttpStatus.OK);
+        ProductionDetailVO productionDetail = coalAnalysisDataDetailHandler.getProductionDetail(date, shift);
+        if(null == productionDetail){
+            productionDetail = new ProductionDetailVO();
+        }
+        return new ResponseEntity<>(ServerResponse.buildOkJson(productionDetail), HttpStatus.OK);
     }
 
 }
