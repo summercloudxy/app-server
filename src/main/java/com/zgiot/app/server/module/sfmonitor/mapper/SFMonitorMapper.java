@@ -15,8 +15,8 @@ public interface SFMonitorMapper {
     @SelectKey(statement = "select LAST_INSERT_ID()", keyProperty = "id", before = false, resultType = long.class) 
     void addMonitor(SFMonitor sfMonitor); 
  
-    @Select("select * from tb_sfmon where sfmon_name=#{name}") 
-    SFMonitor getMonitorByName(@Param("name") String name); 
+    @Select("select * from tb_sfmon where sfmon_name=#{name} and user_name=#{userName}")
+    SFMonitor getMonitorByName(@Param("name") String name,@Param("userName") String userName);
  
     @Select("select * from tb_sfmon where user_id=#{userId} order by sort asc")
     List<SFMonitor> getMonitorByUserId(@Param("userId") long userId); 
