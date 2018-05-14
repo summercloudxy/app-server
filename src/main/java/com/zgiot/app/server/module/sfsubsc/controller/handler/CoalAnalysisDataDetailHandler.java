@@ -465,7 +465,7 @@ public class CoalAnalysisDataDetailHandler {
         ProductionDetailVO.MetricData cleanCoal = productionDetailVO.new MetricData();
         cleanCoal.setName(CLEAN_COAL);
         BigDecimal clean = getDataValue(cleanCoalMap);
-        BigDecimal cleanYield = total.compareTo(BigDecimal.ZERO) == 0 ? BigDecimal.ZERO : (new BigDecimal(100).multiply(clean).divide(total));
+        BigDecimal cleanYield = total.compareTo(BigDecimal.ZERO) == 0 ? BigDecimal.ZERO : (new BigDecimal(100).multiply(clean).divide(total, 2, BigDecimal.ROUND_HALF_UP));
         cleanCoal.setValue1(MetricValueUtil.formartPoint2(clean));
         cleanCoal.setValue2(MetricValueUtil.formartPoint2(cleanYield));
         productionQuantity.add(cleanCoal);
@@ -476,7 +476,7 @@ public class CoalAnalysisDataDetailHandler {
         ProductionDetailVO.MetricData mixedCoal = productionDetailVO.new MetricData();
         mixedCoal.setName(MIXED_COAL);
         BigDecimal mixed = getDataValue(mixedCoalMap);
-        BigDecimal mixedYield = total.compareTo(BigDecimal.ZERO) == 0 ? BigDecimal.ZERO : (new BigDecimal(100).multiply(mixed).divide(total));
+        BigDecimal mixedYield = total.compareTo(BigDecimal.ZERO) == 0 ? BigDecimal.ZERO : (new BigDecimal(100).multiply(mixed).divide(total, 2, BigDecimal.ROUND_HALF_UP));
         mixedCoal.setValue1(MetricValueUtil.formartPoint2(mixed));
         mixedCoal.setValue2(MetricValueUtil.formartPoint2(mixedYield));
         productionQuantity.add(mixedCoal);
@@ -487,7 +487,7 @@ public class CoalAnalysisDataDetailHandler {
         ProductionDetailVO.MetricData coalMud = productionDetailVO.new MetricData();
         coalMud.setName(SLURRY);
         BigDecimal mud = getDataValue(coalMudMap);
-        BigDecimal mudYield = total.compareTo(BigDecimal.ZERO) == 0 ? BigDecimal.ZERO : (new BigDecimal(100).multiply(mud).divide(total));
+        BigDecimal mudYield = total.compareTo(BigDecimal.ZERO) == 0 ? BigDecimal.ZERO : (new BigDecimal(100).multiply(mud).divide(total, 2, BigDecimal.ROUND_HALF_UP));
         coalMud.setValue1(MetricValueUtil.formartPoint2(mud));
         coalMud.setValue2(MetricValueUtil.formartPoint2(mudYield));
         productionQuantity.add(coalMud);
@@ -617,8 +617,10 @@ public class CoalAnalysisDataDetailHandler {
         BigDecimal totalValue = BigDecimal.ZERO;
         for (List<DataModel> dataModelList : map.values()) {
             if (dataModelList != null && !dataModelList.isEmpty()) {
-                String value = dataModelList.get(0).getValue();
-                totalValue = totalValue.add(new BigDecimal(value == null || value == "" ? "0" : value));
+                for (DataModel dataModel : dataModelList){
+                    String value = dataModel.getValue();
+                    totalValue = totalValue.add(new BigDecimal(value == null || value == "" ? "0" : value));
+                }
             }
         }
         return totalValue;
