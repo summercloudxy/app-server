@@ -1340,12 +1340,14 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             calendar.set(Calendar.MINUTE, 0);
             calendar.set(Calendar.SECOND, 0);
             timeBegin = calendar.getTime();
+            coalQualityVO.setShiftTimeBegin(timeBegin);
 
             calendar.setTime(new Date());
             calendar.set(Calendar.HOUR_OF_DAY, NIGHT_SHIFT_END);
             calendar.set(Calendar.MINUTE, 0);
             calendar.set(Calendar.SECOND, 0);
             Date timeEnd = calendar.getTime();
+            coalQualityVO.setShiftTimeEnd(timeEnd);
 
             // 获取班次所有时间
             dateList = coalAnalysisMapper.getTimeRangeTime(MIXE_COAL_552, timeBegin, timeEnd);
@@ -1357,12 +1359,14 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             calendar.set(Calendar.MINUTE, 0);
             calendar.set(Calendar.SECOND, 0);
             Date timeBegin = calendar.getTime();
+            coalQualityVO.setShiftTimeBegin(timeBegin);
 
             calendar.setTime(new Date());
             calendar.set(Calendar.HOUR_OF_DAY, WHITE_SHIFT_END);
             calendar.set(Calendar.MINUTE, 0);
             calendar.set(Calendar.SECOND, 0);
             Date timeEnd = calendar.getTime();
+            coalQualityVO.setShiftTimeEnd(timeEnd);
 
             // 获取班次所有时间
             dateList = coalAnalysisMapper.getTimeRangeTime(MIXE_COAL_552, timeBegin, timeEnd);
@@ -1398,8 +1402,10 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
      * @return
      */
     private List<CoalQualityVO.MetricData> getCoalQualityData(CoalQualityVO coalQualityVO, int system) {
-        CoalAnalysisRecord coalAnalysisClean = coalAnalysisMapper.getTopCoalAnalysisRecord(system, CLEAN_COAL_AVG_551, new Date());
-        CoalAnalysisRecord coalAnalysisMixed = coalAnalysisMapper.getTopCoalAnalysisRecord(system, MIXED_COAL_AVG_552, new Date());
+        CoalAnalysisRecord coalAnalysisClean = coalAnalysisMapper.getTopCoalAnalysisRecord(
+                system, CLEAN_COAL_AVG_551, coalQualityVO.getShiftTimeBegin(), coalQualityVO.getShiftTimeEnd());
+        CoalAnalysisRecord coalAnalysisMixed = coalAnalysisMapper.getTopCoalAnalysisRecord(
+                system, MIXED_COAL_AVG_552, coalQualityVO.getShiftTimeBegin(), coalQualityVO.getShiftTimeEnd());
 
         List<CoalQualityVO.MetricData> list = new ArrayList<>();
         CoalQualityVO.MetricData metricData = coalQualityVO.new MetricData();
