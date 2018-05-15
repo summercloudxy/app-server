@@ -1378,7 +1378,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
                 timeBegin = calendar.getTime();
                 coalQualityVO.setShiftTimeBegin(timeBegin);
 
-                calendar.setTime(new Date());
+                calendar.setTime(timeBegin);
                 calendar.set(Calendar.HOUR_OF_DAY, WHITE_SHIFT_END);
                 calendar.set(Calendar.MINUTE, 0);
                 calendar.set(Calendar.SECOND, 0);
