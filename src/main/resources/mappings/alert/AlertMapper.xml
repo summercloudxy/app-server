@@ -247,6 +247,7 @@
         <!-- LEFT JOIN tb_alert_rule r on c.thing_code = r.thing_code -->
         <!--AND c.metric_code = r.metric_code-->
         <trim prefixOverrides="AND" prefix="WHERE">
+            c.alert_type = #{filter.alertType}
             <if test="filter.assetType != null">
                 AND
                 t.thing_type1_code = #{filter.assetType}
@@ -878,9 +879,11 @@
 
     <insert id="insertAlertRules" useGeneratedKeys="true" keyProperty="id" keyColumn="id"
             parameterType="com.zgiot.app.server.module.alert.pojo.AlertRule">
-        INSERT INTO tb_alert_rule(id,thing_code,metric_code,rule_type,alert_level,lower_limit,upper_limit,enable) VALUES
+        INSERT INTO
+        tb_alert_rule(id,thing_code,metric_code,rule_type,alert_level,lower_limit,upper_limit,enable,delay_time) VALUES
         <foreach collection="list" item="item" separator=",">
-            (#{item.id},#{item.thingCode},#{item.metricCode},#{item.ruleType},#{item.alertLevel},#{item.lowerLimit},#{item.upperLimit},#{item.enable})
+            (#{item.id},#{item.thingCode},#{item.metricCode},#{item.ruleType},#{item.alertLevel},#{item.lowerLimit},#{item.upperLimit},#{item.enable},
+            #{item.delayTime})
         </foreach>
     </insert>
 
@@ -1099,9 +1102,9 @@
     </insert>
 
     <insert id="setParamConfigurationList" parameterType="com.zgiot.app.server.module.alert.pojo.AlertRule">
-        INSERT INTO tb_alert_param_configuration_list (thing_code, metric_code) VALUES
+        INSERT INTO tb_alert_param_configuration_list (thing_code, metric_code ,alert_type) VALUES
         <foreach collection="list" item="item" open="(" separator="),(" close=")">
-            #{item.thingCode},#{item.metricCode}
+            #{item.thingCode},#{item.metricCode},1
         </foreach>
     </insert>
 
