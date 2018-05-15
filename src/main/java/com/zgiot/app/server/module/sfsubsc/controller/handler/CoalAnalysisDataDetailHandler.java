@@ -514,7 +514,7 @@ public class CoalAnalysisDataDetailHandler {
 
         // 精煤仓
         Map<String, List<DataModel>> cleanStockMap = historyDataService.findMultiThingsHistoryDataOfMetric(
-                Arrays.asList(thingCodesArr[4].split(",")), metricCode, startDate, endDate);
+                Arrays.asList(thingCodesArr[4].split(",")), MetricCodes.AMOUNT, startDate, endDate);
         ProductionDetailVO.MetricData cleanStock = productionDetailVO.new MetricData();
         cleanStock.setName(CLEAN_WAREHOUSE);
         cleanStock.setValue1(MetricValueUtil.formartPoint2(getDataValue(cleanStockMap)));
@@ -522,7 +522,7 @@ public class CoalAnalysisDataDetailHandler {
 
         // 混煤仓
         Map<String, List<DataModel>> mixedStockMap = historyDataService.findMultiThingsHistoryDataOfMetric(
-                Arrays.asList(thingCodesArr[5].split(",")), metricCode, startDate, endDate);
+                Arrays.asList(thingCodesArr[5].split(",")), MetricCodes.AMOUNT, startDate, endDate);
         ProductionDetailVO.MetricData mixedStock = productionDetailVO.new MetricData();
         mixedStock.setName(MIXED_WAREHOUSE);
         mixedStock.setValue1(MetricValueUtil.formartPoint2(getDataValue(mixedStockMap)));
