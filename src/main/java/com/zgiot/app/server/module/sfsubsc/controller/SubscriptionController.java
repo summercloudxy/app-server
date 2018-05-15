@@ -9,6 +9,7 @@ import com.zgiot.app.server.module.sfsubsc.entity.pojo.SFSubscriptionCard;
 import com.zgiot.app.server.module.sfsubsc.entity.pojo.SubscCardTypeDO;
 import com.zgiot.app.server.module.sfsubsc.entity.vo.*;
 import com.zgiot.app.server.module.sfsubsc.enums.CardTypeEnum;
+import com.zgiot.app.server.module.sfsubsc.job.CardDataManager;
 import com.zgiot.app.server.module.sfsubsc.service.RelUserSfsubscriptionService;
 import com.zgiot.app.server.module.sfsubsc.service.SubscCardTypeService;
 import com.zgiot.common.constants.GlobalConstants;
@@ -32,6 +33,8 @@ public class SubscriptionController {
     private SubscCardTypeService subscCardTypeService;
     @Autowired
     private RelUserSfsubscriptionService relUserCardService;
+    @Autowired
+    private CardDataManager cardDataManager;
 
     /**
      * 获取所有卡片数据
@@ -148,6 +151,18 @@ public class SubscriptionController {
     public ResponseEntity<String> top(@RequestBody String bodyStr) {
         RelUserSfsubscription relUserSfsubscription = JSON.parseObject(bodyStr, RelUserSfsubscription.class);
         relUserCardService.top(relUserSfsubscription);
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+    /**
+     * 卡片job
+     *
+     * @return
+     */
+    @RequestMapping(value = "/getProductionCardDatas", method = RequestMethod.GET)
+    public ResponseEntity<String> getProductionCardDatas() {
+        cardDataManager.getProductionCardDatas();
 
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }

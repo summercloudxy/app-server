@@ -1330,7 +1330,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
         List<Date> dateList = null;
-        if (hour == NIGHT_SHIFT_END) {// 夜班
+        if (hour >= NIGHT_SHIFT_END && hour < WHITE_SHIFT_END) {// 夜班
             coalQualityVO.setShift(NIGHT_SHIFT);
 
             Date timeBegin = DateUtils.addDays(new Date(), -1);
@@ -1350,27 +1350,44 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
             // 获取班次所有时间
             dateList = coalAnalysisMapper.getTimeRangeTime(MIXE_COAL_552, timeBegin, timeEnd);
-        } else if (hour == WHITE_SHIFT_END) {// 白班
+        } else {// 白班
             coalQualityVO.setShift(WHITE_SHIFT);
 
-            calendar.setTime(new Date());
-            calendar.set(Calendar.HOUR_OF_DAY, WHITE_SHIFT_BEGIN);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
-            Date timeBegin = calendar.getTime();
-            coalQualityVO.setShiftTimeBegin(timeBegin);
+            Date timeBegin;
+            Date timeEnd;
+            if (hour >= WHITE_SHIFT_END) {
+                calendar.setTime(new Date());
+                calendar.set(Calendar.HOUR_OF_DAY, WHITE_SHIFT_BEGIN);
+                calendar.set(Calendar.MINUTE, 0);
+                calendar.set(Calendar.SECOND, 0);
+                timeBegin = calendar.getTime();
+                coalQualityVO.setShiftTimeBegin(timeBegin);
 
-            calendar.setTime(new Date());
-            calendar.set(Calendar.HOUR_OF_DAY, WHITE_SHIFT_END);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
-            Date timeEnd = calendar.getTime();
-            coalQualityVO.setShiftTimeEnd(timeEnd);
+                calendar.setTime(new Date());
+                calendar.set(Calendar.HOUR_OF_DAY, WHITE_SHIFT_END);
+                calendar.set(Calendar.MINUTE, 0);
+                calendar.set(Calendar.SECOND, 0);
+                timeEnd = calendar.getTime();
+                coalQualityVO.setShiftTimeEnd(timeEnd);
+            } else {
+                timeBegin = DateUtils.addDays(new Date(), -1);
+                calendar.setTime(timeBegin);
+                calendar.set(Calendar.HOUR_OF_DAY, WHITE_SHIFT_BEGIN);
+                calendar.set(Calendar.MINUTE, 0);
+                calendar.set(Calendar.SECOND, 0);
+                timeBegin = calendar.getTime();
+                coalQualityVO.setShiftTimeBegin(timeBegin);
+
+                calendar.setTime(timeBegin);
+                calendar.set(Calendar.HOUR_OF_DAY, WHITE_SHIFT_END);
+                calendar.set(Calendar.MINUTE, 0);
+                calendar.set(Calendar.SECOND, 0);
+                timeEnd = calendar.getTime();
+                coalQualityVO.setShiftTimeEnd(timeEnd);
+            }
 
             // 获取班次所有时间
             dateList = coalAnalysisMapper.getTimeRangeTime(MIXE_COAL_552, timeBegin, timeEnd);
-        } else {
-            coalQualityVO.setShift("");
         }
         // 设置班次时间
         if (dateList != null && !dateList.isEmpty()) {
