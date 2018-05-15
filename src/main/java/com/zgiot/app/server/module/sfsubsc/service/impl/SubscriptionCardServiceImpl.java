@@ -1326,10 +1326,8 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         int day = calendar.get(Calendar.DATE);// 获取日
         int hour = calendar.get(Calendar.HOUR_OF_DAY);// 获取小时
 
-        coalQualityVO.setDate("" + year + "-" + (month + 1) + "-" + day);
-
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-        List<Date> dateList = null;
+        List<Date> dateList;
         if (hour >= NIGHT_SHIFT_END && hour < WHITE_SHIFT_END) {// 夜班
             coalQualityVO.setShift(NIGHT_SHIFT);
 
@@ -1340,6 +1338,9 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             calendar.set(Calendar.SECOND, 0);
             timeBegin = calendar.getTime();
             coalQualityVO.setShiftTimeBegin(timeBegin);
+
+            day = calendar.get(Calendar.DATE);
+            coalQualityVO.setDate("" + year + "-" + (month + 1) + "-" + day);
 
             calendar.setTime(new Date());
             calendar.set(Calendar.HOUR_OF_DAY, NIGHT_SHIFT_END);
@@ -1352,6 +1353,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             dateList = coalAnalysisMapper.getTimeRangeTime(MIXE_COAL_552, timeBegin, timeEnd);
         } else {// 白班
             coalQualityVO.setShift(WHITE_SHIFT);
+            coalQualityVO.setDate("" + year + "-" + (month + 1) + "-" + day);
 
             Date timeBegin;
             Date timeEnd;
@@ -1463,14 +1465,24 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         int day = calendar.get(Calendar.DATE);// 获取日
         int hour = calendar.get(Calendar.HOUR_OF_DAY);// 获取小时
 
-        productionVO.setDate("" + year + "-" + (month + 1) + "-" + day);
-
-        if (hour == NIGHT_SHIFT_END) {
+        if (hour >= NIGHT_SHIFT_END && hour < WHITE_SHIFT_END) {
             productionVO.setShift(NIGHT_SHIFT);
-        } else if (hour == WHITE_SHIFT_END) {
-            productionVO.setShift(WHITE_SHIFT);
+
+            Date timeBegin = DateUtils.addDays(new Date(), -1);
+            calendar.setTime(timeBegin);
+            day = calendar.get(Calendar.DATE);
+            productionVO.setDate("" + year + "-" + (month + 1) + "-" + day);
         } else {
-            productionVO.setShift("");
+            productionVO.setShift(WHITE_SHIFT);
+
+            if (hour >= WHITE_SHIFT_END) {
+                productionVO.setDate("" + year + "-" + (month + 1) + "-" + day);
+            } else {
+                Date timeBegin = DateUtils.addDays(new Date(), -1);
+                calendar.setTime(timeBegin);
+                day = calendar.get(Calendar.DATE);
+                productionVO.setDate("" + year + "-" + (month + 1) + "-" + day);
+            }
         }
         // TODO 当班时间
         productionVO.setTimeBegin("");
@@ -1483,7 +1495,11 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             String[] thingCodeArr = cardParamValueArr[i].split(",");
             for (String thingCode : thingCodeArr) {
                 DataModelWrapper dataModelWrapper = dataService.getData(thingCode, MetricCodes.CT_C).orElse(null);
-                dataValue.add(dataModelWrapper == null ? "0" : dataModelWrapper.getValue());
+                if (null == dataModelWrapper) {
+                    dataValue.add("0");
+                } else {
+                    dataValue.add(StringUtils.isBlank(dataModelWrapper.getValue()) ? "0" : dataModelWrapper.getValue());
+                }
             }
         }
 
@@ -1493,7 +1509,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         BigDecimal coalMud = new BigDecimal(0);
         if (dataValue.size() > 0) {
             rawCoal = new BigDecimal(dataValue.get(0)).add(new BigDecimal(dataValue.get(1)))
-                    .add(new BigDecimal(dataValue.get(2) + dataValue.get(3)));
+                    .add(new BigDecimal(dataValue.get(2)).add(new BigDecimal(dataValue.get(3))));
             cleanCoal = new BigDecimal(dataValue.get(4)).add(new BigDecimal(dataValue.get(5)));
             mixedCoal = new BigDecimal(dataValue.get(6));
             coalMud = new BigDecimal(dataValue.get(7)).add(new BigDecimal(dataValue.get(8)));
@@ -1505,9 +1521,9 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         String mixedCoalYield = "0.00";
         String coalMudYield = "0.00";
         if (rawCoal.compareTo(BigDecimal.ZERO) != 0) {
-            cleanCoalYield = MetricValueUtil.formartPoint2(new BigDecimal(100).multiply(cleanCoal.divide(rawCoal)));
-            mixedCoalYield = MetricValueUtil.formartPoint2(new BigDecimal(100).multiply(mixedCoal.divide(rawCoal)));
-            coalMudYield = MetricValueUtil.formartPoint2(new BigDecimal(100).multiply(coalMud.divide(rawCoal)));
+            cleanCoalYield = MetricValueUtil.formartPoint2(new BigDecimal(100).multiply(cleanCoal.divide(rawCoal, 2, BigDecimal.ROUND_HALF_UP)));
+            mixedCoalYield = MetricValueUtil.formartPoint2(new BigDecimal(100).multiply(mixedCoal.divide(rawCoal, 2, BigDecimal.ROUND_HALF_UP)));
+            coalMudYield = MetricValueUtil.formartPoint2(new BigDecimal(100).multiply(coalMud.divide(rawCoal, 2, BigDecimal.ROUND_HALF_UP)));
         }
         // 精煤产率
         productionVO.setCleanCoalYield(cleanCoalYield);

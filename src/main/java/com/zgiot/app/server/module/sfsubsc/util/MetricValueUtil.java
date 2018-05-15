@@ -1,5 +1,7 @@
 package com.zgiot.app.server.module.sfsubsc.util;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.math.BigDecimal;
 
 /**
@@ -20,16 +22,17 @@ public class MetricValueUtil {
     }
 
     public static String formartPoint2(String metricValue) {
-        return String.valueOf(new BigDecimal(metricValue).setScale(placesPoint2, BigDecimal.ROUND_HALF_UP));
+        return String.valueOf(new BigDecimal(StringUtils.isBlank(metricValue) ? "0" : metricValue)
+                .setScale(placesPoint2, BigDecimal.ROUND_HALF_UP));
 
     }
 
     public static String formartPoint2(BigDecimal metricValue) {
-        return formartPoint2(Double.toString(metricValue.doubleValue()));
+        return formartPoint2(Double.toString((metricValue == null ? BigDecimal.ZERO : metricValue).doubleValue()));
     }
 
     public static String formartPoint2(Double metricValue) {
-        return formartPoint2(metricValue.toString());
+        return formartPoint2((metricValue == null ? "0" : metricValue).toString());
     }
 
 }
