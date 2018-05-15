@@ -66,7 +66,7 @@ public interface CoalAnalysisMapper {
      * @param timeEnd
      * @return
      */
-    @Select("select FORMAT(AVG(aad),2) AS aad,FORMAT(AVG(mt),2) AS mt,FORMAT(AVG(stad),2) AS stad,FORMAT(AVG(qnetar),2) AS qnetar from tb_coal_analysis " +
+    @Select("select AVG(aad) AS aad,AVG(mt) AS mt,AVG(stad) AS stad,AVG(qnetar) AS qnetar from tb_coal_analysis " +
             "where system = #{system} and target = #{target} and time >= #{timeBegin} and time <= #{timeEnd} ORDER BY time")
     CoalAnalysisRecord getTimeRangeCoalAnalysisRecordAVG(@Param("system") Integer system, @Param("target") String target,
                                                          @Param("timeBegin") Date timeBegin, @Param("timeEnd") Date timeEnd);
