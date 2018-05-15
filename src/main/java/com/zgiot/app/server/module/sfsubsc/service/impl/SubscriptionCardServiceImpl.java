@@ -1410,12 +1410,12 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         CoalQualityVO.MetricData metricData = coalQualityVO.new MetricData();
 
         Double aad = 0.0;
-        if(null != coalAnalysisClean){
+        if (null != coalAnalysisClean) {
             aad = coalAnalysisClean.getAad();
         }
         metricData.setCleanCoalAad(MetricValueUtil.formartPoint2(aad));
         Double qar = 0.0;
-        if(null != coalAnalysisMixed){
+        if (null != coalAnalysisMixed) {
             qar = coalAnalysisMixed.getQnetar();
         }
         metricData.setMixedCoalQar(Math.round(qar) + "");
@@ -1470,18 +1470,24 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             }
         }
 
-        BigDecimal rawCoal = new BigDecimal(dataValue.get(0)).add(new BigDecimal(dataValue.get(1)))
-                .add(new BigDecimal(dataValue.get(2) + dataValue.get(3)));
-        BigDecimal cleanCoal = new BigDecimal(dataValue.get(4)).add(new BigDecimal(dataValue.get(5)));
-        BigDecimal mixedCoal = new BigDecimal(dataValue.get(6));
-        BigDecimal coalMud = new BigDecimal(dataValue.get(7)).add(new BigDecimal(dataValue.get(8)));
+        BigDecimal rawCoal = new BigDecimal(0);
+        BigDecimal cleanCoal = new BigDecimal(0);
+        BigDecimal mixedCoal = new BigDecimal(0);
+        BigDecimal coalMud = new BigDecimal(0);
+        if (dataValue.size() > 0) {
+            rawCoal = new BigDecimal(dataValue.get(0)).add(new BigDecimal(dataValue.get(1)))
+                    .add(new BigDecimal(dataValue.get(2) + dataValue.get(3)));
+            cleanCoal = new BigDecimal(dataValue.get(4)).add(new BigDecimal(dataValue.get(5)));
+            mixedCoal = new BigDecimal(dataValue.get(6));
+            coalMud = new BigDecimal(dataValue.get(7)).add(new BigDecimal(dataValue.get(8)));
+        }
         // 入洗原煤
         productionVO.setRawCoal(MetricValueUtil.formartPoint2(rawCoal));
 
-        String cleanCoalYield = "0";
-        String mixedCoalYield = "0";
-        String coalMudYield = "0";
-        if (rawCoal != BigDecimal.ZERO) {
+        String cleanCoalYield = "0.00";
+        String mixedCoalYield = "0.00";
+        String coalMudYield = "0.00";
+        if (rawCoal.compareTo(BigDecimal.ZERO) != 0) {
             cleanCoalYield = MetricValueUtil.formartPoint2(new BigDecimal(100).multiply(cleanCoal.divide(rawCoal)));
             mixedCoalYield = MetricValueUtil.formartPoint2(new BigDecimal(100).multiply(mixedCoal.divide(rawCoal)));
             coalMudYield = MetricValueUtil.formartPoint2(new BigDecimal(100).multiply(coalMud.divide(rawCoal)));
