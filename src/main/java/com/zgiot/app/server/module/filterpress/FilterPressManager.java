@@ -51,6 +51,7 @@ public class FilterPressManager {
 
     private static final int POSITION_FEED_OVER = 5;
     private static final int POSITION_RUN = 1;
+    private static final int POSITION_R_BAN_RUN = 9;
     private static final int CLAEN_PERIOD = 500;
     private static final int RETRY_PERIOD = 5000;
     private static final int RETRY_COUNT = 3;
@@ -90,6 +91,10 @@ public class FilterPressManager {
 
     private static final String PUMP = "filterPressPump";
 
+    private static final String SYS_R_BAN_RUN = "SYS_R_BAN_RUN";
+
+    private static final String SYSTEM = "SYSTEM";
+
     private static final Integer CURRENT_COUNT_DURATION = -3;
 
     private Map<String, FilterPress> deviceHolder = new ConcurrentHashMap<>();
@@ -97,6 +102,9 @@ public class FilterPressManager {
     private Map<String, String> filterPressPumpMapping = new HashMap<>();
 
     private Map<String, Integer> filterPressTerm = new HashMap<>();
+
+    //禁止启动煤泥刮板数据map,key:对应一期压滤连锁和二期压滤连锁信号点，value：对应1502（一期）或2502（二期）
+    private Map<String, String> runMap = new HashMap<>();
 
     private Set<String> unconfirmedFeed = new ConcurrentSkipListSet<>();
 
@@ -137,6 +145,7 @@ public class FilterPressManager {
     public void initFilterPress() {
         mappingFilterPressInfo(deviceHolder,filterPressTerm);
         mappingFilterPressAndPump(filterPressPumpMapping);
+        mappingRBanRunData(runMap);
         setMaxUnloadParallel(filterPressMapper
                 .selectParamValue(PARAM_NAME_SYS, FilterPress.PARAM_NAME_MAXUNLOADPARALLEL).intValue());
         setMaxUnloadParallelTerm1(filterPressMapper
@@ -151,6 +160,15 @@ public class FilterPressManager {
             boolean unloadConfirmNeed = filterPressMapper.selectParamValue(code, FilterPress.PARAM_NAME_UNLOADCONFIRMNEED).intValue() == 1;
             filterPress.setUnloadConfirmNeed(unloadConfirmNeed);
         });
+    }
+
+    private void mappingRBanRunData(Map<String, String> runMap){
+        FilterPressConfig filterPressConfig = new FilterPressConfig();
+        filterPressConfig.setThingCode(SYS_R_BAN_RUN);
+        List<FilterPressConfig> filterPressList = filterPressMapper.findFilterInfo(filterPressConfig);
+        for(FilterPressConfig data:filterPressList){
+            runMap.put(data.getParamName(),data.getParamValue());
+        }
     }
 
     private void mappingFilterPressInfo(Map<String, FilterPress> deviceHolder,Map<String, Integer> filterPressPeriod){
@@ -183,6 +201,8 @@ public class FilterPressManager {
     public void onDataSourceChange(DataModel data) {
         String thingCode = data.getThingCode();
         FilterPress filterPress = null;
+        String metricCode = data.getMetricCode();
+        rBanRunOperate(metricCode,thingCode,data.getValue());
         if(deviceHolder.containsKey(thingCode)){
             filterPress = deviceHolder.get(thingCode);
         }else if(filterPressPumpMapping.containsKey(thingCode)){
@@ -194,7 +214,7 @@ public class FilterPressManager {
         if(!statisticLogs.containsKey(thingCode)){
             statisticLogs.put(thingCode,new FilterPressLogBean());
         }
-        String metricCode = data.getMetricCode();
+
         filterPress.onDataSourceChange(metricCode, data.getValue());
         if (deviceHolder.containsKey(thingCode) && filterPressStage.containsKey(metricCode)) {
             processStage(data);
@@ -209,6 +229,91 @@ public class FilterPressManager {
         }
 
         savePlateStatisticsData(thingCode,metricCode,data);
+    }
+
+    /**
+     * 远程控制刮板启动逻辑
+     * @param metricCode
+     * @param metricValueData
+     */
+    private void rBanRunOperate(String metricCode,String code,String metricValueData){
+        int term = 0;
+        if(runMap.containsKey(metricCode)){
+            String thingCode = runMap.get(metricCode);
+            Optional<DataModelWrapper> value = dataService.getData(thingCode,MetricCodes.STATE);
+            if((value.isPresent()) && (!StringUtils.isBlank(value.get().getValue()))){
+                String meticValue = value.get().getValue();
+                if(FilterPressMetricConstants.YL_LS_TERM1.equals(metricCode)){
+                    term = 1;
+                    Set<String> thingCodes = getAllFilterPressCode(term);
+                    filterPressLockControlRBanRun(metricValueData,meticValue,thingCodes);
+
+                }else if(FilterPressMetricConstants.YL_LS_TERM2.equals(metricCode)){
+                    term = 2;
+                    Set<String> thingCodes = getAllFilterPressCode(term);
+                    filterPressLockControlRBanRun(metricValueData,meticValue,thingCodes);
+                }
+            }
+        }else if((runMap.containsValue(code) && FilterPressMetricConstants.STATE.equals(metricCode))) {
+            stateChangeOperate(metricCode,code,metricValueData);
+        }
+    }
+
+    /**
+     * 1502或者2502 STATE状态值触发刮板是否启动逻辑
+     */
+    private void stateChangeOperate(String metricCode,String code,String metricValueData){
+            String meticValue = null;
+            int term = 0;
+            if(code.startsWith(String.valueOf(TERM1))){
+                Optional<DataModelWrapper> value = dataService.getData(SYSTEM,FilterPressMetricConstants.YL_LS_TERM1);
+                if((value.isPresent()) && (!StringUtils.isBlank(value.get().getValue()))){
+                    meticValue = value.get().getValue();
+                }
+                term = 1;
+                Set<String> thingCodes = getAllFilterPressCode(term);
+                stateContrlRbanRun(meticValue,metricValueData,thingCodes);
+            }else if(code.startsWith(String.valueOf(TERM2))){
+                Optional<DataModelWrapper> value = dataService.getData(SYSTEM,FilterPressMetricConstants.YL_LS_TERM2);
+                if((value.isPresent()) && (!StringUtils.isBlank(value.get().getValue()))){
+                    meticValue = value.get().getValue();
+                }
+                term = 2;
+                Set<String> thingCodes = getAllFilterPressCode(term);
+                stateContrlRbanRun(meticValue,metricValueData,thingCodes);
+            }
+    }
+
+    private void stateContrlRbanRun(String metricValueData,String meticValue,Set<String> thingCodes){
+        if((Boolean.parseBoolean(metricValueData)) && (GlobalConstants.STATE_RUNNING == Short.valueOf(meticValue))){
+            //启动刮板，即给刮板启动信号设置为0
+            setRBanRun(thingCodes,Boolean.FALSE.toString());
+        }else if((Boolean.parseBoolean(metricValueData)) && (GlobalConstants.STATE_RUNNING != Short.valueOf(meticValue))){
+            //禁止刮板启动
+            setRBanRun(thingCodes,Boolean.TRUE.toString());
+        }
+    }
+
+    private void filterPressLockControlRBanRun(String metricValueData,String meticValue,Set<String> thingCodes){
+        if((Boolean.parseBoolean(metricValueData)) && (GlobalConstants.STATE_RUNNING == Short.valueOf(meticValue))){
+            //启动刮板，即给刮板启动信号设置为0
+            setRBanRun(thingCodes,Boolean.FALSE.toString());
+        }else if(!Boolean.parseBoolean(metricValueData)){//启动刮板，即给刮板启动信号设置为0
+            setRBanRun(thingCodes,Boolean.FALSE.toString());
+        }else if((Boolean.parseBoolean(metricValueData)) && (GlobalConstants.STATE_RUNNING != Short.valueOf(meticValue))){
+            //禁止刮板启动
+            setRBanRun(thingCodes,Boolean.TRUE.toString());
+        }
+    }
+
+    private void setRBanRun(Set<String> thingCodes,String stopFlag){
+        for(String code:thingCodes){
+            DataModel cmd = new DataModel();
+            cmd.setThingCode(code);
+            cmd.setMetricCode(FilterPressMetricConstants.R_BAN_RUN);
+            cmd.setValue(stopFlag);
+            cmdControlService.sendPulseCmdBoolByShort(cmd,RETRY_PERIOD,RETRY_COUNT,RequestIdUtil.generateRequestId(),POSITION_R_BAN_RUN,CLAEN_PERIOD,true);
+        }
     }
 
     private void savePlateStatisticsData(String thingCode,String metricCode,DataModel data){
