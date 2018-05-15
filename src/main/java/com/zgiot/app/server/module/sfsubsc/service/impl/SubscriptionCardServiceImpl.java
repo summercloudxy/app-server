@@ -1483,7 +1483,11 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             String[] thingCodeArr = cardParamValueArr[i].split(",");
             for (String thingCode : thingCodeArr) {
                 DataModelWrapper dataModelWrapper = dataService.getData(thingCode, MetricCodes.CT_C).orElse(null);
-                dataValue.add(dataModelWrapper == null ? "0" : dataModelWrapper.getValue());
+                if (null == dataModelWrapper) {
+                    dataValue.add("0");
+                } else {
+                    dataValue.add(StringUtils.isBlank(dataModelWrapper.getValue()) ? "0" : dataModelWrapper.getValue());
+                }
             }
         }
 
@@ -1493,7 +1497,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
         BigDecimal coalMud = new BigDecimal(0);
         if (dataValue.size() > 0) {
             rawCoal = new BigDecimal(dataValue.get(0)).add(new BigDecimal(dataValue.get(1)))
-                    .add(new BigDecimal(dataValue.get(2) + dataValue.get(3)));
+                    .add(new BigDecimal(dataValue.get(2)).add(new BigDecimal(dataValue.get(3))));
             cleanCoal = new BigDecimal(dataValue.get(4)).add(new BigDecimal(dataValue.get(5)));
             mixedCoal = new BigDecimal(dataValue.get(6));
             coalMud = new BigDecimal(dataValue.get(7)).add(new BigDecimal(dataValue.get(8)));
