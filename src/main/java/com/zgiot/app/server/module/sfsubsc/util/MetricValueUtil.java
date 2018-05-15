@@ -25,11 +25,11 @@ public class MetricValueUtil {
     }
 
     public static String formartPoint2(BigDecimal metricValue) {
-        return String.valueOf(metricValue.setScale(placesPoint2, BigDecimal.ROUND_HALF_UP));
+        return formartPoint2(Double.toString(metricValue.doubleValue()));
     }
 
     public static String formartPoint2(Double metricValue) {
-        return String.valueOf(new BigDecimal(metricValue).setScale(placesPoint2, BigDecimal.ROUND_HALF_UP));
+        return formartPoint2(metricValue.toString());
     }
 
 }
