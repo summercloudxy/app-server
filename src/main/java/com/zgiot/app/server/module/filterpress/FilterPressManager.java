@@ -91,9 +91,9 @@ public class FilterPressManager {
 
     private static final String PUMP = "filterPressPump";
 
-    private static final String SYS_R_BAN_RUN = "SYS_R_BAN_RUN";
+    private static final String SYS_1_YL = "SYS_1_YL";
 
-    private static final String SYSTEM = "SYSTEM";
+    private static final String SYS_2_YL = "SYS_2_YL";
 
     private static final Integer CURRENT_COUNT_DURATION = -3;
 
@@ -164,10 +164,12 @@ public class FilterPressManager {
 
     private void mappingRBanRunData(Map<String, String> runMap){
         FilterPressConfig filterPressConfig = new FilterPressConfig();
-        filterPressConfig.setThingCode(SYS_R_BAN_RUN);
+        filterPressConfig.setThingCode(SYS_1_YL);
         List<FilterPressConfig> filterPressList = filterPressMapper.findFilterInfo(filterPressConfig);
+        filterPressConfig.setThingCode(SYS_2_YL);
+        filterPressList.addAll(filterPressMapper.findFilterInfo(filterPressConfig));
         for(FilterPressConfig data:filterPressList){
-            runMap.put(data.getParamName(),data.getParamValue());
+            runMap.put(data.getThingCode(),data.getParamValue());
         }
     }
 
@@ -238,17 +240,17 @@ public class FilterPressManager {
      */
     private void rBanRunOperate(String metricCode,String code,String metricValueData){
         int term = 0;
-        if(runMap.containsKey(metricCode)){
-            String thingCode = runMap.get(metricCode);
+        if(FilterPressMetricConstants.YL_LS.equals(metricCode)){
+            String thingCode = runMap.get(code);//thingCode:1502 or 2502
             Optional<DataModelWrapper> value = dataService.getData(thingCode,MetricCodes.STATE);
             if((value.isPresent()) && (!StringUtils.isBlank(value.get().getValue()))){
                 String meticValue = value.get().getValue();
-                if(FilterPressMetricConstants.YL_LS_TERM1.equals(metricCode)){
+                if(code.equals(SYS_1_YL)){
                     term = 1;
                     Set<String> thingCodes = getAllFilterPressCode(term);
                     filterPressLockControlRBanRun(metricValueData,meticValue,thingCodes);
 
-                }else if(FilterPressMetricConstants.YL_LS_TERM2.equals(metricCode)){
+                }else if(code.equals(SYS_2_YL)){
                     term = 2;
                     Set<String> thingCodes = getAllFilterPressCode(term);
                     filterPressLockControlRBanRun(metricValueData,meticValue,thingCodes);
@@ -266,7 +268,7 @@ public class FilterPressManager {
             String meticValue = null;
             int term = 0;
             if(code.startsWith(String.valueOf(TERM1))){
-                Optional<DataModelWrapper> value = dataService.getData(SYSTEM,FilterPressMetricConstants.YL_LS_TERM1);
+                Optional<DataModelWrapper> value = dataService.getData(SYS_1_YL,FilterPressMetricConstants.YL_LS);
                 if((value.isPresent()) && (!StringUtils.isBlank(value.get().getValue()))){
                     meticValue = value.get().getValue();
                 }
@@ -274,7 +276,7 @@ public class FilterPressManager {
                 Set<String> thingCodes = getAllFilterPressCode(term);
                 stateContrlRbanRun(meticValue,metricValueData,thingCodes);
             }else if(code.startsWith(String.valueOf(TERM2))){
-                Optional<DataModelWrapper> value = dataService.getData(SYSTEM,FilterPressMetricConstants.YL_LS_TERM2);
+                Optional<DataModelWrapper> value = dataService.getData(SYS_2_YL,FilterPressMetricConstants.YL_LS);
                 if((value.isPresent()) && (!StringUtils.isBlank(value.get().getValue()))){
                     meticValue = value.get().getValue();
                 }
