@@ -736,9 +736,10 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
     private void getMetricData4(BigDecimal rawCoalTotalValue, BigDecimal cleanCoalTeamValue, BigDecimal mixedCoalTeamValue, BigDecimal slurryTeamValue, ProductYieldVO.MetricData metricData4) {
         metricData4.setThingName(SubscriptionConstants.WASTE_ROCK);
         if ((rawCoalTotalValue.subtract(cleanCoalTeamValue).subtract(mixedCoalTeamValue).subtract(slurryTeamValue)).compareTo(BigDecimal.ZERO) > 0 && rawCoalTotalValue.compareTo(BigDecimal.ZERO) != 0) {
-            metricData4.setThingCodeMetricPercent((rawCoalTotalValue.subtract(cleanCoalTeamValue).subtract(mixedCoalTeamValue).subtract(slurryTeamValue)).divide(rawCoalTotalValue, 1, BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal(100).setScale(0)) + "%");
+            metricData4.setThingCodeMetricPercent((rawCoalTotalValue.subtract(cleanCoalTeamValue).subtract(mixedCoalTeamValue).subtract(slurryTeamValue))
+                    .multiply(new BigDecimal(100)).divide(rawCoalTotalValue, 1, BigDecimal.ROUND_HALF_UP) + "%");
         } else {
-            metricData4.setThingCodeMetricPercent("");
+            metricData4.setThingCodeMetricPercent("0.0%");
         }
     }
 
@@ -753,9 +754,9 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
     private void getMetricData(BigDecimal rawCoalTotalValue, BigDecimal teamValue, ProductYieldVO.MetricData metricData, String metricName) {
         metricData.setThingName(metricName);
         if (teamValue.compareTo(BigDecimal.ZERO) != 0 && rawCoalTotalValue.compareTo(BigDecimal.ZERO) != 0) {
-            metricData.setThingCodeMetricPercent(teamValue.divide(rawCoalTotalValue, 1, BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal(100).setScale(0)) + "%");
+            metricData.setThingCodeMetricPercent(new BigDecimal(100).multiply(teamValue).divide(rawCoalTotalValue, 1, BigDecimal.ROUND_HALF_UP) + "%");
         } else {
-            metricData.setThingCodeMetricPercent("");
+            metricData.setThingCodeMetricPercent("0.0%");
         }
     }
 
@@ -1163,7 +1164,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             DataModelWrapper pipelineData = dataService.getData(pipeline, BellowsConstants.METRIC_PRESSURE).orElse(null);
             if (pipelineData != null) {
                 String pipelineMetricValue = pipelineData.getValue();
-                pipelineMetrics.add(MetricValueUtil.formart(pipelineMetricValue));
+                pipelineMetrics.add(MetricValueUtil.formartPoint2(pipelineMetricValue));
             } else {
                 pipelineMetrics.add("");
             }
