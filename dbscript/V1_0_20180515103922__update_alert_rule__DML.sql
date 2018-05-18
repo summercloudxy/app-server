@@ -181,7 +181,7 @@ UPDATE `tb_metric` SET  `metric_category_code`='ASSAY', `metric_name`='发热量
 UPDATE `tb_metric` SET  `metric_category_code`='ASSAY', `metric_name`='煤质化验密度平均', `metric_code`='ASSAY_DENSITY_AVG', `metric_type1_code`=NULL, `metric_type2_code`='ASSAY', `metric_type3_code`=NULL, `value_type`=NULL, `value_unit`='kg/L' WHERE (`metric_code`='ASSAY_DENSITY_AVG');
 UPDATE `tb_metric` SET  `metric_category_code`='ASSAY', `metric_name`='煤质化验流量平均', `metric_code`='ASSAY_FLOW_AVG', `metric_type1_code`=NULL, `metric_type2_code`='ASSAY', `metric_type3_code`=NULL, `value_type`=NULL, `value_unit`='m^3/h' WHERE (`metric_code`='ASSAY_FLOW_AVG');
 
-UPDATE `tb_metric` SET  `metric_category_code`='ASSAY', `metric_name`='灰分', `metric_code`='AAD', `metric_type1_code`=NULL, `metric_type2_code`='ASSAY', `metric_type3_code`=NULL, `value_type`=NULL, `value_unit`='%' WHERE (`metric_code`='AAD');
-UPDATE `tb_metric` SET  `metric_category_code`='ASSAY', `metric_name`='水分', `metric_code`='MT', `metric_type1_code`=NULL, `metric_type2_code`='ASSAY', `metric_type3_code`=NULL, `value_type`=NULL, `value_unit`='%' WHERE ( `metric_code`='MT');
-UPDATE `tb_metric` SET  `metric_category_code`='ASSAY', `metric_name`='硫份', `metric_code`='STAD', `metric_type1_code`=NULL, `metric_type2_code`='ASSAY', `metric_type3_code`=NULL, `value_type`=NULL, `value_unit`='%' WHERE (`metric_code`='STAD');
-UPDATE `tb_metric` SET  `metric_category_code`='ASSAY', `metric_name`='发热量', `metric_code`='QNETAR', `metric_type1_code`=NULL, `metric_type2_code`='ASSAY', `metric_type3_code`=NULL, `value_type`=NULL, `value_unit`='kg' WHERE (`metric_code`='QNETAR');
+UPDATE `tb_metric` SET   `metric_type2_code`='ASSAY' WHERE (`metric_code`='AAD');
+UPDATE `tb_metric` SET   `metric_type2_code`='ASSAY' WHERE ( `metric_code`='MT');
+UPDATE `tb_metric` SET   `metric_type2_code`='ASSAY' WHERE (`metric_code`='STAD');
+UPDATE `tb_metric` SET   `metric_type2_code`='ASSAY' WHERE (`metric_code`='QNETAR');
