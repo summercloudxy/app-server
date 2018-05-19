@@ -1,9 +1,8 @@
 package com.zgiot.app.server.dataprocessor;
 
 import com.alibaba.fastjson.JSON;
-import com.zgiot.app.server.service.HistoryDataService;
-import com.zgiot.common.enums.MetricDataTypeEnum;
 import com.zgiot.common.pojo.DataModel;
+import org.apache.commons.lang.StringUtils;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.AsyncHttpClientConfig;
 import org.asynchttpclient.DefaultAsyncHttpClient;
@@ -118,34 +117,20 @@ public class WebSocketProcessor implements DataProcessor {
     }
 
     private void handleMessage(String message) {
-        try {
-            DataModel dataModel = JSON.parseObject(message, DataModel.class);
 
-            logger.trace("received: {}", dataModel);
+        DataModel dataModel = JSON.parseObject(message, DataModel.class);
 
-            // exclude ERR data
-            if (MetricDataTypeEnum.METRIC_DATA_TYPE_ERROR.getName().equals(dataModel.getMetricDataType())) {
-                if (HistoryDataService.fulldataLogger.isDebugEnabled()) {
-                    HistoryDataService.fulldataLogger.debug(JSON.toJSONString(dataModel));
-                }
-                logger.warn("Got error data `{}`. ", dataModel.toString());
-                return;
-            }
-
-            // each data per thread, but listeners are sync for ensuring logic dependencies
-            executor.submit(() -> {
-                for (DataListener listener : listeners) {
-                    try {
-                        listener.onDataChange(dataModel); // TODO stop flag
-                    } catch (Throwable e) {
-                        listener.onError(e);
-                    }
-                }
-            });
-
-        } catch (Throwable error) {
-            logger.error("Unknown data processor exception! ", error);
+        if (logger.isTraceEnabled()) {
+            logger.trace("Got message from dataengine wss , body is `{}`", message);
         }
+
+        if (StringUtils.isBlank(dataModel.getThingCode())) {
+            logger.warn("Bad data from dataengine. `{}`", dataModel);
+            return;
+        }
+
+        ProcessorUtil.handleMessage(dataModel, executor, this.listeners, logger);
+
     }
 
     @Override

@@ -117,68 +117,69 @@ public class ModuleListConfig {
 
     void installModules(DataProcessor processor) {
 
-        processor.addListener(completerDataListener);
-        processor.addListener(cacheUpdater);
+        try {
+            processor.addListener(completerDataListener);
+            processor.addListener(cacheUpdater);
 
-        if (containModule(ModuleListConfig.MODULE_COAL_ANALYSIS)) {
-            completerDataListener.addCompleter(reportFormsCompleter);
-            logIt(MODULE_COAL_ANALYSIS);
-        }
+            if (containModule(ModuleListConfig.MODULE_COAL_ANALYSIS)) {
+                completerDataListener.addCompleter(reportFormsCompleter);
+                logIt(MODULE_COAL_ANALYSIS);
+            }
 
-        if (containModule(ModuleListConfig.MODULE_HIST_PERSIST)) {
-            historyDataPersistDaemon.start();
-            QuartzManager.addJob("historyMinData", ModuleListConfig.MODULE_SUBSCRIPTION, "historyMinData",
-                    ModuleListConfig.MODULE_HIST_PERSIST, HistoryMinDataJob.class, "0 0/1 * * * ?");
-            logIt(MODULE_HIST_PERSIST);
-        }
+            if (containModule(ModuleListConfig.MODULE_HIST_PERSIST)) {
+                historyDataPersistDaemon.start();
+                QuartzManager.addJob("historyMinData", ModuleListConfig.MODULE_SUBSCRIPTION, "historyMinData",
+                        ModuleListConfig.MODULE_HIST_PERSIST, HistoryMinDataJob.class, "0 0/1 * * * ?");
+                logIt(MODULE_HIST_PERSIST);
+            }
 
-        if (containModule(ModuleListConfig.MODULE_FILTERPRESS)) {
-            filterPressManager.initFilterPress();
-            processor.addListener(filterPressListener);
-            logIt(MODULE_FILTERPRESS);
-        }
+            if (containModule(ModuleListConfig.MODULE_FILTERPRESS)) {
+                filterPressManager.initFilterPress();
+                processor.addListener(filterPressListener);
+                logIt(MODULE_FILTERPRESS);
+            }
 
-        if (containModule(ModuleListConfig.MODULE_DENSITY_CONTROL)) {
-            processor.addListener(densityControlListener);
-            logIt(MODULE_DENSITY_CONTROL);
-        }
+            if (containModule(ModuleListConfig.MODULE_DENSITY_CONTROL)) {
+                processor.addListener(densityControlListener);
+                logIt(MODULE_DENSITY_CONTROL);
+            }
 
-        if (containModule(ModuleListConfig.MODULE_ALERT)) {
-            alertManager.init();
-            processor.addListener(alertListener);
-            QuartzManager.addJob("checkParam", ModuleListConfig.MODULE_ALERT, "checkParam",
-                    ModuleListConfig.MODULE_ALERT, AlertParamJob.class, "0/10 * * * * ?", new JobDataMap() {
-                        {
-                            put("handler", alertParamHandler);
-                        }
-                    });
-            QuartzManager.addJob("clearHistory", ModuleListConfig.MODULE_ALERT, "clearHistory",
-                    ModuleListConfig.MODULE_ALERT, AlertHistoryJob.class, "0 0 0 * * ?");
-            QuartzManager.addJobWithInterval("checkFault", ModuleListConfig.MODULE_ALERT, "checkFault",
-                    ModuleListConfig.MODULE_ALERT, AlertFaultJob.class, FAULT_SCAN_RATE, new JobDataMap() {
-                        {
-                            put("handler", alertFaultHandler);
-                        }
-                    });
+            if (containModule(ModuleListConfig.MODULE_ALERT)) {
+                alertManager.init();
+                processor.addListener(alertListener);
+                QuartzManager.addJob("checkParam", ModuleListConfig.MODULE_ALERT, "checkParam",
+                        ModuleListConfig.MODULE_ALERT, AlertParamJob.class, "0/10 * * * * ?", new JobDataMap() {
+                            {
+                                put("handler", alertParamHandler);
+                            }
+                        });
+                QuartzManager.addJob("clearHistory", ModuleListConfig.MODULE_ALERT, "clearHistory",
+                        ModuleListConfig.MODULE_ALERT, AlertHistoryJob.class, "0 0 0 * * ?");
+                QuartzManager.addJobWithInterval("checkFault", ModuleListConfig.MODULE_ALERT, "checkFault",
+                        ModuleListConfig.MODULE_ALERT, AlertFaultJob.class, FAULT_SCAN_RATE, new JobDataMap() {
+                            {
+                                put("handler", alertFaultHandler);
+                            }
+                        });
 
-            logIt(MODULE_ALERT);
-        }
+                logIt(MODULE_ALERT);
+            }
 
-        if (containModule(ModuleListConfig.MODULE_BELLOWS)) {
-            valveManager.init();
-            compressorManager.init();
-            processor.addListener(bellowsDataListener);
-            QuartzManager.addJob("checkBlow", ModuleListConfig.MODULE_BELLOWS, "checkBlow",
-                    ModuleListConfig.MODULE_BELLOWS, ValveIntelligentJob.class, "2 * * * * ?");
-            logIt(MODULE_BELLOWS);
-        }
+            if (containModule(ModuleListConfig.MODULE_BELLOWS)) {
+                valveManager.init();
+                compressorManager.init();
+                processor.addListener(bellowsDataListener);
+                QuartzManager.addJob("checkBlow", ModuleListConfig.MODULE_BELLOWS, "checkBlow",
+                        ModuleListConfig.MODULE_BELLOWS, ValveIntelligentJob.class, "2 * * * * ?");
+                logIt(MODULE_BELLOWS);
+            }
 
-        if (containModule(ModuleListConfig.MODULE_SUBSCRIPTION)) {
-            QuartzManager.addJob("uploadsubscCardDatasOf5s", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf5s",
-                    ModuleListConfig.MODULE_SUBSCRIPTION, UploadSubscCardDatas.class, "0/5 * * * * ?");
+            if (containModule(ModuleListConfig.MODULE_SUBSCRIPTION)) {
+                QuartzManager.addJob("uploadsubscCardDatasOf5s", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf5s",
+                        ModuleListConfig.MODULE_SUBSCRIPTION, UploadSubscCardDatas.class, "0/5 * * * * ?");
 
-            QuartzManager.addJob("uploadsubscCardDatasOf10s", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf10s",
-                    ModuleListConfig.MODULE_SUBSCRIPTION, UploadHistorySubscCardDatas.class, "0/10 * * * * ?");
+                QuartzManager.addJob("uploadsubscCardDatasOf10s", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf10s",
+                        ModuleListConfig.MODULE_SUBSCRIPTION, UploadHistorySubscCardDatas.class, "0/10 * * * * ?");
 
             QuartzManager.addJob("uploadsubscCardDatasOf6oclock", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf6oclock",
                     ModuleListConfig.MODULE_SUBSCRIPTION, UploadProductionSubscCardDatas.class, "0 0 6,18 * * ?");
@@ -186,10 +187,16 @@ public class ModuleListConfig {
             logIt(MODULE_SUBSCRIPTION);
         }
 
-        if (this.containModule(MODULE_DEMO)) {
-            completerDataListener.addCompleter(new DemoDataCompleter());
-            processor.addListener(demoBusiness);
-            logIt(MODULE_DEMO);
+            if (this.containModule(MODULE_DEMO)) {
+                completerDataListener.addCompleter(new DemoDataCompleter());
+                processor.addListener(demoBusiness);
+                logIt(MODULE_DEMO);
+            }
+
+            logger.info("Modules are all loaded successfully. ");
+
+        } catch (Exception e) {
+            logger.error("Sys Modules failed to load. Pls check exception and restart again! ",e );
         }
 
     }
