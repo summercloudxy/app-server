@@ -41,7 +41,11 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
 
             processor.connect().thenRun(() -> {
                 logger.info("Connected DataEngine. ");
-                this.moduleListConfig.installModules(processor);
+                try {
+                    this.moduleListConfig.installModules(processor);
+                } catch (Exception e) {
+                    logger.error("Modules load failed. ", e);
+                }
             }).exceptionally(throwable -> {
                 logger.error("error", throwable);
                 return null;
