@@ -167,4 +167,28 @@ public class SubscriptionController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
+    /**
+     * 历史卡片job
+     *
+     * @return
+     */
+    @RequestMapping(value = "/getHistoryCardDatas", method = RequestMethod.GET)
+    public ResponseEntity<String> getHistoryCardDatas() {
+        cardDataManager.getHistoryCardDatas();
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+    /**
+     * 其他卡片job
+     *
+     * @return
+     */
+    @RequestMapping(value = "/getCardDatas", method = RequestMethod.GET)
+    public ResponseEntity<String> getCardDatas() {
+        cardDataManager.getCardDatas();
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
 }
