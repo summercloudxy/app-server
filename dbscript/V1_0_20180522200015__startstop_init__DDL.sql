@@ -1,4 +1,3 @@
-
 CREATE TABLE `tb_start_area_record`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `operate_id` int(11) NULL DEFAULT NULL COMMENT '启车操作id',
