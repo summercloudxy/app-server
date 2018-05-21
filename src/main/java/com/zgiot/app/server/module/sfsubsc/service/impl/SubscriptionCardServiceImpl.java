@@ -630,19 +630,19 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             rawCoalCapValue = rawCoalCapValue.add(new BigDecimal(rawCoalCap2.getValue()));
         }
         //精煤瞬时量
-        String cleanCoalCapValue = "";
+        String cleanCoalCapValue = "0";
         DataModelWrapper cleanCoalCap = dataService.getData(cardParamValues[1], MetricCodes.COAL_CAP).orElse(null);
         if (cleanCoalCap != null) {
             cleanCoalCapValue = MetricValueUtil.formart(cleanCoalCap.getValue());
         }
         //混煤瞬时量
-        String mixedCoalCapValue = "";
+        String mixedCoalCapValue = "0";
         DataModel mixedCoalCap = historyDataService.findClosestHistoryData(Lists.newArrayList(cardParamValues[2]), Lists.newArrayList(MetricCodes.COAL_CAP), new Date(millis - 60000));
         if (mixedCoalCap != null) {
             mixedCoalCapValue = MetricValueUtil.formart(mixedCoalCap.getValue());
         }
         //煤泥瞬时量
-        String slurryCoalCapValue = "";
+        String slurryCoalCapValue = "0";
         DataModel slurryCoalCap = historyDataService.findClosestHistoryData(Lists.newArrayList(cardParamValues[3]), Lists.newArrayList(MetricCodes.COAL_CAP), new Date(millis - 10000));
         if (slurryCoalCap != null) {
             slurryCoalCapValue = MetricValueUtil.formart(slurryCoalCap.getValue());
@@ -652,7 +652,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
                 subtract(new BigDecimal(StringUtils.isEmpty(cleanCoalCapValue) ? "0" : cleanCoalCapValue)).
                 subtract(new BigDecimal(StringUtils.isEmpty(mixedCoalCapValue) ? "0" : mixedCoalCapValue)).
                 subtract(new BigDecimal(StringUtils.isEmpty(slurryCoalCapValue) ? "0" : slurryCoalCapValue));
-        String wasteRockCapValue = "";
+        String wasteRockCapValue = "0";
         if (wasteRockCapVale.compareTo(BigDecimal.ZERO) > -1) {
             wasteRockCapValue = String.valueOf(MetricValueUtil.formart(wasteRockCapVale));
         }
@@ -1322,12 +1322,10 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
-        int year = calendar.get(Calendar.YEAR);// 获取年份
-        int month = calendar.get(Calendar.MONTH);// 获取月份
-        int day = calendar.get(Calendar.DATE);// 获取日
         int hour = calendar.get(Calendar.HOUR_OF_DAY);// 获取小时
 
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+        SimpleDateFormat sdf1 = new SimpleDateFormat("HH:mm");
+        SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
         List<Date> dateList;
         if (hour >= NIGHT_SHIFT_END && hour < WHITE_SHIFT_END) {// 夜班
             coalQualityVO.setShift(NIGHT_SHIFT);
@@ -1340,8 +1338,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             timeBegin = calendar.getTime();
             coalQualityVO.setShiftTimeBegin(timeBegin);
 
-            day = calendar.get(Calendar.DATE);
-            coalQualityVO.setDate("" + year + "-" + (month + 1) + "-" + day);
+            coalQualityVO.setDate(sdf2.format(timeBegin));
 
             calendar.setTime(new Date());
             calendar.set(Calendar.HOUR_OF_DAY, NIGHT_SHIFT_END);
@@ -1354,7 +1351,6 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             dateList = coalAnalysisMapper.getTimeRangeTime(MIXE_COAL_552, timeBegin, timeEnd);
         } else {// 白班
             coalQualityVO.setShift(WHITE_SHIFT);
-            coalQualityVO.setDate("" + year + "-" + (month + 1) + "-" + day);
 
             Date timeBegin;
             Date timeEnd;
@@ -1389,13 +1385,15 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
                 coalQualityVO.setShiftTimeEnd(timeEnd);
             }
 
+            coalQualityVO.setDate(sdf2.format(timeBegin));
+
             // 获取班次所有时间
             dateList = coalAnalysisMapper.getTimeRangeTime(MIXE_COAL_552, timeBegin, timeEnd);
         }
         // 设置班次时间
         if (dateList != null && !dateList.isEmpty()) {
-            coalQualityVO.setTimeBegin(sdf.format(dateList.get(0)));
-            coalQualityVO.setTimeEnd(sdf.format(dateList.get(dateList.size() - 1)));
+            coalQualityVO.setTimeBegin(sdf1.format(dateList.get(0)));
+            coalQualityVO.setTimeEnd(sdf1.format(dateList.get(dateList.size() - 1)));
         } else {
             coalQualityVO.setTimeBegin("");
             coalQualityVO.setTimeEnd("");
@@ -1461,28 +1459,22 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
-        int year = calendar.get(Calendar.YEAR);// 获取年份
-        int month = calendar.get(Calendar.MONTH);// 获取月份
-        int day = calendar.get(Calendar.DATE);// 获取日
         int hour = calendar.get(Calendar.HOUR_OF_DAY);// 获取小时
 
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         if (hour >= NIGHT_SHIFT_END && hour < WHITE_SHIFT_END) {
             productionVO.setShift(NIGHT_SHIFT);
 
             Date timeBegin = DateUtils.addDays(new Date(), -1);
-            calendar.setTime(timeBegin);
-            day = calendar.get(Calendar.DATE);
-            productionVO.setDate("" + year + "-" + (month + 1) + "-" + day);
+            productionVO.setDate(sdf.format(timeBegin));
         } else {
             productionVO.setShift(WHITE_SHIFT);
 
             if (hour >= WHITE_SHIFT_END) {
-                productionVO.setDate("" + year + "-" + (month + 1) + "-" + day);
+                productionVO.setDate(sdf.format(new Date()));
             } else {
                 Date timeBegin = DateUtils.addDays(new Date(), -1);
-                calendar.setTime(timeBegin);
-                day = calendar.get(Calendar.DATE);
-                productionVO.setDate("" + year + "-" + (month + 1) + "-" + day);
+                productionVO.setDate(sdf.format(timeBegin));
             }
         }
         // TODO 当班时间
