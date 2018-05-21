@@ -20,11 +20,15 @@ public class DataEngineConfiguration {
 
     @Bean(name = "wsProcessor")
     public WebSocketProcessor webSocketProcessor() {
-        String schema = properties.isHttps() ? "wss://" : "ws://";
-        String serverName = properties.getServerName();
-        String websocketEndpoint = properties.getWebsocketEndpoint();
-        String url = schema + serverName + websocketEndpoint;
-        return new WebSocketProcessor(url, properties.getHandshakeTimeout(), properties.getConnectionTimeout());
+        if (DataEngineProperties.CONNECTION_MODE_WEBSOCKET.equals(properties.getConnectionMode())) {
+            String schema = properties.isHttps() ? "wss://" : "ws://";
+            String serverName = properties.getServerName();
+            String websocketEndpoint = properties.getWebsocketEndpoint();
+            String url = schema + serverName + websocketEndpoint;
+            return new WebSocketProcessor(url, properties.getHandshakeTimeout(), properties.getConnectionTimeout());
+        } else {
+            return null;
+        }
     }
 
     @Bean
