@@ -1,0 +1,966 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.sfstart.mapper.StartMapper">
+    <resultMap id="startSystemMap" type="com.zgiot.app.server.module.sfstart.pojo.StartSystem">
+        <result property="systemId" column="id"/>
+        <result property="subSystem" column="subsystem"/>
+        <result property="systemName" column="system_name"/>
+        <result property="productionLine" column="production_line"/>
+        <result property="type" column="system_type"/>
+    </resultMap>
+    <resultMap id="startOperationRecordMap"
+               type="com.zgiot.app.server.module.sfstart.pojo.StartOperationRecord">
+        <result property="operateId" column="operate_id"/>
+        <result property="operateUser" column="operate_user"/>
+        <result property="operateState" column="operate_state"/>
+        <result property="createdDate" column="created_time"/>
+        <result property="isDelete" column="is_delete"/>
+    </resultMap>
+    <resultMap id="startDeviceMap" type="com.zgiot.app.server.module.sfstart.pojo.StartDevice">
+        <result property="deviceId" column="device_id"/>
+        <result property="deviceCode" column="device_code"/>
+        <result property="deviceName" column="device_name"/>
+        <result property="deviceState" column="state"/>
+    </resultMap>
+    <resultMap id="startDeviceSequenceMap"
+               type="com.zgiot.app.server.module.sfstart.pojo.StartDeviceInformation">
+        <result property="deviceId" column="device_id"/>
+        <result property="productionLine" column="production_line"/>
+        <result property="startSequence" column="start_sequence"/>
+        <result property="rateWork" column="rate_work"/>
+        <result property="transformerId" column="transformer_id"/>
+        <result property="startWaitTime" column="start_wait_time"/>
+        <result property="startHierarchy" column="start_hierarchy"/>
+    </resultMap>
+    <resultMap id="startRequirementMap" type="com.zgiot.app.server.module.sfstart.pojo.StartRequirement">
+        <result property="compareDeviceId" column="comparison_device_id"/>
+        <result property="compareDeviceCode" column="comparison_device_code"/>
+        <result property="compareDeviceName" column="comparison_device_name"/>
+        <result property="compareName" column="comparison_name"/>
+        <result property="label" column="dataLabel"/>
+        <result property="operator" column="comparison_operator"/>
+        <result property="compareValue" column="comparison_value"/>
+        <result property="compareNameExplain" column="compare_name_explain"/>
+    </resultMap>
+    <resultMap id="startSingleLabelAndValue"
+               type="com.zgiot.app.server.module.sfstart.pojo.StartSingleLabelAndValue">
+        <result property="dataLabel" column="dataLabel"/>
+        <result property="value" column="dataLabel_value"/>
+    </resultMap>
+    <resultMap id="startDeviceStateMap"
+               type="com.zgiot.app.server.module.sfstart.pojo.StartDeviceStateRecord">
+        <result property="operateId" column="operate_id"/>
+        <result property="deviceId" column="device_id"/>
+        <result property="state" column="state"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+    <resultMap id="startBrowseCoalDevice"
+               type="com.zgiot.app.server.module.sfstart.pojo.StartBrowseCoalDevice">
+        <result property="deviceId" column="device_id"/>
+        <result property="deviceCode" column="device_code"/>
+        <result property="deviceName" column="device_name"/>
+        <result property="deportHigh" column="deport_high"/>
+    </resultMap>
+    <resultMap id="startExamineRule" type="com.zgiot.app.server.module.sfstart.pojo.StartExamineRule">
+        <result property="ruleId" column="rule_id"/>
+        <result property="startDeviceId" column="start_device_id"/>
+        <result property="examineType" column="examine_type"/>
+        <result property="examineDeviceId" column="examine_device_id"/>
+        <result property="examineName" column="examine_name"/>
+        <result property="operator" column="operator"/>
+        <result property="compareValue" column="compare_value"/>
+    </resultMap>
+    <resultMap id="startExamineRecord" type="com.zgiot.app.server.module.sfstart.pojo.StartExamineRecord">
+        <result property="examineId" column="examine_id"/>
+        <result property="operateId" column="operate_id"/>
+        <result property="startDeviceId" column="start_device_id"/>
+        <result property="ruleId" column="rule_id"/>
+        <result property="examineType" column="examine_type"/>
+        <result property="examineResult" column="examine_result"/>
+        <result property="examineInformation" column="examine_information"/>
+        <result property="examineDeviceId" column="examine_device_id"/>
+        <result property="examineDeviceCode" column="examine_device_code"/>
+        <result property="examineDeviceName" column="examine_device_name"/>
+    </resultMap>
+    <resultMap id="startFaultInformation"
+               type="com.zgiot.app.server.module.sfstart.pojo.StartFaultInformation">
+        <result property="deviceId" column="deviceId"/>
+        <result property="name" column="name"/>
+        <result property="faultName" column="fault_name"/>
+    </resultMap>
+    <resultMap id="startManualInterventionRecord"
+               type="com.zgiot.app.server.module.sfstart.pojo.StartManualInterventionRecord">
+        <result property="manualInterventionId" column="manual_intervention_id"/>
+        <result property="operateId" column="operate_id"/>
+        <result property="deviceId" column="device_id"/>
+        <result property="deviceName" column="device_name"/>
+        <result property="deviceCode" column="device_code"/>
+        <result property="areaName" column="area_name"/>
+        <result property="systemName" column="system_name"/>
+        <result property="floor" column="floor"/>
+        <result property="manualInterventionPerson" column="manual_intervention_person"/>
+        <result property="interventionState" column="intervention_state"/>
+    </resultMap>
+    <resultMap id="startManualInterventionDevice"
+               type="com.zgiot.app.server.module.sfstart.pojo.StartManualInterventionDevice">
+        <result property="deviceId" column="device_id"/>
+        <result property="state" column="state"/>
+        <result property="personId" column="update_user"/>
+    </resultMap>
+    <resultMap id="startAreaInformation"
+               type="com.zgiot.app.server.module.sfstart.pojo.StartAreaInformation">
+        <result property="areaName" column="area_name"/>
+        <result property="level" column="level"/>
+        <result property="regionId" column="region_id"/>
+        <result property="areaType" column="area_type"/>
+        <result property="number" column="number"/>
+    </resultMap>
+    <resultMap id="startAreaRule" type="com.zgiot.app.server.module.sfstart.pojo.StartAreaRule">
+        <result property="ruleId" column="rule_id"/>
+        <result property="areaFirstId" column="area_first_id"/>
+        <result property="areaSecondId" column="area_second_id"/>
+        <result property="delayTime" column="delay_time"/>
+        <result property="type" column="type"/>
+        <result property="deviceId" column="device_id"/>
+    </resultMap>
+    <resultMap id="startPackage" type="com.zgiot.app.server.module.sfstart.pojo.StartPackage">
+        <result property="packageId" column="package_id"/>
+        <result property="packageName" column="package_name"/>
+        <result property="regionId" column="region_id"/>
+        <result property="regionName" column="region_name"/>
+        <result property="areaId" column="area_id"/>
+        <result property="areaName" column="area_name"/>
+    </resultMap>
+    <resultMap id="startDeviceRelation" type="com.zgiot.app.server.module.sfstart.pojo.StartDeviceRelation">
+        <result property="deviceId" column="start_device_id"/>
+        <result property="controlDeviceId" column="control_device_id"/>
+        <result property="controlDeviceCode" column="control_device_code"/>
+        <result property="controlDeviceName" column="full_name"/>
+    </resultMap>
+    <select id="selectSystem" resultMap="startSystemMap">
+        SELECT
+        id,
+        subsystem,
+        system_name,
+        production_line,
+        system_type
+        FROM
+        tb_start_system
+        WHERE
+        1 = 1
+        <if test="productionLine != null">
+            AND production_line = #{productionLine}
+        </if>
+        <if test="type != null">
+            AND system_type = #{type}
+        </if>
+        <if test="systemCategory != null">
+            AND system_category = #{systemCategory}
+        </if>
+    </select>
+    <select id="selectOperateRecordWithoutOperateState" resultMap="startOperationRecordMap">
+        SELECT
+        operate_id,
+        operate_user,
+        operate_state,
+        operate_system,
+        created_time,
+        is_delete
+        FROM
+        tb_start_operation_record
+        WHERE
+        is_delete = 0
+        <if test="operateState != null">
+            AND operate_state &gt;#{operateState}
+        </if>
+        <if test="finishState != null">
+            AND operate_state &lt;#{finishState}
+        </if>
+    </select>
+    <insert id="saveStartOperationRecord" useGeneratedKeys="true" keyProperty="operateId">
+        INSERT tb_start_operation_record (
+        create_user, operate_state, operate_system, created_time, is_delete
+        )
+        VALUES (#{createUser}, #{operateState}, #{systemIds}, now(), '0')
+    </insert>
+    <update id="updateOperateStateByOperateId">
+        UPDATE tb_start_operation_record
+        SET operate_state = #{operateState}
+        WHERE operate_id = #{operateId}
+    </update>
+    <select id="selectSynergicSystem" resultType="java.lang.String">
+        SELECT DISTINCT
+        synergic_system
+        FROM
+        tb_start_system_synergic_relation AS ssssr
+        WHERE
+        1 = 1
+        <if test="systemIds != null">
+            AND ssssr.system_id IN
+            <foreach item="systemId" collection="systemIds" open="(" separator="," close=")">
+                #{systemId}
+            </foreach>
+        </if>
+        AND is_delete = '0'
+    </select>
+    <select id="selectDeviceBySystemId" resultMap="startDeviceMap">
+        SELECT DISTINCT
+        sssdr.device_id AS device_id,
+        spl.location_serial_num AS device_code,
+        sa.assets_name AS device_name
+        FROM tb_start_system_device_relation AS sssdr
+        INNER JOIN tb_start_production_location AS spl
+        ON sssdr.device_id = spl.object_id
+        INNER JOIN tb_start_assets AS sa
+        ON sa.object_id = spl.assets_object_id
+        WHERE
+        1 = 1
+        <if test="systemIds != null">
+            AND sssdr.system_id IN
+            <foreach item="systemId" collection="systemIds" open="(" separator="," close=")">
+                #{systemId}
+            </foreach>
+        </if>
+        AND sssdr.is_delete = '0'
+    </select>
+    <insert id="saveStartDeviceStateRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT tb_start_device_state_record (
+        operate_id, device_id, state, create_time, update_time, is_delete
+        )
+        VALUES (#{operateId}, #{deviceId}, #{state},#{createTime}, #{updateTime}, '0')
+    </insert>
+    <select id="selectDeviceInformationBySystemId" resultMap="startDeviceSequenceMap">
+        SELECT
+        ssi.device_id,
+        ssi.production_line,
+        ssi.start_sequence,
+        ssi.rate_work,
+        ssi.transformer_id,
+        ssi.start_wait_time,
+        ssi.start_hierarchy
+        FROM
+        tb_start_device_state_record AS sssdsr
+        INNER JOIN tb_start_information AS ssi ON ssi.device_id = sssdsr.device_id AND ssi.is_delete = '0'
+        <if test="ruleId != null">
+            AND ssi.start_rule_id = #{ruleId}
+        </if>
+        WHERE
+        1 = 1
+        <if test="operateId != null">
+            AND sssdsr.operate_id = #{operateId}
+        </if>
+        ORDER BY ssi.start_sequence
+    </select>
+    <select id="selectLabelByDeviceIdAndName" resultType="java.lang.String">
+        SELECT
+        dataLabel
+        FROM
+        tb_start_signal
+        WHERE
+        1 = 1
+        <if test="deviceId != null">
+            AND deviceId = #{deviceId}
+        </if>
+        <if test="name != null">
+            AND name = #{name}
+        </if>
+    </select>
+    <select id="selectRequirementByDeviceId" resultMap="startRequirementMap">
+        SELECT
+        zstsp.device_id AS comparison_device_id,
+        spl.location_serial_num AS comparison_device_code,
+        spl.full_name AS comparison_device_name,
+        zstsp.dic_signal_id AS comparison_name,
+        ts.dataLabel,
+        zstsp.comparison_operator,
+        zstsp.comparison_value,
+        dds. NAME AS compare_name_explain
+        FROM
+        tb_start_type_set_pararmeter AS zstsp
+        INNER JOIN tb_start_production_location AS spl ON spl.object_id = zstsp.device_id
+        INNER JOIN tb_start_device_signal AS dds ON dds.id = zstsp.dic_signal_id
+        INNER JOIN tb_start_signal AS ts ON ts.`name` = zstsp.dic_signal_id
+        AND ts.deviceId = zstsp.device_id
+        WHERE
+        zstsp.is_deleted = '0'
+        <if test="deviceId != null">
+            AND zstsp.parent_deviced_id = #{deviceId}
+        </if>
+    </select>
+    <select id="selectTransformerInformation" resultMap="startSingleLabelAndValue">
+        SELECT
+        ssti.transformer_value AS dataLabel_value,
+        ts.dataLabel
+        FROM
+        tb_start_transformer_information AS ssti
+        INNER JOIN tb_start_signal AS ts ON ts.deviceCode = ssti.transformer_tab_device_code
+        AND ts.name = #{labelName}
+    </select>
+    <select id="selectDeviceIdByDatelabel" resultType="java.lang.String">
+        SELECT
+        deviceId
+        FROM
+        tb_start_signal
+        WHERE
+        dataLabel = #{datalabel}
+        AND name = #{labelName}
+    </select>
+    <update id="updateStartDeviceState">
+        UPDATE tb_start_device_state_record
+        SET state = #{value},
+        update_time = NOW()
+        WHERE
+        operate_id = #{operateId}
+        AND device_id = #{deviceId}
+    </update>
+    <select id="selectStartDeviceState" resultMap="startDeviceStateMap">
+        SELECT
+        operate_id,
+        device_id,
+        state,
+        create_time,
+        update_time
+        FROM
+        tb_start_device_state_record
+        WHERE
+        1=1
+        <if test="operateId != null">
+            AND operate_id = #{operateId}
+        </if>
+        <if test="deviceId != null">
+            AND device_id = #{deviceId}
+        </if>
+        AND is_delete = 0
+    </select>
+    <select id="selectStartingDeviceBySystemIdAndOperateId" resultMap="startDeviceMap">
+        SELECT
+        sssdr.device_id AS device_id,
+        spl.location_serial_num AS device_code,
+        sa.assets_name AS device_name
+        FROM
+        tb_start_system_device_relation AS sssdr
+        INNER JOIN tb_start_production_location AS spl ON sssdr.device_id = spl.object_id
+        INNER JOIN tb_start_assets AS sa ON sa.object_id = spl.assets_object_id
+        WHERE
+        1 = 1
+        <if test="systemId != null">
+            AND sssdr.system_id = #{systemId}
+        </if>
+        <if test="operateId != null">
+            AND sssdr.device_id IN (
+            SELECT
+            ssdsr.device_id
+            FROM
+            tb_start_device_state_record AS ssdsr
+            WHERE
+            ssdsr.operate_id = #{operateId}
+            )
+        </if>
+    </select>
+    <select id="selectMaxSequence" resultType="java.lang.String">
+        SELECT
+        MAX(ssi.start_sequence)
+        FROM
+        tb_start_information AS ssi
+        WHERE
+        ssi.device_id IN (
+        SELECT
+        ssdsr.device_id
+        FROM
+        tb_start_device_state_record AS ssdsr
+        WHERE
+        ssdsr.operate_id = #{operateId}
+        )
+    </select>
+    <update id="closeOperateStateByOperateId">
+        UPDATE tb_start_operation_record
+        SET is_delete = #{isDelete}
+        WHERE operate_id = #{operateId}
+    </update>
+    <select id="selectSystemWithStarting" resultMap="startSystemMap">
+        SELECT
+        id,
+        subsystem,
+        system_name,
+        production_line,
+        system_type
+        FROM
+        tb_start_system
+        WHERE
+        1 = 1
+        <if test="systemCategory != null">
+            AND system_category = #{systemCategory}
+        </if>
+        ORDER BY system_sequence
+    </select>
+    <select id="selectTestDevice" resultMap="startDeviceMap">
+        SELECT DISTINCT
+        spl.object_id AS device_id,
+        spl.location_serial_num AS device_code,
+        sa.assets_name AS device_name
+        FROM
+        tb_start_information AS ssi
+        INNER JOIN tb_start_production_location AS spl ON ssi.device_id = spl.object_id
+        INNER JOIN tb_start_assets AS sa ON sa.object_id = spl.assets_object_id
+    </select>
+    <select id="selectStartDeviceIdBySystemCategory" resultType="java.lang.String">
+        SELECT
+        sssdr.device_id
+        FROM
+        tb_start_system_device_relation AS sssdr
+        WHERE
+        sssdr.system_id IN (
+        SELECT
+        sss.id
+        FROM
+        tb_start_system AS sss
+        WHERE
+        1 = 1
+        <if test="systemCategory != null">
+            AND sss.system_category = #{systemCategory}
+        </if>
+        <if test="systemType != null">
+            AND sss.system_type = #{systemType}
+        </if>
+
+        )
+    </select>
+    <select id="selectStartDeviceByDeviceId" resultMap="startDeviceMap">
+        SELECT
+        spl.object_id AS device_id,
+        spl.location_serial_num AS device_code,
+        sa.assets_name AS device_name
+        FROM
+        tb_start_production_location AS spl
+        INNER JOIN tb_start_assets AS sa ON sa.object_id = spl.assets_object_id
+        WHERE
+        spl.object_id = #{deviceId}
+    </select>
+    <select id="selectStartBrowseCoalDeviceBySystemId" resultMap="startBrowseCoalDevice">
+        SELECT
+        sssdr.device_id AS device_id,
+        spl.location_serial_num AS device_code,
+        sa.assets_name AS device_name,
+        sap.param_value AS deport_high
+        FROM
+        tb_start_system_device_relation AS sssdr
+        INNER JOIN tb_start_production_location AS spl ON sssdr.device_id = spl.object_id
+        INNER JOIN tb_start_assets AS sa ON sa.object_id = spl.assets_object_id
+        INNER JOIN tb_start_assets_params AS sap ON sa.object_id = sap.assets_object_id
+        WHERE
+        1 = 1
+        <if test="systemId != null">
+            AND sssdr.system_id = #{systemId}
+        </if>
+    </select>
+    <select id="selectStartExamineRuleByDeviceId" resultMap="startExamineRule">
+        SELECT
+        rule_id,
+        start_device_id,
+        examine_type,
+        examine_device_id,
+        examine_name,
+        operator,
+        compare_value
+        FROM
+        tb_start_examine_rule
+        WHERE
+        1 = 1
+        <if test="deviceId != null">
+            AND start_device_id = #{deviceId}
+        </if>
+        AND is_delete = '0'
+    </select>
+    <insert id="saveStartExamineRecord" useGeneratedKeys="true" keyProperty="examine_id">
+        INSERT tb_start_examine_record (
+        operate_id, start_device_id, rule_id, examine_type, examine_information, examine_result, create_time, is_delete
+        )
+        VALUES (#{operateId}, #{startDeviceId}, #{ruleId}, #{examineType}, #{examineInformation}, #{examineResult},
+        now(), '0')
+    </insert>
+    <select id="getStartExaminRuleByRuleIdAndLabel" resultMap="startExamineRule">
+        SELECT
+        sser.rule_id,
+        sser.operator,
+        sser.compare_value,
+        sser.examine_type,
+        sser.examine_device_id,
+        sser.examine_name
+        FROM
+        tb_start_examine_rule AS sser
+        INNER JOIN tb_start_signal AS ts ON sser.examine_device_id = ts.deviceId
+        AND sser.examine_name = ts.`name`
+        <if test="label != null">
+            AND ts.dataLabel = #{label}
+        </if>
+        WHERE
+        1 = 1
+        <if test="ruleId != null">
+            AND sser.rule_id = #{ruleId}
+        </if>
+        AND sser.is_delete = '0'
+    </select>
+    <update id="updateStartExamineRecord">
+        UPDATE tb_start_examine_record
+        SET examine_result = #{examineResult},
+        examine_information = #{examineInformation}
+        WHERE
+        rule_id = #{ruleId}
+        AND operate_id = #{operateId}
+    </update>
+    <select id="getStartExaminRecordByRuleAndOperateId" resultMap="startExamineRecord">
+        SELECT
+        sser.examine_id,
+        sser.operate_id,
+        sser.start_device_id,
+        sser.rule_id,
+        sser.examine_type,
+        sser.examine_result,
+        sser.examine_information,
+        sseru.examine_device_id,
+        spl.location_serial_num AS examine_device_code,
+        sa.assets_name AS examine_device_name
+        FROM
+        tb_start_examine_record AS sser
+        INNER JOIN tb_start_examine_rule AS sseru ON sser.rule_id = sseru.rule_id
+        INNER JOIN tb_start_production_location AS spl ON sseru.examine_device_id = spl.object_id
+        INNER JOIN tb_start_assets AS sa ON sa.object_id = spl.assets_object_id
+        WHERE
+        1 = 1
+        <if test="ruleId != null">
+            AND sser.rule_id = #{ruleId}
+        </if>
+        <if test="operateId != null">
+            AND sser.operate_id = #{operateId}
+        </if>
+        AND sser.is_delete = '0'
+    </select>
+    <select id="selectFaultByExamineDeviceId" resultMap="startFaultInformation">
+        SELECT
+        ts.deviceId,
+        ts.name,
+        dds.`name` AS fault_name,
+        ts.deviceCode
+        FROM
+        tb_start_signal AS ts
+        INNER JOIN tb_start_device_signal AS dds ON ts.`name` = dds.id
+        WHERE
+        ts.typeId = '17'
+        AND ts.deviceId = #{deviceId}
+    </select>
+    <select id="selectFullyExamineErrorByOperateId" resultMap="startExamineRecord">
+        SELECT
+        sser.examine_id,
+        sser.operate_id,
+        sser.start_device_id,
+        sser.rule_id,
+        sser.examine_type,
+        sser.examine_result
+        FROM
+        tb_start_examine_record AS sser
+        INNER JOIN tb_start_examine_rule AS sseru ON sser.rule_id = sseru.rule_id
+        INNER JOIN tb_start_examine_type AS sset ON sseru.examine_type = sset.id
+        WHERE
+        1 = 1
+        <if test="operateId != null">
+            AND sser.operate_id = #{operateId}
+        </if>
+        <if test="examineType != null">
+            AND sser.examine_type = #{examineType}
+        </if>
+        AND sser.examine_result != 1
+        AND sser.is_delete = '0'
+    </select>
+    <select id="selectAutoExamineDeviceBySystemIdAndOperateId" resultMap="startDeviceMap">
+        SELECT
+        sssdr.device_id AS device_id,
+        spl.location_serial_num AS device_code,
+        sa.assets_name AS device_name
+        FROM
+        tb_start_system_device_relation AS sssdr
+        INNER JOIN tb_start_production_location AS spl ON sssdr.device_id = spl.object_id
+        INNER JOIN tb_start_assets AS sa ON sa.object_id = spl.assets_object_id
+        WHERE
+        1 = 1
+        <if test="systemId != null">
+            AND sssdr.system_id = #{systemId}
+        </if>
+        <if test="operateId != null">
+            AND sssdr.device_id IN (
+            SELECT DISTINCT
+            sser.start_device_id
+            FROM
+            tb_start_examine_record AS sser
+            WHERE
+            sser.operate_id = #{operateId}
+            )
+        </if>
+    </select>
+    <select id="selectManualInterventionStateByDeviceId" resultMap="startManualInterventionDevice">
+        SELECT
+        device_id,
+        state,
+        update_user
+        FROM
+        tb_start_manual_intervention
+        WHERE
+        <if test="deviceId != null">
+            device_id = #{deviceId}
+        </if>
+    </select>
+    <insert id="saveManualInterventionRecord" useGeneratedKeys="true" keyProperty="operateId">
+        INSERT INTO tb_start_manual_intervention_record (
+        operate_id, device_id, intervention_state, intervention_person_id, create_time, is_delete)
+        VALUES( #{operateId}, #{deviceId}, #{interventionState}, #{manualInterventionPerson}, now(), '0'
+        )
+    </insert>
+    <select id="selectManualInterventionScopeByLikeDeviceCodeAndState" resultMap="startManualInterventionRecord">
+        SELECT
+        ssi.device_id,
+        spl.location_serial_num AS device_code
+        FROM
+        tb_start_information AS ssi
+        INNER JOIN tb_start_manual_intervention AS zsmi ON ssi.device_id = zsmi.device_id
+        <if test="state != null">
+            AND zsmi.state = #{state}
+        </if>
+        INNER JOIN tb_start_production_location AS spl ON ssi.device_id = spl.object_id
+        <if test="deviceCode != null">
+            AND spl.location_serial_num LIKE CONCAT('',#{deviceCode},'%')
+        </if>
+        WHERE
+        ssi.Is_intervention = 1
+    </select>
+    <update id="updateZgkwStartManualIntervention">
+        UPDATE tb_start_manual_intervention
+        SET state = #{state}
+        <if test="userId != null">
+            ,update_user = #{userId}
+        </if>
+        WHERE
+        1 = 1
+        <if test="deviceId != null">
+            AND device_id = #{deviceId}
+        </if>
+        <if test="beforeState != null">
+            AND state = #{beforeState}
+        </if>
+    </update>
+    <update id="updateStartManualInterventionRecord">
+        UPDATE tb_start_manual_intervention_record
+        SET intervention_state = #{state}
+        <if test="relievePersonId != null">
+            ,relieve_person_id = #{relievePersonId}
+        </if>
+        <if test="interventionPersonId != null">
+            ,intervention_person_id = #{interventionPersonId}
+        </if>
+        WHERE
+        device_id = #{deviceId}
+        AND operate_id = #{operateId}
+    </update>
+    <select id="selectStartingManualInterventionScopeByLikeDeviceCode" resultMap="startManualInterventionRecord">
+        SELECT
+        ssmir.device_id,
+        spl.location_serial_num AS device_code
+        FROM
+        tb_start_manual_intervention_record AS ssmir
+        INNER JOIN tb_start_information AS ssi ON ssi.device_id = ssmir.device_id
+        INNER JOIN tb_start_production_location AS spl ON ssi.device_id = spl.object_id
+        AND ssi.Is_intervention = 1
+        <if test="deviceCode != null">
+            AND spl.location_serial_num LIKE CONCAT('',#{deviceCode},'%')
+        </if>
+        WHERE
+        ssmir.intervention_state != 1
+        <if test="operateId != null">
+            AND ssmir.operate_id = #{operateId}
+        </if>
+    </select>
+    <select id="selectManualInterventionInformation" resultMap="startManualInterventionRecord">
+        SELECT
+        spl.object_id AS device_id,
+        spl.full_name AS device_name,
+        spl.location_serial_num AS device_code,
+        sl.floor AS floor,
+        sps.system_name AS system_name
+        FROM
+        tb_start_production_location AS spl
+        INNER JOIN tb_start_location AS sl ON sl.object_id = spl.object_id
+        INNER JOIN tb_start_production_system AS sps ON spl.system_id = sps.object_id
+        WHERE
+        1 = 1
+        <if test="deviceId != null">
+            AND spl.object_id = #{deviceId}
+        </if>
+    </select>
+    <select id="selectDeviceInformationByDeviceId" resultMap="startDeviceSequenceMap">
+        SELECT
+        ssi.device_id,
+        ssi.production_line,
+        ssi.start_sequence,
+        ssi.rate_work,
+        ssi.transformer_id,
+        ssi.start_wait_time,
+        ssi.start_hierarchy
+        FROM
+        tb_start_information AS ssi
+        WHERE
+        1 = 1
+        <if test="deviceId != null">
+            AND ssi.device_id = #{deviceId}
+        </if>
+        AND ssi.is_delete = '0'
+    </select>
+    <select id="selectAreaInformationByAreaId" resultMap="startAreaInformation">
+        SELECT
+        area_name,
+        `level`,
+        region_id,
+        area_type,
+        number
+        FROM
+        tb_start_device_area
+        WHERE
+        1 = 1
+        <if test="areaId != null">
+            AND id = #{areaId}
+        </if>
+        AND is_deleted = '0'
+    </select>
+    <select id="selectStartingManualInterventionRecord" resultMap="startManualInterventionRecord">
+        SELECT
+        ssmir.manual_intervention_id,
+        ssmir.operate_id,
+        ssmir.device_id,
+        spl.full_name AS device_name,
+        spl.location_serial_num AS device_code,
+        ssmir.intervention_state,
+        su.person_name AS manual_intervention_person
+        FROM
+        tb_start_manual_intervention_record AS ssmir
+        INNER JOIN s_user AS su ON ssmir.intervention_person_id = su.uuid
+        INNER JOIN tb_start_production_location AS spl ON ssmir.device_id = spl.object_id
+        WHERE
+        1 = 1
+        <if test="deviceId != null">
+            AND ssmir.device_id = #{deviceId}
+        </if>
+        <if test="operateId != null">
+            AND ssmir.operate_id = #{operateId}
+        </if>
+        <if test="state != null">
+            AND ssmir.intervention_state = #{state}
+        </if>
+    </select>
+    <select id="selectManualInterventionRecordByBefore" resultMap="startManualInterventionRecord">
+        SELECT
+        zsmi.device_id,
+        zsmi.state,
+        spl.full_name AS device_name,
+        spl.location_serial_num AS device_code,
+        su.login_name AS manual_intervention_person
+        FROM
+        tb_start_manual_intervention AS zsmi
+        INNER JOIN s_user AS su ON zsmi.update_user = su.uuid
+        INNER JOIN tb_start_production_location AS spl ON zsmi.device_id = spl.object_id
+        WHERE
+        1 = 1
+        AND zsmi.state != 0
+    </select>
+    <select id="selectPackageWaitTime" resultMap="startSingleLabelAndValue">
+        SELECT
+        ts.dataLabel,
+        ztsdb.delay_time AS dataLabel_value
+        FROM
+        tb_start_device_bag AS ztsdb
+        INNER JOIN tb_start_signal AS ts ON ts.deviceCode = CONCAT(#{deviceCodePart}, ztsdb.number, '')
+        AND ts.`name` = #{name}
+        WHERE
+        ztsdb.is_deleted = '0'
+        ORDER BY
+        ztsdb.id
+    </select>
+    <select id="selectAreaRuleByParentStateAndAreaFirstId" resultMap="startAreaRule">
+        SELECT DISTINCT
+        zasc.id AS rule_id,
+        zasc.area_first_id,
+        zasc.area_second_id,
+        zasc.delay_time,
+        zasc.type,
+        zasc.device_id
+        FROM
+        tb_start_area_setting_condition AS zasc
+        INNER JOIN tb_start_device_bag AS ztsdb ON zasc.area_second_id = ztsdb.area_id
+        INNER JOIN tb_start_information AS ssi ON ssi.bag_id = ztsdb.number
+        WHERE
+        1 = 1
+        <if test="parentState != null">
+            AND zasc.parent_state = #{parentState}
+        </if>
+        <if test="areaFirstId != null">
+            AND zasc.area_first_id = #{areaFirstId}
+        </if>
+    </select>
+    <insert id="saveStartAreaRecord" useGeneratedKeys="true">
+        INSERT INTO tb_start_area_record (operate_id, area_second_id, area_rule_id, state, create_date, is_delete)
+        VALUES (#{operateId}, #{areaSecondId}, #{areaRuleId}, 0, NOW(), 0);
+    </insert>
+    <update id="updateStartAreaRecord">
+        UPDATE tb_start_area_record
+        SET state = #{state}
+        WHERE operate_id = #{operateId}
+        AND area_rule_id = #{areaRuleId}
+    </update>
+    <select id="selectAreaRuleRecordByStateAndAreaSecondId" resultType="java.lang.Integer">
+        SELECT
+        id
+        FROM
+        tb_start_area_record
+        WHERE
+        1 = 1
+        <if test="operateId != null">
+            AND operate_id = #{operateId}
+        </if>
+        <if test="state != null">
+            AND state = #{state}
+        </if>
+        <if test="areaSecondId != null">
+            AND area_second_id = #{areaSecondId}
+        </if>
+        AND is_delete = 0
+    </select>
+    <select id="selectPackageBelongArea" resultMap="startSingleLabelAndValue">
+        SELECT
+        ts.dataLabel,
+        ztsdb.area_id AS dataLabel_value
+        FROM
+        tb_start_device_bag AS ztsdb
+        INNER JOIN tb_start_signal AS ts ON ts.deviceCode = CONCAT(#{deviceCodePart}, ztsdb.number, '')
+        AND ts.`name` = #{name}
+        WHERE
+        ztsdb.is_deleted = '0'
+        ORDER BY
+        ztsdb.number
+    </select>
+    <select id="selectPackageBelongRegion" resultMap="startSingleLabelAndValue">
+        SELECT
+        ts.dataLabel,
+        ztsda.region_id AS dataLabel_value
+        FROM
+        tb_start_device_bag AS ztsdb
+        INNER JOIN tb_start_device_area AS ztsda on ztsda.number = ztsdb.area_id
+        INNER JOIN tb_start_signal AS ts ON ts.deviceCode = CONCAT(#{deviceCodePart}, ztsdb.number, '')
+        AND ts.name = #{name}
+        WHERE
+        ztsdb.is_deleted = '0'
+        ORDER BY
+        ztsdb.number
+    </select>
+    <select id="selectAreaBelongRegion" resultMap="startSingleLabelAndValue">
+        SELECT
+        ts.dataLabel,
+        ztsda.region_id AS dataLabel_value
+        FROM
+        tb_start_device_area AS ztsda
+        INNER JOIN tb_start_signal AS ts ON ts.deviceCode = CONCAT(#{deviceCodePart}, ztsda.number, '')
+        AND ts.`name` = #{name}
+        WHERE
+        ztsda.is_deleted = '0'
+        ORDER BY
+        ztsda.number
+    </select>
+    <select id="selectAreaStartLabel" resultMap="startSingleLabelAndValue">
+        SELECT
+        ts.dataLabel,
+        '1' AS dataLabel_value
+        FROM
+        tb_start_device_area AS ztsda
+        INNER JOIN tb_start_signal AS ts ON ts.deviceCode = CONCAT(#{deviceCodePart}, ztsda.number, '')
+        AND ts.`name` = #{name}
+        WHERE
+        1 = 1
+        AND ztsda.number = #{number}
+        AND ztsda.is_deleted = '0'
+        ORDER BY
+        ztsda.number
+    </select>
+    <select id="selectFrequency" resultMap="startSingleLabelAndValue">
+        SELECT
+        zspsp.default_value AS dataLabel_value,
+        ts.dataLabel
+        FROM
+        tb_start_preset_startandcoal_pararmeter AS zspsp
+        INNER JOIN tb_start_signal AS ts ON zspsp.dic_signal_id = ts.`name`
+        AND zspsp.parent_deviced_id = ts.deviceId
+        WHERE
+        zspsp.is_deleted = '0'
+        AND zspsp.type = #{type}
+        AND zspsp.dic_signal_id = #{name}
+        AND zspsp.start_type = #{startType}
+        AND zspsp.parent_deviced_id = #{deviceId};
+    </select>
+    <select id="selectStartingPackage" resultMap="startPackage">
+        SELECT
+        ztsdbag.number AS package_id,
+        ztsdbag.bag_name AS package_name,
+        ztsdregion.number AS region_id,
+        ztsdregion.region_name AS region_name,
+        ztsdarea.number AS area_id,
+        ztsdarea.area_name AS area_name
+        FROM
+        tb_start_device_bag AS ztsdbag
+        INNER JOIN tb_start_device_area AS ztsdarea ON ztsdbag.area_id = ztsdarea.number
+        AND ztsdarea.is_deleted = '0'
+        INNER JOIN tb_start_device_region AS ztsdregion ON ztsdregion.number = ztsdarea.region_id
+        AND ztsdregion.is_deleted = '0'
+        WHERE
+        ztsdbag.is_deleted = '0'
+        ORDER BY ztsdbag.number;
+    </select>
+    <select id="selectStartingDeviceByPackageIdAndOperateId" resultMap="startDeviceMap">
+        SELECT
+        ssi.device_id AS device_id,
+        spl.location_serial_num AS device_code,
+        sa.assets_name AS device_name
+        FROM
+        tb_start_information AS ssi
+        INNER JOIN tb_start_production_location AS spl ON ssi.device_id = spl.object_id
+        INNER JOIN tb_start_assets AS sa ON sa.object_id = spl.assets_object_id
+        WHERE
+        ssi.is_delete = '0'
+        <if test="packageId != null">
+            AND ssi.bag_id = #{packageId}
+        </if>
+        <if test="operateId != null">
+            AND ssi.device_id IN (
+            SELECT
+            ssdsr.device_id
+            FROM
+            tb_start_device_state_record AS ssdsr
+            WHERE
+            ssdsr.is_delete = '0'
+            AND ssdsr.operate_id = #{operateId}
+            )
+        </if>
+    </select>
+    <select id="selectStartDeviceRelationByPackageIdAndDeviceId" resultMap="startDeviceRelation">
+        SELECT DISTINCT
+        zstsd.device_id AS control_device_id,
+        zstsd.parent_deviced_id AS start_device_id,
+        spl.location_serial_num AS control_device_code,
+        spl.full_name
+        FROM
+        tb_start_type_set_delay AS zstsd
+        INNER JOIN tb_start_production_location AS spl ON spl.object_id = zstsd.device_id
+        INNER JOIN tb_start_information AS ssi ON ssi.device_id = zstsd.parent_deviced_id
+        <if test="packageId != null">
+            AND ssi.bag_id = #{packageId}
+        </if>
+        WHERE 1 = 1
+        <if test="deviceId != null">
+            AND zstsd.parent_deviced_id = #{deviceId}
+        </if>
+    </select>
+</mapper>

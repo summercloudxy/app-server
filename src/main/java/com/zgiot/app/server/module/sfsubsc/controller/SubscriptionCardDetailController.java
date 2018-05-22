@@ -72,14 +72,14 @@ public class SubscriptionCardDetailController {
     /**
      * 班累计煤质统计详情
      *
-     * @param date 日期
+     * @param date  日期
      * @param shift 班次
      * @return
      */
     @RequestMapping(value = "/getCoalQualityDetail", method = RequestMethod.GET)
     public ResponseEntity<String> getCoalQualityDetail(@RequestParam("date") String date, @RequestParam("shift") String shift) {
         CoalQualityDetailVO coalQualityDetail = coalAnalysisDataDetailHandler.getCoalQualityDetail(date, shift);
-        if(null == coalQualityDetail){
+        if (null == coalQualityDetail) {
             coalQualityDetail = new CoalQualityDetailVO();
         }
         return new ResponseEntity<>(ServerResponse.buildOkJson(coalQualityDetail), HttpStatus.OK);
@@ -88,17 +88,18 @@ public class SubscriptionCardDetailController {
     /**
      * 班累计生产统计详情
      *
-     * @param date 日期
+     * @param date  日期
      * @param shift 班次
      * @return
      */
     @RequestMapping(value = "/getProductionDetail", method = RequestMethod.GET)
     public ResponseEntity<String> getProductionDetail(@RequestParam("date") String date, @RequestParam("shift") String shift) {
         ProductionDetailVO productionDetail = coalAnalysisDataDetailHandler.getProductionDetail(date, shift);
-        if(null == productionDetail){
+        if (null == productionDetail) {
             productionDetail = new ProductionDetailVO();
         }
         return new ResponseEntity<>(ServerResponse.buildOkJson(productionDetail), HttpStatus.OK);
     }
+
 
 }
