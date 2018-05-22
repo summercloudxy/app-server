@@ -48,4 +48,8 @@ INSERT INTO `tb_thing_properties`(`id`, `thing_code`, `prop_key`, `prop_value`, 
 INSERT INTO `tb_thing_properties`(`id`, `thing_code`, `prop_key`, `prop_value`, `prop_type`) VALUES (12043, '1541', 'IMAGE_NAME', 'jiezhibeng.png', 'DISP_PROP');
 INSERT INTO `tb_thing_properties`(`id`, `thing_code`, `prop_key`, `prop_value`, `prop_type`) VALUES (12044, '1542', 'IMAGE_NAME', 'jiezhibeng.png', 'DISP_PROP');
 
+delete FROM tb_thing_properties where id=10868;
+delete FROM tb_thing_properties where id=10869;
+delete FROM tb_thing_properties where id=10870;
+
 

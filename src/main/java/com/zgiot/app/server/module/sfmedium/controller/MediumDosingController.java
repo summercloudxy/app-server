@@ -2,11 +2,11 @@ package com.zgiot.app.server.module.sfmedium.controller;
 
 
 import com.google.common.collect.Lists;
-import com.zgiot.app.server.module.alert.AlertManager;
 import com.zgiot.app.server.module.alert.pojo.AlertData;
 import com.zgiot.app.server.module.sfmedium.constants.SfMediumConstants;
 import com.zgiot.app.server.module.sfmedium.entity.po.MediumDosingConfigDO;
 import com.zgiot.app.server.module.sfmedium.entity.vo.*;
+import com.zgiot.app.server.module.sfmedium.service.AlertDataService;
 import com.zgiot.app.server.module.sfmedium.service.MediumDosingService;
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.DataService;
@@ -20,7 +20,6 @@ import com.zgiot.common.pojo.SessionContext;
 import com.zgiot.common.pojo.ThingPropertyModel;
 import com.zgiot.common.restcontroller.ServerResponse;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +36,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 加介功能
@@ -52,8 +50,7 @@ public class MediumDosingController {
     private MediumDosingService mediumDosingService;
     @Autowired
     private DataService dataService;
-    @Autowired
-    private AlertManager alertManager;
+
     @Autowired
     private TMLMapper tmlMapper;
 
@@ -61,6 +58,8 @@ public class MediumDosingController {
     private SimpMessagingTemplate simpMessagingTemplate;
     @Autowired
     private CmdControlService cmdControlService;
+    @Autowired
+    private AlertDataService alertDataService;
 
     @RequestMapping(value = "/getMediumDosingSystem", method = RequestMethod.GET)
     public ResponseEntity<String> getMediumDosingSystem() {
@@ -122,11 +121,10 @@ public class MediumDosingController {
         mediumDosingPump.setThingImageName(getThingImageName(mediumDosingConfig.getMediumdosingpumpCode()));
         mediumDosingPump.setRunState(getMetricDataValue(mediumDosingConfig.getMediumdosingpumpCode(), MetricCodes.STATE));
 
-        //泵告警等级
-        Map<String, Short> seriousAlertLevel = alertManager.getSeriousAlertLevel(Lists.newArrayList(mediumDosingConfig.getMediumdosingpumpCode()));
-        if (MapUtils.isNotEmpty(seriousAlertLevel)) {
-            Short alertLevel = seriousAlertLevel.get(mediumDosingConfig.getMediumdosingpumpCode());
-            mediumDosingPump.setAlertLevel(String.valueOf(alertLevel));
+
+        AlertData maxLevelAlertData = alertDataService.getMaxLevelAlertData(mediumDosingConfig.getMediumdosingpumpCode());
+        if (maxLevelAlertData != null) {
+            mediumDosingPump.setAlertLevel(String.valueOf(maxLevelAlertData.getAlertLevel()));
         } else {
             mediumDosingPump.setAlertLevel("");
         }
@@ -585,13 +583,15 @@ public class MediumDosingController {
         mediumDosingPump.setLocalMetricCode(MetricCodes.LOCAL);
         mediumDosingPump.setLocalMetricName(SfMediumConstants.LOCAL_METRIC_NAME);
         mediumDosingPump.setLocalMetricValue(getMetricDataValue(mediumPoolThingCode, MetricCodes.LOCAL));
+
         //最高级别的报警信息
-        List<AlertData> seriousAlertLevelInList = alertManager.getSeriousAlertLevelInList(Lists.newArrayList(mediumPoolThingCode), 1);
-        if (CollectionUtils.isNotEmpty(seriousAlertLevelInList)) {
-            mediumDosingPump.setAlertInfo(seriousAlertLevelInList.get(0).getAlertInfo());
+        AlertData maxLevelAlertData = alertDataService.getMaxLevelAlertData(mediumPoolThingCode);
+        if (maxLevelAlertData != null) {
+            mediumDosingPump.setAlertInfo(String.valueOf(maxLevelAlertData.getAlertInfo()));
         } else {
             mediumDosingPump.setAlertInfo("");
         }
+
         mediumDosingControlVO.setMediumDosingPump(mediumDosingPump);
     }
 
