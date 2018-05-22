@@ -37,19 +37,20 @@ public class MonitorServiceImpl implements MonitorService {
     @Override
     public AddOrEditMonitorResponse addOrEditMonitorInfo(MonitorInfo monitorInfo) {
         SFMonitor sfMonitor = monitorInfo.getSfMonitor();
+        String userName = sfMonitor.getUserName();
         List<RelSFMonItem> items = new ArrayList<>();
         List<Long> idList = new ArrayList<>();
         boolean isExist = true;
         Float count = null;
         Long id = null;
         if (sfMonitor != null && sfMonitor.getId() != null) {//edit
-            MonitorEditRes monitorEditRes = editMonitor(monitorInfo);
+            MonitorEditRes monitorEditRes = editMonitor(monitorInfo,userName);
             isExist = monitorEditRes.isExist();
             items = monitorEditRes.getItems();
             count = relSFMonitorItemMapper.getMaxSortFromMonitorByMonId(sfMonitor.getId());
             id = sfMonitor.getId();
         } else {//add
-            SFMonitor monitor = sfMonitorMapper.getMonitorByName(monitorInfo.getSfMonitor().getSfMonName());
+            SFMonitor monitor = sfMonitorMapper.getMonitorByName(monitorInfo.getSfMonitor().getSfMonName(),userName);
             if (monitor == null) {
                 isExist = false;
             }
@@ -82,9 +83,9 @@ public class MonitorServiceImpl implements MonitorService {
         return sfMonitor.getId();
     }
 
-    private MonitorEditRes editMonitor(MonitorInfo monitorInfo) {
+    private MonitorEditRes editMonitor(MonitorInfo monitorInfo,String userName) {
         SFMonitor sfMonitor = monitorInfo.getSfMonitor();
-        SFMonitor monitorTemp = sfMonitorMapper.getMonitorByName(monitorInfo.getSfMonitor().getSfMonName());
+        SFMonitor monitorTemp = sfMonitorMapper.getMonitorByName(monitorInfo.getSfMonitor().getSfMonName(),userName);
         boolean isExist = true;
         List<RelSFMonItem> items = new ArrayList<>();
         if ((monitorTemp != null) && (monitorTemp.getId().longValue() == sfMonitor.getId().longValue())) {
