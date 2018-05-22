@@ -630,19 +630,19 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             rawCoalCapValue = rawCoalCapValue.add(new BigDecimal(rawCoalCap2.getValue()));
         }
         //精煤瞬时量
-        String cleanCoalCapValue = "0";
+        String cleanCoalCapValue = "0.0";
         DataModelWrapper cleanCoalCap = dataService.getData(cardParamValues[1], MetricCodes.COAL_CAP).orElse(null);
         if (cleanCoalCap != null) {
             cleanCoalCapValue = MetricValueUtil.formart(cleanCoalCap.getValue());
         }
         //混煤瞬时量
-        String mixedCoalCapValue = "0";
+        String mixedCoalCapValue = "0.0";
         DataModel mixedCoalCap = historyDataService.findClosestHistoryData(Lists.newArrayList(cardParamValues[2]), Lists.newArrayList(MetricCodes.COAL_CAP), new Date(millis - 60000));
         if (mixedCoalCap != null) {
             mixedCoalCapValue = MetricValueUtil.formart(mixedCoalCap.getValue());
         }
         //煤泥瞬时量
-        String slurryCoalCapValue = "0";
+        String slurryCoalCapValue = "0.0";
         DataModel slurryCoalCap = historyDataService.findClosestHistoryData(Lists.newArrayList(cardParamValues[3]), Lists.newArrayList(MetricCodes.COAL_CAP), new Date(millis - 10000));
         if (slurryCoalCap != null) {
             slurryCoalCapValue = MetricValueUtil.formart(slurryCoalCap.getValue());
@@ -652,7 +652,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
                 subtract(new BigDecimal(StringUtils.isEmpty(cleanCoalCapValue) ? "0" : cleanCoalCapValue)).
                 subtract(new BigDecimal(StringUtils.isEmpty(mixedCoalCapValue) ? "0" : mixedCoalCapValue)).
                 subtract(new BigDecimal(StringUtils.isEmpty(slurryCoalCapValue) ? "0" : slurryCoalCapValue));
-        String wasteRockCapValue = "0";
+        String wasteRockCapValue = "0.0";
         if (wasteRockCapVale.compareTo(BigDecimal.ZERO) > -1) {
             wasteRockCapValue = String.valueOf(MetricValueUtil.formart(wasteRockCapVale));
         }
