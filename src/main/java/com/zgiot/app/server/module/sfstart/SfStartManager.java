@@ -28,7 +28,7 @@ import static com.zgiot.app.server.module.sfstart.controller.StartController.sta
  */
 @Component
 @Transactional
-public class StartStopManager {
+public class SfStartManager {
     @Autowired
     private StartService startService;
     @Autowired
@@ -48,7 +48,7 @@ public class StartStopManager {
         this.labelBydevices = labelBydevices;
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(StartStopManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(SfStartManager.class);
 
     public void init() {
 
@@ -69,7 +69,7 @@ public class StartStopManager {
                 logger.info("设备{}前置条件判断开始", deviceRequirement.getDeviceId());
                 Double startPrecondition = null;
                 StartSignal startSignal = startService.getStartSignalByDeviceId(deviceRequirement.getDeviceId());
-                DataModelWrapper dataModelWrapper = dataService.getData(startSignal.getDeviceCode(), MetricCodes.Parameter_Cond).orElse(null);
+                DataModelWrapper dataModelWrapper = dataService.getData(startSignal.getDeviceCode(), MetricCodes.PARAMETER_COND).orElse(null);
                 if (dataModelWrapper != null) {
                     startPrecondition = Double.valueOf(dataModelWrapper.getValue());
                 }

@@ -17,8 +17,8 @@ public class SendCoalDeportJob implements Job {
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         ApplicationContext context = ApplicationContextListener.getApplicationContext();
-        StartStopManager startStopManager = (StartStopManager) context.getBean("startStopManager");
-        startStopManager.sendCoalDeport();
+        SfStartManager sfStartManager = (SfStartManager) context.getBean("startStopManager");
+        sfStartManager.sendCoalDeport();
 
     }
 }

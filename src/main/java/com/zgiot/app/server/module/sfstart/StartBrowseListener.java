@@ -26,7 +26,7 @@ public class StartBrowseListener implements DataListener {
     @Autowired
     private StartHandler startHandler;
     @Autowired
-    private StartStopManager startStopManager;
+    private SfStartManager startStopManager;
 
 
     private static Logger logger = LoggerFactory.getLogger(StartBrowseListener.class);
