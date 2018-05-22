@@ -760,7 +760,7 @@
         zsmi.state,
         spl.full_name AS device_name,
         spl.location_serial_num AS device_code,
-        su.worker_name AS manual_intervention_person
+        su.login_name AS manual_intervention_person
         FROM
         tb_start_manual_intervention AS zsmi
         INNER JOIN s_user AS su ON zsmi.update_user = su.uuid
