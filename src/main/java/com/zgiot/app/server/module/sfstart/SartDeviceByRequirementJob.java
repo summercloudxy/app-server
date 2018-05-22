@@ -17,7 +17,7 @@ public class SartDeviceByRequirementJob implements Job {
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         ApplicationContext context = ApplicationContextListener.getApplicationContext();
-        SfStartManager sfStartManager = (SfStartManager) context.getBean("startStopManager");
+        SfStartManager sfStartManager = (SfStartManager) context.getBean("sfStartManager");
         sfStartManager.startDeviceByRequirement();
 
     }
