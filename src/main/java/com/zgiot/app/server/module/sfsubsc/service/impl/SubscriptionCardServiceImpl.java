@@ -652,7 +652,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
                 subtract(new BigDecimal(StringUtils.isEmpty(cleanCoalCapValue) ? "0" : cleanCoalCapValue)).
                 subtract(new BigDecimal(StringUtils.isEmpty(mixedCoalCapValue) ? "0" : mixedCoalCapValue)).
                 subtract(new BigDecimal(StringUtils.isEmpty(slurryCoalCapValue) ? "0" : slurryCoalCapValue));
-        String wasteRockCapValue = "0";
+        String wasteRockCapValue = "0.0";
         if (wasteRockCapVale.compareTo(BigDecimal.ZERO) > -1) {
             wasteRockCapValue = String.valueOf(MetricValueUtil.formart(wasteRockCapVale));
         }
