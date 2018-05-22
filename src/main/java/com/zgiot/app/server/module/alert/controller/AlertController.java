@@ -85,8 +85,8 @@ public class AlertController {
     }
 
     @ApiOperation("获取指定设备的报警记录,按设备分组")
-    @GetMapping(value = "recordByThing/group", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<String> getAlertDataByThingCode(@ModelAttribute AlertFilterCondition filterCondition, @RequestParam(required = false) Date timeStamp) {
+    @PostMapping(value = "recordByThing/group", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<String> getAlertDataByThingCode(@RequestBody AlertFilterCondition filterCondition, @RequestParam(required = false) Date timeStamp) {
         if (timeStamp == null) {
             timeStamp = new Date();
         }

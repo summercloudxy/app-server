@@ -5,6 +5,7 @@ import com.zgiot.app.server.module.alert.pojo.*;
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.MetricService;
 import com.zgiot.app.server.service.ThingService;
+import com.zgiot.app.server.service.impl.DataEngineTemplate;
 import com.zgiot.app.server.service.impl.FileServiceImpl;
 import com.zgiot.common.constants.AlertConstants;
 import com.zgiot.common.constants.MetricCodes;
@@ -125,7 +126,7 @@ public class AlertManager {
             alertDataMetricMap = new ConcurrentHashMap<>();
             alertDataMap.put(alertData.getThingCode(), alertDataMetricMap);
         }
-        if(!alertDataMetricMap.containsKey(alertData.getMetricCode())){
+        if (!alertDataMetricMap.containsKey(alertData.getMetricCode())) {
             insertFlag = true;
             alertDataMetricMap.put(alertData.getMetricCode(), alertData);
         }
@@ -965,6 +966,7 @@ public class AlertManager {
             filterCondition.setExcluStage(AlertConstants.STAGE_RELEASE);
         }
         List<AlertRecord> alertDataByThingCode = alertMapper.getAlertDataByThingCode(filterCondition);
+        sortRecords(SORT_TYPE_LEVEL_DESC, alertDataByThingCode);
         if (filterCondition.getPage() != null && filterCondition.getCount() != null) {
             alertDataByThingCode = pagingRecords(filterCondition.getPage(), filterCondition.getCount(), alertDataByThingCode);
         }
