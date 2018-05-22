@@ -3,6 +3,8 @@ package com.zgiot.app.server.module.sfsubsc.controller;
 
 import com.zgiot.app.server.module.sfsubsc.controller.handler.CoalAnalysisDataDetailHandler;
 import com.zgiot.app.server.module.sfsubsc.controller.handler.InstantProductDetailHandler;
+import com.zgiot.app.server.module.sfsubsc.entity.vo.CoalQualityDetailVO;
+import com.zgiot.app.server.module.sfsubsc.entity.vo.ProductionDetailVO;
 import com.zgiot.app.server.module.sfsubsc.service.SubscCardTypeService;
 import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.restcontroller.ServerResponse;
@@ -67,5 +69,36 @@ public class SubscriptionCardDetailController {
         return coalAnalysisDataDetailHandler.getCoalAnalysisDataChartDetail(cardCode, dateType, chartType);
     }
 
+    /**
+     * 班累计煤质统计详情
+     *
+     * @param date 日期
+     * @param shift 班次
+     * @return
+     */
+    @RequestMapping(value = "/getCoalQualityDetail", method = RequestMethod.GET)
+    public ResponseEntity<String> getCoalQualityDetail(@RequestParam("date") String date, @RequestParam("shift") String shift) {
+        CoalQualityDetailVO coalQualityDetail = coalAnalysisDataDetailHandler.getCoalQualityDetail(date, shift);
+        if(null == coalQualityDetail){
+            coalQualityDetail = new CoalQualityDetailVO();
+        }
+        return new ResponseEntity<>(ServerResponse.buildOkJson(coalQualityDetail), HttpStatus.OK);
+    }
+
+    /**
+     * 班累计生产统计详情
+     *
+     * @param date 日期
+     * @param shift 班次
+     * @return
+     */
+    @RequestMapping(value = "/getProductionDetail", method = RequestMethod.GET)
+    public ResponseEntity<String> getProductionDetail(@RequestParam("date") String date, @RequestParam("shift") String shift) {
+        ProductionDetailVO productionDetail = coalAnalysisDataDetailHandler.getProductionDetail(date, shift);
+        if(null == productionDetail){
+            productionDetail = new ProductionDetailVO();
+        }
+        return new ResponseEntity<>(ServerResponse.buildOkJson(productionDetail), HttpStatus.OK);
+    }
 
 }

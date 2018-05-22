@@ -16,7 +16,8 @@ public interface RelUserSfsubscriptionMapper {
     void deleteRelUserSfsubscription(@Param("userUuid") String userUuid, @Param("clientId") String clientId);
 
     @Select("select * from rel_user_sfsubscription where user_uuid = #{userUuid} " +
-            "and card_code <> #{cardCode} order by sort")
-    List<RelUserSfsubscription> getTop(@Param("userUuid") String userUuid, @Param("cardCode") String cardCode);
+            "and card_code <> #{cardCode} and client_id = #{clientId} order by sort")
+    List<RelUserSfsubscription> getTop(@Param("userUuid") String userUuid,
+                                       @Param("cardCode") String cardCode, @Param("clientId") String clientId);
 
 }
