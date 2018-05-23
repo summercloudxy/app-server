@@ -1,6 +1,7 @@
 package com.zgiot.app.server.module.demo;
 
 import com.zgiot.app.server.dataprocessor.DataListener;
+import com.zgiot.app.server.dataprocessor.ProcessorUtil;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.service.HistoryDataService;
 import com.zgiot.app.server.service.ThingService;
@@ -8,11 +9,16 @@ import com.zgiot.common.enums.MetricDataTypeEnum;
 import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
 import com.zgiot.common.pojo.ThingModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DemoBusiness implements DataListener {
+
+    private static final Logger logger = LoggerFactory.getLogger(DemoBusiness.class);
+
     public static final String STATUS_NORMAL = "NOR";
     public static final String STATUS_TOO_HIGH = "HIG";
     public static final Float THRESHOLD_BAD = Float.valueOf(10f);
@@ -50,6 +56,9 @@ public class DemoBusiness implements DataListener {
 
     @Override
     public void onDataChange(DataModel dataModel) {
+
+        logger.info("Got data: {}", dataModel);
+
         // cal new status via new data value
         String sValue = doCalStatus(dataModel.getThingCode(), dataModel.getMetricCode());
         DataModel sData = new DataModel(MetricDataTypeEnum.METRIC_DATA_TYPE_OK.getName()
@@ -57,13 +66,17 @@ public class DemoBusiness implements DataListener {
                 , "NEW_STATUS", sValue, dataModel.getDataTimeStamp()
         );
 
+//        ReturnData rtn = new ReturnData();
+//        rtn.stopHere = true;
+//        ProcessorUtil.dataContext.set(rtn);
+
         // save new status to cache
-        this.dataService.saveData(sData);
+        // this.dataService.saveData(sData);
 
     }
 
     @Override
     public void onError(Throwable error) {
-
+        // stub
     }
 }

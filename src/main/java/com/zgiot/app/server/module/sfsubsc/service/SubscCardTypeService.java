@@ -1,6 +1,7 @@
 package com.zgiot.app.server.module.sfsubsc.service;
 
 import com.zgiot.app.server.module.sfsubsc.entity.dto.CardDataDTO;
+import com.zgiot.app.server.module.sfsubsc.entity.pojo.SFSubscriptionCard;
 import com.zgiot.app.server.module.sfsubsc.entity.pojo.SubscCardTypeDO;
 import org.springframework.stereotype.Component;
 
@@ -113,5 +114,37 @@ public interface SubscCardTypeService {
      */
     SubscCardTypeDO getCardTypeByCardCode(String cardCode);
 
+
+    /**
+     * 获取该用户所有权限的卡片
+     *
+     * @param userUuid
+     * @return
+     */
+    List<SubscCardTypeDO> getCardTypeByUuid(String userUuid);
+
+    /**
+     * 获取该用户订阅的卡片
+     *
+     * @param userUuid
+     * @return
+     */
+    List<SFSubscriptionCard> getSubCardTypeByUuid(String userUuid);
+
+    /**
+     * 获取当班煤质统计
+     *
+     * @param subscCardTypeDO
+     * @return
+     */
+    CardDataDTO getCoalQuality(SubscCardTypeDO subscCardTypeDO);
+
+    /**
+     * 获取当班生产统计
+     *
+     * @param subscCardTypeDO
+     * @return
+     */
+    CardDataDTO getProduction(SubscCardTypeDO subscCardTypeDO);
 
 }

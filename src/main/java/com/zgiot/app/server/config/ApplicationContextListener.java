@@ -1,202 +1,93 @@
 package com.zgiot.app.server.config;
 
-import com.zgiot.app.server.dataprocessor.CompleterDataListener;
+import com.zgiot.app.server.config.prop.DataEngineProperties;
 import com.zgiot.app.server.dataprocessor.DataProcessor;
-import com.zgiot.app.server.dataprocessor.impl.CacheUpdater;
-import com.zgiot.app.server.module.alert.*;
-import com.zgiot.app.server.module.alert.handler.AlertFaultHandler;
-import com.zgiot.app.server.module.alert.handler.AlertParamHandler;
-import com.zgiot.app.server.module.bellows.BellowsDataListener;
-import com.zgiot.app.server.module.bellows.compressor.CompressorManager;
-import com.zgiot.app.server.module.bellows.valve.ValveIntelligentJob;
-import com.zgiot.app.server.module.bellows.valve.ValveManager;
-import com.zgiot.app.server.module.demo.DemoBusiness;
-import com.zgiot.app.server.module.demo.DemoDataCompleter;
-import com.zgiot.app.server.module.densitycontrol.DensityControlListener;
-import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
-import com.zgiot.app.server.module.filterpress.FilterPressManager;
-import com.zgiot.app.server.module.historydata.job.HistoryMinDataJob;
-import com.zgiot.app.server.module.reportforms.input.listener.ReportFormsCompleter;
-import com.zgiot.app.server.module.reportforms.output.productionmonitor.listener.ReportFormSystemStartListener;
-import com.zgiot.app.server.module.reportforms.output.service.InfluenceTimeServiceImpl;
-import com.zgiot.app.server.module.reportforms.output.service.OutputStoreAndTargetService;
-import com.zgiot.app.server.module.reportforms.output.service.TransPortServiceImpl;
-import com.zgiot.app.server.module.sfsubsc.job.UploadHistorySubscCardDatas;
-import com.zgiot.app.server.module.sfsubsc.job.UploadSubscCardDatas;
-import com.zgiot.app.server.service.impl.HistoryDataPersistDaemon;
-import com.zgiot.app.server.service.impl.QuartzManager;
-import org.quartz.JobDataMap;
+import com.zgiot.app.server.dataprocessor.RocketMqDataProcessor;
+import com.zgiot.app.server.dataprocessor.WebSocketProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.GenericWebApplicationContext;
+
+import java.util.concurrent.CompletableFuture;
 
 @Component
 public class ApplicationContextListener implements ApplicationListener<ContextRefreshedEvent> {
     private static final Logger logger = LoggerFactory.getLogger(ApplicationContextListener.class);
     private static ApplicationContext applicationContext = null;
-    @Autowired
-    private CacheUpdater cacheUpdater;
-    @Autowired
-    DemoBusiness demoBusiness;
+
     @Autowired
     @Qualifier("wsProcessor")
-    private DataProcessor processor;
+    private DataProcessor wssProcessor;
     @Autowired
-    private FilterPressDataListener filterPressListener;
-    @Autowired
-    private CompleterDataListener completerDataListener;
-    @Autowired
-    private AlertListener alertListener;
-    @Autowired
-    private BellowsDataListener bellowsDataListener;
-    @Autowired
-    private ValveManager valveManager;
-    @Autowired
-    private CompressorManager compressorManager;
+    @Qualifier("rocketMqProcessor")
+    private DataProcessor rocketMqDataProcessor;
+    @Value("${dataengine.connection-mode}")
+    private String dataengineConnMode;
+
     @Autowired
     private ModuleListConfig moduleListConfig;
-    @Autowired
-    private AlertParamHandler alertParamHandler;
-    @Autowired
-    private AlertFaultHandler alertFaultHandler;
-    @Autowired
-    private HistoryDataPersistDaemon historyDataPersistDaemon;
-    @Autowired
-    private DensityControlListener densityControlListener;
-    @Autowired
-    private ReportFormsCompleter reportFormsCompleter;
-    @Autowired
-    private AlertManager alertManager;
-    @Autowired
-    private ReportFormSystemStartListener reportFormSystemStartListener;
-    @Autowired
-    private OutputStoreAndTargetService outputStoreAndTargetService;
-    @Autowired
-    private FilterPressManager filterPressManager;
-    @Autowired
-    private TransPortServiceImpl transPortServiceImpl;
-    @Autowired
-    private InfluenceTimeServiceImpl influenceTimeServiceImpl;
-
-    private static final int FAULT_SCAN_RATE = 20;
 
     private static boolean initFlag = false;
 
-
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-        if (initFlag){
-            return;
-        }
-        initFlag = true;
+
         if (applicationContext == null) {
             applicationContext = contextRefreshedEvent.getApplicationContext();
         }
-        processor.connect().thenRun(() -> {
-            logger.info("Connected DataEngine. ");
-            installModules(processor);
-        }).exceptionally(throwable -> {
-            logger.error("error", throwable);
-            return null;
-        });
 
+        if (contextRefreshedEvent.getApplicationContext() instanceof GenericWebApplicationContext) {
+
+            if (initFlag) {
+                return;
+            }
+            initFlag = true;
+
+            DataProcessor processor = buildDataProcessor();
+
+            if (processor == null) {
+                logger.error("No DataProcessor Configured. ");
+            } else {
+                CompletableFuture<Void> cfu = processor.connect();
+                if (cfu != null) {
+                    cfu.thenRun(() -> {
+                        logger.info("Data Engine WSS Connected. ");
+                        this.moduleListConfig.installModules(processor);
+                    }).exceptionally(throwable -> {
+                        logger.error("error", throwable);
+                        return null;
+                    });
+                } else {
+                    logger.info("Data Bus Connected. ");
+                    this.moduleListConfig.installModules(processor);
+                }
+            }
+        }
 
     }
 
-    void installModules(DataProcessor processor) {
+    private DataProcessor buildDataProcessor() {
 
-
-        if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
-                || moduleListConfig.containModule(ModuleListConfig.MODULE_COAL_ANALYSIS)) {
-            completerDataListener.addCompleter(reportFormsCompleter);
-        }
-        processor.addListener(completerDataListener);
-        processor.addListener(cacheUpdater);
-
-//        completerDataListener.addCompleter(new DemoDataCompleter());  // place here as a sample, could be injected instead.
-
-        if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
-                || moduleListConfig.containModule(ModuleListConfig.MODULE_HIST_PERSIST)) {
-            historyDataPersistDaemon.start();
-            QuartzManager.addJob("historyMinData", ModuleListConfig.MODULE_SUBSCRIPTION, "historyMinData",
-                    ModuleListConfig.MODULE_HIST_PERSIST, HistoryMinDataJob.class, "0 0/1 * * * ?");
+        if (DataEngineProperties.CONNECTION_MODE_WEBSOCKET.equals(this.dataengineConnMode)) {
+            logger.info("DataProcessor `{}` found. ", WebSocketProcessor.class.getName());
+            return this.wssProcessor;
         }
 
-        if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
-                || moduleListConfig.containModule(ModuleListConfig.MODULE_FILTERPRESS)) {
-            filterPressManager.initFilterPress();
-            processor.addListener(filterPressListener);
+        if (DataEngineProperties.CONNECTION_MODE_ROCKETMQ.equals(this.dataengineConnMode)) {
+            logger.info("DataProcessor `{}` found. ", RocketMqDataProcessor.class.getName());
+            return this.rocketMqDataProcessor;
         }
 
-        if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
-                || moduleListConfig.containModule(ModuleListConfig.MODULE_DENSITY_CONTROL)) {
-            processor.addListener(densityControlListener);
-        }
+        logger.error("No dataprocessor found, configured connection mode is `{}`. ", this.dataengineConnMode);
 
-        if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
-                || moduleListConfig.containModule(ModuleListConfig.MODULE_ALERT)) {
-            alertManager.init();
-            processor.addListener(alertListener);
-            QuartzManager.addJob("checkParam", ModuleListConfig.MODULE_ALERT, "checkParam",
-                    ModuleListConfig.MODULE_ALERT, AlertParamJob.class, "0/10 * * * * ?", new JobDataMap() {
-                        {
-                            put("handler", alertParamHandler);
-                        }
-                    });
-            QuartzManager.addJob("clearHistory", ModuleListConfig.MODULE_ALERT, "clearHistory",
-                    ModuleListConfig.MODULE_ALERT, AlertHistoryJob.class, "0 0 0 * * ?");
-            QuartzManager.addJobWithInterval("checkFault", ModuleListConfig.MODULE_ALERT, "checkFault",
-                    ModuleListConfig.MODULE_ALERT, AlertFaultJob.class, FAULT_SCAN_RATE, new JobDataMap() {
-                        {
-                            put("handler", alertFaultHandler);
-                        }
-                    });
-        }
-
-
-
-        if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
-                || moduleListConfig.containModule(ModuleListConfig.MODULE_BELLOWS)) {
-            valveManager.init();
-            compressorManager.init();
-            processor.addListener(bellowsDataListener);
-            QuartzManager.addJob("checkBlow", ModuleListConfig.MODULE_BELLOWS, "checkBlow",
-                    ModuleListConfig.MODULE_BELLOWS, ValveIntelligentJob.class, "2 * * * * ?");
-        }
-
-        if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
-                || moduleListConfig.containModule(ModuleListConfig.MODULE_REPORTFORM)) {
-            reportFormSystemStartListener.init();
-            outputStoreAndTargetService.init();
-            transPortServiceImpl.init();
-            influenceTimeServiceImpl.init();
-            processor.addListener(reportFormSystemStartListener);
-
-        }
-
-
-        if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
-                || moduleListConfig.containModule(ModuleListConfig.MODULE_SUBSCRIPTION)) {
-                QuartzManager.addJob("uploadsubscCardDatasOf5s", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf5s",
-                        ModuleListConfig.MODULE_SUBSCRIPTION, UploadSubscCardDatas.class, "0/5 * * * * ?");
-
-                QuartzManager.addJob("uploadsubscCardDatasOf10s", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf10s",
-                        ModuleListConfig.MODULE_SUBSCRIPTION, UploadHistorySubscCardDatas.class, "0/10 * * * * ?");
-
-        }
-
-
-        if (false) {
-            completerDataListener.addCompleter(new DemoDataCompleter());
-            processor.addListener(demoBusiness);
-            }
-
-
+        return null;
     }
 
     public static ApplicationContext getApplicationContext() {

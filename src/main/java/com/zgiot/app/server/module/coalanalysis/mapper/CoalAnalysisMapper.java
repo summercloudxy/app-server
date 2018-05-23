@@ -50,6 +50,30 @@ public interface CoalAnalysisMapper {
     @Select("select * from tb_coal_analysis where sample =#{sample} and  target =#{target} ORDER BY time DESC  LIMIT 0,2")
     List<CoalAnalysisRecord> getTop2CoalAnalysisRecord(@Param("sample") String sample, @Param("target") String target);
 
+    /**
+     * 查询某个时间段内的所有时间
+     *
+     * @param target
+     * @param timeBegin
+     * @param timeEnd
+     * @return
+     */
+    @Select("select time from tb_coal_analysis where target = #{target} and time >= #{timeBegin} and time <= #{timeEnd} ORDER BY time")
+    List<Date> getTimeRangeTime(@Param("target") String target, @Param("timeBegin") Date timeBegin, @Param("timeEnd") Date timeEnd);
 
+    /**
+     * 查询某个时间段内记录的平均值
+     *
+     * @param system
+     * @param target
+     * @param timeBegin
+     * @param timeEnd
+     * @return
+     */
+    @Select("select ROUND(AVG(aad),3) AS aad,ROUND(AVG(mt),3) AS mt,ROUND(AVG(stad),3) AS stad,ROUND(AVG(qnetar),3) AS qnetar " +
+            "from tb_coal_analysis " +
+            "where system = #{system} and target = #{target} and time >= #{timeBegin} and time <= #{timeEnd} ORDER BY time")
+    CoalAnalysisRecord getTimeRangeCoalAnalysisRecordAVG(@Param("system") Integer system, @Param("target") String target,
+                                                         @Param("timeBegin") Date timeBegin, @Param("timeEnd") Date timeEnd);
 
 }
