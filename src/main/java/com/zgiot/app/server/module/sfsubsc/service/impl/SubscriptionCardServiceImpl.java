@@ -630,19 +630,19 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
             rawCoalCapValue = rawCoalCapValue.add(new BigDecimal(rawCoalCap2.getValue()));
         }
         //精煤瞬时量
-        String cleanCoalCapValue = "0";
+        String cleanCoalCapValue = "0.0";
         DataModelWrapper cleanCoalCap = dataService.getData(cardParamValues[1], MetricCodes.COAL_CAP).orElse(null);
         if (cleanCoalCap != null) {
             cleanCoalCapValue = MetricValueUtil.formart(cleanCoalCap.getValue());
         }
         //混煤瞬时量
-        String mixedCoalCapValue = "0";
+        String mixedCoalCapValue = "0.0";
         DataModel mixedCoalCap = historyDataService.findClosestHistoryData(Lists.newArrayList(cardParamValues[2]), Lists.newArrayList(MetricCodes.COAL_CAP), new Date(millis - 60000));
         if (mixedCoalCap != null) {
             mixedCoalCapValue = MetricValueUtil.formart(mixedCoalCap.getValue());
         }
         //煤泥瞬时量
-        String slurryCoalCapValue = "0";
+        String slurryCoalCapValue = "0.0";
         DataModel slurryCoalCap = historyDataService.findClosestHistoryData(Lists.newArrayList(cardParamValues[3]), Lists.newArrayList(MetricCodes.COAL_CAP), new Date(millis - 10000));
         if (slurryCoalCap != null) {
             slurryCoalCapValue = MetricValueUtil.formart(slurryCoalCap.getValue());
