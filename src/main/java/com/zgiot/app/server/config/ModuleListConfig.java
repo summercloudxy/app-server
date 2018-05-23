@@ -199,7 +199,7 @@ public class ModuleListConfig {
                 sfStartManager.init();
                 processor.addListener(startBrowseListener);
                 QuartzManager.addJob("startDeviceByRequirement", ModuleListConfig.MODULE_SFSTART, "startDeviceByRequirement",
-                        ModuleListConfig.MODULE_SFSTART, SartDeviceByRequirementJob.class, "0/20 * * * * ?");
+                        ModuleListConfig.MODULE_SFSTART, StartDeviceByRequirementJob.class, "0/20 * * * * ?");
 
                 QuartzManager.addJob("sendCoalCapacity", ModuleListConfig.MODULE_SFSTART, "sendCoalCapacity",
                         ModuleListConfig.MODULE_SFSTART, SendCoalCapacityJob.class, "0/30 * * * * ?");
