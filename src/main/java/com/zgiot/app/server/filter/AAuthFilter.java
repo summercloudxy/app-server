@@ -42,9 +42,9 @@ public class AAuthFilter implements Filter {
         //用户获取数据成功
         CurrentUser currentUser = new CurrentUser();
 
-        currentUser.setUserId(userId);
-        currentUser.setUserUuid(userUuid);
-        currentUser.setUserLoginName(userLoginame);
+        currentUser.setUserId("111");
+        currentUser.setUserUuid("11111");
+        currentUser.setUserLoginName("1111");
         currentUser.setRequestId(requestId);
 
 

@@ -178,7 +178,7 @@
             AND operate_state &lt;#{finishState}
         </if>
     </select>
-    <insert id="saveStartOperationRecord" useGeneratedKeys="true" keyProperty="operateId">
+    <insert id="saveStartOperationRecord" useGeneratedKeys="true" >
         INSERT tb_start_operation_record (
         create_user, operate_state, operate_system, created_time, is_delete
         )
@@ -224,7 +224,7 @@
         </if>
         AND sssdr.is_delete = '0'
     </select>
-    <insert id="saveStartDeviceStateRecord" useGeneratedKeys="true" keyProperty="id">
+    <insert id="saveStartDeviceStateRecord" useGeneratedKeys="true" >
         INSERT tb_start_device_state_record (
         operate_id, device_id, state, create_time, update_time, is_delete
         )
@@ -472,7 +472,7 @@
         </if>
         AND is_delete = '0'
     </select>
-    <insert id="saveStartExamineRecord" useGeneratedKeys="true" keyProperty="examine_id">
+    <insert id="saveStartExamineRecord" useGeneratedKeys="true" >
         INSERT tb_start_examine_record (
         operate_id, start_device_id, rule_id, examine_type, examine_information, examine_result, create_time, is_delete
         )
@@ -609,7 +609,7 @@
             device_id = #{deviceId}
         </if>
     </select>
-    <insert id="saveManualInterventionRecord" useGeneratedKeys="true" keyProperty="operateId">
+    <insert id="saveManualInterventionRecord" useGeneratedKeys="true" >
         INSERT INTO tb_start_manual_intervention_record (
         operate_id, device_id, intervention_state, intervention_person_id, create_time, is_delete)
         VALUES( #{operateId}, #{deviceId}, #{interventionState}, #{manualInterventionPerson}, now(), '0'

@@ -21,6 +21,7 @@ import com.zgiot.common.pojo.DataModelWrapper;
 import com.zgiot.common.pojo.MetricModel;
 import com.zgiot.common.pojo.SessionContext;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -212,7 +213,7 @@ public class StartHandler {
         dataModel.setThingCode(startSignalByDataLabel.getThingCode());
         dataModel.setMetricCode(startSignalByDataLabel.getMetricCode());
         dataModel.setValue(String.valueOf(valueShort));
-        CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(dataModel, SessionContext.getCurrentUser().getRequestId());
+        CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(dataModel, "writeSignalByLabel");
         if (cmdSendResponseData.getOkCount() == 0) {
             logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage(),
                     SysException.EC_CMD_FAILED);
@@ -355,8 +356,8 @@ public class StartHandler {
                 DataModel dataModel = new DataModel();
                 dataModel.setThingCode(startSignalByDataLabel.getThingCode());
                 dataModel.setMetricCode(startSignalByDataLabel.getMetricCode());
-                dataModel.setValue(String.valueOf(startSingleLabelAndValue.getValue()));
-                CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(dataModel, SessionContext.getCurrentUser().getRequestId());
+                dataModel.setValue(String.valueOf(startSingleLabelAndValue.getValue().intValue()));
+                CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(dataModel, "sendPackageInfromation");
                 if (cmdSendResponseData.getOkCount() == 0) {
                     logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage());
                 }
@@ -386,7 +387,7 @@ public class StartHandler {
                 dataModel.setThingCode(startSignalByDataLabel.getThingCode());
                 dataModel.setMetricCode(startSignalByDataLabel.getMetricCode());
                 dataModel.setValue(String.valueOf(startSingleLabelAndValue.getValue()));
-                CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(dataModel, SessionContext.getCurrentUser().getRequestId());
+                CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(dataModel, "sendPackageInfromation");
                 if (cmdSendResponseData.getOkCount() == 0) {
                     logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage());
                 }
@@ -411,7 +412,7 @@ public class StartHandler {
                 dataModel.setThingCode(startSignalByDataLabel.getThingCode());
                 dataModel.setMetricCode(startSignalByDataLabel.getMetricCode());
                 dataModel.setValue(String.valueOf(startSingleLabelAndValue.getValue()));
-                CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(dataModel, SessionContext.getCurrentUser().getRequestId());
+                CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(dataModel, "sendTransformation");
                 if (cmdSendResponseData.getOkCount() == 0) {
                     logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage(),
                             SysException.EC_CMD_FAILED);
@@ -678,7 +679,7 @@ public class StartHandler {
         MetricModel metricModel = tmlMapper.findMetricByMetricName(startDeviceSignal.getName());
         DataModelWrapper dataModelWrapper = dataService.getData(startSignal.getDeviceCode(), metricModel.getMetricCode()).orElse(null);
         float singleValue = 0f;
-        if (dataModelWrapper != null) {
+        if (dataModelWrapper != null&&StringUtils.isNumeric(dataModelWrapper.getValue())) {
             singleValue = Float.valueOf(dataModelWrapper.getValue());
             logger.info("startSingleValue:{}", singleValue);
         }
@@ -802,7 +803,7 @@ public class StartHandler {
         MetricModel metricModel = tmlMapper.findMetricByMetricName(startDeviceSignal.getName());
         dataModel.setMetricCode(metricModel.getMetricCode());
         dataModel.setValue(String.valueOf(value));
-        CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(dataModel, SessionContext.getCurrentUser().getRequestId());
+        CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(dataModel,"发送信号");
         if (cmdSendResponseData.getOkCount() == 0) {
             logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage());
         }
