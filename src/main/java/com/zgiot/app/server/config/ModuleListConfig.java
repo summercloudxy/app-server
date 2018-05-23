@@ -86,6 +86,7 @@ public class ModuleListConfig {
         configedModuleMap.put(MODULE_DENSITY_CONTROL, this.moduleDensityCtlEnabled);
         configedModuleMap.put(MODULE_COAL_ANALYSIS, this.moduleCoalAnalyEnabled);
         configedModuleMap.put(MODULE_SUBSCRIPTION, this.moduleSubsEnabled);
+        configedModuleMap.put(MODULE_REPORTFORM, this.moduleReportEnabled);
     }
 
     public boolean containModule(String moduleName) {
