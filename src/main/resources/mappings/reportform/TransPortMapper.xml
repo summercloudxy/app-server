@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.reportforms.output.dao.TransPortMapper">
+
+    <insert id="createTransPort" keyColumn="id" keyProperty="id" useGeneratedKeys="true" parameterType="com.zgiot.app.server.module.reportforms.output.pojo.Transport">
+        INSERT INTO tb_report_form_transport (
+            coal_type,
+            transport_start_time,
+            transport_end_time,
+            destination,
+            batch,
+            carriage_number,
+            transport_volume,
+            ratio,
+            station,
+            duration,
+            remarks,
+            duty_start_time
+        )
+        VALUES
+            (
+                #{coalType},
+                #{transportStartTime},
+                #{transportEndTime},
+                #{destination},
+                #{batch},
+                #{carriageNumber},
+                #{transportVolume},
+                #{ratio},
+                #{station},
+                #{duration},
+                #{remarks},
+                #{dutyStartTime}
+            )
+    </insert>
+
+    <select id="getMostNewTransPortByType" parameterType="Integer" resultType="com.zgiot.app.server.module.reportforms.output.pojo.Transport">
+        SELECT
+            id,
+            coal_type,
+            transport_start_time,
+            transport_end_time,
+            destination,
+            batch,
+            carriage_number,
+            transport_volume,
+            ratio,
+            station,
+            duration,
+            remarks,
+            duty_start_time
+        FROM
+            `tb_report_form_transport` r
+        WHERE
+            r.coal_type = #{coalType}
+        AND r.batch IS NOT NULL
+        ORDER BY
+            r.transport_end_time DESC
+        LIMIT 1;
+    </select>
+
+    <update id="editTransportSaleStatistics" parameterType="com.zgiot.app.server.module.reportforms.output.pojo.TransportSaleStatistics">
+        UPDATE tb_report_form_transport_sale_statistics
+            SET duty_start_time = #{dutyStartTime},
+             coal_type = #{coalType},
+             train_number = #{trainNumber},
+             coal_volunm = #{coalVolunm},
+             month_train_number = #{monthTrainNumber},
+             month_coal_volunm = #{monthCoalVolunm},
+             year_train_number = #{yearTrainNumber},
+             year_coal_volunm = #{yearCoalVolunm},
+             stastistics_type = #{stastisticsType}
+            WHERE
+                id = #{id};
+    </update>
+
+
+
+    <insert id="createSaleStatistics" keyColumn="id" keyProperty="id" useGeneratedKeys="true" parameterType="com.zgiot.app.server.module.reportforms.output.pojo.TransportSaleStatistics">
+        INSERT INTO tb_report_form_transport_sale_statistics (
+            duty_start_time,
+            coal_type,
+            train_number,
+            coal_volunm,
+            month_train_number,
+            month_coal_volunm,
+            year_train_number,
+            year_coal_volunm,
+            stastistics_type
+        )
+        VALUES
+            (
+            #{dutyStartTime},
+            #{coalType},
+            #{trainNumber},
+            #{coalVolunm},
+            #{monthTrainNumber},
+            #{monthCoalVolunm},
+            #{yearTrainNumber},
+            #{yearCoalVolunm},
+            #{stastisticsType}
+            )
+    </insert>
+
+
+    <update id="editTransPort" parameterType="com.zgiot.app.server.module.reportforms.output.pojo.Transport">
+        UPDATE tb_report_form_transport
+        SET coal_type = #{coalType},
+         transport_start_time = #{transportStartTime},
+         transport_end_time = #{transportEndTime},
+         destination = #{destination},
+         batch = #{batch},
+         carriage_number = #{carriageNumber},
+         transport_volume = #{transportVolume},
+         ratio = #{ratio},
+         station = #{station},
+         duration = #{duration},
+         remarks = #{remarks},
+         duty_start_time = #{dutyStartTime}
+        WHERE
+            id = #{id}
+    </update>
+
+
+    <select id="getMostNewSaleStatisticsOut" parameterType="java.util.Date" resultType="com.zgiot.app.server.module.reportforms.output.pojo.TransportSaleStatistics">
+        SELECT
+        *
+        FROM
+        tb_report_form_transport_sale_statistics
+        WHERE
+        (
+        SELECT
+        duty_start_time
+        FROM
+        `tb_report_form_transport_sale_statistics`
+        WHERE
+        duty_start_time &lt; #{nowDutyStartTime}
+        AND stastistics_type = 1
+        ORDER BY
+        duty_start_time DESC
+        LIMIT 1
+        ) = duty_start_time
+        AND stastistics_type = 1
+    </select>
+
+    <select id="getSaleStatisticsByDutyStartTimeOut" parameterType="java.util.Date" resultType="com.zgiot.app.server.module.reportforms.output.pojo.TransportSaleStatistics">
+        SELECT
+            *
+        FROM
+            `tb_report_form_transport_sale_statistics`
+        WHERE
+            duty_start_time = #{nowDutyStartTime}
+        AND stastistics_type = 1;
+    </select>
+
+    <select id="getTransportVolumeByDate" parameterType="java.util.Date" resultType="com.zgiot.app.server.module.reportforms.output.pojo.TransportVolume">
+        SELECT
+            coal_type AS coalType,
+            count(coal_type) AS trainNumber,
+            SUM(transport_volume) AS transportVolume
+        FROM
+            `tb_report_form_transport`
+        WHERE
+            duty_start_time = #{nowDutyStartTime}
+        GROUP BY
+            coal_type;
+    </select>
+
+    <select id="getMostNewSaleStatisticsLocality" parameterType="com.zgiot.app.server.module.reportforms.output.pojo.TransportSaleStatistics" resultType="com.zgiot.app.server.module.reportforms.output.pojo.TransportSaleStatistics">
+        SELECT
+        *
+        FROM
+        `tb_report_form_transport_sale_statistics`
+        WHERE
+        coal_type = #{coalType}
+        AND duty_start_time &lt; #{dutyStartTime}
+        AND stastistics_type = 2
+        ORDER BY
+        duty_start_time DESC
+        LIMIT 1
+    </select>
+
+    <select id="getTransPortByDate" parameterType="java.util.Date" resultType="com.zgiot.app.server.module.reportforms.output.pojo.Transport">
+        SELECT
+            *
+        FROM
+            `tb_report_form_transport`
+        WHERE
+            duty_start_time = #{nowDutyStartTime};
+    </select>
+
+    <select id="getSaleByDateLocality" parameterType="java.util.Date" resultType="com.zgiot.app.server.module.reportforms.output.pojo.TransportSaleStatistics">
+        SELECT
+            *
+        FROM
+            `tb_report_form_transport_sale_statistics`
+        WHERE
+            duty_start_time = #{nowDutyStartTime}
+        AND stastistics_type = 2;
+    </select>
+
+    <select id="getMostNewSaleByDate" parameterType="java.util.Date" resultType="com.zgiot.app.server.module.reportforms.output.pojo.TransportSaleStatistics">
+        SELECT
+        *
+        FROM
+        tb_report_form_transport_sale_statistics
+        WHERE
+        (
+        SELECT
+        duty_start_time
+        FROM
+        tb_report_form_transport_sale_statistics
+        WHERE
+        stastistics_type = 2
+        AND duty_start_time &lt; #{nowDutyStartTime}
+        ORDER BY
+        duty_start_time DESC
+        LIMIT 1
+        ) = duty_start_time
+        AND stastistics_type = 2
+    </select>
+
+</mapper>

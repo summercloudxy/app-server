@@ -115,5 +115,36 @@
         select thing_code,density,flow FROM tb_coal_analysis_density_flow_value WHERE analysis_id = #{param1}
     </select>
 
+    <select id="getCoalAnalysisList" parameterType="com.zgiot.app.server.module.tcs.pojo.FilterCondition" resultType="com.zgiot.common.pojo.CoalAnalysisRecord">
+        SELECT
+        *
+        FROM
+        `tb_coal_analysis`
+        WHERE
+        time &gt;= #{startTime}
+        AND time &lt; #{endTime}
+        AND system = #{system}
+        AND target in
+        <foreach collection="targetList" item="target" open="(" close=")" separator=",">
+            #{target}
+        </foreach>
+        ORDER BY time ASC;
+    </select>
+
+    <select id="getCoalAnalysisAvg" parameterType="com.zgiot.app.server.module.tcs.pojo.FilterCondition" resultType="com.zgiot.common.pojo.CoalAnalysisRecord">
+        SELECT
+        *
+        FROM
+        `tb_coal_analysis`
+        WHERE
+        time = #{startTime}
+        AND system = #{system}
+        AND target in
+        <foreach collection="targetList" item="target" open="(" close=")" separator=",">
+            #{target}
+        </foreach>
+        LIMIT 1;
+    </select>
+
 
 </mapper>

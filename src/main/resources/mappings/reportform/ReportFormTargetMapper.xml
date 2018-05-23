@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.reportforms.output.dao.ReportFormTargetMapper">
+
+    <select id="getTaskFeedbackInfo" resultType="com.zgiot.app.server.module.reportforms.output.pojo.TaskFeedbackInfo">
+        SELECT
+        f.feedback_info_id,
+        f.feedback_value,
+        o.update_dt as feed_back_time
+        FROM
+        `tb_sftask_prod_order_feedback_info` f,
+        tb_sftask_order o
+        WHERE
+        o.id = f.order_id
+        AND  <![CDATA[o.update_dt <#{dutyEndTime}  and o.update_dt > #{dutyStartTime}]]>
+        AND o.order_type_id = 4 and o.state = 4;
+    </select>
+
+    <select id="getTargetRecordList"
+            resultType="com.zgiot.app.server.module.reportforms.output.pojo.ReportFormTargetRecord">
+        select * from tb_report_form_target
+        where duty_start_time = #{dutyStartTime}
+        <if test="term != null">
+            and term =#{term}
+        </if>
+        <if test="targetType != null">
+            and target_type = #{targetType}
+        </if>
+
+    </select>
+
+    <select id="getLastTaskFeedbackInfoBeforeDate"
+            resultType="com.zgiot.app.server.module.reportforms.output.pojo.TaskFeedbackInfo">
+                SELECT
+        f.feedback_info_id,
+        f.feedback_value,
+        o.update_dt as feed_back_time
+        FROM
+        `tb_sftask_prod_order_feedback_info` f,
+        tb_sftask_order o
+        WHERE
+        o.id = f.order_id
+        AND  <![CDATA[o.update_dt < #{dutyStartTime}]]>
+        AND o.order_type_id = 4 and o.state = 4
+        AND f.feedback_info_id = #{feedbackInfoId}
+        ORDER BY o.update_dt DESC
+        limit 0,1;
+    </select>
+
+    <insert id="insertTargetRecordList" keyProperty="id" keyColumn="id" useGeneratedKeys="true">
+        insert into tb_report_form_target(duty_start_time,target_type,class_value,month_value,year_value,term)
+        values
+        <foreach collection="list" item="item" separator="),(" open="(" close=")">
+            #{item.dutyStartTime},#{item.targetType},#{item.classValue},#{item.monthValue},#{item.yearValue},#{item.term}
+        </foreach>
+    </insert>
+
+
+    <select id="getFirstTaskFeedbackInfoBeforeDate"  resultType="com.zgiot.app.server.module.reportforms.output.pojo.TaskFeedbackInfo">
+                     SELECT
+        f.feedback_info_id,
+        f.feedback_value,
+        o.update_dt as feed_back_time
+        FROM
+        `tb_sftask_prod_order_feedback_info` f,
+        tb_sftask_order o
+        WHERE
+        o.id = f.order_id
+        AND  <![CDATA[o.update_dt < #{dutyStartTime}]]>
+        AND o.order_type_id = 4 and o.state = 4
+        AND f.feedback_info_id = #{feedbackInfoId}
+        ORDER BY o.update_dt ASC
+        limit 0,1;
+    </select>
+
+</mapper>

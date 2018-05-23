@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.reportforms.output.dao.ReportFormOutputStoreMapper">
+
+    <select id="getOutputStoreRecord" resultType="com.zgiot.app.server.module.reportforms.output.pojo.ReportFormOutputStoreRecord">
+        select * from tb_report_form_output_store WHERE type = #{type} and duty_start_time = #{dutyStartTime};
+    </select>
+
+    <insert id="insertRecord" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        insert into tb_report_form_output_store ( duty_start_time, clened_coal, washed_coal, slime, washery_rejects, raw_coal, raw_coal_8, raw_coal_13, type,  local_washed_coal) VALUES
+        (#{dutyStartTime},#{clenedCoal},#{washedCoal},#{slime},#{washeryRejects},#{rawCoal},#{rawCoal8},#{rawCoal13},#{type},#{localWashedCoal})
+    </insert>
+
+    <update id="updateRecord">
+        UPDATE tb_report_form_output_store SET
+        duty_start_time = #{dutyStartTime},
+        clened_coal = #{clenedCoal},
+        washed_coal = #{washedCoal},
+        slime = #{slime},
+        washery_rejects = #{washeryRejects},
+        raw_coal = #{rawCoal},
+        raw_coal_8 = #{rawCoal8},
+        raw_coal_13 = #{rawCoal13},
+        type = #{type},
+        local_washed_coal = #{localWashedCoal}
+        WHERE id = #{id}
+    </update>
+
+
+
+</mapper>
