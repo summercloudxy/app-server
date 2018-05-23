@@ -30,8 +30,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class ModuleListConfig {
@@ -111,6 +111,7 @@ public class ModuleListConfig {
         configedModuleMap.put(MODULE_DENSITY_CONTROL, this.moduleDensityCtlEnabled);
         configedModuleMap.put(MODULE_COAL_ANALYSIS, this.moduleCoalAnalyEnabled);
         configedModuleMap.put(MODULE_SUBSCRIPTION, this.moduleSubsEnabled);
+        configedModuleMap.put(MODULE_REPORTFORM, this.moduleReportEnabled);
     }
 
     public boolean containModule(String moduleName) {
