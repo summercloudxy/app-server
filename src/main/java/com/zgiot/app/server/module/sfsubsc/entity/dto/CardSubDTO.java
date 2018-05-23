@@ -5,7 +5,7 @@ import java.util.List;
 public class CardSubDTO {
 
     private String userUuid;
-    private List<String> cardCodeList;
+    private List<CardDataBeanDTO> cardDataBeanList;
 
     public String getUserUuid() {
         return userUuid;
@@ -15,11 +15,11 @@ public class CardSubDTO {
         this.userUuid = userUuid;
     }
 
-    public List<String> getCardCodeList() {
-        return cardCodeList;
+    public List<CardDataBeanDTO> getCardDataBeanList() {
+        return cardDataBeanList;
     }
 
-    public void setCardCodeList(List<String> cardCodeList) {
-        this.cardCodeList = cardCodeList;
+    public void setCardDataBeanList(List<CardDataBeanDTO> cardDataBeanList) {
+        this.cardDataBeanList = cardDataBeanList;
     }
 }
