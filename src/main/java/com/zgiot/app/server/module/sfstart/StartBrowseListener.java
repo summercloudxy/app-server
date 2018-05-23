@@ -20,7 +20,7 @@ import java.util.List;
 @Component
 public class StartBrowseListener implements DataListener {
     @Autowired
-    private static StartService startService;
+    private  StartService startService;
     @Autowired
     private TMLMapper tmlMapper;
     @Autowired
@@ -39,14 +39,14 @@ public class StartBrowseListener implements DataListener {
             thingMetricLabel = thingMetricLabels.get(0);
         }
         //启车总览
-        for (String label : startStopManager.getLabelBydevices()) {
+        for (String label : startStopManager.getLabelBydevices())
             if (thingMetricLabel.getLabelPath().equals(label)) {
-                logger.trace("启车总览标签{}的值{}收到", label, dataModel.getValue());
-                StartDevice startDevice = startService.selectStartDeviceByDeviceId(startService.selectDeviceIdByDatelabel(label, StartStopConstants.DEVICE_STATE).get(0));
+                logger.info("启车总览标签{}的值{}收到", label, dataModel.getValue());
+                String deviceId = startService.selectDeviceIdByDatelabel(label, StartStopConstants.DEVICE_STATE).get(0);
+                StartDevice startDevice = startService.selectStartDeviceByDeviceId(deviceId);
                 startDevice.setDeviceState(Integer.valueOf(dataModel.getValue()));
                 startHandler.sendMessagingTemplate(StartStopConstants.URI_START_BROWSE_STATE, startDevice);
             }
-        }
     }
 
 

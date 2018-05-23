@@ -36,7 +36,7 @@ public class AAuthFilter implements Filter {
         String requestId = hsRequest.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
         String userLoginame = hsRequest.getHeader(GlobalConstants.USER_LOGINNAME);
 
-        logger.info("visit userId is {} , userUuid is {},requestId is {}", userId, userUuid, requestId);
+        logger.trace("visit userId is {} , userUuid is {},requestId is {}", userId, userUuid, requestId);
 
 
         //用户获取数据成功
