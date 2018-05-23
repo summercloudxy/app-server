@@ -23,14 +23,6 @@ public class ReportFromsController {
     @Autowired
     private ReportFormsService reportFormsService;
 
-    @ApiOperation("获取报表数据")
-    @GetMapping("/records/api")
-    public ResponseEntity<ServerResponse<ReportFormsBean>> getReportFromsTest(@ApiParam("当班开始时间")@RequestParam Date dutyStartTime){
-        ReportFormsBean reportFormsBean = reportFormsService.getBean(dutyStartTime);
-        return new ResponseEntity<ServerResponse<ReportFormsBean>>(new ServerResponse(
-                "OK", SysException.EC_SUCCESS, reportFormsBean
-        ), HttpStatus.OK);
-    }
 
     @ApiOperation("获取报表数据")
     @GetMapping("/records")
@@ -39,12 +31,6 @@ public class ReportFromsController {
         return new ResponseEntity<>(ServerResponse.buildOkJsonWithNonStringKey(reportFormsBean), HttpStatus.OK);
     }
 
-    @ApiOperation("获取报表数据")
-    @GetMapping("/test")
-    public ResponseEntity<String> test(@ApiParam("当班开始时间")@RequestParam Date dutyStartTime){
-       Integer aa = reportFormsService.getTeamInfo(dutyStartTime);
-        return new ResponseEntity<>(ServerResponse.buildOkJsonWithNonStringKey(aa), HttpStatus.OK);
-    }
 
     @ApiOperation("获取当班开始时间")
     @GetMapping("/dutyStartTime")
