@@ -18,12 +18,14 @@ import java.util.logging.Filter;
 public interface FilterPressLogMapper {
     /**
      * 插入压板信息（压滤日志数据来源）
+     *
      * @param filterPressLogBean
      */
     void insertFilterPressLog(FilterPressLogBean filterPressLogBean);
 
     /**
      * 根据日期查询压滤日志
+     *
      * @param startTime
      * @param endTime
      * @return
@@ -32,6 +34,7 @@ public interface FilterPressLogMapper {
 
     /**
      * 查询各压滤机压板信息
+     *
      * @param isDayShift
      * @param startTime
      * @param endTime
@@ -41,6 +44,7 @@ public interface FilterPressLogMapper {
 
     /**
      * 查询各压滤机压板总数信息
+     *
      * @param isDayShift
      * @param startTime
      * @param endTime
@@ -50,6 +54,7 @@ public interface FilterPressLogMapper {
 
     /**
      * 查询上一班次历史压板信息
+     *
      * @param startTime
      * @param endTime
      * @return
@@ -58,6 +63,7 @@ public interface FilterPressLogMapper {
 
     /**
      * 人工清零前查询上一班次所属对组
+     *
      * @param isDayShift
      * @param startTime
      * @param endTime
@@ -75,9 +81,23 @@ public interface FilterPressLogMapper {
             "        and datetime < str_to_date(#{endTime},'%Y-%m-%d %H:%i:%s')")
     List<FilterPressPlateStatistic> getPlateStatistic(@Param("isDayShift") boolean isDayShift, @Param("startTime") String startTime, @Param("endTime") String endTime, @Param("term") int term);
 
+    @Select("select * from tb_filterpress_plate_statistics where term=#{term}" +
+            " and datetime >= #{startTime}" +
+            " and datetime <= #{endTime}")
+    List<FilterPressPlateStatistic> getPlateStatisticInDuration(@Param("startTime") Date startTime, @Param("endTime") Date endTime, @Param("term") int term);
+
+    @Select("select * from tb_filterpress_plate_statistics where term=#{term}" +
+            " and datetime = #{startTime}" +
+            " and is_day_shift=#{isDayShift}")
+    FilterPressPlateStatistic getDesignatedClassPlateStatistic(@Param("startTime") Date dayTime, @Param("isDayShift") boolean isDayShift, @Param("term") int term);
+
+
     int selectMaxPlate(@Param("isDayShift") boolean isDayShift, @Param("startTime") String startTime, @Param("endTime") String endTime, @Param("term") int term, @Param("team") int team);
 
     Integer selectTotalPlate(@Param("isDayShift") boolean isDayShift, @Param("startTime") String startTime, @Param("endTime") String endTime, @Param("term") int term, @Param("team") int team);
 
     List<FilterPressLogBean> queryLog(@Param("startTime") String startTime, @Param("endTime") String endTime, @Param("term") int term, @Param("isDayShift") boolean isDayShift);
+
+    Integer queryTotalPlateCount(@Param("startTime") Date startTime, @Param("endTime") Date endTime, @Param("term") int term);
+
 }

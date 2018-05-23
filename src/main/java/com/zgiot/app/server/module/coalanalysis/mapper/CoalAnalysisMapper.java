@@ -19,7 +19,7 @@ public interface CoalAnalysisMapper {
 
     CoalAnalysisRecord getRecentRecord(CoalAnalysisRecord record);
 
-    CoalAnalysisRecord getLastRecordOnDuty(@Param("record") CoalAnalysisRecord record,@Param("endTime") Date dutyEndTime);
+    CoalAnalysisRecord getLastRecordOnDuty(@Param("record") CoalAnalysisRecord record, @Param("endTime") Date dutyEndTime);
 
     void updateRecordWithOutDensityAndFlow(@Param("record") CoalAnalysisRecord record);
 
@@ -27,13 +27,17 @@ public interface CoalAnalysisMapper {
 
     void updateRecordDensityAndFlow(CoalAnalysisRecord record);
 
-    void insertDetailDensityAndFlowValues(@Param("list") List<DensityAndFlowInfo> densityAndFlowValues,@Param("analysisId")Integer id);
+    void insertDetailDensityAndFlowValues(@Param("list") List<DensityAndFlowInfo> densityAndFlowValues, @Param("analysisId") Integer id);
 
     List<DensityAndFlowSourceInfo> getDensityAndFlowSourceInfo();
 
     List<CoalAnalysisRecord> getRecordsMatchCondition(FilterCondition filterCondition);
 
     List<DensityAndFlowInfo> getDetailDensityAndFlowInfo(int recordId);
+
+    List<CoalAnalysisRecord> getCoalAnalysisList(FilterCondition filterCondition);//不可以服用上面,因为开始时间相等处理不一致
+
+    CoalAnalysisRecord getCoalAnalysisAvg(FilterCondition filterCondition);
 
 
     /**

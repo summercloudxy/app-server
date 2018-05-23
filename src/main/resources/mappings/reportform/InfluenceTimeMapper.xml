@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.reportforms.output.dao.InfluenceTimeMapper">
+
+    <select id="getInfluenceTimeByDutyDate" parameterType="java.util.Date" resultType="com.zgiot.app.server.module.reportforms.output.pojo.InfluenceTime">
+      SELECT
+        id,
+        duty_start_time,
+        influence_type,
+        class_duration,
+        month_duration,
+        year_duration,
+        term
+    FROM
+        `tb_report_form_influence_time`
+    WHERE
+        duty_start_time = #{nowDutyStartTime};
+    </select>
+
+    <select id="getRemarksByDutyDate" parameterType="java.util.Date" resultType="com.zgiot.app.server.module.reportforms.output.pojo.InfluenceTimeRemarks">
+      SELECT
+        id,
+        duty_start_time,
+        remarks,
+        factory_duty_leader,
+        checker,
+        dispatcher
+    FROM
+        `tb_report_form_influence_time_remarks`
+    WHERE
+        duty_start_time = #{nowDutyStartTime};
+    </select>
+
+    <select id="getMostNewinfluenceTimeByDate" parameterType="java.util.Date" resultType="com.zgiot.app.server.module.reportforms.output.pojo.InfluenceTime">
+        SELECT
+        id,
+        duty_start_time,
+        influence_type,
+        class_duration,
+        month_duration,
+        year_duration,
+        term
+        FROM
+        tb_report_form_influence_time
+        WHERE
+        (
+        SELECT
+        duty_start_time
+        FROM
+        tb_report_form_influence_time
+        WHERE
+        duty_start_time &lt; #{nowDutyStartTime}
+        ORDER BY
+        duty_start_time DESC
+        LIMIT 1
+        ) = duty_start_time
+    </select>
+
+    <insert id="createinfluenceTime" keyColumn="id" keyProperty="id" useGeneratedKeys="true"  parameterType="com.zgiot.app.server.module.reportforms.output.pojo.InfluenceTime">
+      INSERT INTO tb_report_form_influence_time (
+            duty_start_time,
+            influence_type,
+            class_duration,
+            month_duration,
+            year_duration,
+            term
+        )
+        VALUES
+            ( #{dutyStartTime},
+              #{influenceType},
+              #{classDuration},
+              #{monthDuration},
+              #{yearDuration},
+              #{term})
+    </insert>
+
+    <update id="editinfluenceTimeRemarks" parameterType="com.zgiot.app.server.module.reportforms.output.pojo.InfluenceTimeRemarks">
+      UPDATE tb_report_form_influence_time_remarks
+        SET duty_start_time =#{dutyStartTime}, remarks=#{remarks}
+        WHERE
+            id=#{id}
+    </update>
+
+    <insert id="createinfluenceTimeRemarks" keyColumn="id" keyProperty="id" useGeneratedKeys="true"  parameterType="com.zgiot.app.server.module.reportforms.output.pojo.InfluenceTimeRemarks">
+      INSERT INTO tb_report_form_influence_time_remarks (duty_start_time, remarks)
+        VALUES
+            (#{dutyStartTime},#{remarks})
+    </insert>
+
+    <update id="editinfluenceTime" parameterType="com.zgiot.app.server.module.reportforms.output.pojo.InfluenceTime">
+      UPDATE tb_report_form_influence_time
+        SET duty_start_time= #{dutyStartTime},
+         influence_type=#{influenceType},
+         class_duration=#{classDuration},
+         month_duration=#{monthDuration},
+         year_duration=#{yearDuration},
+         term=#{term}
+        WHERE
+            id =#{id}
+    </update>
+
+
+
+    <insert id="createPersonnel" keyColumn="id" keyProperty="id" useGeneratedKeys="true"  parameterType="com.zgiot.app.server.module.reportforms.output.pojo.InfluenceTimeRemarks">
+        INSERT INTO tb_report_form_influence_time_remarks (duty_start_time,factory_duty_leader,checker,dispatcher)
+        VALUES
+        (#{dutyStartTime},#{factoryDutyLeader},#{checker},#{dispatcher})
+    </insert>
+
+
+    <update id="editPersonnel" parameterType="com.zgiot.app.server.module.reportforms.output.pojo.InfluenceTimeRemarks">
+        UPDATE tb_report_form_influence_time_remarks
+        SET duty_start_time =#{dutyStartTime}, factory_duty_leader=#{factoryDutyLeader},checker=#{checker},dispatcher=#{dispatcher}
+        WHERE
+        id=#{id}
+    </update>
+
+    <select id="InfluenceTimeRemarks" parameterType="java.util.Date" resultType="com.zgiot.app.server.module.reportforms.output.pojo.InfluenceTimeRemarks">
+        SELECT
+        *
+        FROM
+        `tb_report_form_influence_time_remarks`
+        WHERE
+        duty_start_time = #{dutyStartTime};
+    </select>
+
+</mapper>

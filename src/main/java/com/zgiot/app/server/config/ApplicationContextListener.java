@@ -17,6 +17,10 @@ import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
 import com.zgiot.app.server.module.filterpress.FilterPressManager;
 import com.zgiot.app.server.module.historydata.job.HistoryMinDataJob;
 import com.zgiot.app.server.module.reportforms.input.listener.ReportFormsCompleter;
+import com.zgiot.app.server.module.reportforms.output.productionmonitor.listener.ReportFormSystemStartListener;
+import com.zgiot.app.server.module.reportforms.output.service.InfluenceTimeServiceImpl;
+import com.zgiot.app.server.module.reportforms.output.service.OutputStoreAndTargetService;
+import com.zgiot.app.server.module.reportforms.output.service.TransPortServiceImpl;
 import com.zgiot.app.server.module.sfsubsc.job.UploadHistorySubscCardDatas;
 import com.zgiot.app.server.module.sfsubsc.job.UploadSubscCardDatas;
 import com.zgiot.app.server.service.impl.HistoryDataPersistDaemon;
@@ -69,7 +73,15 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
     @Autowired
     private AlertManager alertManager;
     @Autowired
+    private ReportFormSystemStartListener reportFormSystemStartListener;
+    @Autowired
+    private OutputStoreAndTargetService outputStoreAndTargetService;
+    @Autowired
     private FilterPressManager filterPressManager;
+    @Autowired
+    private TransPortServiceImpl transPortServiceImpl;
+    @Autowired
+    private InfluenceTimeServiceImpl influenceTimeServiceImpl;
 
     private static final int FAULT_SCAN_RATE = 20;
 
@@ -156,6 +168,17 @@ public class ApplicationContextListener implements ApplicationListener<ContextRe
             QuartzManager.addJob("checkBlow", ModuleListConfig.MODULE_BELLOWS, "checkBlow",
                     ModuleListConfig.MODULE_BELLOWS, ValveIntelligentJob.class, "2 * * * * ?");
         }
+
+        if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
+                || moduleListConfig.containModule(ModuleListConfig.MODULE_REPORTFORM)) {
+            reportFormSystemStartListener.init();
+            outputStoreAndTargetService.init();
+            transPortServiceImpl.init();
+            influenceTimeServiceImpl.init();
+            processor.addListener(reportFormSystemStartListener);
+
+        }
+
 
         if (moduleListConfig.containModule(ModuleListConfig.MODULE_ALL)
                 || moduleListConfig.containModule(ModuleListConfig.MODULE_SUBSCRIPTION)) {

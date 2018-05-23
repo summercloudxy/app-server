@@ -21,6 +21,7 @@ public class ModuleListConfig {
     public static final String MODULE_DENSITY_CONTROL = "DENSITY_CONTROL";
     public static final String MODULE_COAL_ANALYSIS = "COAL_ANALYSIS";
     public static final String MODULE_SUBSCRIPTION = "SUBSCRIPTION";
+    public static final String MODULE_REPORTFORM = "REPORTFORM";
 
     @Value("${sf.modules.list}")
     private String moduleListStr;
