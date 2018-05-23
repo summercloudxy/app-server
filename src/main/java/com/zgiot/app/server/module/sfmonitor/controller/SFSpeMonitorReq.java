@@ -1,12 +1,5 @@
 package com.zgiot.app.server.module.sfmonitor.controller;
 
-import com.zgiot.app.server.module.sfmonitor.pojo.RelSFSysMonitorTermThing;
-import com.zgiot.app.server.module.sfmonitor.pojo.RelSfSpeMonThingMetric;
-import com.zgiot.app.server.module.sfmonitor.pojo.RelSfSpeMonThingSubthing;
-import com.zgiot.app.server.module.sfmonitor.pojo.ThingTag;
-
-import java.util.List;
-
 public class SFSpeMonitorReq {
     private Short termCount;
     private String thingtagId1;//一级系统id
@@ -56,7 +49,7 @@ public class SFSpeMonitorReq {
     }
 
     public Integer getPageNum() {
-        return pageNum == null ?1:pageNum;
+        return pageNum == null ? 1 : pageNum;
     }
 
     public void setPageNum(Integer pageNum) {

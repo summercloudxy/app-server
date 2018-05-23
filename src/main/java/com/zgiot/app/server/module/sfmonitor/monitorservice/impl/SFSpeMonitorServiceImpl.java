@@ -103,7 +103,7 @@ public class SFSpeMonitorServiceImpl implements SFSpeMonitorService {
         if(sFSpeMonitorReq.getThingCode() != null){
             monitorThing.setThingCode(sFSpeMonitorReq.getThingCode());
         }
-        monitorThing.setSelectCount(sFSpeMonitorReq.getPageNum()*SFSpeMonitorConstant.pageSize);
+        monitorThing.setSelectCount(sFSpeMonitorReq.getPageNum() * SFSpeMonitorConstant.pageSize);
         Long thingTagId = Long.parseLong(sFSpeMonitorReq.getThingtagId2() == null ? sFSpeMonitorReq.getThingtagId1() : sFSpeMonitorReq.getThingtagId2());
         List<ThingTag> thingTags = thingTagMapper.getThingTagByParentId(thingTagId);
         ThingTag thingTag = thingTagMapper.getThingTagById(thingTagId);
