@@ -75,53 +75,54 @@ public class SubscriptionController {
         List<SFSubscriptionCard> sfSubscriptionCardList = subscCardTypeService.getSubCardTypeByUuid(userUuid);
 
         List<Object> list = new ArrayList<>();
+        int sort = 1;
         for (SFSubscriptionCard SFSubscriptionCard : sfSubscriptionCardList) {
             String cardType = SFSubscriptionCard.getCardType();
             String cardCode = SFSubscriptionCard.getCardCode();
             if (CardTypeEnum.HISTORICAL_WASHING_CAPACITY.getCardCode().equals(cardType)) {
                 HistoryWashingQuantityVO historyWashingQuantityVO =
                         JSON.parseObject(SFSubscriptionCard.getCardData(), HistoryWashingQuantityVO.class);
-                list.add(new CardDataBeanDTO(cardCode, historyWashingQuantityVO));
+                list.add(new CardDataBeanDTO(cardCode, historyWashingQuantityVO, sort++));
             } else if (CardTypeEnum.HISTORICAL_PRODUCT_RATE.getCardCode().equals(cardType)) {
                 HistoricalProductRateVO historicalProductRateVO =
                         JSON.parseObject(SFSubscriptionCard.getCardData(), HistoricalProductRateVO.class);
-                list.add(new CardDataBeanDTO(cardCode, historicalProductRateVO));
+                list.add(new CardDataBeanDTO(cardCode, historicalProductRateVO, sort++));
             } else if (CardTypeEnum.CHEMICAL_TESTS_DATA.getCardCode().equals(cardType)) {
                 ChemicalTestsDataVO chemicalTestsDataVO =
                         JSON.parseObject(SFSubscriptionCard.getCardData(), ChemicalTestsDataVO.class);
-                list.add(new CardDataBeanDTO(cardCode, chemicalTestsDataVO));
+                list.add(new CardDataBeanDTO(cardCode, chemicalTestsDataVO, sort++));
             } else if (CardTypeEnum.INSTANTANEOUS_WASH.getCardCode().equals(cardType)) {
                 InstantaneousWashVo instantaneousWashVo =
                         JSON.parseObject(SFSubscriptionCard.getCardData(), InstantaneousWashVo.class);
-                list.add(new CardDataBeanDTO(cardCode, instantaneousWashVo));
+                list.add(new CardDataBeanDTO(cardCode, instantaneousWashVo, sort++));
             } else if (CardTypeEnum.INSTANTANEOUS_PRODUCT_QUANTITY.getCardCode().equals(cardType)) {
                 InstantaneousProductQuantityVO instantaneousProductQuantityVO =
                         JSON.parseObject(SFSubscriptionCard.getCardData(), InstantaneousProductQuantityVO.class);
-                list.add(new CardDataBeanDTO(cardCode, instantaneousProductQuantityVO));
+                list.add(new CardDataBeanDTO(cardCode, instantaneousProductQuantityVO, sort++));
             } else if (CardTypeEnum.PRODUCT_YIELD.getCardCode().equals(cardType)) {
                 ProductYieldVO productYieldVO =
                         JSON.parseObject(SFSubscriptionCard.getCardData(), ProductYieldVO.class);
-                list.add(new CardDataBeanDTO(cardCode, productYieldVO));
+                list.add(new CardDataBeanDTO(cardCode, productYieldVO, sort++));
             } else if (CardTypeEnum.INTELLIGENT_FILTER.getCardCode().equals(cardType)) {
                 IntelligentFilterVO intelligentFilterVO =
                         JSON.parseObject(SFSubscriptionCard.getCardData(), IntelligentFilterVO.class);
-                list.add(new CardDataBeanDTO(cardCode, intelligentFilterVO));
+                list.add(new CardDataBeanDTO(cardCode, intelligentFilterVO, sort++));
             } else if (CardTypeEnum.INTELLIGENT_BLOWER.getCardCode().equals(cardType)) {
                 IntelligentBlowerVO intelligentBlowerVO =
                         JSON.parseObject(SFSubscriptionCard.getCardData(), IntelligentBlowerVO.class);
-                list.add(new CardDataBeanDTO(cardCode, intelligentBlowerVO));
+                list.add(new CardDataBeanDTO(cardCode, intelligentBlowerVO, sort++));
             } else if (CardTypeEnum.MIXTURE_OF_RAW_COAL.getCardCode().equals(cardType)) {
                 MixtureOfRawCoalVO mixtureOfRawCoalVO =
                         JSON.parseObject(SFSubscriptionCard.getCardData(), MixtureOfRawCoalVO.class);
-                list.add(new CardDataBeanDTO(cardCode, mixtureOfRawCoalVO));
+                list.add(new CardDataBeanDTO(cardCode, mixtureOfRawCoalVO, sort++));
             } else if (CardTypeEnum.COAL_QUALITY.getCardCode().equals(cardType)) {
                 CoalQualityVO coalQualityVO =
                         JSON.parseObject(SFSubscriptionCard.getCardData(), CoalQualityVO.class);
-                list.add(new CardDataBeanDTO(cardCode, coalQualityVO));
+                list.add(new CardDataBeanDTO(cardCode, coalQualityVO, sort++));
             } else if (CardTypeEnum.PRODUCTION.getCardCode().equals(cardType)) {
                 ProductionVO productionVO =
                         JSON.parseObject(SFSubscriptionCard.getCardData(), ProductionVO.class);
-                list.add(new CardDataBeanDTO(cardCode, productionVO));
+                list.add(new CardDataBeanDTO(cardCode, productionVO, sort++));
             }
         }
         return new ResponseEntity<>(ServerResponse.buildOkJson(list), HttpStatus.OK);
@@ -163,6 +164,30 @@ public class SubscriptionController {
     @RequestMapping(value = "/getProductionCardDatas", method = RequestMethod.GET)
     public ResponseEntity<String> getProductionCardDatas() {
         cardDataManager.getProductionCardDatas();
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+    /**
+     * 历史卡片job
+     *
+     * @return
+     */
+    @RequestMapping(value = "/getHistoryCardDatas", method = RequestMethod.GET)
+    public ResponseEntity<String> getHistoryCardDatas() {
+        cardDataManager.getHistoryCardDatas();
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+    /**
+     * 其他卡片job
+     *
+     * @return
+     */
+    @RequestMapping(value = "/getCardDatas", method = RequestMethod.GET)
+    public ResponseEntity<String> getCardDatas() {
+        cardDataManager.getCardDatas();
 
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
