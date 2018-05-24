@@ -93,6 +93,10 @@ public class CmdControlServiceImpl implements CmdControlService {
             throw new SysException("data type error", SysException.EC_CMD_FAILED);
         }
         String readValue = getDataSync(dataModel);
+        if(StringUtils.isBlank(readValue)){
+            logger.info("read value from kep:" + readValue);
+            return RETURN_CODE_SUCCESS;
+        }
         int valueInt = Integer.parseInt(readValue);
         boolean dataModelOperate = Boolean.parseBoolean(dataModel.getValue());
         if(dataModelOperate && getBit(Integer.parseInt(readValue), position, VALUE_FALSE)){
