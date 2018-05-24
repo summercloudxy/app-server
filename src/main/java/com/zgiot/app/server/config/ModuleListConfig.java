@@ -15,6 +15,7 @@ import com.zgiot.app.server.module.demo.DemoDataCompleter;
 import com.zgiot.app.server.module.densitycontrol.DensityControlListener;
 import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
 import com.zgiot.app.server.module.filterpress.FilterPressManager;
+import com.zgiot.app.server.module.filterpress.FilterPressSignalOperateJob;
 import com.zgiot.app.server.module.historydata.job.HistoryMinDataJob;
 import com.zgiot.app.server.module.reportforms.input.listener.ReportFormsCompleter;
 import com.zgiot.app.server.module.sfstart.*;
@@ -145,6 +146,8 @@ public class ModuleListConfig {
             if (containModule(ModuleListConfig.MODULE_FILTERPRESS)) {
                 filterPressManager.initFilterPress();
                 processor.addListener(filterPressListener);
+                QuartzManager.addJob("filterPressSignalOperate", ModuleListConfig.MODULE_FILTERPRESS, "filterPressSignalOperate",
+                        ModuleListConfig.MODULE_FILTERPRESS, FilterPressSignalOperateJob.class, "0/10 * * * * ?");
                 logIt(MODULE_FILTERPRESS);
             }
 

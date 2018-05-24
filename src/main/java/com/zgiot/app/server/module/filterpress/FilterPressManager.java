@@ -265,57 +265,61 @@ public class FilterPressManager {
      * 1502或者2502 STATE状态值触发刮板是否启动逻辑
      */
     private void stateChangeOperate(String metricCode,String code,String metricValueData){
-            String meticValue = null;
-            int term = 0;
-            if(code.startsWith(String.valueOf(TERM1))){
-                Optional<DataModelWrapper> value = dataService.getData(SYS_1_YL,FilterPressMetricConstants.YL_LS);
-                if((value.isPresent()) && (!StringUtils.isBlank(value.get().getValue()))){
-                    meticValue = value.get().getValue();
-                }
-                term = 1;
-                Set<String> thingCodes = getAllFilterPressCode(term);
-                stateContrlRbanRun(meticValue,metricValueData,thingCodes);
-            }else if(code.startsWith(String.valueOf(TERM2))){
-                Optional<DataModelWrapper> value = dataService.getData(SYS_2_YL,FilterPressMetricConstants.YL_LS);
-                if((value.isPresent()) && (!StringUtils.isBlank(value.get().getValue()))){
-                    meticValue = value.get().getValue();
-                }
-                term = 2;
-                Set<String> thingCodes = getAllFilterPressCode(term);
-                stateContrlRbanRun(meticValue,metricValueData,thingCodes);
+        String meticValue = null;
+        int term = 0;
+        if(code.startsWith(String.valueOf(TERM1))){
+            Optional<DataModelWrapper> value = dataService.getData(SYS_1_YL,FilterPressMetricConstants.YL_LS);
+            if((value.isPresent()) && (!StringUtils.isBlank(value.get().getValue()))){
+                meticValue = value.get().getValue();
             }
+            term = 1;
+            Set<String> thingCodes = getAllFilterPressCode(term);
+            stateContrlRbanRun(meticValue,metricValueData,thingCodes);
+        }else if(code.startsWith(String.valueOf(TERM2))){
+            Optional<DataModelWrapper> value = dataService.getData(SYS_2_YL,FilterPressMetricConstants.YL_LS);
+            if((value.isPresent()) && (!StringUtils.isBlank(value.get().getValue()))){
+                meticValue = value.get().getValue();
+            }
+            term = 2;
+            Set<String> thingCodes = getAllFilterPressCode(term);
+            stateContrlRbanRun(meticValue,metricValueData,thingCodes);
+        }
     }
 
     private void stateContrlRbanRun(String metricValueData,String meticValue,Set<String> thingCodes){
         if((Boolean.parseBoolean(metricValueData)) && (GlobalConstants.STATE_RUNNING == Short.valueOf(meticValue))){
             //启动刮板，即给刮板启动信号设置为0
-            setRBanRun(thingCodes,Boolean.FALSE.toString());
+            sendRBanRunSignal(thingCodes,Boolean.FALSE.toString());
         }else if((Boolean.parseBoolean(metricValueData)) && (GlobalConstants.STATE_RUNNING != Short.valueOf(meticValue))){
             //禁止刮板启动
-            setRBanRun(thingCodes,Boolean.TRUE.toString());
+            sendRBanRunSignal(thingCodes,Boolean.TRUE.toString());
         }
     }
 
     private void filterPressLockControlRBanRun(String metricValueData,String meticValue,Set<String> thingCodes){
         if((Boolean.parseBoolean(metricValueData)) && (GlobalConstants.STATE_RUNNING == Short.valueOf(meticValue))){
             //启动刮板，即给刮板启动信号设置为0
-            setRBanRun(thingCodes,Boolean.FALSE.toString());
+            sendRBanRunSignal(thingCodes,Boolean.FALSE.toString());
         }else if(!Boolean.parseBoolean(metricValueData)){//启动刮板，即给刮板启动信号设置为0
-            setRBanRun(thingCodes,Boolean.FALSE.toString());
+            sendRBanRunSignal(thingCodes,Boolean.FALSE.toString());
         }else if((Boolean.parseBoolean(metricValueData)) && (GlobalConstants.STATE_RUNNING != Short.valueOf(meticValue))){
             //禁止刮板启动
-            setRBanRun(thingCodes,Boolean.TRUE.toString());
+            sendRBanRunSignal(thingCodes,Boolean.TRUE.toString());
         }
     }
 
-    private void setRBanRun(Set<String> thingCodes,String stopFlag){
+    private void sendRBanRunSignal(Set<String> thingCodes,String stopFlag){
         for(String code:thingCodes){
-            DataModel cmd = new DataModel();
-            cmd.setThingCode(code);
-            cmd.setMetricCode(FilterPressMetricConstants.R_BAN_RUN);
-            cmd.setValue(stopFlag);
-            cmdControlService.sendPulseCmdBoolByShort(cmd,RETRY_PERIOD,RETRY_COUNT,RequestIdUtil.generateRequestId(),POSITION_R_BAN_RUN,CLAEN_PERIOD,true);
+            setRBanRun(code,stopFlag);
         }
+    }
+
+    public void setRBanRun(String thingCode,String stopFlag){
+        DataModel cmd = new DataModel();
+        cmd.setThingCode(thingCode);
+        cmd.setMetricCode(FilterPressMetricConstants.R_BAN_RUN);
+        cmd.setValue(stopFlag);
+        cmdControlService.sendPulseCmdBoolByShort(cmd,RETRY_PERIOD,RETRY_COUNT,RequestIdUtil.generateRequestId(),POSITION_R_BAN_RUN,CLAEN_PERIOD,true);
     }
 
     private void savePlateStatisticsData(String thingCode,String metricCode,DataModel data){
@@ -626,7 +630,7 @@ public class FilterPressManager {
         }else if(term == TERM2){
             return unloadManager.maxUnloadParallel;
         }
-       return 0;
+        return 0;
     }
 
     public void setMaxUnloadParallel(int maxUnloadParallel) {
@@ -769,7 +773,7 @@ public class FilterPressManager {
     }
 
     private Set<String> getFilterPressThingCodes(int term){
-       Set<String> thingCodes = new HashSet<>();
+        Set<String> thingCodes = new HashSet<>();
         for(Map.Entry<String, FilterPress> entry : deviceHolder.entrySet()){
             if(filterPressTerm.get(entry.getKey()) == term){
                 thingCodes.add(entry.getKey());
