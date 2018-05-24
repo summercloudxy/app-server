@@ -36,15 +36,15 @@ public class AAuthFilter implements Filter {
         String requestId = hsRequest.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
         String userLoginame = hsRequest.getHeader(GlobalConstants.USER_LOGINNAME);
 
-        logger.info("visit userId is {} , userUuid is {},requestId is {}", userId, userUuid, requestId);
+        logger.trace("visit userId is {} , userUuid is {},requestId is {}", userId, userUuid, requestId);
 
 
         //用户获取数据成功
         CurrentUser currentUser = new CurrentUser();
 
-        currentUser.setUserId(userId);
-        currentUser.setUserUuid(userUuid);
-        currentUser.setUserLoginName(userLoginame);
+        currentUser.setUserId("111");
+        currentUser.setUserUuid("11111");
+        currentUser.setUserLoginName("1111");
         currentUser.setRequestId(requestId);
 
 

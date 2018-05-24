@@ -15,8 +15,10 @@ import com.zgiot.app.server.module.demo.DemoDataCompleter;
 import com.zgiot.app.server.module.densitycontrol.DensityControlListener;
 import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
 import com.zgiot.app.server.module.filterpress.FilterPressManager;
+import com.zgiot.app.server.module.filterpress.FilterPressSignalOperateJob;
 import com.zgiot.app.server.module.historydata.job.HistoryMinDataJob;
 import com.zgiot.app.server.module.reportforms.input.listener.ReportFormsCompleter;
+import com.zgiot.app.server.module.sfstart.*;
 import com.zgiot.app.server.module.sfsubsc.job.UploadHistorySubscCardDatas;
 import com.zgiot.app.server.module.sfsubsc.job.UploadProductionSubscCardDatas;
 import com.zgiot.app.server.module.sfsubsc.job.UploadSubscCardDatas;
@@ -36,6 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class ModuleListConfig {
     private static final Logger logger = LoggerFactory.getLogger(ModuleListConfig.class);
+    public static final String MODULE_SFSTART = "sfstart";
     public static final String MODULE_DEMO = "demo";
     public static final String MODULE_FILTERPRESS = "filterpress";
     public static final String MODULE_ALERT = "alert";
@@ -44,6 +47,7 @@ public class ModuleListConfig {
     public static final String MODULE_DENSITY_CONTROL = "density-control";
     public static final String MODULE_COAL_ANALYSIS = "coal-analysis";
     public static final String MODULE_SUBSCRIPTION = "subscription";
+
 
     @Value("${sysmodule.demo.enabled}")
     private boolean moduleDemoEnabled;
@@ -61,7 +65,8 @@ public class ModuleListConfig {
     private boolean moduleCoalAnalyEnabled;
     @Value("${sysmodule.subscription.enabled}")
     private boolean moduleSubsEnabled;
-
+    @Value("${sysmodule.sfstart.enabled}")
+    private boolean moduleSfStartEnabled;
 
     private static final int FAULT_SCAN_RATE = 20;
 
@@ -97,6 +102,10 @@ public class ModuleListConfig {
     private AlertManager alertManager;
     @Autowired
     private FilterPressManager filterPressManager;
+    @Autowired
+    private SfStartManager sfStartManager;
+    @Autowired
+    private StartBrowseListener startBrowseListener;
 
     @PostConstruct
     void init() {
@@ -108,6 +117,7 @@ public class ModuleListConfig {
         configedModuleMap.put(MODULE_DENSITY_CONTROL, this.moduleDensityCtlEnabled);
         configedModuleMap.put(MODULE_COAL_ANALYSIS, this.moduleCoalAnalyEnabled);
         configedModuleMap.put(MODULE_SUBSCRIPTION, this.moduleSubsEnabled);
+        configedModuleMap.put(MODULE_SFSTART, this.moduleSfStartEnabled);
     }
 
     public boolean containModule(String moduleName) {
@@ -136,6 +146,8 @@ public class ModuleListConfig {
             if (containModule(ModuleListConfig.MODULE_FILTERPRESS)) {
                 filterPressManager.initFilterPress();
                 processor.addListener(filterPressListener);
+                QuartzManager.addJob("filterPressSignalOperate", ModuleListConfig.MODULE_FILTERPRESS, "filterPressSignalOperate",
+                        ModuleListConfig.MODULE_FILTERPRESS, FilterPressSignalOperateJob.class, "0/10 * * * * ?");
                 logIt(MODULE_FILTERPRESS);
             }
 
@@ -181,11 +193,26 @@ public class ModuleListConfig {
                 QuartzManager.addJob("uploadsubscCardDatasOf10s", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf10s",
                         ModuleListConfig.MODULE_SUBSCRIPTION, UploadHistorySubscCardDatas.class, "0/10 * * * * ?");
 
-            QuartzManager.addJob("uploadsubscCardDatasOf6oclock", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf6oclock",
-                    ModuleListConfig.MODULE_SUBSCRIPTION, UploadProductionSubscCardDatas.class, "0 0 6,18 * * ?");
+                QuartzManager.addJob("uploadsubscCardDatasOf6oclock", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf6oclock",
+                        ModuleListConfig.MODULE_SUBSCRIPTION, UploadProductionSubscCardDatas.class, "0 0 6,18 * * ?");
 
-            logIt(MODULE_SUBSCRIPTION);
-        }
+                logIt(MODULE_SUBSCRIPTION);
+            }
+            if (containModule(ModuleListConfig.MODULE_SFSTART)) {
+                sfStartManager.init();
+                processor.addListener(startBrowseListener);
+                QuartzManager.addJob("startDeviceByRequirement", ModuleListConfig.MODULE_SFSTART, "startDeviceByRequirement",
+                        ModuleListConfig.MODULE_SFSTART, StartDeviceByRequirementJob.class, "0/20 * * * * ?");
+
+                QuartzManager.addJob("sendCoalCapacity", ModuleListConfig.MODULE_SFSTART, "sendCoalCapacity",
+                        ModuleListConfig.MODULE_SFSTART, SendCoalCapacityJob.class, "0/30 * * * * ?");
+
+                QuartzManager.addJob("sendCoalDeport", ModuleListConfig.MODULE_SFSTART, "sendCoalDeport",
+                        ModuleListConfig.MODULE_SFSTART, SendCoalDeportJob.class, "0/30 * * * * ?");
+
+
+            }
+
 
             if (this.containModule(MODULE_DEMO)) {
                 completerDataListener.addCompleter(new DemoDataCompleter());
@@ -196,7 +223,7 @@ public class ModuleListConfig {
             logger.info("Modules are all loaded successfully. ");
 
         } catch (Exception e) {
-            logger.error("Sys Modules failed to load. Pls check exception and restart again! ",e );
+            logger.error("Sys Modules failed to load. Pls check exception and restart again! ", e);
         }
 
     }

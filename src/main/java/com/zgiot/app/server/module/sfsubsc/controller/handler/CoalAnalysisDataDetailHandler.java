@@ -31,7 +31,6 @@ import static com.zgiot.app.server.module.sfsubsc.enums.CardTypeEnum.COAL_QUALIT
 import static com.zgiot.app.server.module.sfsubsc.enums.CardTypeEnum.PRODUCTION;
 import static com.zgiot.app.server.module.tcs.pojo.FilterCondition.FilterConditionBuilder.newFilterCondition;
 import static com.zgiot.common.constants.SubscriptionConstants.*;
-import static com.zgiot.common.constants.SubscriptionConstants.MIXE_COAL_552;
 
 /**
  * 化验数据处理
@@ -617,7 +616,7 @@ public class CoalAnalysisDataDetailHandler {
         BigDecimal totalValue = BigDecimal.ZERO;
         for (List<DataModel> dataModelList : map.values()) {
             if (dataModelList != null && !dataModelList.isEmpty()) {
-                for (DataModel dataModel : dataModelList){
+                for (DataModel dataModel : dataModelList) {
                     String value = dataModel.getValue();
                     totalValue = totalValue.add(new BigDecimal(value == null || value == "" ? "0" : value));
                 }
