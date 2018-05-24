@@ -18,6 +18,10 @@ import com.zgiot.app.server.module.filterpress.FilterPressManager;
 import com.zgiot.app.server.module.filterpress.FilterPressSignalOperateJob;
 import com.zgiot.app.server.module.historydata.job.HistoryMinDataJob;
 import com.zgiot.app.server.module.reportforms.input.listener.ReportFormsCompleter;
+import com.zgiot.app.server.module.reportforms.output.productionmonitor.listener.ReportFormSystemStartListener;
+import com.zgiot.app.server.module.reportforms.output.service.InfluenceTimeServiceImpl;
+import com.zgiot.app.server.module.reportforms.output.service.OutputStoreAndTargetService;
+import com.zgiot.app.server.module.reportforms.output.service.TransPortServiceImpl;
 import com.zgiot.app.server.module.sfstart.*;
 import com.zgiot.app.server.module.sfsubsc.job.UploadHistorySubscCardDatas;
 import com.zgiot.app.server.module.sfsubsc.job.UploadProductionSubscCardDatas;
@@ -47,6 +51,7 @@ public class ModuleListConfig {
     public static final String MODULE_DENSITY_CONTROL = "density-control";
     public static final String MODULE_COAL_ANALYSIS = "coal-analysis";
     public static final String MODULE_SUBSCRIPTION = "subscription";
+    public static final String MODULE_REPORTFORM = "report-form";
 
 
     @Value("${sysmodule.demo.enabled}")
@@ -67,6 +72,9 @@ public class ModuleListConfig {
     private boolean moduleSubsEnabled;
     @Value("${sysmodule.sfstart.enabled}")
     private boolean moduleSfStartEnabled;
+    @Value("${sysmodule.report-form.enabled}")
+    private boolean moduleReportEnabled;
+
 
     private static final int FAULT_SCAN_RATE = 20;
 
@@ -103,6 +111,14 @@ public class ModuleListConfig {
     @Autowired
     private FilterPressManager filterPressManager;
     @Autowired
+    private ReportFormSystemStartListener reportFormSystemStartListener;
+    @Autowired
+    private OutputStoreAndTargetService outputStoreAndTargetService;
+    @Autowired
+    private TransPortServiceImpl transPortServiceImpl;
+    @Autowired
+    private InfluenceTimeServiceImpl influenceTimeServiceImpl;
+    @Autowired
     private SfStartManager sfStartManager;
     @Autowired
     private StartBrowseListener startBrowseListener;
@@ -118,6 +134,7 @@ public class ModuleListConfig {
         configedModuleMap.put(MODULE_COAL_ANALYSIS, this.moduleCoalAnalyEnabled);
         configedModuleMap.put(MODULE_SUBSCRIPTION, this.moduleSubsEnabled);
         configedModuleMap.put(MODULE_SFSTART, this.moduleSfStartEnabled);
+        configedModuleMap.put(MODULE_REPORTFORM, this.moduleReportEnabled);
     }
 
     public boolean containModule(String moduleName) {
@@ -214,6 +231,16 @@ public class ModuleListConfig {
             }
 
 
+
+            if (containModule(ModuleListConfig.MODULE_REPORTFORM)) {
+                reportFormSystemStartListener.init();
+                outputStoreAndTargetService.init();
+                transPortServiceImpl.init();
+                influenceTimeServiceImpl.init();
+                processor.addListener(reportFormSystemStartListener);
+                logIt(MODULE_REPORTFORM);
+            }
+
             if (this.containModule(MODULE_DEMO)) {
                 completerDataListener.addCompleter(new DemoDataCompleter());
                 processor.addListener(demoBusiness);
@@ -223,7 +250,7 @@ public class ModuleListConfig {
             logger.info("Modules are all loaded successfully. ");
 
         } catch (Exception e) {
-            logger.error("Sys Modules failed to load. Pls check exception and restart again! ", e);
+            logger.error("Sys Modules failed to load. Pls check exception and restart again! ",e );
         }
 
     }

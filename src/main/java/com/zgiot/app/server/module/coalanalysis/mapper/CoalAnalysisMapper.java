@@ -35,6 +35,10 @@ public interface CoalAnalysisMapper {
 
     List<DensityAndFlowInfo> getDetailDensityAndFlowInfo(int recordId);
 
+    List<CoalAnalysisRecord> getCoalAnalysisList(FilterCondition filterCondition);//不可以服用上面,因为开始时间相等处理不一致
+
+    CoalAnalysisRecord getCoalAnalysisAvg(FilterCondition filterCondition);
+
 
     /**
      * 查询某个设备的最新的两条化验数据
