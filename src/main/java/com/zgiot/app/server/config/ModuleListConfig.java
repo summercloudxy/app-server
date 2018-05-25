@@ -197,11 +197,11 @@ public class ModuleListConfig {
                 QuartzManager.addJob("uploadsubscCardDatasOf10s", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf10s",
                         ModuleListConfig.MODULE_SUBSCRIPTION, UploadHistorySubscCardDatas.class, "0/10 * * * * ?");
 
-            QuartzManager.addJob("uploadsubscCardDatasOf6oclock", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf6oclock",
-                    ModuleListConfig.MODULE_SUBSCRIPTION, UploadProductionSubscCardDatas.class, "0 0 6,18 * * ?");
+                QuartzManager.addJob("uploadsubscCardDatasOf6oclock", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf6oclock",
+                        ModuleListConfig.MODULE_SUBSCRIPTION, UploadProductionSubscCardDatas.class, "0 0 6,18 * * ?");
 
-            logIt(MODULE_SUBSCRIPTION);
-        }
+                logIt(MODULE_SUBSCRIPTION);
+            }
 
 
             if (containModule(ModuleListConfig.MODULE_REPORTFORM)) {
@@ -222,7 +222,7 @@ public class ModuleListConfig {
             logger.info("Modules are all loaded successfully. ");
 
         } catch (Exception e) {
-            logger.error("Sys Modules failed to load. Pls check exception and restart again! ",e );
+            logger.error("Sys Modules failed to load. Pls check exception and restart again! ", e);
         }
 
     }
