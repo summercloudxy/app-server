@@ -1,6 +1,32 @@
 package com.zgiot.app.server.config;
 
-import org.apache.commons.lang.StringUtils;
+import com.zgiot.app.server.dataprocessor.CompleterDataListener;
+import com.zgiot.app.server.dataprocessor.DataProcessor;
+import com.zgiot.app.server.dataprocessor.impl.CacheUpdater;
+import com.zgiot.app.server.module.alert.*;
+import com.zgiot.app.server.module.alert.handler.AlertFaultHandler;
+import com.zgiot.app.server.module.alert.handler.AlertParamHandler;
+import com.zgiot.app.server.module.bellows.BellowsDataListener;
+import com.zgiot.app.server.module.bellows.compressor.CompressorManager;
+import com.zgiot.app.server.module.bellows.valve.ValveIntelligentJob;
+import com.zgiot.app.server.module.bellows.valve.ValveManager;
+import com.zgiot.app.server.module.demo.DemoBusiness;
+import com.zgiot.app.server.module.demo.DemoDataCompleter;
+import com.zgiot.app.server.module.densitycontrol.DensityControlListener;
+import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
+import com.zgiot.app.server.module.filterpress.FilterPressManager;
+import com.zgiot.app.server.module.historydata.job.HistoryMinDataJob;
+import com.zgiot.app.server.module.reportforms.input.listener.ReportFormsCompleter;
+import com.zgiot.app.server.module.reportforms.output.productionmonitor.listener.ReportFormSystemStartListener;
+import com.zgiot.app.server.module.reportforms.output.service.InfluenceTimeServiceImpl;
+import com.zgiot.app.server.module.reportforms.output.service.OutputStoreAndTargetService;
+import com.zgiot.app.server.module.reportforms.output.service.TransPortServiceImpl;
+import com.zgiot.app.server.module.sfsubsc.job.UploadHistorySubscCardDatas;
+import com.zgiot.app.server.module.sfsubsc.job.UploadProductionSubscCardDatas;
+import com.zgiot.app.server.module.sfsubsc.job.UploadSubscCardDatas;
+import com.zgiot.app.server.service.impl.HistoryDataPersistDaemon;
+import com.zgiot.app.server.service.impl.QuartzManager;
+import org.quartz.JobDataMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +48,7 @@ public class ModuleListConfig {
     public static final String MODULE_DENSITY_CONTROL = "density-control";
     public static final String MODULE_COAL_ANALYSIS = "coal-analysis";
     public static final String MODULE_SUBSCRIPTION = "subscription";
+    public static final String MODULE_REPORTFORM = "report-form";
 
     @Value("${sysmodule.demo.enabled}")
     private boolean moduleDemoEnabled;
@@ -39,6 +66,8 @@ public class ModuleListConfig {
     private boolean moduleCoalAnalyEnabled;
     @Value("${sysmodule.subscription.enabled}")
     private boolean moduleSubsEnabled;
+    @Value("${sysmodule.report-form.enabled}")
+    private boolean moduleReportEnabled;
 
 
     private static final int FAULT_SCAN_RATE = 20;
@@ -75,6 +104,14 @@ public class ModuleListConfig {
     private AlertManager alertManager;
     @Autowired
     private FilterPressManager filterPressManager;
+    @Autowired
+    private ReportFormSystemStartListener reportFormSystemStartListener;
+    @Autowired
+    private OutputStoreAndTargetService outputStoreAndTargetService;
+    @Autowired
+    private TransPortServiceImpl transPortServiceImpl;
+    @Autowired
+    private InfluenceTimeServiceImpl influenceTimeServiceImpl;
 
     @PostConstruct
     void init() {
@@ -165,6 +202,16 @@ public class ModuleListConfig {
 
             logIt(MODULE_SUBSCRIPTION);
         }
+
+
+            if (containModule(ModuleListConfig.MODULE_REPORTFORM)) {
+                reportFormSystemStartListener.init();
+                outputStoreAndTargetService.init();
+                transPortServiceImpl.init();
+                influenceTimeServiceImpl.init();
+                processor.addListener(reportFormSystemStartListener);
+                logIt(MODULE_REPORTFORM);
+            }
 
             if (this.containModule(MODULE_DEMO)) {
                 completerDataListener.addCompleter(new DemoDataCompleter());
