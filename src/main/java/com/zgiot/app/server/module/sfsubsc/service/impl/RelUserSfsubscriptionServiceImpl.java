@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -26,9 +26,7 @@ public class RelUserSfsubscriptionServiceImpl implements RelUserSfsubscriptionSe
         List<CardDataBeanDTO> cardDataBeanList = cardSubDTO.getCardDataBeanList();
         if (cardDataBeanList != null && !cardDataBeanList.isEmpty()) {
             // 按sort升序
-            Collections.sort(cardDataBeanList, (o1, o2) -> {
-                return o1.getSort() - o2.getSort();
-            });
+            cardDataBeanList.sort(Comparator.comparingInt(CardDataBeanDTO::getSort));
 
             for (int i = 0; i < cardDataBeanList.size(); i++) {
                 RelUserSfsubscription relUserSfsubscription = new RelUserSfsubscription();
