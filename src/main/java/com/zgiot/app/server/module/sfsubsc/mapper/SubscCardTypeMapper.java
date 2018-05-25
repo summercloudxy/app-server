@@ -49,8 +49,8 @@ public interface SubscCardTypeMapper {
      * @return
      */
     @Select("select t1.* from tb_sfsubscription_card t1,rel_user_sfsubscription t2 " +
-            "where t1.card_code = t2.card_code " +
-            "and t2.user_uuid=#{userUuid} ORDER BY t2.sort")
-    List<SFSubscriptionCard> getSubCardTypeByUuid(@Param("userUuid") String userUuid);
+            "where t1.card_code = t2.card_code and t2.user_uuid=#{userUuid} " +
+            "and t2.client_id = #{clientId} ORDER BY t2.sort")
+    List<SFSubscriptionCard> getSubCardTypeByUuid(@Param("userUuid") String userUuid, @Param("clientId") String clientId);
 
 }
