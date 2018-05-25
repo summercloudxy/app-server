@@ -17,6 +17,10 @@ import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
 import com.zgiot.app.server.module.filterpress.FilterPressManager;
 import com.zgiot.app.server.module.historydata.job.HistoryMinDataJob;
 import com.zgiot.app.server.module.reportforms.input.listener.ReportFormsCompleter;
+import com.zgiot.app.server.module.reportforms.output.productionmonitor.listener.ReportFormSystemStartListener;
+import com.zgiot.app.server.module.reportforms.output.service.InfluenceTimeServiceImpl;
+import com.zgiot.app.server.module.reportforms.output.service.OutputStoreAndTargetService;
+import com.zgiot.app.server.module.reportforms.output.service.TransPortServiceImpl;
 import com.zgiot.app.server.module.sfsubsc.job.UploadHistorySubscCardDatas;
 import com.zgiot.app.server.module.sfsubsc.job.UploadProductionSubscCardDatas;
 import com.zgiot.app.server.module.sfsubsc.job.UploadSubscCardDatas;
@@ -100,6 +104,14 @@ public class ModuleListConfig {
     private AlertManager alertManager;
     @Autowired
     private FilterPressManager filterPressManager;
+    @Autowired
+    private ReportFormSystemStartListener reportFormSystemStartListener;
+    @Autowired
+    private OutputStoreAndTargetService outputStoreAndTargetService;
+    @Autowired
+    private TransPortServiceImpl transPortServiceImpl;
+    @Autowired
+    private InfluenceTimeServiceImpl influenceTimeServiceImpl;
 
     @PostConstruct
     void init() {
@@ -185,11 +197,21 @@ public class ModuleListConfig {
                 QuartzManager.addJob("uploadsubscCardDatasOf10s", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf10s",
                         ModuleListConfig.MODULE_SUBSCRIPTION, UploadHistorySubscCardDatas.class, "0/10 * * * * ?");
 
-            QuartzManager.addJob("uploadsubscCardDatasOf6oclock", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf6oclock",
-                    ModuleListConfig.MODULE_SUBSCRIPTION, UploadProductionSubscCardDatas.class, "0 0 6,18 * * ?");
+                QuartzManager.addJob("uploadsubscCardDatasOf6oclock", ModuleListConfig.MODULE_SUBSCRIPTION, "uploadsubscCardDatasOf6oclock",
+                        ModuleListConfig.MODULE_SUBSCRIPTION, UploadProductionSubscCardDatas.class, "0 0 6,18 * * ?");
 
-            logIt(MODULE_SUBSCRIPTION);
-        }
+                logIt(MODULE_SUBSCRIPTION);
+            }
+
+
+            if (containModule(ModuleListConfig.MODULE_REPORTFORM)) {
+                reportFormSystemStartListener.init();
+                outputStoreAndTargetService.init();
+                transPortServiceImpl.init();
+                influenceTimeServiceImpl.init();
+                processor.addListener(reportFormSystemStartListener);
+                logIt(MODULE_REPORTFORM);
+            }
 
             if (this.containModule(MODULE_DEMO)) {
                 completerDataListener.addCompleter(new DemoDataCompleter());
@@ -200,7 +222,7 @@ public class ModuleListConfig {
             logger.info("Modules are all loaded successfully. ");
 
         } catch (Exception e) {
-            logger.error("Sys Modules failed to load. Pls check exception and restart again! ",e );
+            logger.error("Sys Modules failed to load. Pls check exception and restart again! ", e);
         }
 
     }
