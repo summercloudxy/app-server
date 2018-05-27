@@ -1,1 +1,0 @@
-delete from rel_sfmon_metrictag_metric_sort where id in(256,257);

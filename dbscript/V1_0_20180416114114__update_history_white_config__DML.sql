@@ -1,1 +1,0 @@
-update rel_historydata_whitelist set minute_summary = 1 where minute_summary = 5;
