@@ -300,7 +300,7 @@ public class StartController {
      * @return
      * @throws Exception
      */
-    @RequestMapping(value = "/getManualInterventionScopeStart", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/getManualInterventionScopeStart", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> getManualInterventionScopeStart(@RequestParam("deviceCode") String deviceCode) throws Exception {
         List<StartManualInterventionRecord> startManualInterventionDevices = startService.getManualInterventionScopeStart(deviceCode);
         return new ResponseEntity<>(ServerResponse.buildOkJson(startManualInterventionDevices), HttpStatus.OK);

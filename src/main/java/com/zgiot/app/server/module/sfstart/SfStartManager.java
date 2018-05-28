@@ -160,25 +160,18 @@ public class SfStartManager {
         List<StartBrowseCoalDevice> startBrowseCoalDevices = new ArrayList<>();
         for (String deviceId : deviceIds) {
             StartSignal startSignal = startService.getStartSignalByDeviceId(deviceId);
-            StartDeviceSignal startDeviceSignal = startService.getStartDeviceSignalById(startSignal.getName());
-            MetricModel metricModel = tmlMapper.findMetricByMetricName(startDeviceSignal.getName());
             StartBrowseCoalDevice startBrowseCoalDevice = new StartBrowseCoalDevice();
             startBrowseCoalDevice.setDeviceCode(startSignal.getDeviceCode());
             startBrowseCoalDevice.setDeviceId(deviceId);
-            DataModelWrapper dataModelWrapper = dataService.getData(startSignal.getDeviceCode(), metricModel.getMetricCode()).orElse(null);
-            if (dataModelWrapper != null) {
-                if (StartStopConstants.DEPOT_ONE.equals(String.valueOf(startSignal.getName()))) {
-                    startBrowseCoalDevice.setCoalDeportOne(Double.valueOf(dataModelWrapper.getValue()));
-
-                } else if (StartStopConstants.DEPOT_TWO.equals(String.valueOf(startSignal.getName()))) {
-                    startBrowseCoalDevice.setCoalDeportTwo(Double.valueOf(dataModelWrapper.getValue()));
-                }
-                startBrowseCoalDevices.add(startBrowseCoalDevice);
-            } else {
-                StartBrowseCoalDevice startBrowseCoalNull = new StartBrowseCoalDevice();
-                startBrowseCoalNull.setDeviceId(deviceId);
-                startBrowseCoalDevices.add(startBrowseCoalNull);
+            DataModelWrapper dataModelWrapper1 = dataService.getData(startSignal.getDeviceCode(), MetricCodes.LE1).orElse(null);
+            if (dataModelWrapper1 != null) {
+                startBrowseCoalDevice.setCoalDeportOne(Double.valueOf(dataModelWrapper1.getValue()));
             }
+            DataModelWrapper dataModelWrapper2 = dataService.getData(startSignal.getDeviceCode(), MetricCodes.LE2).orElse(null);
+            if(dataModelWrapper2!=null){
+                startBrowseCoalDevice.setCoalDeportTwo(Double.valueOf(dataModelWrapper2.getValue()));
+            }
+            startBrowseCoalDevices.add(startBrowseCoalDevice);
         }
         logger.trace("发送仓库库存信号数量{}", startBrowseCoalDevices.size());
         startHandler.sendMessagingTemplate(StartStopConstants.URI_START_BROWSE_COALDEPORT, startBrowseCoalDevices);

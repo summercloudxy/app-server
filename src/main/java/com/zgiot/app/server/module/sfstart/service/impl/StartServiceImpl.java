@@ -111,8 +111,7 @@ public class StartServiceImpl implements StartService {
                 MetricModel metricModel = metricMapper.getMetric(startFaultInformation.getFaultName());
                 DataModelWrapper dataModelWrapper = dataService.getData(startFaultInformation.getDeviceCode(), metricModel.getMetricCode()).orElse(null);
                 if (dataModelWrapper != null) {
-                    error = Double.parseDouble(dataModelWrapper.getValue());
-                    if ((short) StartStopConstants.VALUE_TRUE == error) {
+                    if ("ture".equals(dataModelWrapper.getValue()) ) {
                         fault += startFaultInformation.getFaultName() + ";";
                     }
                 }
@@ -373,7 +372,7 @@ public class StartServiceImpl implements StartService {
         StartManualInterventionRecord startManualInterventionRecord = startMapper.selectManualInterventionInformation(deviceId);
         StartDeviceInformation deviceInformation = startMapper.selectDeviceInformationByDeviceId(deviceId);
         // 获取人工干预设备所属区域
-        if (deviceInformation != null && deviceInformation.getStartHierarchy() != null) {
+        if (deviceInformation != null &&startManualInterventionRecord!=null&& deviceInformation.getStartHierarchy() != null) {
             String[] deviceHierarchy = deviceInformation.getStartHierarchy().split("-");
             StartAreaInformation startAreaInformation = startMapper.selectAreaInformationByAreaId(deviceHierarchy[1]);
             startManualInterventionRecord.setAreaName(startAreaInformation.getAreaName());
@@ -395,12 +394,15 @@ public class StartServiceImpl implements StartService {
         for (StartManualInterventionRecord startManualInterventionRecord : startManualInterventionRecords) {
             StartManualInterventionRecord manualInterventionrInformation =
                     getManualInterventionDeviceInformation(startManualInterventionRecord.getDeviceId());
-            // 补充区域信息
-            startManualInterventionRecord.setAreaName(manualInterventionrInformation.getAreaName());
-            // 补充系统信息
-            startManualInterventionRecord.setSystemName(manualInterventionrInformation.getSystemName());
-            // 补充楼层信息
-            startManualInterventionRecord.setFloor(manualInterventionrInformation.getFloor());
+            if(manualInterventionrInformation!=null){
+                // 补充区域信息
+                startManualInterventionRecord.setAreaName(manualInterventionrInformation.getAreaName());
+                // 补充系统信息
+                startManualInterventionRecord.setSystemName(manualInterventionrInformation.getSystemName());
+                // 补充楼层信息
+                startManualInterventionRecord.setFloor(manualInterventionrInformation.getFloor());
+            }
+
         }
         return startManualInterventionRecords;
     }
