@@ -319,7 +319,9 @@ public class FilterPressManager {
         cmd.setThingCode(thingCode);
         cmd.setMetricCode(FilterPressMetricConstants.R_BAN_RUN);
         cmd.setValue(stopFlag);
-        cmdControlService.sendPulseCmdBoolByShort(cmd,RETRY_PERIOD,RETRY_COUNT,RequestIdUtil.generateRequestId(),POSITION_R_BAN_RUN,CLAEN_PERIOD,true);
+        cmdControlService.sendPulseCmdBoolByShort(cmd,RETRY_PERIOD,RETRY_COUNT,
+                RequestIdUtil.generateRequestId(this.getClass().getSimpleName()),
+                POSITION_R_BAN_RUN,CLAEN_PERIOD,true);
     }
 
     private void savePlateStatisticsData(String thingCode,String metricCode,DataModel data){
@@ -713,7 +715,9 @@ public class FilterPressManager {
         dataModel.setMetricCode(FilterPressMetricConstants.FEED_OVER);
         dataModel.setThingCode(filterPress.getCode());
         dataModel.setValue(Boolean.TRUE.toString());
-        cmdControlService.sendPulseCmdBoolByShort(dataModel,RETRY_PERIOD,RETRY_COUNT,RequestIdUtil.generateRequestId(),POSITION_FEED_OVER,CLAEN_PERIOD,IS_HOLDING_FEED_OVER);
+        cmdControlService.sendPulseCmdBoolByShort(dataModel,RETRY_PERIOD,RETRY_COUNT,
+                RequestIdUtil.generateRequestId(this.getClass().getSimpleName()),
+                POSITION_FEED_OVER,CLAEN_PERIOD,IS_HOLDING_FEED_OVER);
 
         List<String> feedPumpCodes = getKeyByValueFromMap(filterPressPumpMapping,filterPress.getCode());
         String feedPumpCode = feedPumpCodes.get(0);
@@ -1198,7 +1202,9 @@ public class FilterPressManager {
             cmd.setThingCode(filterPress.getCode());
             cmd.setMetricCode(FilterPressMetricConstants.RUN);
             cmd.setValue(Boolean.TRUE.toString());
-            cmdControlService.sendPulseCmdBoolByShort(cmd,RETRY_PERIOD,RETRY_COUNT,RequestIdUtil.generateRequestId(),POSITION_RUN,CLAEN_PERIOD,IS_HOLDING_RUN);
+            cmdControlService.sendPulseCmdBoolByShort(cmd,RETRY_PERIOD,RETRY_COUNT,
+                    RequestIdUtil.generateRequestId(this.getClass().getSimpleName()),
+                    POSITION_RUN,CLAEN_PERIOD,IS_HOLDING_RUN);
         }
 
 
