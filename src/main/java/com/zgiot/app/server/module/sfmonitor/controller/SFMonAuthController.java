@@ -20,9 +20,9 @@ public class SFMonAuthController {
     @Autowired
     private MonitorService monitorService;
 
-    @GetMapping("/byUser/{userUuid}")
-    public ResponseEntity<String> byUser(@PathVariable String userUuid) {
-        Map<String, Object> map = monitorService.byUser(userUuid);
+    @GetMapping("/byUser/{loginName}")
+    public ResponseEntity<String> byUser(@PathVariable String loginName) {
+        Map<String, Object> map = monitorService.byUser(loginName);
         return new ResponseEntity(ServerResponse.buildOkJson(map), HttpStatus.OK);
     }
 

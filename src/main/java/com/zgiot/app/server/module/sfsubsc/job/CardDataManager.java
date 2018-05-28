@@ -3,6 +3,7 @@ package com.zgiot.app.server.module.sfsubsc.job;
 import com.zgiot.app.server.module.sfsubsc.entity.dto.CardDataDTO;
 import com.zgiot.app.server.module.sfsubsc.entity.pojo.SubscCardTypeDO;
 import com.zgiot.app.server.module.sfsubsc.enums.CardTypeEnum;
+import com.zgiot.app.server.module.sfsubsc.service.SFSubscriptionCardService;
 import com.zgiot.app.server.module.sfsubsc.service.SubscCardTypeService;
 import com.zgiot.app.server.module.sfsubsc.service.feign.CloudServerFeignClient;
 import com.zgiot.common.restcontroller.ServerResponse;
@@ -38,11 +39,10 @@ public class CardDataManager {
 
     @Autowired
     private CloudServerFeignClient cloudServerFeignClient;
-
-
-
     @Autowired
     private SubscCardTypeService subscCardTypeService;
+    @Autowired
+    private SFSubscriptionCardService sfSubscriptionCardService;
 
     /**
      * 历史入洗量，历史产品量，仓位信息，化验数据 10s刷新
@@ -78,6 +78,8 @@ public class CardDataManager {
 
         }
 
+        logger.info("开始卡片历史10S数据同步AppServer");
+        sfSubscriptionCardService.updateSubCard(cardDataDTOS);
 
     }
 
@@ -110,7 +112,7 @@ public class CardDataManager {
                 cardDataDTOS.add(cardDataDTO);
             }
         }
-        logger.info("开始卡片历史5S数据上传CloudServer");
+        logger.info("开始卡片实时5S数据上传CloudServer");
         try {
             ServerResponse serverResponse = cloudServerFeignClient.saveAllCardDatas(cardDataDTOS, AUTHORIZATION_PRIFIX + authorization);
             if (serverResponse.getCode() == 0) {
@@ -122,7 +124,47 @@ public class CardDataManager {
             logger.error("5s连接cloudserver异常.URL:" + cloudServiceUrl + cloudServerPath);
         }
 
+        logger.info("开始卡片实时5S数据同步AppServer");
+        sfSubscriptionCardService.updateSubCard(cardDataDTOS);
+
     }
 
+    /**
+     * 生产卡片数据 6/18点刷新
+     */
+    public void getProductionCardDatas() {
+        logger.debug("生产卡片数据开始上传");
+        List<CardDataDTO> cardDataDTOS = new ArrayList<>();
+        List<SubscCardTypeDO> subscCardTypeDOS = subscCardTypeService.getAllSubscCardTypes();
+        for (SubscCardTypeDO subscCardTypeDO : subscCardTypeDOS) {
+            CardDataDTO cardDataDTO;
+            if (subscCardTypeDO.getCardType().equals(CardTypeEnum.COAL_QUALITY.getCardCode())) {
+                // 当班煤质统计
+                cardDataDTO = subscCardTypeService.getCoalQuality(subscCardTypeDO);
+                cardDataDTOS.add(cardDataDTO);
+            } else if (subscCardTypeDO.getCardType().equals(CardTypeEnum.PRODUCTION.getCardCode())) {
+                // 当班生产统计
+                cardDataDTO = subscCardTypeService.getProduction(subscCardTypeDO);
+                cardDataDTOS.add(cardDataDTO);
+            }
+        }
+        logger.info("开始生产卡片数据上传CloudServer");
+        try {
+            ServerResponse serverResponse = cloudServerFeignClient.saveAllCardDatas(cardDataDTOS, AUTHORIZATION_PRIFIX + authorization);
+            logger.info("clouserver的请求响应：" + serverResponse.getCode());
+            if (serverResponse.getCode() == 0) {
+                logger.info("生产卡片数据上传CloudServer完成");
+            }
+
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.error("连接cloudserver异常.URL:" + cloudServiceUrl + cloudServerPath);
+
+        }
+
+        logger.info("开始生产卡片数据同步AppServer");
+        sfSubscriptionCardService.updateSubCard(cardDataDTOS);
+
+    }
 
 }

@@ -89,7 +89,7 @@ public class DataServiceImpl implements DataService {
                     toUpdate = true;
                 }
             }catch (Exception e){
-                e.printStackTrace();
+                logger.error(e.getMessage(), e);
             }
         }
 

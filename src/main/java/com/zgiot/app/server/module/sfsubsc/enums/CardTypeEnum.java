@@ -10,7 +10,6 @@ public enum CardTypeEnum {
      */
     HISTORICAL_WASHING_CAPACITY("lsrxl", "历史入洗量"),
 
-
     /**
      * 历史产品量
      */
@@ -20,6 +19,7 @@ public enum CardTypeEnum {
      * 原煤配比
      */
     MIXTURE_OF_RAW_COAL("ympb", "原煤配比"),
+
     /**
      * 分选指标
      */
@@ -78,7 +78,17 @@ public enum CardTypeEnum {
     /**
      * 智能告警
      */
-    INTELLIGENT_ALARM("zngj", "智能告警");
+    INTELLIGENT_ALARM("zngj", "智能告警"),
+
+    /**
+     * 班累计煤质统计
+     */
+    COAL_QUALITY("mztj", "班累计煤质统计"),
+
+    /**
+     * 班累计生产统计
+     */
+    PRODUCTION("sctj", "班累计生产统计");
 
 
     private String cardCode;

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zgiot.app.server.module.produtioninspect.mapper.ProductionInspectMapper">
 
-    <resultMap id="DensityAndFlowSourceInfoMap" type="com.zgiot.app.server.module.reportforms.pojo.DensityAndFlowSourceInfo">
+    <resultMap id="DensityAndFlowSourceInfoMap" type="com.zgiot.app.server.module.reportforms.input.pojo.DensityAndFlowSourceInfo">
         <result property="coalSample" column="coal_sample"/>
         <result property="system" column="system"/>
         <result property="densityCode" column="density_code"/>

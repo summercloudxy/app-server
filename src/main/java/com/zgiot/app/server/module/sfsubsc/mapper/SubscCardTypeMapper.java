@@ -1,5 +1,6 @@
 package com.zgiot.app.server.module.sfsubsc.mapper;
 
+import com.zgiot.app.server.module.sfsubsc.entity.pojo.SFSubscriptionCard;
 import com.zgiot.app.server.module.sfsubsc.entity.pojo.SubscCardTypeDO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -30,5 +31,26 @@ public interface SubscCardTypeMapper {
     @Select("select * from tb_subsc_card_type where card_code=#{cardCode} ")
     SubscCardTypeDO getCardTypeByCardCode(@Param("cardCode") String cardCode);
 
+    /**
+     * 根据用户uuid查询卡片信息
+     *
+     * @param userUuid
+     * @return
+     */
+    @Select("select t1.* from tb_subsc_card_type t1,rel_user_card t2 " +
+            "where t1.card_code = t2.card_code " +
+            "and t2.user_uuid=#{userUuid}")
+    List<SubscCardTypeDO> getCardTypeByUuid(@Param("userUuid") String userUuid);
+
+    /**
+     * 获取该用户订阅的卡片
+     *
+     * @param userUuid
+     * @return
+     */
+    @Select("select t1.* from tb_sfsubscription_card t1,rel_user_sfsubscription t2 " +
+            "where t1.card_code = t2.card_code and t2.user_uuid=#{userUuid} " +
+            "and t2.client_id = #{clientId} ORDER BY t2.sort")
+    List<SFSubscriptionCard> getSubCardTypeByUuid(@Param("userUuid") String userUuid, @Param("clientId") String clientId);
 
 }

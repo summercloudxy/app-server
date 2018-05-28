@@ -5,7 +5,7 @@ import com.zgiot.app.server.module.qualityandquantity.pojo.CoalAnalysisData;
 import com.zgiot.app.server.module.qualityandquantity.pojo.MetricDataValue;
 import com.zgiot.app.server.module.qualityandquantity.pojo.ReportFormsParam;
 import com.zgiot.app.server.module.qualityandquantity.service.QualityAndQuantityDataManager;
-import com.zgiot.app.server.module.reportforms.ReportFormsUtils;
+import com.zgiot.app.server.module.reportforms.input.ReportFormsUtils;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.common.pojo.CoalAnalysisRecord;
 import com.zgiot.common.pojo.DataModelWrapper;

@@ -56,12 +56,13 @@ public class SFSysMonitorServiceImpl implements SFSysMonitorService {
                 for(ThingTag thingTag2 :thingTagList2){
                     //获取系统监控thingtag三级节点
                     List<ThingTag> thingTagList3 =thingTagMapper.getThingTagByParentId(thingTag2.getId());
+                    Map<String,String> thingMap =new HashMap<>();
                     if(thingTagList3 !=null && thingTagList3.size() >0){
-                        getThingTagMetricCount(thingTag2,thingTagList3);
+                        getThingTagMetricCount(thingTag2,thingTagList3,thingMap);
                     }else{
                         List<ThingTag> thingTags =new ArrayList<>();
                         thingTags.add(thingTag2);
-                        getThingTagMetricCount(thingTag2,thingTags);
+                        getThingTagMetricCount(thingTag2,thingTags,thingMap);
                     }
                     thingTag.getNodeList().add(thingTag2);
                 }
@@ -107,7 +108,7 @@ public class SFSysMonitorServiceImpl implements SFSysMonitorService {
     /**
      * 统计二级系统节点下的设备运行情况
      */
-    public void getThingTagMetricCount(ThingTag thingTag2,List<ThingTag> ThingTagList){
+    public void getThingTagMetricCount(ThingTag thingTag2,List<ThingTag> ThingTagList,Map<String,String> thingMap){
         RelSFSysMonitorTermThing monitorThing = new RelSFSysMonitorTermThing();
         int thingRunCount =0;//运行中设备数量
         int thingFaultCount =0;//故障中设备数量
@@ -116,7 +117,7 @@ public class SFSysMonitorServiceImpl implements SFSysMonitorService {
             monitorThing.setThingTagCode(thingTag.getCode());
             List<RelSFSysMonitorTermThing> monitorThingList = monitorTermThingMapper.getSFSysMonitorThing(monitorThing);
             for (RelSFSysMonitorTermThing mt : monitorThingList) {
-                Map countMap = countMetricState(mt);
+                Map countMap = countMetricState(mt,thingMap);
                 thingRunCount =thingRunCount+(Integer)countMap.get(GlobalConstants.STATE_RUNNING);
                 thingFaultCount =thingFaultCount+(Integer)countMap.get(GlobalConstants.STATE_FAULT);
                 thingStopCount =thingStopCount+(Integer)countMap.get(GlobalConstants.STATE_STOPPED);
@@ -130,14 +131,14 @@ public class SFSysMonitorServiceImpl implements SFSysMonitorService {
     /**
      * 根据设备状态统计数量
      */
-    public Map countMetricState(RelSFSysMonitorTermThing mt){
+    public Map countMetricState(RelSFSysMonitorTermThing mt,Map<String,String> thingMap){
         int thingRunCount =0;//运行中设备数量
         int thingFaultCount =0;//故障中设备数量
         int thingStopCount =0;//待机中设备数量
-        Map<String,String> thingMap =new HashMap<>();
         Map<Short,Integer> resultMap =new HashMap<>();
-        //thingMap包含的设备已经计数
-        if(!thingMap.containsKey(mt.getThingCode())){
+        //thingMap包含的设备已经计数(并且thingCode不是原煤配比)
+        if(!org.apache.commons.lang.StringUtils.isEmpty(mt.getThingCode()) && !thingMap.containsKey(mt.getThingCode())
+                && !SFSysMonitorConstant.THING_CODE_QUIT_SYS_RAW.equals(mt.getThingCode())){
             thingMap.put(mt.getThingCode(),mt.getThingCode());
             Optional<DataModelWrapper> data = dataService.getData(mt.getThingCode(),MetricCodes.STATE);
             if (data.isPresent()) {

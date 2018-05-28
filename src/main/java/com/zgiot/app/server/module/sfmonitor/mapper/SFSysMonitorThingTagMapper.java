@@ -10,7 +10,8 @@ import java.util.List;
 @Mapper
 public interface SFSysMonitorThingTagMapper {
 
-    @Select("SELECT t.*,s.image_name FROM tb_thing_tag t left join tb_sfsysmon_thing_tag_style s on t.code=s.thing_tag_code where parent_id = #{id}")
+    @Select("SELECT t.*,s.image_name FROM tb_thing_tag t left join tb_sfsysmon_thing_tag_style s on t.code=s.thing_tag_code " +
+            "where parent_id = #{id} order by sort,id")
     List<ThingTag> getThingTagByParentId(@Param("id") Long id);
 
     @Select("SELECT * FROM tb_thing_tag WHERE id = #{id}")

@@ -37,19 +37,20 @@ public class MonitorServiceImpl implements MonitorService {
     @Override
     public AddOrEditMonitorResponse addOrEditMonitorInfo(MonitorInfo monitorInfo) {
         SFMonitor sfMonitor = monitorInfo.getSfMonitor();
+        String userName = sfMonitor.getUserName();
         List<RelSFMonItem> items = new ArrayList<>();
         List<Long> idList = new ArrayList<>();
         boolean isExist = true;
         Float count = null;
         Long id = null;
         if (sfMonitor != null && sfMonitor.getId() != null) {//edit
-            MonitorEditRes monitorEditRes = editMonitor(monitorInfo);
+            MonitorEditRes monitorEditRes = editMonitor(monitorInfo,userName);
             isExist = monitorEditRes.isExist();
             items = monitorEditRes.getItems();
             count = relSFMonitorItemMapper.getMaxSortFromMonitorByMonId(sfMonitor.getId());
             id = sfMonitor.getId();
         } else {//add
-            SFMonitor monitor = sfMonitorMapper.getMonitorByName(monitorInfo.getSfMonitor().getSfMonName());
+            SFMonitor monitor = sfMonitorMapper.getMonitorByName(monitorInfo.getSfMonitor().getSfMonName(),userName);
             if (monitor == null) {
                 isExist = false;
             }
@@ -82,9 +83,9 @@ public class MonitorServiceImpl implements MonitorService {
         return sfMonitor.getId();
     }
 
-    private MonitorEditRes editMonitor(MonitorInfo monitorInfo) {
+    private MonitorEditRes editMonitor(MonitorInfo monitorInfo,String userName) {
         SFMonitor sfMonitor = monitorInfo.getSfMonitor();
-        SFMonitor monitorTemp = sfMonitorMapper.getMonitorByName(monitorInfo.getSfMonitor().getSfMonName());
+        SFMonitor monitorTemp = sfMonitorMapper.getMonitorByName(monitorInfo.getSfMonitor().getSfMonName(),userName);
         boolean isExist = true;
         List<RelSFMonItem> items = new ArrayList<>();
         if ((monitorTemp != null) && (monitorTemp.getId().longValue() == sfMonitor.getId().longValue())) {
@@ -327,11 +328,10 @@ public class MonitorServiceImpl implements MonitorService {
     }
 
     @Override
-    public Map<String, Object> byUser(String userUuid) {
+    public Map<String, Object> byUser(String loginName) {
         Map<String, Object> map = new HashMap<>();
         Map<String, Object> thingMap = new HashMap<>();
-        List<String> thingCodeList = new ArrayList<>();
-        List<RelSFMonRolePermission> relSFMonRolePermissionList = relSFMonRolePermissionMapper.getRelSFMonRolePermissionByUser(userUuid);
+        List<RelSFMonRolePermission> relSFMonRolePermissionList = relSFMonRolePermissionMapper.getRelSFMonRolePermissionByUser(loginName);
         if (relSFMonRolePermissionList != null && !relSFMonRolePermissionList.isEmpty()) {
             for (RelSFMonRolePermission relSFMonRolePermission : relSFMonRolePermissionList) {
                 Map<String, Boolean> permissionMap = new HashMap<>();
@@ -340,7 +340,6 @@ public class MonitorServiceImpl implements MonitorService {
                 permissionMap.put(METRICTYPE_CTL, relSFMonRolePermission.isOpControl());
 
                 String thingCode = relSFMonRolePermission.getThingCode();
-                thingCodeList.add(thingCode);
                 if (thingMap.containsKey(thingCode)) {
                     Map<String, Boolean> maxAuthMap = getMaxAuth(permissionMap, (Map<String, Boolean>) thingMap.get(thingCode));
                     thingMap.put(thingCode, maxAuthMap);
@@ -353,11 +352,8 @@ public class MonitorServiceImpl implements MonitorService {
         map.put(THINGAUTHZ, thingMap);
 
         Map<String, Object> metricTypeMap = new HashMap<>();
-        List<RelSFMonMetrictypeMetric> relSFMonMetrictypeMetricList = new ArrayList<>();
-        if(!thingCodeList.isEmpty()){
-            relSFMonMetrictypeMetricList =
-                    relSFMonMetrictypeMetricMapper.getRelSFMonMetrictypeMetricByThingCode(thingCodeList);
-        }
+        List<RelSFMonMetrictypeMetric> relSFMonMetrictypeMetricList =
+                relSFMonMetrictypeMetricMapper.getAllRelSFMonMetrictypeMetric();
         if (relSFMonMetrictypeMetricList != null && !relSFMonMetrictypeMetricList.isEmpty()) {
             for (RelSFMonMetrictypeMetric relSFMonMetrictypeMetric : relSFMonMetrictypeMetricList) {
                 metricTypeMap.put(relSFMonMetrictypeMetric.getMetricCode(), relSFMonMetrictypeMetric.getSfmonMetrictype());
