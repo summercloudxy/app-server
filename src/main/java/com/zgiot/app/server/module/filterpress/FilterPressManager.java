@@ -690,10 +690,11 @@ public class FilterPressManager {
             int term = filterPressTerm.get(filterPress.getCode());
             if(term == TERM1){
                 messagingTemplate.convertAndSend(FEED_OVER_NOTICE_URI_TERM1, feedAsumConfirmBean);
+                unconfirmedFeedTerm1.add(filterPress.getCode());
             }else if(term == TERM2){
                 messagingTemplate.convertAndSend(FEED_OVER_NOTICE_URI_TERM2, feedAsumConfirmBean);
+                unconfirmedFeed.add(filterPress.getCode());
             }
-            unconfirmedFeed.add(filterPress.getCode());
         }
     }
 
