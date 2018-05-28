@@ -16,6 +16,7 @@ import com.zgiot.app.server.module.sfmonitor.util.CompareUtil;
 import com.zgiot.app.server.module.thingtag.pojo.ThingTagGroup;
 import com.zgiot.app.server.service.BusinessService;
 import com.zgiot.app.server.service.DataService;
+import com.zgiot.app.server.service.impl.mapper.TMLMapper;
 import com.zgiot.app.server.service.impl.mapper.ThingTagGroupMapper;
 import com.zgiot.common.constants.MetricCodes;
 import com.zgiot.common.constants.ThingTagConstants;
@@ -51,6 +52,8 @@ public class SFSpeMonitorServiceImpl implements SFSpeMonitorService {
     private AlertManager alertManager;
     @Autowired
     private ThingPropertiesMapper thingPropertiesMapper;
+    @Autowired
+    private TMLMapper tmlMapper;
     @Override
     public List<ThingTag> getSpeMonitorIndex() {
         ThingTagGroup thingTagGroup =new ThingTagGroup();
@@ -305,6 +308,7 @@ public class SFSpeMonitorServiceImpl implements SFSpeMonitorService {
                 List<RelSfSpeMonThingMetric> thingMetrics = speMonThingMetricMapper.selectByExample(speThingExample);
                 for(RelSfSpeMonThingMetric thingMetric:thingMetrics){
                     getMetricValueProtect(thingMetric);
+                    thingMetric.setThingName(tmlMapper.getThingByCode(thingMetric.getThingCode()).getThingName());
                 }
                 speMonThingMetricList.addAll(thingMetrics);
             }
