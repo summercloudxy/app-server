@@ -23,7 +23,6 @@ public class CmdControlServiceImpl implements CmdControlService {
     private static final Logger logger = LoggerFactory.getLogger(CmdControlService.class);
     private static final int DEFAULT_RETRY_COUNT = 5;
     private static final int RETURN_CODE_SUCCESS = 1;
-    private static final int DEFAULT_SEND_DELAY_TIME = 0;
     private static final int SEND_PERIOD = 1000;
     private static final int CLEAN_WAIT_PERIOD = 500;
     private static final int VALUE_TRUE = 1;
@@ -44,22 +43,26 @@ public class CmdControlServiceImpl implements CmdControlService {
         }
         String data = JSON.toJSONString(dataModelList);
         ServerResponse response = null;
-        try { 
+        try {
             String resStr = dataEngineTemplate.postForObject(DataEngineTemplate.URI_CMD, data, String.class);
             logger.debug("dataengine response: `{}`", resStr);
-            response = JSON.parseObject(resStr,ServerResponse.class);
+            response = JSON.parseObject(resStr, ServerResponse.class);
 
             cmdSendResponseData.setErrorMessage(response.getErrorMsg());
             cmdSendResponseData.setOkCount((Integer) response.getObj());
         } catch (RestClientException e) {
-            throw new SysException(response.getErrorMsg(), SysException.EC_CMD_FAILED);
+            String errMsg = e.getMessage();
+            if (response != null) {
+                errMsg += " | " + response.getErrorMsg();
+            }
+            throw new SysException(errMsg, SysException.EC_CMD_FAILED);
         }
 
         return cmdSendResponseData;
     }
 
     public CmdSendResponseData sendPulseCmd(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId) {
-        CmdSendResponseData cmdSendResponseData = new CmdSendResponseData();
+        CmdSendResponseData cmdSendResponseData = null;
         String value = dataModel.getValue();
         Boolean boolValue;
         if (Boolean.TRUE.toString().equalsIgnoreCase(value) || Boolean.FALSE.toString().equalsIgnoreCase(value)) {
@@ -77,36 +80,37 @@ public class CmdControlServiceImpl implements CmdControlService {
 
     /**
      * 根据信号位置下发信号
-     * @param dataModel 信号发送类（包括信号地址和发送值，本接口无视发送值）
+     *
+     * @param dataModel   信号发送类（包括信号地址和发送值，本接口无视发送值）
      * @param retryPeriod 重发等待时间
-     * @param retryCount 重发次数
-     * @param requestId 请求id
-     * @param position 发送位置
+     * @param retryCount  重发次数
+     * @param requestId   请求id
+     * @param position    发送位置
      * @param cleanPeriod 清除等待时间
-     * @param isHolding 是否保持
+     * @param isHolding   是否保持
      * @return
      */
     public int sendPulseCmdBoolByShort(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId
-            , int position, int cleanPeriod, boolean isHolding){
-        logger.info("sendPulseCmdBoolByShort: ThingCode:{},MetricCode:{},在{}位置下发请求开始",dataModel.getThingCode(),dataModel.getMetricCode(), position);
-        if(1 > position){
+            , int position, int cleanPeriod, boolean isHolding) {
+        logger.info("sendPulseCmdBoolByShort: ThingCode:{},MetricCode:{},在{}位置下发请求开始", dataModel.getThingCode(), dataModel.getMetricCode(), position);
+        if (1 > position) {
             throw new SysException("data type error", SysException.EC_CMD_FAILED);
         }
         String readValue = getDataSync(dataModel);
-        if(StringUtils.isBlank(readValue)){
-            logger.info("read value from kep:" + readValue);
+        if (StringUtils.isBlank(readValue)) {
+            logger.info("read value from kep: {}", readValue);
             return RETURN_CODE_SUCCESS;
         }
         int valueInt = Integer.parseInt(readValue);
         boolean dataModelOperate = Boolean.parseBoolean(dataModel.getValue());
-        if(dataModelOperate && getBit(Integer.parseInt(readValue), position, VALUE_FALSE)){
+        if (dataModelOperate && getBit(Integer.parseInt(readValue), position, VALUE_FALSE)) {
             valueInt += (int) Math.pow(2, (position - 1));
         }
-        if(!dataModelOperate && getBit(Integer.parseInt(readValue), position, VALUE_TRUE)){
+        if (!dataModelOperate && getBit(Integer.parseInt(readValue), position, VALUE_TRUE)) {
             valueInt -= (int) Math.pow(2, (position - 1));
         }
-        logger.info("sendPulseCmdBoolByShort: ThingCode:{},MetricCode:{},信号现在值为{},在{}位置",dataModel.getThingCode(),dataModel.getMetricCode(), readValue, position);
-        if(0 > valueInt){
+        logger.info("sendPulseCmdBoolByShort: ThingCode:{},MetricCode:{},信号现在值为{},在{}位置", dataModel.getThingCode(), dataModel.getMetricCode(), readValue, position);
+        if (0 > valueInt) {
             throw new SysException("valueInt is less than zero", SysException.EC_CMD_FAILED);
         }
         // 信号首次发送
@@ -114,12 +118,12 @@ public class CmdControlServiceImpl implements CmdControlService {
         dataModel.setValue(String.valueOf(valueInt));
         sendfirst(dataModel, requestId);
         // 信号脉冲清除发送
-        if(!isHolding) {
+        if (!isHolding) {
             int cleanValueInt = Integer.parseInt(readValue);
-            if(getBit(Integer.parseInt(readValue), position, VALUE_TRUE)){
+            if (getBit(Integer.parseInt(readValue), position, VALUE_TRUE)) {
                 cleanValueInt -= (int) Math.pow(2, (position - 1));
             }
-            logger.info("sendPulseCmdBoolByShort: ThingCode:{},MetricCode:{},清除信号发送值为{},在{}位置",dataModel.getThingCode(),dataModel.getMetricCode(), cleanValueInt, position);
+            logger.info("sendPulseCmdBoolByShort: ThingCode:{},MetricCode:{},清除信号发送值为{},在{}位置", dataModel.getThingCode(), dataModel.getMetricCode(), cleanValueInt, position);
             dataModel.setValue(String.valueOf(cleanValueInt));
             sendSecond(dataModel, retryPeriod, retryCount, requestId, cleanPeriod);
         }
@@ -128,10 +132,11 @@ public class CmdControlServiceImpl implements CmdControlService {
 
     /**
      * 信号首次发送
+     *
      * @param dataModel 信号发送类（包括信号地址和发送值）
      * @param requestId 请求id
      */
-     void sendfirst(DataModel dataModel, String requestId){
+    void sendfirst(DataModel dataModel, String requestId) {
         try {
             sendCmd(dataModel, requestId);
         } catch (Exception e) {
@@ -141,12 +146,13 @@ public class CmdControlServiceImpl implements CmdControlService {
 
     /**
      * 信号重新发送清除
-     * @param dataModel 信号发送类（包括信号地址和发送值）
+     *
+     * @param dataModel   信号发送类（包括信号地址和发送值）
      * @param retryPeriod 重发等待时间
-     * @param retryCount 重发次数
-     * @param requestId 请求id
+     * @param retryCount  重发次数
+     * @param requestId   请求id
      */
-    CmdSendResponseData sendSecond(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId, Integer cleanPeriod){
+    CmdSendResponseData sendSecond(DataModel dataModel, Integer retryPeriod, Integer retryCount, String requestId, Integer cleanPeriod) {
         CmdSendResponseData cmdSendResponseData = new CmdSendResponseData();
         final Integer realRetryCount = retryCount == null ? DEFAULT_RETRY_COUNT : retryCount;
         if (retryPeriod == null) {
@@ -167,7 +173,7 @@ public class CmdControlServiceImpl implements CmdControlService {
             }
             try {
                 Thread.sleep(retryPeriod);
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 logger.error("thread is interrupted");
             }
         }
@@ -179,26 +185,28 @@ public class CmdControlServiceImpl implements CmdControlService {
 
     /**
      * 判断二进制第几位是否为预期值
+     *
      * @param value
      * @param position
      * @return
      */
-     boolean getBit(int value, int position, int compareValue){
+    boolean getBit(int value, int position, int compareValue) {
         boolean flag = false;
-        for(int i=1;i<= position;i++){
+        for (int i = 1; i <= position; i++) {
             flag = value % 2 == compareValue;
-            value = value/2;
+            value = value / 2;
         }
         return flag;
     }
 
     /**
      * 获取/data/sync接口反馈数据值
+     *
      * @param dataModel
      * @return
      */
     @Override
-    public String getDataSync(DataModel dataModel){
+    public String getDataSync(DataModel dataModel) {
         ServerResponse response = null;
         try {
             Map<String, String> uriVariables = new HashMap<>();
@@ -206,12 +214,11 @@ public class CmdControlServiceImpl implements CmdControlService {
             uriVariables.put("metricCode", dataModel.getMetricCode());
             String readDataModelByString = dataEngineTemplate.getForObject(DataEngineTemplate.URI_DATA_SYNC + "/{thingCode}/{metricCode}"
                     , String.class, uriVariables);
-            response = JSON.parseObject(readDataModelByString, ServerResponse.class );
+            response = JSON.parseObject(readDataModelByString, ServerResponse.class);
 
         } catch (Exception e) {
-            throw new SysException(response.getErrorMsg(), SysException.EC_CMD_FAILED);
+            throw new SysException(e.getMessage(), SysException.EC_CMD_FAILED);
         }
-        String readValue = (String) response.getObj();
-        return readValue;
+        return (String) response.getObj();
     }
 }
