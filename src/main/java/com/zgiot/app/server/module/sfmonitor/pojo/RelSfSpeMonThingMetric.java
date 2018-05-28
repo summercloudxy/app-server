@@ -18,6 +18,8 @@ public class RelSfSpeMonThingMetric {
      */
     private String thingCode;
 
+    private String thingName;
+
     /**
      *
      */
@@ -110,11 +112,20 @@ public class RelSfSpeMonThingMetric {
         this.thingCode = thingCode == null ? null : thingCode.trim();
     }
 
+
     /**
      *
      */
     public String getMetricCode() {
         return metricCode;
+    }
+
+    public String getThingName() {
+        return thingName;
+    }
+
+    public void setThingName(String thingName) {
+        this.thingName = thingName;
     }
 
     /**
