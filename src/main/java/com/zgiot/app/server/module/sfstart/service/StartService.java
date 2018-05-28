@@ -494,4 +494,12 @@ public interface StartService {
     ThingMetricCode getStartSignalByDataLabel(String dataLabel);
 
 
+    /**
+     * 根据原有系统的StartDevice id查询现有的MetricCode
+     * @param id
+     * @return
+     */
+    String getMetricCodeByStartDeviceSignalId(int id );
+
+
 }

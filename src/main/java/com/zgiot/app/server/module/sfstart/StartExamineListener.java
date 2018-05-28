@@ -60,7 +60,16 @@ public class StartExamineListener implements DataListener {
                     return;
                 }
                 logger.info("启车检查标签{}的值{}收到", label, dataModel.getValue());
-                startHandler.updateExamineRecordByRule(label, Double.valueOf(dataModel.getValue()));
+                String metricValue=null;
+                if("false".equals(dataModel.getValue())){
+                    metricValue="0.0";
+                }else if("true".equals(dataModel.getValue())){
+                    metricValue="1.0";
+                }else {
+                    metricValue=dataModel.getValue();
+                }
+
+                startHandler.updateExamineRecordByRule(label, Double.valueOf(metricValue));
             }
         }
     }

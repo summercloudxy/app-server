@@ -559,5 +559,18 @@ public class StartServiceImpl implements StartService {
         return thingMetricCode;
     }
 
+    @Override
+    public String getMetricCodeByStartDeviceSignalId(int id) {
+        //液位单独处理
+        if(id==1093){
+            return "LEVEL";
+        }else {
+            StartDeviceSignal startDeviceSignal = startMapper.getStartDeviceSignalById(id);
+            MetricModel metricModel = tmlMapper.findMetricByMetricName(startDeviceSignal.getName());
+            return metricModel.getMetricCode();
+        }
+
+    }
+
 
 }
