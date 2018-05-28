@@ -466,9 +466,11 @@ public class StartHandler {
             try {
                 StartSignal startSignal = startService.getStartSignalByDeviceId(rule.getExamineDeviceId());
                 logger.info("启车自检,检查设备:{},检查内容:{}", rule.getExamineDeviceId(), rule.getExamineName());
-                DataModelWrapper data = dataService.getData(startSignal.getDeviceCode(), MetricCodes.STATE).orElse(null);
+                String metricCode = startService.getMetricCodeByStartDeviceSignalId(Integer.parseInt(rule.getExamineName()));
+                DataModelWrapper data = dataService.getData(startSignal.getDeviceCode(), metricCode).orElse(null);
                 if (data != null) {
-                    updateExamineRecord(rule, Double.valueOf(data.getValue()));
+
+                    updateExamineRecord(rule, changeMetricValue(data.getValue()));
 
                 }
             } catch (Exception e) {
@@ -679,12 +681,12 @@ public class StartHandler {
         MetricModel metricModel = tmlMapper.findMetricByMetricName(startDeviceSignal.getName());
         DataModelWrapper dataModelWrapper = dataService.getData(startSignal.getDeviceCode(), metricModel.getMetricCode()).orElse(null);
         float singleValue = 0f;
-        if (dataModelWrapper != null&&StringUtils.isNumeric(dataModelWrapper.getValue())) {
-            singleValue = Float.valueOf(dataModelWrapper.getValue());
+        if (dataModelWrapper != null) {
+            singleValue = changeMetricValue(dataModelWrapper.getValue()).floatValue();
             logger.info("startSingleValue:{}", singleValue);
         }
         if (singleValue != value) {
-            operateSignal(deviceId, metricModel.getMetricCode(), operateUserId, value);
+            operateSignal(deviceId, nameId, operateUserId, value);
         }
     }
 
@@ -788,27 +790,27 @@ public class StartHandler {
      * 发送操作信号
      *
      * @param deviceId      设备号
-     * @param metricCode    信号值
+     * @param nameId    信号值
      * @param operateUserId 操作者id
      * @param value         操作值
      * @throws Exception
      */
-    public void operateSignal(String deviceId, String metricCode, String operateUserId, Float value) {
-        logger.info("deviceId:{},name:{}启车模块操作信号开始发送。", deviceId, metricCode);
+    public void operateSignal(String deviceId, String nameId, String operateUserId, Float value) {
+        logger.info("deviceId:{},name:{}启车模块操作信号开始发送。", deviceId, nameId);
         long begin = System.currentTimeMillis();
         StartSignal startSignal = startService.getStartSignalByDeviceId(deviceId);
         DataModel dataModel = new DataModel();
         dataModel.setThingCode(startSignal.getDeviceCode());
-        StartDeviceSignal startDeviceSignal = startService.getStartDeviceSignalById(startSignal.getName());
+        StartDeviceSignal startDeviceSignal = startService.getStartDeviceSignalById(Integer.valueOf(nameId));
         MetricModel metricModel = tmlMapper.findMetricByMetricName(startDeviceSignal.getName());
         dataModel.setMetricCode(metricModel.getMetricCode());
-        dataModel.setValue(String.valueOf(value.intValue()));
+        dataModel.setValue(dealMetricValue(metricModel.getValueType(),value));
         CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(dataModel,"发送信号");
         if (cmdSendResponseData.getOkCount() == 0) {
             logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage());
         }
-        logger.info(CMDLOG, startSignal.getDeviceCode(), metricModel.getMetricCode(), value);
-        logger.info("deviceId:{},name:{}启车模块操作信号已经发送成功,cost:{}ms", deviceId, metricCode, (System.currentTimeMillis() - begin));
+        logger.info(CMDLOG, startSignal.getDeviceCode(), metricModel.getMetricCode(), dataModel.getValue());
+        logger.info("deviceId:{},name:{}启车模块操作信号已经发送成功,cost:{}ms", deviceId, nameId, (System.currentTimeMillis() - begin));
     }
 
     /**
@@ -1275,4 +1277,40 @@ public class StartHandler {
 
     }
 
+    /**
+     * 查询处理指标值
+     * @param metricDataValue
+     * @return
+     */
+    public  Double changeMetricValue(String metricDataValue){
+        Double metricValue;
+        if("true".equals(metricDataValue)){
+            metricValue=1.0;
+        }else if("false".equals(metricDataValue)){
+            metricValue=0.0;
+        }else {
+            metricValue=Double.valueOf(metricDataValue);
+        }
+        return metricValue;
+    }
+
+    /**
+     * 处理下发的指标类型
+     * @param metricType
+     * @param value
+     * @return
+     */
+   public String dealMetricValue(String metricType,Float value) {
+        String cmdMetricValue = "";
+        if ("BOO".equals(metricType)) {
+            if (value == 1.0) {
+                cmdMetricValue = "true";
+            } else {
+                cmdMetricValue = "false";
+            }
+        } else {
+            cmdMetricValue=String.valueOf(value);
+        }
+        return cmdMetricValue;
+    }
 }

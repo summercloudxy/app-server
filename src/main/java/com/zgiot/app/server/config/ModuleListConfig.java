@@ -205,10 +205,10 @@ public class ModuleListConfig {
                         ModuleListConfig.MODULE_SFSTART, StartDeviceByRequirementJob.class, "0/20 * * * * ?");
 
                 QuartzManager.addJob("sendCoalCapacity", ModuleListConfig.MODULE_SFSTART, "sendCoalCapacity",
-                        ModuleListConfig.MODULE_SFSTART, SendCoalCapacityJob.class, "0/30 * * * * ?");
+                        ModuleListConfig.MODULE_SFSTART, SendCoalCapacityJob.class, "0/10 * * * * ?");
 
                 QuartzManager.addJob("sendCoalDeport", ModuleListConfig.MODULE_SFSTART, "sendCoalDeport",
-                        ModuleListConfig.MODULE_SFSTART, SendCoalDeportJob.class, "0/30 * * * * ?");
+                        ModuleListConfig.MODULE_SFSTART, SendCoalDeportJob.class, "0/10 * * * * ?");
 
 
             }
