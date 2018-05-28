@@ -41,6 +41,8 @@ public class StartExamineRecord {
         this.examineId = examineId;
     }
 
+
+
     public Integer getOperateId() {
         return operateId;
     }

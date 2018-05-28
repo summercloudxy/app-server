@@ -802,12 +802,12 @@ public class StartHandler {
         StartDeviceSignal startDeviceSignal = startService.getStartDeviceSignalById(startSignal.getName());
         MetricModel metricModel = tmlMapper.findMetricByMetricName(startDeviceSignal.getName());
         dataModel.setMetricCode(metricModel.getMetricCode());
-        dataModel.setValue(String.valueOf(value));
+        dataModel.setValue(String.valueOf(value.intValue()));
         CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(dataModel,"发送信号");
         if (cmdSendResponseData.getOkCount() == 0) {
             logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage());
         }
-        logger.info(CMDLOG, startSignal.getDeviceCode(), metricCode, value);
+        logger.info(CMDLOG, startSignal.getDeviceCode(), metricModel.getMetricCode(), value);
         logger.info("deviceId:{},name:{}启车模块操作信号已经发送成功,cost:{}ms", deviceId, metricCode, (System.currentTimeMillis() - begin));
     }
 
@@ -902,6 +902,8 @@ public class StartHandler {
                 if (value == 1) {
                     relation.setAbnormal(startService.getFaultByDeviceId(relation.getControlDeviceId()));
                 }
+            }else{
+                relation.setControlDeviceState(Double.valueOf("0"));
             }
         }
         return startDeviceRelations;
@@ -958,9 +960,12 @@ public class StartHandler {
         startDeviceControlInformation.setStartRequirements(startRequirements);
         // 获得人工干预信息
         List<StartManualInterventionRecord> startManualInterventionRecords = startService.selectStartingManualInterventionRecord(deviceId, operateId, null);
-        if (CollectionUtils.isNotEmpty(startManualInterventionRecords)) {
+        if(CollectionUtils.isNotEmpty(startManualInterventionRecords)){
             startDeviceControlInformation.setStartManualInterventionRecord(startManualInterventionRecords.get(0));
+        }else{
+            startDeviceControlInformation.setStartManualInterventionRecord(null);
         }
+
         return startDeviceControlInformation;
     }
 
@@ -1090,16 +1095,19 @@ public class StartHandler {
      * @param label 传入标签信号值
      * @param value 数值
      */
-    public void updateStartDeviceState(String label, double value) {
+    public void updateStartDeviceState(String label, String value) {
         List<String> deviceIds = startService.selectDeviceIdByDatelabel(label, StartStopConstants.DEVICE_STATE);
-        // 修改启车记录
-        logger.info("修改设备:{}启车状态为{}", deviceIds.get(0), value);
-        updateStartDeviceState(deviceIds.get(0), value);
+        if(CollectionUtils.isNotEmpty(deviceIds)){
+            // 修改启车记录
+            logger.info("修改设备:{}启车状态为{}", deviceIds.get(0), value);
+            updateStartDeviceState(deviceIds.get(0), value);
 
-        // 发送频率
-        if ((double) StartStopConstants.DEVICE_STATE_WORKING == value) {
-            sendFrequency(deviceIds.get(0));
+            // 发送频率
+            if ( StartStopConstants.DEVICE_STATE_WORKING ==Integer.valueOf(value)  ) {
+                sendFrequency(deviceIds.get(0));
+            }
         }
+
     }
 
     /**

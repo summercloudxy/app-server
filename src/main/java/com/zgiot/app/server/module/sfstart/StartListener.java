@@ -72,7 +72,7 @@ public class StartListener implements DataListener {
                     StartHandler.setPauseState(false);
                 }
             } else {
-                startHandler.updateStartDeviceState(thingMetricLabel.getLabelPath(), Double.valueOf(dataModel.getValue()));
+                startHandler.updateStartDeviceState(thingMetricLabel.getLabelPath(), dataModel.getValue());
             }
         }
 
