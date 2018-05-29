@@ -1,7 +1,7 @@
 package com.zgiot.app.server.module.sfstart;
 
 import com.zgiot.app.server.dataprocessor.DataListener;
-import com.zgiot.app.server.module.sfstart.constants.StartStopConstants;
+import com.zgiot.app.server.module.sfstart.constants.StartConstants;
 import com.zgiot.app.server.module.sfstart.controller.StartHandler;
 import com.zgiot.app.server.module.sfstart.service.StartService;
 import com.zgiot.app.server.service.impl.mapper.TMLMapper;
@@ -55,7 +55,7 @@ public class StartExamineListener implements DataListener {
         //启车检查
         for (String label : startExamineLabels) {
             if (thingMetricLabel.getLabelPath().equals(label)) {
-                if (!startService.judgeStartingState(StartStopConstants.START_PREPARE_STATE, StartStopConstants.START_STARTING_STATE)) {
+                if (!startService.judgeStartingState(StartConstants.START_PREPARE_STATE, StartConstants.START_STARTING_STATE)) {
                     logger.error("抛弃虚假启车检查标签数据{}的值{}", label, dataModel.getValue());
                     return;
                 }

@@ -3,7 +3,7 @@ package com.zgiot.app.server.module.sfstart.constants;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class StartStopConstants {
+public class StartConstants {
 
     // 启车清除信号发送成功
     public static final int START_SEND_CLEAN_STATE = 15;
@@ -176,7 +176,7 @@ public class StartStopConstants {
     public static final int AREA_STATE_FALSE = 0;
 
     // 启车结束PLC值
-    public static final double START_PLC_FINISH = 4.0;
+    public static final double  START_PLC_FINISH = 4.0;
 
     // 区域允许启动
     public static final String AREA_START = "1537";
@@ -296,6 +296,13 @@ public class StartStopConstants {
 
     // float类型值
     public static final int LABEL_TYPE_FLOAT = 3;
+
+
+    public  static final String TRUE="true";
+
+    public  static final String FALSE="false";
+
+    public static final String  BOO="BOO";
 
 
 }
