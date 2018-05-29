@@ -346,7 +346,7 @@ public class OutputStoreAndTargetService {
             Date lastDutyStartTime = ReportFormDateUtil.getbeforeDutyStartTime(dutyStartTime);
             Map<Integer, Map<Integer, ReportFormTargetRecord>> lastOtherTargetRecordMap = getOtherTargetRecordMap(lastDutyStartTime);
             //从任务模块取数据
-            List<TaskFeedbackInfo> currentDutyTaskFeedbackInfo = targetMapper.getTaskFeedbackInfo(dutyStartTime, DateUtils.addHours(dutyStartTime, 12));
+            List<TaskFeedbackInfo> currentDutyTaskFeedbackInfo = targetMapper.getTaskFeedbackInfoList(dutyStartTime, DateUtils.addHours(dutyStartTime, 12));
             for (TaskFeedbackInfo taskFeedbackInfo : currentDutyTaskFeedbackInfo) {
                 FeedbackTargetRelation feedbackTargetRelation = feedbackTargetMap.get(taskFeedbackInfo.getFeedbackInfoId());
                 Integer targetTypeId = feedbackTargetRelation.getTargetTypeId();
@@ -475,9 +475,9 @@ public class OutputStoreAndTargetService {
      * @return
      */
     private Map<Integer, Map<Integer, ReportFormTargetRecord>> getTargetRecordFromTaskModule(Date dutyStartTime) {
-        Date firstDayOfYear = DateUtils.truncate(dutyStartTime, Calendar.YEAR);
+        Date firstDayOfYear = DateUtils.addHours(DateUtils.truncate(dutyStartTime, Calendar.YEAR),-4);
 
-        List<TaskFeedbackInfo> taskFeedbackInfoList = targetMapper.getTaskFeedbackInfo(firstDayOfYear, DateUtils.addHours(dutyStartTime, 12));
+        List<TaskFeedbackInfo> taskFeedbackInfoList = targetMapper.getTaskFeedbackInfoList(firstDayOfYear, DateUtils.addHours(dutyStartTime, 12));
         //outer key :targetTypeId  inner key : term
         Map<Integer, Map<Integer, ReportFormTargetRecord>> reportFormTargetRecordMap = new HashMap<>();
         for (TaskFeedbackInfo taskFeedbackInfo : taskFeedbackInfoList) {
@@ -490,6 +490,7 @@ public class OutputStoreAndTargetService {
         return reportFormTargetRecordMap;
     }
 
+
     /**
      * 从任务反馈信息中获取指标数据
      *
@@ -498,7 +499,7 @@ public class OutputStoreAndTargetService {
      * @param taskFeedbackInfo
      */
     private void getTargetRecordFromFeedbackInfo(Date dutyStartTime, Map<Integer, Map<Integer, ReportFormTargetRecord>> reportFormTargetRecordMap, TaskFeedbackInfo taskFeedbackInfo) {
-        Date firstDayOfMonth = DateUtils.truncate(dutyStartTime, Calendar.MONTH);
+        Date firstDayOfMonth = DateUtils.addHours(DateUtils.truncate(dutyStartTime, Calendar.MONTH),-4);
         Integer feedbackInfoId = taskFeedbackInfo.getFeedbackInfoId();
         FeedbackTargetRelation feedbackTargetRelation = feedbackTargetMap.get(feedbackInfoId);
         Integer targetTypeId = feedbackTargetRelation.getTargetTypeId();
@@ -599,8 +600,8 @@ public class OutputStoreAndTargetService {
     private void getWaterValueFromTaskModule(ReportFormTargetRecord reportFormTargetRecord, FeedbackTargetRelation feedbackTargetRelation) {
         Date dutyStartTime = reportFormTargetRecord.getDutyStartTime();
         Double currentWaterMeter = reportFormTargetRecord.getClassValue();
-        Date firstDayOfYear = DateUtils.truncate(dutyStartTime, Calendar.YEAR);
-        Date firstDayOfMonth = DateUtils.truncate(dutyStartTime, Calendar.MONTH);
+        Date firstDayOfYear = DateUtils.addHours(DateUtils.truncate(dutyStartTime, Calendar.YEAR),-4);
+        Date firstDayOfMonth = DateUtils.addHours(DateUtils.truncate(dutyStartTime, Calendar.MONTH),-4);
         TaskFeedbackInfo lastYearWaterMeterValue = targetMapper.getLastTaskFeedbackInfoBeforeDate(firstDayOfYear, feedbackTargetRelation.getFeedbackInfoId());
         TaskFeedbackInfo lastMonthWaterMeterValue = targetMapper.getLastTaskFeedbackInfoBeforeDate(firstDayOfMonth, feedbackTargetRelation.getFeedbackInfoId());
         TaskFeedbackInfo lastClassWaterMeterValue = targetMapper.getLastTaskFeedbackInfoBeforeDate(dutyStartTime, feedbackTargetRelation.getFeedbackInfoId());
@@ -628,5 +629,10 @@ public class OutputStoreAndTargetService {
                 (firstClassWaterMeterInfoBeforeDate != null && firstClassWaterMeterInfoBeforeDate.getFeedbackValue() != null && currentWaterMeter != 0.0) {
             reportFormTargetRecord.setYearValue(currentWaterMeter - firstClassWaterMeterInfoBeforeDate.getFeedbackValue());
         }
+    }
+
+
+    public List<ReportFormOutputStoreRecord> getOutputRecordsInDuration(Date startTime,Date endTime){
+       return outputStoreMapper.getOutputStoreRecordsInDuration(TYPE_OUTPUT,startTime,endTime);
     }
 }

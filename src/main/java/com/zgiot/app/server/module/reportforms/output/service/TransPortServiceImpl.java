@@ -458,16 +458,26 @@ public class TransPortServiceImpl implements TransPortService {
             transBeanRsp.setTransportList(transPortMapper.getTransPortByDate(dateDutyStartTime));
             List<TransportSaleStatistics> saleByDateLocality = transPortMapper.getSaleByDateLocality(dateDutyStartTime);
             Map<Integer, TransportSaleStatistics> saleStatisticsLocalityMap = transBeanRsp.getSaleStatisticsLocalityMap();
-            for (TransportSaleStatistics ts:saleByDateLocality) {
-                saleStatisticsLocalityMap.put(ts.getCoalType(),ts);
+            if(saleByDateLocality!=null && saleByDateLocality.size()>0){
+                for (TransportSaleStatistics ts:saleByDateLocality) {
+                    saleStatisticsLocalityMap.put(ts.getCoalType(),ts);
+                }
             }
+
             List<TransportSaleStatistics> saleStatisticsByDutyStartTimeOut = transPortMapper.getSaleStatisticsByDutyStartTimeOut(dateDutyStartTime);
             Map<Integer, TransportSaleStatistics> saleStatisticsOutwardMap = transBeanRsp.getSaleStatisticsOutwardMap();
-            for (TransportSaleStatistics ts:saleStatisticsByDutyStartTimeOut) {
-                saleStatisticsOutwardMap.put(ts.getCoalType(),ts);
+            if(saleStatisticsByDutyStartTimeOut!=null && saleStatisticsByDutyStartTimeOut.size()>0){
+                for (TransportSaleStatistics ts:saleStatisticsByDutyStartTimeOut) {
+                    saleStatisticsOutwardMap.put(ts.getCoalType(),ts);
+                }
             }
             return transBeanRsp;
         }
+    }
+
+    @Override
+    public Map<Integer, List<Transport>> getTransportInDuration(Date startTime, Date endTime) {
+        return null;
     }
 
     /**

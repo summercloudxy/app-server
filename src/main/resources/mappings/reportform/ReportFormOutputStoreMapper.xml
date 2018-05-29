@@ -2,7 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zgiot.app.server.module.reportforms.output.dao.ReportFormOutputStoreMapper">
 
-    <select id="getOutputStoreRecord" resultType="com.zgiot.app.server.module.reportforms.output.pojo.ReportFormOutputStoreRecord">
+    <select id="getOutputStoreRecord"
+            resultType="com.zgiot.app.server.module.reportforms.output.pojo.ReportFormOutputStoreRecord">
         select * from tb_report_form_output_store WHERE type = #{type} and duty_start_time = #{dutyStartTime};
     </select>
 
@@ -26,6 +27,12 @@
         WHERE id = #{id}
     </update>
 
+
+    <select id="getOutputStoreRecordsInDuration"
+            resultType="com.zgiot.app.server.module.reportforms.output.pojo.ReportFormOutputStoreRecord">
+             select * from tb_report_form_output_store WHERE type = #{type} and duty_start_time >= #{startTime} and duty_start_time &lt;= #{endTime};
+
+    </select>
 
 
 </mapper>

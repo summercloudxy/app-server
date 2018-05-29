@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.reportforms.output.dao.ProductTransportMapper">
+
+    <select id="getTransPortDayVolume" parameterType="com.zgiot.app.server.module.reportforms.output.pojo.ProductTransPortCond" resultType="com.zgiot.app.server.module.reportforms.output.pojo.ProductTransport">
+        SELECT
+        coal_type AS coalType,
+        count(id) AS dayColumnNumber,
+        sum(carriage_number) AS dayCarNumber,
+        sum(transport_volume) AS dayVolume
+        FROM
+        tb_report_form_transport
+        WHERE
+        transport_end_time &gt;= #{productStartTime}
+        AND transport_end_time &lt; #{productEndTime}
+        AND coal_type IS NOT NULL
+        GROUP BY
+        coal_type
+    </select>
+
+    <select id="getTransPortMonthVolume" parameterType="com.zgiot.app.server.module.reportforms.output.pojo.ProductTransPortCond" resultType="com.zgiot.app.server.module.reportforms.output.pojo.ProductTransport">
+        SELECT
+        coal_type AS coalType,
+        count(id) AS monthColumnNumber,
+        sum(transport_volume) AS monthVolume
+        FROM
+        tb_report_form_transport
+        WHERE
+        transport_end_time &gt;= #{productStartTime}
+        AND transport_end_time &lt; #{productEndTime}
+        AND coal_type IS NOT NULL
+        GROUP BY
+        coal_type
+    </select>
+
+    <select id="getTransPortYearVolume" parameterType="com.zgiot.app.server.module.reportforms.output.pojo.ProductTransPortCond" resultType="com.zgiot.app.server.module.reportforms.output.pojo.ProductTransport">
+        SELECT
+        coal_type AS coalType,
+        count(id) AS yearColumnNumber,
+        sum(transport_volume) AS yearVolume
+        FROM
+        tb_report_form_transport
+        WHERE
+        transport_end_time &gt;= #{productStartTime}
+        AND transport_end_time &lt; #{productEndTime}
+        AND coal_type IS NOT NULL
+        GROUP BY
+        coal_type
+    </select>
+
+
+    <select id="getProductTransport" parameterType="java.util.Date" resultType="com.zgiot.app.server.module.reportforms.output.pojo.ProductTransport">
+        SELECT
+            *
+        FROM
+            `tb_report_form_product_transport`
+        WHERE
+            product_start_time = #{productStartTime}
+    </select>
+
+    <insert id="insertProductTransport" parameterType="com.zgiot.app.server.module.reportforms.output.pojo.ProductTransport">
+        INSERT INTO tb_report_form_product_transport
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="coalType!=null">
+                coal_type,
+            </if>
+            <if test="transportType!=null">
+                transport_type,
+            </if>
+            <if test="dayVolume!=null">
+                day_volume,
+            </if>
+            <if test="dayColumnNumber!=null">
+                day_column_number,
+            </if>
+            <if test="dayCarNumber!=null">
+                day_car_number,
+            </if>
+            <if test="monthVolume!=null">
+                month_volume,
+            </if>
+            <if test="monthColumnNumber!=null">
+                month_column_number,
+            </if>
+            <if test="yearVolume!=null">
+                year_volume,
+            </if>
+            <if test="yearColumnNumber!=null">
+                year_column_number,
+            </if>
+            <if test="productStartTime!=null">
+                product_start_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="coalType!=null">
+                #{coalType},
+            </if>
+            <if test="transportType!=null">
+                #{transportType},
+            </if>
+            <if test="dayVolume!=null">
+                #{dayVolume},
+            </if>
+            <if test="dayColumnNumber!=null">
+                #{dayColumnNumber},
+            </if>
+            <if test="dayCarNumber!=null">
+                #{dayCarNumber},
+            </if>
+            <if test="monthVolume!=null">
+                #{monthVolume},
+            </if>
+            <if test="monthColumnNumber!=null">
+                #{monthColumnNumber},
+            </if>
+            <if test="yearVolume!=null">
+                #{yearVolume},
+            </if>
+            <if test="yearColumnNumber!=null">
+                #{yearColumnNumber},
+            </if>
+            <if test="productStartTime!=null">
+                #{productStartTime},
+            </if>
+        </trim>
+    </insert>
+
+    <select id="getProductTransportMessage" parameterType="java.util.Date" resultType="com.zgiot.app.server.module.reportforms.output.pojo.ProductTransportRemarks">
+        SELECT
+            *
+        FROM
+            tb_report_form_product_transport_remarks
+        WHERE
+            product_start_time = #{productStartTime}
+    </select>
+
+    <update id="updateProductTransportMessage" parameterType="com.zgiot.app.server.module.reportforms.output.pojo.ProductTransportRemarks">
+        UPDATE tb_report_form_product_transport_remarks
+        <trim prefix="set" suffixOverrides=",">
+            <if test="productStartTime!=null">
+                product_start_time=#{productStartTime},
+            </if>
+            <if test="remarks!=null">
+                remarks=#{remarks},
+            </if>
+            <if test="factoryDutyLeader!=null">
+                factory_duty_leader=#{factoryDutyLeader},
+            </if>
+            <if test="checker!=null">
+                checker=#{checker},
+            </if>
+            <if test="dispatcher!=null">
+                dispatcher=#{dispatcher},
+            </if>
+        </trim>
+        WHERE id =#{id}
+    </update>
+
+    <insert id="insertProductTransportMessage" parameterType="com.zgiot.app.server.module.reportforms.output.pojo.ProductTransportRemarks">
+        INSERT INTO tb_report_form_product_transport_remarks
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="productStartTime!=null">
+                product_start_time,
+            </if>
+            <if test="remarks!=null">
+                remarks,
+            </if>
+            <if test="factoryDutyLeader!=null">
+                factory_duty_leader,
+            </if>
+            <if test="checker!=null">
+                checker,
+            </if>
+            <if test="dispatcher!=null">
+                dispatcher,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="productStartTime!=null">
+                #{productStartTime},
+            </if>
+            <if test="remarks!=null">
+                #{remarks},
+            </if>
+            <if test="factoryDutyLeader!=null">
+                #{factoryDutyLeader},
+            </if>
+            <if test="checker!=null">
+                #{checker},
+            </if>
+            <if test="dispatcher!=null">
+                #{dispatcher},
+            </if>
+        </trim>
+    </insert>
+
+</mapper>
