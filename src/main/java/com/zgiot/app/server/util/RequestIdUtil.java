@@ -8,8 +8,9 @@ public class RequestIdUtil {
 
     }
 
-    public static String generateRequestId() {
+    public static String generateRequestId(String prefix) {
+        String realPrefix = (prefix == null) ? "" : prefix;
         UUID id = UUID.randomUUID();
-        return id.toString();
+        return realPrefix + "_" + id.toString();
     }
 }

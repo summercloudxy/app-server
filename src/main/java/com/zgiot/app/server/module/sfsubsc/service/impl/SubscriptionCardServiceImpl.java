@@ -3,6 +3,7 @@ package com.zgiot.app.server.module.sfsubsc.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.zgiot.app.server.module.coalanalysis.mapper.CoalAnalysisMapper;
+import com.zgiot.app.server.module.sfsubsc.constants.SFSubscConstant;
 import com.zgiot.app.server.module.sfsubsc.entity.dto.CardDataDTO;
 import com.zgiot.app.server.module.sfsubsc.entity.pojo.SFSubscriptionCard;
 import com.zgiot.app.server.module.sfsubsc.entity.pojo.SubscCardTypeDO;
@@ -1310,7 +1311,7 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
 
     @Override
     public List<SFSubscriptionCard> getSubCardTypeByUuid(String userUuid) {
-        return subscCardTypeMapper.getSubCardTypeByUuid(userUuid);
+        return subscCardTypeMapper.getSubCardTypeByUuid(userUuid, SFSubscConstant.PAD_CLIENT_ID);
     }
 
     @Override
