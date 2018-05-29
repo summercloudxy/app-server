@@ -1,7 +1,7 @@
 package com.zgiot.app.server.module.sfstart;
 
 import com.zgiot.app.server.dataprocessor.DataListener;
-import com.zgiot.app.server.module.sfstart.constants.StartStopConstants;
+import com.zgiot.app.server.module.sfstart.constants.StartConstants;
 import com.zgiot.app.server.module.sfstart.controller.StartHandler;
 import com.zgiot.app.server.module.sfstart.pojo.StartDevice;
 import com.zgiot.app.server.module.sfstart.service.StartService;
@@ -42,10 +42,10 @@ public class StartBrowseListener implements DataListener {
         for (String label : startStopManager.getLabelBydevices())
             if (thingMetricLabel.getLabelPath().equals(label)) {
                 logger.info("启车总览标签{}的值{}收到", label, dataModel.getValue());
-                String deviceId = startService.selectDeviceIdByDatelabel(label, StartStopConstants.DEVICE_STATE).get(0);
+                String deviceId = startService.selectDeviceIdByDatelabel(label, StartConstants.DEVICE_STATE).get(0);
                 StartDevice startDevice = startService.selectStartDeviceByDeviceId(deviceId);
                 startDevice.setDeviceState(Integer.valueOf(dataModel.getValue()));
-                startHandler.sendMessagingTemplate(StartStopConstants.URI_START_BROWSE_STATE, startDevice);
+                startHandler.sendMessagingTemplate(StartConstants.URI_START_BROWSE_STATE, startDevice);
             }
     }
 
