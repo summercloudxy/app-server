@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Transactional
 public interface TransPortService {
@@ -18,4 +19,5 @@ public interface TransPortService {
 
     TransBean getTransPortCacheBean(Date date);
 
+    Map<Integer,List<Transport>> getTransportInDuration(Date startTime, Date endTime);
 }

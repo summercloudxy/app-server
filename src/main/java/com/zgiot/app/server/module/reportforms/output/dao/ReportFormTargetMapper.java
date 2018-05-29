@@ -23,7 +23,11 @@ public interface ReportFormTargetMapper {
 
     void insertTargetRecordList(@Param("list") List<ReportFormTargetRecord> targetRecordList);
 
-    List<TaskFeedbackInfo> getTaskFeedbackInfo(@Param("dutyStartTime") Date dutyStartTime, @Param("dutyEndTime") Date dutyEndTime);
+    List<TaskFeedbackInfo> getTaskFeedbackInfoList(@Param("dutyStartTime") Date dutyStartTime, @Param("dutyEndTime") Date dutyEndTime);
+
+
+    TaskFeedbackInfo getLastTaskFeedbackInfoInDuration(@Param("dutyStartTime") Date dutyStartTime, @Param("dutyEndTime") Date dutyEndTime, @Param("feedbackInfoId") Integer feedbackInfoId);
+
 
     @Select(value = "select * from rel_reportform_feedback_target")
     @MapKey(value = "feedbackInfoId")

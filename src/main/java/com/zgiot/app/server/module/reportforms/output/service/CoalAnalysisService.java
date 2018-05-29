@@ -110,4 +110,6 @@ public class CoalAnalysisService {
         return coalAnalysisBean;
     }
 
+
+
 }
