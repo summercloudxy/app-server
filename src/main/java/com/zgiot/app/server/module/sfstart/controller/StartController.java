@@ -1,8 +1,5 @@
 package com.zgiot.app.server.module.sfstart.controller;
 
-import com.zgiot.app.server.dataprocessor.DataProcessor;
-import com.zgiot.app.server.module.sfstart.StartExamineListener;
-import com.zgiot.app.server.module.sfstart.StartListener;
 import com.zgiot.app.server.module.sfstart.constants.StartConstants;
 import com.zgiot.app.server.module.sfstart.pojo.*;
 import com.zgiot.app.server.module.sfstart.service.StartMultithreading;
@@ -13,7 +10,6 @@ import com.zgiot.common.restcontroller.ServerResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -39,14 +35,6 @@ public class StartController {
     private static List<String> staticSystemIds;
 
 
-    @Autowired
-    @Qualifier("wsProcessor")
-    private DataProcessor processor;
-    @Autowired
-    private StartExamineListener startExamineListener;
-
-    @Autowired
-    private StartListener startListener;
 
     // 当前启车操作号
     private static Integer operateId;
@@ -179,7 +167,7 @@ public class StartController {
      * @param operateId
      */
     public void sendStarting(Integer operateId, Set<String> startDeviceIds) throws Exception {
-        processor.removeListener(startExamineListener);
+        StartHandler.setStartListenerFlag(true);
         StartHandler.setStartTime(new Date());
         startService.updateStartOperate(StartConstants.START_STARTING_STATE);
         startHandler.sendMessageTemplateByJson(StartConstants.URI_START_STATE, StartConstants.URI_START_STATE_MESSAGE_SET_UP_START_TASK);

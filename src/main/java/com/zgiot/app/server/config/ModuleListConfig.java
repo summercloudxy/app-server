@@ -122,6 +122,10 @@ public class ModuleListConfig {
     private SfStartManager sfStartManager;
     @Autowired
     private StartBrowseListener startBrowseListener;
+    @Autowired
+    private StartExamineListener startExamineListener;
+    @Autowired
+    private StartListener startListener;
 
     @PostConstruct
     void init() {
@@ -218,6 +222,10 @@ public class ModuleListConfig {
             if (containModule(ModuleListConfig.MODULE_SFSTART)) {
                 sfStartManager.init();
                 processor.addListener(startBrowseListener);
+                processor.addListener(startExamineListener);
+                processor.addListener(startListener);
+
+
                 QuartzManager.addJob("startDeviceByRequirement", ModuleListConfig.MODULE_SFSTART, "startDeviceByRequirement",
                         ModuleListConfig.MODULE_SFSTART, StartDeviceByRequirementJob.class, "0/20 * * * * ?");
 
