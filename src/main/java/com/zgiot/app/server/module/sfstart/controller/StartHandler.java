@@ -3,7 +3,6 @@ package com.zgiot.app.server.module.sfstart.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.zgiot.app.server.dataprocessor.DataProcessor;
 import com.zgiot.app.server.module.sfstart.StartExamineListener;
 import com.zgiot.app.server.module.sfstart.StartListener;
 import com.zgiot.app.server.module.sfstart.constants.StartConstants;
@@ -24,7 +23,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
@@ -61,6 +59,26 @@ public class StartHandler {
     // 当前系统暂停状态
     private static Boolean pauseState;
 
+
+    public static Boolean startExamineListenerFlag;
+    public static Boolean startListenerFlag;
+
+    public static Boolean getStartExamineListenerFlag() {
+        return startExamineListenerFlag;
+    }
+
+    public static void setStartExamineListenerFlag(Boolean startExamineListenerFlag) {
+        StartHandler.startExamineListenerFlag = startExamineListenerFlag;
+    }
+
+    public static Boolean getStartListenerFlag() {
+        return startListenerFlag;
+    }
+
+    public static void setStartListenerFlag(Boolean startListenerFlag) {
+        StartHandler.startListenerFlag = startListenerFlag;
+    }
+
     public static Boolean getPauseState() {
         return pauseState == null ? false : pauseState;
     }
@@ -90,9 +108,7 @@ public class StartHandler {
     @Autowired
     private CmdControlService cmdControlService;
 
-    @Autowired
-    @Qualifier("wsProcessor")
-    private DataProcessor processor;
+
     @Autowired
     private StartExamineListener startExamineListener;
 
@@ -479,8 +495,7 @@ public class StartHandler {
             examineLabel.addAll(startService.selectLabelByDeviceIdAndName(rule.getExamineDeviceId(), rule.getExamineName()));
         }
         startExamineListener.setStartExamineLabels(examineLabel);
-        processor.removeListener(startExamineListener);
-        processor.addListener(startExamineListener);
+        startExamineListenerFlag = true;
 
     }
 
@@ -1082,7 +1097,7 @@ public class StartHandler {
      */
     public void finishStartState() {
         // 取消订阅
-        processor.removeListener(startListener);
+        startListenerFlag = false;
         // 关闭观察
         StartHandler.setStartDeviceRequirements(null);
         // 关闭启车
@@ -1271,8 +1286,7 @@ public class StartHandler {
         // 新建观察者
         startListener.setStartLabels(startLabels);
         // 建立设备观察
-        processor.removeListener(startListener);
-        processor.addListener(startListener);
+        startListenerFlag = true;
 
     }
 
@@ -1308,7 +1322,7 @@ public class StartHandler {
                 cmdMetricValue = StartConstants.FALSE;
             }
         } else {
-            cmdMetricValue=String.valueOf(value);
+            cmdMetricValue = String.valueOf(value.intValue());
         }
         return cmdMetricValue;
     }

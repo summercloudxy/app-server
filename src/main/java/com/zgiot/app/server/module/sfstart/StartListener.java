@@ -26,6 +26,7 @@ public class StartListener implements DataListener {
     private StartHandler startHandler;
 
 
+
     /**
      * 需要订阅的标签
      */
@@ -45,38 +46,43 @@ public class StartListener implements DataListener {
     @Override
     public void onDataChange(DataModel dataModel) {
 
-        ThingMetricLabel thingMetricLabel = new ThingMetricLabel();
-        List<ThingMetricLabel> thingMetricLabels = tmlMapper.findThingMetricLabel(dataModel.getThingCode(), dataModel.getMetricCode());
-        if (CollectionUtils.isNotEmpty(thingMetricLabels)) {
-            thingMetricLabel = thingMetricLabels.get(0);
-        }
-
-        Double metricValue=startHandler.changeMetricValue(dataModel.getValue());
-
-
-        //启车
-        if (!startService.judgeStartingState(StartConstants.START_SEND_FINISH_STATE, StartConstants.START_FINISH_STATE)) {
-            logger.error("抛弃虚假启车标签数据{}的值{}", thingMetricLabel.getLabelPath(), metricValue);
-            return;
-        } else {
-           logger.info("启车标签{}的值{}收到", thingMetricLabel.getLabelPath(), metricValue);
-            // 返回获取数值
-            if (StartConstants.FINISH_STARTING_LABEL.equals(thingMetricLabel.getLabelPath())) {
-                if (metricValue == StartConstants.START_PLC_FINISH) {
-                    logger.info("本次启车结束，收到" + StartConstants.FINISH_STARTING_LABEL + "的反馈消息");
-                    startHandler.finishStartState();
-                    startHandler.sendMessageTemplateByJson(StartConstants.URI_START_STATE, StartConstants.URI_START_STATE_MESSAGE_START_FINISH);
-                }
-            } else if (StartConstants.PAUSE_STARTING_LABEL.equals(thingMetricLabel.getLabelPath())) {
-                if (metricValue == (double) StartConstants.VALUE_TRUE) {
-                    StartHandler.setPauseState(true);
-                } else {
-                    StartHandler.setPauseState(false);
-                }
-            } else {
-                startHandler.updateStartDeviceState(thingMetricLabel.getLabelPath(), dataModel.getValue());
+        if (StartHandler.startListenerFlag != null && StartHandler.startListenerFlag) {
+            ThingMetricLabel thingMetricLabel = new ThingMetricLabel();
+            List<ThingMetricLabel> thingMetricLabels = tmlMapper.findThingMetricLabel(dataModel.getThingCode(), dataModel.getMetricCode());
+            if (CollectionUtils.isNotEmpty(thingMetricLabels)) {
+                thingMetricLabel = thingMetricLabels.get(0);
             }
+
+            Double metricValue = startHandler.changeMetricValue(dataModel.getValue());
+
+
+            //启车
+            if (!startService.judgeStartingState(StartConstants.START_SEND_FINISH_STATE, StartConstants.START_FINISH_STATE)) {
+                logger.error("抛弃虚假启车标签数据{}的值{}", thingMetricLabel.getLabelPath(), metricValue);
+                return;
+            } else {
+                logger.info("启车标签{}的值{}收到", thingMetricLabel.getLabelPath(), metricValue);
+                // 返回获取数值
+                if (StartConstants.FINISH_STARTING_LABEL.equals(thingMetricLabel.getLabelPath())) {
+                    if (metricValue == StartConstants.START_PLC_FINISH) {
+                        logger.info("本次启车结束，收到" + StartConstants.FINISH_STARTING_LABEL + "的反馈消息");
+                        startHandler.finishStartState();
+                        startHandler.sendMessageTemplateByJson(StartConstants.URI_START_STATE, StartConstants.URI_START_STATE_MESSAGE_START_FINISH);
+                    }
+                } else if (StartConstants.PAUSE_STARTING_LABEL.equals(thingMetricLabel.getLabelPath())) {
+                    if (metricValue == (double) StartConstants.VALUE_TRUE) {
+                        StartHandler.setPauseState(true);
+                    } else {
+                        StartHandler.setPauseState(false);
+                    }
+                } else {
+                    startHandler.updateStartDeviceState(thingMetricLabel.getLabelPath(), dataModel.getValue());
+                }
+            }
+        } else {
+            return;
         }
+
 
 
     }

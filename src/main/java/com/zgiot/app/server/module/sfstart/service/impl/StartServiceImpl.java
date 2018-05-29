@@ -1,11 +1,11 @@
 package com.zgiot.app.server.module.sfstart.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.zgiot.app.server.dataprocessor.DataProcessor;
 import com.zgiot.app.server.module.sfstart.StartExamineListener;
 import com.zgiot.app.server.module.sfstart.StartListener;
 import com.zgiot.app.server.module.sfstart.constants.StartConstants;
 import com.zgiot.app.server.module.sfstart.controller.StartController;
+import com.zgiot.app.server.module.sfstart.controller.StartHandler;
 import com.zgiot.app.server.module.sfstart.mapper.StartMapper;
 import com.zgiot.app.server.module.sfstart.pojo.*;
 import com.zgiot.app.server.module.sfstart.service.StartService;
@@ -19,7 +19,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -35,10 +34,6 @@ public class StartServiceImpl implements StartService {
     @Autowired
     private MetricMapper metricMapper;
 
-
-    @Autowired
-    @Qualifier("wsProcessor")
-    private DataProcessor processor;
     @Autowired
     private StartExamineListener startExamineListener;
 
@@ -125,9 +120,9 @@ public class StartServiceImpl implements StartService {
     @Override
     public void closeStartOperate() {
         Integer findOperateId = findOperateIdWhenNull();
-        processor.removeListener(startListener);
+        StartHandler.startListenerFlag = false;
         StartController.startDeviceRequirements = null;
-        processor.removeListener(startExamineListener);
+        StartHandler.startExamineListenerFlag = false;
         startMapper.closeOperateStateByOperateId(StartConstants.IS_DELETE, findOperateId);
     }
 
