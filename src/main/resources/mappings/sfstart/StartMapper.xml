@@ -224,7 +224,7 @@
         </if>
         AND sssdr.is_delete = '0'
     </select>
-    <insert id="saveStartDeviceStateRecord" useGeneratedKeys="true" keyProperty="id">
+    <insert id="saveStartDeviceStateRecord" useGeneratedKeys="true">
         INSERT tb_start_device_state_record (
         operate_id, device_id, state, create_time, update_time, is_delete
         )

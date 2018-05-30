@@ -26,7 +26,6 @@ public class StartListener implements DataListener {
     private StartHandler startHandler;
 
 
-
     /**
      * 需要订阅的标签
      */
@@ -76,13 +75,12 @@ public class StartListener implements DataListener {
                         StartHandler.setPauseState(false);
                     }
                 } else {
-                    startHandler.updateStartDeviceState(thingMetricLabel.getLabelPath(), dataModel.getValue());
+                    startHandler.updateStartDeviceState(thingMetricLabel.getLabelPath(), metricValue);
                 }
             }
         } else {
             return;
         }
-
 
 
     }
