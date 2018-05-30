@@ -1112,15 +1112,15 @@ public class StartHandler {
      * @param label 传入标签信号值
      * @param value 数值
      */
-    public void updateStartDeviceState(String label, String value) {
+    public void updateStartDeviceState(String label, double value) {
         List<String> deviceIds = startService.selectDeviceIdByDatelabel(label, StartConstants.DEVICE_STATE);
         if (CollectionUtils.isNotEmpty(deviceIds)) {
             // 修改启车记录
             logger.info("修改设备:{}启车状态为{}", deviceIds.get(0), value);
-            updateStartDeviceState(deviceIds.get(0), value);
+            updateStartDeviceStateByDeviceId(deviceIds.get(0), value);
 
             // 发送频率
-            if (StartConstants.DEVICE_STATE_WORKING == Integer.valueOf(value)) {
+            if ((double) StartConstants.DEVICE_STATE_WORKING == value) {
                 sendFrequency(deviceIds.get(0));
             }
         }
