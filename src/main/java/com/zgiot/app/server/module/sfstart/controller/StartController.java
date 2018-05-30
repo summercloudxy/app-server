@@ -35,7 +35,6 @@ public class StartController {
     private static List<String> staticSystemIds;
 
 
-
     // 当前启车操作号
     private static Integer operateId;
 
@@ -100,7 +99,6 @@ public class StartController {
 
     /**
      * 获取启车中设备状态
-     * a
      *
      * @param
      * @return
