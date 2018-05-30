@@ -135,7 +135,7 @@ public class ReportFormDateUtil {
 
     /**
      * 判断两个时间是否在同一年
-     * @param beforeDate
+     * @param beforeDate 这里必须是之前数据
      * @param afterDate
      * @return
      */
@@ -144,12 +144,21 @@ public class ReportFormDateUtil {
         beforeCal.setTime(beforeDate);
         Calendar afterCal=Calendar.getInstance();
         afterCal.setTime(afterDate);
-        return beforeCal.get(Calendar.YEAR)==afterCal.get(Calendar.YEAR);
+        if(beforeCal.get(Calendar.YEAR)==afterCal.get(Calendar.YEAR)){
+            return true;
+        }
+        Date date = DateUtils.addHours(beforeDate, 4);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        if(calendar.get(Calendar.YEAR)==afterCal.get(Calendar.YEAR)){
+            return true;
+        }
+        return false;
     }
 
     /**
      * 判断两个时间是否在用一年的同一月
-     * @param beforeDate
+     * @param beforeDate 这里必须是之前的数据
      * @param afterDate
      * @return
      */
@@ -161,6 +170,13 @@ public class ReportFormDateUtil {
         if(beforeCal.get(Calendar.YEAR)==afterCal.get(Calendar.YEAR) && beforeCal.get(Calendar.MONTH)==afterCal.get(Calendar.MONTH)){
             return true;
         }
+
+        Calendar calendar=Calendar.getInstance();
+        calendar.setTime(DateUtils.addHours(beforeDate, 4));
+        if(calendar.get(Calendar.YEAR)==afterCal.get(Calendar.YEAR) && calendar.get(Calendar.MONTH)==afterCal.get(Calendar.MONTH)){
+            return true;
+        }
+
         return false;
     }
 
