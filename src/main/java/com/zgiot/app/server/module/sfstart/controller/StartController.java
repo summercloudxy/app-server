@@ -1,9 +1,6 @@
 package com.zgiot.app.server.module.sfstart.controller;
 
-import com.zgiot.app.server.dataprocessor.DataProcessor;
-import com.zgiot.app.server.module.sfstart.StartExamineListener;
-import com.zgiot.app.server.module.sfstart.StartListener;
-import com.zgiot.app.server.module.sfstart.constants.StartStopConstants;
+import com.zgiot.app.server.module.sfstart.constants.StartConstants;
 import com.zgiot.app.server.module.sfstart.pojo.*;
 import com.zgiot.app.server.module.sfstart.service.StartMultithreading;
 import com.zgiot.app.server.module.sfstart.service.StartService;
@@ -13,7 +10,6 @@ import com.zgiot.common.restcontroller.ServerResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -39,14 +35,6 @@ public class StartController {
     private static List<String> staticSystemIds;
 
 
-    @Autowired
-    @Qualifier("wsProcessor")
-    private DataProcessor processor;
-    @Autowired
-    private StartExamineListener startExamineListener;
-
-    @Autowired
-    private StartListener startListener;
 
     // 当前启车操作号
     private static Integer operateId;
@@ -149,11 +137,11 @@ public class StartController {
      */
     @RequestMapping(value = "/setUpStartTask", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public synchronized ResponseEntity<String> setUpStartTask() throws Exception {
-        if (startService.judgeStartingState(StartStopConstants.START_SEND_FINISH_STATE, StartStopConstants.START_FINISH_STATE)) {
+        if (startService.judgeStartingState(StartConstants.START_SEND_FINISH_STATE, StartConstants.START_FINISH_STATE)) {
             // 通知前端已经存在启车任务
             return new ResponseEntity<>(ServerResponse.buildOkJson("starting"), HttpStatus.OK);
         }
-        if (startService.judgeStartingState(null, StartStopConstants.START_SEND_FINISH_STATE)) {
+        if (startService.judgeStartingState(null, StartConstants.START_SEND_FINISH_STATE)) {
             // 通知前端信号未发送完毕
             return new ResponseEntity<>(ServerResponse.buildOkJson("sendMessageIsNotFinish"), HttpStatus.OK);
         }
@@ -179,10 +167,10 @@ public class StartController {
      * @param operateId
      */
     public void sendStarting(Integer operateId, Set<String> startDeviceIds) throws Exception {
-        processor.removeListener(startExamineListener);
+        StartHandler.setStartListenerFlag(true);
         StartHandler.setStartTime(new Date());
-        startService.updateStartOperate(StartStopConstants.START_STARTING_STATE);
-        startHandler.sendMessageTemplateByJson(StartStopConstants.URI_START_STATE, StartStopConstants.URI_START_STATE_MESSAGE_SET_UP_START_TASK);
+        startService.updateStartOperate(StartConstants.START_STARTING_STATE);
+        startHandler.sendMessageTemplateByJson(StartConstants.URI_START_STATE, StartConstants.URI_START_STATE_MESSAGE_SET_UP_START_TASK);
         startMultithreadingStart(operateId, startDeviceIds, StartMultithreading.SEND_STARTING);
     }
 
@@ -241,7 +229,7 @@ public class StartController {
     @RequestMapping(value = "/setUpAutoTest", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
     public synchronized ResponseEntity<String> setUpAutoTest(@RequestBody List<String> systemIds) throws Exception {
-        if (startService.judgeStartingState(null, StartStopConstants.START_FINISH_STATE)) {
+        if (startService.judgeStartingState(null, StartConstants.START_FINISH_STATE)) {
             // 通知前端已经存在启车任务
             return new ResponseEntity<>(ServerResponse.buildOkJson("starting"), HttpStatus.OK);
         }
@@ -300,7 +288,7 @@ public class StartController {
      * @return
      * @throws Exception
      */
-    @RequestMapping(value = "/getManualInterventionScopeStart", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/getManualInterventionScopeStart", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> getManualInterventionScopeStart(@RequestParam("deviceCode") String deviceCode) throws Exception {
         List<StartManualInterventionRecord> startManualInterventionDevices = startService.getManualInterventionScopeStart(deviceCode);
         return new ResponseEntity<>(ServerResponse.buildOkJson(startManualInterventionDevices), HttpStatus.OK);
@@ -409,22 +397,22 @@ public class StartController {
             // 通知前端检查不合格
             return new ResponseEntity<>(ServerResponse.buildOkJson("examineError"), HttpStatus.OK);
         }
-        if (startService.judgeStartingState(StartStopConstants.START_SEND_INFORMATION_STATE, StartStopConstants.START_FINISH_STATE)) {
+        if (startService.judgeStartingState(StartConstants.START_SEND_INFORMATION_STATE, StartConstants.START_FINISH_STATE)) {
             // 通知前端已经发送成功了
             return new ResponseEntity<>(ServerResponse.buildOkJson("sendIsFinish"), HttpStatus.OK);
         }
-        if (startService.judgeStartingState(StartStopConstants.START_SEND_CLEAN_STATE, StartStopConstants.START_SEND_FINISH_STATE)) {
+        if (startService.judgeStartingState(StartConstants.START_SEND_CLEAN_STATE, StartConstants.START_SEND_FINISH_STATE)) {
             // 通知前端信号发送中
             return new ResponseEntity<>(ServerResponse.buildOkJson("sendNotFinish"), HttpStatus.OK);
         }
-        if (startService.judgeStartingState(StartStopConstants.START_NO_STATE, StartStopConstants.START_SEND_CLEAN_STATE)) {
+        if (startService.judgeStartingState(StartConstants.START_NO_STATE, StartConstants.START_SEND_CLEAN_STATE)) {
             // 发送启车清除信息
             startHandler.sendCleanInformation();
         }
         Set<String> startDeviceIds = startService.getAllDeviceIdBySystenIds(staticSystemIds);
         // 发送启车信息到plc
         startMultithreadingStart(startService.findOperateIdWhenNull(), startDeviceIds, StartMultithreading.SEND_INFORMATION);
-        startService.updateStartOperate(StartStopConstants.START_SEND_INFORMATION_STATE);
+        startService.updateStartOperate(StartConstants.START_SEND_INFORMATION_STATE);
         return new ResponseEntity<>(ServerResponse.buildOkJson(SUCCESS), HttpStatus.OK);
     }
 

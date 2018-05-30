@@ -178,7 +178,7 @@
             AND operate_state &lt;#{finishState}
         </if>
     </select>
-    <insert id="saveStartOperationRecord" useGeneratedKeys="true" >
+    <insert id="saveStartOperationRecord" useGeneratedKeys="true" keyProperty="operateId">
         INSERT tb_start_operation_record (
         create_user, operate_state, operate_system, created_time, is_delete
         )
@@ -224,7 +224,7 @@
         </if>
         AND sssdr.is_delete = '0'
     </select>
-    <insert id="saveStartDeviceStateRecord" useGeneratedKeys="true" >
+    <insert id="saveStartDeviceStateRecord" useGeneratedKeys="true" keyProperty="id">
         INSERT tb_start_device_state_record (
         operate_id, device_id, state, create_time, update_time, is_delete
         )
@@ -472,7 +472,7 @@
         </if>
         AND is_delete = '0'
     </select>
-    <insert id="saveStartExamineRecord" useGeneratedKeys="true" >
+    <insert id="saveStartExamineRecord" useGeneratedKeys="true" keyProperty="examineId">
         INSERT tb_start_examine_record (
         operate_id, start_device_id, rule_id, examine_type, examine_information, examine_result, create_time, is_delete
         )
@@ -609,7 +609,7 @@
             device_id = #{deviceId}
         </if>
     </select>
-    <insert id="saveManualInterventionRecord" useGeneratedKeys="true" >
+    <insert id="saveManualInterventionRecord" useGeneratedKeys="true" keyProperty="operateId">
         INSERT INTO tb_start_manual_intervention_record (
         operate_id, device_id, intervention_state, intervention_person_id, create_time, is_delete)
         VALUES( #{operateId}, #{deviceId}, #{interventionState}, #{manualInterventionPerson}, now(), '0'
@@ -737,10 +737,9 @@
         spl.full_name AS device_name,
         spl.location_serial_num AS device_code,
         ssmir.intervention_state,
-        su.person_name AS manual_intervention_person
+        ssmir.intervention_person_id AS manual_intervention_person
         FROM
         tb_start_manual_intervention_record AS ssmir
-        INNER JOIN s_user AS su ON ssmir.intervention_person_id = su.uuid
         INNER JOIN tb_start_production_location AS spl ON ssmir.device_id = spl.object_id
         WHERE
         1 = 1
@@ -755,15 +754,15 @@
         </if>
     </select>
     <select id="selectManualInterventionRecordByBefore" resultMap="startManualInterventionRecord">
-        SELECT
+          SELECT
         zsmi.device_id,
         zsmi.state,
         spl.full_name AS device_name,
         spl.location_serial_num AS device_code,
-        su.login_name AS manual_intervention_person
+        zsmi.update_user AS manual_intervention_person
         FROM
         tb_start_manual_intervention AS zsmi
-        INNER JOIN s_user AS su ON zsmi.update_user = su.uuid
+
         INNER JOIN tb_start_production_location AS spl ON zsmi.device_id = spl.object_id
         WHERE
         1 = 1

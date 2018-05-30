@@ -1,6 +1,6 @@
 package com.zgiot.app.server.module.sfstart.service;
 
-import com.zgiot.app.server.module.sfstart.constants.StartStopConstants;
+import com.zgiot.app.server.module.sfstart.constants.StartConstants;
 import com.zgiot.app.server.module.sfstart.controller.StartHandler;
 import com.zgiot.app.server.module.sfstart.exception.StartException;
 import com.zgiot.app.server.module.sfstart.pojo.StartExamineRule;
@@ -35,8 +35,8 @@ public class StartMultithreading implements Runnable {
                     sendStartDeviceInformation(operateId);
                 } catch (Exception e) {
                     logger.error("多线程发送信号错误，错误内容为:{}", e);
-                    startService.updateStartOperate(StartStopConstants.START_SEND_CLEAN_STATE);
-                    startHandler.sendMessageTemplateByJson(StartStopConstants.URI_START_STATE, StartStopConstants.URI_START_STATE_MESSAGE_SEND_ERROR);
+                    startService.updateStartOperate(StartConstants.START_SEND_CLEAN_STATE);
+                    startHandler.sendMessageTemplateByJson(StartConstants.URI_START_STATE, StartConstants.URI_START_STATE_MESSAGE_SEND_ERROR);
                     throw new StartException("多线程发送信号错误,请重新发送");
                 }
                 break;
@@ -50,7 +50,7 @@ public class StartMultithreading implements Runnable {
                     logger.error("多线程启车错误，错误内容为:{}", e);
                     logger.error("关闭异常启车进度");
                     startService.closeStartOperate();
-                    startHandler.sendMessageTemplateByJson(StartStopConstants.URI_START_STATE, StartStopConstants.URI_START_STATE_MESSAGE_CHECK_ERROR);
+                    startHandler.sendMessageTemplateByJson(StartConstants.URI_START_STATE, StartConstants.URI_START_STATE_MESSAGE_CHECK_ERROR);
                     throw new StartException("多线程启车错误");
                 }
                 break;
@@ -60,7 +60,7 @@ public class StartMultithreading implements Runnable {
                 } catch (Exception e) {
                     logger.error("启车自检过程异常，异常信息为:{}", e);
                     startService.closeStartOperate();
-                    startHandler.sendMessageTemplateByJson(StartStopConstants.URI_START_STATE, StartStopConstants.URI_START_STATE_MESSAGE_CLOSE_EXAMINE);
+                    startHandler.sendMessageTemplateByJson(StartConstants.URI_START_STATE, StartConstants.URI_START_STATE_MESSAGE_CLOSE_EXAMINE);
                 }
                 break;
             default:
@@ -78,9 +78,9 @@ public class StartMultithreading implements Runnable {
 
         startHandler.sendStartInformation(operateId);
         // 修改状态为准备启车
-        startService.updateStartOperate(StartStopConstants.START_SEND_FINISH_STATE);
+        startService.updateStartOperate(StartConstants.START_SEND_FINISH_STATE);
         // 通知前端信号下发成功结束
-        startHandler.sendMessageTemplateByJson(StartStopConstants.URI_START_STATE, StartStopConstants.URI_START_STATE_MESSAGE_SEND_FINISH);
+        startHandler.sendMessageTemplateByJson(StartConstants.URI_START_STATE, StartConstants.URI_START_STATE_MESSAGE_SEND_FINISH);
     }
 
     /**
@@ -91,7 +91,7 @@ public class StartMultithreading implements Runnable {
         // 建立启车检查
         startHandler.createDeviceRequirement(startDeviceIds);
         // 信息发送无误后，发送启车命令
-        startHandler.writeSignalByLabel(StartStopConstants.START_DEVICE_LABEL, StartStopConstants.VALUE_TRUE, StartStopConstants.LABEL_TYPE_BOOLEAN);
+        startHandler.writeSignalByLabel(StartConstants.START_DEVICE_LABEL, StartConstants.VALUE_TRUE, StartConstants.LABEL_TYPE_BOOLEAN);
         // 建立区域判断开始
         startHandler.createAreaRuleExamine(null);
     }
@@ -114,8 +114,8 @@ public class StartMultithreading implements Runnable {
         // 创建本次启车设备记录
         startService.saveDeviceStateRecord(startDeviceIds, operateId);
         // 修改启车状态
-        startService.updateStartOperate(StartStopConstants.START_EXAMIN_STATE);
-        startHandler.sendMessageTemplateByJson(StartStopConstants.URI_START_STATE, StartStopConstants.URI_START_STATE_MESSAGE_EXAMINE_FINISH);
+        startService.updateStartOperate(StartConstants.START_EXAMIN_STATE);
+        startHandler.sendMessageTemplateByJson(StartConstants.URI_START_STATE, StartConstants.URI_START_STATE_MESSAGE_EXAMINE_FINISH);
     }
 
 
