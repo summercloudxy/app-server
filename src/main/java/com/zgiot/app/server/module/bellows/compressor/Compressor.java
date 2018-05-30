@@ -230,7 +230,7 @@ public class Compressor {
         confirmState(false);
 
         //重故障非停止状态，空压机关闭
-        String requestId = RequestIdUtil.generateRequestId();
+        String requestId = RequestIdUtil.generateRequestId(this.getClass().getSimpleName());
         stopWhenError(requestId);
 
         return this;
@@ -509,7 +509,7 @@ public class Compressor {
                         waitForStateConfirm();
                         if (!error && running && !loading) {
                             logger.info("Compressor {} unload overtime, starting stop.", thingCode);
-                            String requestId = RequestIdUtil.generateRequestId();
+                            String requestId = RequestIdUtil.generateRequestId(this.getClass().getSimpleName());
                             try {
                                 operate(EnumCompressorOperation.STOP, BellowsConstants.TYPE_AUTO, requestId);
                             } catch (SysException e) {

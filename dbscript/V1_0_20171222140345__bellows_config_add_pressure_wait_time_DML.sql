@@ -1,1 +1,0 @@
-INSERT INTO `tb_bellows_config` (`thing_code`, `param_name`, `param_value`) VALUES ('SYS', 'CP_PRESSURE_WAIT', '60');

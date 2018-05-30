@@ -194,7 +194,8 @@
         <trim prefixOverrides="AND" prefix="WHERE">
             <if test="filter.assetType != null">
                 AND
-                t.thing_type1_code = #{filter.assetType}
+                t.thing_type1_cod
+                。e = #{filter.assetType}
             </if>
             <if test="filter.category != null">
                 AND

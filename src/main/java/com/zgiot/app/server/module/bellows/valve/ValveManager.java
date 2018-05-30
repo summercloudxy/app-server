@@ -890,7 +890,7 @@ public class ValveManager {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public synchronized void checkLoop() {
-        String requestId = RequestIdUtil.generateRequestId();
+        String requestId = RequestIdUtil.generateRequestId(this.getClass().getSimpleName());
         if (logger.isDebugEnabled()) {
             logger.debug("Check valve loop. RequestId: {}.", requestId);
         }

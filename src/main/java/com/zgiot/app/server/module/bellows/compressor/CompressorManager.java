@@ -107,7 +107,7 @@ public class CompressorManager {
 
 
     public void onDataSourceChange(DataModel data) {
-        String requestId = RequestIdUtil.generateRequestId();
+        String requestId = RequestIdUtil.generateRequestId(this.getClass().getSimpleName());
         if (logger.isTraceEnabled()) {
             logger.trace("Got data: {}.RequestId: {}.", data, requestId);
         }
@@ -142,7 +142,7 @@ public class CompressorManager {
      * @param data
      */
     public void onPressureStateChange(DataModel data) {
-        String requestId = RequestIdUtil.generateRequestId();
+        String requestId = RequestIdUtil.generateRequestId(this.getClass().getSimpleName());
         if (logger.isTraceEnabled()) {
             logger.trace("Got data: {}.RequestId: {}.", data, requestId);
         }

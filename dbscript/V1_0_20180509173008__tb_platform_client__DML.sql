@@ -1,1 +1,0 @@
-INSERT INTO `tb_platform_client` VALUES ('2', 'pad');

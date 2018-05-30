@@ -35,6 +35,8 @@ public class AlertFaultHandler implements AlertHandler {
     private MetricService metricService;
     @Autowired
     private ThingService thingService;
+    @Autowired
+    private AlertProtectHandler protectHandler;
     private Logger logger = LoggerFactory.getLogger(AlertFaultHandler.class);
     private static final String ENABLE_VALUE = Boolean.TRUE.toString();
     private static final String DISABLE_VALUE = Boolean.FALSE.toString();
@@ -49,14 +51,15 @@ public class AlertFaultHandler implements AlertHandler {
         String metricCode = dataModel.getMetricCode();
         AlertData alertData = alertManager.getAlertDataByThingAndMetricCode(thingCode, metricCode);
         if (ENABLE_VALUE.equalsIgnoreCase(dataModel.getValue()) && alertData == null) {
+            String state = protectHandler.getState(dataModel);
             //判断是否是桶
-            List<NoPowerThing> noPowerThings = alertManager.getNoPowerThingByThingCode(thingCode);
-            Short level;
-            if (CollectionUtils.isNotEmpty(noPowerThings)) {
-                level = getLevelWithOutState(noPowerThings);
-            } else {
-                level = getAlertLevelWithState(dataModel, true);
-            }
+//            List<NoPowerThing> noPowerThings = alertManager.getNoPowerThingByThingCode(thingCode);
+            Short level = getAlertLevel(state);
+//            if (CollectionUtils.isNotEmpty(noPowerThings)) {
+//                level = getLevelWithOutState(noPowerThings);
+//            } else {
+//                level = getAlertLevelWithState(dataModel, true);
+//            }
             if (level == null) {
                 putCache(dataModel);
             } else {

@@ -113,7 +113,7 @@ public class CompressorGroup {
         }
 
         //初始化低压空压机压力状态和智能状态
-        String requestId = RequestIdUtil.generateRequestId();
+        String requestId = RequestIdUtil.generateRequestId(this.getClass().getSimpleName());
         setPressureState(Double.parseDouble(BellowsUtil.getDataModelValue(dataService, BellowsConstants.PRESSURE_THING_CODE, CompressorMetricConstants.PRESSURE_STATE, true).orElse(BellowsConstants.PRESSURE_NORMAL + "")), requestId);
 
         initIntelligent(requestId);
@@ -472,7 +472,8 @@ public class CompressorGroup {
 
         logger.info("Compressor {} will be unloaded because of high pressure.", compressor.getThingCode());
         try {
-            compressor.operate(EnumCompressorOperation.UNLOAD, BellowsConstants.TYPE_AUTO, RequestIdUtil.generateRequestId());
+            compressor.operate(EnumCompressorOperation.UNLOAD, BellowsConstants.TYPE_AUTO,
+                    RequestIdUtil.generateRequestId(this.getClass().getSimpleName()));
         } catch (SysException e) {
             logger.warn(e.getMessage());
         }
@@ -521,13 +522,15 @@ public class CompressorGroup {
         logger.info("Compressor {} will be running because of low pressure.", compressor.getThingCode());
         if (!compressor.isRunning()) {
             try {
-                compressor.operate(EnumCompressorOperation.START, BellowsConstants.TYPE_AUTO, RequestIdUtil.generateRequestId());
+                compressor.operate(EnumCompressorOperation.START, BellowsConstants.TYPE_AUTO,
+                        RequestIdUtil.generateRequestId(this.getClass().getSimpleName()));
             } catch (SysException e) {
                 logger.warn(e.getMessage());
             }
         } else if (!compressor.isLoading()) {
             try {
-                compressor.operate(EnumCompressorOperation.LOAD, BellowsConstants.TYPE_AUTO, RequestIdUtil.generateRequestId());
+                compressor.operate(EnumCompressorOperation.LOAD, BellowsConstants.TYPE_AUTO,
+                        RequestIdUtil.generateRequestId(this.getClass().getSimpleName()));
             } catch (SysException e) {
                 logger.warn(e.getMessage());
             }

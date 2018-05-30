@@ -107,5 +107,9 @@ public interface TMLMapper {
 
     @Select("SELECT * FROM `rel_thing_metric_label` WHERE label_path = #{labelPath}")
     ThingMetricLabel getThingMetricLabel(@Param("labelPath") String labelPath);
+    
+     @Select("SELECT * FROM `tb_thing_properties` where thing_code=#{thingCode} and prop_key=#{propKey}")
+    ThingPropertyModel findThingProperties(@Param("thingCode") String thingCode, @Param("propKey") String propKey);
+
 
 }

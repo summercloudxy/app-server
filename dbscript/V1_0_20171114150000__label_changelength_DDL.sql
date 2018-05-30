@@ -1,1 +1,0 @@
-ALTER  TABLE  `rel_thing_metric_label` MODIFY label_path VARCHAR(128);                                                  

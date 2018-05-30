@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.reportforms.output.productionmonitor.dao.ReportFormSystemStartMapper">
+
+    <select id="getTheLastOneRecord"
+            resultType="com.zgiot.app.server.module.reportforms.output.productionmonitor.pojo.ReportFormSystemStartRecord">
+        SELECT id,duty_start_time,start_time,end_time,coal_8_thing_code,coal_13_thing_code,blending_washing_type,production_description,duration,heavy_medium_lump,heavy_medium_slack,tcs_857,tcs_858,tcs_859,reason,term
+        FROM tb_report_form_system_start_record
+        WHERE   <![CDATA[duty_start_time<#{date}]]>
+        AND term = #{term}
+        ORDER BY duty_start_time DESC
+        LIMIT 0,1
+    </select>
+
+    <update id="updateRecord">
+        UPDATE tb_report_form_system_start_record
+        SET
+         duty_start_time = #{dutyStartTime},
+         start_time = #{startTime},
+         end_time = #{endTime},
+         coal_8_thing_code = #{coal8ThingCode},
+         coal_13_thing_code = #{coal13ThingCode},
+         blending_washing_type = #{blendingWashingType},
+         production_description = #{productionDescription},
+         duration = #{duration},
+         heavy_medium_slack = #{heavyMediumSlack},
+         heavy_medium_lump = #{heavyMediumLump},
+         tcs_857 = #{tcs857},
+         tcs_858 = #{tcs858},
+         tcs_859 = #{tcs859},
+         reason = #{reason},
+         term = #{term}
+        WHERE id = #{id}
+    </update>
+
+    <insert id="insertRecord" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO tb_report_form_system_start_record(duty_start_time, start_time, end_time, coal_8_thing_code, coal_13_thing_code, blending_washing_type, production_description, duration, heavy_medium_lump, heavy_medium_slack, tcs_857, tcs_858, tcs_859, reason, term) VALUES
+        (#{dutyStartTime},#{startTime},#{endTime},#{coal8ThingCode},#{coal13ThingCode},#{blendingWashingType},#{productionDescription},#{duration},#{heavyMediumLump},#{heavyMediumSlack},#{tcs857},#{tcs858},#{tcs859},#{reason},#{term})
+    </insert>
+
+    <delete id="deleteRecord">
+        DELETE FROM tb_report_form_system_start_record WHERE id = #{id}
+    </delete>
+
+    <select id="getRecordsOnDuty"
+            resultType="com.zgiot.app.server.module.reportforms.output.productionmonitor.pojo.ReportFormSystemStartRecord">
+        SELECT id,duty_start_time,start_time,end_time,coal_8_thing_code,coal_13_thing_code,blending_washing_type,production_description,duration,heavy_medium_lump,heavy_medium_slack,tcs_857,tcs_858,tcs_859,reason,term
+        FROM tb_report_form_system_start_record
+        WHERE   duty_start_time = #{dutyStartTime}
+        AND term = #{term}
+        ORDER BY duty_start_time ASC
+    </select>
+
+    <select id="getAllModuleStateThreshold" resultType="com.zgiot.app.server.module.reportforms.output.productionmonitor.pojo.StateThreshold">
+        SELECT id,thing_code,metric_code,threshold_value,module,term,`index`
+        FROM tb_report_form_module_state_threshold
+    </select>
+</mapper>

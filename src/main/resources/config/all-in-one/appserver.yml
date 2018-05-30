@@ -1,0 +1,68 @@
+
+# 监控服务配置
+spring:
+  application:
+    name: app-server
+  boot:
+    admin:
+      url: http://localhost:9090/app-server
+management.security.enabled: false
+
+# profile配置
+spring.profiles.active: dev
+
+# 服务器配置
+server:
+  context-path: /app-server
+  port: 9090
+
+# 数据库配置
+spring.datasource.druid:
+  url: ${mysql.url}
+  username: ${mysql.username}
+  password: ${mysql.password}
+  initial-size: 5
+  min-idle: 2
+  max-active: 20
+  test-on-borrow: true
+  driver-class-name: com.mysql.jdbc.Driver
+
+mongo:
+  enable: ${mongodb.enable}
+  url: ${mongodb.url}
+  port: ${mongodb.port}
+  db-name: ${mongodb.db-name}
+
+# data engine配置
+dataengine:
+  enable: true
+  https: ${dataengine.https}
+  server-name: ${dataengine.server-name}
+  websocket-endpoint: ${dataengine.websocket-endpoint}
+  read-timeout: ${dataengine.read-timeout}
+  handshake-timeout: ${dataengine.handshake-timeout}
+  connection-timeout: ${dataengine.connection-timeout}
+mybatis:
+  mapper-locations: classpath:mappings/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
+alert:
+  param:
+    period: 60000
+
+
+# STOMP client
+stomp:
+  client:
+    server-url:
+      ${stomp.client.server-url}
+    topics:
+      topic/ss,topic/12
+
+
+shift:
+  time:
+    day: 8
+    night: 20
+

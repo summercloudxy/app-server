@@ -1,1 +1,0 @@
-INSERT INTO `tb_thing_tag` VALUES ('1', 'EQUIPMENT', '设备', null, null, '2', '2018-02-06 15:20:13', null, null, null);
