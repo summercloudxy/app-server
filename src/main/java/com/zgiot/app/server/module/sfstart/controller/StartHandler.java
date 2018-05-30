@@ -804,7 +804,7 @@ public class StartHandler {
      * 发送操作信号
      *
      * @param deviceId      设备号
-     * @param nameId    信号值
+     * @param nameId        信号值
      * @param operateUserId 操作者id
      * @param value         操作值
      * @throws Exception
@@ -818,8 +818,8 @@ public class StartHandler {
         StartDeviceSignal startDeviceSignal = startService.getStartDeviceSignalById(Integer.valueOf(nameId));
         MetricModel metricModel = tmlMapper.findMetricByMetricName(startDeviceSignal.getName());
         dataModel.setMetricCode(metricModel.getMetricCode());
-        dataModel.setValue(dealMetricValue(metricModel.getValueType(),value));
-        CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(dataModel,"发送信号");
+        dataModel.setValue(dealMetricValue(metricModel.getValueType(), value));
+        CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(dataModel, "发送信号");
         if (cmdSendResponseData.getOkCount() == 0) {
             logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage());
         }
@@ -918,7 +918,7 @@ public class StartHandler {
                 if (value == 1) {
                     relation.setAbnormal(startService.getFaultByDeviceId(relation.getControlDeviceId()));
                 }
-            }else{
+            } else {
                 relation.setControlDeviceState(Double.valueOf("0"));
             }
         }
@@ -976,9 +976,9 @@ public class StartHandler {
         startDeviceControlInformation.setStartRequirements(startRequirements);
         // 获得人工干预信息
         List<StartManualInterventionRecord> startManualInterventionRecords = startService.selectStartingManualInterventionRecord(deviceId, operateId, null);
-        if(CollectionUtils.isNotEmpty(startManualInterventionRecords)){
+        if (CollectionUtils.isNotEmpty(startManualInterventionRecords)) {
             startDeviceControlInformation.setStartManualInterventionRecord(startManualInterventionRecords.get(0));
-        }else{
+        } else {
             startDeviceControlInformation.setStartManualInterventionRecord(null);
         }
 
@@ -1098,6 +1098,7 @@ public class StartHandler {
     public void finishStartState() {
         // 取消订阅
         startListenerFlag = false;
+        startExamineListenerFlag = false;
         // 关闭观察
         StartHandler.setStartDeviceRequirements(null);
         // 关闭启车
@@ -1113,13 +1114,13 @@ public class StartHandler {
      */
     public void updateStartDeviceState(String label, String value) {
         List<String> deviceIds = startService.selectDeviceIdByDatelabel(label, StartConstants.DEVICE_STATE);
-        if(CollectionUtils.isNotEmpty(deviceIds)){
+        if (CollectionUtils.isNotEmpty(deviceIds)) {
             // 修改启车记录
             logger.info("修改设备:{}启车状态为{}", deviceIds.get(0), value);
             updateStartDeviceState(deviceIds.get(0), value);
 
             // 发送频率
-            if ( StartConstants.DEVICE_STATE_WORKING ==Integer.valueOf(value)  ) {
+            if (StartConstants.DEVICE_STATE_WORKING == Integer.valueOf(value)) {
                 sendFrequency(deviceIds.get(0));
             }
         }
@@ -1292,28 +1293,30 @@ public class StartHandler {
 
     /**
      * 查询处理指标值
+     *
      * @param metricDataValue
      * @return
      */
-    public  Double changeMetricValue(String metricDataValue){
+    public Double changeMetricValue(String metricDataValue) {
         Double metricValue;
-        if(StartConstants.TRUE.equals(metricDataValue)){
-            metricValue=1.0;
-        }else if(StartConstants.FALSE.equals(metricDataValue)){
-            metricValue=0.0;
-        }else {
-            metricValue=Double.valueOf(metricDataValue);
+        if (StartConstants.TRUE.equals(metricDataValue)) {
+            metricValue = 1.0;
+        } else if (StartConstants.FALSE.equals(metricDataValue)) {
+            metricValue = 0.0;
+        } else {
+            metricValue = Double.valueOf(metricDataValue);
         }
         return metricValue;
     }
 
     /**
      * 处理下发的指标类型
+     *
      * @param metricType
      * @param value
      * @return
      */
-   public String dealMetricValue(String metricType,Float value) {
+    public String dealMetricValue(String metricType, Float value) {
         String cmdMetricValue = "";
         if (StartConstants.BOO.equals(metricType)) {
             if (value == 1.0) {
