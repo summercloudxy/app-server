@@ -63,9 +63,9 @@ public class BusinessServiceImpl implements BusinessService {
         DataModelWrapper data2 = dataService.getData(thingCode, MetricCodes.TAP_CLOSE).orElse(null);
         String value =AppServerConstant.UNKNOWN;
         if(data1 != null && data2 != null){
-            if ("1".equals(data1.getValue()) && "0".equals(data2.getValue())){
+            if ("true".equals(data1.getValue()) && "false".equals(data2.getValue())){
                 return AppServerConstant.TAP_OPEN;
-            }else if ("0".equals(data1.getValue()) && "1".equals(data2.getValue())){
+            }else if ("false".equals(data1.getValue()) && "true".equals(data2.getValue())){
                 return AppServerConstant.TAP_CLOSE;
             }
         }
