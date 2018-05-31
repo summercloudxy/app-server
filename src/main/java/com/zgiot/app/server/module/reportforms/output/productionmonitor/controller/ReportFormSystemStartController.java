@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "systemstart")
+@RequestMapping(value = "/reportform/systemstart")
 public class ReportFormSystemStartController {
     @Autowired
     private ReportFormSystemStartService reportFormSystemStartService;

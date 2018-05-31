@@ -24,7 +24,7 @@ import java.util.Date;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = GlobalConstants.API_VERSION + "/reportform/influenceTime/")
+@RequestMapping(value = "/reportform/influenceTime/")
 public class InfluenceTimeController {
 
     @Autowired
