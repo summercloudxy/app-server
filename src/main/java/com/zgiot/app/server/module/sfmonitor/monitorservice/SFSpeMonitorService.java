@@ -2,6 +2,7 @@ package com.zgiot.app.server.module.sfmonitor.monitorservice;
 
 import com.zgiot.app.server.module.sfmonitor.controller.SFSpeMonitorReq;
 import com.zgiot.app.server.module.sfmonitor.controller.SystemMonitorDetailInfo;
+import com.zgiot.app.server.module.sfmonitor.pojo.RelSfSpeMonThingMetric;
 import com.zgiot.app.server.module.sfmonitor.pojo.ThingTag;
 
 import java.util.List;
@@ -42,5 +43,5 @@ public interface SFSpeMonitorService {
     /**
      * 获取专题监控页面查询的信号
      */
-    List<Map<String,String>> getMetricList(SFSpeMonitorReq sFSpeMonitorReq);
+    List<RelSfSpeMonThingMetric> getMetricList(SFSpeMonitorReq sFSpeMonitorReq);
 }

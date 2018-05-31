@@ -92,7 +92,6 @@ public class SFSpeMonitorController {
     public ResponseEntity<String> getSpecialMonitorMetric(@RequestBody String bodyStr){
         ControllerUtil.validateBodyRequired(bodyStr);
         SFSpeMonitorReq sFSpeMonitorReq = JSON.parseObject(bodyStr, SFSpeMonitorReq.class);
-        List<Map<String,String>> metricList = sfSpeMonitorService.getMetricList(sFSpeMonitorReq);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(metricList), HttpStatus.OK);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(sfSpeMonitorService.getMetricList(sFSpeMonitorReq)), HttpStatus.OK);
     }
 }

@@ -97,13 +97,10 @@ public class SFSpeMonitorServiceImpl implements SFSpeMonitorService {
     public SystemMonitorDetailInfo getSpecialMonitorDetailProtect(SFSpeMonitorReq sFSpeMonitorReq) {
         SystemMonitorDetailInfo systemMonitorDetailInfo = new SystemMonitorDetailInfo();
         List<RelSFSysMonitorTermThing> sfThingList =  new ArrayList<>();
-        short termCount = 0;
         RelSFSysMonitorTermThing monitorThing = new RelSFSysMonitorTermThing();
-        monitorThing.setSelectCount(sFSpeMonitorReq.getPageNum()*SFSpeMonitorConstant.pageSize);
-        monitorThing.setThingCode(sFSpeMonitorReq.getThingCode());
         monitorThing.setMetricCode(sFSpeMonitorReq.getMetricCode());
         monitorThing.setTermId(sFSpeMonitorReq.getTermCount() == null ? SFSysMonitorConstant.TERM_ONE : sFSpeMonitorReq.getTermCount());
-        if(sFSpeMonitorReq.getThingCode() != null){
+        if(StringUtils.isNotBlank(sFSpeMonitorReq.getThingCode())){
             monitorThing.setThingCode(sFSpeMonitorReq.getThingCode());
         }
         monitorThing.setSelectCount(sFSpeMonitorReq.getPageNum() * SFSpeMonitorConstant.pageSize);
@@ -111,20 +108,19 @@ public class SFSpeMonitorServiceImpl implements SFSpeMonitorService {
         List<ThingTag> thingTags = thingTagMapper.getThingTagByParentId(thingTagId);
         ThingTag thingTag = thingTagMapper.getThingTagById(thingTagId);
         if (thingTags != null && thingTags.size() > 0) {
-            List<RelSFSysMonitorTermThing> sfThings;
             for(ThingTag tag:thingTags){
                 monitorThing.setThingTagCode(tag.getCode());
-                sfThings = monitorTermThingMapper.getSFSysMonitorThing(monitorThing);
+                List<RelSFSysMonitorTermThing> sfThings = monitorTermThingMapper.getSFSysMonitorThing(monitorThing);
                 sfThingList.addAll(sfThings);
             }
         } else {
             monitorThing.setThingTagCode(thingTag.getCode());
             sfThingList = monitorTermThingMapper.getSFSysMonitorThing(monitorThing);
         }
-        getThingMetricProtect(sfThingList,systemMonitorDetailInfo);
+        getThingMetricProtect(sfThingList, monitorThing, systemMonitorDetailInfo);
         // todo 排序
-        systemMonitorDetailInfo.setTermCount(termCount);
-        systemMonitorDetailInfo.setRelSFSysMonitorTermThingList(sfThingList);
+        systemMonitorDetailInfo.setTermCount(monitorThing.getTermId());
+//        systemMonitorDetailInfo.setRelSFSysMonitorTermThingList(sfThingList);
         return systemMonitorDetailInfo;
     }
 
@@ -141,14 +137,13 @@ public class SFSpeMonitorServiceImpl implements SFSpeMonitorService {
         List<String> thingCodeList = new ArrayList<>();
         Long thingTagId = Long.parseLong(sFSpeMonitorReq.getThingtagId2() == null ? sFSpeMonitorReq.getThingtagId1() : sFSpeMonitorReq.getThingtagId2());
         monitorThing.setTermId(sFSpeMonitorReq.getTermCount());
-        //有二级系统id按二级系统id查询thingCode
-        if(!StringUtils.isEmpty(sFSpeMonitorReq.getThingtagId2())){
+        // 有二级系统id按二级系统id查询thingCode
+        List<ThingTag> thingTags = thingTagMapper.getThingTagByParentId(thingTagId);
+        if(StringUtils.isNotEmpty(sFSpeMonitorReq.getThingtagId2()) || thingTags == null || thingTags.isEmpty()){
             ThingTag thingTag = thingTagMapper.getThingTagById(thingTagId);
             monitorThing.setThingTagCode(thingTag.getCode());
             thingCodeList = monitorTermThingMapper.getThingCodeList(monitorThing);
-
         }else{
-            List<ThingTag> thingTags = thingTagMapper.getThingTagByParentId(thingTagId);
             for(ThingTag tag :thingTags){
                 monitorThing.setThingTagCode(tag.getCode());
                 List<String> thingCodes = monitorTermThingMapper.getThingCodeList(monitorThing);
@@ -159,36 +154,31 @@ public class SFSpeMonitorServiceImpl implements SFSpeMonitorService {
     }
 
     @Override
-    public List<Map<String, String>> getMetricList(SFSpeMonitorReq sFSpeMonitorReq) {
-        List<Map<String, String>> resultList = new ArrayList<>();
-        List<RelSfSpeMonThingMetric> speMonThingMetricList;
+    public List<RelSfSpeMonThingMetric> getMetricList(SFSpeMonitorReq sFSpeMonitorReq) {
         RelSFSysMonitorTermThing monitorThing = new RelSFSysMonitorTermThing();
-        Map<String, String> map = new HashMap<>();
-        RelSfSpeMonThingMetricExample speThingExample = new RelSfSpeMonThingMetricExample();
-        RelSfSpeMonThingMetricExample.Criteria criteria = speThingExample.createCriteria();
         Long thingTagId = Long.parseLong(sFSpeMonitorReq.getThingtagId2() == null ? sFSpeMonitorReq.getThingtagId1() : sFSpeMonitorReq.getThingtagId2());
         monitorThing.setTermId(sFSpeMonitorReq.getTermCount());
-        //有二级系统id按二级系统id查询metric
-        if(!StringUtils.isEmpty(sFSpeMonitorReq.getThingtagId2())){
+
+        List<String> thingCodeList = new ArrayList<>();
+        List<String> thingTagCodeList = new ArrayList<>();
+        // 有二级系统id按二级系统id查询thingCode
+        if(StringUtils.isNotEmpty(sFSpeMonitorReq.getThingtagId2())){
             ThingTag thingTag = thingTagMapper.getThingTagById(thingTagId);
-            criteria.andThingTagCodeEqualTo(thingTag.getCode());
-            speMonThingMetricList= speMonThingMetricMapper.selectByExample(speThingExample);
-            for(RelSfSpeMonThingMetric speMonThingMetric :speMonThingMetricList){
-                map.put(speMonThingMetric.getMetricCode(),speMonThingMetric.getMetricName());
-                resultList.add(map);
-            }
+            monitorThing.setThingTagCode(thingTag.getCode());
+            thingCodeList = monitorTermThingMapper.getThingCodeList(monitorThing);
+            thingTagCodeList.add(thingTag.getCode());
         }else{
             List<ThingTag> thingTags = thingTagMapper.getThingTagByParentId(thingTagId);
             for(ThingTag tag :thingTags){
-                criteria.andThingTagCodeEqualTo(tag.getCode());
-                speMonThingMetricList= speMonThingMetricMapper.selectByExample(speThingExample);
-                for(RelSfSpeMonThingMetric speMonThingMetric :speMonThingMetricList){
-                    map.put(speMonThingMetric.getMetricCode(),speMonThingMetric.getMetricName());
-                    resultList.add(map);
-                }
+                monitorThing.setThingTagCode(tag.getCode());
+                List<String> thingCodes = monitorTermThingMapper.getThingCodeList(monitorThing);
+                thingCodeList.addAll(thingCodes);
+                thingTagCodeList.add(tag.getCode());
             }
         }
-        return resultList;
+
+        List<RelSfSpeMonThingMetric> speMonThingMetricList = speMonThingMetricMapper.getMetricType(thingCodeList, thingTagCodeList);
+        return speMonThingMetricList;
     }
 
     public SystemMonitorDetailInfo getMonitorTermThing(SFSpeMonitorReq sFSpeMonitorReq){
@@ -297,20 +287,46 @@ public class SFSpeMonitorServiceImpl implements SFSpeMonitorService {
     /**
      * 获取设备保护模块设备数据
      */
-    public void getThingMetricProtect(List<RelSFSysMonitorTermThing> sfThingList,SystemMonitorDetailInfo systemMonitorDetailInfo){
-        RelSfSpeMonThingMetricExample speThingExample = new RelSfSpeMonThingMetricExample();
-        RelSfSpeMonThingMetricExample.Criteria criteria = speThingExample.createCriteria();
+    public void getThingMetricProtect(List<RelSFSysMonitorTermThing> sfThingList,
+            RelSFSysMonitorTermThing monitorThing, SystemMonitorDetailInfo systemMonitorDetailInfo){
         List<RelSfSpeMonThingMetric> speMonThingMetricList = new ArrayList<>();
+
+        int realCount = 0;
         for(RelSFSysMonitorTermThing mt:sfThingList){
             //获取当前设备所有信号
             if(mt.getShowType() !=SFSysMonitorConstant.SHOW_TYPE_2){
+                RelSfSpeMonThingMetricExample speThingExample = new RelSfSpeMonThingMetricExample();
+                RelSfSpeMonThingMetricExample.Criteria criteria = speThingExample.createCriteria();
+
                 criteria.andThingTagCodeEqualTo(mt.getThingTagCode()).andThingCodeEqualTo(mt.getThingCode());
-                List<RelSfSpeMonThingMetric> thingMetrics = speMonThingMetricMapper.selectByExample(speThingExample);
-                for(RelSfSpeMonThingMetric thingMetric:thingMetrics){
-                    getMetricValueProtect(thingMetric);
-                    thingMetric.setThingName(tmlMapper.getThingByCode(thingMetric.getThingCode()).getThingName());
+                if (StringUtils.isNotBlank(monitorThing.getMetricCode())) {
+                    criteria.andMetricCodeEqualTo(monitorThing.getMetricCode());
                 }
+                List<RelSfSpeMonThingMetric> thingMetrics = speMonThingMetricMapper.selectByExample(speThingExample);
+
+                // 处理分页逻辑
+                if (thingMetrics != null && !thingMetrics.isEmpty()) {
+                    realCount += thingMetrics.size();
+                } else {
+                    continue;
+                }
+
+                int num = thingMetrics.size();
+                if (realCount > monitorThing.getSelectCount()) {
+                    num = num - (realCount - monitorThing.getSelectCount());
+                }
+
+                // 获取metricValue
+                for (int i = 0;i < num;i++) {
+                    getMetricValueProtect(thingMetrics.get(i));
+                    thingMetrics.get(i).setThingName(tmlMapper.getThingByCode(thingMetrics.get(i).getThingCode()).getThingName());
+                }
+
                 speMonThingMetricList.addAll(thingMetrics);
+                if (speMonThingMetricList.size() > monitorThing.getSelectCount()) {
+                    speMonThingMetricList = speMonThingMetricList.subList(0, monitorThing.getSelectCount());
+                    break;
+                }
             }
         }
         systemMonitorDetailInfo.setSpeMonThingMetricList(speMonThingMetricList);
@@ -320,13 +336,13 @@ public class SFSpeMonitorServiceImpl implements SFSpeMonitorService {
      * 获取设备保护模块信号数据
      */
     public void getMetricValueProtect(RelSfSpeMonThingMetric thingMetric){
-        if(!StringUtils.isEmpty(thingMetric.getMetricCode())){
+        if(StringUtils.isNotEmpty(thingMetric.getMetricCode())){
             Optional<DataModelWrapper> data = dataService.getData(thingMetric.getThingCode(),thingMetric.getMetricCode());
             if (data.isPresent()) {
                 thingMetric.setMetricValue(data.get().getValue());
             }
         }
-        if(!StringUtils.isEmpty(thingMetric.getMetricCode2())){
+        if(StringUtils.isNotEmpty(thingMetric.getMetricCode2())){
             Optional<DataModelWrapper> data = dataService.getData(thingMetric.getThingCode(),thingMetric.getMetricCode2());
             if (data.isPresent()) {
                 thingMetric.setMetricValue2(data.get().getValue());

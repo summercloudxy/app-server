@@ -348,4 +348,20 @@
       update_date = #{updateDate,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}
   </update>
+
+  <select id="getMetricType" resultType="com.zgiot.app.server.module.sfmonitor.pojo.RelSfSpeMonThingMetric">
+    SELECT metric_code,metric_name FROM rel_sfspemon_thing_metric
+    WHERE thing_code IN
+    <foreach collection="thingCodeList" item="thingCode" index="index"
+             open="(" close=")" separator=",">
+      #{thingCode}
+    </foreach>
+    AND thing_tag_code IN
+    <foreach collection="thingTagCodeList" item="thingTagCode" index="index"
+             open="(" close=")" separator=",">
+      #{thingTagCode}
+    </foreach>
+    GROUP BY metric_code
+  </select>
+
 </mapper>

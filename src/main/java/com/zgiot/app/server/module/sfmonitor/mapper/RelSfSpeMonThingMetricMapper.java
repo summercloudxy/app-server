@@ -96,4 +96,8 @@ public interface RelSfSpeMonThingMetricMapper {
      * @mbggenerated Thu Apr 26 14:58:13 CST 2018
      */
     int updateByPrimaryKey(RelSfSpeMonThingMetric record);
+
+    List<RelSfSpeMonThingMetric> getMetricType(@Param("thingCodeList") List<String> thingCodeList,
+                                               @Param("thingTagCodeList") List<String> thingTagCodeList);
+
 }
