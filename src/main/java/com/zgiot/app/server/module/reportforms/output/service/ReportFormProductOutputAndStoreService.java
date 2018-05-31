@@ -544,11 +544,11 @@ public class ReportFormProductOutputAndStoreService {
     public void generateRawData(CoalAnalysisRecord rawCoalRecord, CoalAnalysisRecord clenedCoalRecord, CoalAnalysisRecord washedCoalRecord, CoalAnalysisRecord slimeRecord, Date date) {
         Map<Integer, ReportFormProductOutput> productOutputInfo = getProductOutputInfo(date);
         double aad = 0.0;
-        if (productOutputInfo.get(ReportFormCoalTypeConstant.rawCoal).getRealDay() != 0) {
-            aad = (productOutputInfo.get(ReportFormCoalTypeConstant.clenedCoal).getRealDay() * clenedCoalRecord.getAad()
-                    + productOutputInfo.get(ReportFormCoalTypeConstant.washedCoal).getRealDay() * washedCoalRecord.getAad()
-                    + productOutputInfo.get(ReportFormCoalTypeConstant.slime).getRealDay() * slimeRecord.getAad()
-                    + productOutputInfo.get(ReportFormCoalTypeConstant.washeryRejects).getRealDay() * 78) /
+        if (productOutputInfo.containsKey(ReportFormCoalTypeConstant.rawCoal) && productOutputInfo.get(ReportFormCoalTypeConstant.rawCoal).getRealDay() != 0) {
+            aad = ((productOutputInfo.containsKey(ReportFormCoalTypeConstant.clenedCoal) ? productOutputInfo.get(ReportFormCoalTypeConstant.clenedCoal).getRealDay() * clenedCoalRecord.getAad() : 0)
+                    + (productOutputInfo.containsKey(ReportFormCoalTypeConstant.washedCoal) ? productOutputInfo.get(ReportFormCoalTypeConstant.washedCoal).getRealDay() * washedCoalRecord.getAad() : 0)
+                    + (productOutputInfo.containsKey(ReportFormCoalTypeConstant.slime) ? productOutputInfo.get(ReportFormCoalTypeConstant.slime).getRealDay() * slimeRecord.getAad() : 0)
+                    + (productOutputInfo.containsKey(ReportFormCoalTypeConstant.washeryRejects) ? (productOutputInfo.get(ReportFormCoalTypeConstant.washeryRejects).getRealDay() * 78) : 0)) /
                     productOutputInfo.get(ReportFormCoalTypeConstant.rawCoal).getRealDay();
         }
         rawCoalRecord.setAad(aad);
