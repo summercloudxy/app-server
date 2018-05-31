@@ -465,7 +465,7 @@ public class ReportFormProductOutputAndStoreService {
             if (productTransportBean.get(coalType).containsKey(1) && productTransportBean.get(coalType).get(1) != null && productTransportBean.get(coalType).get(1).getDayVolume() != null) {
                 productStore.setValue(productStore.getValue() - productTransportBean.get(coalType).get(1).getDayVolume());
             }
-            if (productTransportBean.get(coalType).containsKey(2) && productTransportBean.get(coalType).get(2) != null && productTransportBean.get(coalType).get(1).getDayVolume() != null) {
+            if (productTransportBean.get(coalType).containsKey(2) && productTransportBean.get(coalType).get(2) != null && productTransportBean.get(coalType).get(2).getDayVolume() != null) {
                 productStore.setValue(productStore.getValue() - productTransportBean.get(coalType).get(2).getDayVolume());
             }
         }
