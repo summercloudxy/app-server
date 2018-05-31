@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.reportforms.output.dao.ReportFormProductionMapper">
+
+    <select id="getReportFormProductOutputPlan"
+            resultType="com.zgiot.app.server.module.reportforms.output.pojo.ReportFormProductOutput">
+        SELECT * FROM tb_report_form_product_output_plan
+        WHERE product_start_time = #{param0}
+    </select>
+
+    <select id="getReportFormProductOutput"
+            resultType="com.zgiot.app.server.module.reportforms.output.pojo.ReportFormProductOutput">
+             SELECT * FROM tb_report_form_product_output
+        WHERE product_start_time = #{param0}
+    </select>
+
+    <select id="getReportFormProductStore"
+            resultType="com.zgiot.app.server.module.reportforms.output.pojo.ReportFormProductStore">
+        SELECT * FROM tb_report_form_product_store
+        WHERE product_start_time = #{param0}
+    </select>
+
+    <select id="getReportFormProductQuality"
+            resultType="com.zgiot.app.server.module.reportforms.output.pojo.ReportFormProductQuality">
+        SELECT * FROM tb_report_form_product_quality
+        WHERE product_start_time = #{param0}
+    </select>
+
+    <insert id="insertReportFormProductOutputPlans">
+        INSERT INTO tb_report_form_product_output_plan ( product_start_time, coal_type, plan_day, plan_month,
+        plan_year)
+        VALUES
+        <foreach collection="list" item="item" open="(" close=")" separator="),(">
+            #{item.productStartTime},#{item.coalType},#{item.planDay},#{item.planMonth},#{item.planYear}
+        </foreach>
+
+    </insert>
+
+    <insert id="insertReportFormProductOutputs"  keyProperty="id" keyColumn="id" useGeneratedKeys="true">
+        INSERT INTO tb_report_form_product_output (product_start_time, coal_type, plan_day, real_day, profit_lose_day,
+        ratio_day, plan_month, real_month, profit_lose_month, ratio_month, plan_year, real_year, profit_lose_year,
+        ratio_year)
+        VALUES
+        <foreach collection="list" item="item" open="(" close=")" separator="),(">
+            #{item.productStartTime},#{item.coalType},#{item.planDay},#{item.realDay},#{item.profitLoseDay},#{item.ratioDay},#{item.planMonth},#{item.realMonth},#{item.profitLoseMonth},#{item.ratioMonth},#{item.planYear},#{item.realYear},#{item.profitLoseYear},#{item.ratioYear}
+        </foreach>
+    </insert>
+
+    <insert id="insertReportFormProductQualities"  keyProperty="id" keyColumn="id" useGeneratedKeys="true">
+        insert INTO tb_report_form_product_quality ( product_start_time, coal_type, aad, mt, stad, qnetar)
+        VALUES
+        <foreach collection="list" item="item" open="(" close=")" separator="),(">
+            #{item.productStartTime},#{item.coalType},#{item.aad},#{item.mt},#{item.stad},#{item.qnetar}
+        </foreach>
+    </insert>
+
+    <insert id="insertReportFormProductStores" keyProperty="id" keyColumn="id" useGeneratedKeys="true">
+        INSERT INTO tb_report_form_product_store (product_start_time, coal_type, `value`) VALUES
+        <foreach collection="list" item="item" open="(" close=")" separator="),(">
+            #{item.productStartTime},#{item.coalType},#{item.value}
+        </foreach>
+    </insert>
+
+    <insert id="insertReportFormProductStore" keyProperty="id" keyColumn="id" useGeneratedKeys="true">
+        INSERT INTO tb_report_form_product_store (product_start_time, coal_type, `value`) VALUES
+            (#{productStartTime},#{coalType},#{value})
+
+    </insert>
+
+    <insert id="updateReportFormProductStore">
+       update tb_report_form_product_store set value = #{value} where id = #{id} ;
+    </insert>
+
+</mapper>

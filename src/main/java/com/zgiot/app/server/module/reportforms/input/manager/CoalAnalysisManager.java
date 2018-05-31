@@ -35,21 +35,21 @@ public class CoalAnalysisManager implements ReportFormsManager {
 
     @Override
     public void updateRecordWithOutDensityAndFlow(ReportFormsRecord record) {
-        logger.debug("化验数据项目-{},样本-{},时间-{}，该化验数据已经存在，对应数据库id为{}，进行更新",record.getTarget(),record.getSample(),record.getTime(),record.getId());
+        logger.debug("化验数据项目-{},样本-{},时间-{}，该化验数据已经存在，对应数据库id为{}，进行更新", record.getTarget(), record.getSample(), record.getTime(), record.getId());
         coalAnalysisMapper.updateRecordWithOutDensityAndFlow((CoalAnalysisRecord) record);
     }
 
 
     @Override
     public void updateRecordDensityAndFlow(ReportFormsRecord record) {
-        logger.debug("化验数据项目-{},样本-{},时间-{}，该化验数据已经存在，对应数据库id为{}，更新其密度和顶水流量",record.getTarget(),record.getSample(),record.getTime(),record.getId());
+        logger.debug("化验数据项目-{},样本-{},时间-{}，该化验数据已经存在，对应数据库id为{}，更新其密度和顶水流量", record.getTarget(), record.getSample(), record.getTime(), record.getId());
         coalAnalysisMapper.updateRecordDensityAndFlow((CoalAnalysisRecord) record);
     }
 
 
     @Override
     public void insertRecord(ReportFormsRecord record) {
-        logger.debug("化验数据项目-{},样本-{},时间-{}，该化验数据不存在,新增一条煤质化验数据",record.getTarget(),record.getSample(),record.getTime());
+        logger.debug("化验数据项目-{},样本-{},时间-{}，该化验数据不存在,新增一条煤质化验数据", record.getTarget(), record.getSample(), record.getTime());
         coalAnalysisMapper.insertRecord((CoalAnalysisRecord) record);
     }
 
@@ -137,6 +137,19 @@ public class CoalAnalysisManager implements ReportFormsManager {
 
 
     private boolean hasAllRecordBeforeAvgRecord(CoalAnalysisRecord record, List<CoalAnalysisRecord> recordsOnDuty) {
+        CoalAnalysisRecord avgRecord = getAvgRecord(recordsOnDuty);
+        Double avgAad = avgRecord.getAad();
+        Double avgMt = avgRecord.getMt();
+        Double avgStad = avgRecord.getStad();
+        logger.debug("计算平均报表记录班次内的所有记录是否都已经读取到，平均报表数据为:项目-{},样本-{},时间-{},aad-{},mt-{},stad-{}，计算已存入数据库中的当前班次的平均值为aad-{}，mt-{}，stad-{}"
+                , record.getTarget(), record.getSample(), record.getTime(), record.getAad(), record.getMt(), record.getStad(), avgAad, avgMt, avgStad);
+        return Objects.equals(avgAad, record.getAad()) &&
+                Objects.equals(avgMt, record.getMt()) &&
+                Objects.equals(avgStad, record.getStad());
+
+    }
+
+    public CoalAnalysisRecord getAvgRecord(List<CoalAnalysisRecord> recordsOnDuty) {
         CumulativeData aadCumulativeData = new CumulativeData();
         CumulativeData mtCumulativeData = new CumulativeData();
         CumulativeData stadCumulativeData = new CumulativeData();
@@ -150,12 +163,13 @@ public class CoalAnalysisManager implements ReportFormsManager {
         Double avgAad = aadCumulativeData.getAvgValue(true, 2);
         Double avgMt = mtCumulativeData.getAvgValue(true, 1);
         Double avgStad = stadCumulativeData.getAvgValue(true, 2);
-        logger.debug("计算平均报表记录班次内的所有记录是否都已经读取到，平均报表数据为:项目-{},样本-{},时间-{},aad-{},mt-{},stad-{}，计算已存入数据库中的当前班次的平均值为aad-{}，mt-{}，stad-{}"
-                , record.getTarget(), record.getSample(), record.getTime(), record.getAad(), record.getMt(), record.getStad(), avgAad, avgMt, avgStad);
-        return Objects.equals(avgAad, record.getAad()) &&
-                Objects.equals(avgMt, record.getMt()) &&
-                Objects.equals(avgStad, record.getStad());
-
+        Double avgQnetar = qnetarCumulativeData.getAvgValue(true, 0);
+        CoalAnalysisRecord avgRecord = new CoalAnalysisRecord();
+        avgRecord.setAad(avgAad);
+        avgRecord.setMt(avgMt);
+        avgRecord.setStad(avgStad);
+        avgRecord.setQnetar(avgQnetar);
+        return avgRecord;
     }
 
 

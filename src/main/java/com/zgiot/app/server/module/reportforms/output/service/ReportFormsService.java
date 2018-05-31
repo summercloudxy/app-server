@@ -61,20 +61,17 @@ public class ReportFormsService {
             reportFormsBean.setCoalAnalysis(coalAnalysisBean.getCoalAnalysis());
             reportFormsBean.setCoalAnalysisAvg(coalAnalysisBean.getCoalAnalysisAvg());
         }
-
         TransBean transPortCacheBean = transPortService.getTransPortCacheBean(dutyStartTime);
         if(transPortCacheBean!=null){
             reportFormsBean.setTransportList(transPortCacheBean.getTransportList());
             reportFormsBean.setSaleStatisticsOutwardMap(transPortCacheBean.getSaleStatisticsOutwardMap());
             reportFormsBean.setSaleStatisticsLocalityMap(transPortCacheBean.getSaleStatisticsLocalityMap());
         }
-
         InfluenceTimeBean influenceTimeBean = influenceTimeService.getData(date);
         if(influenceTimeBean!=null){
             reportFormsBean.setInfluenceTimeRsps(influenceTimeBean.getInfluenceTimeRsps());
             reportFormsBean.setInfluenceTimeRemarks(influenceTimeBean.getInfluenceTimeRemarks());
         }
-
        reportFormsBean.setSchedulingGroup(getTeamInfo(dutyStartTime));
 
         return reportFormsBean;

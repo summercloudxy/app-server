@@ -328,12 +328,12 @@ public class TransPortServiceImpl implements TransPortService {
      */
     public void saleStatisticsByDate(TransportSaleStatistics transportSaleStatistics,Date nowDutyStartTime,TransportSaleStatistics ts){
         //这里需要对ts是否是当月或者当年数据进行处理
-        if(!ReportFormDateUtil.isYearSame(nowDutyStartTime,ts.getDutyStartTime())){
+        if(!ReportFormDateUtil.isYearSame(ts.getDutyStartTime(),nowDutyStartTime)){
             //表明时间不在同一年,需要将年统计设置为0
             ts.setYearTrainNumber(0);
             ts.setYearCoalVolunm(0.0);
         }
-        if(!ReportFormDateUtil.isMonthSame(nowDutyStartTime,ts.getDutyStartTime())){
+        if(!ReportFormDateUtil.isMonthSame(ts.getDutyStartTime(),nowDutyStartTime)){
             //表明不在同一个月
             ts.setMonthTrainNumber(0);
             ts.setMonthCoalVolunm(0.0);
@@ -458,16 +458,26 @@ public class TransPortServiceImpl implements TransPortService {
             transBeanRsp.setTransportList(transPortMapper.getTransPortByDate(dateDutyStartTime));
             List<TransportSaleStatistics> saleByDateLocality = transPortMapper.getSaleByDateLocality(dateDutyStartTime);
             Map<Integer, TransportSaleStatistics> saleStatisticsLocalityMap = transBeanRsp.getSaleStatisticsLocalityMap();
-            for (TransportSaleStatistics ts:saleByDateLocality) {
-                saleStatisticsLocalityMap.put(ts.getCoalType(),ts);
+            if(saleByDateLocality!=null && saleByDateLocality.size()>0){
+                for (TransportSaleStatistics ts:saleByDateLocality) {
+                    saleStatisticsLocalityMap.put(ts.getCoalType(),ts);
+                }
             }
+
             List<TransportSaleStatistics> saleStatisticsByDutyStartTimeOut = transPortMapper.getSaleStatisticsByDutyStartTimeOut(dateDutyStartTime);
             Map<Integer, TransportSaleStatistics> saleStatisticsOutwardMap = transBeanRsp.getSaleStatisticsOutwardMap();
-            for (TransportSaleStatistics ts:saleStatisticsByDutyStartTimeOut) {
-                saleStatisticsOutwardMap.put(ts.getCoalType(),ts);
+            if(saleStatisticsByDutyStartTimeOut!=null && saleStatisticsByDutyStartTimeOut.size()>0){
+                for (TransportSaleStatistics ts:saleStatisticsByDutyStartTimeOut) {
+                    saleStatisticsOutwardMap.put(ts.getCoalType(),ts);
+                }
             }
             return transBeanRsp;
         }
+    }
+
+    @Override
+    public Map<Integer, List<Transport>> getTransportInDuration(Date startTime, Date endTime) {
+        return null;
     }
 
     /**
