@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.sfstop.mapper.StopLineMapper">
+
+    <select id="getStopLineByAreaId" parameterType="java.lang.Long" resultType="com.zgiot.app.server.module.sfstop.entity.pojo.StopLine">
+        SELECT
+            *
+        FROM
+            `tb_stop_line`
+        WHERE
+            area_id = #{areaId}
+        AND is_deleted = 0
+    </select>
+
+    <select id="validateStopLineName" parameterType="com.zgiot.app.server.module.sfstop.entity.pojo.StopLine" resultType="com.zgiot.app.server.module.sfstop.entity.pojo.StopLine">
+        SELECT
+            *
+        FROM
+            `tb_stop_line`
+        WHERE
+            line_name = #{lineName}
+        AND is_deleted = 0;
+    </select>
+
+    <insert id="addStopLine" parameterType="com.zgiot.app.server.module.sfstop.entity.pojo.StopLine">
+        INSERT INTO tb_stop_line
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="lineName!=null">
+                line_name,
+            </if>
+            <if test="areaId!=null">
+                area_id,
+            </if>
+            <if test="createUser!=null">
+                create_user,
+            </if>
+            <if test="createTime!=null">
+                create_time,
+            </if>
+            <if test="updateUser!=null">
+                update_user,
+            </if>
+            <if test="updateTime!=null">
+                update_time,
+            </if>
+            <if test="delayTime!=null">
+                delay_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="lineName!=null">
+                #{lineName},
+            </if>
+            <if test="areaId!=null">
+                #{areaId},
+            </if>
+            <if test="createUser!=null">
+                #{createUser},
+            </if>
+            <if test="createTime!=null">
+                #{createTime},
+            </if>
+            <if test="updateUser!=null">
+                #{updateUser},
+            </if>
+            <if test="updateTime!=null">
+                #{updateTime},
+            </if>
+            <if test="delayTime!=null">
+                #{delayTime},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateStopLine" parameterType="com.zgiot.app.server.module.sfstop.entity.pojo.StopLine">
+        UPDATE tb_stop_line
+        <trim prefix="set" suffixOverrides=",">
+            <if test="lineName!=null">
+                line_name=#{lineName},
+            </if>
+            <if test="areaId!=null">
+                area_id=#{areaId},
+            </if>
+            <if test="createUser!=null">
+                create_user=#{createUser},
+            </if>
+            <if test="createTime!=null">
+                create_time=#{createTime},
+            </if>
+            <if test="updateUser!=null">
+                update_user=#{updateUser},
+            </if>
+            <if test="updateTime!=null">
+                update_time=#{updateTime},
+            </if>
+            <if test="delayTime!=null">
+                delay_time=#{delayTime},
+            </if>
+        </trim>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteStopLine" parameterType="java.lang.Long">
+        DELETE
+        FROM
+            tb_stop_line
+        WHERE
+            id = #{id}
+    </delete>
+
+
+</mapper>

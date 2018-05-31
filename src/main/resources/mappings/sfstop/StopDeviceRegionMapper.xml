@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.sfstop.mapper.StopDeviceRegionMapper">
+
+    <select id="selectAllStopDeviceRegion" resultType="com.zgiot.app.server.module.sfstop.entity.pojo.StopDeviceRegion">
+        SELECT
+            *
+        FROM
+            `tb_stop_device_region`
+        WHERE
+	        is_deleted = 0
+    </select>
+
+    <select id="selectAllStopDeviceRegionOrder" resultType="com.zgiot.app.server.module.sfstop.entity.pojo.StopDeviceRegion">
+        SELECT
+            *
+        FROM
+            `tb_stop_device_region`
+        WHERE
+	        is_deleted = 0
+        ORDER BY
+            `level` ASC
+    </select>
+
+    <select id="validateStopDeviceRegionName" parameterType="com.zgiot.app.server.module.sfstop.entity.pojo.StopDeviceRegion" resultType="com.zgiot.app.server.module.sfstop.entity.pojo.StopDeviceRegion">
+        SELECT
+            *
+        FROM
+            `tb_stop_device_region`
+        WHERE
+            region_name = #{regionName}
+        AND is_deleted = 0;
+    </select>
+
+    <select id="getRegionCount" resultType="java.lang.Integer">
+        SELECT
+            count(*)
+        FROM
+            `tb_stop_device_region`
+        WHERE
+            is_deleted = 0;
+    </select>
+
+    <insert id="addStopDeviceRegion" keyColumn="id" keyProperty="id" useGeneratedKeys="true" parameterType="com.zgiot.app.server.module.sfstop.entity.pojo.StopDeviceRegion">
+        INSERT INTO tb_stop_device_region
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="regionName != null">
+                region_name,
+            </if>
+            <if test="level != null">
+                level,
+            </if>
+            <if test="createUser != null">
+                create_user,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="updateUser != null">
+                update_user,
+            </if>
+            <if test="updateTime != null">
+                update_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="regionName != null">
+                #{regionName},
+            </if>
+            <if test="level != null">
+                #{level},
+            </if>
+            <if test="createUser != null">
+                #{createUser},
+            </if>
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+            <if test="updateUser != null">
+                #{updateUser},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime},
+            </if>
+        </trim>
+    </insert>
+
+    <select id="selectAllRegionByLevel" parameterType="java.lang.Integer" resultType="com.zgiot.app.server.module.sfstop.entity.pojo.StopDeviceRegion">
+        SELECT
+            *
+        FROM
+            `tb_stop_device_region`
+        WHERE
+            LEVEL &gt;= #{level}
+        AND is_deleted = 0;
+    </select>
+
+    <update id="updateStopDeviceRegion" parameterType="com.zgiot.app.server.module.sfstop.entity.pojo.StopDeviceRegion">
+        UPDATE tb_stop_device_region
+        <trim prefix="set" suffixOverrides=",">
+            <if test="regionName != null">
+                region_name =#{regionName},
+            </if>
+            <if test="level != null">
+                `level` =#{level},
+            </if>
+            <if test="createUser != null">
+                create_user =#{createUser},
+            </if>
+            <if test="createTime != null">
+                create_time =#{createTime},
+            </if>
+            <if test="updateUser != null">
+                update_user =#{updateUser},
+            </if>
+            <if test="updateTime != null">
+                update_time =#{updateTime},
+            </if>
+        </trim>
+        WHERE id =#{id}
+    </update>
+
+    <select id="selectStopDeviceRegionById" parameterType="java.lang.Long" resultType="com.zgiot.app.server.module.sfstop.entity.pojo.StopDeviceRegion">
+        SELECT
+            *
+        FROM
+            `tb_stop_device_region`
+        WHERE
+            id = #{id};
+    </select>
+
+    <delete id="deleteStopDeviceRegion" parameterType="java.lang.Long">
+        DELETE
+        FROM
+            tb_stop_device_region
+        WHERE
+            id = #{id}
+    </delete>
+
+</mapper>
