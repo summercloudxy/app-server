@@ -428,6 +428,7 @@ public class ReportFormProductOutputAndStoreService {
 
     /**
      * 加上一班库存
+     *
      * @param lastProductStore
      * @param coalType
      * @param productStore
@@ -440,6 +441,7 @@ public class ReportFormProductOutputAndStoreService {
 
     /**
      * 减自用
+     *
      * @param daySelfUse
      * @param nightSelfUse
      * @param coalType
@@ -453,16 +455,17 @@ public class ReportFormProductOutputAndStoreService {
 
     /**
      * 减运销
+     *
      * @param productTransportBean
      * @param coalType
      * @param productStore
      */
     private void storeExcludeTransport(Map<Integer, Map<Integer, ProductTransport>> productTransportBean, Integer coalType, ReportFormProductStore productStore) {
         if (productTransportBean.containsKey(coalType)) {
-            if (productTransportBean.get(coalType).containsKey(1) && productTransportBean.get(coalType).get(1).getDayVolume() != null) {
+            if (productTransportBean.get(coalType).containsKey(1) && productTransportBean.get(coalType).get(1) != null && productTransportBean.get(coalType).get(1).getDayVolume() != null) {
                 productStore.setValue(productStore.getValue() - productTransportBean.get(coalType).get(1).getDayVolume());
             }
-            if (productTransportBean.get(coalType).containsKey(2) && productTransportBean.get(coalType).get(1).getDayVolume() != null) {
+            if (productTransportBean.get(coalType).containsKey(2) && productTransportBean.get(coalType).get(2) != null && productTransportBean.get(coalType).get(1).getDayVolume() != null) {
                 productStore.setValue(productStore.getValue() - productTransportBean.get(coalType).get(2).getDayVolume());
             }
         }
