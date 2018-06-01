@@ -1,7 +1,9 @@
 package com.zgiot.app.server.module.sfstop.service.impl;
 
+import com.zgiot.app.server.module.sfstop.entity.pojo.StopMetric;
 import com.zgiot.app.server.module.sfstop.entity.pojo.StopPresetPararmeter;
 import com.zgiot.app.server.module.sfstop.entity.pojo.StopPresetPararmeterDTO;
+import com.zgiot.app.server.module.sfstop.mapper.StopMetricMapper;
 import com.zgiot.app.server.module.sfstop.mapper.StopPresetPararmeterMapper;
 import com.zgiot.app.server.module.sfstop.service.StopPresetPararmeterService;
 import com.zgiot.common.pojo.SessionContext;
@@ -17,9 +19,20 @@ public class StopPresetPararmeterServiceImpl implements StopPresetPararmeterServ
     @Autowired
     private StopPresetPararmeterMapper stopPresetPararmeterMapper;
 
+    @Autowired
+    private StopMetricMapper stopMetricMapper;
+
     @Override
     public List<StopPresetPararmeter> getStopPresetPararmeterByTC(StopPresetPararmeter stopPresetPararmeter) {
-        List<StopPresetPararmeter> stopPresetPararmeterList=stopPresetPararmeterMapper.getStopPresetPararmeterByTC(stopPresetPararmeter);
+        List<StopPresetPararmeter> stopPresetPararmeterList = stopPresetPararmeterMapper.getStopPresetPararmeterByTC(stopPresetPararmeter);
+        if (stopPresetPararmeterList != null && stopPresetPararmeterList.size() > 0) {
+            for (StopPresetPararmeter stopPreset : stopPresetPararmeterList) {
+                StopMetric metricByCode = stopMetricMapper.getMetricByCode(stopPreset.getMetricCode());
+                if (metricByCode != null) {
+                    stopPreset.setMetricName(metricByCode.getMetricName());
+                }
+            }
+        }
         return stopPresetPararmeterList;
     }
 

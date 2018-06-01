@@ -176,6 +176,9 @@ public class StopDeviceBagServiceImpl implements StopDeviceBagService {
             }
             stopDeviceBag.setDelayTime(sum);
             stopDeviceBag.setStopInformationCount(stopInformationList.size());
+        }else {
+        stopDeviceBag.setDelayTime(0L);
+        stopDeviceBag.setStopInformationCount(0);
         }
         return stopDeviceBag;
     }

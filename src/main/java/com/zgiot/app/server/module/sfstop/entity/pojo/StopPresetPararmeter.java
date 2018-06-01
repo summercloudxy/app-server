@@ -44,6 +44,9 @@ public class StopPresetPararmeter {
     @ApiModelProperty("停车类型 0表示调节参数 1表示停止设备")
     private Integer stopType;
 
+    @ApiModelProperty("指标名称")
+    private String metricName;
+
     public Long getId() {
         return id;
     }
@@ -130,5 +133,13 @@ public class StopPresetPararmeter {
 
     public void setStopType(Integer stopType) {
         this.stopType = stopType;
+    }
+
+    public String getMetricName() {
+        return metricName;
+    }
+
+    public void setMetricName(String metricName) {
+        this.metricName = metricName;
     }
 }
