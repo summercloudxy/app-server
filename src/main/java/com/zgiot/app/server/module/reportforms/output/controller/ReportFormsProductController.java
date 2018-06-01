@@ -26,7 +26,7 @@ public class ReportFormsProductController {
     private ReportFormProductOutputAndStoreService reportFormProductOutputAndStoreService;
 
     @ApiOperation("获取产品外运情况数据")
-    @GetMapping( "/reportform/product")
+    @GetMapping( "/reportForm/product")
     public ResponseEntity<String> getReportFromProduct(@RequestParam Date date) {
         ReportFormsProductBean reportFormsProductBean=reportFormsProductBeanService.getReportFromProduct(date);
         return new ResponseEntity<>(ServerResponse.buildOkJsonWithNonStringKey(reportFormsProductBean), HttpStatus.OK);
@@ -34,7 +34,7 @@ public class ReportFormsProductController {
 
 
     @ApiOperation("更新产品备注以及人员信息")
-    @PostMapping("/reportform/product/transport/update")
+    @PostMapping("/reportForm/product/transport/update")
     public ResponseEntity<String> updateProductTransportMessage(@RequestBody ProductTransportRemarks productTransport){
         productTransport.setProductStartTime(ReportFormDateUtil.getProductStartTime(productTransport.getProductStartTime()));
         reportFormsProductBeanService.updateProductTransportMessage(productTransport);
@@ -42,7 +42,7 @@ public class ReportFormsProductController {
     }
 
     @ApiOperation("更新产品介质库存")
-    @PostMapping(value = "/reportform/product/medium")
+    @PostMapping(value = "/reportForm/product/medium")
     public ResponseEntity<String> setMediumStore(@RequestBody ReportFormProductStore reportFormProductStore) {
         reportFormProductOutputAndStoreService.addMediumStore(reportFormProductStore);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);

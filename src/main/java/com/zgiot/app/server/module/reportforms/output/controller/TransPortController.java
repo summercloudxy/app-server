@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/reportform/transPort/")
+@RequestMapping(value = "/reportForm/transPort/")
 public class TransPortController {
 
     @Autowired
