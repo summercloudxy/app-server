@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.service.dao.SendTraceLogMapper">
+
+    <insert id="insertSendTraceLog" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        INSERT INTO tb_send_trace_log (send_time,user_id,user_name,send_thing_code,send_metric_code,send_type,influence_thing_code,influence_metric_code,pre_value,current_value,platform)
+        VALUES (#{sendTime},#{userId},#{userName},#{sendThingCode},#{sendMetricCode},#{sendType},#{influenceThingCode},#{influenceMetricCode},#{preValue},#{currentValue},#{platform})
+    </insert>
+
+    <select id="getRelSendTraceInfo" resultType="com.zgiot.app.server.service.pojo.RelSendTraceInfo">
+        SELECT * FROM rel_send_state_trace
+    </select>
+
+    <select id="getSendTraceLogList" resultType="com.zgiot.app.server.service.pojo.SendTraceLog">
+        SELECT
+        id,send_time,user_id,user_name,send_thing_code,send_metric_code,send_type,influence_thing_code,influence_metric_code,pre_value,current_value,platform
+        FROM tb_send_trace_log
+        <where>
+            <if test="startTime != null">
+                send_time > #{startTime}
+            </if>
+            <if test="endTime != null">
+                and send_time &lt; #{endTime}
+            </if>
+            <if test="condition.platform != null">
+                and platform = #{condition.platform}
+            </if>
+            <if test="condition.sendType != null">
+                and send_type = #{condition.sendType}
+            </if>
+            <if test="condition.sendThingCode != null">
+                and thing_code = #{condition.sendThingCode}
+            </if>
+        </where>
+    </select>
+</mapper>

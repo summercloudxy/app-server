@@ -44,6 +44,7 @@ public class AlertManager {
     private static final String REPAIR_URI = "/topic/alert/repair";
     private static final String FEEDBACK_URI = "/topic/alert/feedback";
     private static final String READ_STATE_URI = "/topic/alert/readstate";
+    public static final String ALERT_LEVEL_30_URI = "/topic/alert/serious";
     private static final int VERIFY_TO_UNTREATED_PERIOD = 60000;
     private static final int SORT_TYPE_TIME_DESC = 0;
     private static final int SORT_TYPE_TIME_ASC = 1;
@@ -133,6 +134,9 @@ public class AlertManager {
         if (insertFlag) {
             alertMapper.createAlertData(alertData);
             alertMapper.createAlertDataBackup(alertData);
+            if (alertData.getAlertLevel() != null && AlertConstants.LEVEL_30 == alertData.getAlertLevel()) {
+                messagingTemplate.convertAndSend(ALERT_LEVEL_30_URI, alertData);
+            }
         }
     }
 
