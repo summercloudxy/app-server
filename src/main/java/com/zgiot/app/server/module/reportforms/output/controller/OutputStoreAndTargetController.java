@@ -21,7 +21,7 @@ public class OutputStoreAndTargetController {
     private OutputStoreAndTargetService outputStoreAndTargetService;
 
     @ApiOperation("设置生产、库存数据")
-    @PostMapping(value = "outputstore")
+    @PostMapping(value = "outputStore")
     public ResponseEntity<String> addOutPutStoreInfo(@RequestBody ReportFormOutputStoreRecord outputStoreRecord){
         if (outputStoreRecord.getType()==1){
             outputStoreAndTargetService.addOutputRecord(outputStoreRecord);
@@ -32,7 +32,7 @@ public class OutputStoreAndTargetController {
     }
 
 
-    @GetMapping(value = "outputstore")
+    @GetMapping(value = "outputStore")
     public ResponseEntity<String> getOutPutStoreInfo(@Param("dutyStartTime")Date dutyStartTime){
         Map<Integer, ReportFormOutputStoreRecord> outputStoreRecord = outputStoreAndTargetService.getOutputStoreRecord(dutyStartTime);
         return new ResponseEntity<>(ServerResponse.buildOkJsonWithNonStringKey(outputStoreRecord), HttpStatus.OK);
