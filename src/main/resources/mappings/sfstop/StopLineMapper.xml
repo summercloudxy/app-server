@@ -19,7 +19,10 @@
             `tb_stop_line`
         WHERE
             line_name = #{lineName}
-        AND is_deleted = 0;
+        AND is_deleted = 0
+        <if test="id!=null">
+            AND id<![CDATA[ <> ]]>#{id}
+        </if>
     </select>
 
     <insert id="addStopLine" parameterType="com.zgiot.app.server.module.sfstop.entity.pojo.StopLine">

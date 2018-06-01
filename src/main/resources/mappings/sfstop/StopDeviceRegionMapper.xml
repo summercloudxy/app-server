@@ -29,7 +29,10 @@
             `tb_stop_device_region`
         WHERE
             region_name = #{regionName}
-        AND is_deleted = 0;
+        AND is_deleted = 0
+        <if test="id!=null">
+            AND id<![CDATA[ <> ]]>#{id}
+        </if>
     </select>
 
     <select id="getRegionCount" resultType="java.lang.Integer">

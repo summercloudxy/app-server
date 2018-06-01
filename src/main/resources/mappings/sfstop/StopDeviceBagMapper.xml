@@ -30,7 +30,10 @@
         WHERE
             bag_name = #{bagName}
         AND area_id = #{areaId}
-        AND is_deleted = 0;
+        AND is_deleted = 0
+        <if test="id!=null">
+            AND id<![CDATA[ <> ]]>#{id}
+        </if>
     </select>
 
     <insert id="addStopDeviceBag" parameterType="com.zgiot.app.server.module.sfstop.entity.pojo.StopDeviceBag">

@@ -22,6 +22,9 @@
             area_name = #{areaName}
         AND region_id = #{regionId}
         AND is_deleted = 0
+        <if test="id!=null">
+            AND id<![CDATA[ <> ]]>#{id}
+        </if>
     </select>
 
     <select id="getCountByRegion" parameterType="com.zgiot.app.server.module.sfstop.entity.pojo.StopDeviceArea" resultType="java.lang.Integer">

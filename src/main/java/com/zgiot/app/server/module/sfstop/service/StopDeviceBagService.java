@@ -39,5 +39,9 @@ public interface StopDeviceBagService {
     PageListRsp getStopDeviceBagByLinePage(Integer pageNum, Integer pageSize, StopDeviceBag stopDeviceBag);
 
     StopDeviceBag getInformationCountById(Long bagId);
+
+    List<StopDeviceBag> getStopDeviceBagByAreaIdAndNoLine(Long areaId);
+
+    void relieveStopDeviceBagToLine(Long bagId);
 }
                                                   

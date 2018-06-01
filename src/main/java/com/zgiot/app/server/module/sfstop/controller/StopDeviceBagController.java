@@ -135,4 +135,20 @@ public class StopDeviceBagController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(stopDeviceBag), HttpStatus.OK);
     }
 
+
+    @ApiOperation("根据区域id查询未关联停车线的包")
+    @RequestMapping(value = "/getStopDeviceBagByAreaIdAndNoLine", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> getStopDeviceBagByAreaIdAndNoLine(@RequestParam Long areaId) {
+        List<StopDeviceBag> stopDeviceBagList=stopDeviceBagService.getStopDeviceBagByAreaIdAndNoLine(areaId);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(stopDeviceBagList), HttpStatus.OK);
+    }
+
+    @ApiOperation("解除包所关联的停车线")
+    @RequestMapping(value = "/relieveStopDeviceBagToLine", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> relieveStopDeviceBagToLine(@RequestParam Long bagId) {
+        stopDeviceBagService.relieveStopDeviceBagToLine(bagId);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+
 }

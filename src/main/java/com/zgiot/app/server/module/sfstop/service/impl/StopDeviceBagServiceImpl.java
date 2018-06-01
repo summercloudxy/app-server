@@ -162,6 +162,22 @@ public class StopDeviceBagServiceImpl implements StopDeviceBagService {
         return stopDeviceBag;
     }
 
+    @Override
+    public List<StopDeviceBag> getStopDeviceBagByAreaIdAndNoLine(Long areaId) {
+        List<StopDeviceBag> stopDeviceBags=stopDeviceBagMapper.getStopDeviceBagByAreaIdAndNoLine(areaId);
+        if(stopDeviceBags!=null){
+            for (StopDeviceBag stopDeviceBagDutyTime:stopDeviceBags) {
+                getDelayTime(stopDeviceBagDutyTime);
+            }
+        }
+        return stopDeviceBags;
+    }
+
+    @Override
+    public void relieveStopDeviceBagToLine(Long bagId) {
+        stopDeviceBagMapper.relieveStopDeviceBagToLine(bagId);
+    }
+
     public StopDeviceBag getDelayTime(StopDeviceBag stopDeviceBag){
         List<StopInformation> stopInformationList= stopInformationMapper.getStopInformationByBagId(stopDeviceBag.getId());
         if(stopInformationList!=null && stopInformationList.size()>0){
