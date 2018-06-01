@@ -52,17 +52,8 @@ public class AlertFaultHandler implements AlertHandler {
         AlertData alertData = alertManager.getAlertDataByThingAndMetricCode(thingCode, metricCode);
         if (ENABLE_VALUE.equalsIgnoreCase(dataModel.getValue()) && alertData == null) {
             String state = protectHandler.getState(dataModel);
-            //判断是否是桶
-//            List<NoPowerThing> noPowerThings = alertManager.getNoPowerThingByThingCode(thingCode);
             Short level = getAlertLevel(state);
-//            if (CollectionUtils.isNotEmpty(noPowerThings)) {
-//                level = getLevelWithOutState(noPowerThings);
-//            } else {
-//                level = getAlertLevelWithState(dataModel, true);
-//            }
-            if (level == null) {
-                putCache(dataModel);
-            } else {
+            if (level != null && level == AlertConstants.LEVEL_30) {
                 generateFaultAlert(dataModel, level);
             }
         } else if (DISABLE_VALUE.equalsIgnoreCase(dataModel.getValue()) && alertData != null) {

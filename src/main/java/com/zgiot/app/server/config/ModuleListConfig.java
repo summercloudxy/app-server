@@ -26,6 +26,7 @@ import com.zgiot.app.server.module.sfstart.*;
 import com.zgiot.app.server.module.sfsubsc.job.UploadHistorySubscCardDatas;
 import com.zgiot.app.server.module.sfsubsc.job.UploadProductionSubscCardDatas;
 import com.zgiot.app.server.module.sfsubsc.job.UploadSubscCardDatas;
+import com.zgiot.app.server.service.SendTraceLogService;
 import com.zgiot.app.server.service.impl.HistoryDataPersistDaemon;
 import com.zgiot.app.server.service.impl.QuartzManager;
 import org.quartz.JobDataMap;
@@ -52,6 +53,7 @@ public class ModuleListConfig {
     public static final String MODULE_COAL_ANALYSIS = "coal-analysis";
     public static final String MODULE_SUBSCRIPTION = "subscription";
     public static final String MODULE_REPORTFORM = "report-form";
+    public static final String MODULE_SEND_TRACE = "send-trace";
 
 
     @Value("${sysmodule.demo.enabled}")
@@ -74,6 +76,8 @@ public class ModuleListConfig {
     private boolean moduleSfStartEnabled;
     @Value("${sysmodule.report-form.enabled}")
     private boolean moduleReportEnabled;
+    @Value("${sysmodule.send-trace.enabled}")
+    private boolean moduleSendTraceEnabled;
 
 
     private static final int FAULT_SCAN_RATE = 20;
@@ -122,6 +126,8 @@ public class ModuleListConfig {
     private SfStartManager sfStartManager;
     @Autowired
     private StartBrowseListener startBrowseListener;
+    @Autowired
+    private SendTraceLogService sendTraceLogService;
 
     @PostConstruct
     void init() {
@@ -135,6 +141,8 @@ public class ModuleListConfig {
         configedModuleMap.put(MODULE_SUBSCRIPTION, this.moduleSubsEnabled);
         configedModuleMap.put(MODULE_SFSTART, this.moduleSfStartEnabled);
         configedModuleMap.put(MODULE_REPORTFORM, this.moduleReportEnabled);
+
+        configedModuleMap.put(MODULE_SEND_TRACE, this.moduleSendTraceEnabled);
     }
 
     public boolean containModule(String moduleName) {
@@ -239,6 +247,12 @@ public class ModuleListConfig {
                 influenceTimeServiceImpl.init();
                 processor.addListener(reportFormSystemStartListener);
                 logIt(MODULE_REPORTFORM);
+            }
+
+            if (this.containModule(MODULE_SEND_TRACE)) {
+                sendTraceLogService.init();
+                processor.addListener(sendTraceLogService);
+                logIt(MODULE_SEND_TRACE);
             }
 
             if (this.containModule(MODULE_DEMO)) {

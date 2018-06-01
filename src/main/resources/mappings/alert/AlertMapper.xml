@@ -592,14 +592,12 @@
             ,rts.system_id
         </if>
         FROM tb_alert_data ad
-        <if test="thingCode == null">
             <if test="systems != null or stage == 'RELEASE'">
                 ,rel_thing_system rts
             </if>
             <if test="buildingIds != null or floors != null">
                 ,tb_thing_position ttp
             </if>
-        </if>
         <trim prefix="where" prefixOverrides="AND">
             <if test="thingCode == null">
                 <if test="systems != null or stage == 'RELEASE'">
