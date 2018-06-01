@@ -29,8 +29,9 @@
                 and send_type = #{condition.sendType}
             </if>
             <if test="condition.sendThingCode != null">
-                and thing_code = #{condition.sendThingCode}
+                and send_thing_code = #{condition.sendThingCode}
             </if>
         </where>
+        ORDER by send_time DESC
     </select>
 </mapper>

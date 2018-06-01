@@ -1,5 +1,6 @@
 package com.zgiot.app.server.module.generic;
 
+import com.github.pagehelper.PageInfo;
 import com.zgiot.app.server.service.SendTraceLogService;
 import com.zgiot.app.server.service.pojo.SendTraceLog;
 import com.zgiot.app.server.service.pojo.SendType;
@@ -7,10 +8,7 @@ import com.zgiot.common.restcontroller.ServerResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
@@ -20,10 +18,10 @@ public class SendTraceController {
     @Autowired
     private SendTraceLogService sendTraceLogService;
 
-    @GetMapping("/sendTrace/logs")
-    public ResponseEntity<String> getSendTraceLog(@ModelAttribute SendTraceLog filterCondition, @RequestParam(required = false) Date startTime, @RequestParam(required = false) Date endTime) {
+    @GetMapping("/sendTrace/logs/{page}/{count}")
+    public ResponseEntity<String> getSendTraceLog(@ModelAttribute SendTraceLog filterCondition, @RequestParam(required = false) Date startTime, @RequestParam(required = false) Date endTime, @PathVariable Integer page,@PathVariable Integer count) {
 
-        List<SendTraceLog> sendTraceLogList = sendTraceLogService.getSendTraceLogList(filterCondition, startTime, endTime);
+        PageInfo<SendTraceLog> sendTraceLogList = sendTraceLogService.getSendTraceLogList(filterCondition, startTime, endTime,page,count);
         return new ResponseEntity<>(
                 ServerResponse.buildOkJson(sendTraceLogList)
                 , HttpStatus.OK);
