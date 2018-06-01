@@ -1,11 +1,11 @@
 package com.zgiot.app.server.module.sfstart.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.zgiot.app.server.dataprocessor.DataProcessor;
 import com.zgiot.app.server.module.sfstart.StartExamineListener;
 import com.zgiot.app.server.module.sfstart.StartListener;
-import com.zgiot.app.server.module.sfstart.constants.StartStopConstants;
+import com.zgiot.app.server.module.sfstart.constants.StartConstants;
 import com.zgiot.app.server.module.sfstart.controller.StartController;
+import com.zgiot.app.server.module.sfstart.controller.StartHandler;
 import com.zgiot.app.server.module.sfstart.mapper.StartMapper;
 import com.zgiot.app.server.module.sfstart.pojo.*;
 import com.zgiot.app.server.module.sfstart.service.StartService;
@@ -19,7 +19,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -35,10 +34,6 @@ public class StartServiceImpl implements StartService {
     @Autowired
     private MetricMapper metricMapper;
 
-
-    @Autowired
-    @Qualifier("wsProcessor")
-    private DataProcessor processor;
     @Autowired
     private StartExamineListener startExamineListener;
 
@@ -80,7 +75,7 @@ public class StartServiceImpl implements StartService {
     @Override
     public Integer findOperateIdWhenNull() {
         Integer operateId = null;
-        List<StartOperationRecord> startOperationRecords = findUnfinishStartOperate(null, StartStopConstants.START_FINISH_STATE);
+        List<StartOperationRecord> startOperationRecords = findUnfinishStartOperate(null, StartConstants.START_FINISH_STATE);
         if (CollectionUtils.isNotEmpty(startOperationRecords)) {
             operateId = startOperationRecords.get(0).getOperateId();
         }
@@ -93,7 +88,7 @@ public class StartServiceImpl implements StartService {
         List<StartDeviceStateRecord> startDeviceStateRecords = startMapper.selectStartDeviceState(findOperateId, null);
         // 增加设备异常状态下反馈设备异常信息
         for (StartDeviceStateRecord record : startDeviceStateRecords) {
-            if (StartStopConstants.DEVICE_STATE_ERROR == record.getState()) {
+            if (StartConstants.DEVICE_STATE_ERROR == record.getState()) {
                 record.setExceptionCause(getFaultByDeviceId(record.getDeviceId()));
             }
         }
@@ -111,8 +106,7 @@ public class StartServiceImpl implements StartService {
                 MetricModel metricModel = metricMapper.getMetric(startFaultInformation.getFaultName());
                 DataModelWrapper dataModelWrapper = dataService.getData(startFaultInformation.getDeviceCode(), metricModel.getMetricCode()).orElse(null);
                 if (dataModelWrapper != null) {
-                    error = Double.parseDouble(dataModelWrapper.getValue());
-                    if ((short) StartStopConstants.VALUE_TRUE == error) {
+                    if ("ture".equals(dataModelWrapper.getValue()) ) {
                         fault += startFaultInformation.getFaultName() + ";";
                     }
                 }
@@ -126,10 +120,10 @@ public class StartServiceImpl implements StartService {
     @Override
     public void closeStartOperate() {
         Integer findOperateId = findOperateIdWhenNull();
-        processor.removeListener(startListener);
+        StartHandler.startListenerFlag = false;
         StartController.startDeviceRequirements = null;
-        processor.removeListener(startExamineListener);
-        startMapper.closeOperateStateByOperateId(StartStopConstants.IS_DELETE, findOperateId);
+        StartHandler.startExamineListenerFlag = false;
+        startMapper.closeOperateStateByOperateId(StartConstants.IS_DELETE, findOperateId);
     }
 
     @Override
@@ -147,8 +141,8 @@ public class StartServiceImpl implements StartService {
         boolean flag = false;
         Integer operateId = findOperateIdWhenNull();
         List<StartExamineRecord> startExamineRecords = new ArrayList<>();
-        startExamineRecords.addAll(startMapper.selectFullyExamineErrorByOperateId(operateId, StartStopConstants.REMOTE_ERROR_TYPE));
-        startExamineRecords.addAll(startMapper.selectFullyExamineErrorByOperateId(operateId, StartStopConstants.DEVICE_ERROR_TYPE));
+        startExamineRecords.addAll(startMapper.selectFullyExamineErrorByOperateId(operateId, StartConstants.REMOTE_ERROR_TYPE));
+        startExamineRecords.addAll(startMapper.selectFullyExamineErrorByOperateId(operateId, StartConstants.DEVICE_ERROR_TYPE));
         if (CollectionUtils.isEmpty(startExamineRecords)) {
             flag = true;
         }
@@ -243,7 +237,7 @@ public class StartServiceImpl implements StartService {
             startDeviceStateRecord.setOperateId(operateId);
             startDeviceStateRecord.setDeviceId(startDeviceId);
             // 初始状态都是未启动
-            startDeviceStateRecord.setState(StartStopConstants.DEVICE_STATE_STANDBY_MODE);
+            startDeviceStateRecord.setState(StartConstants.DEVICE_STATE_STANDBY_MODE);
             startDeviceStateRecord.setCreateTime(new Date());
             startDeviceStateRecord.setUpdateTime(new Date());
             startMapper.saveStartDeviceStateRecord(startDeviceStateRecord);
@@ -257,7 +251,7 @@ public class StartServiceImpl implements StartService {
         // 查询系统分类
         List<StartSystem> startSystems = new LinkedList<>();
         // 查询系统名称系统
-        startSystems.addAll(getStartSystemWithStarting(StartStopConstants.SYSTEM_CATEGORY_BROWSE_PAGE));
+        startSystems.addAll(getStartSystemWithStarting(StartConstants.SYSTEM_CATEGORY_BROWSE_PAGE));
         for (StartSystem startSystem : startSystems) {
             List<StartDevice> startDevices = startMapper.selectStartingDeviceBySystemIdAndOperateId(null, startSystem.getSystemId());
             startSystem.setStartDevices(startDevices);
@@ -268,7 +262,7 @@ public class StartServiceImpl implements StartService {
     @Override
     public List<StartSystem> getStartBrowseDeprotSystem() {
         // 查询系统分类
-        List<StartSystem> startSystems = getStartSystemWithStarting(StartStopConstants.SYSTEM_CATEGORY_COAL_DEPOT_PAGE);
+        List<StartSystem> startSystems = getStartSystemWithStarting(StartConstants.SYSTEM_CATEGORY_COAL_DEPOT_PAGE);
         for (StartSystem startSystem : startSystems) {
             List<StartBrowseCoalDevice> startDevices = startMapper.selectStartBrowseCoalDeviceBySystemId(startSystem.getSystemId());
             startSystem.setStartCoalDevice(startDevices);
@@ -289,7 +283,7 @@ public class StartServiceImpl implements StartService {
         String jsonSystemIds = JSON.toJSONString(systemIds);
         startOperationRecord.setSystemIds(jsonSystemIds);
         // 记录当前起车任务状态
-        startOperationRecord.setOperateState(StartStopConstants.START_PREPARE_STATE);
+        startOperationRecord.setOperateState(StartConstants.START_PREPARE_STATE);
         startMapper.saveStartOperationRecord(startOperationRecord);
         // 设置本次启车操作id
         StartController.setOperateId(startOperationRecord.getOperateId());
@@ -308,7 +302,7 @@ public class StartServiceImpl implements StartService {
             startExamineRecord.setRuleId(startExamineRule.getRuleId());
             startExamineRecord.setExamineType(startExamineRule.getExamineType());
             startExamineRecord.setExamineInformation("");
-            startExamineRecord.setExamineResult(StartStopConstants.EXAMINE_RESULT_NO);
+            startExamineRecord.setExamineResult(StartConstants.EXAMINE_RESULT_NO);
             startMapper.saveStartExamineRecord(startExamineRecord);
         }
     }
@@ -333,7 +327,7 @@ public class StartServiceImpl implements StartService {
         // 查询系统分类
         List<StartSystem> startSystems = new LinkedList<>();
         // 查询系统名称系统
-        startSystems.addAll(getStartSystemWithStarting(StartStopConstants.SYSTEM_CATEGORY_STARTING_PAGE));
+        startSystems.addAll(getStartSystemWithStarting(StartConstants.SYSTEM_CATEGORY_STARTING_PAGE));
         getAutoExamineSystemWithDeviceInformation(startSystems);
         return startSystems;
     }
@@ -351,13 +345,13 @@ public class StartServiceImpl implements StartService {
     public List<StartManualInterventionRecord> getManualInterventionScopeStart(String deviceCode) {
         // 启车前
         List<StartManualInterventionRecord> startManualInterventionDevices = null;
-        if (judgeStartingState(null, StartStopConstants.START_FINISH_STATE)) {
+        if (judgeStartingState(null, StartConstants.START_FINISH_STATE)) {
             // 启车中
             Integer operateId = findOperateIdWhenNull();
             startManualInterventionDevices = startMapper.selectStartingManualInterventionScopeByLikeDeviceCode(deviceCode, operateId);
         } else {
             // 启车前可设置干预范围
-            startManualInterventionDevices = startMapper.selectManualInterventionScopeByLikeDeviceCodeAndState(StartStopConstants.MANUAL_INTERVENTION_FALSE, deviceCode);
+            startManualInterventionDevices = startMapper.selectManualInterventionScopeByLikeDeviceCodeAndState(StartConstants.MANUAL_INTERVENTION_FALSE, deviceCode);
         }
         return startManualInterventionDevices;
     }
@@ -373,7 +367,7 @@ public class StartServiceImpl implements StartService {
         StartManualInterventionRecord startManualInterventionRecord = startMapper.selectManualInterventionInformation(deviceId);
         StartDeviceInformation deviceInformation = startMapper.selectDeviceInformationByDeviceId(deviceId);
         // 获取人工干预设备所属区域
-        if (deviceInformation != null && deviceInformation.getStartHierarchy() != null) {
+        if (deviceInformation != null &&startManualInterventionRecord!=null&& deviceInformation.getStartHierarchy() != null) {
             String[] deviceHierarchy = deviceInformation.getStartHierarchy().split("-");
             StartAreaInformation startAreaInformation = startMapper.selectAreaInformationByAreaId(deviceHierarchy[1]);
             startManualInterventionRecord.setAreaName(startAreaInformation.getAreaName());
@@ -384,10 +378,10 @@ public class StartServiceImpl implements StartService {
     @Override
     public List<StartManualInterventionRecord> getManualInterventionRecord() {
         List<StartManualInterventionRecord> startManualInterventionRecords = null;
-        if (judgeStartingState(null, StartStopConstants.START_FINISH_STATE)) {
+        if (judgeStartingState(null, StartConstants.START_FINISH_STATE)) {
             // 启车中
             Integer operateId = findOperateIdWhenNull();
-            startManualInterventionRecords = startMapper.selectStartingManualInterventionRecord(null, operateId, StartStopConstants.MANUAL_INTERVENTION_TRUE);
+            startManualInterventionRecords = startMapper.selectStartingManualInterventionRecord(null, operateId, StartConstants.MANUAL_INTERVENTION_TRUE);
         } else {
             // 启车前
             startManualInterventionRecords = startMapper.selectManualInterventionRecordByBefore();
@@ -395,12 +389,15 @@ public class StartServiceImpl implements StartService {
         for (StartManualInterventionRecord startManualInterventionRecord : startManualInterventionRecords) {
             StartManualInterventionRecord manualInterventionrInformation =
                     getManualInterventionDeviceInformation(startManualInterventionRecord.getDeviceId());
-            // 补充区域信息
-            startManualInterventionRecord.setAreaName(manualInterventionrInformation.getAreaName());
-            // 补充系统信息
-            startManualInterventionRecord.setSystemName(manualInterventionrInformation.getSystemName());
-            // 补充楼层信息
-            startManualInterventionRecord.setFloor(manualInterventionrInformation.getFloor());
+            if(manualInterventionrInformation!=null){
+                // 补充区域信息
+                startManualInterventionRecord.setAreaName(manualInterventionrInformation.getAreaName());
+                // 补充系统信息
+                startManualInterventionRecord.setSystemName(manualInterventionrInformation.getSystemName());
+                // 补充楼层信息
+                startManualInterventionRecord.setFloor(manualInterventionrInformation.getFloor());
+            }
+
         }
         return startManualInterventionRecords;
     }
@@ -555,6 +552,19 @@ public class StartServiceImpl implements StartService {
             thingMetricCode.setMetricCode(metricModel.getMetricCode());
         }
         return thingMetricCode;
+    }
+
+    @Override
+    public String getMetricCodeByStartDeviceSignalId(int id) {
+        //液位单独处理
+        if(id==1093){
+            return "LEVEL";
+        }else {
+            StartDeviceSignal startDeviceSignal = startMapper.getStartDeviceSignalById(id);
+            MetricModel metricModel = tmlMapper.findMetricByMetricName(startDeviceSignal.getName());
+            return metricModel.getMetricCode();
+        }
+
     }
 
 

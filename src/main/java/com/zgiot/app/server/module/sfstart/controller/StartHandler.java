@@ -3,10 +3,9 @@ package com.zgiot.app.server.module.sfstart.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.zgiot.app.server.dataprocessor.DataProcessor;
 import com.zgiot.app.server.module.sfstart.StartExamineListener;
 import com.zgiot.app.server.module.sfstart.StartListener;
-import com.zgiot.app.server.module.sfstart.constants.StartStopConstants;
+import com.zgiot.app.server.module.sfstart.constants.StartConstants;
 import com.zgiot.app.server.module.sfstart.enums.EnumDeviceCode;
 import com.zgiot.app.server.module.sfstart.exception.StartException;
 import com.zgiot.app.server.module.sfstart.pojo.*;
@@ -21,11 +20,9 @@ import com.zgiot.common.pojo.DataModelWrapper;
 import com.zgiot.common.pojo.MetricModel;
 import com.zgiot.common.pojo.SessionContext;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
@@ -62,6 +59,26 @@ public class StartHandler {
     // 当前系统暂停状态
     private static Boolean pauseState;
 
+
+    public static Boolean startExamineListenerFlag;
+    public static Boolean startListenerFlag;
+
+    public static Boolean getStartExamineListenerFlag() {
+        return startExamineListenerFlag;
+    }
+
+    public static void setStartExamineListenerFlag(Boolean startExamineListenerFlag) {
+        StartHandler.startExamineListenerFlag = startExamineListenerFlag;
+    }
+
+    public static Boolean getStartListenerFlag() {
+        return startListenerFlag;
+    }
+
+    public static void setStartListenerFlag(Boolean startListenerFlag) {
+        StartHandler.startListenerFlag = startListenerFlag;
+    }
+
     public static Boolean getPauseState() {
         return pauseState == null ? false : pauseState;
     }
@@ -91,9 +108,7 @@ public class StartHandler {
     @Autowired
     private CmdControlService cmdControlService;
 
-    @Autowired
-    @Qualifier("wsProcessor")
-    private DataProcessor processor;
+
     @Autowired
     private StartExamineListener startExamineListener;
 
@@ -110,10 +125,10 @@ public class StartHandler {
      * @return
      */
     public StartOperationRecord getStartState() {
-        List<StartOperationRecord> querystartOperationRecord = startService.findUnfinishStartOperate(null, StartStopConstants.START_FINISH_STATE);
+        List<StartOperationRecord> querystartOperationRecord = startService.findUnfinishStartOperate(null, StartConstants.START_FINISH_STATE);
         if (CollectionUtils.isEmpty(querystartOperationRecord)) {
             StartOperationRecord startOperationRecord = new StartOperationRecord();
-            startOperationRecord.setOperateState(StartStopConstants.START_NO_STATE);
+            startOperationRecord.setOperateState(StartConstants.START_NO_STATE);
             return startOperationRecord;
         } else if (querystartOperationRecord.size() > 1) {
             throw new StartException("当前起车数据异常，存在多条启动中有效数据，请检查。");
@@ -131,9 +146,9 @@ public class StartHandler {
         // 查询系统分类
         List<StartSystem> startSystems = new LinkedList<>();
         // 查询二期系统
-        startSystems.addAll(startService.getStartSystem(StartStopConstants.PRODUCTION_LINE_TWO, StartStopConstants.SYSTEM_TYPE_SYSTEM, StartStopConstants.SYSTEM_CATEGORY_SELECT_PAGE));
+        startSystems.addAll(startService.getStartSystem(StartConstants.PRODUCTION_LINE_TWO, StartConstants.SYSTEM_TYPE_SYSTEM, StartConstants.SYSTEM_CATEGORY_SELECT_PAGE));
         // 查询二期公用设备
-        startSystems.addAll(startService.getStartSystem(StartStopConstants.PRODUCTION_LINE_TWO, StartStopConstants.SYSTEM_TYPE_DEVICE, StartStopConstants.SYSTEM_CATEGORY_SELECT_PAGE));
+        startSystems.addAll(startService.getStartSystem(StartConstants.PRODUCTION_LINE_TWO, StartConstants.SYSTEM_TYPE_DEVICE, StartConstants.SYSTEM_CATEGORY_SELECT_PAGE));
         return startSystems;
     }
 
@@ -147,7 +162,7 @@ public class StartHandler {
         // 查询系统分类
         List<StartSystem> startSystems = new LinkedList<>();
         // 查询系统名称系统
-        startSystems.addAll(startService.getStartSystemWithStarting(StartStopConstants.SYSTEM_CATEGORY_STARTING_PAGE));
+        startSystems.addAll(startService.getStartSystemWithStarting(StartConstants.SYSTEM_CATEGORY_STARTING_PAGE));
         startService.getStartinSystemWithDeviceInformation(startSystems);
         return startSystems;
     }
@@ -161,25 +176,25 @@ public class StartHandler {
         switch (operate) {
             case "pause":
                 // 暂停启车
-                writeSignalByLabel(StartStopConstants.PAUSE_STARTING_LABEL, StartStopConstants.VALUE_TRUE, StartStopConstants.LABEL_TYPE_BOOLEAN);
-                sendMessageTemplateByJson(StartStopConstants.URI_START_STATE, StartStopConstants.URI_START_STATE_MESSAGE_PAUSE);
+                writeSignalByLabel(StartConstants.PAUSE_STARTING_LABEL, StartConstants.VALUE_TRUE, StartConstants.LABEL_TYPE_BOOLEAN);
+                sendMessageTemplateByJson(StartConstants.URI_START_STATE, StartConstants.URI_START_STATE_MESSAGE_PAUSE);
                 break;
             case "continueStart":
                 // 恢复启车
-                writeSignalByLabel(StartStopConstants.PAUSE_STARTING_LABEL, StartStopConstants.VALUE_FALSE, StartStopConstants.LABEL_TYPE_BOOLEAN);
-                sendMessageTemplateByJson(StartStopConstants.URI_START_STATE, StartStopConstants.URI_START_STATE_MESSAGE_CONTINUE_START);
+                writeSignalByLabel(StartConstants.PAUSE_STARTING_LABEL, StartConstants.VALUE_FALSE, StartConstants.LABEL_TYPE_BOOLEAN);
+                sendMessageTemplateByJson(StartConstants.URI_START_STATE, StartConstants.URI_START_STATE_MESSAGE_CONTINUE_START);
                 break;
             case "closeStart":
                 // 结束启车
-                writeSignalByLabel(StartStopConstants.START_DEVICE_LABEL, StartStopConstants.VALUE_FALSE, StartStopConstants.LABEL_TYPE_BOOLEAN);
-                writeSignalByLabel(StartStopConstants.PAUSE_STARTING_LABEL, StartStopConstants.VALUE_FALSE, StartStopConstants.LABEL_TYPE_BOOLEAN);
+                writeSignalByLabel(StartConstants.START_DEVICE_LABEL, StartConstants.VALUE_FALSE, StartConstants.LABEL_TYPE_BOOLEAN);
+                writeSignalByLabel(StartConstants.PAUSE_STARTING_LABEL, StartConstants.VALUE_FALSE, StartConstants.LABEL_TYPE_BOOLEAN);
                 startService.closeStartOperate();
-                sendMessageTemplateByJson(StartStopConstants.URI_START_STATE, StartStopConstants.URI_START_STATE_MESSAGE_CLOSE_START);
+                sendMessageTemplateByJson(StartConstants.URI_START_STATE, StartConstants.URI_START_STATE_MESSAGE_CLOSE_START);
                 break;
             case "closeExamine":
                 // 结束检查
                 startService.closeStartOperate();
-                sendMessageTemplateByJson(StartStopConstants.URI_START_STATE, StartStopConstants.URI_START_STATE_MESSAGE_CLOSE_EXAMINE);
+                sendMessageTemplateByJson(StartConstants.URI_START_STATE, StartConstants.URI_START_STATE_MESSAGE_CLOSE_EXAMINE);
                 break;
             default:
                 break;
@@ -199,10 +214,10 @@ public class StartHandler {
         Object valueShort = null;
 
         switch (boolreal) {
-            case StartStopConstants.LABEL_TYPE_SHORT:
+            case StartConstants.LABEL_TYPE_SHORT:
                 valueShort = (short) value;
                 break;
-            case StartStopConstants.LABEL_TYPE_BOOLEAN:
+            case StartConstants.LABEL_TYPE_BOOLEAN:
                 valueShort = 1 == value;
                 break;
             default:
@@ -272,7 +287,7 @@ public class StartHandler {
                 }
             }
         };
-        timer.schedule(timerTask, StartStopConstants.SEND_MESSAGE_CIRCLE_TIME, StartStopConstants.SEND_MESSAGE_WAIT_TIME);
+        timer.schedule(timerTask, StartConstants.SEND_MESSAGE_CIRCLE_TIME, StartConstants.SEND_MESSAGE_WAIT_TIME);
     }
 
 
@@ -312,7 +327,7 @@ public class StartHandler {
      */
     public void sendStartInformation(Integer getOperateId) throws Exception {
         // 信号发送等待预值
-        Thread.sleep(StartStopConstants.SEND_SINGLE_VALUE_WAIT_TIME);
+        Thread.sleep(StartConstants.SEND_SINGLE_VALUE_WAIT_TIME);
         // 发送变压器的数值
         sendTransformation();
         // 发送包信息
@@ -326,15 +341,15 @@ public class StartHandler {
             logger.info("设备{}启动顺序为{}，功率为{}，变压器号为{}，等待时间为{}, 大区区域包信息:{}", deviceInformation.getDeviceId(),
                     deviceInformation.getStartSequence(), deviceInformation.getRateWork(),
                     deviceInformation.getTransformerId(), deviceInformation.getStartWaitTime(), deviceInformation.getStartHierarchy());
-            compareAndSendSignal(deviceInformation.getDeviceId(), StartStopConstants.IS_STARTING, "设备是否参与启车", (float) StartStopConstants.VALUE_TRUE);
-            compareAndSendSignal(deviceInformation.getDeviceId(), StartStopConstants.IS_REQUIREMENT, "清除启车前置条件", (float) StartStopConstants.VALUE_FALSE);
-            compareAndSendSignal(deviceInformation.getDeviceId(), StartStopConstants.RATE_WORK, "起车发送该设备功率", deviceInformation.getRateWork());
-            compareAndSendSignal(deviceInformation.getDeviceId(), StartStopConstants.TRANSFORMER_ID, "起车设备所属变压器号", (float) deviceInformation.getTransformerId());
-            compareAndSendSignal(deviceInformation.getDeviceId(), StartStopConstants.START_WAIT_TIME, "起车发送该设备等待时间", (float) deviceInformation.getStartWaitTime());
+            compareAndSendSignal(deviceInformation.getDeviceId(), StartConstants.IS_STARTING, "设备是否参与启车", (float) StartConstants.VALUE_TRUE);
+            compareAndSendSignal(deviceInformation.getDeviceId(), StartConstants.IS_REQUIREMENT, "清除启车前置条件", (float) StartConstants.VALUE_FALSE);
+            compareAndSendSignal(deviceInformation.getDeviceId(), StartConstants.RATE_WORK, "起车发送该设备功率", deviceInformation.getRateWork());
+            compareAndSendSignal(deviceInformation.getDeviceId(), StartConstants.TRANSFORMER_ID, "起车设备所属变压器号", (float) deviceInformation.getTransformerId());
+            compareAndSendSignal(deviceInformation.getDeviceId(), StartConstants.START_WAIT_TIME, "起车发送该设备等待时间", (float) deviceInformation.getStartWaitTime());
             String[] deviceHierarchy = deviceInformation.getStartHierarchy().split("-");
-            compareAndSendSignal(deviceInformation.getDeviceId(), StartStopConstants.DEVICE_REGION_ID, "起车发送大区信息", Float.parseFloat(deviceHierarchy[0]));
-            compareAndSendSignal(deviceInformation.getDeviceId(), StartStopConstants.DEVICE_AREA_ID, "起车发送区域信息", Float.parseFloat(deviceHierarchy[1]));
-            compareAndSendSignal(deviceInformation.getDeviceId(), StartStopConstants.DEVICE_BAG_ID, "起车发送包信息", Float.parseFloat(deviceHierarchy[2]));
+            compareAndSendSignal(deviceInformation.getDeviceId(), StartConstants.DEVICE_REGION_ID, "起车发送大区信息", Float.parseFloat(deviceHierarchy[0]));
+            compareAndSendSignal(deviceInformation.getDeviceId(), StartConstants.DEVICE_AREA_ID, "起车发送区域信息", Float.parseFloat(deviceHierarchy[1]));
+            compareAndSendSignal(deviceInformation.getDeviceId(), StartConstants.DEVICE_BAG_ID, "起车发送包信息", Float.parseFloat(deviceHierarchy[2]));
         }
 
 
@@ -345,7 +360,7 @@ public class StartHandler {
      */
     private void sendAreaInfromation() throws Exception {
         // 区域所属大区
-        List<StartSingleLabelAndValue> startSingleLabelAndValues = startService.selectAreaBelongRegion(EnumDeviceCode.AREA.getInfo(), StartStopConstants.AREA_BELONG_REGION);
+        List<StartSingleLabelAndValue> startSingleLabelAndValues = startService.selectAreaBelongRegion(EnumDeviceCode.AREA.getInfo(), StartConstants.AREA_BELONG_REGION);
         for (StartSingleLabelAndValue startSingleLabelAndValue : startSingleLabelAndValues) {
             float plcValue = getSystemMessageValue(startSingleLabelAndValue.getDataLabel());
             if (plcValue != startSingleLabelAndValue.getValue()) {
@@ -373,11 +388,11 @@ public class StartHandler {
      */
     private void sendPackageInfromation() throws Exception {
         // 包等待时间信息
-        List<StartSingleLabelAndValue> startSingleLabelAndValues = startService.selectPackageWaitTime(EnumDeviceCode.PACKAGE.getInfo(), StartStopConstants.WAIT_TIME);
+        List<StartSingleLabelAndValue> startSingleLabelAndValues = startService.selectPackageWaitTime(EnumDeviceCode.PACKAGE.getInfo(), StartConstants.WAIT_TIME);
         // 包所属区域
-        startSingleLabelAndValues.addAll(startService.selectPackageBelongArea(EnumDeviceCode.PACKAGE.getInfo(), StartStopConstants.BAG_BELONG_AREA));
+        startSingleLabelAndValues.addAll(startService.selectPackageBelongArea(EnumDeviceCode.PACKAGE.getInfo(), StartConstants.BAG_BELONG_AREA));
         // 包所属大区
-        startSingleLabelAndValues.addAll(startService.selectPackageBelongRegion(EnumDeviceCode.PACKAGE.getInfo(), StartStopConstants.BAG_BELONG_REGION));
+        startSingleLabelAndValues.addAll(startService.selectPackageBelongRegion(EnumDeviceCode.PACKAGE.getInfo(), StartConstants.BAG_BELONG_REGION));
         for (StartSingleLabelAndValue startSingleLabelAndValue : startSingleLabelAndValues) {
             float plcValue = getSystemMessageValue(startSingleLabelAndValue.getDataLabel());
             if (plcValue != startSingleLabelAndValue.getValue()) {
@@ -402,7 +417,7 @@ public class StartHandler {
      * 向PLC发送变压器信息
      */
     private void sendTransformation() throws Exception {
-        List<StartSingleLabelAndValue> startSingleLabelAndValues = startService.selectTransformerInformation(StartStopConstants.TRANSFORMER_VALUE);
+        List<StartSingleLabelAndValue> startSingleLabelAndValues = startService.selectTransformerInformation(StartConstants.TRANSFORMER_VALUE);
         for (StartSingleLabelAndValue startSingleLabelAndValue : startSingleLabelAndValues) {
             float plcValue = getSystemMessageValue(startSingleLabelAndValue.getDataLabel());
             if (plcValue != startSingleLabelAndValue.getValue()) {
@@ -466,9 +481,11 @@ public class StartHandler {
             try {
                 StartSignal startSignal = startService.getStartSignalByDeviceId(rule.getExamineDeviceId());
                 logger.info("启车自检,检查设备:{},检查内容:{}", rule.getExamineDeviceId(), rule.getExamineName());
-                DataModelWrapper data = dataService.getData(startSignal.getDeviceCode(), MetricCodes.STATE).orElse(null);
+                String metricCode = startService.getMetricCodeByStartDeviceSignalId(Integer.parseInt(rule.getExamineName()));
+                DataModelWrapper data = dataService.getData(startSignal.getDeviceCode(), metricCode).orElse(null);
                 if (data != null) {
-                    updateExamineRecord(rule, Double.valueOf(data.getValue()));
+
+                    updateExamineRecord(rule, changeMetricValue(data.getValue()));
 
                 }
             } catch (Exception e) {
@@ -478,8 +495,7 @@ public class StartHandler {
             examineLabel.addAll(startService.selectLabelByDeviceIdAndName(rule.getExamineDeviceId(), rule.getExamineName()));
         }
         startExamineListener.setStartExamineLabels(examineLabel);
-        processor.removeListener(startExamineListener);
-        processor.addListener(startExamineListener);
+        startExamineListenerFlag = true;
 
     }
 
@@ -500,15 +516,15 @@ public class StartHandler {
             // 规则校验是否属于本次启车
             return;
         }
-        if (estimateExamineResult(startExamineRule, value) && startExamineRecords.get(0).getExamineResult() != StartStopConstants.EXAMINE_RESULT_RIGHT) {
+        if (estimateExamineResult(startExamineRule, value) && startExamineRecords.get(0).getExamineResult() != StartConstants.EXAMINE_RESULT_RIGHT) {
             // 保存正常的检测内容
-            examineResult = StartStopConstants.EXAMINE_RESULT_RIGHT;
+            examineResult = StartConstants.EXAMINE_RESULT_RIGHT;
             examineInformation = null;
             flag = true;
         }
-        if (!estimateExamineResult(startExamineRule, value) && startExamineRecords.get(0).getExamineResult() != StartStopConstants.EXAMINE_RESULT_ERROR) {
+        if (!estimateExamineResult(startExamineRule, value) && startExamineRecords.get(0).getExamineResult() != StartConstants.EXAMINE_RESULT_ERROR) {
             // 检测异常时根据检查类型不同判断错误信息
-            examineResult = StartStopConstants.EXAMINE_RESULT_ERROR;
+            examineResult = StartConstants.EXAMINE_RESULT_ERROR;
             flag = true;
             // 获得故障信息反馈
             examineInformation = getExamineInformation(startExamineRule, value);
@@ -519,8 +535,8 @@ public class StartHandler {
             StartSignal startSignal = startService.getStartSignalByDeviceId(startExamineRule.getExamineDeviceId());
             DataModelWrapper closeData = dataService.getData(startSignal.getDeviceCode(), MetricCodes.TAP_CLOSE).orElse(null);
             DataModelWrapper openData = dataService.getData(startSignal.getDeviceCode(), MetricCodes.TAP_OPEN).orElse(null);
-            if (closeData != null && openData != null && startExamineRule.getExamineType() == StartStopConstants.TAP_ERROR_TYPE && openData.getValue().equals(closeData.getValue())) {
-                examineResult = StartStopConstants.EXAMINE_RESULT_ERROR;
+            if (closeData != null && openData != null && startExamineRule.getExamineType() == StartConstants.TAP_ERROR_TYPE && openData.getValue().equals(closeData.getValue())) {
+                examineResult = StartConstants.EXAMINE_RESULT_ERROR;
                 examineInformation = "异常";
                 flag = true;
             }
@@ -534,7 +550,7 @@ public class StartHandler {
             startService.updateStartExamineRecord(startExamineRule.getRuleId(), startService.findOperateIdWhenNull(), examineResult, examineInformation);
             startExamineRecords.get(0).setExamineResult(examineResult);
             startExamineRecords.get(0).setExamineInformation(examineInformation);
-            sendMessagingTemplate(StartStopConstants.URI_START_AUTO_EXAMINE, startExamineRecords.get(0));
+            sendMessagingTemplate(StartConstants.URI_START_AUTO_EXAMINE, startExamineRecords.get(0));
         }
     }
 
@@ -548,20 +564,20 @@ public class StartHandler {
     private String getExamineInformation(StartExamineRule startExamineRule, Double value) {
         String examineInformation = "";
         switch (startExamineRule.getExamineType()) {
-            case StartStopConstants.REMOTE_ERROR_TYPE:
+            case StartConstants.REMOTE_ERROR_TYPE:
                 examineInformation = "就地";
                 break;
-            case StartStopConstants.DEVICE_ERROR_TYPE:
+            case StartConstants.DEVICE_ERROR_TYPE:
                 examineInformation = startService.getFaultByDeviceId(startExamineRule.getExamineDeviceId());
                 break;
-            case StartStopConstants.TAP_ERROR_TYPE:
-                if (StartStopConstants.TAP_CLOSE.equals(startExamineRule.getExamineName())) {
+            case StartConstants.TAP_ERROR_TYPE:
+                if (StartConstants.TAP_CLOSE.equals(startExamineRule.getExamineName())) {
                     examineInformation = "关到位";
-                } else if (StartStopConstants.TAP_OPEN.equals(startExamineRule.getExamineName())) {
+                } else if (StartConstants.TAP_OPEN.equals(startExamineRule.getExamineName())) {
                     examineInformation = "开到位";
                 }
                 break;
-            case StartStopConstants.LEVEL_ERROR_TYPE:
+            case StartConstants.LEVEL_ERROR_TYPE:
                 // 保留小数点两位
                 DecimalFormat df = new DecimalFormat("#0.00");
                 examineInformation = df.format(value) + "m";
@@ -583,32 +599,32 @@ public class StartHandler {
     private Boolean estimateExamineResult(StartExamineRule startExamineRule, Double value) {
         Boolean flag = false;
         switch (startExamineRule.getOperator()) {
-            case StartStopConstants.COMPARE_GREATER_THAN:
+            case StartConstants.COMPARE_GREATER_THAN:
                 if (value > startExamineRule.getCompareValue()) {
                     flag = true;
                 }
                 break;
-            case StartStopConstants.COMPARE_LESS_THAN:
+            case StartConstants.COMPARE_LESS_THAN:
                 if (value < startExamineRule.getCompareValue()) {
                     flag = true;
                 }
                 break;
-            case StartStopConstants.COMPARE_EQUAL_TO:
+            case StartConstants.COMPARE_EQUAL_TO:
                 if (value == startExamineRule.getCompareValue()) {
                     flag = true;
                 }
                 break;
-            case StartStopConstants.COMPARE_GREATER_THAN_AND_EQUAL_TO:
+            case StartConstants.COMPARE_GREATER_THAN_AND_EQUAL_TO:
                 if (value >= startExamineRule.getCompareValue()) {
                     flag = true;
                 }
                 break;
-            case StartStopConstants.COMPARE_LESS_THAN_AND_EQUAL_TO:
+            case StartConstants.COMPARE_LESS_THAN_AND_EQUAL_TO:
                 if (value <= startExamineRule.getCompareValue()) {
                     flag = true;
                 }
                 break;
-            case StartStopConstants.COMPARE_NOT_EQUAL_TO:
+            case StartConstants.COMPARE_NOT_EQUAL_TO:
                 if (value != startExamineRule.getCompareValue()) {
                     flag = true;
                 }
@@ -632,12 +648,12 @@ public class StartHandler {
             StartManualInterventionDevice startManualInterventionDevice = startService.selectManualInterventionStateByDeviceId(deviceId).get(0);
             startManualInterventionRecord.setManualInterventionPerson(startManualInterventionDevice.getPersonId());
             // 发送干预设置到PLC
-            if (StartStopConstants.MANUAL_INTERVENTION_FALSE == startManualInterventionDevice.getState()) {
+            if (StartConstants.MANUAL_INTERVENTION_FALSE == startManualInterventionDevice.getState()) {
                 // 不人工干预
-                startManualInterventionRecord.setInterventionState(StartStopConstants.MANUAL_INTERVENTION_FALSE);
+                startManualInterventionRecord.setInterventionState(StartConstants.MANUAL_INTERVENTION_FALSE);
             } else {
                 // 人工干预
-                startManualInterventionRecord.setInterventionState(StartStopConstants.MANUAL_INTERVENTION_TRUE);
+                startManualInterventionRecord.setInterventionState(StartConstants.MANUAL_INTERVENTION_TRUE);
             }
             try {
                 sendManualInterventionrState(startManualInterventionRecord.getDeviceId(), startManualInterventionRecord.getInterventionState());
@@ -649,7 +665,7 @@ public class StartHandler {
             // 保存本次启车人工干预记录
             startService.saveManualInterventionRecord(startManualInterventionRecord);
             // 解除所有临时人工干预设置
-            startService.updateZgkwStartManualIntervention(null, null, StartStopConstants.MANUAL_INTERVENTION_FALSE, StartStopConstants.MANUAL_INTERVENTION_TEMPORARY);
+            startService.updateZgkwStartManualIntervention(null, null, StartConstants.MANUAL_INTERVENTION_FALSE, StartConstants.MANUAL_INTERVENTION_TEMPORARY);
         }
     }
 
@@ -662,7 +678,7 @@ public class StartHandler {
 
     public void sendManualInterventionrState(String deviceId, Integer value) throws Exception {
         // 发送启车预设定状态
-        compareAndSendSignal(deviceId, StartStopConstants.MANUAL_INTERVENTION, "启车人工干预", (float) value);
+        compareAndSendSignal(deviceId, StartConstants.MANUAL_INTERVENTION, "启车人工干预", (float) value);
     }
 
     /**
@@ -679,12 +695,12 @@ public class StartHandler {
         MetricModel metricModel = tmlMapper.findMetricByMetricName(startDeviceSignal.getName());
         DataModelWrapper dataModelWrapper = dataService.getData(startSignal.getDeviceCode(), metricModel.getMetricCode()).orElse(null);
         float singleValue = 0f;
-        if (dataModelWrapper != null&&StringUtils.isNumeric(dataModelWrapper.getValue())) {
-            singleValue = Float.valueOf(dataModelWrapper.getValue());
+        if (dataModelWrapper != null) {
+            singleValue = changeMetricValue(dataModelWrapper.getValue()).floatValue();
             logger.info("startSingleValue:{}", singleValue);
         }
         if (singleValue != value) {
-            operateSignal(deviceId, metricModel.getMetricCode(), operateUserId, value);
+            operateSignal(deviceId, nameId, operateUserId, value);
         }
     }
 
@@ -696,7 +712,7 @@ public class StartHandler {
      */
     public List<StartDevice> getStartBrowseDevice() throws Exception {
         List<StartDevice> startDeviceStates = new ArrayList<>();
-        List<String> deviceIds = startService.selectStartDeviceIdBySystemCategory(StartStopConstants.SYSTEM_CATEGORY_BROWSE_PAGE, null);
+        List<String> deviceIds = startService.selectStartDeviceIdBySystemCategory(StartConstants.SYSTEM_CATEGORY_BROWSE_PAGE, null);
         // 通过deviceId 查询deviceCode  在查询带煤量的信号数据
         for (String deviceId : deviceIds) {
             StartDevice startDevice = startService.selectStartDeviceByDeviceId(deviceId);
@@ -737,19 +753,19 @@ public class StartHandler {
 
                 switch (startExamineRule.getExamineType()) {
                     // 控制类型
-                    case StartStopConstants.REMOTE_ERROR_TYPE:
-                        operateSignal(startExamineRule.getExamineDeviceId(), StartStopConstants.REMOTE_LOCAL_CONTROL, userUuid, (float) startExamineRule.getCompareValue());
+                    case StartConstants.REMOTE_ERROR_TYPE:
+                        operateSignal(startExamineRule.getExamineDeviceId(), StartConstants.REMOTE_LOCAL_CONTROL, userUuid, (float) startExamineRule.getCompareValue());
                         break;
                     // 故障类别
-                    case StartStopConstants.DEVICE_ERROR_TYPE:
-                        operateSignal(startExamineRule.getExamineDeviceId(), StartStopConstants.HANDLE_EXCEPTION, userUuid, (float) StartStopConstants.VALUE_TRUE);
+                    case StartConstants.DEVICE_ERROR_TYPE:
+                        operateSignal(startExamineRule.getExamineDeviceId(), StartConstants.HANDLE_EXCEPTION, userUuid, (float) StartConstants.VALUE_TRUE);
                         break;
                     // 阀门开关
-                    case StartStopConstants.TAP_ERROR_TYPE:
+                    case StartConstants.TAP_ERROR_TYPE:
                         dealTapErrorType(tapOperate, userUuid, startExamineRule);
                         break;
                     // 液位检查
-                    case StartStopConstants.LEVEL_ERROR_TYPE:
+                    case StartConstants.LEVEL_ERROR_TYPE:
                         // 不做处理
                         break;
                     default:
@@ -770,17 +786,17 @@ public class StartHandler {
      * @param startExamineRule
      */
     private void dealTapErrorType(String tapOperate, String userUuid, StartExamineRule startExamineRule) {
-        if (StartStopConstants.REMOTE_OPEN_TAP.equals(tapOperate) || StartStopConstants.REMOTE_CLOSE_TAP.equals(tapOperate)) {
+        if (StartConstants.REMOTE_OPEN_TAP.equals(tapOperate) || StartConstants.REMOTE_CLOSE_TAP.equals(tapOperate)) {
             // 用户指定阀门操作类型
-            operateSignal(startExamineRule.getExamineDeviceId(), tapOperate, userUuid, (float) StartStopConstants.VALUE_TRUE);
+            operateSignal(startExamineRule.getExamineDeviceId(), tapOperate, userUuid, (float) StartConstants.VALUE_TRUE);
         }
-        if (StartStopConstants.TAP_CLOSE.equals(startExamineRule.getExamineName())) {
+        if (StartConstants.TAP_CLOSE.equals(startExamineRule.getExamineName())) {
             //规则判断关阀门
-            operateSignal(startExamineRule.getExamineDeviceId(), StartStopConstants.REMOTE_CLOSE_TAP, userUuid, (float) StartStopConstants.VALUE_TRUE);
+            operateSignal(startExamineRule.getExamineDeviceId(), StartConstants.REMOTE_CLOSE_TAP, userUuid, (float) StartConstants.VALUE_TRUE);
         }
-        if (StartStopConstants.TAP_OPEN.equals(startExamineRule.getExamineName())) {
+        if (StartConstants.TAP_OPEN.equals(startExamineRule.getExamineName())) {
             //规则判断开阀门
-            operateSignal(startExamineRule.getExamineDeviceId(), StartStopConstants.REMOTE_OPEN_TAP, userUuid, (float) StartStopConstants.VALUE_TRUE);
+            operateSignal(startExamineRule.getExamineDeviceId(), StartConstants.REMOTE_OPEN_TAP, userUuid, (float) StartConstants.VALUE_TRUE);
         }
     }
 
@@ -788,27 +804,27 @@ public class StartHandler {
      * 发送操作信号
      *
      * @param deviceId      设备号
-     * @param metricCode    信号值
+     * @param nameId        信号值
      * @param operateUserId 操作者id
      * @param value         操作值
      * @throws Exception
      */
-    public void operateSignal(String deviceId, String metricCode, String operateUserId, Float value) {
-        logger.info("deviceId:{},name:{}启车模块操作信号开始发送。", deviceId, metricCode);
+    public void operateSignal(String deviceId, String nameId, String operateUserId, Float value) {
+        logger.info("deviceId:{},name:{}启车模块操作信号开始发送。", deviceId, nameId);
         long begin = System.currentTimeMillis();
         StartSignal startSignal = startService.getStartSignalByDeviceId(deviceId);
         DataModel dataModel = new DataModel();
         dataModel.setThingCode(startSignal.getDeviceCode());
-        StartDeviceSignal startDeviceSignal = startService.getStartDeviceSignalById(startSignal.getName());
+        StartDeviceSignal startDeviceSignal = startService.getStartDeviceSignalById(Integer.valueOf(nameId));
         MetricModel metricModel = tmlMapper.findMetricByMetricName(startDeviceSignal.getName());
         dataModel.setMetricCode(metricModel.getMetricCode());
-        dataModel.setValue(String.valueOf(value));
-        CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(dataModel,"发送信号");
+        dataModel.setValue(dealMetricValue(metricModel.getValueType(), value));
+        CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(dataModel, "发送信号");
         if (cmdSendResponseData.getOkCount() == 0) {
             logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage());
         }
-        logger.info(CMDLOG, startSignal.getDeviceCode(), metricCode, value);
-        logger.info("deviceId:{},name:{}启车模块操作信号已经发送成功,cost:{}ms", deviceId, metricCode, (System.currentTimeMillis() - begin));
+        logger.info(CMDLOG, startSignal.getDeviceCode(), metricModel.getMetricCode(), dataModel.getValue());
+        logger.info("deviceId:{},name:{}启车模块操作信号已经发送成功,cost:{}ms", deviceId, nameId, (System.currentTimeMillis() - begin));
     }
 
     /**
@@ -819,18 +835,18 @@ public class StartHandler {
      */
     public String setManualIntervention(String deviceId, String userId) throws Exception {
         String infromation = "success";
-        if (startService.judgeStartingState(null, StartStopConstants.START_FINISH_STATE)) {
+        if (startService.judgeStartingState(null, StartConstants.START_FINISH_STATE)) {
             // 启车中
-            sendManualInterventionrState(deviceId, StartStopConstants.VALUE_TRUE);
+            sendManualInterventionrState(deviceId, StartConstants.VALUE_TRUE);
             StartSignal startSignal = startService.getStartSignalByDeviceId(deviceId);
             DataModelWrapper dataModelWrapper = dataService.getData(startSignal.getDeviceCode(), MetricCodes.STATE).orElse(null);
             Double value = null;
             if (dataModelWrapper != null) {
                 value = Double.parseDouble(dataModelWrapper.getValue());
-                if ((short) StartStopConstants.DEVICE_STATE_WORKING != value) {
+                if ((short) StartConstants.DEVICE_STATE_WORKING != value) {
                     // 设备未启动
                     Integer operteId = startService.findOperateIdWhenNull();
-                    startService.updateStartManualInterventionRecord(deviceId, operteId, StartStopConstants.MANUAL_INTERVENTION_TRUE, userId, null);
+                    startService.updateStartManualInterventionRecord(deviceId, operteId, StartConstants.MANUAL_INTERVENTION_TRUE, userId, null);
                 } else {
                     // 设备已启动
                     infromation = "manualInterventionerrorByStarting";
@@ -839,10 +855,10 @@ public class StartHandler {
 
         } else {
             // 启车前
-            startService.updateZgkwStartManualIntervention(deviceId, userId, StartStopConstants.MANUAL_INTERVENTION_TEMPORARY, StartStopConstants.MANUAL_INTERVENTION_FALSE);
+            startService.updateZgkwStartManualIntervention(deviceId, userId, StartConstants.MANUAL_INTERVENTION_TEMPORARY, StartConstants.MANUAL_INTERVENTION_FALSE);
         }
         // 通知前端人工干预变化
-        sendMessageTemplateByJson(StartStopConstants.URI_MANUAL_INTERVENTION, StartStopConstants.URI_MANUAL_INTERVENTION_MESSAGE_MANUAL_INTERVENTION_CHANGE);
+        sendMessageTemplateByJson(StartConstants.URI_MANUAL_INTERVENTION, StartConstants.URI_MANUAL_INTERVENTION_MESSAGE_MANUAL_INTERVENTION_CHANGE);
         return infromation;
     }
 
@@ -856,12 +872,12 @@ public class StartHandler {
      */
     public String relieveManualIntervention(String deviceId, String userId) throws Exception {
         String information;
-        if (startService.judgeStartingState(null, StartStopConstants.START_FINISH_STATE)) {
+        if (startService.judgeStartingState(null, StartConstants.START_FINISH_STATE)) {
             Integer operteId = startService.findOperateIdWhenNull();
-            sendManualInterventionrState(deviceId, StartStopConstants.VALUE_FALSE);
-            startService.updateStartManualInterventionRecord(deviceId, operteId, StartStopConstants.MANUAL_INTERVENTION_REMOVE, null, userId);
+            sendManualInterventionrState(deviceId, StartConstants.VALUE_FALSE);
+            startService.updateStartManualInterventionRecord(deviceId, operteId, StartConstants.MANUAL_INTERVENTION_REMOVE, null, userId);
             // 通知前端人工干预变化
-            sendMessageTemplateByJson(StartStopConstants.URI_MANUAL_INTERVENTION, StartStopConstants.URI_MANUAL_INTERVENTION_MESSAGE_MANUAL_INTERVENTION_CHANGE);
+            sendMessageTemplateByJson(StartConstants.URI_MANUAL_INTERVENTION, StartConstants.URI_MANUAL_INTERVENTION_MESSAGE_MANUAL_INTERVENTION_CHANGE);
             information = "success";
         } else {
             information = "noStarting";
@@ -878,8 +894,8 @@ public class StartHandler {
     public List<StartDeviceRelation> getStartDeviceRelationByPackageId(String packageId, List<String> systemIds) throws Exception {
         Set<String> startDeviceIds = getStartDeviceIds(systemIds);
         List<StartDeviceRelation> relations = getStartDeviceRelationByPackage(packageId, null);
-        List<StartDeviceRelation> relationsFilterByDeviceId = filterDeviceRelation(relations, startDeviceIds, StartStopConstants.FILTER_TYPE_DEVICE_ID);
-        List<StartDeviceRelation> relationsFilterAll = filterDeviceRelation(relationsFilterByDeviceId, startDeviceIds, StartStopConstants.FILTER_TYPE_CONTROL_DEVICE_ID);
+        List<StartDeviceRelation> relationsFilterByDeviceId = filterDeviceRelation(relations, startDeviceIds, StartConstants.FILTER_TYPE_DEVICE_ID);
+        List<StartDeviceRelation> relationsFilterAll = filterDeviceRelation(relationsFilterByDeviceId, startDeviceIds, StartConstants.FILTER_TYPE_CONTROL_DEVICE_ID);
         return relationsFilterAll;
     }
 
@@ -902,6 +918,8 @@ public class StartHandler {
                 if (value == 1) {
                     relation.setAbnormal(startService.getFaultByDeviceId(relation.getControlDeviceId()));
                 }
+            } else {
+                relation.setControlDeviceState(Double.valueOf("0"));
             }
         }
         return startDeviceRelations;
@@ -919,11 +937,11 @@ public class StartHandler {
         for (StartDeviceRelation relation : startDeviceRelations) {
             for (String deviceId : startDeviceIds) {
                 // 当控制设备条件在本次启车中时加入筛选
-                if (deviceId.equals(relation.getDeviceId()) && fileterType.equals(StartStopConstants.FILTER_TYPE_DEVICE_ID)) {
+                if (deviceId.equals(relation.getDeviceId()) && fileterType.equals(StartConstants.FILTER_TYPE_DEVICE_ID)) {
                     relationsFilerByDeviceId.add(relation);
                     break;
                 }
-                if (deviceId.equals(relation.getControlDeviceId()) && fileterType.equals(StartStopConstants.FILTER_TYPE_CONTROL_DEVICE_ID)) {
+                if (deviceId.equals(relation.getControlDeviceId()) && fileterType.equals(StartConstants.FILTER_TYPE_CONTROL_DEVICE_ID)) {
                     relationsFilerByDeviceId.add(relation);
                     break;
                 }
@@ -950,9 +968,9 @@ public class StartHandler {
         List<StartRequirement> startRequirements = startService.getRequirementByDeviceId(deviceId);
         for (StartRequirement requirement : startRequirements) {
             // 预设该条件错误
-            requirement.setIsAbnormal(StartStopConstants.REQUIRENMENT_FALSE);
+            requirement.setIsAbnormal(StartConstants.REQUIRENMENT_FALSE);
             if (judgeSingleRequirement(requirement)) {
-                requirement.setIsAbnormal(StartStopConstants.REQUIRENMENT_TRUE);
+                requirement.setIsAbnormal(StartConstants.REQUIRENMENT_TRUE);
             }
         }
         startDeviceControlInformation.setStartRequirements(startRequirements);
@@ -960,7 +978,10 @@ public class StartHandler {
         List<StartManualInterventionRecord> startManualInterventionRecords = startService.selectStartingManualInterventionRecord(deviceId, operateId, null);
         if (CollectionUtils.isNotEmpty(startManualInterventionRecords)) {
             startDeviceControlInformation.setStartManualInterventionRecord(startManualInterventionRecords.get(0));
+        } else {
+            startDeviceControlInformation.setStartManualInterventionRecord(null);
         }
+
         return startDeviceControlInformation;
     }
 
@@ -999,37 +1020,37 @@ public class StartHandler {
             value = Double.parseDouble(dataModelWrapper.getValue());
         }
         switch (singleRequirement.getOperator()) {
-            case StartStopConstants.COMPARE_GREATER_THAN:
+            case StartConstants.COMPARE_GREATER_THAN:
                 //需要判断大于>
                 if (value <= singleRequirement.getCompareValue()) {
                     flag = false;
                 }
                 break;
-            case StartStopConstants.COMPARE_LESS_THAN:
+            case StartConstants.COMPARE_LESS_THAN:
                 //需要判断小于<
                 if (value >= singleRequirement.getCompareValue()) {
                     flag = false;
                 }
                 break;
-            case StartStopConstants.COMPARE_EQUAL_TO:
+            case StartConstants.COMPARE_EQUAL_TO:
                 //需要判断等于=
                 if (value != singleRequirement.getCompareValue()) {
                     flag = false;
                 }
                 break;
-            case StartStopConstants.COMPARE_GREATER_THAN_AND_EQUAL_TO:
+            case StartConstants.COMPARE_GREATER_THAN_AND_EQUAL_TO:
                 //需要判断大于等于>=
                 if (value < singleRequirement.getCompareValue()) {
                     flag = false;
                 }
                 break;
-            case StartStopConstants.COMPARE_LESS_THAN_AND_EQUAL_TO:
+            case StartConstants.COMPARE_LESS_THAN_AND_EQUAL_TO:
                 //需要判断小于等于<=
                 if (value > singleRequirement.getCompareValue()) {
                     flag = false;
                 }
                 break;
-            case StartStopConstants.COMPARE_NOT_EQUAL_TO:
+            case StartConstants.COMPARE_NOT_EQUAL_TO:
                 //需要判断不等于
                 if (value == singleRequirement.getCompareValue()) {
                     flag = false;
@@ -1051,8 +1072,8 @@ public class StartHandler {
         try {
             cleanStartInformation();
             // 清除信号发送完毕
-            startService.updateStartOperate(StartStopConstants.START_SEND_CLEAN_STATE);
-            sendMessageTemplateByJson(StartStopConstants.URI_START_STATE, StartStopConstants.URI_START_STATE_MESSAGE_SEND_MESSAGE_START);
+            startService.updateStartOperate(StartConstants.START_SEND_CLEAN_STATE);
+            sendMessageTemplateByJson(StartConstants.URI_START_STATE, StartConstants.URI_START_STATE_MESSAGE_SEND_MESSAGE_START);
         } catch (Exception e) {
             logger.error("启车清除信号发送失败,失败原因信息:{}", e.getMessage());
             throw new StartException("启车清除信息发送失败");
@@ -1066,7 +1087,7 @@ public class StartHandler {
      */
     public void cleanStartInformation() throws Exception {
         // 清除顺序
-        writeSignalByLabel(StartStopConstants.CLEAN_LABEL, StartStopConstants.VALUE_TRUE, StartStopConstants.LABEL_TYPE_BOOLEAN);
+        writeSignalByLabel(StartConstants.CLEAN_LABEL, StartConstants.VALUE_TRUE, StartConstants.LABEL_TYPE_BOOLEAN);
         logger.info("启车清除信号发送成功");
     }
 
@@ -1076,11 +1097,12 @@ public class StartHandler {
      */
     public void finishStartState() {
         // 取消订阅
-        processor.removeListener(startListener);
+        startListenerFlag = false;
+        startExamineListenerFlag = false;
         // 关闭观察
         StartHandler.setStartDeviceRequirements(null);
         // 关闭启车
-        startService.updateStartOperate(StartStopConstants.START_FINISH_STATE);
+        startService.updateStartOperate(StartConstants.START_FINISH_STATE);
     }
 
 
@@ -1091,15 +1113,18 @@ public class StartHandler {
      * @param value 数值
      */
     public void updateStartDeviceState(String label, double value) {
-        List<String> deviceIds = startService.selectDeviceIdByDatelabel(label, StartStopConstants.DEVICE_STATE);
-        // 修改启车记录
-        logger.info("修改设备:{}启车状态为{}", deviceIds.get(0), value);
-        updateStartDeviceState(deviceIds.get(0), value);
+        List<String> deviceIds = startService.selectDeviceIdByDatelabel(label, StartConstants.DEVICE_STATE);
+        if (CollectionUtils.isNotEmpty(deviceIds)) {
+            // 修改启车记录
+            logger.info("修改设备:{}启车状态为{}", deviceIds.get(0), value);
+            updateStartDeviceStateByDeviceId(deviceIds.get(0), value);
 
-        // 发送频率
-        if ((double) StartStopConstants.DEVICE_STATE_WORKING == value) {
-            sendFrequency(deviceIds.get(0));
+            // 发送频率
+            if ((double) StartConstants.DEVICE_STATE_WORKING == value) {
+                sendFrequency(deviceIds.get(0));
+            }
         }
+
     }
 
     /**
@@ -1117,7 +1142,7 @@ public class StartHandler {
         startDeviceStateRecord.setOperateId(findOperateId);
         startDeviceStateRecord.setDeviceId(deviceId);
         startDeviceStateRecord.setState((int) value);
-        sendMessagingTemplate(StartStopConstants.URI_START_DEVICE_STATE, startDeviceStateRecord);
+        sendMessagingTemplate(StartConstants.URI_START_DEVICE_STATE, startDeviceStateRecord);
     }
 
     /**
@@ -1126,13 +1151,13 @@ public class StartHandler {
      * @param deviceId
      */
     public void sendFrequency(String deviceId) {
-        StartSingleLabelAndValue singleLabelAndFrequency = startService.selectFrequency(deviceId, StartStopConstants.SET_FREQUENCY, StartStopConstants.START_TYPE_NORMAL, StartStopConstants.TYPE_STARTING);
+        StartSingleLabelAndValue singleLabelAndFrequency = startService.selectFrequency(deviceId, StartConstants.SET_FREQUENCY, StartConstants.START_TYPE_NORMAL, StartConstants.TYPE_STARTING);
         if (singleLabelAndFrequency != null) {
             float plcValue = getSystemMessageValue(singleLabelAndFrequency.getDataLabel());
             if (plcValue != singleLabelAndFrequency.getValue()) {
                 logger.info("启车频率发送:{}的值为{}", singleLabelAndFrequency.getDataLabel(), singleLabelAndFrequency.getValue());
                 while (true) {
-                    Boolean sendAnswer = sendSingleLabelAndValue(singleLabelAndFrequency, StartStopConstants.LABEL_TYPE_FLOAT);
+                    Boolean sendAnswer = sendSingleLabelAndValue(singleLabelAndFrequency, StartConstants.LABEL_TYPE_FLOAT);
                     if (sendAnswer) {
                         break;
                     }
@@ -1149,9 +1174,9 @@ public class StartHandler {
         // 初始规则范围
         List<StartAreaRule> startAreaRules;
         if (areaFirstId == null) {
-            startAreaRules = startService.selectAreaRuleByParentStateAndAreaFirstId(StartStopConstants.START_AREA, null);
+            startAreaRules = startService.selectAreaRuleByParentStateAndAreaFirstId(StartConstants.START_AREA, null);
         } else {
-            startAreaRules = startService.selectAreaRuleByParentStateAndAreaFirstId(StartStopConstants.NO_START_AREA, areaFirstId);
+            startAreaRules = startService.selectAreaRuleByParentStateAndAreaFirstId(StartConstants.NO_START_AREA, areaFirstId);
         }
         // 处理每条规则
         for (StartAreaRule startAreaRule : startAreaRules) {
@@ -1159,7 +1184,7 @@ public class StartHandler {
             TimerTask task = new TimerTask() {
                 @Override
                 public void run() {
-                    startService.updateStartAreaRecord(startService.findOperateIdWhenNull(), StartStopConstants.AREA_STATE_TRUE, startAreaRule.getRuleId());
+                    startService.updateStartAreaRecord(startService.findOperateIdWhenNull(), StartConstants.AREA_STATE_TRUE, startAreaRule.getRuleId());
                     startAreaByRule(startService.findOperateIdWhenNull(), startAreaRule.getAreaSecondId());
                 }
             };
@@ -1175,13 +1200,13 @@ public class StartHandler {
      * @param areaSecondId
      */
     public void startAreaByRule(Integer operateId, Integer areaSecondId) {
-        List<Integer> recordId = startService.selectAreaRuleRecordByStateAndAreaSecondId(operateId, StartStopConstants.AREA_STATE_FALSE, areaSecondId);
+        List<Integer> recordId = startService.selectAreaRuleRecordByStateAndAreaSecondId(operateId, StartConstants.AREA_STATE_FALSE, areaSecondId);
         if (recordId == null || recordId.size() == 0) {
             // 启动新规则计时
             createAreaRuleExamine(areaSecondId);
             // 通知该区域满足
-            StartSingleLabelAndValue startSingleLabelAndValue = startService.selectAreaStartLabel(EnumDeviceCode.AREA.getInfo(), areaSecondId, StartStopConstants.AREA_START);
-            startSingleLabelAndValue.setValue((float) StartStopConstants.VALUE_TRUE);
+            StartSingleLabelAndValue startSingleLabelAndValue = startService.selectAreaStartLabel(EnumDeviceCode.AREA.getInfo(), areaSecondId, StartConstants.AREA_START);
+            startSingleLabelAndValue.setValue((float) StartConstants.VALUE_TRUE);
             sendAreaStarting(startSingleLabelAndValue);
         }
 
@@ -1194,7 +1219,7 @@ public class StartHandler {
      */
     private void sendAreaStarting(StartSingleLabelAndValue startSingleLabelAndValue) {
         while (true) {
-            Boolean sendAnswer = sendSingleLabelAndValue(startSingleLabelAndValue, StartStopConstants.LABEL_TYPE_BOOLEAN);
+            Boolean sendAnswer = sendSingleLabelAndValue(startSingleLabelAndValue, StartConstants.LABEL_TYPE_BOOLEAN);
             if (sendAnswer) {
                 break;
             }
@@ -1211,7 +1236,7 @@ public class StartHandler {
     public Boolean sendSingleLabelAndValue(StartSingleLabelAndValue startSingleLabelAndValue, int type) {
         Boolean flag = true;
         try {
-            Thread.sleep(StartStopConstants.SEND_SINGLE_VALUE_ERROR_WAIT_TIME);
+            Thread.sleep(StartConstants.SEND_SINGLE_VALUE_ERROR_WAIT_TIME);
             float plcValue = getSystemMessageValue(startSingleLabelAndValue.getDataLabel());
             if (plcValue != startSingleLabelAndValue.getValue()) {
                 ThingMetricCode startSignalByDataLabel = startService.getStartSignalByDataLabel(startSingleLabelAndValue.getDataLabel());
@@ -1219,7 +1244,7 @@ public class StartHandler {
                     DataModel dataModel = new DataModel();
                     dataModel.setThingCode(startSignalByDataLabel.getThingCode());
                     dataModel.setMetricCode(startSignalByDataLabel.getMetricCode());
-                    if (type == StartStopConstants.LABEL_TYPE_BOOLEAN) {
+                    if (type == StartConstants.LABEL_TYPE_BOOLEAN) {
 
                         dataModel.setValue(String.valueOf(startSingleLabelAndValue.getValue() == 1));
                     } else {
@@ -1254,17 +1279,54 @@ public class StartHandler {
      */
     public void observeDeviceState(Set<String> startDeviceIds) {
         // 获取所有设备的label
-        List<String> startLabels = startService.getLabelBydeviceIdsAndName(startDeviceIds, StartStopConstants.DEVICE_STATE);
+        List<String> startLabels = startService.getLabelBydeviceIdsAndName(startDeviceIds, StartConstants.DEVICE_STATE);
         // 加入启车结果监控
-        startLabels.add(StartStopConstants.FINISH_STARTING_LABEL);
+        startLabels.add(StartConstants.FINISH_STARTING_LABEL);
         // 加入启车暂停状态监控
-        startLabels.add(StartStopConstants.PAUSE_STARTING_LABEL);
+        startLabels.add(StartConstants.PAUSE_STARTING_LABEL);
         // 新建观察者
         startListener.setStartLabels(startLabels);
         // 建立设备观察
-        processor.removeListener(startListener);
-        processor.addListener(startListener);
+        startListenerFlag = true;
 
     }
 
+    /**
+     * 查询处理指标值
+     *
+     * @param metricDataValue
+     * @return
+     */
+    public Double changeMetricValue(String metricDataValue) {
+        Double metricValue;
+        if (StartConstants.TRUE.equals(metricDataValue)) {
+            metricValue = 1.0;
+        } else if (StartConstants.FALSE.equals(metricDataValue)) {
+            metricValue = 0.0;
+        } else {
+            metricValue = Double.valueOf(metricDataValue);
+        }
+        return metricValue;
+    }
+
+    /**
+     * 处理下发的指标类型
+     *
+     * @param metricType
+     * @param value
+     * @return
+     */
+    public String dealMetricValue(String metricType, Float value) {
+        String cmdMetricValue = "";
+        if (StartConstants.BOO.equals(metricType)) {
+            if (value == 1.0) {
+                cmdMetricValue = StartConstants.TRUE;
+            } else {
+                cmdMetricValue = StartConstants.FALSE;
+            }
+        } else {
+            cmdMetricValue = String.valueOf(value.intValue());
+        }
+        return cmdMetricValue;
+    }
 }

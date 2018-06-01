@@ -5,7 +5,6 @@ import java.util.Date;
 
 public class StartDeviceStateRecord {
 
-    private int id;
 
     // 操作记录号
     private Integer operateId;
@@ -69,11 +68,4 @@ public class StartDeviceStateRecord {
     }
 
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 }

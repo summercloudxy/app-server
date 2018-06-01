@@ -1,7 +1,7 @@
 package com.zgiot.app.server.module.sfstart;
 
 import com.zgiot.app.server.dataprocessor.DataListener;
-import com.zgiot.app.server.module.sfstart.constants.StartStopConstants;
+import com.zgiot.app.server.module.sfstart.constants.StartConstants;
 import com.zgiot.app.server.module.sfstart.controller.StartHandler;
 import com.zgiot.app.server.module.sfstart.service.StartService;
 import com.zgiot.app.server.service.impl.mapper.TMLMapper;
@@ -25,6 +25,7 @@ public class StartExamineListener implements DataListener {
     @Autowired
     private StartHandler startHandler;
 
+
     public List<String> getStartExamineLabels() {
         return startExamineLabels;
     }
@@ -45,24 +46,39 @@ public class StartExamineListener implements DataListener {
     @Override
     public void onDataChange(DataModel dataModel) {
 
-        ThingMetricLabel thingMetricLabel = new ThingMetricLabel();
-        List<ThingMetricLabel> thingMetricLabels = tmlMapper.findThingMetricLabel(dataModel.getThingCode(), dataModel.getMetricCode());
-        if (CollectionUtils.isNotEmpty(thingMetricLabels)) {
-            thingMetricLabel = thingMetricLabels.get(0);
-        }
+        if (StartHandler.startExamineListenerFlag != null && StartHandler.startExamineListenerFlag) {
 
-
-        //启车检查
-        for (String label : startExamineLabels) {
-            if (thingMetricLabel.getLabelPath().equals(label)) {
-                if (!startService.judgeStartingState(StartStopConstants.START_PREPARE_STATE, StartStopConstants.START_STARTING_STATE)) {
-                    logger.error("抛弃虚假启车检查标签数据{}的值{}", label, dataModel.getValue());
-                    return;
-                }
-                logger.info("启车检查标签{}的值{}收到", label, dataModel.getValue());
-                startHandler.updateExamineRecordByRule(label, Double.valueOf(dataModel.getValue()));
+            ThingMetricLabel thingMetricLabel = new ThingMetricLabel();
+            List<ThingMetricLabel> thingMetricLabels = tmlMapper.findThingMetricLabel(dataModel.getThingCode(), dataModel.getMetricCode());
+            if (CollectionUtils.isNotEmpty(thingMetricLabels)) {
+                thingMetricLabel = thingMetricLabels.get(0);
             }
+
+
+            //启车检查
+            for (String label : startExamineLabels) {
+                if (thingMetricLabel.getLabelPath().equals(label)) {
+                    if (!startService.judgeStartingState(StartConstants.START_PREPARE_STATE, StartConstants.START_STARTING_STATE)) {
+                        logger.error("抛弃虚假启车检查标签数据{}的值{}", label, dataModel.getValue());
+                        return;
+                    }
+                    logger.info("启车检查标签{}的值{}收到", label, dataModel.getValue());
+                    String metricValue = null;
+                    if ("false".equals(dataModel.getValue())) {
+                        metricValue = "0.0";
+                    } else if ("true".equals(dataModel.getValue())) {
+                        metricValue = "1.0";
+                    } else {
+                        metricValue = dataModel.getValue();
+                    }
+
+                    startHandler.updateExamineRecordByRule(label, Double.valueOf(metricValue));
+                }
+            }
+        } else {
+            return;
         }
+
     }
 
     @Override

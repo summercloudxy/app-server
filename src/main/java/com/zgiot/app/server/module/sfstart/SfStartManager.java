@@ -1,6 +1,6 @@
 package com.zgiot.app.server.module.sfstart;
 
-import com.zgiot.app.server.module.sfstart.constants.StartStopConstants;
+import com.zgiot.app.server.module.sfstart.constants.StartConstants;
 import com.zgiot.app.server.module.sfstart.controller.StartHandler;
 import com.zgiot.app.server.module.sfstart.pojo.*;
 import com.zgiot.app.server.module.sfstart.service.StartService;
@@ -8,7 +8,6 @@ import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.service.impl.mapper.TMLMapper;
 import com.zgiot.common.constants.MetricCodes;
 import com.zgiot.common.pojo.DataModelWrapper;
-import com.zgiot.common.pojo.MetricModel;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +19,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import static com.zgiot.app.server.module.sfstart.constants.StartStopConstants.IS_REQUIREMENT;
+import static com.zgiot.app.server.module.sfstart.constants.StartConstants.IS_REQUIREMENT;
 import static com.zgiot.app.server.module.sfstart.controller.StartController.startDeviceRequirements;
 
 /**
@@ -52,9 +51,9 @@ public class SfStartManager {
 
     public void init() {
 
-        List<String> deviceIds = startService.selectStartDeviceIdBySystemCategory(StartStopConstants.SYSTEM_CATEGORY_BROWSE_PAGE, null);
+        List<String> deviceIds = startService.selectStartDeviceIdBySystemCategory(StartConstants.SYSTEM_CATEGORY_BROWSE_PAGE, null);
         HashSet<String> deviceIdSets = new HashSet<>(deviceIds);
-        labelBydevices = startService.getLabelBydeviceIdsAndName(deviceIdSets, StartStopConstants.DEVICE_STATE);
+        labelBydevices = startService.getLabelBydeviceIdsAndName(deviceIdSets, StartConstants.DEVICE_STATE);
 
 
     }
@@ -78,7 +77,7 @@ public class SfStartManager {
                 } else {
                     // 没有规则，则通知PLC启动设备
                     logger.info("deviceId:{}没有启车前置条件下发信号", deviceRequirement.getDeviceId());
-                    startHandler.operateSignal(deviceRequirement.getDeviceId(), IS_REQUIREMENT, "没有启车前置条件", (float) StartStopConstants.VALUE_TRUE);
+                    startHandler.operateSignal(deviceRequirement.getDeviceId(), IS_REQUIREMENT, "没有启车前置条件", (float) StartConstants.VALUE_TRUE);
                     startDeviceRequirements.remove(deviceRequirement);
                 }
 
@@ -94,14 +93,14 @@ public class SfStartManager {
      * @param startPrecondition
      */
     private void judgeRequirements(StartDeviceRequirement deviceRequirement, Double startPrecondition) {
-        if (judgeRequirements(deviceRequirement.getStartRequirements()) && (float) StartStopConstants.VALUE_FALSE == startPrecondition) {
+        if (judgeRequirements(deviceRequirement.getStartRequirements()) && (float) StartConstants.VALUE_FALSE == startPrecondition) {
             // 规则满足通知PLC
             logger.info("deviceId:{}启车前置条件满足，下发信号", deviceRequirement.getDeviceId());
-            startHandler.operateSignal(deviceRequirement.getDeviceId(), IS_REQUIREMENT, "启车前置条件满足", (float) StartStopConstants.VALUE_TRUE);
+            startHandler.operateSignal(deviceRequirement.getDeviceId(), IS_REQUIREMENT, "启车前置条件满足", (float) StartConstants.VALUE_TRUE);
         }
-        if (!judgeRequirements(deviceRequirement.getStartRequirements()) && (float) StartStopConstants.VALUE_TRUE == startPrecondition) {
+        if (!judgeRequirements(deviceRequirement.getStartRequirements()) && (float) StartConstants.VALUE_TRUE == startPrecondition) {
             logger.info("deviceId:{}启车前置条件不满足，下发信号", deviceRequirement.getDeviceId());
-            startHandler.operateSignal(deviceRequirement.getDeviceId(), IS_REQUIREMENT, "启车前置条件不满足", (float) StartStopConstants.VALUE_FALSE);
+            startHandler.operateSignal(deviceRequirement.getDeviceId(), IS_REQUIREMENT, "启车前置条件不满足", (float) StartConstants.VALUE_FALSE);
         }
     }
 
@@ -132,7 +131,7 @@ public class SfStartManager {
      */
     public void sendCoalCapacity() {
 
-        List<String> deviceIds = startService.selectStartDeviceIdBySystemCategory(StartStopConstants.SYSTEM_CATEGORY_BROWSE_PAGE, StartStopConstants.SYSTEM_TYPE_BROWSE_COAL);
+        List<String> deviceIds = startService.selectStartDeviceIdBySystemCategory(StartConstants.SYSTEM_CATEGORY_BROWSE_PAGE, StartConstants.SYSTEM_TYPE_BROWSE_COAL);
         List<StartDevice> startDeviceCoalCapacitys = new ArrayList<>();
         for (String deviceId : deviceIds) {
             StartSignal startSignal = startService.getStartSignalByDeviceId(deviceId);
@@ -148,7 +147,7 @@ public class SfStartManager {
         // 发送带煤量集合
         if (CollectionUtils.isNotEmpty(startDeviceCoalCapacitys)) {
             logger.debug("发送带煤量信号数量{}", startDeviceCoalCapacitys.size());
-            startHandler.sendMessagingTemplate(StartStopConstants.URI_START_BROWSE_COALCAPACITY, startDeviceCoalCapacitys);
+            startHandler.sendMessagingTemplate(StartConstants.URI_START_BROWSE_COALCAPACITY, startDeviceCoalCapacitys);
         }
     }
 
@@ -156,31 +155,24 @@ public class SfStartManager {
      * 发送总览页面仓库库存给前端
      */
     public void sendCoalDeport() {
-        List<String> deviceIds = startService.selectStartDeviceIdBySystemCategory(StartStopConstants.SYSTEM_CATEGORY_COAL_DEPOT_PAGE, null);
+        List<String> deviceIds = startService.selectStartDeviceIdBySystemCategory(StartConstants.SYSTEM_CATEGORY_COAL_DEPOT_PAGE, null);
         List<StartBrowseCoalDevice> startBrowseCoalDevices = new ArrayList<>();
         for (String deviceId : deviceIds) {
             StartSignal startSignal = startService.getStartSignalByDeviceId(deviceId);
-            StartDeviceSignal startDeviceSignal = startService.getStartDeviceSignalById(startSignal.getName());
-            MetricModel metricModel = tmlMapper.findMetricByMetricName(startDeviceSignal.getName());
             StartBrowseCoalDevice startBrowseCoalDevice = new StartBrowseCoalDevice();
             startBrowseCoalDevice.setDeviceCode(startSignal.getDeviceCode());
             startBrowseCoalDevice.setDeviceId(deviceId);
-            DataModelWrapper dataModelWrapper = dataService.getData(startSignal.getDeviceCode(), metricModel.getMetricCode()).orElse(null);
-            if (dataModelWrapper != null) {
-                if (StartStopConstants.DEPOT_ONE.equals(String.valueOf(startSignal.getName()))) {
-                    startBrowseCoalDevice.setCoalDeportOne(Double.valueOf(dataModelWrapper.getValue()));
-
-                } else if (StartStopConstants.DEPOT_TWO.equals(String.valueOf(startSignal.getName()))) {
-                    startBrowseCoalDevice.setCoalDeportTwo(Double.valueOf(dataModelWrapper.getValue()));
-                }
-                startBrowseCoalDevices.add(startBrowseCoalDevice);
-            } else {
-                StartBrowseCoalDevice startBrowseCoalNull = new StartBrowseCoalDevice();
-                startBrowseCoalNull.setDeviceId(deviceId);
-                startBrowseCoalDevices.add(startBrowseCoalNull);
+            DataModelWrapper dataModelWrapper1 = dataService.getData(startSignal.getDeviceCode(), MetricCodes.LE1).orElse(null);
+            if (dataModelWrapper1 != null) {
+                startBrowseCoalDevice.setCoalDeportOne(Double.valueOf(dataModelWrapper1.getValue()));
             }
+            DataModelWrapper dataModelWrapper2 = dataService.getData(startSignal.getDeviceCode(), MetricCodes.LE2).orElse(null);
+            if(dataModelWrapper2!=null){
+                startBrowseCoalDevice.setCoalDeportTwo(Double.valueOf(dataModelWrapper2.getValue()));
+            }
+            startBrowseCoalDevices.add(startBrowseCoalDevice);
         }
         logger.trace("发送仓库库存信号数量{}", startBrowseCoalDevices.size());
-        startHandler.sendMessagingTemplate(StartStopConstants.URI_START_BROWSE_COALDEPORT, startBrowseCoalDevices);
+        startHandler.sendMessagingTemplate(StartConstants.URI_START_BROWSE_COALDEPORT, startBrowseCoalDevices);
     }
 }

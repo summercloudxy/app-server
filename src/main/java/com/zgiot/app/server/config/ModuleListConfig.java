@@ -127,6 +127,10 @@ public class ModuleListConfig {
     @Autowired
     private StartBrowseListener startBrowseListener;
     @Autowired
+    private StartExamineListener startExamineListener;
+    @Autowired
+    private StartListener startListener;
+    @Autowired
     private SendTraceLogService sendTraceLogService;
 
     @PostConstruct
@@ -226,14 +230,18 @@ public class ModuleListConfig {
             if (containModule(ModuleListConfig.MODULE_SFSTART)) {
                 sfStartManager.init();
                 processor.addListener(startBrowseListener);
+                processor.addListener(startExamineListener);
+                processor.addListener(startListener);
+
+
                 QuartzManager.addJob("startDeviceByRequirement", ModuleListConfig.MODULE_SFSTART, "startDeviceByRequirement",
                         ModuleListConfig.MODULE_SFSTART, StartDeviceByRequirementJob.class, "0/20 * * * * ?");
 
                 QuartzManager.addJob("sendCoalCapacity", ModuleListConfig.MODULE_SFSTART, "sendCoalCapacity",
-                        ModuleListConfig.MODULE_SFSTART, SendCoalCapacityJob.class, "0/30 * * * * ?");
+                        ModuleListConfig.MODULE_SFSTART, SendCoalCapacityJob.class, "0/10 * * * * ?");
 
                 QuartzManager.addJob("sendCoalDeport", ModuleListConfig.MODULE_SFSTART, "sendCoalDeport",
-                        ModuleListConfig.MODULE_SFSTART, SendCoalDeportJob.class, "0/30 * * * * ?");
+                        ModuleListConfig.MODULE_SFSTART, SendCoalDeportJob.class, "0/10 * * * * ?");
 
 
             }
