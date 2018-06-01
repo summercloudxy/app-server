@@ -12,4 +12,9 @@ public class AppServerConstant {
     public static final int MINUS_ONE =-1;
     public static final int TWO=2;
     public static final int MINUS_TWO =-2;
+
+    //开到位关到位常量
+    public static final String TAP_OPEN ="开到位";
+    public static final String TAP_CLOSE ="关到位";
+    public static final String UNKNOWN ="未知";
 }
