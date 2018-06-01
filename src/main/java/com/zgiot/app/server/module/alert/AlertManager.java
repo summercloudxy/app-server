@@ -948,6 +948,13 @@ public class AlertManager {
         List<AlertRecord> alertRecords =
                 alertMapper.getAlertDataListGroupByThing(filterCondition);
         sortRecords(filterCondition.getSortType(), alertRecords);
+
+        if(alertRecords!=null && alertRecords.size()>0){
+            for (AlertRecord alertRecord:alertRecords) {
+                alertDataSetCauseList(alertRecord);
+            }
+        }
+
         if (page != null && count != null) {
             List<AlertRecord> alertRecordsPaged = pagingRecords(page, count, alertRecords);
             disposeImageAndMessage(filterCondition.getStage(), alertRecordsPaged);
