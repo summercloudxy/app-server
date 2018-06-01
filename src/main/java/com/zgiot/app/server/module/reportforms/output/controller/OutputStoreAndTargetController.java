@@ -15,7 +15,7 @@ import java.util.Date;
 import java.util.Map;
 
 @RestController
-@RequestMapping(value = "/reportform/")
+@RequestMapping(value = "/reportForm/")
 public class OutputStoreAndTargetController {
     @Autowired
     private OutputStoreAndTargetService outputStoreAndTargetService;

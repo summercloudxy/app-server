@@ -24,7 +24,7 @@ import java.util.Date;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/reportform/influenceTime/")
+@RequestMapping(value = "/reportForm/influenceTime/")
 public class InfluenceTimeController {
 
     @Autowired
