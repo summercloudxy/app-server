@@ -1,5 +1,7 @@
 package com.zgiot.app.server.service.impl;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.zgiot.app.server.dataprocessor.DataListener;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.service.MetricService;
@@ -120,16 +122,19 @@ public class SendTraceLogServiceImp implements SendTraceLogService {
     }
 
     @Override
-    public List<SendTraceLog> getSendTraceLogList(SendTraceLog condition, Date startTime, Date endTime) {
+    public PageInfo<SendTraceLog>  getSendTraceLogList(SendTraceLog condition, Date startTime, Date endTime,Integer page,Integer count) {
+        PageHelper.startPage(page,count,true,false,null);
         List<SendTraceLog> sendTraceLogList = sendTraceLogMapper.getSendTraceLogList(condition, startTime, endTime);
-        for (SendTraceLog sendTraceLog : sendTraceLogList) {
+        PageInfo<SendTraceLog> pageInfo = new PageInfo<>(sendTraceLogList);
+        List<SendTraceLog> list = pageInfo.getList();
+        for (SendTraceLog sendTraceLog : list) {
             String influenceMetricCode = sendTraceLog.getInfluenceMetricCode();
             getMetricShow(sendTraceLog);
             getThingShow(sendTraceLog);
 
             getStateShow(sendTraceLog, influenceMetricCode);
         }
-        return sendTraceLogList;
+        return pageInfo;
     }
 
     private void getThingShow(SendTraceLog sendTraceLog) {
