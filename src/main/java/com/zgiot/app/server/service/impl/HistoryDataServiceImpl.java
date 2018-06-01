@@ -10,6 +10,7 @@ import com.mongodb.client.model.Sorts;
 import com.zgiot.app.server.common.QueueManager;
 import com.zgiot.app.server.config.prop.MongoDBProperties;
 import com.zgiot.app.server.module.historydata.enums.AccuracyEnum;
+import com.zgiot.app.server.module.historydata.enums.SummaryTypeEnum;
 import com.zgiot.app.server.service.HistoryDataService;
 import com.zgiot.app.server.service.impl.mapper.TMLMapper;
 import com.zgiot.app.server.service.pojo.HistdataWhitelistModel;
@@ -17,6 +18,7 @@ import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.reloader.Reloader;
 import com.zgiot.common.reloader.ServerReloadManager;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.slf4j.Logger;
@@ -36,7 +38,12 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
     private static final Map<String, Map<String, Object>> WHITE_MAP = new HashMap();
 
     private static final String COLLECTION_NAME = "metricdata";
-    private static final String MIN_COLLECTION_NAME = "metricdata_min";
+    private static final String MIN_COLLECTION_NAME = "metricdata_min_avg";
+    private static final String MIN_COLLECTION_ACCU_NAME = "metricdata_min_accu";
+    private static final String HOUR_COLLECTION_NAME = "metricdata_hour_avg";
+    private static final String HOUR_COLLECTION_ACCU_NAME = "metricdata_hour_accu";
+    private static final String DAY_COLLECTION_NAME = "metricdata_day_avg";
+    private static final String DAY_COLLECTION_ACCU_NAME = "metricdata_day_accu";
 
     private static final String KEY_ARRAY = "array";
     private static final String KEY_SIZE = "size";
@@ -45,12 +52,16 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
     private static final int DEFAUTL_LIMIT = 1000;
     private static final int DEFAUTL_MAX_TIMERANGE = 3600 * 12 * 1000;
 
-
-
     @Autowired
     private MongoDatabase database;
     private MongoCollection<Document> collection;
-    private MongoCollection<Document> mincollection;
+    private MongoCollection<Document> minCollection;
+    private MongoCollection<Document> minAccuCollection;
+    private MongoCollection<Document> hourCollection;
+    private MongoCollection<Document> hourAccuCollection;
+    private MongoCollection<Document> dayCollection;
+    private MongoCollection<Document> dayAccuCollection;
+    private Map<String, MongoCollection<Document>> collectionMap = new HashMap();
     @Autowired
     TMLMapper tmlMapper;
 
@@ -68,7 +79,34 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
             return;
         }
         collection = database.getCollection(COLLECTION_NAME);
-        mincollection = database.getCollection(MIN_COLLECTION_NAME);
+        collectionMap.put(AccuracyEnum.SECOND.getAccuracyType(), collection);
+
+        minCollection = database.getCollection(MIN_COLLECTION_NAME);
+        minAccuCollection = database.getCollection(MIN_COLLECTION_ACCU_NAME);
+        collectionMap.put(AccuracyEnum.MINUTE.getAccuracyType() + "_" + SummaryTypeEnum.AVG.getSumType(), minCollection);
+        collectionMap.put(AccuracyEnum.MINUTE.getAccuracyType() + "_" + SummaryTypeEnum.SUM_BY_ACCU.getSumType(),
+                minAccuCollection);
+        collectionMap.put(AccuracyEnum.MINUTE.getAccuracyType() + "_" + SummaryTypeEnum.SUM_BY_DIFF.getSumType(),
+                minAccuCollection);
+
+        hourCollection = database.getCollection(HOUR_COLLECTION_NAME);
+        hourAccuCollection = database.getCollection(HOUR_COLLECTION_ACCU_NAME);
+        collectionMap.put(AccuracyEnum.HOUR.getAccuracyType() + "_" + SummaryTypeEnum.AVG.getSumType(),
+                hourCollection);
+        collectionMap.put(AccuracyEnum.HOUR.getAccuracyType() + "_" + SummaryTypeEnum.SUM_BY_ACCU.getSumType(),
+                hourAccuCollection);
+        collectionMap.put(AccuracyEnum.HOUR.getAccuracyType() + "_" + SummaryTypeEnum.SUM_BY_DIFF.getSumType(),
+                hourAccuCollection);
+
+        dayCollection = database.getCollection(DAY_COLLECTION_NAME);
+        dayAccuCollection = database.getCollection(DAY_COLLECTION_ACCU_NAME);
+        collectionMap.put(AccuracyEnum.DAY.getAccuracyType() + "_" + SummaryTypeEnum.AVG.getSumType(),
+                dayCollection);
+        collectionMap.put(AccuracyEnum.DAY.getAccuracyType() + "_" + SummaryTypeEnum.SUM_BY_ACCU.getSumType(),
+                dayAccuCollection);
+        collectionMap.put(AccuracyEnum.DAY.getAccuracyType() + "_" + SummaryTypeEnum.SUM_BY_DIFF.getSumType(),
+                dayAccuCollection);
+
     }
 
     @Override
@@ -84,7 +122,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
         if (!checkEnabled()) {
             return Lists.newArrayList();
         }
-        return findHistoryDataList(thingCodes, metricCodes, startDate, endDate, AccuracyEnum.SECOND);
+        return findHistoryDataList(thingCodes, metricCodes, startDate, endDate, AccuracyEnum.SECOND,null,null);
     }
 
     private void documentToDataModel(List<DataModel> result, Document document) {
@@ -113,7 +151,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
         if (!checkEnabled()) {
             return new HashMap<>();
         }
-        return findMultiThingsHistoryDataOfMetricBySegment(thingCodes, metricCode, startDate, endDate, segment, isTimeCorrection, AccuracyEnum.SECOND);
+        return findMultiThingsHistoryDataOfMetricBySegment(thingCodes, metricCode, startDate, endDate, segment, isTimeCorrection, AccuracyEnum.SECOND,null);
     }
 
 
@@ -129,12 +167,28 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
     }
 
     @Override
+    public Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetric(List<String> thingCodes, String metricCode, Date startDate, Date endDate, AccuracyEnum accuracy, SummaryTypeEnum summaryTypeEnum) {
+        MongoCollection<Document> mongoCollection = getMongoCollection(accuracy,summaryTypeEnum);
+        if (!checkEnabled()) {
+            return new HashMap<>();
+        }
+
+        if (mongoCollection == null) {
+            logger.warn("mongo disabled");
+            return new HashMap<>();
+        }
+
+
+        return getMultiThingsHistoryDataOfMetric(thingCodes,metricCode,startDate,endDate,accuracy,mongoCollection);
+    }
+
+    @Override
     public Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetric(List<String> thingCodes, String metricCode, Date startDate, Date endDate, AccuracyEnum accuracy) {
         MongoCollection<Document> mongoCollection = null;
         if (AccuracyEnum.SECOND.equals(accuracy)) {
             mongoCollection = collection;
         } else if (AccuracyEnum.MINUTE.equals(accuracy)) {
-            mongoCollection = mincollection;
+            mongoCollection = minCollection;
         }
         if (!checkEnabled()) {
             return new HashMap<>();
@@ -145,6 +199,11 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
             return new HashMap<>();
         }
 
+
+        return getMultiThingsHistoryDataOfMetric(thingCodes,metricCode,startDate,endDate,accuracy,mongoCollection);
+    }
+
+    private Map<String, List<DataModel>> getMultiThingsHistoryDataOfMetric(List<String> thingCodes, String metricCode, Date startDate, Date endDate, AccuracyEnum accuracy, MongoCollection<Document> mongoCollection){
         long startTime = startDate.getTime();
         long endTime = endDate.getTime();
 
@@ -171,7 +230,6 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
             model.setDataTimeStamp(new Date(document.getLong(DataModel.DATA_TIMESTAMP)));
             result.get(tc).add(model);
         }
-
         return result;
     }
 
@@ -225,13 +283,13 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
      * @param dataModels
      * @param size
      */
-    private void queryForUnsetDataModel(String thingCode, String metricCode, long endTime, DataModel[] dataModels, int size, long interval, boolean isTimeCorrection, AccuracyEnum accuracy) {
-        MongoCollection<Document> mongoCollection = null;
-        if (AccuracyEnum.SECOND.equals(accuracy)) {
-            mongoCollection = collection;
-        } else if (AccuracyEnum.MINUTE.equals(accuracy)) {
-            mongoCollection = mincollection;
-        }
+    private void queryForUnsetDataModel(String thingCode, String metricCode, long endTime, DataModel[] dataModels, int size, long interval, boolean isTimeCorrection, MongoCollection<Document> mongoCollection) {
+//        MongoCollection<Document> mongoCollection = null;
+//        if (AccuracyEnum.SECOND.equals(accuracy)) {
+//            mongoCollection = collection;
+//        } else if (AccuracyEnum.MINUTE.equals(accuracy)) {
+//            mongoCollection = minCollection;
+//        }
         Bson criteria = and(gte(DataModel.DATA_TIMESTAMP, endTime - DEFAUTL_MAX_TIMERANGE),
                 lte(DataModel.DATA_TIMESTAMP, endTime), eq(DataModel.METRIC_CODE, metricCode), eq(DataModel.THING_CODE, thingCode));
 
@@ -371,7 +429,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
         if (AccuracyEnum.SECOND.equals(accuracy)) {
             mongoCollection = collection;
         } else if (AccuracyEnum.MINUTE.equals(accuracy)) {
-            mongoCollection = mincollection;
+            mongoCollection = minCollection;
         }
         if (!checkEnabled()) {
             return Collections.emptyList();
@@ -408,6 +466,29 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
             return 0;
         }
         return saveDatasByCollection(modelList, collection);
+    }
+
+    @Override
+    public int insertBatchSuite(List<DataModel> modelList, AccuracyEnum accuracyEnum,
+                                SummaryTypeEnum summaryTypeEnum) {
+        if (!checkEnabled()) {
+            return 0;
+        }
+
+        MongoCollection<Document> c = null;
+        if (summaryTypeEnum == null) {
+            c = this.collection;
+        } else {
+            c = collectionMap.get(accuracyEnum.getAccuracyType() + "_" + summaryTypeEnum.getSumType());
+        }
+
+        if (c == null) {
+            logger.error("No suitable collection found. accuracy=`{}`, summarytype=`{}`",
+                    accuracyEnum.getAccuracyType(), summaryTypeEnum.getSumType());
+            return 0;
+        }
+
+        return saveDatasByCollection(modelList, c);
     }
 
     @Override
@@ -496,7 +577,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
         if (AccuracyEnum.SECOND.equals(accuracy)) {
             mongoCollection = collection;
         } else if (AccuracyEnum.MINUTE.equals(accuracy)) {
-            mongoCollection = mincollection;
+            mongoCollection = minCollection;
         }
         if (!checkEnabled()) {
             return new HashMap<>();
@@ -506,6 +587,10 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
             return new HashMap<>();
         }
 
+        return getMultiThingsHistoryDataOfMetricBySegment(thingCodes, metricCode, startDate, endDate, segment, isTimeCorrection, accuracy,mongoCollection);
+    }
+
+    private Map<String, List<DataModel>> getMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment, boolean isTimeCorrection, AccuracyEnum accuracy, MongoCollection<Document> mongoCollection){
         long startTime = startDate.getTime();
         long endTime = endDate.getTime();
         //param validator
@@ -557,12 +642,12 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
             DataModel[] dataModels;
             if (temp == null) {
                 dataModels = new DataModel[segment];
-                queryForUnsetDataModel(thingCode, metricCode, startTime, dataModels, segment, interval, isTimeCorrection, accuracy);
+                queryForUnsetDataModel(thingCode, metricCode, startTime, dataModels, segment, interval, isTimeCorrection, mongoCollection);
             } else {
                 dataModels = (DataModel[]) temp.get(KEY_ARRAY);
                 int size = (int) temp.get(KEY_SIZE);
                 if (size > 0) {
-                    queryForUnsetDataModel(thingCode, metricCode, startTime, dataModels, size, interval, isTimeCorrection, accuracy);
+                    queryForUnsetDataModel(thingCode, metricCode, startTime, dataModels, size, interval, isTimeCorrection, mongoCollection);
                 }
             }
 
@@ -573,13 +658,48 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
         return result;
     }
 
+
+
+    @Override
+    public Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment, boolean isTimeCorrection, AccuracyEnum accuracy, SummaryTypeEnum summaryTypeEnum) {
+
+        MongoCollection<Document> mongoCollection = getMongoCollection(accuracy,summaryTypeEnum);
+
+        if (!checkEnabled()) {
+            return new HashMap<>();
+        }
+        if (mongoCollection == null) {
+            logger.warn("mongo disabled");
+            return new HashMap<>();
+        }
+        return getMultiThingsHistoryDataOfMetricBySegment(thingCodes, metricCode, startDate, endDate, segment, isTimeCorrection, accuracy,mongoCollection);
+    }
+
+    private MongoCollection<Document> getMongoCollection(AccuracyEnum accuracy, SummaryTypeEnum summaryTypeEnum){
+        MongoCollection<Document> mongoCollection = null;
+        if(summaryTypeEnum == null){
+            if (AccuracyEnum.SECOND.equals(accuracy)) {
+                mongoCollection = collection;
+            } else if (AccuracyEnum.MINUTE.equals(accuracy)) {
+                mongoCollection = minCollection;
+            }
+        }else{
+            if (AccuracyEnum.SECOND.equals(accuracy)) {
+                mongoCollection = collection;
+            }else {
+                 mongoCollection = collectionMap.get(accuracy.getAccuracyType() + "_" + summaryTypeEnum.getSumType());
+            }
+        }
+        return mongoCollection;
+    }
+
     @Override
     public int insertMinDataBatch(List<DataModel> list) {
         if (!checkEnabled()) {
             return 0;
         }
 
-        return saveDatasByCollection(list, mincollection);
+        return saveDatasByCollection(list, minCollection);
     }
 
 
@@ -612,7 +732,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
         if (AccuracyEnum.SECOND.equals(accuracy)) {
             mongoCollection = collection;
         } else if (AccuracyEnum.MINUTE.equals(accuracy)) {
-            mongoCollection = mincollection;
+            mongoCollection = minCollection;
         }
 
         Bson criteria = and(gte(DataModel.DATA_TIMESTAMP, startTime.getTime()),
@@ -629,12 +749,16 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
         if (AccuracyEnum.SECOND.equals(accuracy)) {
             mongoCollection = collection;
         } else if (AccuracyEnum.MINUTE.equals(accuracy)) {
-            mongoCollection = mincollection;
+            mongoCollection = minCollection;
         }
         if (!checkEnabled()) {
             return Lists.newArrayList();
         }
+        return getHisData(thingCodes, metricCodes, startDate, endDate,mongoCollection,null,null);
 
+    }
+
+    private List<DataModel> getHisData(List<String> thingCodes, List<String> metricCodes, Date startDate, Date endDate, MongoCollection<Document> mongoCollection, AccuracyEnum accuracy, SummaryTypeEnum summaryTypeEnum){
         Bson criteria;
         // for end date
         if (endDate == null) {
@@ -656,17 +780,50 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
         }
 
         List<DataModel> result = new LinkedList<>();
+        List<DataModel> result1 = new LinkedList<>();
         if (mongoCollection != null) {
-            mongoCollection.find(criteria)
-                    .sort(Sorts.descending(DataModel.DATA_TIMESTAMP))
-                    .forEach((Block<Document>) document -> {
-                        documentToDataModel(result, document);
-                    });
+            if((!StringUtils.isBlank(accuracy.getAccuracyType()))
+                    && (accuracy.getAccuracyType().equals(AccuracyEnum.DAY.getAccuracyType()) || accuracy.getAccuracyType().equals(AccuracyEnum.HOUR.getAccuracyType()))
+                    && summaryTypeEnum.getSumType().equals(SummaryTypeEnum.SUM_BY_DIFF.getSumType())){
+                mongoCollection.find(criteria)
+                        .sort(Sorts.ascending(DataModel.DATA_TIMESTAMP)).limit(1)
+                        .forEach((Block<Document>) document -> {
+                            documentToDataModel(result, document);
+                        });
+                mongoCollection.find(criteria)
+                        .sort(Sorts.descending(DataModel.DATA_TIMESTAMP)).limit(1)
+                        .forEach((Block<Document>) document -> {
+                            documentToDataModel(result1, document);
+                        });
+                result.addAll(result1);
+            }else{
+                mongoCollection.find(criteria)
+                        .sort(Sorts.descending(DataModel.DATA_TIMESTAMP))
+                        .forEach((Block<Document>) document -> {
+                            documentToDataModel(result, document);
+                        });
+            }
+
+
         } else {
             logger.warn("mongo disabled");
         }
         return result;
     }
+
+    @Override
+    public List<DataModel> findHistoryDataList(List<String> thingCodes, List<String> metricCodes, Date startDate, Date endDate, AccuracyEnum accuracy, AccuracyEnum targetAccuracy, SummaryTypeEnum summaryTypeEnum) {
+        if (!checkEnabled()) {
+            return Lists.newArrayList();
+        }
+        MongoCollection<Document> mongoCollection = getMongoCollection(accuracy,summaryTypeEnum);
+
+        if (!checkEnabled()) {
+            return Lists.newArrayList();
+        }
+        return getHisData(thingCodes, metricCodes, startDate, endDate,mongoCollection,targetAccuracy,summaryTypeEnum);
+    }
+
 
     @Override
     public Double findAvgValueDataInDuration(String thingCode, String metricCode, Date startDate, Date endDate, AccuracyEnum accuracyEnum) {

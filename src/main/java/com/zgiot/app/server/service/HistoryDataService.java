@@ -1,6 +1,7 @@
 package com.zgiot.app.server.service;
 
 import com.zgiot.app.server.module.historydata.enums.AccuracyEnum;
+import com.zgiot.app.server.module.historydata.enums.SummaryTypeEnum;
 import com.zgiot.common.pojo.DataModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,11 +84,31 @@ public interface HistoryDataService {
     Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetric(List<String> thingCodes, String metricCode, Date startDate, Date endDate, AccuracyEnum accuracy);
 
     /**
+     *
+     * @param thingCodes
+     * @param metricCode
+     * @param startDate
+     * @param endDate
+     * @param accuracy
+     * @param summaryTypeEnum
+     * @return
+     */
+    Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetric(List<String> thingCodes, String metricCode, Date startDate, Date endDate, AccuracyEnum accuracy, SummaryTypeEnum summaryTypeEnum);
+    /**
      * @param list MongoData use MongoData directly to avoid another loop to convert obj.
      * @return count of success.
      */
     int insertBatch(List<DataModel> list);
 
+    /**
+     * Customized batch insert.
+     * @param modelList
+     * @param accuracyEnum
+     * @param summaryTypeEnum
+     * @return int of ok count
+     */
+    int insertBatchSuite(List<DataModel> modelList, AccuracyEnum accuracyEnum,
+                         SummaryTypeEnum summaryTypeEnum) ;
     /**
      * Check whitelist and determine how to add to batch insert queue.
      *
@@ -146,6 +167,20 @@ public interface HistoryDataService {
     Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment, boolean isTimeCorrection, AccuracyEnum accuracy);
 
     /**
+     *
+     * @param thingCodes
+     * @param metricCode
+     * @param startDate
+     * @param endDate
+     * @param segment
+     * @param isTimeCorrection
+     * @param accuracy
+     * @param summaryTypeEnum
+     * @return
+     */
+    Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment, boolean isTimeCorrection, AccuracyEnum accuracy, SummaryTypeEnum summaryTypeEnum);
+
+    /**
      * @param list MongoData use MongoData directly to avoid another loop to convert obj.
      * @return count of success.
      */
@@ -173,6 +208,19 @@ public interface HistoryDataService {
      */
     List<DataModel> findHistoryDataList(List<String> thingCodes, List<String> metricCodes
             , Date startDate, Date endDate, AccuracyEnum accuracy);
+
+    /**
+     * 根据精度和类型（avg、accu、diff）查询信号数据
+     * @param thingCodes
+     * @param metricCodes
+     * @param startDate
+     * @param endDate
+     * @param accuracy
+     * @param summaryTypeEnum
+     * @return
+     */
+    List<DataModel> findHistoryDataList(List<String> thingCodes, List<String> metricCodes
+            , Date startDate, Date endDate, AccuracyEnum accuracy, AccuracyEnum targetAccuracy, SummaryTypeEnum summaryTypeEnum);
 
     /**
      * 根据精度查询信号值数据平均值
