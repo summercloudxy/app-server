@@ -2,6 +2,8 @@ package com.zgiot.app.server.module.generic;
 
 import com.alibaba.fastjson.JSON;
 import com.zgiot.app.server.service.CmdControlService;
+import com.zgiot.app.server.service.SendTraceLogService;
+import com.zgiot.app.server.service.pojo.SendInfo;
 import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.DataModel;
@@ -21,10 +23,15 @@ import javax.servlet.http.HttpServletRequest;
 public class CmdController {
     @Autowired
     private CmdControlService cmdControlService;
+    @Autowired
+    private SendTraceLogService sendTraceLogService;
 
     @PostMapping(value = "")
     public ResponseEntity<String> sendCmd(@RequestBody String reqBody, HttpServletRequest request) {
         String requestId = request.getHeader(GlobalConstants.REQUEST_ID_HEADER_KEY);
+        String userId = request.getHeader(GlobalConstants.USER_ID);
+        String userName = request.getHeader(GlobalConstants.USER_LOGINNAME);
+        String platform = request.getHeader(GlobalConstants.PLATFORM_CLIENT_ID);
         DataModel dataModel = JSON.parseObject(reqBody.trim(), DataModel.class);
 
         if (StringUtils.isBlank(reqBody) || dataModel.getThingCode() == null
@@ -37,6 +44,12 @@ public class CmdController {
 
         /* do send */
         CmdControlService.CmdSendResponseData res = cmdControlService.sendCmd(dataModel, requestId);
+        /* send log */
+        SendInfo sendInfo = new SendInfo(dataModel);
+        sendInfo.setUserId(userId);
+        sendInfo.setUserName(userName);
+        sendInfo.setPlatform(Integer.valueOf(platform));
+        sendTraceLogService.recordSendTraceLog(sendInfo);
 
         return new ResponseEntity<>(ServerResponse.buildJson(
                 res.getErrorMessage()
