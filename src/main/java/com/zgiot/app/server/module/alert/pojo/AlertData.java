@@ -68,6 +68,8 @@ public class AlertData {
     private ThingModel thingModel;
     private SystemModel systemModel;
     private Date startDelayTime;//开始延迟时间
+    private String alertCause;//报警原因id
+    private List<String> alertCauseList;//报警原理集合
 
     public List<AlertMessage> getAlertMessageList() {
         return alertMessageList;
@@ -379,5 +381,21 @@ public class AlertData {
 
     public void setStartDelayTime(Date startDelayTime) {
         this.startDelayTime = startDelayTime;
+    }
+
+    public String getAlertCause() {
+        return alertCause;
+    }
+
+    public void setAlertCause(String alertCause) {
+        this.alertCause = alertCause;
+    }
+
+    public List<String> getAlertCauseList() {
+        return alertCauseList;
+    }
+
+    public void setAlertCauseList(List<String> alertCauseList) {
+        this.alertCauseList = alertCauseList;
     }
 }

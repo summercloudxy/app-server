@@ -919,15 +919,8 @@ public class AlertManager {
     }
 
     /**
-     * 获取报警记录，按设备进行分组
-     *
-     * @param stage
-     * @param levels
-     * @param types
-     * @param buildingIds
-     * @param floors
-     * @param systems
-     * @param sortType
+     *  获取报警记录，按设备进行分组
+     * @param filterCondition
      * @return
      */
     public List<AlertRecord> getAlertDataListGroupByThing(FilterCondition filterCondition) {
@@ -980,8 +973,28 @@ public class AlertManager {
             if (thing != null) {
                 alertRecord.setThingName(thing.getThingName());
             }
+            //设置报警原因
+            alertDataSetCauseList(alertRecord);
         }
         return alertDataByThingCode;
+    }
+
+    private void alertDataSetCauseList(AlertRecord alertRecord) {
+            if(alertRecord.getAlertDataList()!=null){
+                for (AlertData alertData:alertRecord.getAlertDataList()) {
+                    if(StringUtils.isNotBlank(alertData.getAlertCause())){
+                        String[] split = alertData.getAlertCause().split(",");
+                        List<String> causeList=new ArrayList<>();
+                        for (String causeId:split) {
+                            String cause=alertMapper.getAlertCauseById(causeId);
+                            if(cause!=null){
+                                causeList.add(cause);
+                            }
+                        }
+                        alertData.setAlertCauseList(causeList);
+                    }
+                }
+            }
     }
 
     private void disposeImageAndMessage(String stage, List<AlertRecord> alertRecordsPaged) {
@@ -1661,5 +1674,24 @@ public class AlertManager {
 
     public Map<String, Map<String, AlertRelieveTime>> getParamRelieveTimeMap() {
         return paramRelieveTimeMap;
+    }
+
+    public String getAlertDataCauseByTCAndMC(AlertData alertData) {
+        if(alertData!=null && StringUtils.isNotBlank(alertData.getThingCode()) && StringUtils.isNotBlank(alertData.getMetricCode())){
+            List<Integer> list=alertMapper.getAlertDataCauseByTCAndMC(alertData);
+            if(list!=null && list.size()>0){
+                StringBuilder sb=new StringBuilder();
+                for (int i=0;i<list.size();i++) {
+                    if(i==list.size()-1){
+                        sb.append(list.get(i));
+                    }else{
+                        sb.append(list.get(i));
+                        sb.append(",");
+                    }
+                }
+                return sb.toString();
+            }
+        }
+        return null;
     }
 }
