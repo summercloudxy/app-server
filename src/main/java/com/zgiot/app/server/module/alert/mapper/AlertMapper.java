@@ -126,4 +126,9 @@ public interface AlertMapper {
     List<NoPowerThing> getNoPowerThingByThingCode(@Param("thingCode") String thingCode);
     List<AlertRelieveTime> getWholeAlertRelieveTimeList();
 
+    @Select("SELECT alert_data_cause_id FROM `tb_alert_data_cause_thing_metric` where thing_code=#{thingCode} AND metric_code=#{metricCode}")
+    List<Integer> getAlertDataCauseByTCAndMC(AlertData alertData);
+
+    @Select("SELECT alert_data_cause FROM `tb_alert_data_cause` where id=#{causeId}")
+    String getAlertCauseById(@Param("causeId") String causeId);
 }

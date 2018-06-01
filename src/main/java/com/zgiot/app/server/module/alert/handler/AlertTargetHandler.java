@@ -43,10 +43,21 @@ public class AlertTargetHandler implements AlertHandler {
                 alertData.setParamLower(alertRule.getLowerLimit());
                 alertData.setParamUpper(alertRule.getUpperLimit());
                 alertData.setLastUpdateTime(new Date());
+
+                //设置报警原因
+                alertDataSetCause(alertData);
+
                 alertManager.generateAlert(alertData);
                 logger.debug("生成一条保护类报警，thing:{},metric:{}", thingCode, metricCode);
         }
 
+    }
+
+    private void alertDataSetCause(AlertData alertData) {
+        if(alertData!=null){
+            String cause=alertManager.getAlertDataCauseByTCAndMC(alertData);
+            alertData.setAlertCause(cause);
+        }
     }
 
 }

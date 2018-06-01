@@ -122,8 +122,18 @@ public class AlertFaultHandler implements AlertHandler {
         AlertData alertData = new AlertData(dataModel, AlertConstants.TYPE_FAULT, level,
                 metricService.getMetric(dataModel.getMetricCode()).getMetricName(), AlertConstants.SOURCE_SYSTEM,
                 AlertConstants.REPORTER_SYSTEM);
+        //根据thingCode和metricCode查询出报警原因并放入AlertData中
+        alertDataSetCause(alertData);
+
         alertManager.generateAlert(alertData);
         logger.debug("生成一条故障类报警，thing:{},metric:{},等级：{}", dataModel.getThingCode(), dataModel.getMetricCode(), level);
+    }
+
+    private void alertDataSetCause(AlertData alertData) {
+        if(alertData!=null){
+            String cause=alertManager.getAlertDataCauseByTCAndMC(alertData);
+            alertData.setAlertCause(cause);
+        }
     }
 
     public void putCache(DataModel dataModel) {

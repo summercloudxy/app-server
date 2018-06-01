@@ -32,6 +32,7 @@
         <result property="postWorker" column="post_worker"/>
         <result property="dispatcher" column="dispatcher"/>
         <result property="releaseTime" column="release_time"/>
+        <result property="alertCause" column="alert_cause"/>
         <result property="alertDuration" column="alertDuration"/>
         <result property="repairDuration" column="repair_duration"/>
         <association property="thingModel" resultMap="thingMap"/>
@@ -410,7 +411,8 @@
         last_update_time,
         verify_time,
         post_worker,
-        release_time
+        release_time,
+        alert_cause
         FROM tb_alert_data
         WHERE alert_stage != 'RELEASE'
     </select>
@@ -429,7 +431,7 @@
         alert_info, reporter, alert_stage, is_repair, repair_confirm_user, repair_start_time, repair_end_time,
         is_manual_intervention, feedback_image, feedback_video, scene_confirm_state, scene_confirm_time,
         scene_confirm_user, is_recovery, param_value, param_lower, param_upper, last_update_time, verify_time,
-        post_worker, dispatcher, release_time)
+        post_worker, dispatcher, release_time,alert_cause)
         VALUES
         (#{thingCode}, #{metricCode}, #{alertSource}, #{alertType}, #{alertLevel}, #{alertDateTime}, #{alertInfo},
         #{reporter}, #{alertStage}, #{repair}, #{repairConfirmUser}, #{repairStartTime},
@@ -442,7 +444,7 @@
         #{sceneConfirmUser},
         #{recovery}, #{paramValue},
         #{paramLower}, #{paramUpper}, #{lastUpdateTime}, #{verifyTime}, #{postWorker}, #{dispatcher},
-        #{releaseTime})
+        #{releaseTime},#{alertCause})
     </insert>
 
     <insert id="createAlertDataBackup"
@@ -451,7 +453,7 @@
         alert_datetime, alert_info, reporter, alert_stage, is_repair, repair_confirm_user, repair_start_time,
         repair_end_time, is_manual_intervention, feedback_image, feedback_video, scene_confirm_state,
         scene_confirm_time, scene_confirm_user, is_recovery, param_value, param_lower, param_upper, last_update_time,
-        verify_time, post_worker, dispatcher, release_time)
+        verify_time, post_worker, dispatcher, release_time,alert_cause)
         VALUES (#{id}, #{thingCode}, #{metricCode}, #{alertSource}, #{alertType}, #{alertLevel}, #{alertDateTime},
         #{alertInfo}, #{reporter}, #{alertStage}, #{repair}, #{repairConfirmUser}, #{repairStartTime},
         #{repairEndTime}, #{manualIntervention},
@@ -459,7 +461,7 @@
         #{sceneConfirmState}, #{sceneConfirmTime},
         #{sceneConfirmUser}, #{recovery},
         #{paramValue}, #{paramLower}, #{paramUpper}, #{lastUpdateTime}, #{verifyTime}, #{postWorker},
-        #{dispatcher}, #{releaseTime})
+        #{dispatcher}, #{releaseTime},#{alertCause})
     </insert>
 
     <update id="updateAlertData">
@@ -492,7 +494,8 @@
         verify_time = #{verifyTime},
         post_worker = #{postWorker},
         dispatcher = #{dispatcher},
-        release_time = #{releaseTime}
+        release_time = #{releaseTime},
+        alert_cause=#{alertCause}
         WHERE id = #{id}
     </update>
 
@@ -526,7 +529,8 @@
         verify_time = #{verifyTime},
         post_worker = #{postWorker},
         dispatcher = #{dispatcher},
-        release_time = #{releaseTime}
+        release_time = #{releaseTime},
+        alert_cause=#{alertCause}
         WHERE id = #{id}
     </update>
 
@@ -584,7 +588,7 @@
         ad.alert_stage,ad.is_repair,ad.repair_confirm_user,ad.repair_start_time,ad.repair_end_time,
         ad.is_manual_intervention,ad.feedback_image,ad.feedback_video,ad.scene_confirm_state,ad.scene_confirm_time,
         ad.scene_confirm_user,ad.is_recovery,ad.param_value,ad.param_lower,ad.param_upper,ad.last_update_time,ad.verify_time,
-        ad.post_worker,ad.dispatcher,ad.release_time
+        ad.post_worker,ad.dispatcher,ad.release_time,ad.alert_cause
         <if test="stage == 'RELEASE'">
             ,ABS(ad.release_time-ad.alert_datetime) as alertDuration
         </if>
@@ -681,7 +685,7 @@
         ad.alert_stage,ad.is_repair,ad.repair_confirm_user,ad.repair_start_time,ad.repair_end_time,
         ad.is_manual_intervention,ad.feedback_image,ad.feedback_video,ad.scene_confirm_state,ad.scene_confirm_time,
         ad.scene_confirm_user,ad.is_recovery,ad.param_value,ad.param_lower,ad.param_upper,ad.last_update_time,ad.verify_time,
-        ad.post_worker,ad.dispatcher,ad.release_time
+        ad.post_worker,ad.dispatcher,ad.release_time,ad.alert_cause
         FROM tb_alert_data ad
         WHERE 1=1
         <if test="thingCodes != null">
@@ -729,7 +733,7 @@
 
     <select id="getAlertDataList" resultMap="alertDataMap">
         SELECT
-        ad.id,ad.thing_code,ad.metric_code,ad.alert_source,ad.alert_type,ad.alert_level,ad.alert_datetime,ad.alert_info,ad.reporter,ad.alert_stage,ad.is_repair,ad.repair_confirm_user,ad.repair_start_time,ad.repair_end_time,ad.is_manual_intervention,ad.feedback_image,ad.feedback_video,ad.scene_confirm_state,ad.scene_confirm_time,ad.scene_confirm_user,ad.is_recovery,ad.param_value,ad.param_lower,ad.param_upper,ad.last_update_time,ad.verify_time,ad.post_worker,ad.dispatcher,ad.release_time
+        ad.id,ad.thing_code,ad.metric_code,ad.alert_source,ad.alert_type,ad.alert_level,ad.alert_datetime,ad.alert_info,ad.reporter,ad.alert_stage,ad.is_repair,ad.repair_confirm_user,ad.repair_start_time,ad.repair_end_time,ad.is_manual_intervention,ad.feedback_image,ad.feedback_video,ad.scene_confirm_state,ad.scene_confirm_time,ad.scene_confirm_user,ad.is_recovery,ad.param_value,ad.param_lower,ad.param_upper,ad.last_update_time,ad.verify_time,ad.post_worker,ad.dispatcher,ad.release_time,ad.alert_cause
         ,abs(ad.repair_end_time-ad.repair_start_time) as repair_duration,
         tt.thing_name,tt.thing_type1_code,tt.thing_type2_code,rts.system_id
         <if test="stage == 'RELEASE'">
