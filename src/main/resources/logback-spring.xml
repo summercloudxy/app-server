@@ -2,8 +2,6 @@
 
 <configuration scan="true" scanPeriod="30 seconds" debug="false">
 
-    <property name="LOG_FILE" value="${LOG_PATH}/${LOG_FILE_NAME}"/>
-
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
 
     <logger name="root" level="INFO"/>
@@ -13,7 +11,7 @@
         <!--appender-ref ref="FILE"/-->
     </logger>
 
-    <logger name="com.zgiot.app.server.service.impl.FullHistData" level="DEBUG" additivity="false">
+    <logger name="com.zgiot.app.server.service.impl.FullHistData" level="INFO" additivity="false">
         <appender-ref ref="CONSOLE"/>
         <!--appender-ref ref="FILE"/-->
     </logger>
