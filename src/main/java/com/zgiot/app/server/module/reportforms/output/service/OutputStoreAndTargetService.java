@@ -378,15 +378,16 @@ public class OutputStoreAndTargetService {
             }
             //填充没有查询到的指标数据
             checkNonExistTargetRecord(dutyStartTime,otherTargetRecordMap);
-            if (!otherTargetRecordMap.containsKey(ReportFormTargetConstant.WATER_CONSUME)){
-                Map<Integer,ReportFormTargetRecord> termRecordMap = new HashMap<>();
-                termRecordMap.put(1,new ReportFormTargetRecord());
-                termRecordMap.put(2,new ReportFormTargetRecord());
-                otherTargetRecordMap.put(ReportFormTargetConstant.WATER_CONSUME,termRecordMap);
-            }
+
 
         } else {
             otherTargetRecordMap = getOtherTargetRecordMap(dutyStartTime);
+        }
+        if (!otherTargetRecordMap.containsKey(ReportFormTargetConstant.WATER_CONSUME)){
+            Map<Integer,ReportFormTargetRecord> termRecordMap = new HashMap<>();
+            termRecordMap.put(1,new ReportFormTargetRecord());
+            termRecordMap.put(2,new ReportFormTargetRecord());
+            otherTargetRecordMap.put(ReportFormTargetConstant.WATER_CONSUME,termRecordMap);
         }
         return otherTargetRecordMap;
     }
@@ -525,10 +526,15 @@ public class OutputStoreAndTargetService {
                 reportFormTargetRecord.setMonthValue(reportFormTargetRecord.getMonthValue() + feedbackValue);
             }
         } else {
-            ReportFormTargetRecord reportFormWaterTargetRecord = getWaterTargetRecord(feedbackTargetRelation, reportFormTargetRecord);
-            reportFormTargetTermRecordMap = getReportFormTargetTermRecordMap(reportFormTargetRecordMap, ReportFormTargetConstant.WATER_CONSUME);
-            reportFormTargetTermRecordMap.put(feedbackTargetRelation.getTerm(), reportFormWaterTargetRecord);
+            countWaterConsumeFromMeter(reportFormTargetRecordMap, feedbackTargetRelation, reportFormTargetRecord);
         }
+    }
+
+    private void countWaterConsumeFromMeter(Map<Integer, Map<Integer, ReportFormTargetRecord>> reportFormTargetRecordMap, FeedbackTargetRelation feedbackTargetRelation, ReportFormTargetRecord reportFormTargetRecord) {
+        Map<Integer, ReportFormTargetRecord> reportFormTargetTermRecordMap;
+        ReportFormTargetRecord reportFormWaterTargetRecord = getWaterTargetRecord(feedbackTargetRelation, reportFormTargetRecord);
+        reportFormTargetTermRecordMap = getReportFormTargetTermRecordMap(reportFormTargetRecordMap, ReportFormTargetConstant.WATER_CONSUME);
+        reportFormTargetTermRecordMap.put(feedbackTargetRelation.getTerm(), reportFormWaterTargetRecord);
     }
 
 

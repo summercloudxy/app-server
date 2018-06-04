@@ -1,10 +1,7 @@
 package com.zgiot.app.server.module.sfstop.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.zgiot.app.server.module.sfstop.constants.StopConstants;
-import com.zgiot.app.server.module.sfstop.entity.pojo.StopDeviceArea;
-import com.zgiot.app.server.module.sfstop.entity.pojo.StopLine;
-import com.zgiot.app.server.module.sfstop.entity.pojo.StopOperationRecord;
+import com.zgiot.app.server.module.sfstop.entity.pojo.*;
 import com.zgiot.app.server.module.sfstop.exception.StopException;
 import com.zgiot.app.server.module.sfstop.service.*;
 import org.apache.commons.collections4.CollectionUtils;
@@ -14,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -24,7 +22,7 @@ import java.util.Set;
 public class StopHandler {
     private static final Logger logger = LoggerFactory.getLogger(StopHandler.class);
     @Autowired
-    private StopOperationRecordService stopOperationRecordService;
+    private StopService stopService;
     @Autowired
     private StopDeviceAreaService stopDeviceAreaService;
     @Autowired
@@ -41,7 +39,7 @@ public class StopHandler {
      * @return
      */
     public StopOperationRecord getStopState(int systemId) {
-        List<StopOperationRecord> querystartOperationRecord = stopOperationRecordService.findUnfinishStopOperate(systemId, null, StopConstants.STOP_FINISH_STATE);
+        List<StopOperationRecord> querystartOperationRecord = stopService.findUnfinishStopOperate(systemId, null, StopConstants.STOP_FINISH_STATE);
         if (CollectionUtils.isEmpty(querystartOperationRecord)) {
             StopOperationRecord startOperationRecord = new StopOperationRecord();
             startOperationRecord.setOperateState(StopConstants.STOP_NO_STATE);
@@ -60,7 +58,7 @@ public class StopHandler {
      * @return
      */
     public boolean judgeStopingState(Integer systemId, Integer startState, Integer finishState) {
-        List<StopOperationRecord> stopOperationRecords = stopOperationRecordService.findUnfinishStopOperate(systemId, startState, finishState);
+        List<StopOperationRecord> stopOperationRecords = stopService.findUnfinishStopOperate(systemId, startState, finishState);
         if (CollectionUtils.isNotEmpty(stopOperationRecords)) {
             // 已经存在启车任务
             return true;
@@ -86,25 +84,6 @@ public class StopHandler {
         return stopLineList;
     }
 
-    /**
-     * 保存启车检查
-     *
-     * @param lines
-     * @param userUuid
-     * @return
-     */
-    public StopOperationRecord saveStopOperationRecord(List<String> lines, String userUuid) {
-        StopOperationRecord stopOperationRecord = new StopOperationRecord();
-        stopOperationRecord.setCreateUser(userUuid);
-        String jsonSystemIds = JSON.toJSONString(lines);
-        stopOperationRecord.setOperateSystem(jsonSystemIds);
-        // 记录当前起车任务状态
-        stopOperationRecord.setOperateState(StopConstants.STOP_PREPARE_STATE);
-        stopOperationRecordService.saveStopOperationRecord(stopOperationRecord);
-        // 设置本次启车操作id
-        StopController.setOperateId(stopOperationRecord.getOperateId());
-        return stopOperationRecord;
-    }
 
     /**
      * 获取所有停车设备id
@@ -113,7 +92,16 @@ public class StopHandler {
      * @return
      */
     public Set<String> getStopDeviceIds(List<String> lineIds) {
-
-        return null;
+        Set<String> startDeviceIds = new HashSet<>();
+        for (String line : lineIds) {
+            List<StopDeviceBag> stopDeviceBags = stopDeviceBagService.getStopDeviceBagByStartLineId(Long.valueOf(line));
+            for (StopDeviceBag stopDeviceBag : stopDeviceBags) {
+                List<StopInformation> stopInformations = stopInformationService.getStopInformationByBagId(stopDeviceBag.getId());
+                for (StopInformation stopInformation : stopInformations) {
+                    startDeviceIds.add(stopInformation.getThingCode());
+                }
+            }
+        }
+        return startDeviceIds;
     }
 }

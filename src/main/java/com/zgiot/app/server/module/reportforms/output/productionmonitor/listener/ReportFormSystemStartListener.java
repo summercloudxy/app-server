@@ -457,6 +457,7 @@ public class ReportFormSystemStartListener implements DataListener {
         int cycloneMainState = getModuleState(term, ReportFormSystemStartConstant.MODULE_CYCLONE_MAIN);
         //洗精
         if (cycloneReState > 0) {
+            coalThingCode = "主";
             coalThingCode = getCoalThingCodeOnState(coalThingCode, cycloneReState);
         }
         //洗混

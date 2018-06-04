@@ -2,6 +2,7 @@ package com.zgiot.app.server.module.historydata;
 
 import com.alibaba.fastjson.JSON;
 import com.zgiot.app.server.module.historydata.enums.AccuracyEnum;
+import com.zgiot.app.server.module.historydata.enums.SummaryTypeEnum;
 import com.zgiot.app.server.service.HistoryDataService;
 import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.DataModel;
@@ -71,8 +72,14 @@ public class HistoryDataController {
                         historyDataDto.getStartTime(), historyDataDto.getEndTime(), historyDataDto.getSegment(), historyDataDto.getTimeCorrection());
             }else {
                 AccuracyEnum accuracyEnum = AccuracyEnum.valueOf(historyDataDto.getAccuracy());
-                result = historyDataService.findMultiThingsHistoryDataOfMetricBySegment(historyDataDto.getThingCodes(), metricCode,
-                        historyDataDto.getStartTime(), historyDataDto.getEndTime(), historyDataDto.getSegment(), historyDataDto.getTimeCorrection(),accuracyEnum);
+                if(StringUtils.isBlank(historyDataDto.getStatsMode())){
+                    result = historyDataService.findMultiThingsHistoryDataOfMetricBySegment(historyDataDto.getThingCodes(), metricCode,
+                            historyDataDto.getStartTime(), historyDataDto.getEndTime(), historyDataDto.getSegment(), historyDataDto.getTimeCorrection(),accuracyEnum);
+                }else{
+                    SummaryTypeEnum summaryTypeEnum = SummaryTypeEnum.valueOf(historyDataDto.getStatsMode());
+                    result = historyDataService.findMultiThingsHistoryDataOfMetricBySegment(historyDataDto.getThingCodes(), metricCode,
+                            historyDataDto.getStartTime(), historyDataDto.getEndTime(), historyDataDto.getSegment(), historyDataDto.getTimeCorrection(),accuracyEnum,summaryTypeEnum);
+                }
             }
         } else {
             // all data in time range
@@ -80,7 +87,14 @@ public class HistoryDataController {
                 result = historyDataService.findMultiThingsHistoryDataOfMetric(historyDataDto.getThingCodes(), metricCode, historyDataDto.getStartTime(), historyDataDto.getEndTime());
             }else {
                 AccuracyEnum accuracyEnum = AccuracyEnum.valueOf(historyDataDto.getAccuracy());
-                result = historyDataService.findMultiThingsHistoryDataOfMetric(historyDataDto.getThingCodes(), metricCode, historyDataDto.getStartTime(), historyDataDto.getEndTime(),accuracyEnum);
+                if(StringUtils.isBlank(historyDataDto.getStatsMode())){
+                    result = historyDataService.findMultiThingsHistoryDataOfMetric(historyDataDto.getThingCodes(), metricCode, historyDataDto.getStartTime(), historyDataDto.getEndTime(),accuracyEnum,SummaryTypeEnum.AVG);
+                }else{
+                    SummaryTypeEnum summaryTypeEnum = SummaryTypeEnum.valueOf(historyDataDto.getStatsMode());
+                    result =  historyDataService.findMultiThingsHistoryDataOfMetric(historyDataDto.getThingCodes(), metricCode, historyDataDto.getStartTime(), historyDataDto.getEndTime(),accuracyEnum,summaryTypeEnum);
+                }
+
+
             }
         }
         return new ResponseEntity<>(ServerResponse.buildOkJson(result), HttpStatus.OK);

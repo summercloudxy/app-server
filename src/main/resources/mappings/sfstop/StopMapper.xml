@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.sfstop.mapper.StopOperationRecordMapper">
+
+    <resultMap id="stopOperationRecordMap"
+               type="com.zgiot.app.server.module.sfstop.entity.pojo.StopOperationRecord">
+        <result property="operateId" column="operate_id"/>
+        <result property="operateUser" column="operate_user"/>
+        <result property="operateState" column="operate_state"/>
+        <result property="createdTime" column="created_time"/>
+        <result property="isDelete" column="is_delete"/>
+    </resultMap>
+
+    <resultMap id="stopExamineRecord" type="com.zgiot.app.server.module.sfstop.entity.pojo.StopExamineRecord">
+        <result property="examineId" column="examine_id"/>
+        <result property="operateId" column="operate_id"/>
+        <result property="startDeviceId" column="start_device_id"/>
+        <result property="ruleId" column="rule_id"/>
+        <result property="examineType" column="examine_type"/>
+        <result property="examineResult" column="examine_result"/>
+        <result property="examineInformation" column="examine_information"/>
+        <result property="examineDeviceId" column="examine_device_id"/>
+        <result property="examineDeviceCode" column="examine_device_code"/>
+        <result property="examineDeviceName" column="examine_device_name"/>
+    </resultMap>
+
+    <resultMap id="stopExamineRule" type="com.zgiot.app.server.module.sfstop.entity.pojo.StopExamineRule">
+        <result property="ruleId" column="rule_id"/>
+        <result property="stopThingCode" column="stop_thing_code"/>
+        <result property="examineType" column="examine_type"/>
+        <result property="examineThingCode" column="examine_thing_code"/>
+        <result property="examineName" column="examine_name"/>
+        <result property="operator" column="operator"/>
+        <result property="compareValue" column="compare_value"/>
+    </resultMap>
+    <select id="selectOperateRecordWithoutOperateState" resultMap="stopOperationRecordMap">
+        SELECT
+        operate_id,
+        operate_user,
+        operate_state,
+        operate_system,
+        created_time,
+        system,
+        is_delete
+        FROM
+        tb_stop_operation_record
+        WHERE
+        is_delete = 0
+        <if test="operateState != null">
+            AND operate_state &gt;#{operateState}
+        </if>
+        <if test="finishState != null">
+            AND operate_state &lt;#{finishState}
+        </if>
+        <if test="system != null">
+            AND system =#{system}
+        </if>
+    </select>
+
+    <insert id="saveStopOperationRecord" useGeneratedKeys="true" keyProperty="operateId">
+        INSERT tb_stop_operation_record (
+        create_user, operate_state, operate_system, created_time, is_delete,system
+        )
+        VALUES (#{createUser}, #{operateState}, #{operateSystem}, now(), '0',#{system})
+    </insert>
+
+    <select id="getStopExaminRecordByRuleAndOperateId" resultMap="stopExamineRecord">
+        SELECT
+        sser.examine_id,
+        sser.operate_id,
+        sser.start_device_id,
+        sser.rule_id,
+        sser.examine_type,
+        sser.examine_result,
+        sser.examine_information,
+        sseru.examine_device_id,
+        spl.location_serial_num AS examine_device_code,
+        sa.assets_name AS examine_device_name
+        FROM
+        tb_start_examine_record AS sser
+        INNER JOIN tb_start_examine_rule AS sseru ON sser.rule_id = sseru.rule_id
+        INNER JOIN tb_start_production_location AS spl ON sseru.examine_device_id = spl.object_id
+        INNER JOIN tb_start_assets AS sa ON sa.object_id = spl.assets_object_id
+        WHERE
+        1 = 1
+        <if test="ruleId != null">
+            AND sser.rule_id = #{ruleId}
+        </if>
+        <if test="operateId != null">
+            AND sser.operate_id = #{operateId}
+        </if>
+        AND sser.is_delete = '0'
+    </select>
+   
+
+    <select id="selectStopExamineRuleByDeviceId" resultMap="stopExamineRule">
+        SELECT
+        rule_id,
+        stop_thing_code,
+        examine_type,
+        examine_thing_code,
+        examine_name,
+        operator,
+        compare_value
+        FROM
+        tb_stop_examine_rule
+        WHERE
+        1 = 1
+        <if test="deviceId != null">
+            AND stop_thing_code = #{deviceId}
+        </if>
+        AND is_delete = '0'
+    </select>
+</mapper>

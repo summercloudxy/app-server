@@ -1,5 +1,6 @@
 package com.zgiot.app.server.module.sfstop.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.zgiot.app.server.module.alert.pojo.AlertData;
 import com.zgiot.app.server.module.sfstop.constants.StopConstants;
 import com.zgiot.app.server.module.sfstop.entity.pojo.*;
@@ -10,7 +11,6 @@ import com.zgiot.app.server.service.DataService;
 import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.constants.MetricCodes;
 import com.zgiot.common.pojo.DataModelWrapper;
-import com.zgiot.common.pojo.SessionContext;
 import com.zgiot.common.restcontroller.ServerResponse;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -37,7 +37,7 @@ public class StopController {
     @Autowired
     private StopDeviceRegionService stopDeviceRegionService;
     @Autowired
-    private StartOperationRecordService startOperationRecordService;
+    private StopService stopService;
     @Autowired
     private StopLineService stopLineService;
     @Autowired
@@ -52,24 +52,9 @@ public class StopController {
     private StopHandler stopHandler;
     @Autowired
     private StopTypeSetDelayService stopTypeSetDelayService;
-    @Autowired
-    private StopAlertDataService stopAlertDataService;
+
     @Autowired
     private StopTypeSetPararmeterService stopTypeSetPararmeterService;
-    @Autowired
-    private StopManualInterventionRecordService stopManualInterventionRecordService;
-    @Autowired
-    private StopOperationRecordService stopOperationRecordService;
-    // 当前启车操作号
-    private static Integer operateId;
-
-    public static Integer getOperateId() {
-        return operateId;
-    }
-
-    public static void setOperateId(Integer operateId) {
-        StopController.operateId = operateId;
-    }
 
 
     /**
@@ -86,7 +71,6 @@ public class StopController {
     }
 
 
-
     /**
      * 查询所有的设备大区
      *
@@ -98,7 +82,7 @@ public class StopController {
         StopIndexVO stopIndexVO = new StopIndexVO();
         Long runTime = null;
         //最后的启车的记录
-        StartOperationRecord startOperationRecord = startOperationRecordService.getStartOperationRecord(StopConstants.START_FINISH_STATE);
+        StartOperationRecord startOperationRecord = stopService.getStartOperationRecord(StopConstants.START_FINISH_STATE);
         if (startOperationRecord != null) {
             Date updateTime = startOperationRecord.getUpdateTime();
             runTime = DateTimeUtils.getDifferenceTime(updateTime, new Date(), StopConstants.TIMEFORMAT);
@@ -279,66 +263,89 @@ public class StopController {
     /**
      * 停车方案设置
      *
-     * @param areaSystem
+     * @param system
      * @return
      */
-    @RequestMapping(value = "/setStopChoice", method = RequestMethod.GET)
+    @RequestMapping(value = "/getStopChoice", method = RequestMethod.GET)
     public ResponseEntity<String> setStopChoice(@RequestParam("system") String system) {
-        StopChoiceVO stopChoiceVO = new StopChoiceVO();
+        List<StopChoiceVO> stopChoiceVOList = new ArrayList<>();
+
+        StopChoiceVO rawStopSet = new StopChoiceVO();
+        rawStopSet.setChoiceTitle("原煤与洗选停车模式");
         List<StopChoiceVO.ChiceVO> rawStopSets = new ArrayList<>();
-        StopChoiceVO.ChiceVO rawStop1 = stopChoiceVO.new ChiceVO();
+        StopChoiceVO.ChiceVO rawStop1 = rawStopSet.new ChiceVO();
         rawStop1.setId("1");
         rawStop1.setName("先原煤准备后主洗停车");
-        StopChoiceVO.ChiceVO rawStop2 = stopChoiceVO.new ChiceVO();
+        StopChoiceVO.ChiceVO rawStop2 = rawStopSet.new ChiceVO();
         rawStop2.setId("0");
         rawStop2.setName("原煤准备停车");
-        StopChoiceVO.ChiceVO rawStop3 = stopChoiceVO.new ChiceVO();
+        StopChoiceVO.ChiceVO rawStop3 = rawStopSet.new ChiceVO();
         rawStop3.setId("0");
         rawStop3.setName("主洗停车");
-        StopChoiceVO.ChiceVO rawStop4 = stopChoiceVO.new ChiceVO();
+        StopChoiceVO.ChiceVO rawStop4 = rawStopSet.new ChiceVO();
         rawStop4.setId("0");
         rawStop4.setName("同时停车");
         rawStopSets.add(rawStop1);
         rawStopSets.add(rawStop2);
         rawStopSets.add(rawStop3);
         rawStopSets.add(rawStop4);
-        stopChoiceVO.setRawStopSets(rawStopSets);
+        rawStopSet.setChoiceSets(rawStopSets);
+        rawStopSet.setIsSingleChoice("1");
+        stopChoiceVOList.add(rawStopSet);
 
+
+        StopChoiceVO tcsStopSet = new StopChoiceVO();
+        tcsStopSet.setChoiceTitle("TCS停车模式");
         List<StopChoiceVO.ChiceVO> tcsStopSets = new ArrayList<>();
-        StopChoiceVO.ChiceVO tcsStop1 = stopChoiceVO.new ChiceVO();
+        StopChoiceVO.ChiceVO tcsStop1 = tcsStopSet.new ChiceVO();
         tcsStop1.setId("1");
         tcsStop1.setName("TCS系统正常停车");
-        StopChoiceVO.ChiceVO tcsStop2 = stopChoiceVO.new ChiceVO();
+        StopChoiceVO.ChiceVO tcsStop2 = tcsStopSet.new ChiceVO();
         tcsStop2.setId("0");
         tcsStop2.setName("TCS系统检修停车");
         tcsStopSets.add(tcsStop1);
         tcsStopSets.add(tcsStop2);
-        stopChoiceVO.setTcsStopSet(tcsStopSets);
+        tcsStopSet.setChoiceSets(tcsStopSets);
+        tcsStopSet.setIsSingleChoice("1");
+        stopChoiceVOList.add(tcsStopSet);
 
+        StopChoiceVO filterpressStopSet = new StopChoiceVO();
+        filterpressStopSet.setChoiceTitle("压滤系统停车模式");
         List<StopChoiceVO.ChiceVO> filterpressStopSets = new ArrayList<>();
-
-        StopChoiceVO.ChiceVO filterpressStop1 = stopChoiceVO.new ChiceVO();
+        StopChoiceVO.ChiceVO filterpressStop1 = filterpressStopSet.new ChiceVO();
         filterpressStop1.setId("1");
         filterpressStop1.setName("压滤与洗选同步停车");
-        StopChoiceVO.ChiceVO filterpressStop2 = stopChoiceVO.new ChiceVO();
+        StopChoiceVO.ChiceVO filterpressStop2 = filterpressStopSet.new ChiceVO();
         filterpressStop2.setId("0");
         filterpressStop2.setName("压滤滞后洗选停车");
         filterpressStopSets.add(filterpressStop1);
         filterpressStopSets.add(filterpressStop2);
-        stopChoiceVO.setFilterpressStopSet(filterpressStopSets);
+        filterpressStopSet.setChoiceSets(filterpressStopSets);
+        filterpressStopSet.setIsSingleChoice("1");
+        stopChoiceVOList.add(filterpressStopSet);
 
-        String coal8Device = getMetricValue(StopConstants.Quit_SYS_2, MetricCodes.COAL_8_DEVICE);
-        String coal13Device = getMetricValue(StopConstants.Quit_SYS_2, MetricCodes.COAL_13_DEVICE);
 
+        StopChoiceVO beltRouteSet = new StopChoiceVO();
+        beltRouteSet.setChoiceTitle("原煤仓下皮带停车选择");
+        String coal8Device = null;
+        String coal13Device = null;
+        if (StopConstants.SYSTEM_1.equals(system)) {
+            coal8Device = getMetricValue(StopConstants.Quit_SYS_1, MetricCodes.COAL_8_DEVICE);
+            coal13Device = getMetricValue(StopConstants.Quit_SYS_1, MetricCodes.COAL_13_DEVICE);
+
+        } else if (StopConstants.SYSTEM_2.equals(system)) {
+            coal8Device = getMetricValue(StopConstants.Quit_SYS_2, MetricCodes.COAL_8_DEVICE);
+            coal13Device = getMetricValue(StopConstants.Quit_SYS_2, MetricCodes.COAL_13_DEVICE);
+        }
         List<StopChoiceVO.ChiceVO> beltRoutes = new ArrayList<>();
-        StopChoiceVO.ChiceVO beltRoute1 = stopChoiceVO.new ChiceVO();
+        StopChoiceVO.ChiceVO beltRoute1 = beltRouteSet.new ChiceVO();
         beltRoute1.setName("1143");
         if (StringUtils.isNotEmpty(coal8Device) && "1143".equals(coal8Device)) {
             beltRoute1.setId("1");
         } else {
             beltRoute1.setId("0");
         }
-        StopChoiceVO.ChiceVO beltRoute2 = stopChoiceVO.new ChiceVO();
+        StopChoiceVO.ChiceVO beltRoute2 = beltRouteSet.new ChiceVO();
         beltRoute2.setName("1144");
         if (StringUtils.isNotEmpty(coal8Device) && "1144".equals(coal8Device)) {
             beltRoute2.setId("1");
@@ -346,7 +353,7 @@ public class StopController {
             beltRoute2.setId("0");
         }
 
-        StopChoiceVO.ChiceVO beltRoute3 = stopChoiceVO.new ChiceVO();
+        StopChoiceVO.ChiceVO beltRoute3 = beltRouteSet.new ChiceVO();
         beltRoute3.setName("2143");
         if (StringUtils.isNotEmpty(coal8Device) && "2143".equals(coal13Device)) {
             beltRoute3.setId("1");
@@ -354,7 +361,7 @@ public class StopController {
             beltRoute3.setId("0");
         }
 
-        StopChoiceVO.ChiceVO beltRoute4 = stopChoiceVO.new ChiceVO();
+        StopChoiceVO.ChiceVO beltRoute4 = beltRouteSet.new ChiceVO();
         beltRoute4.setName("2144");
         if (StringUtils.isNotEmpty(coal8Device) && "2144".equals(coal13Device)) {
             beltRoute4.setId("1");
@@ -366,8 +373,11 @@ public class StopController {
         beltRoutes.add(beltRoute2);
         beltRoutes.add(beltRoute3);
         beltRoutes.add(beltRoute4);
-        stopChoiceVO.setBeltRoute(beltRoutes);
-        return new ResponseEntity<>(ServerResponse.buildOkJson(stopChoiceVO), HttpStatus.OK);
+        beltRouteSet.setChoiceSets(beltRoutes);
+        beltRouteSet.setIsSingleChoice("0");
+        stopChoiceVOList.add(beltRouteSet);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(stopChoiceVOList), HttpStatus.OK);
+
     }
 
     /**
@@ -450,6 +460,72 @@ public class StopController {
 
 
     /**
+     * 保存停车方案并自检
+     *
+     * @return
+     */
+    @RequestMapping(value = "/setUpAutoTest", method = RequestMethod.POST)
+    public synchronized ResponseEntity<String> setUpAutoTest(@RequestBody StopChoiceSetVO stopChoiceSetVO) {
+        if (stopHandler.judgeStopingState(Integer.valueOf(stopChoiceSetVO.getSystem()), null, StopConstants.STOP_FINISH_STATE)) {
+            // 通知前端已经存在停车任务
+            return new ResponseEntity<>(ServerResponse.buildOkJson("stoping"), HttpStatus.OK);
+        }
+
+        //保存停车记录，保存停车方案选择记录
+        StopOperationRecord stopOperationRecord = new StopOperationRecord();
+        stopOperationRecord.setOperateState(StopConstants.STOP_CHOICE_SET);
+        stopOperationRecord.setOperateSystem(JSON.toJSONString(stopChoiceSetVO.getLineIds()));
+        stopOperationRecord.setSystem(Integer.valueOf(stopChoiceSetVO.getSystem()));
+        stopService.saveStopOperationRecord(stopOperationRecord);
+
+
+        StopChoiceSet stopChoiceSet = new StopChoiceSet();
+        stopChoiceSet.setRawStopSet(Integer.valueOf(stopChoiceSetVO.getRawStopSet()));
+        stopChoiceSet.setTcsStopSet(Integer.valueOf(stopChoiceSetVO.getTcsStopSet()));
+        stopChoiceSet.setFilterpressStopSet(Integer.valueOf(stopChoiceSetVO.getFilterpressStopSet()));
+        stopChoiceSet.setBeltRoute(JSON.toJSONString(stopChoiceSetVO.getBeltRouteSet()));
+        stopChoiceSet.setOperateId(Long.valueOf(stopOperationRecord.getOperateId()));
+        stopService.saveStopChoiceSet(stopChoiceSet);
+
+        Set<String> stopDeviceIds = stopHandler.getStopDeviceIds(stopChoiceSetVO.getLineIds());
+
+        stopService.setUpAutoExamine(stopDeviceIds, stopOperationRecord.getOperateId());
+
+
+        //TODO 停车自检
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+
+    /**
+     * 获得本次停车检查信息
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/getAutoExamineRecord", method = RequestMethod.GET)
+    public ResponseEntity<String> getAutoExamineRecord(@RequestParam("system") String system) throws Exception {
+        Integer stopOperateId = stopService.getStopOperateId(Integer.valueOf(system));
+        List<StopExamineRecord> startExamineRecords = new ArrayList<>();
+      /*  stopExamineRecordService.getAutoExamineRecord(stopOperateId);
+        List<StopExamineRecord> startExamineRecords = startService.getAutoExamineRecord(stopOperateId);*/
+        return new ResponseEntity<>(ServerResponse.buildOkJson(startExamineRecords), HttpStatus.OK);
+    }
+
+    /**
+     * 查询人工干预解除区域
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/getManualInterventionRecord", method = RequestMethod.GET)
+    public ResponseEntity<String> getManualInterventionRecord(@RequestParam("lineId") String lineId) throws Exception {
+        List<StopManualInterventionRecord> stopManualInterventionRecordByLineId = stopService.getStopManualInterventionRecordByLineId(Integer.valueOf(lineId));
+        return new ResponseEntity<>(ServerResponse.buildOkJson(stopManualInterventionRecordByLineId), HttpStatus.OK);
+    }
+
+
+    /**
      * 保存TCS系统检修模式设置 选择桶
      *
      * @return
@@ -480,39 +556,6 @@ public class StopController {
         }
     }
 
-    /**
-     * 停车自检
-     *
-     * @param system
-     * @return
-     */
-    @RequestMapping(value = "/setUpAutoTest", method = RequestMethod.GET)
-    public ResponseEntity<String> setUpAutoTest(@RequestParam("system") String system) {
-        if (stopHandler.judgeStopingState(Integer.valueOf(system), null, StopConstants.STOP_FINISH_STATE)) {
-            // 通知前端已经存在停车任务
-            return new ResponseEntity<>(ServerResponse.buildOkJson("stoping"), HttpStatus.OK);
-        }
-        List<String> thingCodes = new ArrayList<>();
-        List<String> lines = stopHandler.getStopLinesBySystem(system);
-
-
-        // 保存启车检查操作
-        StopOperationRecord saveStartOperationRecord = stopHandler.saveStopOperationRecord(lines, SessionContext.getCurrentUser().getUserUuid());
-
-        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
-    }
-
-    /**
-     * 获得本次停车检查信息
-     *
-     * @return
-     * @throws Exception
-     */
-    @RequestMapping(value = "/getAutoExamineRecord", method = RequestMethod.GET)
-    public ResponseEntity<String> getAutoExamineRecord() throws Exception {
-
-        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
-    }
 
     /**
      * 修复检查
@@ -577,9 +620,9 @@ public class StopController {
             StopManualIntervention stopManualInterventionByThingCode = stopManualInterventionService.getStopManualInterventionByThingCode(thingCode);
             if (stopManualInterventionByThingCode != null && stopManualInterventionByThingCode.getState() == 1) {
                 stopThingDetail.setIsManualIntervention("1");
-                List<StopOperationRecord> unfinishStopOperate = stopOperationRecordService.findUnfinishStopOperate(Integer.valueOf(system), StopConstants.STOP_STARTING_STATE, StopConstants.STOP_FINISH_STATE);
+                List<StopOperationRecord> unfinishStopOperate = stopService.findUnfinishStopOperate(Integer.valueOf(system), StopConstants.STOP_STARTING_STATE, StopConstants.STOP_FINISH_STATE);
                 if (CollectionUtils.isNotEmpty(unfinishStopOperate)) {
-                    StopManualInterventionRecord stopManualInterventionRecord = stopManualInterventionRecordService.getStopManualInterventionRecord(unfinishStopOperate.get(0).getOperateId(), thingCode);
+                    StopManualInterventionRecord stopManualInterventionRecord = stopService.getStopManualInterventionRecord(unfinishStopOperate.get(0).getOperateId(), thingCode);
                     if (stopManualInterventionRecord != null) {
                         stopThingDetail.setIsRelieve(String.valueOf(stopManualInterventionRecord.getInterventionState()));
                     }
@@ -655,7 +698,19 @@ public class StopController {
      * @throws Exception
      */
     @RequestMapping(value = "/setUpStopTask", method = RequestMethod.POST)
-    public synchronized ResponseEntity<String> setUpStartTask() throws Exception {
+    public synchronized ResponseEntity<String> setUpStartTask(@RequestParam("system") String system) throws Exception {
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
+    /**
+     * 停车完成
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/setUpStopEnd", method = RequestMethod.POST)
+    public synchronized ResponseEntity<String> setUpStopEnd(@RequestParam("system") String system) throws Exception {
 
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -685,7 +740,7 @@ public class StopController {
      */
     private String getThingAlertInfo(String thingCode) {
 
-        AlertData maxLevelAlertData = stopAlertDataService.getMaxLevelAlertData(thingCode);
+        AlertData maxLevelAlertData = stopService.getMaxLevelAlertData(thingCode);
         if (maxLevelAlertData != null) {
             return maxLevelAlertData.getAlertInfo();
         }

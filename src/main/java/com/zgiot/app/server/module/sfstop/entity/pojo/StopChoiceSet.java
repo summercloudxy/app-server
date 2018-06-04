@@ -22,6 +22,17 @@ public class StopChoiceSet {
     private String updateUser;
     private Date updateTime;
 
+    private Long operateId;
+
+
+    public Long getOperateId() {
+        return operateId;
+    }
+
+    public void setOperateId(Long operateId) {
+        this.operateId = operateId;
+    }
+
     public Long getId() {
         return id;
     }

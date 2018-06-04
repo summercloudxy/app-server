@@ -16,6 +16,8 @@ import com.zgiot.app.server.module.densitycontrol.DensityControlListener;
 import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
 import com.zgiot.app.server.module.filterpress.FilterPressManager;
 import com.zgiot.app.server.module.filterpress.FilterPressSignalOperateJob;
+import com.zgiot.app.server.module.historydata.job.HistoryDayDataJob;
+import com.zgiot.app.server.module.historydata.job.HistoryHourDataJob;
 import com.zgiot.app.server.module.historydata.job.HistoryMinDataJob;
 import com.zgiot.app.server.module.reportforms.input.listener.ReportFormsCompleter;
 import com.zgiot.app.server.module.reportforms.output.productionmonitor.listener.ReportFormSystemStartListener;
@@ -26,6 +28,7 @@ import com.zgiot.app.server.module.sfstart.*;
 import com.zgiot.app.server.module.sfsubsc.job.UploadHistorySubscCardDatas;
 import com.zgiot.app.server.module.sfsubsc.job.UploadProductionSubscCardDatas;
 import com.zgiot.app.server.module.sfsubsc.job.UploadSubscCardDatas;
+import com.zgiot.app.server.service.SendTraceLogService;
 import com.zgiot.app.server.service.impl.HistoryDataPersistDaemon;
 import com.zgiot.app.server.service.impl.QuartzManager;
 import org.quartz.JobDataMap;
@@ -53,6 +56,7 @@ public class ModuleListConfig {
     public static final String MODULE_SUBSCRIPTION = "subscription";
     public static final String MODULE_REPORTFORM = "report-form";
     public static final String MODULE_SFSTOP = "sfstop";
+    public static final String MODULE_SEND_TRACE = "send-trace";
 
 
     @Value("${sysmodule.demo.enabled}")
@@ -77,6 +81,8 @@ public class ModuleListConfig {
     private boolean moduleReportEnabled;
     @Value("${sysmodule.sfstop.enabled}")
     private boolean moduleSfStopEnabled;
+    @Value("${sysmodule.send-trace.enabled}")
+    private boolean moduleSendTraceEnabled;
 
 
     private static final int FAULT_SCAN_RATE = 20;
@@ -129,6 +135,8 @@ public class ModuleListConfig {
     private StartExamineListener startExamineListener;
     @Autowired
     private StartListener startListener;
+    @Autowired
+    private SendTraceLogService sendTraceLogService;
 
     @PostConstruct
     void init() {
@@ -142,6 +150,8 @@ public class ModuleListConfig {
         configedModuleMap.put(MODULE_SUBSCRIPTION, this.moduleSubsEnabled);
         configedModuleMap.put(MODULE_SFSTART, this.moduleSfStartEnabled);
         configedModuleMap.put(MODULE_REPORTFORM, this.moduleReportEnabled);
+
+        configedModuleMap.put(MODULE_SEND_TRACE, this.moduleSendTraceEnabled);
     }
 
     public boolean containModule(String moduleName) {
@@ -162,8 +172,12 @@ public class ModuleListConfig {
 
             if (containModule(ModuleListConfig.MODULE_HIST_PERSIST)) {
                 historyDataPersistDaemon.start();
-                QuartzManager.addJob("historyMinData", ModuleListConfig.MODULE_SUBSCRIPTION, "historyMinData",
-                        ModuleListConfig.MODULE_HIST_PERSIST, HistoryMinDataJob.class, "0 0/1 * * * ?");
+                QuartzManager.addJob("historyMinData", ModuleListConfig.MODULE_HIST_PERSIST, "historyMinData",
+                        ModuleListConfig.MODULE_HIST_PERSIST, HistoryMinDataJob.class, "0 */1 * * * ?");
+                QuartzManager.addJob("historyHourData", ModuleListConfig.MODULE_HIST_PERSIST, "historyHourData",
+                        ModuleListConfig.MODULE_HIST_PERSIST, HistoryHourDataJob.class, "0 0 */1 * * ?");
+                QuartzManager.addJob("historyDayData", ModuleListConfig.MODULE_HIST_PERSIST, "historyDayData",
+                        ModuleListConfig.MODULE_HIST_PERSIST, HistoryDayDataJob.class, "0 0 0 */1 * ?");
                 logIt(MODULE_HIST_PERSIST);
             }
 
@@ -253,6 +267,12 @@ public class ModuleListConfig {
                 influenceTimeServiceImpl.init();
                 processor.addListener(reportFormSystemStartListener);
                 logIt(MODULE_REPORTFORM);
+            }
+
+            if (this.containModule(MODULE_SEND_TRACE)) {
+                sendTraceLogService.init();
+                processor.addListener(sendTraceLogService);
+                logIt(MODULE_SEND_TRACE);
             }
 
             if (this.containModule(MODULE_DEMO)) {

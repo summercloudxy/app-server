@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface RelSFSysMonitorTermThingMapper {
@@ -13,4 +14,8 @@ public interface RelSFSysMonitorTermThingMapper {
     short getTermCountByThingTagCode(@Param("thingTagCode") String thingTagCode);
 
     List<RelSFSysMonitorTermThing> getSFSysMonitorThing(RelSFSysMonitorTermThing sFSysMonitorTermThingRel);
+
+    List<RelSFSysMonitorTermThing> getSFSpeMonitorThingProtect(RelSFSysMonitorTermThing monitorThing);
+
+    List<String> getThingCodeList(RelSFSysMonitorTermThing monitorThing);
 }

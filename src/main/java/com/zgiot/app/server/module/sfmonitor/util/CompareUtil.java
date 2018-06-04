@@ -23,8 +23,8 @@ public class CompareUtil {
      */
     public static int compareThingCodeHaveLetter(String thingCode1, String thingCode2) {
         String reg = "[A-Za-z]+";
-        String num1 = thingCode1.split(reg)[0];
-        String num2 = thingCode2.split(reg)[0];
+        String num1 = thingCode1.replaceAll(".","").replaceAll("-","").split(reg)[0];
+        String num2 = thingCode2.replaceAll(".","").replaceAll("-","").split(reg)[0];
 
         int result = 0;
         if (num1.equals(num2)) {

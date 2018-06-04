@@ -6,7 +6,7 @@ public class StopExamineRule {
     private Integer ruleId;
 
     // 启车自检规则涉及设备
-    private String startThingCode;
+    private String stopThingCode;
 
     // 启车检查类型
     private Integer examineType;
@@ -31,12 +31,13 @@ public class StopExamineRule {
         this.ruleId = ruleId;
     }
 
-    public String getStartThingCode() {
-        return startThingCode;
+
+    public String getStopThingCode() {
+        return stopThingCode;
     }
 
-    public void setStartThingCode(String startThingCode) {
-        this.startThingCode = startThingCode;
+    public void setStopThingCode(String stopThingCode) {
+        this.stopThingCode = stopThingCode;
     }
 
     public Integer getExamineType() {

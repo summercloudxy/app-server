@@ -428,6 +428,7 @@ public class ReportFormProductOutputAndStoreService {
 
     /**
      * 加上一班库存
+     *
      * @param lastProductStore
      * @param coalType
      * @param productStore
@@ -440,6 +441,7 @@ public class ReportFormProductOutputAndStoreService {
 
     /**
      * 减自用
+     *
      * @param daySelfUse
      * @param nightSelfUse
      * @param coalType
@@ -453,16 +455,17 @@ public class ReportFormProductOutputAndStoreService {
 
     /**
      * 减运销
+     *
      * @param productTransportBean
      * @param coalType
      * @param productStore
      */
     private void storeExcludeTransport(Map<Integer, Map<Integer, ProductTransport>> productTransportBean, Integer coalType, ReportFormProductStore productStore) {
         if (productTransportBean.containsKey(coalType)) {
-            if (productTransportBean.get(coalType).containsKey(1) && productTransportBean.get(coalType).get(1).getDayVolume() != null) {
+            if (productTransportBean.get(coalType).containsKey(1) && productTransportBean.get(coalType).get(1) != null && productTransportBean.get(coalType).get(1).getDayVolume() != null) {
                 productStore.setValue(productStore.getValue() - productTransportBean.get(coalType).get(1).getDayVolume());
             }
-            if (productTransportBean.get(coalType).containsKey(2) && productTransportBean.get(coalType).get(1).getDayVolume() != null) {
+            if (productTransportBean.get(coalType).containsKey(2) && productTransportBean.get(coalType).get(2) != null && productTransportBean.get(coalType).get(2).getDayVolume() != null) {
                 productStore.setValue(productStore.getValue() - productTransportBean.get(coalType).get(2).getDayVolume());
             }
         }
@@ -541,11 +544,11 @@ public class ReportFormProductOutputAndStoreService {
     public void generateRawData(CoalAnalysisRecord rawCoalRecord, CoalAnalysisRecord clenedCoalRecord, CoalAnalysisRecord washedCoalRecord, CoalAnalysisRecord slimeRecord, Date date) {
         Map<Integer, ReportFormProductOutput> productOutputInfo = getProductOutputInfo(date);
         double aad = 0.0;
-        if (productOutputInfo.get(ReportFormCoalTypeConstant.rawCoal).getRealDay() != 0) {
-            aad = (productOutputInfo.get(ReportFormCoalTypeConstant.clenedCoal).getRealDay() * clenedCoalRecord.getAad()
-                    + productOutputInfo.get(ReportFormCoalTypeConstant.washedCoal).getRealDay() * washedCoalRecord.getAad()
-                    + productOutputInfo.get(ReportFormCoalTypeConstant.slime).getRealDay() * slimeRecord.getAad()
-                    + productOutputInfo.get(ReportFormCoalTypeConstant.washeryRejects).getRealDay() * 78) /
+        if (productOutputInfo.containsKey(ReportFormCoalTypeConstant.rawCoal) && productOutputInfo.get(ReportFormCoalTypeConstant.rawCoal).getRealDay() != 0) {
+            aad = ((productOutputInfo.containsKey(ReportFormCoalTypeConstant.clenedCoal) ? productOutputInfo.get(ReportFormCoalTypeConstant.clenedCoal).getRealDay() * clenedCoalRecord.getAad() : 0)
+                    + (productOutputInfo.containsKey(ReportFormCoalTypeConstant.washedCoal) ? productOutputInfo.get(ReportFormCoalTypeConstant.washedCoal).getRealDay() * washedCoalRecord.getAad() : 0)
+                    + (productOutputInfo.containsKey(ReportFormCoalTypeConstant.slime) ? productOutputInfo.get(ReportFormCoalTypeConstant.slime).getRealDay() * slimeRecord.getAad() : 0)
+                    + (productOutputInfo.containsKey(ReportFormCoalTypeConstant.washeryRejects) ? (productOutputInfo.get(ReportFormCoalTypeConstant.washeryRejects).getRealDay() * 78) : 0)) /
                     productOutputInfo.get(ReportFormCoalTypeConstant.rawCoal).getRealDay();
         }
         rawCoalRecord.setAad(aad);

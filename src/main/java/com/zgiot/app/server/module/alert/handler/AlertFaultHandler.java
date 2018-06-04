@@ -52,17 +52,8 @@ public class AlertFaultHandler implements AlertHandler {
         AlertData alertData = alertManager.getAlertDataByThingAndMetricCode(thingCode, metricCode);
         if (ENABLE_VALUE.equalsIgnoreCase(dataModel.getValue()) && alertData == null) {
             String state = protectHandler.getState(dataModel);
-            //判断是否是桶
-//            List<NoPowerThing> noPowerThings = alertManager.getNoPowerThingByThingCode(thingCode);
             Short level = getAlertLevel(state);
-//            if (CollectionUtils.isNotEmpty(noPowerThings)) {
-//                level = getLevelWithOutState(noPowerThings);
-//            } else {
-//                level = getAlertLevelWithState(dataModel, true);
-//            }
-            if (level == null) {
-                putCache(dataModel);
-            } else {
+            if (level != null && level == AlertConstants.LEVEL_30) {
                 generateFaultAlert(dataModel, level);
             }
         } else if (DISABLE_VALUE.equalsIgnoreCase(dataModel.getValue()) && alertData != null) {
@@ -122,8 +113,18 @@ public class AlertFaultHandler implements AlertHandler {
         AlertData alertData = new AlertData(dataModel, AlertConstants.TYPE_FAULT, level,
                 metricService.getMetric(dataModel.getMetricCode()).getMetricName(), AlertConstants.SOURCE_SYSTEM,
                 AlertConstants.REPORTER_SYSTEM);
+        //根据thingCode和metricCode查询出报警原因并放入AlertData中
+        alertDataSetCause(alertData);
+
         alertManager.generateAlert(alertData);
         logger.debug("生成一条故障类报警，thing:{},metric:{},等级：{}", dataModel.getThingCode(), dataModel.getMetricCode(), level);
+    }
+
+    private void alertDataSetCause(AlertData alertData) {
+        if(alertData!=null){
+            String cause=alertManager.getAlertDataCauseByTCAndMC(alertData);
+            alertData.setAlertCause(cause);
+        }
     }
 
     public void putCache(DataModel dataModel) {

@@ -1,5 +1,6 @@
 package com.zgiot.app.server.service.impl.mapper;
 
+import com.zgiot.app.server.module.equipments.pojo.Thing;
 import com.zgiot.app.server.service.pojo.HistdataWhitelistModel;
 import com.zgiot.common.pojo.*;
 import org.apache.ibatis.annotations.Mapper;
@@ -99,6 +100,9 @@ public interface TMLMapper {
 
     @Select("select thing_code from rel_thing_metric_label where thing_code like #{thingCode} group by thing_code")
     List<String> findRelateThing(@Param("thingCode") String thingCode);
+
+    @Select("select * from tb_thing where thing_code=#{thingCode}")
+    Thing getThingByCode(@Param("thingCode") String thingCode);
 
 
     @Select("SELECT * FROM `tb_metric` where metric_name =#{metricName} ")

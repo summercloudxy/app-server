@@ -7,46 +7,13 @@ import java.util.List;
  */
 public class StopChoiceVO {
 
-    private List<ChiceVO> rawStopSets;
 
-    private List<ChiceVO> tcsStopSet;
+    private String choiceTitle;
 
-    private List<ChiceVO> filterpressStopSet;
+    private List<ChiceVO> choiceSets;
 
-    private List<ChiceVO> beltRoute;
+    private String isSingleChoice;
 
-
-    public List<ChiceVO> getRawStopSets() {
-        return rawStopSets;
-    }
-
-    public void setRawStopSets(List<ChiceVO> rawStopSets) {
-        this.rawStopSets = rawStopSets;
-    }
-
-    public List<ChiceVO> getTcsStopSet() {
-        return tcsStopSet;
-    }
-
-    public void setTcsStopSet(List<ChiceVO> tcsStopSet) {
-        this.tcsStopSet = tcsStopSet;
-    }
-
-    public List<ChiceVO> getFilterpressStopSet() {
-        return filterpressStopSet;
-    }
-
-    public void setFilterpressStopSet(List<ChiceVO> filterpressStopSet) {
-        this.filterpressStopSet = filterpressStopSet;
-    }
-
-    public List<ChiceVO> getBeltRoute() {
-        return beltRoute;
-    }
-
-    public void setBeltRoute(List<ChiceVO> beltRoute) {
-        this.beltRoute = beltRoute;
-    }
 
     public class ChiceVO {
 
@@ -69,5 +36,29 @@ public class StopChoiceVO {
         public void setName(String name) {
             this.name = name;
         }
+    }
+
+    public String getChoiceTitle() {
+        return choiceTitle;
+    }
+
+    public void setChoiceTitle(String choiceTitle) {
+        this.choiceTitle = choiceTitle;
+    }
+
+    public List<ChiceVO> getChoiceSets() {
+        return choiceSets;
+    }
+
+    public void setChoiceSets(List<ChiceVO> choiceSets) {
+        this.choiceSets = choiceSets;
+    }
+
+    public String getIsSingleChoice() {
+        return isSingleChoice;
+    }
+
+    public void setIsSingleChoice(String isSingleChoice) {
+        this.isSingleChoice = isSingleChoice;
     }
 }

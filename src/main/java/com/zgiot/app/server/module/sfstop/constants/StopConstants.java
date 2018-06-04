@@ -34,7 +34,9 @@ public class StopConstants {
 
 
     // 原煤仓下皮带走向
+    public static final String Quit_SYS_1 = "Quit_SYS_1";
     public static final String Quit_SYS_2 = "Quit_SYS_2";
+
     //尾矿排料阀
     public static final String PL_1 = ".PL-1";
 
@@ -77,6 +79,9 @@ public class StopConstants {
     // 不等于
     public static final String COMPARE_NOT_EQUAL_TO = "notEqual";
 
+
+    public static final String SYSTEM_1 = "1";
+    public static final String SYSTEM_2 = "2";
 
 
 }
