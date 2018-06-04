@@ -8,12 +8,12 @@ import org.apache.ibatis.annotations.Select;
 @Mapper
 public interface StopAlertDataMapper {
     /**
-     * 查询某个设备级别最高的告警信息
+     * 查询某个设备级别最高的故障告警信息
      *
      * @param thingCode
      * @return
      */
-    @Select("SELECT * from tb_alert_data where thing_code =#{thingCode} and alert_stage!='RELEASE' ORDER BY alert_datetime DESC,alert_level DESC LIMIT 1")
+    @Select("SELECT * from tb_alert_data where thing_code =#{thingCode} and alert_type =0 and alert_stage!='RELEASE' ORDER BY alert_datetime DESC,alert_level DESC LIMIT 1")
     AlertData getMaxLevelAlertData(@Param("thingCode") String thingCode);
 
 }

@@ -4,25 +4,21 @@ import com.zgiot.app.server.module.sfstop.entity.pojo.StopMetric;
 import com.zgiot.app.server.module.sfstop.entity.pojo.StopSysParameter;
 import com.zgiot.app.server.module.sfstop.entity.pojo.StopTypeSetPararmeter;
 import com.zgiot.app.server.module.sfstop.entity.pojo.StopTypeSetPararmeterDTO;
+import com.zgiot.app.server.module.sfstop.entity.vo.StopPararmeterVO;
 import com.zgiot.app.server.module.sfstop.mapper.StopMetricMapper;
 import com.zgiot.app.server.module.sfstop.mapper.StopSysParameterMapper;
 import com.zgiot.app.server.module.sfstop.mapper.StopTypeSetPararmeterMapper;
 import com.zgiot.app.server.module.sfstop.service.StopTypeSetPararmeterService;
-import com.zgiot.app.server.module.util.StringUtils;
-import com.zgiot.app.server.service.impl.mapper.MetricMapper;
 import com.zgiot.common.pojo.CurrentUser;
-import com.zgiot.common.pojo.MetricModel;
 import com.zgiot.common.pojo.SessionContext;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.metrics.Metric;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
 
 @Service
-public class StopNormalSetPararmeterServiceImpl implements StopTypeSetPararmeterService {
+public class StopTypeSetPararmeterServiceImpl implements StopTypeSetPararmeterService {
 
     @Autowired
     private StopTypeSetPararmeterMapper stopTypeSetPararmeterMapper;
@@ -115,5 +111,10 @@ public class StopNormalSetPararmeterServiceImpl implements StopTypeSetPararmeter
                 stopTypeSetPararmeterMapper.insertStopNormalSetPararmeter(stopTypeSetPararmeter);
             }
         }
+    }
+
+    @Override
+    public List<StopPararmeterVO> getParentStopTypeSetPararmeter(String thingCode) {
+        return stopTypeSetPararmeterMapper.getParentStopTypeSetPararmeter(thingCode);
     }
 }

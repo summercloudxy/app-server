@@ -1,13 +1,12 @@
 package com.zgiot.app.server.module.sfstop.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.zgiot.app.server.module.sfstart.controller.StartController;
 import com.zgiot.app.server.module.sfstop.constants.StopConstants;
-import com.zgiot.app.server.module.sfstop.entity.pojo.*;
-import com.zgiot.app.server.module.sfstop.entity.vo.StopIndexVO;
+import com.zgiot.app.server.module.sfstop.entity.pojo.StopDeviceArea;
+import com.zgiot.app.server.module.sfstop.entity.pojo.StopLine;
+import com.zgiot.app.server.module.sfstop.entity.pojo.StopOperationRecord;
 import com.zgiot.app.server.module.sfstop.exception.StopException;
 import com.zgiot.app.server.module.sfstop.service.*;
-import com.zgiot.common.constants.MetricCodes;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,16 +35,13 @@ public class StopHandler {
     private StopInformationService stopInformationService;
 
 
-
-
-
     /**
      * 判断当前启车状态
      *
      * @return
      */
-    public StopOperationRecord getStopState() {
-        List<StopOperationRecord> querystartOperationRecord = stopOperationRecordService.findUnfinishStopOperate(null, StopConstants.STOP_FINISH_STATE);
+    public StopOperationRecord getStopState(int systemId) {
+        List<StopOperationRecord> querystartOperationRecord = stopOperationRecordService.findUnfinishStopOperate(systemId, null, StopConstants.STOP_FINISH_STATE);
         if (CollectionUtils.isEmpty(querystartOperationRecord)) {
             StopOperationRecord startOperationRecord = new StopOperationRecord();
             startOperationRecord.setOperateState(StopConstants.STOP_NO_STATE);
@@ -58,12 +54,13 @@ public class StopHandler {
 
     /**
      * 判断当前停车状态
+     *
      * @param startState
      * @param finishState
      * @return
      */
-    public boolean judgeStopingState(Integer startState, Integer finishState) {
-        List<StopOperationRecord> stopOperationRecords = stopOperationRecordService.findUnfinishStopOperate(startState, finishState);
+    public boolean judgeStopingState(Integer systemId, Integer startState, Integer finishState) {
+        List<StopOperationRecord> stopOperationRecords = stopOperationRecordService.findUnfinishStopOperate(systemId, startState, finishState);
         if (CollectionUtils.isNotEmpty(stopOperationRecords)) {
             // 已经存在启车任务
             return true;
@@ -73,11 +70,12 @@ public class StopHandler {
 
     /**
      * 查询二期所有停车线
+     *
      * @param system
      * @return
      */
-    public List<String> getStopLinesBySystem(String system){
-        List<String> stopLineList=new ArrayList<>();
+    public List<String> getStopLinesBySystem(String system) {
+        List<String> stopLineList = new ArrayList<>();
         List<StopDeviceArea> stopDeviceAreas = stopDeviceAreaService.getStopDeviceArea(StopConstants.REGION_1, Integer.valueOf(system));
         for (StopDeviceArea stopDeviceArea : stopDeviceAreas) {
             List<StopLine> stopLines = stopLineService.getStopLineByAreaId(stopDeviceArea.getId());
@@ -90,6 +88,7 @@ public class StopHandler {
 
     /**
      * 保存启车检查
+     *
      * @param lines
      * @param userUuid
      * @return

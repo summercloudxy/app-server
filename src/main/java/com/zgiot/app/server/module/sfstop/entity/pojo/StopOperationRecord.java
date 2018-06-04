@@ -31,6 +31,16 @@ public class StopOperationRecord {
     // 是否删除
     private Integer isDelete;
 
+    private int system;
+
+    public int getSystem() {
+        return system;
+    }
+
+    public void setSystem(int system) {
+        this.system = system;
+    }
+
     public Integer getOperateId() {
         return operateId;
     }

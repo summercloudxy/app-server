@@ -41,16 +41,42 @@ public class StopConstants {
     // 没有启车
     public static final int STOP_NO_STATE = 0;
 
+    //停车方案选择
+    public static final int STOP_CHOICE_SET = 1;
+
     //停车准备
     public static final int STOP_PREPARE_STATE = 5;
     // 启车首次自检完成
     public static final int STOP_EXAMIN_STATE = 10;
-    // 停车信号发送中
-    public static final int STOP_SEND_FINISH_STATE = 25;
     // 正式停车
     public static final int STOP_STARTING_STATE = 30;
+    // 停车暂停
+    public static final int STOP_PAUSESTATE_STATE = 35;
     // 停车结束
     public static final int STOP_FINISH_STATE = 40;
+
+    //是否人工干预
+    public static final int MANUALINTERVENTION_1 = 1;
+    public static final int MANUALINTERVENTION_0 = 0;
+
+    // 大于
+    public static final String COMPARE_GREATER_THAN = "greater";
+
+    // 小于
+    public static final String COMPARE_LESS_THAN = "less";
+
+    // 等于
+    public static final String COMPARE_EQUAL_TO = "equal";
+
+    // 大于等于
+    public static final String COMPARE_GREATER_THAN_AND_EQUAL_TO = "greaterAndEqual";
+
+    // 小于等于
+    public static final String COMPARE_LESS_THAN_AND_EQUAL_TO = "lessAndEqual";
+
+    // 不等于
+    public static final String COMPARE_NOT_EQUAL_TO = "notEqual";
+
 
 
 }

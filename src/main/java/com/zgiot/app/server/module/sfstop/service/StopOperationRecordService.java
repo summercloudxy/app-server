@@ -14,7 +14,7 @@ public interface StopOperationRecordService {
      * @param finishState
      * @return
      */
-    List<StopOperationRecord> findUnfinishStopOperate(Integer startState, Integer finishState);
+    List<StopOperationRecord> findUnfinishStopOperate(Integer system, Integer startState, Integer finishState);
 
     /**
      * 保存新的停车记录
@@ -22,6 +22,14 @@ public interface StopOperationRecordService {
      * @param stopOperationRecord
      */
     void saveStopOperationRecord(StopOperationRecord stopOperationRecord);
+
+    /**
+     * 根据操作状态查询停车记录
+     *
+     * @param operateState
+     * @return
+     */
+    StopOperationRecord getStopOperationRecordByOperateState(int operateState);
 
 
 }

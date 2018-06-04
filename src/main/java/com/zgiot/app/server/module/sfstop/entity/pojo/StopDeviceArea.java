@@ -39,7 +39,7 @@ public class StopDeviceArea {
     private Long regionId;
 
     @ApiModelProperty("区域编号")
-    private Integer areaSystem;
+    private Integer system;
 
     private Integer number;
 
@@ -119,12 +119,12 @@ public class StopDeviceArea {
         this.regionId = regionId;
     }
 
-    public Integer getAreaSystem() {
-        return areaSystem;
+    public Integer getSystem() {
+        return system;
     }
 
-    public void setAreaSystem(Integer areaSystem) {
-        this.areaSystem = areaSystem;
+    public void setSystem(Integer system) {
+        this.system = system;
     }
 
     public Integer getNumber() {

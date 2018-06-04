@@ -16,12 +16,17 @@ public class StopOperationRecordServiceImpl implements StopOperationRecordServic
     private StopOperationRecordMapper stopOperationRecordMapper;
 
     @Override
-    public List<StopOperationRecord> findUnfinishStopOperate(Integer startState, Integer finishState) {
-        return stopOperationRecordMapper.selectOperateRecordWithoutOperateState(startState,finishState);
+    public List<StopOperationRecord> findUnfinishStopOperate(Integer system, Integer startState, Integer finishState) {
+        return stopOperationRecordMapper.selectOperateRecordWithoutOperateState(system, startState, finishState);
     }
 
     @Override
     public void saveStopOperationRecord(StopOperationRecord stopOperationRecord) {
         stopOperationRecordMapper.saveStopOperationRecord(stopOperationRecord);
+    }
+
+    @Override
+    public StopOperationRecord getStopOperationRecordByOperateState(int operateState) {
+        return stopOperationRecordMapper.getStopOperationRecordByOperateState(operateState);
     }
 }

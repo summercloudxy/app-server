@@ -1,12 +1,9 @@
 package com.zgiot.app.server.module.sfstop.controller;
 
-import com.zgiot.app.server.module.sfstart.controller.StartController;
+import com.zgiot.app.server.module.alert.pojo.AlertData;
 import com.zgiot.app.server.module.sfstop.constants.StopConstants;
 import com.zgiot.app.server.module.sfstop.entity.pojo.*;
-import com.zgiot.app.server.module.sfstop.entity.vo.StopChoiceVO;
-import com.zgiot.app.server.module.sfstop.entity.vo.StopIndexVO;
-import com.zgiot.app.server.module.sfstop.entity.vo.StopManualInterventionAreaVO;
-import com.zgiot.app.server.module.sfstop.entity.vo.TcsBucketVO;
+import com.zgiot.app.server.module.sfstop.entity.vo.*;
 import com.zgiot.app.server.module.sfstop.service.*;
 import com.zgiot.app.server.module.sfstop.util.DateTimeUtils;
 import com.zgiot.app.server.service.DataService;
@@ -15,10 +12,10 @@ import com.zgiot.common.constants.MetricCodes;
 import com.zgiot.common.pojo.DataModelWrapper;
 import com.zgiot.common.pojo.SessionContext;
 import com.zgiot.common.restcontroller.ServerResponse;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -53,7 +50,16 @@ public class StopController {
     private StopManualInterventionService stopManualInterventionService;
     @Autowired
     private StopHandler stopHandler;
-
+    @Autowired
+    private StopTypeSetDelayService stopTypeSetDelayService;
+    @Autowired
+    private StopAlertDataService stopAlertDataService;
+    @Autowired
+    private StopTypeSetPararmeterService stopTypeSetPararmeterService;
+    @Autowired
+    private StopManualInterventionRecordService stopManualInterventionRecordService;
+    @Autowired
+    private StopOperationRecordService stopOperationRecordService;
     // 当前启车操作号
     private static Integer operateId;
 
@@ -73,12 +79,11 @@ public class StopController {
      * @throws Exception
      */
     @RequestMapping(value = "/findStopState", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> findStopState() throws Exception {
-        StopOperationRecord stopState = stopHandler.getStopState();
+    public ResponseEntity<String> findStopState(@RequestParam("system") String system) throws Exception {
+        StopOperationRecord stopState = stopHandler.getStopState(Integer.valueOf(system));
         logger.info("查询到的启车状态为{}", stopState);
         return new ResponseEntity<>(ServerResponse.buildOkJson(stopState), HttpStatus.OK);
     }
-
 
 
 
@@ -89,9 +94,9 @@ public class StopController {
      * @throws Exception
      */
     @RequestMapping(value = "/getStopIndex", method = RequestMethod.GET)
-    public ResponseEntity<String> getStopIndex(@RequestParam("areaSystem") String areaSystem) {
+    public ResponseEntity<String> getStopIndex(@RequestParam("system") String system) {
         StopIndexVO stopIndexVO = new StopIndexVO();
-        Long runTime =null;
+        Long runTime = null;
         //最后的启车的记录
         StartOperationRecord startOperationRecord = startOperationRecordService.getStartOperationRecord(StopConstants.START_FINISH_STATE);
         if (startOperationRecord != null) {
@@ -102,7 +107,7 @@ public class StopController {
         List<StopIndexVO.StopThingArea> stopThingAreas = new ArrayList<>();
         //查询大区下区域
         int lineRunCount = 0;
-        List<StopDeviceArea> stopDeviceAreas = stopDeviceAreaService.getStopDeviceArea(StopConstants.REGION_1, Integer.valueOf(areaSystem));
+        List<StopDeviceArea> stopDeviceAreas = stopDeviceAreaService.getStopDeviceArea(StopConstants.REGION_1, Integer.valueOf(system));
         for (StopDeviceArea stopDeviceArea : stopDeviceAreas) {
             StopIndexVO.StopThingArea stopThingArea = stopIndexVO.new StopThingArea();
             stopThingArea.setAreaId(String.valueOf(stopDeviceArea.getId()));
@@ -167,15 +172,15 @@ public class StopController {
      * @throws Exception
      */
     @RequestMapping(value = "/getStopAbnormalDevices", method = RequestMethod.GET)
-        public ResponseEntity<String> getStopAbnormalDevices(@RequestParam("lineId") String lineId) {
-        List<StopInformation> stopInformationList=new ArrayList<>();
+    public ResponseEntity<String> getStopAbnormalDevices(@RequestParam("lineId") String lineId) {
+        List<StopInformation> stopInformationList = new ArrayList<>();
         List<StopDeviceBag> stopDeviceBags = stopDeviceBagService.getStopDeviceBagByStartLineId(Long.valueOf(lineId));
         for (StopDeviceBag stopDeviceBag : stopDeviceBags) {
             //查询停车包下的设备
             List<StopInformation> stopInformations = stopInformationService.getStopInformationByBagId(stopDeviceBag.getId());
             for (StopInformation stopInformation : stopInformations) {
                 String state = getMetricValue(stopInformation.getThingCode(), MetricCodes.STATE);
-                if(StringUtils.isNotEmpty(state)&&StopConstants.RUNSTATE_4.equals(state)){
+                if (StringUtils.isNotEmpty(state) && StopConstants.RUNSTATE_4.equals(state)) {
                     stopInformationList.add(stopInformation);
                 }
             }
@@ -191,9 +196,9 @@ public class StopController {
      * @throws Exception
      */
     @RequestMapping(value = "/getStopManualIntervention", method = RequestMethod.GET)
-    public ResponseEntity<String> getStopManualIntervention(@RequestParam("areaSystem") String areaSystem) {
+    public ResponseEntity<String> getStopManualIntervention(@RequestParam("system") String system) {
         List<StopManualInterventionAreaVO> manualInterventionAreaVOList = new ArrayList<>();
-        List<StopDeviceArea> stopDeviceAreas = stopDeviceAreaService.getStopDeviceArea(StopConstants.REGION_1, Integer.valueOf(areaSystem));
+        List<StopDeviceArea> stopDeviceAreas = stopDeviceAreaService.getStopDeviceArea(StopConstants.REGION_1, Integer.valueOf(system));
         for (StopDeviceArea stopDeviceArea : stopDeviceAreas) {
             StopManualInterventionAreaVO stopManualInterventionAreaVO = new StopManualInterventionAreaVO();
             stopManualInterventionAreaVO.setAreaId(String.valueOf(stopDeviceArea.getId()));
@@ -219,6 +224,7 @@ public class StopController {
                 stopThingLine.setLineId(String.valueOf(stopLine.getId()));
                 stopThingLine.setLineName(stopLine.getLineName());
                 stopThingLine.setManualCnt(String.valueOf(manualInterventionThing));
+
                 stopThingLines.add(stopThingLine);
             }
             stopManualInterventionAreaVO.setStopThingLines(stopThingLines);
@@ -234,23 +240,40 @@ public class StopController {
      * @throws Exception
      */
     @RequestMapping(value = "/getStopLineManualIntervention", method = RequestMethod.GET)
-    public ResponseEntity<String> getStopLineManualIntervention(@RequestParam("lineId") String lineId, @RequestParam("state") String state) {
-        List<StopManualIntervention> stopManualInterventionList = new ArrayList<>();
+    public ResponseEntity<String> getStopLineManualIntervention(@RequestParam("lineId") String lineId) {
+        List<StopManualInterventionVO> stopManualInterventionList = new ArrayList<>();
         List<StopDeviceBag> stopDeviceBags = stopDeviceBagService.getStopDeviceBagByStartLineId(Long.valueOf(lineId));
         for (StopDeviceBag stopDeviceBag : stopDeviceBags) {
             List<StopInformation> stopInformations = stopInformationService.getStopInformationByBagId(stopDeviceBag.getId());
             for (StopInformation stopInformation : stopInformations) {
+                StopManualInterventionVO stopManualInterventionVO = new StopManualInterventionVO();
                 StopManualIntervention stopManualInterventionByThingCode = stopManualInterventionService.getStopManualInterventionByThingCode(stopInformation.getThingCode());
                 if (stopManualInterventionByThingCode != null) {
-                    if ("-1".equals(state)) {
-                        stopManualInterventionList.add(stopManualInterventionByThingCode);
-                    } else if (Integer.parseInt(state) == stopManualInterventionByThingCode.getState()) {
-                        stopManualInterventionList.add(stopManualInterventionByThingCode);
-                    }
+                    stopManualInterventionVO.setThingCode(stopInformation.getThingCode());
+                    stopManualInterventionVO.setThingName(stopInformation.getThingName());
+                    stopManualInterventionVO.setIsManualIntervention(String.valueOf(stopManualInterventionByThingCode.getState()));
+                    stopManualInterventionList.add(stopManualInterventionVO);
                 }
             }
         }
         return new ResponseEntity<>(ServerResponse.buildOkJson(stopManualInterventionList), HttpStatus.OK);
+    }
+
+    /**
+     * 保存人工干预记录
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/saveStopLineManualIntervention", method = RequestMethod.POST)
+    public ResponseEntity<String> saveStopLineManualIntervention(@RequestBody List<StopManualInterventionVO> stopManualInterventionVOs) {
+        for (StopManualInterventionVO stopManualInterventionVO : stopManualInterventionVOs) {
+            StopManualIntervention stopManualIntervention = new StopManualIntervention();
+            stopManualIntervention.setThingCode(stopManualInterventionVO.getThingCode());
+            stopManualIntervention.setState(Integer.parseInt(stopManualInterventionVO.getIsManualIntervention()));
+            stopManualInterventionService.updateStopManualInterventionByTC(stopManualIntervention);
+        }
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
     /**
@@ -260,7 +283,7 @@ public class StopController {
      * @return
      */
     @RequestMapping(value = "/setStopChoice", method = RequestMethod.GET)
-    public ResponseEntity<String> setStopChoice(@RequestParam("areaSystem") String areaSystem) {
+    public ResponseEntity<String> setStopChoice(@RequestParam("system") String system) {
         StopChoiceVO stopChoiceVO = new StopChoiceVO();
         List<StopChoiceVO.ChiceVO> rawStopSets = new ArrayList<>();
         StopChoiceVO.ChiceVO rawStop1 = stopChoiceVO.new ChiceVO();
@@ -434,7 +457,10 @@ public class StopController {
     @RequestMapping(value = "/saveTcsBucketCheck", method = RequestMethod.POST)
     public ResponseEntity<String> saveTcsBucketCheck(@RequestBody List<String> thingCodes) {
         for (String thingCode : thingCodes) {
-            stopManualInterventionService.updateStopManualInterventionState(1, thingCode);
+            StopManualIntervention stopManualIntervention = new StopManualIntervention();
+            stopManualIntervention.setThingCode(thingCode);
+            stopManualIntervention.setState(StopConstants.MANUALINTERVENTION_1);
+            stopManualInterventionService.updateStopManualInterventionByTC(stopManualIntervention);
         }
         return new ResponseEntity<>(ServerResponse.buildOkJson("保存成功"), HttpStatus.OK);
     }
@@ -457,17 +483,17 @@ public class StopController {
     /**
      * 停车自检
      *
-     * @param areaSystem
+     * @param system
      * @return
      */
     @RequestMapping(value = "/setUpAutoTest", method = RequestMethod.GET)
-    public ResponseEntity<String> setUpAutoTest(@RequestParam("areaSystem") String areaSystem) {
-        if (stopHandler.judgeStopingState(null, StopConstants.STOP_FINISH_STATE)) {
+    public ResponseEntity<String> setUpAutoTest(@RequestParam("system") String system) {
+        if (stopHandler.judgeStopingState(Integer.valueOf(system), null, StopConstants.STOP_FINISH_STATE)) {
             // 通知前端已经存在停车任务
             return new ResponseEntity<>(ServerResponse.buildOkJson("stoping"), HttpStatus.OK);
         }
-        List<String> thingCodes=new ArrayList<>();
-        List<String> lines = stopHandler.getStopLinesBySystem(areaSystem);
+        List<String> thingCodes = new ArrayList<>();
+        List<String> lines = stopHandler.getStopLinesBySystem(system);
 
 
         // 保存启车检查操作
@@ -502,6 +528,127 @@ public class StopController {
     }
 
     /**
+     * 查询设备详情
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/getStopThingDetails", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> handleExamine(@RequestParam("thingCode") String thingCode, @RequestParam("system") String system) throws Exception {
+        StopThingDetail stopThingDetail = new StopThingDetail();
+        StopInformation stopInformation = stopInformationService.getStopInformation(thingCode);
+        if (stopInformation != null) {
+            stopThingDetail.setThingCode(thingCode);
+            stopThingDetail.setThingName(stopInformation.getThingName());
+            List<StopThingDetail.ThingCondition> thingConditionList = new ArrayList<>();
+            List<StopThing> parentStopTypeSetDelay = stopTypeSetDelayService.getParentStopTypeSetDelay(thingCode);
+            for (StopThing stopThing : parentStopTypeSetDelay) {
+                StopThingDetail.ThingCondition thingCondition = stopThingDetail.new ThingCondition();
+                thingCondition.setThingCode(stopThing.getThingCode());
+                thingCondition.setThingName(stopThing.getThingName());
+                thingCondition.setRunState(getMetricValue(stopThing.getThingCode(), MetricCodes.STATE));
+                thingCondition.setAlertInfo(getThingAlertInfo(stopThing.getThingCode()));
+                thingConditionList.add(thingCondition);
+            }
+            stopThingDetail.setThingConditionList(thingConditionList);
+
+
+            List<StopThingDetail.PararmeterCondition> pararmeterConditionList = new ArrayList<>();
+            List<StopPararmeterVO> parentStopTypeSetPararmeters = stopTypeSetPararmeterService.getParentStopTypeSetPararmeter(thingCode);
+            for (StopPararmeterVO stopPararmeter : parentStopTypeSetPararmeters) {
+                StopThingDetail.PararmeterCondition pararmeterCondition = stopThingDetail.new PararmeterCondition();
+                pararmeterCondition.setThingCode(stopPararmeter.getThingCode());
+                pararmeterCondition.setThingName(stopPararmeter.getThingName());
+                pararmeterCondition.setPararmeter(stopPararmeter.getMetricCode() + stopPararmeter.getOperator() + stopPararmeter.getMetricValue());
+
+                String metricCode = stopPararmeter.getMetricCode();
+                String operator = stopPararmeter.getOperator();
+                String metricValue = stopPararmeter.getMetricValue();
+                String realMetricValue = getMetricValue(stopPararmeter.getThingCode(), metricCode);
+
+                pararmeterCondition.setIsUnusual(getIsUnusual(metricValue, operator, realMetricValue));
+
+                pararmeterConditionList.add(pararmeterCondition);
+
+            }
+            stopThingDetail.setPararmeterConditionList(pararmeterConditionList);
+
+            //查询人工干预
+            StopManualIntervention stopManualInterventionByThingCode = stopManualInterventionService.getStopManualInterventionByThingCode(thingCode);
+            if (stopManualInterventionByThingCode != null && stopManualInterventionByThingCode.getState() == 1) {
+                stopThingDetail.setIsManualIntervention("1");
+                List<StopOperationRecord> unfinishStopOperate = stopOperationRecordService.findUnfinishStopOperate(Integer.valueOf(system), StopConstants.STOP_STARTING_STATE, StopConstants.STOP_FINISH_STATE);
+                if (CollectionUtils.isNotEmpty(unfinishStopOperate)) {
+                    StopManualInterventionRecord stopManualInterventionRecord = stopManualInterventionRecordService.getStopManualInterventionRecord(unfinishStopOperate.get(0).getOperateId(), thingCode);
+                    if (stopManualInterventionRecord != null) {
+                        stopThingDetail.setIsRelieve(String.valueOf(stopManualInterventionRecord.getInterventionState()));
+                    }
+                }
+            } else {
+                stopThingDetail.setIsManualIntervention("0");
+                stopThingDetail.setIsRelieve("0");
+            }
+
+
+        }
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(stopThingDetail), HttpStatus.OK);
+    }
+
+    /**
+     * 根据比较字符判断实时的指标值和设定的指标值
+     *
+     * @param setMetricValue
+     * @param operator
+     * @param realMetricValue
+     * @return
+     */
+    public String getIsUnusual(String setMetricValue, String operator, String realMetricValue) {
+
+        double setValue1 = Double.valueOf(setMetricValue);
+        double realValue = Double.valueOf(realMetricValue);
+        String isUnusual = "0";
+        switch (operator) {
+            case StopConstants.COMPARE_GREATER_THAN:
+                if (realValue > setValue1) {
+                    isUnusual = "1";
+                }
+                break;
+            case StopConstants.COMPARE_LESS_THAN:
+                if (realValue < setValue1) {
+                    isUnusual = "1";
+                }
+                break;
+            case StopConstants.COMPARE_EQUAL_TO:
+                if (realValue == setValue1) {
+                    isUnusual = "1";
+                }
+                break;
+            case StopConstants.COMPARE_GREATER_THAN_AND_EQUAL_TO:
+                if (realValue >= setValue1) {
+                    isUnusual = "1";
+                }
+                break;
+            case StopConstants.COMPARE_LESS_THAN_AND_EQUAL_TO:
+                if (realValue <= setValue1) {
+                    isUnusual = "1";
+                }
+                break;
+            case StopConstants.COMPARE_NOT_EQUAL_TO:
+                if (realValue != setValue1) {
+                    isUnusual = "1";
+                }
+                break;
+            default:
+                break;
+
+        }
+        return isUnusual;
+
+    }
+
+
+    /**
      * 正式停车
      *
      * @return
@@ -529,5 +676,20 @@ public class StopController {
         return "";
     }
 
+
+    /**
+     * 查询设备的告警信息
+     *
+     * @param thingCode
+     * @return
+     */
+    private String getThingAlertInfo(String thingCode) {
+
+        AlertData maxLevelAlertData = stopAlertDataService.getMaxLevelAlertData(thingCode);
+        if (maxLevelAlertData != null) {
+            return maxLevelAlertData.getAlertInfo();
+        }
+        return "";
+    }
 
 }

@@ -5,7 +5,7 @@ import com.zgiot.app.server.module.alert.pojo.AlertData;
 public interface StopAlertDataService {
 
     /**
-     * 查询某个设备级别最高的告警信息
+     * 查询某个设备级别最高的故障告警信息
      *
      * @param thingCode
      * @return

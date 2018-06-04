@@ -52,6 +52,7 @@ public class ModuleListConfig {
     public static final String MODULE_COAL_ANALYSIS = "coal-analysis";
     public static final String MODULE_SUBSCRIPTION = "subscription";
     public static final String MODULE_REPORTFORM = "report-form";
+    public static final String MODULE_SFSTOP = "sfstop";
 
 
     @Value("${sysmodule.demo.enabled}")
@@ -74,6 +75,8 @@ public class ModuleListConfig {
     private boolean moduleSfStartEnabled;
     @Value("${sysmodule.report-form.enabled}")
     private boolean moduleReportEnabled;
+    @Value("${sysmodule.sfstop.enabled}")
+    private boolean moduleSfStopEnabled;
 
 
     private static final int FAULT_SCAN_RATE = 20;
@@ -238,6 +241,9 @@ public class ModuleListConfig {
 
             }
 
+            if (containModule(ModuleListConfig.MODULE_SFSTOP)) {
+
+            }
 
 
             if (containModule(ModuleListConfig.MODULE_REPORTFORM)) {
@@ -258,7 +264,7 @@ public class ModuleListConfig {
             logger.info("Modules are all loaded successfully. ");
 
         } catch (Exception e) {
-            logger.error("Sys Modules failed to load. Pls check exception and restart again! ",e );
+            logger.error("Sys Modules failed to load. Pls check exception and restart again! ", e);
         }
 
     }

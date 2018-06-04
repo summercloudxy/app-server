@@ -1,9 +1,10 @@
 package com.zgiot.app.server.module.sfstop.mapper;
 
 import com.zgiot.app.server.module.sfstop.entity.pojo.StopInformation;
-import org.apache.ibatis.annotations.*;
-
-import java.util.List;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -29,6 +30,15 @@ public interface StopInformationMapper {
 
     @Select("SELECT * FROM `tb_stop_information` where is_delete=0 and thing_code=#{thingCode} LIMIT 1")
     StopInformation getStopInformationByTC(StopInformation stopInformation);
+
+    /**
+     * 查询停车设备信息
+     *
+     * @param thingCode
+     * @return
+     */
+    @Select("SELECT * FROM `tb_stop_information` where is_delete=0 and thing_code=#{thingCode}")
+    StopInformation getStopInformation(@Param("thingCode") String thingCode);
 
     @Select("select * from tb_stop_information where is_delete=0")
     List<StopInformation> getStopInformationList();

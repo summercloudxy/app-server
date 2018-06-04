@@ -2,6 +2,7 @@ package com.zgiot.app.server.module.sfstop.service.impl;
 
 import com.zgiot.app.server.module.sfstop.entity.pojo.StopTypeSetDelay;
 import com.zgiot.app.server.module.sfstop.entity.pojo.StopTypeSetDelayDTO;
+import com.zgiot.app.server.module.sfstop.entity.vo.StopThing;
 import com.zgiot.app.server.module.sfstop.mapper.StopTypeSetDelayMapper;
 import com.zgiot.app.server.module.sfstop.service.StopTypeSetDelayService;
 import com.zgiot.common.pojo.CurrentUser;
@@ -13,7 +14,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-public class StopNormalSetDelayServiceImpl implements StopTypeSetDelayService {
+public class StopTypeSetDelayServiceImpl implements StopTypeSetDelayService {
 
     @Autowired
     private StopTypeSetDelayMapper stopTypeSetDelayMapper;
@@ -73,6 +74,11 @@ public class StopNormalSetDelayServiceImpl implements StopTypeSetDelayService {
                 stopTypeSetDelayMapper.insertStopTypeSetDelay(stopTypeSetDelay);
             }
         }
+    }
+
+    @Override
+    public List<StopThing> getParentStopTypeSetDelay(String thingCode) {
+        return stopTypeSetDelayMapper.getParentStopTypeSetDelay(thingCode);
     }
 
 }

@@ -3,7 +3,6 @@ package com.zgiot.app.server.module.sfstop.service.impl;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.zgiot.app.server.module.sfstop.entity.pojo.StopDeviceBag;
-import com.zgiot.app.server.module.sfstop.entity.pojo.StopDeviceRegion;
 import com.zgiot.app.server.module.sfstop.entity.pojo.StopInformation;
 import com.zgiot.app.server.module.sfstop.enums.ResultCode;
 import com.zgiot.app.server.module.sfstop.mapper.StopInformationMapper;
@@ -11,9 +10,6 @@ import com.zgiot.app.server.module.sfstop.service.StopInformationService;
 import com.zgiot.app.server.module.sfstop.util.PageListRsp;
 import com.zgiot.common.pojo.SessionContext;
 import com.zgiot.common.restcontroller.ServerResponse;
-import com.zgiot.app.server.module.sfstop.entity.pojo.StopInformation;
-import com.zgiot.app.server.module.sfstop.mapper.StopInformationMapper;
-import com.zgiot.app.server.module.sfstop.service.StopInformationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -118,6 +114,12 @@ public class StopInformationServiceImpl implements StopInformationService {
         return stopInformationList;
     }
 
+    @Override
+    public StopInformation getStopInformation(String thingCode) {
+        return stopInformationMapper.getStopInformation(thingCode);
+    }
+
+    @Override
     public List<StopInformation> getStopInformationByBagId(Long bagId) {
         return stopInformationMapper.getStopInformationByBagId(bagId);
     }

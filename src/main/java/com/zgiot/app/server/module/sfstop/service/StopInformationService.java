@@ -38,5 +38,14 @@ public interface StopInformationService {
     List<StopInformation> getInformationByTCAndNameNoBagId(String string);
 
     List<StopInformation> getInformationByTCAndName(String string);
+
+
+    /**
+     * 查询停车设备信息
+     *
+     * @param thingCode
+     * @return
+     */
+    StopInformation getStopInformation(String thingCode);
 }
                                                   

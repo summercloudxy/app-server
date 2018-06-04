@@ -17,13 +17,6 @@ public interface StopManualInterventionService {
      */
     StopManualIntervention getStopManualInterventionByThingCode(String thingCode);
 
-    /**
-     * 更新人工干预的状态
-     *
-     * @param state
-     * @param thingCode
-     */
-    void updateStopManualInterventionState(Integer state, String thingCode);
 
     void updateStopManualInterventionByTC(StopManualIntervention stopManualIntervention);
 }

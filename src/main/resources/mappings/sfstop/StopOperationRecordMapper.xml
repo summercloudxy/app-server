@@ -17,6 +17,7 @@
         operate_state,
         operate_system,
         created_time,
+        system,
         is_delete
         FROM
         tb_stop_operation_record
@@ -27,6 +28,9 @@
         </if>
         <if test="finishState != null">
             AND operate_state &lt;#{finishState}
+        </if>
+        <if test="system != null">
+            AND system =#{system}
         </if>
     </select>
 

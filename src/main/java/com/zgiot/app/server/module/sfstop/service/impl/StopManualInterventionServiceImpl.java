@@ -19,14 +19,10 @@ public class StopManualInterventionServiceImpl implements StopManualIntervention
         return stopManualInterventionMapper.getStopManualInterventionByThingCode(thingCode);
     }
 
-    @Override
-    public void updateStopManualInterventionState(Integer state, String thingCode) {
-        stopManualInterventionMapper.updateStopManualInterventionState(state, thingCode);
-    }
 
     @Override
     public void updateStopManualInterventionByTC(StopManualIntervention stopManualIntervention) {
-        if(SessionContext.getCurrentUser()!=null){
+        if (SessionContext.getCurrentUser() != null) {
             stopManualIntervention.setUpdateUser(SessionContext.getCurrentUser().getUserId());
         }
         stopManualIntervention.setUpdateTime(new Date());

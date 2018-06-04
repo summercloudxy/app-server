@@ -8,8 +8,6 @@ import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
-import java.util.List;
-
 @Mapper
 public interface StopDeviceAreaMapper {
 
@@ -26,13 +24,14 @@ public interface StopDeviceAreaMapper {
     void updateStopDeviceArea(StopDeviceArea stopDeviceAreaLevel);
 
     StopDeviceArea getStopDeviceAreaById(Long id);
+
     /**
      * 查询所有的停车设备区域
      *
      * @return
      */
-    @Select("select * from tb_stop_device_area WHERE is_deleted=0  and region_id =#{regionId} and area_system =#{areaSystem} ")
-    List<StopDeviceArea> getStopDeviceArea(@Param("regionId") Long regionId, @Param("areaSystem") Integer areaSystem);
+    @Select("select * from tb_stop_device_area WHERE is_deleted=0  and region_id =#{regionId} and system =#{system} ")
+    List<StopDeviceArea> getStopDeviceArea(@Param("regionId") Long regionId, @Param("system") Integer system);
 
 
     void deleteStopDeviceArea(Long id);

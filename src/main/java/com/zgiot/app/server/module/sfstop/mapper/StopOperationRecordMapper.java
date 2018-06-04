@@ -4,6 +4,7 @@ package com.zgiot.app.server.module.sfstop.mapper;
 import com.zgiot.app.server.module.sfstop.entity.pojo.StopOperationRecord;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ public interface StopOperationRecordMapper {
      * @param finishState  查询状态结尾
      * @return
      */
-    List<StopOperationRecord> selectOperateRecordWithoutOperateState(@Param("operateState") Integer operateState, @Param("finishState") Integer finishState);
+    List<StopOperationRecord> selectOperateRecordWithoutOperateState(@Param("system") Integer system, @Param("operateState") Integer operateState, @Param("finishState") Integer finishState);
 
 
     /**
@@ -26,4 +27,13 @@ public interface StopOperationRecordMapper {
      * @param stopOperationRecord
      */
     void saveStopOperationRecord(StopOperationRecord stopOperationRecord);
+
+    /**
+     * 根据操作状态查询停车记录
+     *
+     * @param operateState
+     * @return
+     */
+    @Select("select * from tb_stop_operation_record where is_delete=0 and operate_state =#{operateState}")
+    StopOperationRecord getStopOperationRecordByOperateState(@Param("operateState") int operateState);
 }
