@@ -6,6 +6,7 @@ import com.zgiot.app.server.module.reportforms.output.enums.InfluenceTimeTypeEnu
 import com.zgiot.app.server.module.reportforms.output.dao.InfluenceTimeMapper;
 import com.zgiot.app.server.module.reportforms.output.pojo.*;
 import com.zgiot.app.server.module.reportforms.output.productionmonitor.pojo.ReportFormSystemStartRecord;
+import com.zgiot.app.server.module.reportforms.output.productionmonitor.service.ReportFormSystemStartService;
 import com.zgiot.app.server.module.reportforms.output.utils.ReportFormDateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -20,6 +21,9 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
     private InfluenceTimeMapper influenceTimeMapper;
 
     private static final InfluenceTimeBean influenceTimeBean=new InfluenceTimeBean();
+
+    @Autowired
+    private ReportFormSystemStartService reportFormSystemStartService;
 
     public void init(){
         //项目启动时初始化
@@ -66,7 +70,6 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
 
     }
 
-    @Override
     public void handle(List<ReportFormSystemStartRecord> reportList) {
         if(reportList!=null && reportList.size()>0){
             //因为都是一个班的数据,所以这里取出第一个的当班开始时间即可
@@ -76,12 +79,7 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
             //将数据进行封装
             List<InfluenceTime> influenceTimes=new ArrayList<>();
             for (ReportFormSystemStartRecord report:reportList) {
-                InfluenceTime influenceTime=new InfluenceTime();
-                influenceTime.setDutyStartTime(report.getDutyStartTime());
-                influenceTime.setInfluenceType(InfluenceTimeTypeEnum.getInfluenceTimeTypeByDesc(report.getProductionDescription()).getInfluenceType());
-                influenceTime.setTerm(report.getTerm());
-                influenceTime.setClassDuration(report.getDuration());
-                influenceTimes.add(influenceTime);
+                setInfluenceTimes(influenceTimes, report);
             }
 
             //根据当班时间查询数据
@@ -95,9 +93,49 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
         }
     }
 
+    private void setInfluenceTimes(List<InfluenceTime> influenceTimes, ReportFormSystemStartRecord report) {
+        if(report.getProductionDescription()==null){
+            return;
+        }
+        InfluenceTime influence=null;
+        for (InfluenceTime influenceTime:influenceTimes) {
+            if(influenceTime.getInfluenceType().equals(report.getProductionDescription().intValue()) && influenceTime.getTerm().equals(report.getTerm())){
+                influence=influenceTime;
+            }
+        }
+
+        if(influence!=null){
+            Long influenceClass=0L;
+            Long startCar=0L;
+            if(influence.getClassDuration()!=null){
+                influenceClass=influence.getClassDuration();
+            }
+            if(report.getDuration()!=null){
+                startCar=report.getDuration();
+            }
+            influence.setClassDuration(influenceClass+startCar);
+        }else {
+            influence=new InfluenceTime();
+            influence.setDutyStartTime(report.getDutyStartTime());
+            influence.setInfluenceType(report.getProductionDescription().intValue());
+            influence.setTerm(report.getTerm());
+            influence.setClassDuration(report.getDuration());
+            influenceTimes.add(influence);
+        }
+    }
+
     @Override
     public InfluenceTimeBean getData(Date date) {
         Date dutyStartTime = ReportFormDateUtil.getNowDutyStartTime(date);
+
+        //每次在获取报表数据之前需要将开车情况数据进行设置
+        Map<Integer, List<ReportFormSystemStartRecord>> systemStartRecords = reportFormSystemStartService.getSystemStartRecords(date);
+        List<ReportFormSystemStartRecord> list=new ArrayList<>();
+        for (Map.Entry<Integer,List<ReportFormSystemStartRecord>> entry:systemStartRecords.entrySet()) {
+            list.addAll(entry.getValue());
+        }
+        handle(list);
+
         Date nowDutyStartTime = ReportFormDateUtil.getNowDutyStartTime(new Date());
         if(nowDutyStartTime.equals(dutyStartTime) && influenceTimeBean.getInfluenceTimeRsps().size()>0){
             return influenceTimeBean;
