@@ -82,6 +82,8 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
                 setInfluenceTimes(influenceTimes, report);
             }
 
+            setInfluenctTimeData(dutyStartTime, influenceTimes);
+
             //根据当班时间查询数据
             List<InfluenceTime> influenceTimeByDutyList = influenceTimeMapper.getInfluenceTimeByDutyDate(dutyStartTime);
             List<InfluenceTime> dutyinfluenceTimeList = createDutyinfluenceTime(dutyStartTime);
@@ -90,6 +92,42 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
             }else{
                 addFulenceTime(influenceTimes, dutyinfluenceTimeList);
             }
+        }
+    }
+
+    private void setInfluenctTimeData(Date dutyStartTime, List<InfluenceTime> influenceTimes) {
+        Set<Integer> integers = InfluenceTimeTypeEnum.influenceTypeCodes();
+        for (Integer type:integers) {
+            Integer oneNum=0;
+            Integer twoNum=0;
+            for (InfluenceTime influence:influenceTimes) {
+                if(influence.getInfluenceType().equals(type) && influence.getTerm().equals(ReportFormConstant.INFLUENCE_TIME_ONE_TERM)){
+                    oneNum=1;
+                }
+
+                if(influence.getInfluenceType().equals(type) && influence.getTerm().equals(ReportFormConstant.INFLUENCE_TIME_TWO_TERM)){
+                    twoNum=1;
+                }
+            }
+
+            if(oneNum==0){
+                InfluenceTime oneInfluence=new InfluenceTime();
+                oneInfluence.setDutyStartTime(dutyStartTime);
+                oneInfluence.setTerm(ReportFormConstant.INFLUENCE_TIME_ONE_TERM);
+                oneInfluence.setClassDuration(0L);
+                oneInfluence.setInfluenceType(type);
+                influenceTimes.add(oneInfluence);
+            }
+
+            if(twoNum==0){
+                InfluenceTime twoInfluence=new InfluenceTime();
+                twoInfluence.setDutyStartTime(dutyStartTime);
+                twoInfluence.setTerm(ReportFormConstant.INFLUENCE_TIME_TWO_TERM);
+                twoInfluence.setClassDuration(0L);
+                twoInfluence.setInfluenceType(type);
+                influenceTimes.add(twoInfluence);
+            }
+
         }
     }
 
