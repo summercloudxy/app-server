@@ -12,8 +12,6 @@ public interface InfluenceTimeService {
 
     void influenceTimeService(InfluenceTimeReq influenceTimeReq);
 
-    void handle(List<ReportFormSystemStartRecord> reportList);
-
     InfluenceTimeBean getData(Date date);
 
     void updatePersonnel(InfluenceTimeRemarks influenceTimeRemarks);

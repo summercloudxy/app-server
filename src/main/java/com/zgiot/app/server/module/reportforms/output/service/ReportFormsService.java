@@ -42,8 +42,6 @@ public class ReportFormsService {
         //根据时间获取当班开始时间
         Date dutyStartTime = ReportFormDateUtil.getNowDutyStartTime(date);
 
-        //TODO 获取对组信息进行封装
-
         ReportFormsBean reportFormsBean=new ReportFormsBean();
         //封装开车
         reportFormsBean.setStartRecordMap(reportFormSystemStartService.getSystemStartRecords(dutyStartTime));
