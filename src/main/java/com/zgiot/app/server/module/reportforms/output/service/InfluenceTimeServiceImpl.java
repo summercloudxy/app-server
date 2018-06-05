@@ -94,6 +94,9 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
     }
 
     private void setInfluenceTimes(List<InfluenceTime> influenceTimes, ReportFormSystemStartRecord report) {
+        if(report.getProductionDescription()==null){
+            return;
+        }
         InfluenceTime influence=null;
         for (InfluenceTime influenceTime:influenceTimes) {
             if(influenceTime.getInfluenceType().equals(report.getProductionDescription().intValue()) && influenceTime.getTerm().equals(report.getTerm())){
@@ -102,7 +105,15 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
         }
 
         if(influence!=null){
-            influence.setClassDuration(influence.getClassDuration()+report.getDuration());
+            Long influenceClass=0L;
+            Long startCar=0L;
+            if(influence.getClassDuration()!=null){
+                influenceClass=influence.getClassDuration();
+            }
+            if(report.getDuration()!=null){
+                startCar=report.getDuration();
+            }
+            influence.setClassDuration(influenceClass+startCar);
         }else {
             influence=new InfluenceTime();
             influence.setDutyStartTime(report.getDutyStartTime());
