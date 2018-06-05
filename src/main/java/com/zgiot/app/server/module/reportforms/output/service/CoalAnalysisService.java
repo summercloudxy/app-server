@@ -93,7 +93,7 @@ public class CoalAnalysisService {
         //获取1552平均值
         FilterCondition offtWashedAvg=new FilterCondition();
         offtWashedAvg.setStartTime(nowDutyStartTime);
-        offtWashedAvg.setSystem(TWO_SYSTEM);
+        offtWashedAvg.setSystem(ONE_SYSTEM);
         offtWashedAvg.setTargetList(Collections.singletonList(CoalAnalysisConstants.FIVE_FIVE_TWO_WASHED+AVG_RECORD_KEYWORD));
         CoalAnalysisRecord avgOfftWashedAvg = coalAnalysisMapper.getCoalAnalysisAvg(offtWashedAvg);
         coalAnalysisAvg.put(ONETERMWASHED,avgOfftWashedAvg);
