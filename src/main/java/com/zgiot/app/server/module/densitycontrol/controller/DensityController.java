@@ -66,4 +66,17 @@ public class DensityController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
+    /**
+     * 目标密度设定
+     *
+     * @param reqBody
+     * @return
+     */
+    @PostMapping("/setTargetDensity")
+    public ResponseEntity<String> setTargetDensity(@RequestBody String reqBody) {
+        DataModel dataModel = JSON.parseObject(reqBody.trim(), DataModel.class);
+        densityControlService.setTargetDensity(dataModel);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+    }
+
 }

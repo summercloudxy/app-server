@@ -78,7 +78,7 @@ public class ParamCacheImpl implements ParamCache {
                 cache.put(generateKey(thingCode, metricCode),
                         new DataModel(null, thingCode, null, metricCode, value, new Date()));
 
-                // TODO 写入KepServer
+                // 写入KepServer
                 densityControlService.setBaseParam(densityControlConfig);
             }
         }

@@ -41,19 +41,18 @@ public class DensityControlServiceImpl implements DensityControlService {
     private static Map<String, String> baseParamMap = new HashMap<>();
 
     static {
-        baseParamMap.put("LE_H_SET", SETTED_HIGH_LEVEL);
-        baseParamMap.put("PRE_STOP_DENSITY_HIGH_SET", PRE_STOP_SETTED_HIGH_LEVEL);
-        baseParamMap.put("LE_PJ_SET", LE_PJ_SET);
-        baseParamMap.put("LE_L_SET", SETTED_LOW_LEVEL);
-        baseParamMap.put("DELAY_TEST", DELAY_TEST);
-        baseParamMap.put("DELAY_TEST_FL", DELAY_TEST_FL);
-        baseParamMap.put("DELAY_TEST_BS", DELAY_TEST_BS);
-        baseParamMap.put("TIME_FL", TIME_FL);
-        baseParamMap.put("TIME_BS", TIME_BS);
-        baseParamMap.put("TIME_BS_LOW", TIME_BS_LOW);
-        baseParamMap.put("TIME_FL_HIGH", TIME_FL_HIGH);
-        baseParamMap.put("TIME_EXECUTE_HIGH", TIME_EXECUTE_HIGH);
-        baseParamMap.put("TIME_STOP", TIME_STOP);
+        baseParamMap.put(SETTED_HIGH_LEVEL, "");
+        baseParamMap.put(PRE_STOP_SETTED_HIGH_LEVEL, "");
+        baseParamMap.put(LE_JJ_SET, "");
+        baseParamMap.put(SETTED_LOW_LEVEL, "");
+        baseParamMap.put(TEST_DELAY, "");
+        baseParamMap.put(FL_TEST_DELAY, "");
+        baseParamMap.put(BS_TEST_DELAY, "");
+        baseParamMap.put(LE_N_O_TIME, "");
+        baseParamMap.put(LE_L_O_TIME, "");
+        baseParamMap.put(LE_H_O_TIME, "");
+        baseParamMap.put(LE_H_EXECUTE_TIME, "");
+        baseParamMap.put(PRE_STOP_TIME, "");
     }
 
     @Override
@@ -76,7 +75,7 @@ public class DensityControlServiceImpl implements DensityControlService {
         if (dataModelWrapper != null) {
             if (!dataModel.getValue().equals(dataModelWrapper.getValue())) {
                 if (Boolean.TRUE.toString().equals(dataModel.getValue())) {
-                    // 初始化模块缓存和KepServer数据
+                    // 智能开启,初始化模块缓存和KepServer数据
                     paramCache.init();
 
                     // 改点状态写入KepServer
@@ -85,7 +84,7 @@ public class DensityControlServiceImpl implements DensityControlService {
                         logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
                     }
                 } else if (Boolean.FALSE.toString().equals(dataModel.getValue())) {
-                    // 改点状态写入KepServer
+                    // 智能关闭,改点状态写入KepServer
                     CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(dataModel, "endDensityControl");
                     if (cmdSendResponseData.getOkCount() <= 0) {
                         logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
@@ -110,6 +109,15 @@ public class DensityControlServiceImpl implements DensityControlService {
             if (cmdSendResponseData.getOkCount() <= 0) {
                 logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
             }
+        }
+    }
+
+    @Override
+    public void setTargetDensity(DataModel dataModel) {
+        paramCache.updateValue(dataModel);
+        CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(dataModel, "setTargetDensity");
+        if (cmdSendResponseData.getOkCount() <= 0) {
+            logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
         }
     }
 

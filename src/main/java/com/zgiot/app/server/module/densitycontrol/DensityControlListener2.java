@@ -20,8 +20,10 @@ public class DensityControlListener2 implements DataListener {
     @Override
     public void onDataChange(DataModel dataModel) {
         if (TERM_TWO_THING_CODE.equals(dataModel.getThingCode()) && CURRENT_LEVEL_M.equals(dataModel.getMetricCode())) {
-            // 当前液位
-            densityControlManager2.handleLevel(dataModel);
+            if (!densityControlManager2.isRunning()) {
+                // 当前液位
+                densityControlManager2.handleLevel(dataModel);
+            }
         }
     }
 

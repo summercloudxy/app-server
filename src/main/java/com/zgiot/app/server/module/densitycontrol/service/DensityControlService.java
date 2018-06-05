@@ -15,4 +15,6 @@ public interface DensityControlService {
     void switchDensityControl(DataModel dataModel);
 
     void setBaseParam(DensityControlConfig densityControlConfig);
+
+    void setTargetDensity(DataModel dataModel);
 }
