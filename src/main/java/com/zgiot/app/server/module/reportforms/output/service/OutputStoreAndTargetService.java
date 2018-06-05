@@ -383,12 +383,7 @@ public class OutputStoreAndTargetService {
         } else {
             otherTargetRecordMap = getOtherTargetRecordMap(dutyStartTime);
         }
-        if (!otherTargetRecordMap.containsKey(ReportFormTargetConstant.WATER_CONSUME)){
-            Map<Integer,ReportFormTargetRecord> termRecordMap = new HashMap<>();
-            termRecordMap.put(1,new ReportFormTargetRecord());
-            termRecordMap.put(2,new ReportFormTargetRecord());
-            otherTargetRecordMap.put(ReportFormTargetConstant.WATER_CONSUME,termRecordMap);
-        }
+        checkWaterConsume(dutyStartTime,otherTargetRecordMap);
         return otherTargetRecordMap;
     }
 
@@ -441,6 +436,25 @@ public class OutputStoreAndTargetService {
         return targetRecordMap;
     }
 
+    private void checkWaterConsume(Date dutyStartTime,Map<Integer, Map<Integer, ReportFormTargetRecord>> targetRecordMap) {
+        if (!targetRecordMap.containsKey(ReportFormTargetConstant.WATER_CONSUME)){
+            ReportFormTargetRecord waterConsumeRecordTermOne = createWaterConsumeRecord(dutyStartTime, 1);
+            ReportFormTargetRecord waterConsumeRecordTermTwo = createWaterConsumeRecord(dutyStartTime, 2);
+            Map<Integer,ReportFormTargetRecord> termRecordMap = new HashMap<>();
+            termRecordMap.put(1,waterConsumeRecordTermOne);
+            termRecordMap.put(2,waterConsumeRecordTermTwo);
+            targetRecordMap.put(ReportFormTargetConstant.WATER_CONSUME,termRecordMap);
+        }
+    }
+
+    private ReportFormTargetRecord createWaterConsumeRecord(Date dutyStartTime,int term) {
+        ReportFormTargetRecord reportFormTargetRecordTermOne = new ReportFormTargetRecord();
+        reportFormTargetRecordTermOne.setDutyStartTime(dutyStartTime);
+        reportFormTargetRecordTermOne.setTerm(term);
+        reportFormTargetRecordTermOne.setTargetType(ReportFormTargetConstant.WATER_CONSUME);
+        return reportFormTargetRecordTermOne;
+    }
+
     /**
      * 有自用数据时，更新库存的洗混煤
      *
@@ -488,6 +502,7 @@ public class OutputStoreAndTargetService {
             }
         }
         checkNonExistTargetRecord(dutyStartTime, reportFormTargetRecordMap);
+        checkWaterConsume(dutyStartTime,reportFormTargetRecordMap);
         return reportFormTargetRecordMap;
     }
 
