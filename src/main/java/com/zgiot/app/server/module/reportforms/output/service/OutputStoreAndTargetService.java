@@ -383,12 +383,7 @@ public class OutputStoreAndTargetService {
         } else {
             otherTargetRecordMap = getOtherTargetRecordMap(dutyStartTime);
         }
-        if (!otherTargetRecordMap.containsKey(ReportFormTargetConstant.WATER_CONSUME)){
-            Map<Integer,ReportFormTargetRecord> termRecordMap = new HashMap<>();
-            termRecordMap.put(1,new ReportFormTargetRecord());
-            termRecordMap.put(2,new ReportFormTargetRecord());
-            otherTargetRecordMap.put(ReportFormTargetConstant.WATER_CONSUME,termRecordMap);
-        }
+        checkWaterConsume(otherTargetRecordMap);
         return otherTargetRecordMap;
     }
 
@@ -441,6 +436,15 @@ public class OutputStoreAndTargetService {
         return targetRecordMap;
     }
 
+    private void checkWaterConsume(Map<Integer, Map<Integer, ReportFormTargetRecord>> targetRecordMap) {
+        if (!targetRecordMap.containsKey(ReportFormTargetConstant.WATER_CONSUME)){
+            Map<Integer,ReportFormTargetRecord> termRecordMap = new HashMap<>();
+            termRecordMap.put(1,new ReportFormTargetRecord());
+            termRecordMap.put(2,new ReportFormTargetRecord());
+            targetRecordMap.put(ReportFormTargetConstant.WATER_CONSUME,termRecordMap);
+        }
+    }
+
     /**
      * 有自用数据时，更新库存的洗混煤
      *
@@ -488,6 +492,7 @@ public class OutputStoreAndTargetService {
             }
         }
         checkNonExistTargetRecord(dutyStartTime, reportFormTargetRecordMap);
+        checkWaterConsume(reportFormTargetRecordMap);
         return reportFormTargetRecordMap;
     }
 
