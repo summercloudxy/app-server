@@ -121,7 +121,7 @@
         FROM
         `tb_report_form_influence_time_remarks`
         WHERE
-        duty_start_time = #{dutyStartTime};
+        duty_start_time = #{dutyStartTime} limit 1;
     </select>
 
 </mapper>
