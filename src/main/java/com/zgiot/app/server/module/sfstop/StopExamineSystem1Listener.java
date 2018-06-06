@@ -12,12 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * 停车自检
+ * 一期设备停车自检
  */
 @Transactional
 @Component
-public class StopExamineListener implements DataListener {
-    private static org.slf4j.Logger logger = LoggerFactory.getLogger(StopExamineListener.class);
+public class StopExamineSystem1Listener implements DataListener {
+    private static org.slf4j.Logger logger = LoggerFactory.getLogger(StopExamineSystem1Listener.class);
 
     @Autowired
     private StopHandler stopHandler;
