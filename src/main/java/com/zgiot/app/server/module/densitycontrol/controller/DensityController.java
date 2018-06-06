@@ -2,7 +2,6 @@ package com.zgiot.app.server.module.densitycontrol.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.zgiot.app.server.module.densitycontrol.DensityControlManager;
-import com.zgiot.app.server.module.densitycontrol.dto.DensityControlDTO;
 import com.zgiot.app.server.module.densitycontrol.pojo.DensityControlConfig;
 import com.zgiot.app.server.module.densitycontrol.pojo.MonitoringParam;
 import com.zgiot.app.server.module.densitycontrol.service.DensityControlService;
@@ -44,12 +43,12 @@ public class DensityController {
     /**
      * 修改设定参数
      *
-     * @param densityControlDTO
+     * @param densityControlConfigList
      * @return
      */
     @PostMapping("/updateDensityControl")
-    public ResponseEntity<String> updateDensityControlConfig(@RequestBody DensityControlDTO densityControlDTO) {
-        densityControlService.updateDensityControlConfig(densityControlDTO);
+    public ResponseEntity<String> updateDensityControlConfig(@RequestBody List<DensityControlConfig> densityControlConfigList) {
+        densityControlService.updateDensityControlConfig(densityControlConfigList);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 

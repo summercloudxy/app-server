@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -60,11 +61,19 @@ public class DensityControlServiceImpl implements DensityControlService {
         return densityControlConfigMapper.getAllDensityControlConfig();
     }
 
-    @Override
-    public void updateDensityControlConfig(DensityControlDTO densityControlDTO) {
-        // TODO 整理数据,存入MySql和模块缓存
-        DensityControlConfig densityControlConfig = new DensityControlConfig();
-        densityControlConfigMapper.updateDensityControlConfig(densityControlConfig);
+    @Transactional
+    public void updateDensityControlConfig(List<DensityControlConfig> densityControlConfigList) {
+        densityControlConfigMapper.deleteAllDensityControlConfig();
+
+        if (densityControlConfigList != null && !densityControlConfigList.isEmpty()) {
+            for (DensityControlConfig densityControlConfig : densityControlConfigList) {
+                densityControlConfig.setUpdateDt(new Date());
+                paramCache.updateValue(new DataModel(null, densityControlConfig.getThingCode(), null,
+                        densityControlConfig.getMetricCode(), densityControlConfig.getMetricValue(), densityControlConfig.getUpdateDt()));
+
+                densityControlConfigMapper.insertDensityControlConfig(densityControlConfig);
+            }
+        }
     }
 
     @Override

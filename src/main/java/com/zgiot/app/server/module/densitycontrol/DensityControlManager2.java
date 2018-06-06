@@ -90,11 +90,11 @@ public class DensityControlManager2 {
     private void getSystemStatus(DensityControlStatus densityControlStatus) {
         DataModelWrapper dataA = dataService.getData(TERM_TWO_SYSTEM_A_THING_CODE, RUN_STATE).orElse(null);
         String runsA = dataA == null ? "0" : dataA.getValue();
-        String thingCodeA = dataA == null ? "0" : dataA.getThingCode();
+        String thingCodeA = dataA == null ? "" : dataA.getThingCode();
 
         DataModelWrapper dataB = dataService.getData(TERM_TWO_SYSTEM_B_THING_CODE, RUN_STATE).orElse(null);
         String runsB = dataB == null ? "0" : dataB.getValue();
-        String thingCodeB = dataB == null ? "0" : dataB.getThingCode();
+        String thingCodeB = dataB == null ? "" : dataB.getThingCode();
 
         if (RUN_STATE_1.equals(runsA) && !RUN_STATE_1.equals(runsB)) {
             densityControlStatus.setSystemStatus(SYSTEM_STATUS_1);
@@ -119,17 +119,23 @@ public class DensityControlManager2 {
     private void getDensityData(DensityControlStatus densityControlStatus) {
         DataModelWrapper dataA = dataService.getData(TERM_TWO_SYSTEM_A_THING_CODE, DENSITY_CONTROL_MODE).orElse(null);
         String runsA = dataA == null ? "" : dataA.getValue();
+        String thingCodeA = dataA == null ? "" : dataA.getThingCode();
 
         DataModelWrapper dataB = dataService.getData(TERM_TWO_SYSTEM_B_THING_CODE, DENSITY_CONTROL_MODE).orElse(null);
+        String thingCodeB = dataB == null ? "" : dataB.getThingCode();
 
         if (Boolean.TRUE.toString().equals(runsA)) {
-            densityControlStatus.setDensityThingCode(dataA == null ? "" : dataA.getThingCode());
-            DataModelWrapper data = dataService.getData(TERM_TWO_SYSTEM_A_THING_CODE, CURRENT_DENSITY).orElse(null);
-            densityControlStatus.setDensity(StringUtils.isBlank(data.getValue()) ? 0.0 : Double.parseDouble(data.getValue()));
+            densityControlStatus.setDensityThingCode(thingCodeA);
+            DataModelWrapper data = dataService.getData(thingCodeA, CURRENT_DENSITY).orElse(null);
+            if (data != null) {
+                densityControlStatus.setDensity(StringUtils.isBlank(data.getValue()) ? 0.0 : Double.parseDouble(data.getValue()));
+            }
         } else {
-            densityControlStatus.setDensityThingCode(dataB == null ? "" : dataB.getThingCode());
-            DataModelWrapper data = dataService.getData(TERM_TWO_SYSTEM_B_THING_CODE, CURRENT_DENSITY).orElse(null);
-            densityControlStatus.setDensity(StringUtils.isBlank(data.getValue()) ? 0.0 : Double.parseDouble(data.getValue()));
+            densityControlStatus.setDensityThingCode(thingCodeB);
+            DataModelWrapper data = dataService.getData(thingCodeB, CURRENT_DENSITY).orElse(null);
+            if (data != null) {
+                densityControlStatus.setDensity(StringUtils.isBlank(data.getValue()) ? 0.0 : Double.parseDouble(data.getValue()));
+            }
         }
     }
 
@@ -137,8 +143,11 @@ public class DensityControlManager2 {
      * 高液位处理
      */
     private void handleHighLevel() {
-        cmdControlService.sendCmd(new DataModel(null, TERM_TWO_THING_CODE, null,
-                LEVEL_MODE, HIGH_MODE, new Date()), "beginHandleHighLevel");
+        CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(new DataModel(null,
+                TERM_TWO_THING_CODE, null, LEVEL_MODE, HIGH_MODE, new Date()), "beginHandleHighLevel");
+        if (cmdSendResponseData.getOkCount() <= 0) {
+            logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
+        }
         timeExecuteHigh = new Date().getTime();
     }
 
@@ -148,17 +157,23 @@ public class DensityControlManager2 {
      * @param densityControlStatus
      */
     private void handleLowLevel(DensityControlStatus densityControlStatus) {
-        // 当前密度
+        CmdControlService.CmdSendResponseData csrd = cmdControlService.sendCmd(new DataModel(null,
+                TERM_TWO_THING_CODE, null, LEVEL_MODE, LOW_MODE, new Date()), "beginHandleLowLevel");
+        if (csrd.getOkCount() <= 0) {
+            logger.error(CMD_FAILED_LOG + csrd.getErrorMessage(), SysException.EC_CMD_FAILED);
+        }
+
+        // 获取当前密度
         Double density = densityControlStatus.getDensity();
 
-        // 设定密度
+        // 获取设定密度
         DataModelWrapper dataSet = paramCache.getValue(TERM_TWO_THING_CODE, SETTED_DENSITY);
         Double densitySet = 0.0;
         if (dataSet != null) {
             densitySet = new BigDecimal(density).multiply(new BigDecimal(dataSet.getValue())).doubleValue();
         }
 
-        // 设定密度最小值
+        // 计算设定密度最小值
         DataModelWrapper dataMin = paramCache.getValue(TERM_TWO_THING_CODE, LE_L_DENSITY_RANGE_MIN);
         Double densityMin = 0.0;
         if (dataMin != null) {
@@ -183,20 +198,29 @@ public class DensityControlManager2 {
             String levelRangeMin = paramCache.getValue(TERM_TWO_THING_CODE, LE_L_LEVEL_RANGE_MIN).getValue();
             Double levelMin = new BigDecimal(levelSet).multiply(new BigDecimal(1).add(new BigDecimal(levelRangeMin))).doubleValue();
 
-            while (level > levelMax && level < levelMin) {
-                if (level < levelMin) {
-                    CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(new DataModel(null,
-                            TERM_TWO_THING_CODE, null, LOW_LEVEL_FLU,
-                            LOW_MODE, new Date()), "sendLowLowLevelMode");
-                    if (cmdSendResponseData.getOkCount() <= 0) {
-                        logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
-                    }
+            if (level < levelMin) {
+                CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(new DataModel(null,
+                        TERM_TWO_THING_CODE, null, LOW_LEVEL_FLU,
+                        LOW_MODE, new Date()), "sendLowLowLevelMode");
+                if (cmdSendResponseData.getOkCount() <= 0) {
+                    logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
+                }
+            } else if (level > levelMax) {
+                CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(new DataModel(null,
+                        TERM_TWO_THING_CODE, null, LOW_LEVEL_FLU,
+                        HIGH_MODE, new Date()), "sendLowHighLevelMode");
+                if (cmdSendResponseData.getOkCount() <= 0) {
+                    logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
+                }
+            } else {
+                CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(new DataModel(null,
+                        TERM_TWO_THING_CODE, null, LOW_LEVEL_FLU,
+                        NORMAL_MODE, new Date()), "sendLowNormalLevelMode");
+                if (cmdSendResponseData.getOkCount() <= 0) {
+                    logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
                 }
             }
-
-            sendNormalLevelMode();
         }
-
     }
 
     /**
@@ -205,6 +229,12 @@ public class DensityControlManager2 {
      * @param densityControlStatus
      */
     private void handleNormalLevel(DensityControlStatus densityControlStatus) {
+        CmdControlService.CmdSendResponseData csrd = cmdControlService.sendCmd(new DataModel(null,
+                TERM_TWO_THING_CODE, null, LEVEL_MODE, NORMAL_MODE, new Date()), "beginHandleNormalLevel");
+        if (csrd.getOkCount() <= 0) {
+            logger.error(CMD_FAILED_LOG + csrd.getErrorMessage(), SysException.EC_CMD_FAILED);
+        }
+
         // 当前密度
         Double density = densityControlStatus.getDensity();
 
@@ -230,36 +260,28 @@ public class DensityControlManager2 {
         }
 
         if (density > densityMax) {
-            DataModelWrapper data = dataService.getData(densityControlStatus.getSystemThingCode1(), CURRENT_DENSITY).orElse(null);
-            if (data != null) {
-                Double curDensity = Double.parseDouble(data.getValue());
-                if (curDensity > densityMax) {
-                    // 高密度
-                    CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(new DataModel(null,
-                            densityControlStatus.getSystemThingCode1(), null, DENSITY_FLU2,
-                            HIGH_MODE, new Date()), "sendHighDensityMode");
-                    if (cmdSendResponseData.getOkCount() <= 0) {
-                        logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
-                    }
-                } else  {
-                    sendNormalLevelMode();
-                }
+            // 高密度
+            CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(new DataModel(null,
+                    densityControlStatus.getSystemThingCode1(), null, DENSITY_FLU2,
+                    HIGH_MODE, new Date()), "sendHighDensityMode");
+            if (cmdSendResponseData.getOkCount() <= 0) {
+                logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
             }
         } else if (density < densityMin) {
-            DataModelWrapper data = dataService.getData(densityControlStatus.getSystemThingCode1(), CURRENT_DENSITY).orElse(null);
-            if (data != null) {
-                Double curDensity = Double.parseDouble(data.getValue());
-                if (curDensity < densityMin) {
-                    // 低密度
-                    CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(new DataModel(null,
-                            densityControlStatus.getSystemThingCode1(), null, DENSITY_FLU2,
-                            LOW_MODE, new Date()), "sendLowDensityMode");
-                    if (cmdSendResponseData.getOkCount() <= 0) {
-                        logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
-                    }
-                } else  {
-                    sendNormalLevelMode();
-                }
+            // 低密度
+            CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(new DataModel(null,
+                    densityControlStatus.getSystemThingCode1(), null, DENSITY_FLU2,
+                    LOW_MODE, new Date()), "sendLowDensityMode");
+            if (cmdSendResponseData.getOkCount() <= 0) {
+                logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
+            }
+        } else {
+            // 正常密度
+            CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(new DataModel(null,
+                    densityControlStatus.getSystemThingCode1(), null, DENSITY_FLU2,
+                    NORMAL_MODE, new Date()), "sendNormalDensityMode");
+            if (cmdSendResponseData.getOkCount() <= 0) {
+                logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
             }
         }
     }

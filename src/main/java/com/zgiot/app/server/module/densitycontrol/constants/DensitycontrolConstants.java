@@ -13,10 +13,6 @@ public class DensitycontrolConstants {
     public static final String TERM_TWO_THING_CODE = "2321";// 合介桶
     public static final String TERM_TWO_SYSTEM_A_THING_CODE = "2307";// 块煤系统A
     public static final String TERM_TWO_SYSTEM_B_THING_CODE = "2308";// 块煤系统B
-    public static final String TERM_TWO_SYSTEM_A_FL_THING_CODE = "2307.FL-1";// 块煤系统A分流阀
-    public static final String TERM_TWO_SYSTEM_B_FL_THING_CODE = "2308.FL-1";// 块煤系统B分流阀
-    public static final String TERM_TWO_SYSTEM_A_BS_THING_CODE = "2307.BS-1";// 块煤系统A补水阀
-    public static final String TERM_TWO_SYSTEM_B_BS_THING_CODE = "2308.BS-1";// 块煤系统B补水阀
 
     public static final String LE_N_O_TIME = "LE_N_O_TIME";// 正常液位开启时间
     public static final String LE_L_O_TIME = "LE_L_O_TIME";// 低液位开启时间

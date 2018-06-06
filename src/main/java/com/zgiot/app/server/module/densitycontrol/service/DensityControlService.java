@@ -1,6 +1,5 @@
 package com.zgiot.app.server.module.densitycontrol.service;
 
-import com.zgiot.app.server.module.densitycontrol.dto.DensityControlDTO;
 import com.zgiot.app.server.module.densitycontrol.pojo.DensityControlConfig;
 import com.zgiot.common.pojo.DataModel;
 
@@ -10,7 +9,7 @@ public interface DensityControlService {
 
     List<DensityControlConfig> getAllDensityControlConfig();
 
-    void updateDensityControlConfig(DensityControlDTO densityControlDTO);
+    void updateDensityControlConfig(List<DensityControlConfig> densityControlConfigList);
 
     void switchDensityControl(DataModel dataModel);
 
