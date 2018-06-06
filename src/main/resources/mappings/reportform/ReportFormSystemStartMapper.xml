@@ -4,7 +4,7 @@
 
     <select id="getTheLastOneRecord"
             resultType="com.zgiot.app.server.module.reportforms.output.productionmonitor.pojo.ReportFormSystemStartRecord">
-        SELECT id,duty_start_time,start_time,end_time,coal_8_thing_code,coal_13_thing_code,blending_washing_type,production_description,duration,heavy_medium_lump,heavy_medium_slack,tcs_857,tcs_858,tcs_859,reason,term
+        SELECT id,duty_start_time,start_time,end_time,coal_8_thing_code,coal_13_thing_code,blending_washing_type,production_description,duration,heavy_medium_lump,heavy_medium_slack,tcs_857,tcs_858,tcs_859,reason,term,system_startup_state
         FROM tb_report_form_system_start_record
         WHERE   <![CDATA[duty_start_time<#{date}]]>
         AND term = #{term}
@@ -34,8 +34,8 @@
     </update>
 
     <insert id="insertRecord" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
-        INSERT INTO tb_report_form_system_start_record(duty_start_time, start_time, end_time, coal_8_thing_code, coal_13_thing_code, blending_washing_type, production_description, duration, heavy_medium_lump, heavy_medium_slack, tcs_857, tcs_858, tcs_859, reason, term) VALUES
-        (#{dutyStartTime},#{startTime},#{endTime},#{coal8ThingCode},#{coal13ThingCode},#{blendingWashingType},#{productionDescription},#{duration},#{heavyMediumLump},#{heavyMediumSlack},#{tcs857},#{tcs858},#{tcs859},#{reason},#{term})
+        INSERT INTO tb_report_form_system_start_record(duty_start_time, start_time, end_time, coal_8_thing_code, coal_13_thing_code, blending_washing_type, production_description, duration, heavy_medium_lump, heavy_medium_slack, tcs_857, tcs_858, tcs_859, reason, term ,system_startup_state) VALUES
+        (#{dutyStartTime},#{startTime},#{endTime},#{coal8ThingCode},#{coal13ThingCode},#{blendingWashingType},#{productionDescription},#{duration},#{heavyMediumLump},#{heavyMediumSlack},#{tcs857},#{tcs858},#{tcs859},#{reason},#{term},#{systemStartupState})
     </insert>
 
     <delete id="deleteRecord">
@@ -44,7 +44,7 @@
 
     <select id="getRecordsOnDuty"
             resultType="com.zgiot.app.server.module.reportforms.output.productionmonitor.pojo.ReportFormSystemStartRecord">
-        SELECT id,duty_start_time,start_time,end_time,coal_8_thing_code,coal_13_thing_code,blending_washing_type,production_description,duration,heavy_medium_lump,heavy_medium_slack,tcs_857,tcs_858,tcs_859,reason,term
+        SELECT id,duty_start_time,start_time,end_time,coal_8_thing_code,coal_13_thing_code,blending_washing_type,production_description,duration,heavy_medium_lump,heavy_medium_slack,tcs_857,tcs_858,tcs_859,reason,term,system_startup_state
         FROM tb_report_form_system_start_record
         WHERE   duty_start_time = #{dutyStartTime}
         AND term = #{term}

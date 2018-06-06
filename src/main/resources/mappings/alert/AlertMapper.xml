@@ -596,20 +596,18 @@
             ,rts.system_id
         </if>
         FROM tb_alert_data ad
+        <if test="systems != null or stage == 'RELEASE'">
+            ,rel_thing_system rts
+        </if>
+        <if test="buildingIds != null or floors != null">
+            ,tb_thing_position ttp
+        </if>
+        <trim prefix="where" prefixOverrides="AND">
             <if test="systems != null or stage == 'RELEASE'">
-                ,rel_thing_system rts
+                AND ad.thing_code = rts.thing_code
             </if>
             <if test="buildingIds != null or floors != null">
-                ,tb_thing_position ttp
-            </if>
-        <trim prefix="where" prefixOverrides="AND">
-            <if test="thingCode == null">
-                <if test="systems != null or stage == 'RELEASE'">
-                    AND ad.thing_code = rts.thing_code
-                </if>
-                <if test="buildingIds != null or floors != null">
-                    AND ad.thing_code = ttp.thing_code
-                </if>
+                AND ad.thing_code = ttp.thing_code
             </if>
             <if test="stage !=null">
                 AND
@@ -665,16 +663,20 @@
                 AND
                 ad.thing_code = #{thingCode}
             </if>
+            <if test="thingCodes != null">
+                AND
+                ad.thing_code IN
+                <foreach collection="thingCodes" item="item" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
         </trim>
-        <if test="thingCode == null">
+        <if test="thingCode == null and thingCodes == null">
             ORDER BY ad.alert_level is not null,ad.alert_level desc,ad.alert_datetime desc
         </if>
-        <if test="thingCode != null">
+        <if test="thingCode != null or thingCodes != null">
             ORDER BY ad.alert_level is not null,ad.alert_datetime DESC
         </if>
-        <!--<if test="offset != null">-->
-        <!--limit #{offset},#{count}-->
-        <!--</if>-->
     </select>
 
     <select id="getAlertDataByThingCode" resultMap="alertRecordMap">

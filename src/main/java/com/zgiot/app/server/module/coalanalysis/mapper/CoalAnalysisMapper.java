@@ -1,6 +1,7 @@
 package com.zgiot.app.server.module.coalanalysis.mapper;
 
 import com.zgiot.app.server.module.reportforms.input.pojo.DensityAndFlowSourceInfo;
+import com.zgiot.app.server.module.reportforms.output.pojo.ProductCoalStatistics;
 import com.zgiot.app.server.module.tcs.pojo.FilterCondition;
 import com.zgiot.common.pojo.CoalAnalysisRecord;
 import com.zgiot.common.pojo.DensityAndFlowInfo;
@@ -75,5 +76,12 @@ public interface CoalAnalysisMapper {
             "where system = #{system} and target = #{target} and time >= #{timeBegin} and time <= #{timeEnd} ORDER BY time")
     CoalAnalysisRecord getTimeRangeCoalAnalysisRecordAVG(@Param("system") Integer system, @Param("target") String target,
                                                          @Param("timeBegin") Date timeBegin, @Param("timeEnd") Date timeEnd);
+
+
+    void insertProductCoalStatisticsRecords(List<ProductCoalStatistics> productCoalStatisticsList);
+
+    List<ProductCoalStatistics> getProductCoalStatisticsRecords(ProductCoalStatistics filterCondition);
+
+    void clearAllProductCoalStatisticsInDuration(@Param("startTime") Date startTime, @Param("endTime") Date endTime);
 
 }
