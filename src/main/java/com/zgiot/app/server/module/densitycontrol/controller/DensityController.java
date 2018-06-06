@@ -43,11 +43,12 @@ public class DensityController {
     /**
      * 修改设定参数
      *
-     * @param densityControlConfigList
+     * @param bodyStr
      * @return
      */
     @PostMapping("/updateDensityControl")
-    public ResponseEntity<String> updateDensityControlConfig(@RequestBody List<DensityControlConfig> densityControlConfigList) {
+    public ResponseEntity<String> updateDensityControlConfig(@RequestBody String bodyStr) {
+        List<DensityControlConfig> densityControlConfigList = JSON.parseArray(bodyStr, DensityControlConfig.class);
         densityControlService.updateDensityControlConfig(densityControlConfigList);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }

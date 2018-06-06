@@ -15,10 +15,10 @@ public interface DensityControlConfigMapper {
     DensityControlConfig getDensityControlConfigByThingMetric(@Param("thingCode") String thingCode, @Param("metricCode") String metricCode);
 
     @Delete("DELETE FROM tb_density_control_config WHERE term = #{term}")
-    void deleteAllDensityControlConfig();
+    void deleteAllDensityControlConfig(@Param("term") Integer term);
 
     @Insert("INSERT INTO tb_density_control_config (term,thing_code,metric_code,metric_value,status,update_dt) " +
-            "VALUES (#{term},#{thing_code},#{metric_code},#{metric_value},#{status},#{update_dt})")
+            "VALUES (#{term},#{thingCode},#{metricCode},#{metricValue},#{status},#{updateDt})")
     void insertDensityControlConfig(DensityControlConfig densityControlConfig);
 
 }

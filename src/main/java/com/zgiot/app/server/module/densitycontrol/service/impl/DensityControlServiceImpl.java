@@ -63,9 +63,9 @@ public class DensityControlServiceImpl implements DensityControlService {
 
     @Transactional
     public void updateDensityControlConfig(List<DensityControlConfig> densityControlConfigList) {
-        densityControlConfigMapper.deleteAllDensityControlConfig();
-
         if (densityControlConfigList != null && !densityControlConfigList.isEmpty()) {
+            densityControlConfigMapper.deleteAllDensityControlConfig(densityControlConfigList.get(0).getTerm());
+
             for (DensityControlConfig densityControlConfig : densityControlConfigList) {
                 densityControlConfig.setUpdateDt(new Date());
                 paramCache.updateValue(new DataModel(null, densityControlConfig.getThingCode(), null,
