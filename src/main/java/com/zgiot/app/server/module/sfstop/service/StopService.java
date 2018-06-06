@@ -2,6 +2,7 @@ package com.zgiot.app.server.module.sfstop.service;
 
 import com.zgiot.app.server.module.alert.pojo.AlertData;
 import com.zgiot.app.server.module.sfstop.entity.pojo.*;
+import com.zgiot.app.server.module.sfstop.entity.vo.StopExamineResult;
 
 import java.util.List;
 import java.util.Set;
@@ -96,4 +97,43 @@ public interface StopService {
      * @param stopChoiceSet
      */
     void saveStopChoiceSet(StopChoiceSet stopChoiceSet);
+
+    /**
+     * 关闭启车操作
+     */
+    void closeStopOperate(String system);
+
+    /**
+     * 判断当前停车状态
+     *
+     * @param startState  查询状态开始
+     * @param finishState 查询状态结尾
+     * @return
+     */
+    boolean judgeStopingState(String system, Integer startState, Integer finishState);
+
+    /**
+     * 修改启车中人工干预记录
+     *
+     * @param thingCode       人工干预设备
+     * @param operateId       启车操作id
+     * @param state           修改状态
+     * @param relievePersonId 干预解除人
+     */
+    void updateStopManualInterventionRecord(String thingCode, Integer operateId, Integer state, String relievePersonId);
+
+    /**
+     * 修改停车状态
+     *
+     * @param stopFinishState
+     */
+    void updateStopOperate(String system, int stopFinishState);
+
+    /**
+     * 根据规则查询本次停车检查记录
+     *
+     * @param operateId
+     * @return
+     */
+    List<StopExamineResult> getStartExaminRecordByOperateId(Integer operateId);
 }

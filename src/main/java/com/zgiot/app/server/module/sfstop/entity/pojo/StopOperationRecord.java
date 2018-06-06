@@ -33,6 +33,26 @@ public class StopOperationRecord {
 
     private int system;
 
+    private Integer stopElapsedTime;
+
+    private Integer stopPauseTime;
+
+    public Integer getStopPauseTime() {
+        return stopPauseTime;
+    }
+
+    public void setStopPauseTime(Integer stopPauseTime) {
+        this.stopPauseTime = stopPauseTime;
+    }
+
+    public Integer getStopElapsedTime() {
+        return stopElapsedTime;
+    }
+
+    public void setStopElapsedTime(Integer stopElapsedTime) {
+        this.stopElapsedTime = stopElapsedTime;
+    }
+
     public int getSystem() {
         return system;
     }

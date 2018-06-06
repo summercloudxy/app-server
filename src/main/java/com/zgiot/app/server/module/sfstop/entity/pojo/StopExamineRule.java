@@ -5,9 +5,6 @@ public class StopExamineRule {
     // 启车规则id
     private Integer ruleId;
 
-    // 启车自检规则涉及设备
-    private String stopThingCode;
-
     // 启车检查类型
     private Integer examineType;
 
@@ -15,7 +12,7 @@ public class StopExamineRule {
     private String examineThingCode;
 
     // 检查信号点
-    private String examineName;
+    private String examineMetricCode;
 
     // 比较符(greater：大于,less:小于,equal:等于,greaterAndEqual:大于等于,lessAndEqual:小于等于,notEqual:不等于)
     private String operator;
@@ -31,14 +28,6 @@ public class StopExamineRule {
         this.ruleId = ruleId;
     }
 
-
-    public String getStopThingCode() {
-        return stopThingCode;
-    }
-
-    public void setStopThingCode(String stopThingCode) {
-        this.stopThingCode = stopThingCode;
-    }
 
     public Integer getExamineType() {
         return examineType;
@@ -56,12 +45,12 @@ public class StopExamineRule {
         this.examineThingCode = examineThingCode;
     }
 
-    public String getExamineName() {
-        return examineName;
+    public String getExamineMetricCode() {
+        return examineMetricCode;
     }
 
-    public void setExamineName(String examineName) {
-        this.examineName = examineName;
+    public void setExamineMetricCode(String examineMetricCode) {
+        this.examineMetricCode = examineMetricCode;
     }
 
     public String getOperator() {

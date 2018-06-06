@@ -1,16 +1,13 @@
 package com.zgiot.app.server.module.sfstop.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.zgiot.app.server.module.alert.pojo.AlertData;
 import com.zgiot.app.server.module.sfstop.constants.StopConstants;
 import com.zgiot.app.server.module.sfstop.entity.pojo.*;
 import com.zgiot.app.server.module.sfstop.entity.vo.*;
 import com.zgiot.app.server.module.sfstop.service.*;
 import com.zgiot.app.server.module.sfstop.util.DateTimeUtils;
-import com.zgiot.app.server.service.DataService;
 import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.constants.MetricCodes;
-import com.zgiot.common.pojo.DataModelWrapper;
 import com.zgiot.common.restcontroller.ServerResponse;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -42,8 +39,7 @@ public class StopController {
     private StopLineService stopLineService;
     @Autowired
     private StopDeviceBagService stopDeviceBagService;
-    @Autowired
-    private DataService dataService;
+
     @Autowired
     private StopInformationService stopInformationService;
     @Autowired
@@ -116,7 +112,7 @@ public class StopController {
                     //查询停车包下的设备
                     List<StopInformation> stopInformations = stopInformationService.getStopInformationByBagId(stopDeviceBag.getId());
                     for (StopInformation stopInformation : stopInformations) {
-                        String metricValue = getMetricValue(stopInformation.getThingCode(), MetricCodes.STATE);
+                        String metricValue = stopHandler.getMetricValue(stopInformation.getThingCode(), MetricCodes.STATE);
 
                         if (!StopConstants.RUNSTATE_2.equals(metricValue)) {
                             lineRunState_2 = false;
@@ -163,7 +159,7 @@ public class StopController {
             //查询停车包下的设备
             List<StopInformation> stopInformations = stopInformationService.getStopInformationByBagId(stopDeviceBag.getId());
             for (StopInformation stopInformation : stopInformations) {
-                String state = getMetricValue(stopInformation.getThingCode(), MetricCodes.STATE);
+                String state = stopHandler.getMetricValue(stopInformation.getThingCode(), MetricCodes.STATE);
                 if (StringUtils.isNotEmpty(state) && StopConstants.RUNSTATE_4.equals(state)) {
                     stopInformationList.add(stopInformation);
                 }
@@ -330,12 +326,12 @@ public class StopController {
         String coal8Device = null;
         String coal13Device = null;
         if (StopConstants.SYSTEM_1.equals(system)) {
-            coal8Device = getMetricValue(StopConstants.Quit_SYS_1, MetricCodes.COAL_8_DEVICE);
-            coal13Device = getMetricValue(StopConstants.Quit_SYS_1, MetricCodes.COAL_13_DEVICE);
+            coal8Device = stopHandler.getMetricValue(StopConstants.Quit_SYS_1, MetricCodes.COAL_8_DEVICE);
+            coal13Device = stopHandler.getMetricValue(StopConstants.Quit_SYS_1, MetricCodes.COAL_13_DEVICE);
 
         } else if (StopConstants.SYSTEM_2.equals(system)) {
-            coal8Device = getMetricValue(StopConstants.Quit_SYS_2, MetricCodes.COAL_8_DEVICE);
-            coal13Device = getMetricValue(StopConstants.Quit_SYS_2, MetricCodes.COAL_13_DEVICE);
+            coal8Device = stopHandler.getMetricValue(StopConstants.Quit_SYS_2, MetricCodes.COAL_8_DEVICE);
+            coal13Device = stopHandler.getMetricValue(StopConstants.Quit_SYS_2, MetricCodes.COAL_13_DEVICE);
         }
         List<StopChoiceVO.ChiceVO> beltRoutes = new ArrayList<>();
         StopChoiceVO.ChiceVO beltRoute1 = beltRouteSet.new ChiceVO();
@@ -386,76 +382,161 @@ public class StopController {
      * @return
      */
     @RequestMapping(value = "/getTcsBucketCheck", method = RequestMethod.GET)
-    public ResponseEntity<String> getTcsBucketCheck() {
+    public ResponseEntity<String> getTcsBucketCheck(@RequestParam("system") String system) {
         Map<String, List<TcsBucketVO>> map = new HashMap<>();
+        if (StopConstants.SYSTEM_1.equals(system)) {
+            List<TcsBucketVO> tcsBuckets1 = new ArrayList<>();
+            TcsBucketVO tcsBucketVO1 = new TcsBucketVO();
+            tcsBucketVO1.setThingCode("1857-1");
+            tcsBucketVO1.setRunState(getBucketRunState(tcsBucketVO1.getThingCode()));
+            tcsBuckets1.add(tcsBucketVO1);
 
-        List<TcsBucketVO> tcsBuckets1 = new ArrayList<>();
-        TcsBucketVO tcsBucketVO1 = new TcsBucketVO();
-        tcsBucketVO1.setThingCode("2857-1");
-        tcsBucketVO1.setRunState(getBucketRunState(tcsBucketVO1.getThingCode()));
-        tcsBuckets1.add(tcsBucketVO1);
+            TcsBucketVO tcsBucketVO2 = new TcsBucketVO();
+            tcsBucketVO2.setThingCode("1857-2");
+            tcsBucketVO2.setRunState(getBucketRunState(tcsBucketVO2.getThingCode()));
+            tcsBuckets1.add(tcsBucketVO2);
 
-        TcsBucketVO tcsBucketVO2 = new TcsBucketVO();
-        tcsBucketVO2.setThingCode("2857-2");
-        tcsBucketVO2.setRunState(getBucketRunState(tcsBucketVO2.getThingCode()));
-        tcsBuckets1.add(tcsBucketVO2);
-
-        TcsBucketVO tcsBucketVO3 = new TcsBucketVO();
-        tcsBucketVO3.setThingCode("2857-3");
-        tcsBucketVO3.setRunState(getBucketRunState(tcsBucketVO3.getThingCode()));
-        tcsBuckets1.add(tcsBucketVO3);
-        map.put("2857", tcsBuckets1);
-
-
-        List<TcsBucketVO> tcsBuckets2 = new ArrayList<>();
-        TcsBucketVO tcsBucketVO4 = new TcsBucketVO();
-        tcsBucketVO4.setThingCode("2858-1");
-        tcsBucketVO4.setRunState(getBucketRunState(tcsBucketVO4.getThingCode()));
-        tcsBuckets2.add(tcsBucketVO4);
-
-        TcsBucketVO tcsBucketVO5 = new TcsBucketVO();
-        tcsBucketVO5.setThingCode("2858-2");
-        tcsBucketVO5.setRunState(getBucketRunState(tcsBucketVO5.getThingCode()));
-        tcsBuckets2.add(tcsBucketVO5);
-
-        TcsBucketVO tcsBucketVO6 = new TcsBucketVO();
-        tcsBucketVO6.setThingCode("2858-3");
-        tcsBucketVO6.setRunState(getBucketRunState(tcsBucketVO6.getThingCode()));
-        tcsBuckets2.add(tcsBucketVO6);
-        map.put("2858", tcsBuckets2);
+            TcsBucketVO tcsBucketVO3 = new TcsBucketVO();
+            tcsBucketVO3.setThingCode("1857-3");
+            tcsBucketVO3.setRunState(getBucketRunState(tcsBucketVO3.getThingCode()));
+            tcsBuckets1.add(tcsBucketVO3);
+            map.put("1857", tcsBuckets1);
 
 
-        List<TcsBucketVO> tcsBuckets3 = new ArrayList<>();
-        TcsBucketVO tcsBucketVO7 = new TcsBucketVO();
-        tcsBucketVO7.setThingCode("2859-1");
-        tcsBucketVO7.setRunState(getBucketRunState(tcsBucketVO7.getThingCode()));
-        tcsBuckets3.add(tcsBucketVO7);
+            List<TcsBucketVO> tcsBuckets2 = new ArrayList<>();
+            TcsBucketVO tcsBucketVO4 = new TcsBucketVO();
+            tcsBucketVO4.setThingCode("1858-1");
+            tcsBucketVO4.setRunState(getBucketRunState(tcsBucketVO4.getThingCode()));
+            tcsBuckets2.add(tcsBucketVO4);
 
-        TcsBucketVO tcsBucketVO8 = new TcsBucketVO();
-        tcsBucketVO8.setThingCode("2859-2");
-        tcsBucketVO8.setRunState(getBucketRunState(tcsBucketVO8.getThingCode()));
-        tcsBuckets3.add(tcsBucketVO8);
+            TcsBucketVO tcsBucketVO5 = new TcsBucketVO();
+            tcsBucketVO5.setThingCode("1858-2");
+            tcsBucketVO5.setRunState(getBucketRunState(tcsBucketVO5.getThingCode()));
+            tcsBuckets2.add(tcsBucketVO5);
 
-        TcsBucketVO tcsBucketVO9 = new TcsBucketVO();
-        tcsBucketVO9.setThingCode("2859-3");
-        tcsBucketVO9.setRunState(getBucketRunState(tcsBucketVO9.getThingCode()));
-        tcsBuckets3.add(tcsBucketVO9);
-        map.put("2859", tcsBuckets3);
+            TcsBucketVO tcsBucketVO6 = new TcsBucketVO();
+            tcsBucketVO6.setThingCode("1858-3");
+            tcsBucketVO6.setRunState(getBucketRunState(tcsBucketVO6.getThingCode()));
+            tcsBuckets2.add(tcsBucketVO6);
+            map.put("1858", tcsBuckets2);
 
 
+            List<TcsBucketVO> tcsBuckets3 = new ArrayList<>();
+            TcsBucketVO tcsBucketVO7 = new TcsBucketVO();
+            tcsBucketVO7.setThingCode("1859-1");
+            tcsBucketVO7.setRunState(getBucketRunState(tcsBucketVO7.getThingCode()));
+            tcsBuckets3.add(tcsBucketVO7);
+
+            TcsBucketVO tcsBucketVO8 = new TcsBucketVO();
+            tcsBucketVO8.setThingCode("1859-2");
+            tcsBucketVO8.setRunState(getBucketRunState(tcsBucketVO8.getThingCode()));
+            tcsBuckets3.add(tcsBucketVO8);
+
+            TcsBucketVO tcsBucketVO9 = new TcsBucketVO();
+            tcsBucketVO9.setThingCode("1859-3");
+            tcsBucketVO9.setRunState(getBucketRunState(tcsBucketVO9.getThingCode()));
+            tcsBuckets3.add(tcsBucketVO9);
+            map.put("1859", tcsBuckets3);
+
+
+        } else if (StopConstants.SYSTEM_2.equals(system)) {
+            List<TcsBucketVO> tcsBuckets1 = new ArrayList<>();
+            TcsBucketVO tcsBucketVO1 = new TcsBucketVO();
+            tcsBucketVO1.setThingCode("2857-1");
+            tcsBucketVO1.setRunState(getBucketRunState(tcsBucketVO1.getThingCode()));
+            tcsBuckets1.add(tcsBucketVO1);
+
+            TcsBucketVO tcsBucketVO2 = new TcsBucketVO();
+            tcsBucketVO2.setThingCode("2857-2");
+            tcsBucketVO2.setRunState(getBucketRunState(tcsBucketVO2.getThingCode()));
+            tcsBuckets1.add(tcsBucketVO2);
+
+            TcsBucketVO tcsBucketVO3 = new TcsBucketVO();
+            tcsBucketVO3.setThingCode("2857-3");
+            tcsBucketVO3.setRunState(getBucketRunState(tcsBucketVO3.getThingCode()));
+            tcsBuckets1.add(tcsBucketVO3);
+            map.put("2857", tcsBuckets1);
+
+
+            List<TcsBucketVO> tcsBuckets2 = new ArrayList<>();
+            TcsBucketVO tcsBucketVO4 = new TcsBucketVO();
+            tcsBucketVO4.setThingCode("2858-1");
+            tcsBucketVO4.setRunState(getBucketRunState(tcsBucketVO4.getThingCode()));
+            tcsBuckets2.add(tcsBucketVO4);
+
+            TcsBucketVO tcsBucketVO5 = new TcsBucketVO();
+            tcsBucketVO5.setThingCode("2858-2");
+            tcsBucketVO5.setRunState(getBucketRunState(tcsBucketVO5.getThingCode()));
+            tcsBuckets2.add(tcsBucketVO5);
+
+            TcsBucketVO tcsBucketVO6 = new TcsBucketVO();
+            tcsBucketVO6.setThingCode("2858-3");
+            tcsBucketVO6.setRunState(getBucketRunState(tcsBucketVO6.getThingCode()));
+            tcsBuckets2.add(tcsBucketVO6);
+            map.put("2858", tcsBuckets2);
+
+
+            List<TcsBucketVO> tcsBuckets3 = new ArrayList<>();
+            TcsBucketVO tcsBucketVO7 = new TcsBucketVO();
+            tcsBucketVO7.setThingCode("2859-1");
+            tcsBucketVO7.setRunState(getBucketRunState(tcsBucketVO7.getThingCode()));
+            tcsBuckets3.add(tcsBucketVO7);
+
+            TcsBucketVO tcsBucketVO8 = new TcsBucketVO();
+            tcsBucketVO8.setThingCode("2859-2");
+            tcsBucketVO8.setRunState(getBucketRunState(tcsBucketVO8.getThingCode()));
+            tcsBuckets3.add(tcsBucketVO8);
+
+            TcsBucketVO tcsBucketVO9 = new TcsBucketVO();
+            tcsBucketVO9.setThingCode("2859-3");
+            tcsBucketVO9.setRunState(getBucketRunState(tcsBucketVO9.getThingCode()));
+            tcsBuckets3.add(tcsBucketVO9);
+            map.put("2859", tcsBuckets3);
+        }
         return new ResponseEntity<>(ServerResponse.buildOkJson(map), HttpStatus.OK);
 
     }
 
     /**
-     * 查询停车线下的停车包
+     * 查询停车线的详情
      *
      * @return
      */
-    @RequestMapping(value = "/getStopDeviceBags", method = RequestMethod.GET)
-    public ResponseEntity<String> getStopDeviceBags(@RequestParam("lineId") String lineId) {
+    @RequestMapping(value = "/getStopLineDetails", method = RequestMethod.GET)
+    public ResponseEntity<String> getStopLineDetails(@RequestParam("lineId") String lineId) {
+        List<StopLineDetailVO> stopLineDetailVOList = new ArrayList<>();
+
         List<StopDeviceBag> stopDeviceBags = stopDeviceBagService.getStopDeviceBagByStartLineId(Long.valueOf(lineId));
-        return new ResponseEntity<>(ServerResponse.buildOkJson(stopDeviceBags), HttpStatus.OK);
+        for (StopDeviceBag stopDeviceBag : stopDeviceBags) {
+            StopLineDetailVO stopLineDetailVO = new StopLineDetailVO();
+            stopLineDetailVO.setBagId(String.valueOf(stopDeviceBag.getId()));
+            stopLineDetailVO.setBagName(stopDeviceBag.getBagName());
+            List<StopInformation> stopInformations = stopInformationService.getStopInformationByBagId(stopDeviceBag.getId());
+            boolean isFault = false;
+            List<StopLineDetailVO.ThingAlertInfo> thingAlertInfoList = new ArrayList<>();
+            for (StopInformation stopInformation : stopInformations) {
+                StopLineDetailVO.ThingAlertInfo thingAlertInfo = stopLineDetailVO.new ThingAlertInfo();
+                thingAlertInfo.setThingCode(stopInformation.getThingCode());
+                thingAlertInfo.setThingName(stopInformation.getThingName());
+                String metricValue = stopHandler.getMetricValue(stopInformation.getThingCode(), MetricCodes.STATE);
+                thingAlertInfo.setRunState(metricValue);
+                thingAlertInfo.setAlertInfo(stopHandler.getThingAlertInfo(stopInformation.getThingCode()));
+                if (StringUtils.isNotEmpty(metricValue) && StopConstants.RUNSTATE_4.equals(metricValue)) {
+                    isFault = true;
+                    break;
+                }
+                thingAlertInfoList.add(thingAlertInfo);
+
+            }
+            if (isFault) {
+                stopLineDetailVO.setIsFault("1");
+            } else {
+                stopLineDetailVO.setIsFault("0");
+            }
+            stopLineDetailVO.setThingAlertInfoList(thingAlertInfoList);
+            stopLineDetailVOList.add(stopLineDetailVO);
+        }
+        return new ResponseEntity<>(ServerResponse.buildOkJson(stopLineDetailVOList), HttpStatus.OK);
     }
 
 
@@ -465,7 +546,7 @@ public class StopController {
      * @return
      */
     @RequestMapping(value = "/setUpAutoTest", method = RequestMethod.POST)
-    public synchronized ResponseEntity<String> setUpAutoTest(@RequestBody StopChoiceSetVO stopChoiceSetVO) {
+    public synchronized ResponseEntity<String> setUpAutoTest(@RequestBody StopChoiceSetVO stopChoiceSetVO) throws Exception {
         if (stopHandler.judgeStopingState(Integer.valueOf(stopChoiceSetVO.getSystem()), null, StopConstants.STOP_FINISH_STATE)) {
             // 通知前端已经存在停车任务
             return new ResponseEntity<>(ServerResponse.buildOkJson("stoping"), HttpStatus.OK);
@@ -491,26 +572,37 @@ public class StopController {
 
         stopService.setUpAutoExamine(stopDeviceIds, stopOperationRecord.getOperateId());
 
+        autoExamine(stopDeviceIds, stopOperationRecord.getOperateId(), stopChoiceSetVO.getSystem());
 
-        //TODO 停车自检
-        return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+
+        return new ResponseEntity<>(ServerResponse.buildOkJson(StopConstants.SUCCESS), HttpStatus.OK);
     }
-
 
     /**
-     * 获得本次停车检查信息
+     * 自检开始
      *
-     * @return
      * @throws Exception
      */
-    @RequestMapping(value = "/getAutoExamineRecord", method = RequestMethod.GET)
-    public ResponseEntity<String> getAutoExamineRecord(@RequestParam("system") String system) throws Exception {
-        Integer stopOperateId = stopService.getStopOperateId(Integer.valueOf(system));
-        List<StopExamineRecord> startExamineRecords = new ArrayList<>();
-      /*  stopExamineRecordService.getAutoExamineRecord(stopOperateId);
-        List<StopExamineRecord> startExamineRecords = startService.getAutoExamineRecord(stopOperateId);*/
-        return new ResponseEntity<>(ServerResponse.buildOkJson(startExamineRecords), HttpStatus.OK);
+    public void autoExamine(Set<String> startDeviceIds, Integer operateId, String system) throws Exception {
+        startMultithreading(operateId, startDeviceIds, system);
     }
+
+    /**
+     * 建立多线程任务
+     *
+     * @param operateId     启车操作id
+     * @param stopDeviceIds 涉及设备
+     */
+    public void startMultithreading(Integer operateId, Set<String> stopDeviceIds, String system) {
+        StopMultithreading stopMultithreading = new StopMultithreading();
+        stopMultithreading.setSystem(system);
+        stopMultithreading.setStopService(stopService);
+        stopMultithreading.setStopHandler(stopHandler);
+        stopMultithreading.setStopDeviceIds(stopDeviceIds);
+        stopMultithreading.setOperateId(operateId);
+        new Thread(stopMultithreading).start();
+    }
+
 
     /**
      * 查询人工干预解除区域
@@ -548,7 +640,7 @@ public class StopController {
      * @return
      */
     private String getBucketRunState(String thingCode) {
-        String dsflMetricValue = getMetricValue(thingCode, MetricCodes.DSFL);
+        String dsflMetricValue = stopHandler.getMetricValue(thingCode, MetricCodes.DSFL);
         if (StringUtils.isNotEmpty(dsflMetricValue) && new BigDecimal(dsflMetricValue).compareTo(BigDecimal.valueOf(10)) > 0) {
             return "1";
         } else {
@@ -589,8 +681,8 @@ public class StopController {
                 StopThingDetail.ThingCondition thingCondition = stopThingDetail.new ThingCondition();
                 thingCondition.setThingCode(stopThing.getThingCode());
                 thingCondition.setThingName(stopThing.getThingName());
-                thingCondition.setRunState(getMetricValue(stopThing.getThingCode(), MetricCodes.STATE));
-                thingCondition.setAlertInfo(getThingAlertInfo(stopThing.getThingCode()));
+                thingCondition.setRunState(stopHandler.getMetricValue(stopThing.getThingCode(), MetricCodes.STATE));
+                thingCondition.setAlertInfo(stopHandler.getThingAlertInfo(stopThing.getThingCode()));
                 thingConditionList.add(thingCondition);
             }
             stopThingDetail.setThingConditionList(thingConditionList);
@@ -607,7 +699,7 @@ public class StopController {
                 String metricCode = stopPararmeter.getMetricCode();
                 String operator = stopPararmeter.getOperator();
                 String metricValue = stopPararmeter.getMetricValue();
-                String realMetricValue = getMetricValue(stopPararmeter.getThingCode(), metricCode);
+                String realMetricValue = stopHandler.getMetricValue(stopPararmeter.getThingCode(), metricCode);
 
                 pararmeterCondition.setIsUnusual(getIsUnusual(metricValue, operator, realMetricValue));
 
@@ -698,7 +790,7 @@ public class StopController {
      * @throws Exception
      */
     @RequestMapping(value = "/setUpStopTask", method = RequestMethod.POST)
-    public synchronized ResponseEntity<String> setUpStartTask(@RequestParam("system") String system) throws Exception {
+    public synchronized ResponseEntity<String> setUpStartTask(@RequestBody List<String> lineIds) throws Exception {
 
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -709,42 +801,56 @@ public class StopController {
      * @return
      * @throws Exception
      */
-    @RequestMapping(value = "/setUpStopEnd", method = RequestMethod.POST)
-    public synchronized ResponseEntity<String> setUpStopEnd(@RequestParam("system") String system) throws Exception {
+    @RequestMapping(value = "/setUpStopEnd", method = RequestMethod.GET)
+    public ResponseEntity<String> setUpStopEnd(@RequestParam("system") String system) throws Exception {
+        stopHandler.finishStopState(system);
+        stopHandler.sendMessageTemplateByJson(StopConstants.URI_STOP_STATE, StopConstants.URI_STOP_STATE_MESSAGE_START_FINISH);
 
+        return new ResponseEntity<>(ServerResponse.buildOkJson(StopConstants.SUCCESS), HttpStatus.OK);
+    }
+
+    /**
+     * 获得本次停车检查信息
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/getAutoExamineRecord", method = RequestMethod.GET)
+    public ResponseEntity<String> getAutoExamineRecord(@RequestParam("system") String system) throws Exception {
+        List<StopExamineResult> stopExamineResults = new ArrayList<>();
+        List<StopOperationRecord> stopOperationRecords = stopService.findUnfinishStopOperate(Integer.valueOf(system), null, StopConstants.STOP_FINISH_STATE);
+        if (CollectionUtils.isNotEmpty(stopOperationRecords)) {
+            stopExamineResults = stopService.getStartExaminRecordByOperateId(stopOperationRecords.get(0).getOperateId());
+        }
+        return new ResponseEntity<>(ServerResponse.buildOkJson(stopExamineResults), HttpStatus.OK);
+    }
+
+
+    /**
+     * 停车中操作
+     *
+     * @return
+     */
+    @RequestMapping(value = "/operateStoping", method = RequestMethod.GET)
+    public ResponseEntity<String> operateStarting(@RequestParam("system") String system, @RequestParam("operate") String operate) throws Exception {
+
+        stopHandler.operateStoping(system, operate);
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
 
-
     /**
-     * 查询指标数据
-     *
-     * @param thingCode
-     * @param metricCode
-     * @return
-     */
-    private String getMetricValue(String thingCode, String metricCode) {
-        DataModelWrapper dataModelWrapper = dataService.getData(thingCode, metricCode).orElse(null);
-        if (dataModelWrapper != null) {
-            return dataModelWrapper.getValue();
-        }
-        return "";
-    }
-
-
-    /**
-     * 查询设备的告警信息
+     * 解除人工干预
      *
      * @param thingCode
      * @return
+     * @throws Exception
      */
-    private String getThingAlertInfo(String thingCode) {
-
-        AlertData maxLevelAlertData = stopService.getMaxLevelAlertData(thingCode);
-        if (maxLevelAlertData != null) {
-            return maxLevelAlertData.getAlertInfo();
-        }
-        return "";
+    @RequestMapping(value = "/relieveManualIntervention", method = RequestMethod.GET)
+    public ResponseEntity<String> relieveManualIntervention(@RequestParam("system") String system, @RequestParam("thingCode") String thingCode) throws Exception {
+        // 使用者id
+        String information = stopHandler.relieveManualIntervention(system, thingCode);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(information), HttpStatus.OK);
     }
+
 
 }

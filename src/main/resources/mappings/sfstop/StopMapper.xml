@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.zgiot.app.server.module.sfstop.mapper.StopOperationRecordMapper">
+<mapper namespace="com.zgiot.app.server.module.sfstop.mapper.StopMapper">
 
     <resultMap id="stopOperationRecordMap"
                type="com.zgiot.app.server.module.sfstop.entity.pojo.StopOperationRecord">
@@ -91,7 +91,7 @@
         </if>
         AND sser.is_delete = '0'
     </select>
-   
+
 
     <select id="selectStopExamineRuleByDeviceId" resultMap="stopExamineRule">
         SELECT
@@ -111,4 +111,27 @@
         </if>
         AND is_delete = '0'
     </select>
+
+    <update id="closeOperateStopByOperateId">
+        UPDATE tb_stop_operation_record
+        SET is_delete = #{isDelete}
+        WHERE operate_id = #{operateId}
+    </update>
+
+    <update id="updateStopManualInterventionRecord">
+        UPDATE tb_stop_manual_intervention_record
+        SET intervention_state = #{interventionState}
+        <if test="relievePersonId != null">
+            ,relieve_person_id = #{relievePersonId}
+        </if>
+        WHERE
+        thing_code = #{thingCode}
+        AND operate_id = #{operateId}
+    </update>
+
+    <update id="updateOperateStateByOperateId">
+        UPDATE tb_stop_operation_record
+        SET operate_state = #{operateState}
+        WHERE operate_id = #{operateId}
+    </update>
 </mapper>

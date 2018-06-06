@@ -3,6 +3,7 @@ package com.zgiot.app.server.module.sfstop.mapper;
 
 import com.zgiot.app.server.module.alert.pojo.AlertData;
 import com.zgiot.app.server.module.sfstop.entity.pojo.*;
+import com.zgiot.app.server.module.sfstop.entity.vo.StopExamineResult;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -108,4 +109,46 @@ public interface StopMapper {
      * @return
      */
     List<StopExamineRule> selectStopExamineRuleByDeviceId(@Param("deviceId") String deviceId);
+
+    /**
+     * 结束停车
+     *
+     * @param isDelete
+     * @param operateId
+     */
+    void closeOperateStopByOperateId(@Param("isDelete") int isDelete, @Param("operateId") Integer operateId);
+
+    /**
+     * 修改启车中人工干预记录
+     *
+     * @param deviceId          人工干预设备
+     * @param operateId         启车操作id
+     * @param interventionState 修改状态
+     * @param relievePersonId   干预解除人
+     */
+    void updateStopManualInterventionRecord(@Param("thingCode") String deviceId, @Param("operateId") Integer operateId, @Param("interventionState") Integer interventionState, @Param("relievePersonId") String relievePersonId);
+
+    /**
+     * 修改停车记录状态
+     *
+     * @param operateState
+     * @param operateId
+     */
+    void updateOperateStateByOperateId(@Param("operateState") Integer operateState, @Param("operateId") Integer operateId);
+
+
+    /**
+     * 根据规则查询本次停车检查记录
+     *
+     * @param operateId
+     * @return
+     */
+    @Select("SELECT t.id as line_id,t.line_name,t.thing_name,t.thing_code,ser.examine_type,se.type_name,ser.examine_information as examine_info from " +
+            " tb_stop_examine_record  ser left join (select si.thing_code,si.thing_name,sl.id,sl.line_name from tb_stop_information si LEFT JOIN " +
+            "tb_stop_device_bag sdb on si.bag_id=sdb.id LEFT JOIN tb_stop_line sl on sl.id =sdb.stop_line_id) t on t.thing_code=ser.stop_thing_code " +
+            " left join tb_stop_examine_type se on se.id=ser.examine_type WHERE ser.is_delete =0 and ser.examine_result =2 and ser.operate_id =#{operateId}")
+    List<StopExamineResult> getStartExaminRecordByOperateId(@Param("operateId") Integer operateId);
+
+
+
 }

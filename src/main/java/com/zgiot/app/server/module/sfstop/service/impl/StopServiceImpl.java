@@ -3,13 +3,18 @@ package com.zgiot.app.server.module.sfstop.service.impl;
 import com.zgiot.app.server.module.alert.pojo.AlertData;
 import com.zgiot.app.server.module.sfstart.constants.StartConstants;
 import com.zgiot.app.server.module.sfstop.constants.StopConstants;
+import com.zgiot.app.server.module.sfstop.controller.StopHandler;
 import com.zgiot.app.server.module.sfstop.entity.pojo.*;
+import com.zgiot.app.server.module.sfstop.entity.vo.StopExamineResult;
 import com.zgiot.app.server.module.sfstop.mapper.StopMapper;
 import com.zgiot.app.server.module.sfstop.service.StopService;
 import com.zgiot.common.pojo.CurrentUser;
 import com.zgiot.common.pojo.SessionContext;
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -20,8 +25,13 @@ import java.util.Set;
 
 @Service
 public class StopServiceImpl implements StopService {
+
+    private static final Logger logger = LoggerFactory.getLogger(StopServiceImpl.class);
     @Autowired
     private StopMapper stopMapper;
+
+    @Autowired
+    private SimpMessagingTemplate simpMessagingTemplate;
 
     @Override
     public StopManualInterventionRecord getStopManualInterventionRecord(int operateId, String thingCode) {
@@ -37,6 +47,7 @@ public class StopServiceImpl implements StopService {
     public List<StopOperationRecord> findUnfinishStopOperate(Integer system, Integer startState, Integer finishState) {
         return stopMapper.selectOperateRecordWithoutOperateState(system, startState, finishState);
     }
+
 
     @Override
     public void saveStopOperationRecord(StopOperationRecord stopOperationRecord) {
@@ -78,7 +89,6 @@ public class StopServiceImpl implements StopService {
         for (StopExamineRule stopExamineRule : stopExamineRules) {
             StopExamineRecord stopExamineRecord = new StopExamineRecord();
             stopExamineRecord.setOperateId(operateId);
-            stopExamineRecord.setStopThingCode(stopExamineRule.getStopThingCode());
             stopExamineRecord.setRuleId(stopExamineRule.getRuleId());
             stopExamineRecord.setExamineType(stopExamineRule.getExamineType());
             stopExamineRecord.setExamineInformation("");
@@ -112,5 +122,42 @@ public class StopServiceImpl implements StopService {
     @Override
     public void saveStopChoiceSet(StopChoiceSet stopChoiceSet) {
         stopMapper.saveStopChoiceSet(stopChoiceSet);
+    }
+
+    @Override
+    public void closeStopOperate(String system) {
+        Integer findOperateId = getStopOperateId(Integer.valueOf(system));
+        StopHandler.startExamineListenerFlag = false;
+        stopMapper.closeOperateStopByOperateId(StopConstants.IS_DELETE, findOperateId);
+
+    }
+
+    @Override
+    public boolean judgeStopingState(String system, Integer startState, Integer finishState) {
+        List<StopOperationRecord> stopOperationRecords = findUnfinishStopOperate(Integer.valueOf(system), startState, finishState);
+        if (CollectionUtils.isNotEmpty(stopOperationRecords)) {
+            // 已经存在停车任务
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void updateStopManualInterventionRecord(String thingCode, Integer operateId, Integer interventionState, String relievePersonId) {
+        stopMapper.updateStopManualInterventionRecord(thingCode, operateId, interventionState, relievePersonId);
+    }
+
+    @Override
+    public void updateStopOperate(String system, int stopFinishState) {
+
+        Integer findOperateId = getStopOperateId(Integer.valueOf(system));
+        logger.info("修改{}停车记录状态为{}", findOperateId, stopFinishState);
+        stopMapper.updateOperateStateByOperateId(stopFinishState, findOperateId);
+
+    }
+
+    @Override
+    public List<StopExamineResult> getStartExaminRecordByOperateId(Integer operateId) {
+        return stopMapper.getStartExaminRecordByOperateId(operateId);
     }
 }
