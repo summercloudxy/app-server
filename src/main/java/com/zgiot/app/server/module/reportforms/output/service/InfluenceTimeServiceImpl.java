@@ -202,8 +202,10 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
 
     @Override
     public void updatePersonnel(InfluenceTimeRemarks influenceTimeRemarks) {
-        if(influenceTimeRemarks!=null && influenceTimeRemarks.getId()!=null){
+        InfluenceTimeRemarks influence= influenceTimeMapper.InfluenceTimeRemarks(influenceTimeRemarks.getDutyStartTime());
+        if(influence!=null){
             //修改
+            influenceTimeRemarks.setId(influence.getId());
             influenceTimeMapper.editPersonnel(influenceTimeRemarks);
         }else{
             //新增
