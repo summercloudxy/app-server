@@ -14,6 +14,15 @@ public class RelSFSysMonitorThingMetric {
     private String metricValue;
     private Date createDate;
     private Date updateDate;
+    private Boolean isAlert;//是否报警
+
+    public Boolean getAlert() {
+        return isAlert;
+    }
+
+    public void setAlert(Boolean alert) {
+        isAlert = alert;
+    }
 
     public String getMetricValue() {
         return metricValue;

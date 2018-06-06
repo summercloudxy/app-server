@@ -16,6 +16,8 @@ import com.zgiot.app.server.module.densitycontrol.DensityControlListener;
 import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
 import com.zgiot.app.server.module.filterpress.FilterPressManager;
 import com.zgiot.app.server.module.filterpress.FilterPressSignalOperateJob;
+import com.zgiot.app.server.module.historydata.job.HistoryDayDataJob;
+import com.zgiot.app.server.module.historydata.job.HistoryHourDataJob;
 import com.zgiot.app.server.module.historydata.job.HistoryMinDataJob;
 import com.zgiot.app.server.module.reportforms.input.listener.ReportFormsCompleter;
 import com.zgiot.app.server.module.reportforms.output.productionmonitor.listener.ReportFormSystemStartListener;
@@ -167,8 +169,12 @@ public class ModuleListConfig {
 
             if (containModule(ModuleListConfig.MODULE_HIST_PERSIST)) {
                 historyDataPersistDaemon.start();
-                QuartzManager.addJob("historyMinData", ModuleListConfig.MODULE_SUBSCRIPTION, "historyMinData",
-                        ModuleListConfig.MODULE_HIST_PERSIST, HistoryMinDataJob.class, "0 0/1 * * * ?");
+                QuartzManager.addJob("historyMinData", ModuleListConfig.MODULE_HIST_PERSIST, "historyMinData",
+                        ModuleListConfig.MODULE_HIST_PERSIST, HistoryMinDataJob.class, "0 */1 * * * ?");
+                QuartzManager.addJob("historyHourData", ModuleListConfig.MODULE_HIST_PERSIST, "historyHourData",
+                        ModuleListConfig.MODULE_HIST_PERSIST, HistoryHourDataJob.class, "0 0 */1 * * ?");
+                QuartzManager.addJob("historyDayData", ModuleListConfig.MODULE_HIST_PERSIST, "historyDayData",
+                        ModuleListConfig.MODULE_HIST_PERSIST, HistoryDayDataJob.class, "0 0 0 */1 * ?");
                 logIt(MODULE_HIST_PERSIST);
             }
 

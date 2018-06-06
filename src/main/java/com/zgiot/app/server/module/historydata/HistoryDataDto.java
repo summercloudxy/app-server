@@ -20,6 +20,16 @@ public class HistoryDataDto {
 
     private String accuracy;
 
+    private String statsMode;// 统计模式。 AVG: 算数平均值， ACCUMULATED: 累计值,见SummaryTypeEnum类
+
+    public String getStatsMode() {
+        return statsMode;
+    }
+
+    public void setStatsMode(String statsMode) {
+        this.statsMode = statsMode;
+    }
+
     public Date getStartTime() {
         return startTime;
     }

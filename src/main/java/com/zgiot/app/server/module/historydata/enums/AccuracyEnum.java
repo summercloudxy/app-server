@@ -6,15 +6,14 @@ package com.zgiot.app.server.module.historydata.enums;
 public enum AccuracyEnum {
 
     SECOND("SECOND"),
-
-    MINUTE("MINUTE");
-
+    MINUTE("MINUTE"),
+    HOUR("HOUR"),
+    DAY("DAY");
 
     private String accuracyType;
 
-
-    AccuracyEnum(String state) {
-        accuracyType = accuracyType;
+    AccuracyEnum(String str) {
+        accuracyType = str;
     }
 
     public String getAccuracyType() {

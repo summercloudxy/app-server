@@ -226,6 +226,9 @@ public class AlertParamHandler implements AlertHandler {
         //清除待报警缓存
         clearWaitCache(thingCode, metricCode);
 
+        //设置报警原因
+        alertDataSetCause(alertData);
+
         //在数据库新增一条报警信息
         alertManager.generateAlert(alertData);
         //更新缓存
@@ -239,6 +242,13 @@ public class AlertParamHandler implements AlertHandler {
         //讲最后的数据放入到alertDataCache中
         metricAlertDataCache.put(metricCode, alertData);
         logger.debug("生成一条参数类报警，thing:{},metric:{}", thingCode, metricCode);
+    }
+
+    private void alertDataSetCause(AlertData alertData) {
+        if(alertData!=null){
+            String cause=alertManager.getAlertDataCauseByTCAndMC(alertData);
+            alertData.setAlertCause(cause);
+        }
     }
 
     /**

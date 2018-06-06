@@ -57,6 +57,10 @@ public class AlertProtectHandler implements AlertHandler {
             alertData = new AlertData(dataModel, AlertConstants.TYPE_PROTECT, alertRule.getAlertLevel(),
                     metricService.getMetric(metricCode).getMetricName(), AlertConstants.SOURCE_SYSTEM,
                     AlertConstants.REPORTER_SYSTEM);
+
+            //设置报警原因
+            alertDataSetCause(alertData);
+
             alertManager.generateAlert(alertData);
             logger.debug("生成一条保护类报警，thing:{},metric:{}", thingCode, metricCode);
         } else if (DISABLE_VALUE.equalsIgnoreCase(dataModel.getValue()) && alertData != null) {
@@ -66,6 +70,13 @@ public class AlertProtectHandler implements AlertHandler {
             } else {
                 alertManager.releaseAlert(alertData);
             }
+        }
+    }
+
+    private void alertDataSetCause(AlertData alertData) {
+        if(alertData!=null){
+            String cause=alertManager.getAlertDataCauseByTCAndMC(alertData);
+            alertData.setAlertCause(cause);
         }
     }
 
