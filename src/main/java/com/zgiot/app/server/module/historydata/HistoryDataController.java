@@ -62,6 +62,10 @@ public class HistoryDataController {
         }
 
         Map<String, List<DataModel>> result;
+        String nullReturn = historyDataDto.getNullReturn();
+        if(StringUtils.isBlank(nullReturn)){
+            nullReturn = "0";
+        }
         if (historyDataDto.getSegment() != null) {
             if (historyDataDto.getTimeCorrection() == null){
                 historyDataDto.setTimeCorrection(true);
@@ -74,11 +78,11 @@ public class HistoryDataController {
                 AccuracyEnum accuracyEnum = AccuracyEnum.valueOf(historyDataDto.getAccuracy());
                 if(StringUtils.isBlank(historyDataDto.getStatsMode())){
                     result = historyDataService.findMultiThingsHistoryDataOfMetricBySegment(historyDataDto.getThingCodes(), metricCode,
-                            historyDataDto.getStartTime(), historyDataDto.getEndTime(), historyDataDto.getSegment(), historyDataDto.getTimeCorrection(),accuracyEnum);
+                            historyDataDto.getStartTime(), historyDataDto.getEndTime(), historyDataDto.getSegment(), historyDataDto.getTimeCorrection(),accuracyEnum,Integer.valueOf(nullReturn));
                 }else{
                     SummaryTypeEnum summaryTypeEnum = SummaryTypeEnum.valueOf(historyDataDto.getStatsMode());
                     result = historyDataService.findMultiThingsHistoryDataOfMetricBySegment(historyDataDto.getThingCodes(), metricCode,
-                            historyDataDto.getStartTime(), historyDataDto.getEndTime(), historyDataDto.getSegment(), historyDataDto.getTimeCorrection(),accuracyEnum,summaryTypeEnum);
+                            historyDataDto.getStartTime(), historyDataDto.getEndTime(), historyDataDto.getSegment(), historyDataDto.getTimeCorrection(),accuracyEnum,summaryTypeEnum,nullReturn);
                 }
             }
         } else {
