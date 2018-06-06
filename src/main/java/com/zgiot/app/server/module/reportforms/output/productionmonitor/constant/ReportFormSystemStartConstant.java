@@ -4,7 +4,6 @@ public class ReportFormSystemStartConstant {
     public static final String MODULE_SHALLOWGROOVE = "shallow_groove";
     public static final String MODULE_CYCLONE_MAIN = "cyclone_main";
     public static final String MODULE_CYCLONE_RE = "cyclone_re";
-
     public static final String MODULE_TCS_857 = "tcs_857";
     public static final String MODULE_TCS_858 = "tcs_858";
     public static final String MODULE_TCS_859 = "tcs_859";

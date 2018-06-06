@@ -90,15 +90,16 @@ public class ReportFormSystemStartListener implements DataListener {
      */
     private void initRecords(Integer term) {
         Date nowDutyStartTime = ReportFormDateUtil.getNowDutyStartTime(new Date());
-        List<ReportFormSystemStartRecord> recordsOnDutyTermOne = systemStartMapper.getRecordsOnDuty(nowDutyStartTime, term);
-        dutyRecords.put(term, recordsOnDutyTermOne);
-        if (CollectionUtils.isNotEmpty(recordsOnDutyTermOne)) {
-            ReportFormSystemStartRecord theLastRecord = recordsOnDutyTermOne.get(recordsOnDutyTermOne.size() - 1);
-            if ("/".equals(theLastRecord.getBlendingWashingType())) {
-                systemStartupState.put(term, ReportFormSystemStartConstant.SYSTEM_STARTUP_STATE_STOP);
-            } else {
-                systemStartupState.put(term, ReportFormSystemStartConstant.SYSTEM_STARTUP_STATE_START);
-            }
+        List<ReportFormSystemStartRecord> recordsOnDuty = systemStartMapper.getRecordsOnDuty(nowDutyStartTime, term);
+        dutyRecords.put(term, recordsOnDuty);
+        if (CollectionUtils.isNotEmpty(recordsOnDuty)) {
+            ReportFormSystemStartRecord theLastRecord = recordsOnDuty.get(recordsOnDuty.size() - 1);
+//            if ("/".equals(theLastRecord.getBlendingWashingType())) {
+//                systemStartupState.put(term, ReportFormSystemStartConstant.SYSTEM_STARTUP_STATE_STOP);
+//            } else {
+//                systemStartupState.put(term, ReportFormSystemStartConstant.SYSTEM_STARTUP_STATE_START);
+//            }
+            systemStartupState.put(term, theLastRecord.getSystemStartupState());
         }
     }
 
@@ -333,6 +334,7 @@ public class ReportFormSystemStartListener implements DataListener {
         reportFormSystemStartRecord.setTerm(term);
         reportFormSystemStartRecord.setStartTime(startupTime);
         reportFormSystemStartRecord.setDutyStartTime(ReportFormDateUtil.getNowDutyStartTime(startupTime));
+        reportFormSystemStartRecord.setSystemStartupState(ReportFormSystemStartConstant.SYSTEM_STARTUP_STATE_START);
         String coal8ThingCode = getCoalThingCode("Quit_SYS_1", "COAL_8_DEVICE", reportFormSystemStartRecord);
         reportFormSystemStartRecord.setCoal8ThingCode(coal8ThingCode);
         String coal13ThingCode = getCoalThingCode("Quit_SYS_1", "COAL_13_DEVICE", reportFormSystemStartRecord);
@@ -355,6 +357,7 @@ public class ReportFormSystemStartListener implements DataListener {
         ReportFormSystemStartRecord currentRecord = new ReportFormSystemStartRecord();
         currentRecord.setTerm(term);
         currentRecord.setStartTime(stopDate);
+        currentRecord.setSystemStartupState(ReportFormSystemStartConstant.SYSTEM_STARTUP_STATE_STOP);
         currentRecord.setDutyStartTime(ReportFormDateUtil.getNowDutyStartTime(stopDate));
         currentRecord.setCoal8ThingCode("/");
         currentRecord.setCoal13ThingCode("/");
@@ -536,7 +539,6 @@ public class ReportFormSystemStartListener implements DataListener {
     public void onError(Throwable error) {
         logger.error("data invalid", error);
     }
-
 
 
 }

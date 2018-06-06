@@ -115,7 +115,8 @@
         select thing_code,density,flow FROM tb_coal_analysis_density_flow_value WHERE analysis_id = #{param1}
     </select>
 
-    <select id="getCoalAnalysisList" parameterType="com.zgiot.app.server.module.tcs.pojo.FilterCondition" resultType="com.zgiot.common.pojo.CoalAnalysisRecord">
+    <select id="getCoalAnalysisList" parameterType="com.zgiot.app.server.module.tcs.pojo.FilterCondition"
+            resultType="com.zgiot.common.pojo.CoalAnalysisRecord">
         SELECT
         *
         FROM
@@ -131,7 +132,8 @@
         ORDER BY time ASC;
     </select>
 
-    <select id="getCoalAnalysisAvg" parameterType="com.zgiot.app.server.module.tcs.pojo.FilterCondition" resultType="com.zgiot.common.pojo.CoalAnalysisRecord">
+    <select id="getCoalAnalysisAvg" parameterType="com.zgiot.app.server.module.tcs.pojo.FilterCondition"
+            resultType="com.zgiot.common.pojo.CoalAnalysisRecord">
         SELECT
         *
         FROM
@@ -146,5 +148,58 @@
         LIMIT 1;
     </select>
 
+
+    <insert id="insertProductCoalStatisticsRecords" keyProperty="id" keyColumn="id" useGeneratedKeys="true">
+        INSERT INTO tb_report_form_product_coal_statistics (time, team_id,term, heavy_medium_lump, heavy_medium_slack,
+        ratio8, ratio13, raw_coal, target_coal, target_type, value) VALUES
+        <foreach collection="list" item="item" open="(" close=")" separator="),(">
+            #{item.time},#{item.teamId},#{item.term},#{item.heavyMediumLump},#{item.heavyMediumSlack},#{item.ratio8},#{item.ratio13},#{item.rawCoal},#{item.targetCoal},#{item.targetType},#{item.value}
+        </foreach>
+    </insert>
+
+
+    <select id="getProductCoalStatisticsRecords"
+            resultType="com.zgiot.app.server.module.reportforms.output.pojo.ProductCoalStatistics">
+        SELECT * FROM tb_report_form_product_coal_statistics
+        <where>
+            <if test="term !=null">
+                AND term = #{term}
+            </if>
+            <if test="teamId != null">
+                AND team_id = #{teamId}
+            </if>
+            <if test="heavyMediumLump !=null">
+                AND heavy_medium_lump = #{heavyMediumLump}
+            </if>
+            <if test="heavyMediumSlack != null">
+                AND heavy_medium_slack = #{heavyMediumSlack}
+            </if>
+            <if test="ratio8 != null">
+                AND ratio8 = #{ratio8}
+            </if>
+            <if test="ratio13 != null">
+                AND ratio13 = #{ratio13}
+            </if>
+            <if test="targetCoal != null">
+                AND target_coal = #{targetCoal}
+            </if>
+            <if test="targetType != null">
+                AND target_type = #{targetType}
+            </if>
+            <if test="startTime != null">
+                AND time > #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND time &lt; #{endTime}
+            </if>
+
+        </where>
+        ORDER BY  time DESC
+    </select>
+
+
+    <delete id="clearAllProductCoalStatisticsInDuration">
+        DELETE FROM tb_report_form_product_coal_statistics WHERE time > #{startTime} and time &lt; #{endTime}
+    </delete>
 
 </mapper>

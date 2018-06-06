@@ -1,0 +1,1 @@
+package com.zgiot.app.server.service.dao;import org.apache.ibatis.annotations.Mapper;import org.apache.ibatis.annotations.Param;import java.util.List;@Mapperpublic interface UserMapper {    List<String> getThingCodesInWorkshopPostByUserId(@Param("userId") Long userId);}
