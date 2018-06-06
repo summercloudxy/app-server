@@ -33,10 +33,10 @@ public class AlertProtectHandler implements AlertHandler {
     private DataService dataService;
     private static final String ENABLE_VALUE = Boolean.TRUE.toString();
     private static final String DISABLE_VALUE = Boolean.FALSE.toString();
-    private static final String STATE_RUN = "2";
-    private static final String STATE_STOP = "1";
+    protected static final String STATE_RUN = "2";
+    protected static final String STATE_STOP = "1";
 
-    private static final String STATE_FAULT = "4";
+    protected static final String STATE_FAULT = "4";
     private static final int WAIT_TIME = 1000;
     private final Logger logger = LoggerFactory.getLogger(AlertProtectHandler.class);
 
