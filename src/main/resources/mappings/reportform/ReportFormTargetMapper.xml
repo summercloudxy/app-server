@@ -14,7 +14,7 @@
     WHERE
     o.id = f.order_id
     AND  <![CDATA[o.update_dt <#{dutyEndTime}  and o.update_dt > #{dutyStartTime}]]>
-    AND o.order_type_id = 4 and o.state = 4;
+    AND o.order_type_id = 3 and o.state = 4;
 </select>
 
     <select id="getLastTaskFeedbackInfoInDuration" resultType="com.zgiot.app.server.module.reportforms.output.pojo.TaskFeedbackInfo">
@@ -28,7 +28,7 @@
         WHERE
         o.id = f.order_id
         AND  <![CDATA[o.update_dt <#{dutyEndTime}  and o.update_dt > #{dutyStartTime}]]>
-        AND o.order_type_id = 4 and o.state = 4
+        AND o.order_type_id = 3 and o.state = 4
         and f.feedback_info_id = #{feedbackInfoId}
         ORDER BY feed_back_time DESC
         limit 0,1;
@@ -59,7 +59,7 @@
         WHERE
         o.id = f.order_id
         AND  <![CDATA[o.update_dt < #{dutyStartTime}]]>
-        AND o.order_type_id = 4 and o.state = 4
+        AND o.order_type_id = 3 and o.state = 4
         AND f.feedback_info_id = #{feedbackInfoId}
         ORDER BY o.update_dt DESC
         limit 0,1;
@@ -86,7 +86,7 @@
         WHERE
         o.id = f.order_id
         AND  <![CDATA[o.update_dt < #{dutyStartTime}]]>
-        AND o.order_type_id = 4 and o.state = 4
+        AND o.order_type_id = 3 and o.state = 4
         AND f.feedback_info_id = #{feedbackInfoId}
         ORDER BY o.update_dt ASC
         limit 0,1;

@@ -42,12 +42,5 @@ public class InfluenceTimeController {
         return new ResponseEntity<>(ServerResponse.buildOkJsonWithNonStringKey(null), HttpStatus.OK);
     }
 
-    @ApiOperation("更新影响生产时间测试方法")
-    @PostMapping("handle")
-    public ResponseEntity<String> handle(@RequestBody List<ReportFormSystemStartRecord> list) {
-        influenceTimeService.handle(list);
-        return new ResponseEntity<>(ServerResponse.buildOkJsonWithNonStringKey(null), HttpStatus.OK);
-    }
-
 
 }
