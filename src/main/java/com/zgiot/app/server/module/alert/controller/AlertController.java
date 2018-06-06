@@ -84,7 +84,7 @@ public class AlertController {
         String userId = request.getHeader(GlobalConstants.USER_ID);
         List<String> thingCodesInWorkshopPostByUserId = userService.getThingCodesInWorkshopPostByUserId(Long.parseLong(userId));
         if (CollectionUtils.isEmpty(thingCodesInWorkshopPostByUserId)){
-            return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+            return new ResponseEntity<>(ServerResponse.buildOkJson(new AlertRecordRsp(new ArrayList<>(), timeStamp)), HttpStatus.OK);
         }
         filterCondition.setEndTime(timeStamp);
         filterCondition.setThingCodes(thingCodesInWorkshopPostByUserId);
@@ -92,7 +92,7 @@ public class AlertController {
             if (thingCodesInWorkshopPostByUserId.contains(filterCondition.getThingCode())) {
                 filterCondition.setThingCodes(null);
             } else {
-                return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+                return new ResponseEntity<>(ServerResponse.buildOkJson(new AlertRecordRsp(new ArrayList<>(), timeStamp)), HttpStatus.OK);
             }
         }
 
