@@ -179,5 +179,14 @@ public class UserService {
         return userMapper.getUser(userId);
     }
 
-    public User getUserByUuid(String userUuid) { return userMapper.getUserByUuid(userUuid);}
+    public User getUserByUuid(String userUuid) {
+        return userMapper.getUserByUuid(userUuid);
+    }
+
+
+    public List<String> getThingCodesInWorkshopPostByUserId(Long userId) {
+        return userMapper.getThingCodesInWorkshopPostByUserId(userId);
+    }
+
+
 }

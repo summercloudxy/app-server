@@ -3,16 +3,15 @@ package com.zgiot.app.server.module.alert.controller;
 
 import com.zgiot.app.server.module.alert.AlertManager;
 import com.zgiot.app.server.module.alert.pojo.*;
+import com.zgiot.app.server.module.auth.service.UserService;
 import com.zgiot.app.server.service.FileService;
-import com.zgiot.app.server.service.UserService;
 import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.FileModel;
 import com.zgiot.common.restcontroller.ServerResponse;
 import io.swagger.annotations.ApiOperation;
-import net.bytebuddy.asm.Advice;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -84,6 +83,9 @@ public class AlertController {
         }
         String userId = request.getHeader(GlobalConstants.USER_ID);
         List<String> thingCodesInWorkshopPostByUserId = userService.getThingCodesInWorkshopPostByUserId(Long.parseLong(userId));
+        if (CollectionUtils.isEmpty(thingCodesInWorkshopPostByUserId)){
+            return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
+        }
         filterCondition.setEndTime(timeStamp);
         filterCondition.setThingCodes(thingCodesInWorkshopPostByUserId);
         if (filterCondition.getThingCode() != null) {
