@@ -196,4 +196,31 @@ public interface StopMapper {
     @Update(" UPDATE tb_start_examine_record  SET examine_result = #{examineResult},  examine_information = #{examineInformation}   WHERE " +
             "  rule_id = #{ruleId}  AND operate_id = #{stopOperateId}")
     void updateStopExamineRecord(@Param("ruleId") Integer ruleId, @Param("stopOperateId") Integer stopOperateId, @Param("examineResult") Integer examineResult, @Param("examineInformation") String examineInformation);
+
+    /**
+     * 根据设备号查询人工干预设置
+     *
+     * @param thingCode
+     * @return
+     */
+    @Select("select * from  tb_stop_manual_intervention where thingCode=#{thingCode}")
+    StopManualIntervention getStopManualInterventionByThingCode(@Param("thingCode") String thingCode);
+
+
+    /**
+     * 保存人工自检记录
+     *
+     * @param stopManualInterventionRecord
+     */
+    @Insert(" INSERT INTO tb_stop_manual_intervention_record (operate_id, thing_code, intervention_state, intervention_person_id, create_time, is_delete) " +
+            "        VALUES( #{operateId}, #{thingCode}, #{interventionState}, #{manualInterventionPerson}, now(), '0'  )")
+    void saveManualInterventionRecord(StopManualInterventionRecord stopManualInterventionRecord);
+
+    /**
+     * 保存停车设备状态记录
+     *
+     * @param stopDeviceStateRecord
+     */
+    @Insert("INSERT tb_stop_device_state_record ( operate_id, thing_code, state, create_time, update_time, is_delete )  VALUES (#{operateId}, #{thing_code}, #{state},#{createTime}, #{updateTime}, '0')")
+    void saveStopDeviceStateRecord(StopDeviceStateRecord stopDeviceStateRecord);
 }

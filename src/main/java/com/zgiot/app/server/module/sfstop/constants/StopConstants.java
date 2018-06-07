@@ -89,6 +89,11 @@ public class StopConstants {
 
     public static final String URI_STOP_AUTO_EXAMINE = "/topic/stop/auto/examine";// 发送启车自检结果变化信息
 
+    // 不干预
+    public static final int MANUAL_INTERVENTION_FALSE = 0;
+    // 干预中
+    public static final int MANUAL_INTERVENTION_TRUE = 1;
+
 
     // 信号下发等待时间
     public static final int SEND_MESSAGE_WAIT_TIME = 10;
@@ -132,6 +137,9 @@ public class StopConstants {
     public static final int EXAMINE_RESULT_RIGHT = 1;
     // 自检异常
     public static final int EXAMINE_RESULT_ERROR = 2;
+
+    // 设备待机
+    public static final int DEVICE_STATE_STANDBY_MODE = 0;
 
 
 }

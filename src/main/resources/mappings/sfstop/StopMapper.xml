@@ -64,34 +64,6 @@
         VALUES (#{createUser}, #{operateState}, #{operateSystem}, now(), '0',#{system})
     </insert>
 
-    <select id="getStopExaminRecordByRuleAndOperateId" resultMap="stopExamineRecord">
-        SELECT
-        sser.examine_id,
-        sser.operate_id,
-        sser.start_device_id,
-        sser.rule_id,
-        sser.examine_type,
-        sser.examine_result,
-        sser.examine_information,
-        sseru.examine_device_id,
-        spl.location_serial_num AS examine_device_code,
-        sa.assets_name AS examine_device_name
-        FROM
-        tb_start_examine_record AS sser
-        INNER JOIN tb_start_examine_rule AS sseru ON sser.rule_id = sseru.rule_id
-        INNER JOIN tb_start_production_location AS spl ON sseru.examine_device_id = spl.object_id
-        INNER JOIN tb_start_assets AS sa ON sa.object_id = spl.assets_object_id
-        WHERE
-        1 = 1
-        <if test="ruleId != null">
-            AND sser.rule_id = #{ruleId}
-        </if>
-        <if test="operateId != null">
-            AND sser.operate_id = #{operateId}
-        </if>
-        AND sser.is_delete = '0'
-    </select>
-
 
     <select id="selectStopExamineRuleByThingCode" resultMap="stopExamineRule">
         SELECT

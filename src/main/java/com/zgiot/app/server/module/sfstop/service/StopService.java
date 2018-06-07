@@ -181,4 +181,30 @@ public interface StopService {
      * @param examineInformation
      */
     void updateStopExamineRecord(Integer ruleId, Integer stopOperateId, Integer examineResult, String examineInformation);
+
+
+    /**
+     * 根据设备号查询人工干预设置
+     *
+     * @param thingCode
+     * @return
+     */
+    StopManualIntervention getStopManualInterventionByThingCode(String thingCode);
+
+    /**
+     * 保存人工自检记录
+     *
+     * @param stopManualInterventionRecord
+     */
+    void saveManualInterventionRecord(StopManualInterventionRecord stopManualInterventionRecord);
+
+
+    /**
+     * 增加停车中设备状态记录
+     *
+     * @param operateId      对应启车操作id
+     * @param stopThingCodes 启车设备id
+     * @return
+     */
+    void saveThingStateRecord(Set<String> stopThingCodes, Integer operateId);
 }

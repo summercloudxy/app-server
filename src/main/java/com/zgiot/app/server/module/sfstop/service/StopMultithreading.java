@@ -44,12 +44,12 @@ public class StopMultithreading implements Runnable {
         // 启车自检
         stopHandler.autoExamineStarting(system, stopExamineRules);
         // 建立人工干预
-        // stopHandler.createManualInterventionRecord(stopDeviceIds, operateId);
+        stopHandler.createManualInterventionRecord(stopThingCodes, operateId);
 
-        // 创建本次启车设备记录
-        //  stopService.saveDeviceStateRecord(stopDeviceIds, operateId);
+        // 创建本次停车设备记录
+        stopService.saveThingStateRecord(stopThingCodes, operateId);
         // 修改启车状态
-        //  stopService.updateStartOperate(StopConstants.STOP_EXAMIN_STATE);
+        stopService.updateStopOperate(system, StopConstants.STOP_EXAMIN_STATE);
         stopHandler.sendMessageTemplateByJson(StopConstants.URI_STOP_STATE, StopConstants.URI_STOP_STATE_MESSAGE_EXAMINE_FINISH);
     }
 

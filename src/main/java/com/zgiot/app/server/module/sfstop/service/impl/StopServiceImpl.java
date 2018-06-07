@@ -183,4 +183,29 @@ public class StopServiceImpl implements StopService {
     public void updateStopExamineRecord(Integer ruleId, Integer stopOperateId, Integer examineResult, String examineInformation) {
         stopMapper.updateStopExamineRecord(ruleId, stopOperateId, examineResult, examineInformation);
     }
+
+    @Override
+    public StopManualIntervention getStopManualInterventionByThingCode(String thingCode) {
+        return stopMapper.getStopManualInterventionByThingCode(thingCode);
+    }
+
+    @Override
+    public void saveManualInterventionRecord(StopManualInterventionRecord stopManualInterventionRecord) {
+        stopMapper.saveManualInterventionRecord(stopManualInterventionRecord);
+    }
+
+    @Override
+    public void saveThingStateRecord(Set<String> stopThingCodes, Integer operateId) {
+        // 根据不同系统，获取对应启车设备信息
+        for (String startThingCode : stopThingCodes) {
+            StopDeviceStateRecord stopDeviceStateRecord = new StopDeviceStateRecord();
+            stopDeviceStateRecord.setOperateId(Long.valueOf(operateId));
+            stopDeviceStateRecord.setThingCode(startThingCode);
+            // 初始状态都是未启动
+            stopDeviceStateRecord.setState(StopConstants.DEVICE_STATE_STANDBY_MODE);
+            stopDeviceStateRecord.setCreateTime(new Date());
+            stopDeviceStateRecord.setUpdateTime(new Date());
+            stopMapper.saveStopDeviceStateRecord(stopDeviceStateRecord);
+        }
+    }
 }

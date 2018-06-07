@@ -1422,4 +1422,24 @@ public class StopHandler {
         }
 
     }
+
+    /**
+     * 建立停车人工干预
+     *
+     * @param stopThingCodes
+     */
+    public void createManualInterventionRecord(Set<String> stopThingCodes, Integer operateId) {
+        for (String thingCode : stopThingCodes) {
+            StopManualIntervention stopManualIntervention = stopService.getStopManualInterventionByThingCode(thingCode);
+            if (stopManualIntervention.getState().equals(StopConstants.MANUAL_INTERVENTION_TRUE)) {
+                StopManualInterventionRecord stopManualInterventionRecord = new StopManualInterventionRecord();
+
+                stopManualInterventionRecord.setInterventionPersonId(stopManualIntervention.getCreateUser());
+                stopManualInterventionRecord.setInterventionState(StopConstants.MANUAL_INTERVENTION_TRUE);
+                stopManualInterventionRecord.setOperateId(operateId);
+                stopManualInterventionRecord.setThingCode(thingCode);
+                stopService.saveManualInterventionRecord(stopManualInterventionRecord);
+            }
+        }
+    }
 }
