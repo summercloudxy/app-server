@@ -25,7 +25,7 @@ import com.zgiot.app.server.module.reportforms.output.service.InfluenceTimeServi
 import com.zgiot.app.server.module.reportforms.output.service.OutputStoreAndTargetService;
 import com.zgiot.app.server.module.reportforms.output.service.TransPortServiceImpl;
 import com.zgiot.app.server.module.sfstart.*;
-import com.zgiot.app.server.module.sfstop.StopExamineSystemListener;
+import com.zgiot.app.server.module.sfstop.StopExamineListener;
 import com.zgiot.app.server.module.sfsubsc.job.UploadHistorySubscCardDatas;
 import com.zgiot.app.server.module.sfsubsc.job.UploadProductionSubscCardDatas;
 import com.zgiot.app.server.module.sfsubsc.job.UploadSubscCardDatas;
@@ -139,7 +139,7 @@ public class ModuleListConfig {
     @Autowired
     private SendTraceLogService sendTraceLogService;
     @Autowired
-    private StopExamineSystemListener stopExamineSystemListener;
+    private StopExamineListener stopExamineListener;
 
     @PostConstruct
     void init() {
@@ -259,6 +259,7 @@ public class ModuleListConfig {
             }
 
             if (containModule(ModuleListConfig.MODULE_SFSTOP)) {
+                processor.addListener(stopExamineListener);
 
             }
 

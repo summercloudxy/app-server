@@ -175,4 +175,25 @@ public interface StopMapper {
     void updateStopExamineResult(@Param("examineResult") int examineResult, @Param("examineId") int examineId);
 
 
+    /**
+     * 根据规则查询本次停车检查记录
+     *
+     * @param ruleId
+     * @param operateId
+     * @return
+     */
+    @Select("SELECT * from tb_stop_examine_record WHERE rule_id = #{ruleId} and  operate_id =#{operateId}")
+    List<StopExamineRecord> getStopExaminRecordByRuleAndOperateId(@Param("ruleId") Integer ruleId, @Param("operateId") Integer operateId);
+
+    /**
+     * 修改停车检查记录
+     *
+     * @param ruleId
+     * @param stopOperateId
+     * @param examineResult
+     * @param examineInformation
+     */
+    @Update(" UPDATE tb_start_examine_record  SET examine_result = #{examineResult},  examine_information = #{examineInformation}   WHERE " +
+            "  rule_id = #{ruleId}  AND operate_id = #{stopOperateId}")
+    void updateStopExamineRecord(@Param("ruleId") Integer ruleId, @Param("stopOperateId") Integer stopOperateId, @Param("examineResult") Integer examineResult, @Param("examineInformation") String examineInformation);
 }

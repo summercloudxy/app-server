@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.zgiot.app.server.module.alert.pojo.AlertData;
 import com.zgiot.app.server.module.sfstart.pojo.StartMessage;
+import com.zgiot.app.server.module.sfstop.StopExamineListener;
 import com.zgiot.app.server.module.sfstop.constants.StopConstants;
 import com.zgiot.app.server.module.sfstop.entity.pojo.*;
 import com.zgiot.app.server.module.sfstop.entity.vo.*;
@@ -25,6 +26,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -57,6 +59,8 @@ public class StopHandler {
 
     @Autowired
     private StopTypeSetPararmeterService stopTypeSetPararmeterService;
+    @Autowired
+    private StopExamineListener stopExamineListener;
 
     @Autowired
     private DataService dataService;
@@ -967,29 +971,151 @@ public class StopHandler {
      *
      * @param stopExamineRules
      */
-    public void autoExamineStarting(List<StopExamineRule> stopExamineRules) {
+    public void autoExamineStarting(String system, List<StopExamineRule> stopExamineRules) {
         List<StopExamineThing> examinethings = new ArrayList<>();
         for (StopExamineRule rule : stopExamineRules) {
             try {
                 logger.info("停车自检,检查设备:{},检查内容:{}", rule.getExamineThingCode(), rule.getExamineMetricCode());
                 String metricValue = getMetricValue(rule.getExamineThingCode(), rule.getExamineMetricCode());
-
-
                 if (StringUtils.isNotEmpty(metricValue)) {
-
-                    // updateExamineRecord(rule, metricValue);
-
+                    updateExamineRecord(system, rule, metricValue);
                 }
             } catch (Exception e) {
                 logger.error("检查建立失败,错误内容{}", e);
                 throw new StopException("自动检查任务失败，请稍后重新提交");
             }
             StopExamineThing stopExamineThing = new StopExamineThing();
+            stopExamineThing.setThingCode(rule.getExamineThingCode());
             stopExamineThing.setMetricCode(rule.getExamineMetricCode());
+            examinethings.add(stopExamineThing);
         }
-        //    startExamineListener.setStartExamineLabels(examineLabel);
-     
+        if (StopConstants.SYSTEM_1.equals(system)) {
+            stopExamineListener.setSystem1StopExamineThingList(examinethings);
 
+        } else if (StopConstants.SYSTEM_2.equals(system)) {
+            stopExamineListener.setSystem2StopExamineThingList(examinethings);
+        }
+    }
+
+    /**
+     * 修改检查记录
+     *
+     * @param rule
+     * @param metricValue
+     */
+    private void updateExamineRecord(String system, StopExamineRule rule, String metricValue) {
+        //是否发生改变
+        Boolean flag = false;
+        Integer examineResult = null;
+        String examineInformation = "";
+        List<StopExamineRecord> stopExamineRecords = stopService.getStopExaminRecordByRuleAndOperateId(rule.getRuleId(), stopService.getStopOperateId(Integer.valueOf(system)));
+        if (CollectionUtils.isEmpty(stopExamineRecords)) {
+            // 规则校验是否属于本次停车
+            return;
+        }
+        if (estimateExamineResult(rule, metricValue) && stopExamineRecords.get(0).getExamineResult() != StopConstants.EXAMINE_RESULT_RIGHT) {
+            // 保存正常的检测内容
+            examineResult = StopConstants.EXAMINE_RESULT_RIGHT;
+            examineInformation = null;
+            flag = true;
+        }
+
+        if (!estimateExamineResult(rule, metricValue) && stopExamineRecords.get(0).getExamineResult() != StopConstants.EXAMINE_RESULT_ERROR) {
+            // 检测异常时根据检查类型不同判断错误信息
+            examineResult = StopConstants.EXAMINE_RESULT_ERROR;
+            flag = true;
+            // 获得故障信息反馈
+            examineInformation = getExamineInformation(rule, metricValue);
+        }
+        // 发生改变修改逻辑，并通知前段
+        if (flag) {
+            logger.info("规则{}自检结果状态改变改为{},描述信息为{}", rule.getRuleId(), examineResult, examineInformation);
+            stopService.updateStopExamineRecord(rule.getRuleId(), stopService.getStopOperateId(Integer.valueOf(system)), examineResult, examineInformation);
+            stopExamineRecords.get(0).setExamineResult(examineResult);
+            stopExamineRecords.get(0).setExamineInformation(examineInformation);
+            sendMessagingTemplate(StopConstants.URI_STOP_AUTO_EXAMINE, stopExamineRecords.get(0));
+        }
+    }
+
+    /**
+     * 获取故障内容和信息
+     *
+     * @param stopExamineRule
+     * @param metricValue
+     * @return
+     */
+    private String getExamineInformation(StopExamineRule stopExamineRule, String metricValue) {
+        String examineInformation = "";
+        switch (stopExamineRule.getExamineType()) {
+            case StopConstants.REMOTE_ERROR_TYPE:
+                examineInformation = "就地";
+                break;
+
+            case StopConstants.LEVEL_ERROR_TYPE:
+                // 保留小数点两位
+                DecimalFormat df = new DecimalFormat("#0.00");
+                examineInformation = df.format(metricValue) + "m";
+                break;
+
+            default:
+                break;
+        }
+        return examineInformation;
+    }
+
+    /**
+     * 启车自检规则结果判断
+     *
+     * @param startExamineRule
+     * @param value
+     * @return
+     */
+    private Boolean estimateExamineResult(StopExamineRule startExamineRule, String value) {
+        Boolean flag = false;
+        if (startExamineRule.getExamineMetricCode().equals(MetricCodes.LOCAL)) {
+            if (!value.equals(startExamineRule.getCompareValue())) {
+                flag = true;
+            }
+
+        } else if (startExamineRule.getExamineMetricCode().equals(MetricCodes.CURRENT_LEVEL_M)) {
+            double realValue = Double.parseDouble(startExamineRule.getCompareValue());
+            double examineValue = Double.parseDouble(value);
+            switch (startExamineRule.getOperator()) {
+                case StopConstants.COMPARE_GREATER_THAN:
+                    if (examineValue > realValue) {
+                        flag = true;
+                    }
+                    break;
+                case StopConstants.COMPARE_LESS_THAN:
+                    if (examineValue < realValue) {
+                        flag = true;
+                    }
+                    break;
+                case StopConstants.COMPARE_EQUAL_TO:
+                    if (examineValue == realValue) {
+                        flag = true;
+                    }
+                    break;
+                case StopConstants.COMPARE_GREATER_THAN_AND_EQUAL_TO:
+                    if (examineValue >= realValue) {
+                        flag = true;
+                    }
+                    break;
+                case StopConstants.COMPARE_LESS_THAN_AND_EQUAL_TO:
+                    if (examineValue <= realValue) {
+                        flag = true;
+                    }
+                    break;
+                case StopConstants.COMPARE_NOT_EQUAL_TO:
+                    if (examineValue != realValue) {
+                        flag = true;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        return flag;
     }
 
 

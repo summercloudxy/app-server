@@ -162,4 +162,23 @@ public interface StopService {
      * @param examineId
      */
     void updateStopExamineResult(int examineResult, int examineId);
+
+    /**
+     * 根据自检规则和停车自检记录Id查询
+     *
+     * @param ruleId
+     * @param stopOperateId
+     * @return
+     */
+    List<StopExamineRecord> getStopExaminRecordByRuleAndOperateId(Integer ruleId, Integer stopOperateId);
+
+    /**
+     * 修改停车检查记录
+     *
+     * @param ruleId
+     * @param stopOperateId
+     * @param examineResult
+     * @param examineInformation
+     */
+    void updateStopExamineRecord(Integer ruleId, Integer stopOperateId, Integer examineResult, String examineInformation);
 }

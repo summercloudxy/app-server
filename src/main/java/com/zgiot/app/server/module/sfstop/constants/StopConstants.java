@@ -87,6 +87,8 @@ public class StopConstants {
 
     private static final String MESSAGE_URI = "/topic/stop/message";
 
+    public static final String URI_STOP_AUTO_EXAMINE = "/topic/stop/auto/examine";// 发送启车自检结果变化信息
+
 
     // 信号下发等待时间
     public static final int SEND_MESSAGE_WAIT_TIME = 10;
@@ -125,6 +127,11 @@ public class StopConstants {
 
     // 液位故障
     public static final int LEVEL_ERROR_TYPE = 2;
+
+    // 自检正常
+    public static final int EXAMINE_RESULT_RIGHT = 1;
+    // 自检异常
+    public static final int EXAMINE_RESULT_ERROR = 2;
 
 
 }

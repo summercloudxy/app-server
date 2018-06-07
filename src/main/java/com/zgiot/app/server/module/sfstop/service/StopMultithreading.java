@@ -22,7 +22,7 @@ public class StopMultithreading implements Runnable {
     @Override
     public void run() {
         try {
-            setUpAutoTest();
+            setUpAutoTest(system);
         } catch (Exception e) {
             logger.error("停车自检过程异常，异常信息为:{}", e);
             stopService.closeStopOperate(system);
@@ -37,15 +37,15 @@ public class StopMultithreading implements Runnable {
      *
      * @throws Exception
      */
-    public void setUpAutoTest() throws Exception {
+    public void setUpAutoTest(String system) throws Exception {
         logger.info("进入停车车自检流程");
         // 获取自建规则范围
         List<StopExamineRule> stopExamineRules = stopService.getStopExamineRuleByDeviceIds(stopThingCodes);
         // 启车自检
-        stopHandler.autoExamineStarting(stopExamineRules);
+        stopHandler.autoExamineStarting(system, stopExamineRules);
         // 建立人工干预
         // stopHandler.createManualInterventionRecord(stopDeviceIds, operateId);
-       
+
         // 创建本次启车设备记录
         //  stopService.saveDeviceStateRecord(stopDeviceIds, operateId);
         // 修改启车状态

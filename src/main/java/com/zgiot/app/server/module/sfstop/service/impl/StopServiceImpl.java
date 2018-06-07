@@ -173,4 +173,14 @@ public class StopServiceImpl implements StopService {
     public void updateStopExamineResult(int examineResult, int examineId) {
         stopMapper.updateStopExamineResult(examineResult, examineId);
     }
+
+    @Override
+    public List<StopExamineRecord> getStopExaminRecordByRuleAndOperateId(Integer ruleId, Integer stopOperateId) {
+        return stopMapper.getStopExaminRecordByRuleAndOperateId(ruleId, stopOperateId);
+    }
+
+    @Override
+    public void updateStopExamineRecord(Integer ruleId, Integer stopOperateId, Integer examineResult, String examineInformation) {
+        stopMapper.updateStopExamineRecord(ruleId, stopOperateId, examineResult, examineInformation);
+    }
 }

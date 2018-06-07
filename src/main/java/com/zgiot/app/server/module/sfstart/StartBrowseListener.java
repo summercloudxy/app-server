@@ -41,7 +41,9 @@ public class StartBrowseListener implements DataListener {
         //启车总览
         for (String label : startStopManager.getLabelBydevices()) {
             if (label.equals(thingMetricLabel.getLabelPath())) {
-                logger.info("启车总览标签{}的值{}收到", label, dataModel.getValue());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("启车总览标签{}的值{}收到", label, dataModel.getValue());
+                }
                 String deviceId = startService.selectDeviceIdByDatelabel(label, StartConstants.DEVICE_STATE).get(0);
                 StartDevice startDevice = startService.selectStartDeviceByDeviceId(deviceId);
                 startDevice.setDeviceState(Integer.valueOf(dataModel.getValue()));
