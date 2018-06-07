@@ -13,6 +13,7 @@ import com.zgiot.app.server.module.bellows.valve.ValveManager;
 import com.zgiot.app.server.module.demo.DemoBusiness;
 import com.zgiot.app.server.module.demo.DemoDataCompleter;
 import com.zgiot.app.server.module.densitycontrol.DensityControlListener;
+import com.zgiot.app.server.module.densitycontrol.DensityControlListener2;
 import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
 import com.zgiot.app.server.module.filterpress.FilterPressManager;
 import com.zgiot.app.server.module.filterpress.FilterPressSignalOperateJob;
@@ -56,6 +57,7 @@ public class ModuleListConfig {
     public static final String MODULE_SUBSCRIPTION = "subscription";
     public static final String MODULE_REPORTFORM = "report-form";
     public static final String MODULE_SEND_TRACE = "send-trace";
+    public static final String MODULE_DENSITY_CONTROL2 = "density-control2";
 
 
     @Value("${sysmodule.demo.enabled}")
@@ -80,6 +82,8 @@ public class ModuleListConfig {
     private boolean moduleReportEnabled;
     @Value("${sysmodule.send-trace.enabled}")
     private boolean moduleSendTraceEnabled;
+    @Value("${sysmodule.density-control2.enabled}")
+    private boolean moduleDensityCtl2Enabled;
 
 
     private static final int FAULT_SCAN_RATE = 20;
@@ -134,6 +138,8 @@ public class ModuleListConfig {
     private StartListener startListener;
     @Autowired
     private SendTraceLogService sendTraceLogService;
+    @Autowired
+    private DensityControlListener2 densityControlListener2;
 
     @PostConstruct
     void init() {
@@ -149,6 +155,7 @@ public class ModuleListConfig {
         configedModuleMap.put(MODULE_REPORTFORM, this.moduleReportEnabled);
 
         configedModuleMap.put(MODULE_SEND_TRACE, this.moduleSendTraceEnabled);
+        configedModuleMap.put(MODULE_DENSITY_CONTROL2, this.moduleDensityCtl2Enabled);
     }
 
     public boolean containModule(String moduleName) {
@@ -189,6 +196,11 @@ public class ModuleListConfig {
             if (containModule(ModuleListConfig.MODULE_DENSITY_CONTROL)) {
                 processor.addListener(densityControlListener);
                 logIt(MODULE_DENSITY_CONTROL);
+            }
+
+            if (containModule(ModuleListConfig.MODULE_DENSITY_CONTROL2)) {
+                processor.addListener(densityControlListener2);
+                logIt(MODULE_DENSITY_CONTROL2);
             }
 
             if (containModule(ModuleListConfig.MODULE_ALERT)) {

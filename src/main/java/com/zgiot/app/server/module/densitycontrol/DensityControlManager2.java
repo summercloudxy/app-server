@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static com.zgiot.app.server.module.densitycontrol.constants.DensitycontrolConstants.*;
 import static com.zgiot.common.constants.MetricCodes.*;
@@ -33,7 +34,7 @@ public class DensityControlManager2 {
     private ParamCache paramCache;
 
     private static String CMD_FAILED_LOG = "下发信号失败，失败原因：";
-    private Long timeExecuteHigh = 0L;
+    private AtomicLong timeExecuteHigh = new AtomicLong(0);
     public static AtomicBoolean isRunning = new AtomicBoolean(false);
 
     public boolean isRunning() {
@@ -66,7 +67,7 @@ public class DensityControlManager2 {
         getDensityData(densityControlStatus);
 
         String timeSet = paramCache.getValue(thingCode, LE_H_EXECUTE_TIME).getValue();
-        if (new Date().getTime() > (timeExecuteHigh + Long.parseLong(timeSet))) {
+        if (new Date().getTime() > (timeExecuteHigh.get() + Long.parseLong(timeSet))) {
             if (value > Double.parseDouble(levelSetHigh)) {
                 // 高液位处理
                 handleHighLevel();
@@ -148,7 +149,7 @@ public class DensityControlManager2 {
         if (cmdSendResponseData.getOkCount() <= 0) {
             logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
         }
-        timeExecuteHigh = new Date().getTime();
+        timeExecuteHigh = new AtomicLong(new Date().getTime());
     }
 
     /**
@@ -229,11 +230,7 @@ public class DensityControlManager2 {
      * @param densityControlStatus
      */
     private void handleNormalLevel(DensityControlStatus densityControlStatus) {
-        CmdControlService.CmdSendResponseData csrd = cmdControlService.sendCmd(new DataModel(null,
-                TERM_TWO_THING_CODE, null, LEVEL_MODE, NORMAL_MODE, new Date()), "beginHandleNormalLevel");
-        if (csrd.getOkCount() <= 0) {
-            logger.error(CMD_FAILED_LOG + csrd.getErrorMessage(), SysException.EC_CMD_FAILED);
-        }
+        sendNormalLevelMode();
 
         // 当前密度
         Double density = densityControlStatus.getDensity();
@@ -296,6 +293,40 @@ public class DensityControlManager2 {
         if (cmdSendResponseData.getOkCount() <= 0) {
             logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
         }
+    }
+
+    public void checkSystemRunState() {
+        // 判断是否为智能状态
+        DataModelWrapper data = dataService.getData(TERM_TWO_THING_CODE, RUN_STATE).orElse(null);
+        if (data == null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("无智能密控信号!");
+            }
+            return;
+        } else if (!RUN_STATE_1.equals(data.getValue())) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("智能密控不在运行状态!");
+            }
+            return;
+        }
+
+        // 判断系统状态
+        DataModelWrapper dataA = dataService.getData(TERM_TWO_SYSTEM_A_THING_CODE, RUN_STATE).orElse(null);
+        DataModelWrapper dataB = dataService.getData(TERM_TWO_SYSTEM_B_THING_CODE, RUN_STATE).orElse(null);
+        if (dataA == null && dataB == null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("无智能密控系统设备信号!");
+            }
+            return;
+        } else if (dataA != null && dataB == null) {
+            if (RUN_STATE_1.equals(dataA.getValue())) {
+                // A系统在运行,检查主控状态
+                DataModelWrapper dataAFL = dataService.getData(TERM_TWO_SYSTEM_A_FL_THING_CODE, CONTROL_MODE).orElse(null);
+                DataModelWrapper dataAMD = dataService.getData(TERM_TWO_SYSTEM_A_THING_CODE, DENSITY_CONTROL_MODE).orElse(null);
+
+            }
+        }
+
     }
 
 }
