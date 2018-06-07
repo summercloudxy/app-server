@@ -32,8 +32,8 @@ public class ProportionPieChartParser implements CardParser {
     public ProportionPieChartData parse(String paramValueJson) {
         ProportionPieChartData proportionPieChartData = new ProportionPieChartData();
         ProportionPieChartParam param = JSON.parseObject(paramValueJson, ProportionPieChartParam.class);
-        MetricDataValue partOneCoalValue = getCoalValue(param.getThingCode(), param.getPartOneThingMetricCode(), param.getPartOneCoalMetricCode());
-        MetricDataValue partTwoCoalValue = getCoalValue(param.getThingCode(), param.getPartTwoThingMetricCode(), param.getPartTwoCoalMetricCode());
+        MetricDataValue partOneCoalValue = getRatioCoalValue(param.getThingCode(), param.getPartOneThingMetricCode(), param.getPartOneCoalMetricCode());
+        MetricDataValue partTwoCoalValue = getRatioCoalValue(param.getThingCode(), param.getPartTwoThingMetricCode(), param.getPartTwoCoalMetricCode());
         proportionPieChartData.setTitle(param.getTitle());
         proportionPieChartData.setRatioThingCode(param.getThingCode());
         proportionPieChartData.setRatioMetricCode(param.getRatioMetricCode());
@@ -55,7 +55,7 @@ public class ProportionPieChartParser implements CardParser {
      * @param thingMetricCode
      * @return
      */
-    private MetricDataValue getCoalValue(String thingCode, String thingMetricCode, String coalMetricCode) {
+    public MetricDataValue getRatioCoalValue(String thingCode, String thingMetricCode, String coalMetricCode) {
         MetricDataValue metricDataValue = null;
         //根据该thing、metric查到的值是一个设备号
         Optional<DataModelWrapper> coalThingCodeData = dataService.getData(thingCode, thingMetricCode);
@@ -78,7 +78,7 @@ public class ProportionPieChartParser implements CardParser {
         return metricDataValue;
     }
 
-    private void countRatio(ProportionPieChartData proportionPieChartData, MetricDataValue partOneData, MetricDataValue partTwoData) {
+    public void countRatio(ProportionPieChartData proportionPieChartData, MetricDataValue partOneData, MetricDataValue partTwoData) {
         if (isInvalidValue(partOneData, partTwoData)) return;
         if (partOneData == null || Double.parseDouble(partOneData.getValue()) <= 0) {
             proportionPieChartData.setRatioTwo(VALUE_ONE);

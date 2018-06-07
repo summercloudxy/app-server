@@ -53,7 +53,7 @@ public class AlertFaultHandler implements AlertHandler {
         if (ENABLE_VALUE.equalsIgnoreCase(dataModel.getValue()) && alertData == null) {
             String state = protectHandler.getState(dataModel);
             Short level = getAlertLevel(state);
-            if (level != null && level == AlertConstants.LEVEL_30) {
+            if (STATE_RUN.equals(state)) {
                 generateFaultAlert(dataModel, level);
             }
         } else if (DISABLE_VALUE.equalsIgnoreCase(dataModel.getValue()) && alertData != null) {

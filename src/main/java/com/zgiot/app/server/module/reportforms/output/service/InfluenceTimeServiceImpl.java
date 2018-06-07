@@ -115,6 +115,8 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
                 oneInfluence.setDutyStartTime(dutyStartTime);
                 oneInfluence.setTerm(ReportFormConstant.INFLUENCE_TIME_ONE_TERM);
                 oneInfluence.setClassDuration(0L);
+                oneInfluence.setMonthDuration(0L);
+                oneInfluence.setYearDuration(0L);
                 oneInfluence.setInfluenceType(type);
                 influenceTimes.add(oneInfluence);
             }
@@ -124,6 +126,8 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
                 twoInfluence.setDutyStartTime(dutyStartTime);
                 twoInfluence.setTerm(ReportFormConstant.INFLUENCE_TIME_TWO_TERM);
                 twoInfluence.setClassDuration(0L);
+                twoInfluence.setMonthDuration(0L);
+                twoInfluence.setYearDuration(0L);
                 twoInfluence.setInfluenceType(type);
                 influenceTimes.add(twoInfluence);
             }
@@ -202,8 +206,10 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
 
     @Override
     public void updatePersonnel(InfluenceTimeRemarks influenceTimeRemarks) {
-        if(influenceTimeRemarks!=null && influenceTimeRemarks.getId()!=null){
+        InfluenceTimeRemarks influence= influenceTimeMapper.InfluenceTimeRemarks(influenceTimeRemarks.getDutyStartTime());
+        if(influence!=null){
             //修改
+            influenceTimeRemarks.setId(influence.getId());
             influenceTimeMapper.editPersonnel(influenceTimeRemarks);
         }else{
             //新增
@@ -211,7 +217,7 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
         }
 
         InfluenceTimeRemarks personnel = influenceTimeBean.getInfluenceTimeRemarks();
-        if(personnel!=null && influenceTimeRemarks!=null){
+        if(personnel!=null){
             personnel.setDutyStartTime(influenceTimeRemarks.getDutyStartTime());
             personnel.setDispatcher(influenceTimeRemarks.getDispatcher());
             personnel.setChecker(influenceTimeRemarks.getChecker());
@@ -243,6 +249,7 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
             for (InfluenceTime dutyinfluenceTime:dutyinfluenceTimeList) {
                 if(influenceTime.getInfluenceType().equals(dutyinfluenceTime.getInfluenceType()) && influenceTime.getTerm().equals(dutyinfluenceTime.getTerm()) && influenceTime.getClassDuration()!=null){
                     //类型和期数相同,设置月累计和年累计
+                    setInitMonthAndYear(dutyinfluenceTime);
                     influenceTime.setMonthDuration(influenceTime.getClassDuration()+dutyinfluenceTime.getMonthDuration());
                     influenceTime.setYearDuration(influenceTime.getClassDuration()+dutyinfluenceTime.getYearDuration());
                     break;
@@ -261,6 +268,15 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
         }
         if(ReportFormDateUtil.getNowDutyStartTime(new Date()).equals(dutyStartTime)){
             influenceTimeBeanUpdateData(influenceTimes,influenceTimeBean.getInfluenceTimeRsps());
+        }
+    }
+
+    private void setInitMonthAndYear(InfluenceTime dutyinfluenceTime) {
+        if(dutyinfluenceTime.getMonthDuration()==null){
+            dutyinfluenceTime.setMonthDuration(0L);
+        }
+        if(dutyinfluenceTime.getYearDuration()==null){
+            dutyinfluenceTime.setYearDuration(0L);
         }
     }
 

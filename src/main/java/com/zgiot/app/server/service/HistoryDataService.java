@@ -175,10 +175,23 @@ public interface HistoryDataService {
      * @param segment
      * @param isTimeCorrection
      * @param accuracy
+     * @param nullReturn
+     * @return
+     */
+    Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment, boolean isTimeCorrection, AccuracyEnum accuracy,int nullReturn);
+    /**
+     *
+     * @param thingCodes
+     * @param metricCode
+     * @param startDate
+     * @param endDate
+     * @param segment
+     * @param isTimeCorrection
+     * @param accuracy
      * @param summaryTypeEnum
      * @return
      */
-    Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment, boolean isTimeCorrection, AccuracyEnum accuracy, SummaryTypeEnum summaryTypeEnum);
+    Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment, boolean isTimeCorrection, AccuracyEnum accuracy, SummaryTypeEnum summaryTypeEnum,String nullReturn);
 
     /**
      * @param list MongoData use MongoData directly to avoid another loop to convert obj.

@@ -42,6 +42,8 @@ public class ReportFormSystemStartRecord {
   private String reason;
   @ApiModelProperty("系统期数")
   private Integer term;
+  @ApiModelProperty("系统状态 1 启车  2 停车")
+  private Integer systemStartupState;
 
   public long getId() {
     return id;
@@ -177,5 +179,13 @@ public class ReportFormSystemStartRecord {
 
   public void setDutyStartTime(Date dutyStartTime) {
     this.dutyStartTime = dutyStartTime;
+  }
+
+  public Integer getSystemStartupState() {
+    return systemStartupState;
+  }
+
+  public void setSystemStartupState(Integer systemStartupState) {
+    this.systemStartupState = systemStartupState;
   }
 }

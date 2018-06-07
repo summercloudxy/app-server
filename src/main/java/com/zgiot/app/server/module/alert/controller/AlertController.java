@@ -3,12 +3,14 @@ package com.zgiot.app.server.module.alert.controller;
 
 import com.zgiot.app.server.module.alert.AlertManager;
 import com.zgiot.app.server.module.alert.pojo.*;
+import com.zgiot.app.server.module.auth.service.UserService;
 import com.zgiot.app.server.service.FileService;
 import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.exceptions.SysException;
 import com.zgiot.common.pojo.FileModel;
 import com.zgiot.common.restcontroller.ServerResponse;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +31,8 @@ public class AlertController {
     private AlertManager alertManager;
     @Autowired
     private FileService fileService;
+    @Autowired
+    private UserService userService;
 
     private static final String MODULE_NAME = "alert";
 
@@ -73,11 +77,25 @@ public class AlertController {
 
     @ApiOperation("获取报警记录,按设备分组")
     @GetMapping(value = "record/group")
-    public ResponseEntity<String> getAlertRecordGroupByThing(@ModelAttribute FilterCondition filterCondition, @RequestParam(required = false) Date timeStamp) {
+    public ResponseEntity<String> getAlertRecordGroupByThing(@ModelAttribute FilterCondition filterCondition, @RequestParam(required = false) Date timeStamp, HttpServletRequest request) {
         if (timeStamp == null) {
             timeStamp = new Date();
         }
+        String userId = request.getHeader(GlobalConstants.USER_ID);
+        List<String> thingCodesInWorkshopPostByUserId = userService.getThingCodesInWorkshopPostByUserId(Long.parseLong(userId));
+        if (CollectionUtils.isEmpty(thingCodesInWorkshopPostByUserId)){
+            return new ResponseEntity<>(ServerResponse.buildOkJson(new AlertRecordRsp(new ArrayList<>(), timeStamp)), HttpStatus.OK);
+        }
         filterCondition.setEndTime(timeStamp);
+        filterCondition.setThingCodes(thingCodesInWorkshopPostByUserId);
+        if (filterCondition.getThingCode() != null) {
+            if (thingCodesInWorkshopPostByUserId.contains(filterCondition.getThingCode())) {
+                filterCondition.setThingCodes(null);
+            } else {
+                return new ResponseEntity<>(ServerResponse.buildOkJson(new AlertRecordRsp(new ArrayList<>(), timeStamp)), HttpStatus.OK);
+            }
+        }
+
         List<AlertRecord> alertDataListGroupByThing =
                 alertManager.getAlertDataListGroupByThing(filterCondition);
         AlertRecordRsp alertRecordRsp = new AlertRecordRsp(alertDataListGroupByThing, timeStamp);
