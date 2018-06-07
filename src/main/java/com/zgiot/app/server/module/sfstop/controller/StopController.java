@@ -5,7 +5,6 @@ import com.zgiot.app.server.module.sfstop.constants.StopConstants;
 import com.zgiot.app.server.module.sfstop.entity.pojo.*;
 import com.zgiot.app.server.module.sfstop.entity.vo.*;
 import com.zgiot.app.server.module.sfstop.service.*;
-import com.zgiot.app.server.module.sfstop.util.DateTimeUtils;
 import com.zgiot.common.constants.GlobalConstants;
 import com.zgiot.common.constants.MetricCodes;
 import com.zgiot.common.restcontroller.ServerResponse;
@@ -75,73 +74,7 @@ public class StopController {
      */
     @RequestMapping(value = "/getStopIndex", method = RequestMethod.GET)
     public ResponseEntity<String> getStopIndex(@RequestParam("system") String system) {
-        StopIndexVO stopIndexVO = new StopIndexVO();
-        Long runTime = null;
-        //最后的启车的记录
-        StartOperationRecord startOperationRecord = stopService.getStartOperationRecord(StopConstants.START_FINISH_STATE);
-        if (startOperationRecord != null) {
-            Date updateTime = startOperationRecord.getUpdateTime();
-            runTime = DateTimeUtils.getDifferenceTime(updateTime, new Date(), StopConstants.TIMEFORMAT);
-        }
-        stopIndexVO.setThingRunTime(runTime);
-        List<StopIndexVO.StopThingArea> stopThingAreas = new ArrayList<>();
-        //查询大区下区域
-        int lineRunCount = 0;
-        List<StopDeviceArea> stopDeviceAreas = stopDeviceAreaService.getStopDeviceArea(StopConstants.REGION_1, Integer.valueOf(system));
-        for (StopDeviceArea stopDeviceArea : stopDeviceAreas) {
-            StopIndexVO.StopThingArea stopThingArea = stopIndexVO.new StopThingArea();
-            stopThingArea.setAreaId(String.valueOf(stopDeviceArea.getId()));
-            stopThingArea.setAreaName(stopDeviceArea.getAreaName());
-            //区域下的停车线
-            List<StopLine> stopLines = stopLineService.getStopLineByAreaId(stopDeviceArea.getId());
-            stopThingArea.setLineCnt(String.valueOf(stopLines.size()));
-            List<StopIndexVO.StopThingLine> stopThingLines = new ArrayList<>();
-            for (StopLine stopLine : stopLines) {
-                //待机
-                Boolean lineRunState_1 = true;
-                //运行
-                Boolean lineRunState_2 = true;
-                //故障
-                Boolean lineRunState_4 = true;
-                StopIndexVO.StopThingLine stopThingLine = stopIndexVO.new StopThingLine();
-                stopThingLine.setLineId(String.valueOf(stopLine.getId()));
-                stopThingLine.setLineName(stopLine.getLineName());
-                //停车线下的停车包
-                List<StopDeviceBag> stopDeviceBags = stopDeviceBagService.getStopDeviceBagByStartLineId(stopLine.getId());
-                for (StopDeviceBag stopDeviceBag : stopDeviceBags) {
-                    //查询停车包下的设备
-                    List<StopInformation> stopInformations = stopInformationService.getStopInformationByBagId(stopDeviceBag.getId());
-                    for (StopInformation stopInformation : stopInformations) {
-                        String metricValue = stopHandler.getMetricValue(stopInformation.getThingCode(), MetricCodes.STATE);
-
-                        if (!StopConstants.RUNSTATE_2.equals(metricValue)) {
-                            lineRunState_2 = false;
-                        }
-                        if (!StopConstants.RUNSTATE_1.equals(metricValue)) {
-                            lineRunState_1 = false;
-                        }
-                        if (!StopConstants.RUNSTATE_4.equals(metricValue)) {
-                            lineRunState_4 = false;
-                        }
-                    }
-                }
-                stopThingLine.setLineRunState("");
-                if (lineRunState_1) {
-                    stopThingLine.setLineRunState(StopConstants.RUNSTATE_1);
-                } else if (lineRunState_2) {
-                    lineRunCount++;
-                    stopThingLine.setLineRunState(StopConstants.RUNSTATE_2);
-                } else if (lineRunState_4) {
-                    stopThingLine.setLineRunState(StopConstants.RUNSTATE_4);
-                }
-                stopThingLines.add(stopThingLine);
-            }
-            stopThingArea.setStopThingLines(stopThingLines);
-            stopThingAreas.add(stopThingArea);
-
-        }
-        stopIndexVO.setStopThingAreas(stopThingAreas);
-        stopIndexVO.setThingRunCount(String.valueOf(lineRunCount));
+        StopIndexVO stopIndexVO = stopHandler.getStopIndex(system);
         return new ResponseEntity<>(ServerResponse.buildOkJson(stopIndexVO), HttpStatus.OK);
     }
 
@@ -578,6 +511,167 @@ public class StopController {
         return new ResponseEntity<>(ServerResponse.buildOkJson(StopConstants.SUCCESS), HttpStatus.OK);
     }
 
+
+    /**
+     * 获取自检中系统和设备关系
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/getAutoExamineSystem", method = RequestMethod.GET)
+    public ResponseEntity<String> getAutoExamineSystem(@RequestParam("system") String system) throws Exception {
+        Integer operateId = null;
+        List<StopOperationRecord> stopOperationRecords = stopService.findUnfinishStopOperate(Integer.valueOf(system), null, StopConstants.STOP_FINISH_STATE);
+        if (CollectionUtils.isNotEmpty(stopOperationRecords)) {
+            operateId = stopOperationRecords.get(0).getOperateId();
+        }
+        StopExamineIndexVO stopExamineIndexVO = new StopExamineIndexVO();
+        //查询大区下区域
+        int lineRunCount = 0;
+        List<StopExamineIndexVO.StopExamineArea> stopExamineAreas = new ArrayList<>();
+        List<StopDeviceArea> stopDeviceAreas = stopDeviceAreaService.getStopDeviceArea(StopConstants.REGION_1, Integer.valueOf(system));
+        for (StopDeviceArea stopDeviceArea : stopDeviceAreas) {
+            StopExamineIndexVO.StopExamineArea stopExamineArea = stopExamineIndexVO.new StopExamineArea();
+            stopExamineArea.setAreaId(String.valueOf(stopDeviceArea.getId()));
+            stopExamineArea.setAreaName(stopDeviceArea.getAreaName());
+            //区域下的停车线
+            List<StopLine> stopLines = stopLineService.getStopLineByAreaId(stopDeviceArea.getId());
+            stopExamineArea.setLineCnt(String.valueOf(stopLines.size()));
+            List<StopExamineIndexVO.StopExamineLine> stopExamineLines = new ArrayList<>();
+            for (StopLine stopLine : stopLines) {
+                //待机
+                Boolean lineRunState_1 = true;
+                //运行
+                Boolean lineRunState_2 = true;
+                //故障
+                Boolean lineRunState_4 = true;
+                StopExamineIndexVO.StopExamineLine stopExamineLine = stopExamineIndexVO.new StopExamineLine();
+                stopExamineLine.setLineId(String.valueOf(stopLine.getId()));
+                stopExamineLine.setLineName(stopLine.getLineName());
+                //停车线下的停车包
+                List<StopDeviceBag> stopDeviceBags = stopDeviceBagService.getStopDeviceBagByStartLineId(stopLine.getId());
+                for (StopDeviceBag stopDeviceBag : stopDeviceBags) {
+                    //查询停车包下的设备
+                    List<StopInformation> stopInformations = stopInformationService.getStopInformationByBagId(stopDeviceBag.getId());
+                    for (StopInformation stopInformation : stopInformations) {
+                        String metricValue = stopHandler.getMetricValue(stopInformation.getThingCode(), MetricCodes.STATE);
+
+                        if (!StopConstants.RUNSTATE_2.equals(metricValue)) {
+                            lineRunState_2 = false;
+                        }
+                        if (!StopConstants.RUNSTATE_1.equals(metricValue)) {
+                            lineRunState_1 = false;
+                        }
+                        if (!StopConstants.RUNSTATE_4.equals(metricValue)) {
+                            lineRunState_4 = false;
+                        }
+                        if (operateId != null) {
+                            StopExamineRecord stopExamineRecord = stopService.getStopExamineRecordByThingCode(operateId, stopInformation.getThingCode());
+                            if (stopExamineRecord != null) {
+                                stopExamineLine.setIsUnusual("1");
+                            } else {
+                                stopExamineLine.setIsUnusual("0");
+                            }
+                        }
+                    }
+                }
+                stopExamineLine.setLineRunState("");
+                if (lineRunState_1) {
+                    stopExamineLine.setLineRunState(StopConstants.RUNSTATE_1);
+                } else if (lineRunState_2) {
+                    lineRunCount++;
+                    stopExamineLine.setLineRunState(StopConstants.RUNSTATE_2);
+                } else if (lineRunState_4) {
+                    stopExamineLine.setLineRunState(StopConstants.RUNSTATE_4);
+                }
+                stopExamineLines.add(stopExamineLine);
+            }
+            stopExamineArea.setStopExamineLines(stopExamineLines);
+            stopExamineAreas.add(stopExamineArea);
+
+        }
+        stopExamineIndexVO.setStopExamineAreas(stopExamineAreas);
+        stopExamineIndexVO.setThingRunCount(String.valueOf(lineRunCount));
+        return new ResponseEntity<>(ServerResponse.buildOkJson(stopExamineIndexVO), HttpStatus.OK);
+    }
+
+    /**
+     * 获取停车中系统和设备关系
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/getStopingSystem", method = RequestMethod.GET)
+    public ResponseEntity<String> getStopingSystem(@RequestParam("system") String system) throws Exception {
+        StopingIndexVO stopingIndexVO = new StopingIndexVO();
+        List<StopOperationRecord> stopOperationRecords = stopService.findUnfinishStopOperate(Integer.valueOf(system), null, StopConstants.STOP_FINISH_STATE);
+        if (CollectionUtils.isNotEmpty(stopOperationRecords)) {
+            stopingIndexVO.setStopElapsedTime(stopOperationRecords.get(0).getStopElapsedTime());
+            stopingIndexVO.setStopPauseTime(stopOperationRecords.get(0).getStopPauseTime());
+            stopingIndexVO.setOperateState(String.valueOf(stopOperationRecords.get(0).getOperateState()));
+        }
+        List<StopingIndexVO.StopingArea> stopingAreas = new ArrayList<>();
+        List<StopDeviceArea> stopDeviceAreas = stopDeviceAreaService.getStopDeviceArea(StopConstants.REGION_1, Integer.valueOf(system));
+        for (StopDeviceArea stopDeviceArea : stopDeviceAreas) {
+            StopingIndexVO.StopingArea stopingArea = stopingIndexVO.new StopingArea();
+            stopingArea.setAreaId(String.valueOf(stopDeviceArea.getId()));
+            stopingArea.setAreaName(stopDeviceArea.getAreaName());
+            //区域下的停车线
+            List<StopLine> stopLines = stopLineService.getStopLineByAreaId(stopDeviceArea.getId());
+            stopingArea.setLineCnt(String.valueOf(stopLines.size()));
+            List<StopingIndexVO.StopingLine> stopingLines = new ArrayList<>();
+            for (StopLine stopLine : stopLines) {
+                //待机
+                Boolean lineRunState_1 = true;
+                //运行
+                Boolean lineRunState_2 = true;
+                //故障
+                Boolean lineRunState_4 = true;
+                StopingIndexVO.StopingLine stopingLine = stopingIndexVO.new StopingLine();
+                stopingLine.setLineId(String.valueOf(stopLine.getId()));
+                stopingLine.setLineName(stopLine.getLineName());
+                //停车线下的停车包
+                List<StopingIndexVO.StopingThing> stopingThings = new ArrayList<>();
+                List<StopDeviceBag> stopDeviceBags = stopDeviceBagService.getStopDeviceBagByStartLineId(stopLine.getId());
+                for (StopDeviceBag stopDeviceBag : stopDeviceBags) {
+                    //查询停车包下的设备
+                    List<StopInformation> stopInformations = stopInformationService.getStopInformationByBagId(stopDeviceBag.getId());
+                    for (StopInformation stopInformation : stopInformations) {
+                        StopingIndexVO.StopingThing stopingThing = stopingIndexVO.new StopingThing();
+                        stopingThing.setThingCode(stopInformation.getThingCode());
+                        stopingThing.setThingName(stopInformation.getThingName());
+                        String metricValue = stopHandler.getMetricValue(stopInformation.getThingCode(), MetricCodes.STATE);
+                        stopingThing.setRunState(metricValue);
+                        stopingThings.add(stopingThing);
+                        if (!StopConstants.RUNSTATE_2.equals(metricValue)) {
+                            lineRunState_2 = false;
+                        }
+                        if (!StopConstants.RUNSTATE_1.equals(metricValue)) {
+                            lineRunState_1 = false;
+                        }
+                        if (!StopConstants.RUNSTATE_4.equals(metricValue)) {
+                            lineRunState_4 = false;
+                        }
+                    }
+                }
+                stopingLine.setStopingThings(stopingThings);
+                stopingLine.setLineRunState("");
+                if (lineRunState_1) {
+                    stopingLine.setLineRunState(StopConstants.RUNSTATE_1);
+                } else if (lineRunState_2) {
+                    stopingLine.setLineRunState(StopConstants.RUNSTATE_2);
+                } else if (lineRunState_4) {
+                    stopingLine.setLineRunState(StopConstants.RUNSTATE_4);
+                }
+                stopingLines.add(stopingLine);
+            }
+            stopingArea.setStopingLines(stopingLines);
+            stopingAreas.add(stopingArea);
+
+        }
+        stopingIndexVO.setStopingAreas(stopingAreas);
+        return new ResponseEntity<>(ServerResponse.buildOkJson(stopingIndexVO), HttpStatus.OK);
+    }
     /**
      * 自检开始
      *
@@ -655,9 +749,9 @@ public class StopController {
      * @return
      * @throws Exception
      */
-    @RequestMapping(value = "/handleExamine", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/handleExamine", method = RequestMethod.POST)
     public ResponseEntity<String> handleExamine(@RequestBody List<Integer> ruleIds, @RequestParam("tapOperate") String tapOperate) throws Exception {
-
+        stopHandler.handleExamine(ruleIds, tapOperate);
 
         return new ResponseEntity<>(ServerResponse.buildOkJson(null), HttpStatus.OK);
     }
@@ -712,7 +806,7 @@ public class StopController {
             StopManualIntervention stopManualInterventionByThingCode = stopManualInterventionService.getStopManualInterventionByThingCode(thingCode);
             if (stopManualInterventionByThingCode != null && stopManualInterventionByThingCode.getState() == 1) {
                 stopThingDetail.setIsManualIntervention("1");
-                List<StopOperationRecord> unfinishStopOperate = stopService.findUnfinishStopOperate(Integer.valueOf(system), StopConstants.STOP_STARTING_STATE, StopConstants.STOP_FINISH_STATE);
+                List<StopOperationRecord> unfinishStopOperate = stopService.findUnfinishStopOperate(Integer.valueOf(system), StopConstants.STOP_STOPING_STATE, StopConstants.STOP_FINISH_STATE);
                 if (CollectionUtils.isNotEmpty(unfinishStopOperate)) {
                     StopManualInterventionRecord stopManualInterventionRecord = stopService.getStopManualInterventionRecord(unfinishStopOperate.get(0).getOperateId(), thingCode);
                     if (stopManualInterventionRecord != null) {
@@ -804,7 +898,7 @@ public class StopController {
     @RequestMapping(value = "/setUpStopEnd", method = RequestMethod.GET)
     public ResponseEntity<String> setUpStopEnd(@RequestParam("system") String system) throws Exception {
         stopHandler.finishStopState(system);
-        stopHandler.sendMessageTemplateByJson(StopConstants.URI_STOP_STATE, StopConstants.URI_STOP_STATE_MESSAGE_START_FINISH);
+        stopHandler.sendMessageTemplateByJson(StopConstants.URI_STOP_STATE, StopConstants.URI_STOP_STATE_MESSAGE_STOP_FINISH);
 
         return new ResponseEntity<>(ServerResponse.buildOkJson(StopConstants.SUCCESS), HttpStatus.OK);
     }

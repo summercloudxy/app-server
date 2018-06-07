@@ -136,4 +136,22 @@ public interface StopService {
      * @return
      */
     List<StopExamineResult> getStartExaminRecordByOperateId(Integer operateId);
+
+    /**
+     * 查询停车自检的记录
+     *
+     * @param operateId
+     * @param thingCode
+     * @return
+     */
+    StopExamineRecord getStopExamineRecordByThingCode(Integer operateId, String thingCode);
+
+
+    /**
+     * 查询停车自检规则
+     *
+     * @param ruleId
+     * @return
+     */
+    StopExamineRule getStopExamineRuleByRuleId(int ruleId);
 }

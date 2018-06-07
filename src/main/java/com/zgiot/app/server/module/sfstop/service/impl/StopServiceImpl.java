@@ -160,4 +160,14 @@ public class StopServiceImpl implements StopService {
     public List<StopExamineResult> getStartExaminRecordByOperateId(Integer operateId) {
         return stopMapper.getStartExaminRecordByOperateId(operateId);
     }
+
+    @Override
+    public StopExamineRecord getStopExamineRecordByThingCode(Integer operateId, String thingCode) {
+        return stopMapper.getStopExamineRecordByThingCode(operateId, thingCode);
+    }
+
+    @Override
+    public StopExamineRule getStopExamineRuleByRuleId(int ruleId) {
+        return stopMapper.getStopExamineRuleByRuleId(ruleId);
+    }
 }

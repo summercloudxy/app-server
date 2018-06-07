@@ -7,11 +7,17 @@ import com.zgiot.app.server.module.sfstart.pojo.StartMessage;
 import com.zgiot.app.server.module.sfstop.constants.StopConstants;
 import com.zgiot.app.server.module.sfstop.entity.pojo.*;
 import com.zgiot.app.server.module.sfstop.entity.vo.StopExamineThing;
+import com.zgiot.app.server.module.sfstop.entity.vo.StopIndexVO;
 import com.zgiot.app.server.module.sfstop.entity.vo.StopMessage;
 import com.zgiot.app.server.module.sfstop.exception.StopException;
 import com.zgiot.app.server.module.sfstop.service.*;
+import com.zgiot.app.server.module.sfstop.util.DateTimeUtils;
+import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.DataService;
+import com.zgiot.common.constants.MetricCodes;
+import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
+import com.zgiot.common.pojo.SessionContext;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -47,8 +53,12 @@ public class StopHandler {
     @Autowired
     private DataService dataService;
 
-    // 当前系统暂停状态
-    private static Boolean pauseState;
+    @Autowired
+    private CmdControlService cmdControlService;
+    // 一期系统暂停状态
+    private static Boolean system1PauseState;
+    // 二期系统暂停状态
+    private static Boolean system2PauseState;
 
     private static BlockingQueue blockingQueue;
 
@@ -100,12 +110,21 @@ public class StopHandler {
         this.stopInformationService = stopInformationService;
     }
 
-    public static Boolean getPauseState() {
-        return pauseState;
+
+    public static Boolean getSystem2PauseState() {
+        return system2PauseState;
     }
 
-    public static void setPauseState(Boolean pauseState) {
-        StopHandler.pauseState = pauseState;
+    public static void setSystem2PauseState(Boolean system2PauseState) {
+        StopHandler.system2PauseState = system2PauseState;
+    }
+
+    public static Boolean getSystem1PauseState() {
+        return system1PauseState;
+    }
+
+    public static void setSystem1PauseState(Boolean system1PauseState) {
+        StopHandler.system1PauseState = system1PauseState;
     }
 
     public static Boolean getStartExamineListenerFlag() {
@@ -358,24 +377,167 @@ public class StopHandler {
     public void operateStoping(String system, String operate) {
         switch (operate) {
             case "pause":
-                // 暂停启车
-                //  writeSignalByLabel(StopConstants.PAUSE_STARTING_LABEL, StopConstants.VALUE_TRUE, StopConstants.LABEL_TYPE_BOOLEAN);
+                // 暂停停车
+                if (StopConstants.SYSTEM_1.equals(system)) {
+                    system1PauseState = true;
+                } else if (StopConstants.SYSTEM_2.equals(system)) {
+                    system2PauseState = true;
+                }
+                stopService.updateStopOperate(system, StopConstants.STOP_PAUSE_STATE);
                 sendMessageTemplateByJson(StopConstants.URI_STOP_STATE, StopConstants.URI_STOP_STATE_MESSAGE_PAUSE);
                 break;
-            case "continueStart":
-                // 恢复启车
-                //writeSignalByLabel(StopConstants.PAUSE_STARTING_LABEL, StopConstants.VALUE_FALSE, StopConstants.LABEL_TYPE_BOOLEAN);
-                sendMessageTemplateByJson(StopConstants.URI_STOP_STATE, StopConstants.URI_STOP_STATE_MESSAGE_CONTINUE_START);
+            case "continueStop":
+                // 恢复停车
+                if (StopConstants.SYSTEM_1.equals(system)) {
+                    system1PauseState = false;
+                } else if (StopConstants.SYSTEM_2.equals(system)) {
+                    system2PauseState = false;
+                }
+                stopService.updateStopOperate(system, StopConstants.STOP_STOPING_STATE);
+                sendMessageTemplateByJson(StopConstants.URI_STOP_STATE, StopConstants.URI_STOP_STATE_MESSAGE_CONTINUE_STOP);
                 break;
-            case "closeStart":
-                // 结束启车
-                //writeSignalByLabel(StopConstants.START_DEVICE_LABEL, StopConstants.VALUE_FALSE, StopConstants.LABEL_TYPE_BOOLEAN);
-                //writeSignalByLabel(StopConstants.PAUSE_STARTING_LABEL, StopConstants.VALUE_FALSE, StopConstants.LABEL_TYPE_BOOLEAN);
+            case "closeStop":
+                // 结束停车
                 stopService.closeStopOperate(system);
-                sendMessageTemplateByJson(StopConstants.URI_STOP_STATE, StopConstants.URI_STOP_STATE_MESSAGE_CLOSE_START);
+                if (StopConstants.SYSTEM_1.equals(system)) {
+                    system1PauseState = false;
+                } else if (StopConstants.SYSTEM_2.equals(system)) {
+                    system2PauseState = false;
+                }
+                sendMessageTemplateByJson(StopConstants.URI_STOP_STATE, StopConstants.URI_STOP_STATE_MESSAGE_CLOSE_STOP);
                 break;
             default:
                 break;
+        }
+
+    }
+
+    /**
+     * 停车设备线总览
+     *
+     * @param system
+     * @return
+     */
+    public StopIndexVO getStopIndex(String system) {
+        StopIndexVO stopIndexVO = new StopIndexVO();
+        Long runTime = null;
+        //最后的启车的记录
+        StartOperationRecord startOperationRecord = stopService.getStartOperationRecord(StopConstants.START_FINISH_STATE);
+        if (startOperationRecord != null) {
+            Date updateTime = startOperationRecord.getUpdateTime();
+            runTime = DateTimeUtils.getDifferenceTime(updateTime, new Date(), StopConstants.TIMEFORMAT);
+        }
+        stopIndexVO.setThingRunTime(runTime);
+        List<StopIndexVO.StopThingArea> stopThingAreas = new ArrayList<>();
+        //查询大区下区域
+        int lineRunCount = 0;
+        List<StopDeviceArea> stopDeviceAreas = stopDeviceAreaService.getStopDeviceArea(StopConstants.REGION_1, Integer.valueOf(system));
+        for (StopDeviceArea stopDeviceArea : stopDeviceAreas) {
+            StopIndexVO.StopThingArea stopThingArea = stopIndexVO.new StopThingArea();
+            stopThingArea.setAreaId(String.valueOf(stopDeviceArea.getId()));
+            stopThingArea.setAreaName(stopDeviceArea.getAreaName());
+            //区域下的停车线
+            List<StopLine> stopLines = stopLineService.getStopLineByAreaId(stopDeviceArea.getId());
+            stopThingArea.setLineCnt(String.valueOf(stopLines.size()));
+            List<StopIndexVO.StopThingLine> stopThingLines = new ArrayList<>();
+            for (StopLine stopLine : stopLines) {
+                //待机
+                Boolean lineRunState_1 = true;
+                //运行
+                Boolean lineRunState_2 = true;
+                //故障
+                Boolean lineRunState_4 = true;
+                StopIndexVO.StopThingLine stopThingLine = stopIndexVO.new StopThingLine();
+                stopThingLine.setLineId(String.valueOf(stopLine.getId()));
+                stopThingLine.setLineName(stopLine.getLineName());
+                //停车线下的停车包
+                List<StopDeviceBag> stopDeviceBags = stopDeviceBagService.getStopDeviceBagByStartLineId(stopLine.getId());
+                for (StopDeviceBag stopDeviceBag : stopDeviceBags) {
+                    //查询停车包下的设备
+                    List<StopInformation> stopInformations = stopInformationService.getStopInformationByBagId(stopDeviceBag.getId());
+                    for (StopInformation stopInformation : stopInformations) {
+                        String metricValue = getMetricValue(stopInformation.getThingCode(), MetricCodes.STATE);
+
+                        if (!StopConstants.RUNSTATE_2.equals(metricValue)) {
+                            lineRunState_2 = false;
+                        }
+                        if (!StopConstants.RUNSTATE_1.equals(metricValue)) {
+                            lineRunState_1 = false;
+                        }
+                        if (!StopConstants.RUNSTATE_4.equals(metricValue)) {
+                            lineRunState_4 = false;
+                        }
+                    }
+                }
+                stopThingLine.setLineRunState("");
+                if (lineRunState_1) {
+                    stopThingLine.setLineRunState(StopConstants.RUNSTATE_1);
+                } else if (lineRunState_2) {
+                    lineRunCount++;
+                    stopThingLine.setLineRunState(StopConstants.RUNSTATE_2);
+                } else if (lineRunState_4) {
+                    stopThingLine.setLineRunState(StopConstants.RUNSTATE_4);
+                }
+                stopThingLines.add(stopThingLine);
+            }
+            stopThingArea.setStopThingLines(stopThingLines);
+            stopThingAreas.add(stopThingArea);
+
+        }
+        stopIndexVO.setStopThingAreas(stopThingAreas);
+        stopIndexVO.setThingRunCount(String.valueOf(lineRunCount));
+        return stopIndexVO;
+    }
+
+    /**
+     * 停车自检修复
+     *
+     * @param ruleIds
+     * @param tapOperate
+     */
+    public void handleExamine(List<Integer> ruleIds, String tapOperate) {
+        for (Integer ruleId : ruleIds) {
+            StopExamineRule stopExamineRule = stopService.getStopExamineRuleByRuleId(ruleId);
+
+            if (stopExamineRule != null) {
+
+
+                switch (stopExamineRule.getExamineType()) {
+                    // 控制类型
+                    case StopConstants.REMOTE_ERROR_TYPE:
+                        cmdControl(stopExamineRule.getExamineThingCode(), stopExamineRule.getExamineMetricCode(), stopExamineRule.getCompareValue());
+                        break;
+                    // 液位检查
+                    case StopConstants.LEVEL_ERROR_TYPE:
+                        // 不做处理
+                        //TODO 更新自检记录
+                        break;
+                    default:
+                        break;
+
+                }
+            }
+        }
+
+    }
+
+    /**
+     * 发送停车自检修复
+     *
+     * @param thingCode
+     * @param metricCode
+     * @param value
+     */
+    public void cmdControl(String thingCode, String metricCode, String value) {
+
+        DataModel dataModel = new DataModel();
+        dataModel.setThingCode(thingCode);
+        dataModel.setMetricCode(metricCode);
+        dataModel.setValue(value);
+        logger.info("ThingCode{},MetricCode{},Value{}", thingCode, metricCode, value);
+        CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(dataModel, SessionContext.getCurrentUser().getRequestId());
+        if (cmdSendResponseData.getOkCount() == 0) {
+            logger.error("下发信号失败，失败原因：" + cmdSendResponseData.getErrorMessage());
         }
 
     }

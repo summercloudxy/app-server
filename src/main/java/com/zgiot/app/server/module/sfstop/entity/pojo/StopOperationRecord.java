@@ -33,24 +33,25 @@ public class StopOperationRecord {
 
     private int system;
 
-    private Integer stopElapsedTime;
+    private Long stopElapsedTime;
 
-    private Integer stopPauseTime;
+    private Long stopPauseTime;
 
-    public Integer getStopPauseTime() {
-        return stopPauseTime;
-    }
 
-    public void setStopPauseTime(Integer stopPauseTime) {
-        this.stopPauseTime = stopPauseTime;
-    }
-
-    public Integer getStopElapsedTime() {
+    public Long getStopElapsedTime() {
         return stopElapsedTime;
     }
 
-    public void setStopElapsedTime(Integer stopElapsedTime) {
+    public void setStopElapsedTime(Long stopElapsedTime) {
         this.stopElapsedTime = stopElapsedTime;
+    }
+
+    public Long getStopPauseTime() {
+        return stopPauseTime;
+    }
+
+    public void setStopPauseTime(Long stopPauseTime) {
+        this.stopPauseTime = stopPauseTime;
     }
 
     public int getSystem() {

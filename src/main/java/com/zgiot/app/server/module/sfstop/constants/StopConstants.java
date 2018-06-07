@@ -50,9 +50,9 @@ public class StopConstants {
     // 启车首次自检完成
     public static final int STOP_EXAMIN_STATE = 10;
     // 正式停车
-    public static final int STOP_STARTING_STATE = 30;
+    public static final int STOP_STOPING_STATE = 30;
     // 停车暂停
-    public static final int STOP_PAUSESTATE_STATE = 35;
+    public static final int STOP_PAUSE_STATE = 35;
     // 停车结束
     public static final int STOP_FINISH_STATE = 40;
 
@@ -101,7 +101,7 @@ public class StopConstants {
     // 自检初查完毕
     public static final String URI_STOP_STATE_MESSAGE_EXAMINE_FINISH = "examineFinish";
 
-    public static final String URI_MANUAL_INTERVENTION = "/topic/stop/manual/interventionStart";// 人工干预变更
+    public static final String URI_MANUAL_INTERVENTION = "/topic/stop/manual/interventionStop";// 人工干预变更
 
     public static final String URI_MANUAL_INTERVENTION_MESSAGE_MANUAL_INTERVENTION_CHANGE = "manualInterventionChange";
 
@@ -110,15 +110,21 @@ public class StopConstants {
     public static final int MANUAL_INTERVENTION_REMOVE = 2;
 
     // 停车结束
-    public static final String URI_STOP_STATE_MESSAGE_START_FINISH = "stopFinish";
+    public static final String URI_STOP_STATE_MESSAGE_STOP_FINISH = "stopFinish";
 
     // 暂停停车
     public static final String URI_STOP_STATE_MESSAGE_PAUSE = "pause";
 
     // 继续停车
-    public static final String URI_STOP_STATE_MESSAGE_CONTINUE_START = "continueStart";
+    public static final String URI_STOP_STATE_MESSAGE_CONTINUE_STOP = "continueStop";
     // 结束停车
-    public static final String URI_STOP_STATE_MESSAGE_CLOSE_START = "closeStart";
+    public static final String URI_STOP_STATE_MESSAGE_CLOSE_STOP = "closeStop";
+
+    // 集控就地类故障
+    public static final int REMOTE_ERROR_TYPE = 1;
+
+    // 液位故障
+    public static final int LEVEL_ERROR_TYPE = 2;
 
 
 }

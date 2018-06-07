@@ -9,7 +9,7 @@ public class StopExamineRecord {
     private Integer operateId;
 
     // 启车设备id
-    private String stopThingCode;
+    private String examineThingCode;
 
     // 检查规则id
     private Integer ruleId;
@@ -23,14 +23,6 @@ public class StopExamineRecord {
     // 是否故障(0:未检测完毕，1:正常，2:故障)
     private Integer examineResult;
 
-    // 检查设备id
-    private String examineDeviceId;
-
-    // 检查设备code
-    private String examineThingCode;
-
-    // 检查设备name
-    private String examineThingName;
 
     public Integer getExamineId() {
         return examineId;
@@ -48,13 +40,6 @@ public class StopExamineRecord {
         this.operateId = operateId;
     }
 
-    public String getStopThingCode() {
-        return stopThingCode;
-    }
-
-    public void setStopThingCode(String stopThingCode) {
-        this.stopThingCode = stopThingCode;
-    }
 
     public Integer getRuleId() {
         return ruleId;
@@ -88,13 +73,6 @@ public class StopExamineRecord {
         this.examineResult = examineResult;
     }
 
-    public String getExamineDeviceId() {
-        return examineDeviceId;
-    }
-
-    public void setExamineDeviceId(String examineDeviceId) {
-        this.examineDeviceId = examineDeviceId;
-    }
 
     public String getExamineThingCode() {
         return examineThingCode;
@@ -104,11 +82,5 @@ public class StopExamineRecord {
         this.examineThingCode = examineThingCode;
     }
 
-    public String getExamineThingName() {
-        return examineThingName;
-    }
-
-    public void setExamineThingName(String examineThingName) {
-        this.examineThingName = examineThingName;
-    }
+    
 }

@@ -149,6 +149,24 @@ public interface StopMapper {
             " left join tb_stop_examine_type se on se.id=ser.examine_type WHERE ser.is_delete =0 and ser.examine_result =2 and ser.operate_id =#{operateId}")
     List<StopExamineResult> getStartExaminRecordByOperateId(@Param("operateId") Integer operateId);
 
+    /**
+     * 查询停车自检的记录
+     *
+     * @param operateId
+     * @param examineThingCode
+     * @return
+     */
+    @Select("select * from tb_stop_examine_record where operate_id =#{operateId} and examine_thing_code =#{examineThingCode}")
+    StopExamineRecord getStopExamineRecordByThingCode(@Param("operateId") Integer operateId, @Param("examineThingCode") String examineThingCode);
+
+    /**
+     * 查询停车自检规则
+     *
+     * @param ruleId
+     * @return
+     */
+    @Select("select * from tb_stop_examine_rule WHERE rule_id =#{ruleId}")
+    StopExamineRule getStopExamineRuleByRuleId(@Param("ruleId") int ruleId);
 
 
 }

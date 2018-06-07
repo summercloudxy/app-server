@@ -24,24 +24,24 @@ public class StopExamineSystem2Listener implements DataListener {
     /**
      * 停车自检的设备
      */
-    private List<StopExamineThing> stopExamineThingList;
+    private List<StopExamineThing> system2StopExamineThingList;
 
 
-    public List<StopExamineThing> getStopExamineThingList() {
-        return stopExamineThingList;
+    public List<StopExamineThing> getSystem2StopExamineThingList() {
+        return system2StopExamineThingList;
     }
 
-    public void setStopExamineThingList(List<StopExamineThing> stopExamineThingList) {
-        this.stopExamineThingList = stopExamineThingList;
+    public void setSystem2StopExamineThingList(List<StopExamineThing> system2StopExamineThingList) {
+        this.system2StopExamineThingList = system2StopExamineThingList;
     }
 
     @Override
     public void onDataChange(DataModel dataModel) {
 
         if (StopHandler.startExamineListenerFlag != null && StopHandler.startExamineListenerFlag) {
-            for (StopExamineThing stopExamineThing : stopExamineThingList) {
+            for (StopExamineThing stopExamineThing : system2StopExamineThingList) {
                 if (dataModel.getThingCode().equals(stopExamineThing.getThingCode()) && dataModel.getMetricCode().equals(stopExamineThing.getMetricCode())) {
-                    logger.info("停车检查ThingCode：{},MetricCode{},的值{}收到", dataModel.getThingCode(), dataModel.getMetricCode(), dataModel.getValue());
+                    logger.info("二期停车检查ThingCode：{},MetricCode{},的值{}收到", dataModel.getThingCode(), dataModel.getMetricCode(), dataModel.getValue());
                     stopHandler.updateExamineRecordByRule(dataModel.getThingCode(), dataModel.getMetricCode(), dataModel.getValue());
                 } else {
                     return;

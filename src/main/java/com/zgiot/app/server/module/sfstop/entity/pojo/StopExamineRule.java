@@ -18,7 +18,7 @@ public class StopExamineRule {
     private String operator;
 
     // 比较值
-    private double compareValue;
+    private String compareValue;
 
     public Integer getRuleId() {
         return ruleId;
@@ -61,11 +61,11 @@ public class StopExamineRule {
         this.operator = operator;
     }
 
-    public double getCompareValue() {
+    public String getCompareValue() {
         return compareValue;
     }
 
-    public void setCompareValue(double compareValue) {
+    public void setCompareValue(String compareValue) {
         this.compareValue = compareValue;
     }
 }
