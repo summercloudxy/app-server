@@ -4,10 +4,7 @@ package com.zgiot.app.server.module.sfstop.mapper;
 import com.zgiot.app.server.module.alert.pojo.AlertData;
 import com.zgiot.app.server.module.sfstop.entity.pojo.*;
 import com.zgiot.app.server.module.sfstop.entity.vo.StopExamineResult;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -167,6 +164,15 @@ public interface StopMapper {
      */
     @Select("select * from tb_stop_examine_rule WHERE rule_id =#{ruleId}")
     StopExamineRule getStopExamineRuleByRuleId(@Param("ruleId") int ruleId);
+
+    /**
+     * 更新自检的记录（液位确认的结果）
+     *
+     * @param examineResult
+     * @param examineId
+     */
+    @Update("update tb_stop_examine_record set examine_result =#{examineResult} where examine_id =#{examineId} ")
+    void updateStopExamineResult(@Param("examineResult") int examineResult, @Param("examineId") int examineId);
 
 
 }

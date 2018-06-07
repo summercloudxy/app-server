@@ -170,4 +170,9 @@ public class StopServiceImpl implements StopService {
     public StopExamineRule getStopExamineRuleByRuleId(int ruleId) {
         return stopMapper.getStopExamineRuleByRuleId(ruleId);
     }
+
+    @Override
+    public void updateStopExamineResult(int examineResult, int examineId) {
+        stopMapper.updateStopExamineResult(examineResult, examineId);
+    }
 }

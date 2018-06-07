@@ -154,4 +154,12 @@ public interface StopService {
      * @return
      */
     StopExamineRule getStopExamineRuleByRuleId(int ruleId);
+
+    /**
+     * 更新自检的记录（液位确认的结果）
+     *
+     * @param examineResult
+     * @param examineId
+     */
+    void updateStopExamineResult(int examineResult, int examineId);
 }
