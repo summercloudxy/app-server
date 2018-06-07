@@ -13,8 +13,8 @@ public class StopMultithreading implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(StopMultithreading.class);
     private String system;
-    private Integer operateId; // 启车操作号
-    private Set<String> stopDeviceIds; //启动设备
+    private Integer operateId; // 停车操作号
+    private Set<String> stopThingCodes; //停车设备
     private String userId; // 操作人
     private StopService stopService;
     private StopHandler stopHandler;
@@ -40,7 +40,7 @@ public class StopMultithreading implements Runnable {
     public void setUpAutoTest() throws Exception {
         logger.info("进入停车车自检流程");
         // 获取自建规则范围
-        List<StopExamineRule> stopExamineRules = stopService.getStopExamineRuleByDeviceIds(stopDeviceIds);
+        List<StopExamineRule> stopExamineRules = stopService.getStopExamineRuleByDeviceIds(stopThingCodes);
         // 启车自检
         stopHandler.autoExamineStarting(stopExamineRules);
         // 建立人工干预
@@ -67,12 +67,12 @@ public class StopMultithreading implements Runnable {
         this.operateId = operateId;
     }
 
-    public Set<String> getStopDeviceIds() {
-        return stopDeviceIds;
+    public Set<String> getStopThingCodes() {
+        return stopThingCodes;
     }
 
-    public void setStopDeviceIds(Set<String> stopDeviceIds) {
-        this.stopDeviceIds = stopDeviceIds;
+    public void setStopThingCodes(Set<String> stopThingCodes) {
+        this.stopThingCodes = stopThingCodes;
     }
 
     public String getUserId() {

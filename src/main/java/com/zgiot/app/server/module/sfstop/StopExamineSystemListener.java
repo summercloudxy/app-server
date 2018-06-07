@@ -16,15 +16,28 @@ import java.util.List;
  */
 @Transactional
 @Component
-public class StopExamineSystem1Listener implements DataListener {
-    private static org.slf4j.Logger logger = LoggerFactory.getLogger(StopExamineSystem1Listener.class);
+public class StopExamineSystemListener implements DataListener {
+    private static org.slf4j.Logger logger = LoggerFactory.getLogger(StopExamineSystemListener.class);
 
     @Autowired
     private StopHandler stopHandler;
     /**
-     * 停车自检的设备
+     * 一期停车自检的设备
      */
     private List<StopExamineThing> system1StopExamineThingList;
+
+    /**
+     * 二期停车自检的设备
+     */
+    private List<StopExamineThing> system2StopExamineThingList;
+
+    public List<StopExamineThing> getSystem2StopExamineThingList() {
+        return system2StopExamineThingList;
+    }
+
+    public void setSystem2StopExamineThingList(List<StopExamineThing> system2StopExamineThingList) {
+        this.system2StopExamineThingList = system2StopExamineThingList;
+    }
 
     public List<StopExamineThing> getSystem1StopExamineThingList() {
         return system1StopExamineThingList;
@@ -37,7 +50,6 @@ public class StopExamineSystem1Listener implements DataListener {
     @Override
     public void onDataChange(DataModel dataModel) {
 
-        if (StopHandler.startExamineListenerFlag != null && StopHandler.startExamineListenerFlag) {
             for (StopExamineThing stopExamineThing : system1StopExamineThingList) {
                 if (dataModel.getThingCode().equals(stopExamineThing.getThingCode()) && dataModel.getMetricCode().equals(stopExamineThing.getMetricCode())) {
                     logger.info("一期停车检查ThingCode：{},MetricCode{},的值{}收到", dataModel.getThingCode(), dataModel.getMetricCode(), dataModel.getValue());
@@ -47,8 +59,14 @@ public class StopExamineSystem1Listener implements DataListener {
                 }
 
             }
-        } else {
-            return;
+        for (StopExamineThing stopExamineThing : system2StopExamineThingList) {
+            if (dataModel.getThingCode().equals(stopExamineThing.getThingCode()) && dataModel.getMetricCode().equals(stopExamineThing.getMetricCode())) {
+                logger.info("二期停车检查ThingCode：{},MetricCode{},的值{}收到", dataModel.getThingCode(), dataModel.getMetricCode(), dataModel.getValue());
+                stopHandler.updateExamineRecordByRule(dataModel.getThingCode(), dataModel.getMetricCode(), dataModel.getValue());
+            } else {
+                return;
+            }
+
         }
 
 

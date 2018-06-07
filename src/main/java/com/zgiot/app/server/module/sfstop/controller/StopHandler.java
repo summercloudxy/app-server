@@ -71,7 +71,6 @@ public class StopHandler {
     private static BlockingQueue blockingQueue;
 
 
-    public static Boolean startExamineListenerFlag;
     public static Boolean startListenerFlag;
 
     public static Logger getLogger() {
@@ -135,13 +134,6 @@ public class StopHandler {
         StopHandler.system1PauseState = system1PauseState;
     }
 
-    public static Boolean getStartExamineListenerFlag() {
-        return startExamineListenerFlag;
-    }
-
-    public static void setStartExamineListenerFlag(Boolean startExamineListenerFlag) {
-        StopHandler.startExamineListenerFlag = startExamineListenerFlag;
-    }
 
     public static Boolean getStartListenerFlag() {
         return startListenerFlag;
@@ -877,6 +869,7 @@ public class StopHandler {
         stopChoiceVOList.add(beltRouteSet);
         return stopChoiceVOList;
     }
+
     /**
      * 查询二期所有停车线
      *
@@ -978,8 +971,7 @@ public class StopHandler {
         List<StopExamineThing> examinethings = new ArrayList<>();
         for (StopExamineRule rule : stopExamineRules) {
             try {
-
-                logger.info("启车自检,检查设备:{},检查内容:{}", rule.getExamineThingCode(), rule.getExamineMetricCode());
+                logger.info("停车自检,检查设备:{},检查内容:{}", rule.getExamineThingCode(), rule.getExamineMetricCode());
                 String metricValue = getMetricValue(rule.getExamineThingCode(), rule.getExamineMetricCode());
 
 
@@ -996,7 +988,7 @@ public class StopHandler {
             stopExamineThing.setMetricCode(rule.getExamineMetricCode());
         }
         //    startExamineListener.setStartExamineLabels(examineLabel);
-        startExamineListenerFlag = true;
+     
 
     }
 

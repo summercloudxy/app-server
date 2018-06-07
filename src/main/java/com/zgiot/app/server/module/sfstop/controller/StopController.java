@@ -47,7 +47,6 @@ public class StopController {
     private StopHandler stopHandler;
 
 
-
     /**
      * 查询停车状态,根据停车状态判断跳转页面
      *
@@ -85,7 +84,6 @@ public class StopController {
         List<StopInformation> stopInformationList = stopHandler.getStopInformations(lineId);
         return new ResponseEntity<>(ServerResponse.buildOkJson(stopInformationList), HttpStatus.OK);
     }
-
 
 
     /**
@@ -187,8 +185,6 @@ public class StopController {
         stopOperationRecord.setOperateSystem(JSON.toJSONString(stopChoiceSetVO.getLineIds()));
         stopOperationRecord.setSystem(Integer.valueOf(stopChoiceSetVO.getSystem()));
         stopService.saveStopOperationRecord(stopOperationRecord);
-
-
         StopChoiceSet stopChoiceSet = new StopChoiceSet();
         stopChoiceSet.setRawStopSet(Integer.valueOf(stopChoiceSetVO.getRawStopSet()));
         stopChoiceSet.setTcsStopSet(Integer.valueOf(stopChoiceSetVO.getTcsStopSet()));
@@ -254,7 +250,7 @@ public class StopController {
         stopMultithreading.setSystem(system);
         stopMultithreading.setStopService(stopService);
         stopMultithreading.setStopHandler(stopHandler);
-        stopMultithreading.setStopDeviceIds(stopDeviceIds);
+        stopMultithreading.setStopThingCodes(stopDeviceIds);
         stopMultithreading.setOperateId(operateId);
         new Thread(stopMultithreading).start();
     }
@@ -290,7 +286,6 @@ public class StopController {
     }
 
 
-
     /**
      * 修复检查
      *
@@ -316,7 +311,6 @@ public class StopController {
 
         return new ResponseEntity<>(ServerResponse.buildOkJson(stopThingDetail), HttpStatus.OK);
     }
-
 
 
     /**

@@ -70,10 +70,10 @@ public interface StopService {
     /**
      * 根据设备查询检查规则
      *
-     * @param deviceIds
+     * @param thingCodes
      * @return
      */
-    List<StopExamineRule> getStopExamineRuleByDeviceIds(Set<String> deviceIds);
+    List<StopExamineRule> getStopExamineRuleByDeviceIds(Set<String> thingCodes);
 
     /**
      * 查询某个设备级别最高的故障告警信息

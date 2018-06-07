@@ -102,10 +102,10 @@ public interface StopMapper {
     /**
      * 根据设备查询规则
      *
-     * @param deviceId
+     * @param thingCode
      * @return
      */
-    List<StopExamineRule> selectStopExamineRuleByDeviceId(@Param("deviceId") String deviceId);
+    List<StopExamineRule> selectStopExamineRuleByThingCode(@Param("thingCode") String thingCode);
 
     /**
      * 结束停车

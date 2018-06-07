@@ -3,7 +3,6 @@ package com.zgiot.app.server.module.sfstop.service.impl;
 import com.zgiot.app.server.module.alert.pojo.AlertData;
 import com.zgiot.app.server.module.sfstart.constants.StartConstants;
 import com.zgiot.app.server.module.sfstop.constants.StopConstants;
-import com.zgiot.app.server.module.sfstop.controller.StopHandler;
 import com.zgiot.app.server.module.sfstop.entity.pojo.*;
 import com.zgiot.app.server.module.sfstop.entity.vo.StopExamineResult;
 import com.zgiot.app.server.module.sfstop.mapper.StopMapper;
@@ -98,10 +97,10 @@ public class StopServiceImpl implements StopService {
     }
 
     @Override
-    public List<StopExamineRule> getStopExamineRuleByDeviceIds(Set<String> deviceIds) {
+    public List<StopExamineRule> getStopExamineRuleByDeviceIds(Set<String> thingCodes) {
         List<StopExamineRule> startExamineRules = new ArrayList<>();
-        for (String device : deviceIds) {
-            startExamineRules.addAll(stopMapper.selectStopExamineRuleByDeviceId(device));
+        for (String thingCode : thingCodes) {
+            startExamineRules.addAll(stopMapper.selectStopExamineRuleByThingCode(thingCode));
         }
         return startExamineRules;
 
@@ -127,7 +126,6 @@ public class StopServiceImpl implements StopService {
     @Override
     public void closeStopOperate(String system) {
         Integer findOperateId = getStopOperateId(Integer.valueOf(system));
-        StopHandler.startExamineListenerFlag = false;
         stopMapper.closeOperateStopByOperateId(StopConstants.IS_DELETE, findOperateId);
 
     }
