@@ -218,8 +218,6 @@ public class AlertManager {
         alertData.setReporter(userId);
         alertData.setAlertSource(AlertConstants.SOURCE_USER);
         alertData.setAlertType(AlertConstants.TYPE_USER);
-        //todo  delete
-        alertData.setAlertLevel(AlertConstants.LEVEL_30);
         generateAlert(alertData);
         AlertMessage alertMessage = new AlertMessage();
         alertMessage.setAlertId(alertData.getId());
