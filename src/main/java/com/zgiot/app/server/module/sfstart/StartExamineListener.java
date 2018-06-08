@@ -59,10 +59,14 @@ public class StartExamineListener implements DataListener {
             for (String label : startExamineLabels) {
                 if (thingMetricLabel.getLabelPath().equals(label)) {
                     if (!startService.judgeStartingState(StartConstants.START_PREPARE_STATE, StartConstants.START_STARTING_STATE)) {
-                        logger.error("抛弃虚假启车检查标签数据{}的值{}", label, dataModel.getValue());
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("抛弃虚假启车检查标签数据{}的值{}", label, dataModel.getValue());
+                        }
                         return;
                     }
-                    logger.info("启车检查标签{}的值{}收到", label, dataModel.getValue());
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("启车检查标签{}的值{}收到", label, dataModel.getValue());
+                    }
                     String metricValue = null;
                     if ("false".equals(dataModel.getValue())) {
                         metricValue = "0.0";
