@@ -144,8 +144,20 @@ public class TransPortServiceImpl implements TransPortService {
      * @param transport
      */
     private void editTransPort(Transport transport) {
+
+        if(transport.getCoalType()!=null && transport.getBatch()==null){
+            //判断缓存中是否存在符合数据
+            Transport  mostNewTransport = transPortMapper.getMostNewTransPortByType(transport.getCoalType());
+            //设置transport中的批次数据
+            if (mostNewTransport == null) {
+                transport.setBatch(1);
+            } else {
+                transport.setBatch(mostNewTransport.getBatch() + 1);
+            }
+        }
+
         //这里需要重新计算是为避免用户更改结束时间
-        if(transport.getTransportEndTime()!=null){
+        if(transport.getTransportEndTime()!=null && transport.getTransportStartTime()!=null){
             Long dateLength = transport.getTransportEndTime().getTime() - transport.getTransportStartTime().getTime();
             transport.setDuration((int) (dateLength / 1000 / 60));
 
@@ -159,11 +171,7 @@ public class TransPortServiceImpl implements TransPortService {
                 updateTransportList(transport);
             }else{
                 //不在当班时间之内需要清除Bean中数据
-                for (Transport tp:transBean.getTransportList()) {
-                    if(tp.getId().equals(transport.getId())){
-                        transBean.getTransportList().remove(tp);
-                    }
-                }
+                removeBeanTransport(transport);
             }
         }else{
             transPortMapper.editTransPort(transport);
@@ -171,6 +179,19 @@ public class TransPortServiceImpl implements TransPortService {
             updateTransportList(transport);
         }
         updateOutSaleStatistics();
+    }
+
+    private void removeBeanTransport(Transport transport) {
+        List<Transport> transportList = transBean.getTransportList();
+        int index=0;
+        for (int i=0;i<transportList.size();i++){
+            if(transportList.get(i).getId().equals(transport.getId())){
+                index=i;
+            }
+        }
+        if(index!=0){
+            transportList.remove(index);
+        }
     }
 
     /**
@@ -499,9 +520,6 @@ public class TransPortServiceImpl implements TransPortService {
         if(currentStoreRecord==null){
             currentStoreRecord=outputService.getCurrentStoreRecord(dutyStartTime,lastStoreRecord);
         }
-
-
-
         Double washedCoalOutWardVolunm = 0.0;
         if(saleStatisticsOutwardMap.containsKey(ReportFormConstant.COAL_TYPE_WASHED_NUM) && saleStatisticsOutwardMap.get(ReportFormConstant.COAL_TYPE_WASHED_NUM).getCoalVolunm()!=null){
             washedCoalOutWardVolunm = saleStatisticsOutwardMap.get(ReportFormConstant.COAL_TYPE_WASHED_NUM).getCoalVolunm();
@@ -511,8 +529,6 @@ public class TransPortServiceImpl implements TransPortService {
         if(saleStatisticsLocalityMap.containsKey(ReportFormConstant.COAL_TYPE_WASHED_NUM) && saleStatisticsLocalityMap.get(ReportFormConstant.COAL_TYPE_WASHED_NUM).getCoalVolunm()!=null){
             washedCoalLocalityVolunm=saleStatisticsLocalityMap.get(ReportFormConstant.COAL_TYPE_WASHED_NUM).getCoalVolunm();
         }
-
-
         Double washedCoalValue=lastStoreRecord.getWashedCoal()-washedCoalOutWardVolunm-washedCoalLocalityVolunm;
 
         //这是减去自用,只有洗混煤才需要减去自用
