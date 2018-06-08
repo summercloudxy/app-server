@@ -1,5 +1,6 @@
 package com.zgiot.app.server.module.auth.service;
 
+import com.zgiot.app.server.module.auth.controller.workshopPost.RelThingCodeUserInWorkshop;
 import com.zgiot.app.server.module.auth.mapper.PlatformClientMapper;
 import com.zgiot.app.server.module.auth.mapper.RoleUserMapper;
 import com.zgiot.app.server.module.auth.mapper.StationMapper;
@@ -186,6 +187,11 @@ public class UserService {
 
     public List<String> getThingCodesInWorkshopPostByUserId(Long userId) {
         return userMapper.getThingCodesInWorkshopPostByUserId(userId);
+    }
+
+
+    public List<RelThingCodeUserInWorkshop> getThingCodesInWorkshopPost() {
+        return userMapper.getThingCodesInWorkshopPost();
     }
 
 

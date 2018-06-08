@@ -1,5 +1,6 @@
 package com.zgiot.app.server.module.auth.mapper;
 
+import com.zgiot.app.server.module.auth.controller.workshopPost.RelThingCodeUserInWorkshop;
 import com.zgiot.app.server.module.auth.pojo.User;
 import com.zgiot.app.server.module.auth.pojo.UserDepartmentStation;
 import com.zgiot.app.server.module.auth.pojo.UserDetail;
@@ -124,5 +125,12 @@ public interface UserMapper {
             "        AND\n" +
             "        u.workshop_post_id = t.workshop_post_id")
     List<String> getThingCodesInWorkshopPostByUserId(Long userId);
+
+
+    @Select("        SELECT t.thing_code,u.user_id\n" +
+            "        FROM s_department_station_user u,rel_workshop_post_thing t\n" +
+            "        WHERE\n" +
+            "        u.workshop_post_id = t.workshop_post_id")
+    List<RelThingCodeUserInWorkshop> getThingCodesInWorkshopPost();
 
 }
