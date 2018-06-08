@@ -650,8 +650,15 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
 
         FindIterable<Document> iterable = null; //query result
 
-        long interval = getIntervalAndSearchResult( thingCodes, metricCode,startTime,endTime,segment, iterable,mongoCollection);
-
+        long interval; 
+        //long interval;
+        if (segment == 1) {
+            //when segment eq 1, take startTime as the standard
+            interval = 0;
+        } else {
+            interval = (endTime - startTime) / (segment - 1);
+            iterable = getSearchResult(thingCodes,metricCode,startTime,endTime,segment,mongoCollection);
+        }
 
         Map<String, Map<String, Object>> map = new HashMap<>(thingCodes.size());    //store dataModel array, timestamp and unset size
         setBaseHisDataAttributeToThing(iterable, map,segment, isTimeCorrection,interval,endTime);
@@ -691,7 +698,16 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
         }
 
         FindIterable<Document> iterable = null; //query result
-        long interval = getIntervalAndSearchResult( thingCodes, metricCode,startTime,endTime,segment, iterable,mongoCollection);
+        long interval ;
+
+        //long interval;
+        if (segment == 1) {
+            //when segment eq 1, take startTime as the standard
+            interval = 0;
+        } else {
+            interval = (endTime - startTime) / (segment - 1);
+            iterable = getSearchResult(thingCodes,metricCode,startTime,endTime,segment,mongoCollection);
+        }
 
 
         Map<String, Map<String, Object>> map = new HashMap<>(thingCodes.size());    //store dataModel array, timestamp and unset size
@@ -739,19 +755,13 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
         }
     }
 
-    private long getIntervalAndSearchResult( List<String> thingCodes, String metricCode,long startTime, long endTime, Integer segment, FindIterable<Document> iterable,MongoCollection<Document> mongoCollection){
-        long interval;
-        if (segment == 1) {
-            //when segment eq 1, take startTime as the standard
-            interval = 0;
-        } else {
-            interval = (endTime - startTime) / (segment - 1);
-            //query
-            Bson criteria = and(gte(DataModel.DATA_TIMESTAMP, startTime), lt(DataModel.DATA_TIMESTAMP, endTime),
+    private  FindIterable<Document>  getSearchResult( List<String> thingCodes, String metricCode,long startTime, long endTime, Integer segment,MongoCollection<Document> mongoCollection){
+        FindIterable<Document> iterable = null;
+        Bson criteria = and(gte(DataModel.DATA_TIMESTAMP, startTime), lt(DataModel.DATA_TIMESTAMP, endTime),
                     eq(DataModel.METRIC_CODE, metricCode), in(DataModel.THING_CODE, thingCodes));
-            iterable = mongoCollection.find(criteria).sort(Sorts.descending(DataModel.DATA_TIMESTAMP));
-        }
-        return interval;
+        iterable = mongoCollection.find(criteria).sort(Sorts.descending(DataModel.DATA_TIMESTAMP));
+
+        return iterable;
     }
 
 
