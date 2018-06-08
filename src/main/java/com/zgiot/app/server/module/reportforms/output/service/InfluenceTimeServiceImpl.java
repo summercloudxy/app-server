@@ -219,6 +219,7 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
         InfluenceTimeRemarks personnel = influenceTimeBean.getInfluenceTimeRemarks();
         if(personnel!=null){
             personnel.setDutyStartTime(influenceTimeRemarks.getDutyStartTime());
+            personnel.setRemarks(influenceTimeRemarks.getRemarks());
             personnel.setDispatcher(influenceTimeRemarks.getDispatcher());
             personnel.setChecker(influenceTimeRemarks.getChecker());
             personnel.setFactoryDutyLeader(influenceTimeRemarks.getFactoryDutyLeader());
