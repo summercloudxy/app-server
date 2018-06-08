@@ -53,7 +53,7 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
 
     @Override
     public void influenceTimeService(InfluenceTimeReq influenceTimeReq) {
-        updateRemarks(influenceTimeReq);
+        //updateRemarks(influenceTimeReq);
 
         List<InfluenceTime> influenceTimes = influenceTimeReq.getInfluenceTimeList();
         if(influenceTimes!=null && influenceTimes.size()>0){
