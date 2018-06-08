@@ -151,7 +151,7 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
         if (!checkEnabled()) {
             return new HashMap<>();
         }
-        return findMultiThingsHistoryDataOfMetricBySegment(thingCodes, metricCode, startDate, endDate, segment, isTimeCorrection, AccuracyEnum.SECOND,null);
+        return findMultiThingsHistoryDataOfMetricBySegment(thingCodes, metricCode, startDate, endDate, segment, isTimeCorrection, AccuracyEnum.SECOND,null,null);
     }
 
 
@@ -294,6 +294,11 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
                 lte(DataModel.DATA_TIMESTAMP, endTime), eq(DataModel.METRIC_CODE, metricCode), eq(DataModel.THING_CODE, thingCode));
 
         FindIterable<Document> iterable = mongoCollection.find(criteria).sort(Sorts.descending(DataModel.DATA_TIMESTAMP)).limit(1);
+        setDefaultValue(iterable,endTime, dataModels, size, interval, isTimeCorrection);
+
+    }
+
+    private void setDefaultValue(FindIterable<Document> iterable,long endTime, DataModel[] dataModels, int size, long interval, boolean isTimeCorrection){
         for (Document document : iterable) {
             DataModel model = new DataModel();
             model.setValue(document.getString(DataModel.VALUE));
@@ -307,6 +312,27 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
             }
         }
     }
+
+    private void queryForUnsetOrNullDataModel(String thingCode, String metricCode, long endTime, DataModel[] dataModels, int size, long interval, boolean isTimeCorrection, MongoCollection<Document> mongoCollection,String nullReturn) {
+        Bson criteria = and(gte(DataModel.DATA_TIMESTAMP, endTime - DEFAUTL_MAX_TIMERANGE),
+                lte(DataModel.DATA_TIMESTAMP, endTime), eq(DataModel.METRIC_CODE, metricCode), eq(DataModel.THING_CODE, thingCode));
+
+        FindIterable<Document> iterable = mongoCollection.find(criteria).sort(Sorts.descending(DataModel.DATA_TIMESTAMP)).limit(1);
+        setDefaultValue(iterable,endTime, dataModels, size, interval, isTimeCorrection);
+        //dataModel
+        for(int i = 0; i < size; i++){
+            if(dataModels[i] == null){
+                DataModel model = new DataModel();
+                model.setThingCode(thingCode);
+                model.setMetricCode(metricCode);
+                model.setDataTimeStamp(new Date(endTime + i * interval));
+                model.setValue(nullReturn);
+                dataModels[i] = model;
+            }
+        }
+
+    }
+
 
 
     @Override
@@ -573,12 +599,8 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
     @Override
     public Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment, boolean isTimeCorrection, AccuracyEnum accuracy) {
 
-        MongoCollection<Document> mongoCollection = null;
-        if (AccuracyEnum.SECOND.equals(accuracy)) {
-            mongoCollection = collection;
-        } else if (AccuracyEnum.MINUTE.equals(accuracy)) {
-            mongoCollection = minCollection;
-        }
+        MongoCollection<Document> mongoCollection = getCollection(accuracy);
+
         if (!checkEnabled()) {
             return new HashMap<>();
         }
@@ -588,6 +610,31 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
         }
 
         return getMultiThingsHistoryDataOfMetricBySegment(thingCodes, metricCode, startDate, endDate, segment, isTimeCorrection, accuracy,mongoCollection);
+    }
+
+    private MongoCollection<Document> getCollection( AccuracyEnum accuracy){
+        MongoCollection<Document> mongoCollection = null;
+        if (AccuracyEnum.SECOND.equals(accuracy)) {
+            mongoCollection = collection;
+        } else if (AccuracyEnum.MINUTE.equals(accuracy)) {
+            mongoCollection = minCollection;
+        }
+        return mongoCollection;
+    }
+
+    @Override
+    public Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment, boolean isTimeCorrection, AccuracyEnum accuracy,int nullReturn) {
+
+        MongoCollection<Document> mongoCollection = getCollection(accuracy);
+        if (!checkEnabled()) {
+            return new HashMap<>();
+        }
+        if (mongoCollection == null) {
+            logger.warn("mongo disabled");
+            return new HashMap<>();
+        }
+
+        return getMultiThingsHistoryDataOfMetricBySegment(thingCodes, metricCode, startDate, endDate, segment, isTimeCorrection, accuracy,mongoCollection,String.valueOf(nullReturn));
     }
 
     private Map<String, List<DataModel>> getMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment, boolean isTimeCorrection, AccuracyEnum accuracy, MongoCollection<Document> mongoCollection){
@@ -601,39 +648,13 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
             throw new IllegalArgumentException("StartDate must be earlier than endDate");
         }
 
-        long interval;
         FindIterable<Document> iterable = null; //query result
 
-        if (segment == 1) {
-            //when segment eq 1, take startTime as the standard
-            interval = 0;
-        } else {
-            interval = (endTime - startTime) / (segment - 1);
-            //query
-            Bson criteria = and(gte(DataModel.DATA_TIMESTAMP, startTime), lt(DataModel.DATA_TIMESTAMP, endTime),
-                    eq(DataModel.METRIC_CODE, metricCode), in(DataModel.THING_CODE, thingCodes));
-            iterable = mongoCollection.find(criteria).sort(Sorts.descending(DataModel.DATA_TIMESTAMP));
-        }
+        long interval = getIntervalAndSearchResult( thingCodes, metricCode,startTime,endTime,segment, iterable,mongoCollection);
 
 
         Map<String, Map<String, Object>> map = new HashMap<>(thingCodes.size());    //store dataModel array, timestamp and unset size
-        if (iterable != null) {
-            for (Document document : iterable) {
-                String tc = document.getString(DataModel.THING_CODE);
-                Map<String, Object> temp = map.get(tc);
-                if (temp == null) {
-                    //init temp map
-                    temp = new HashMap<>(3);
-                    temp.put(KEY_ARRAY, new DataModel[segment]);  //empty dataModel array
-                    temp.put(KEY_TIMESTAMP, endTime); //timestamp for check
-                    temp.put(KEY_SIZE, segment);  //unset size
-                    map.put(tc, temp);
-                }
-
-                checkDocument(document, temp, interval, isTimeCorrection);
-            }
-        }
-
+        setBaseHisDataAttributeToThing(iterable, map,segment, isTimeCorrection,interval,endTime);
 
         //generate result map
         Map<String, List<DataModel>> result = new LinkedHashMap<>(thingCodes.size());
@@ -658,10 +679,84 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
         return result;
     }
 
+    private Map<String, List<DataModel>> getMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment, boolean isTimeCorrection, AccuracyEnum accuracy, MongoCollection<Document> mongoCollection,String nullReturn){
+        long startTime = startDate.getTime();
+        long endTime = endDate.getTime();
+        //param validator
+        if (segment <= 0) {
+            throw new IllegalArgumentException("Segment must be greater than 0");
+        }
+        if (startTime >= endTime) {
+            throw new IllegalArgumentException("StartDate must be earlier than endDate");
+        }
+
+        FindIterable<Document> iterable = null; //query result
+        long interval = getIntervalAndSearchResult( thingCodes, metricCode,startTime,endTime,segment, iterable,mongoCollection);
+
+
+        Map<String, Map<String, Object>> map = new HashMap<>(thingCodes.size());    //store dataModel array, timestamp and unset size
+        setBaseHisDataAttributeToThing(iterable, map,segment, isTimeCorrection,interval,endTime);
+
+        //generate result map
+        Map<String, List<DataModel>> result = new LinkedHashMap<>(thingCodes.size());
+        for (String thingCode : thingCodes) {
+            Map<String, Object> temp = map.get(thingCode);
+            DataModel[] dataModels;
+            if (temp == null) {
+                dataModels = new DataModel[segment];
+                queryForUnsetOrNullDataModel(thingCode, metricCode, startTime, dataModels, segment, interval, isTimeCorrection, mongoCollection,nullReturn);
+            } else {
+                dataModels = (DataModel[]) temp.get(KEY_ARRAY);
+                int size = (int) temp.get(KEY_SIZE);
+                if (size > 0) {
+                    queryForUnsetOrNullDataModel(thingCode, metricCode, startTime, dataModels, size, interval, isTimeCorrection, mongoCollection,nullReturn);
+                }
+            }
+
+            List<DataModel> dataModelList = Arrays.asList(dataModels);
+            result.put(thingCode, dataModelList);
+        }
+
+        return result;
+    }
+
+    private void setBaseHisDataAttributeToThing(FindIterable<Document> iterable, Map<String, Map<String, Object>> map,Integer segment, boolean isTimeCorrection,long interval,long endTime){
+        if (iterable != null) {
+            for (Document document : iterable) {
+                String tc = document.getString(DataModel.THING_CODE);
+                Map<String, Object> temp = map.get(tc);
+                if (temp == null) {
+                    //init temp map
+                    temp = new HashMap<>(3);
+                    temp.put(KEY_ARRAY, new DataModel[segment]);  //empty dataModel array
+                    temp.put(KEY_TIMESTAMP, endTime); //timestamp for check
+                    temp.put(KEY_SIZE, segment);  //unset size
+                    map.put(tc, temp);
+                }
+
+                checkDocument(document, temp, interval, isTimeCorrection);
+            }
+        }
+    }
+
+    private long getIntervalAndSearchResult( List<String> thingCodes, String metricCode,long startTime, long endTime, Integer segment, FindIterable<Document> iterable,MongoCollection<Document> mongoCollection){
+        long interval;
+        if (segment == 1) {
+            //when segment eq 1, take startTime as the standard
+            interval = 0;
+        } else {
+            interval = (endTime - startTime) / (segment - 1);
+            //query
+            Bson criteria = and(gte(DataModel.DATA_TIMESTAMP, startTime), lt(DataModel.DATA_TIMESTAMP, endTime),
+                    eq(DataModel.METRIC_CODE, metricCode), in(DataModel.THING_CODE, thingCodes));
+            iterable = mongoCollection.find(criteria).sort(Sorts.descending(DataModel.DATA_TIMESTAMP));
+        }
+        return interval;
+    }
 
 
     @Override
-    public Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment, boolean isTimeCorrection, AccuracyEnum accuracy, SummaryTypeEnum summaryTypeEnum) {
+    public Map<String, List<DataModel>> findMultiThingsHistoryDataOfMetricBySegment(List<String> thingCodes, String metricCode, Date startDate, Date endDate, Integer segment, boolean isTimeCorrection, AccuracyEnum accuracy, SummaryTypeEnum summaryTypeEnum,String nullReturn) {
 
         MongoCollection<Document> mongoCollection = getMongoCollection(accuracy,summaryTypeEnum);
 
@@ -672,7 +767,12 @@ public class HistoryDataServiceImpl implements HistoryDataService, Reloader {
             logger.warn("mongo disabled");
             return new HashMap<>();
         }
-        return getMultiThingsHistoryDataOfMetricBySegment(thingCodes, metricCode, startDate, endDate, segment, isTimeCorrection, accuracy,mongoCollection);
+        if(StringUtils.isBlank(nullReturn)){
+            return getMultiThingsHistoryDataOfMetricBySegment(thingCodes, metricCode, startDate, endDate, segment, isTimeCorrection, accuracy,mongoCollection);
+        }else{
+            return getMultiThingsHistoryDataOfMetricBySegment(thingCodes, metricCode, startDate, endDate, segment, isTimeCorrection, accuracy,mongoCollection,nullReturn);
+        }
+
     }
 
     private MongoCollection<Document> getMongoCollection(AccuracyEnum accuracy, SummaryTypeEnum summaryTypeEnum){
