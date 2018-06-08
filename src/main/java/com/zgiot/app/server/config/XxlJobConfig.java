@@ -13,8 +13,8 @@ import org.springframework.context.annotation.Configuration;
  *
  * @author xuxueli 2017-04-28
  */
-//@Configuration
-//@ComponentScan(basePackages = "com.zgiot.app.server.module")
+@Configuration
+@ComponentScan(basePackages = "com.zgiot.app.server.module")
 public class XxlJobConfig {
     private Logger logger = LoggerFactory.getLogger(XxlJobConfig.class);
 
