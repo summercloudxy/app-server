@@ -377,14 +377,36 @@ public class OutputStoreAndTargetService {
                 }
             }
             //填充没有查询到的指标数据
-            checkNonExistTargetRecord(dutyStartTime,otherTargetRecordMap);
-
+            checkNonExistTargetRecord(dutyStartTime, otherTargetRecordMap);
+            checkWaterConsume(dutyStartTime, otherTargetRecordMap);
+            //给填充的数据设置年、月累计值
+            setNoExistTargetMonthAndYearValue(dutyStartTime, otherTargetRecordMap, lastOtherTargetRecordMap);
 
         } else {
             otherTargetRecordMap = getOtherTargetRecordMap(dutyStartTime);
         }
-        checkWaterConsume(dutyStartTime,otherTargetRecordMap);
+
         return otherTargetRecordMap;
+    }
+
+    private void setNoExistTargetMonthAndYearValue(Date dutyStartTime, Map<Integer, Map<Integer, ReportFormTargetRecord>> otherTargetRecordMap, Map<Integer, Map<Integer, ReportFormTargetRecord>> lastOtherTargetRecordMap) {
+        for (Map.Entry<Integer, Map<Integer, ReportFormTargetRecord>> entry : otherTargetRecordMap.entrySet()) {
+            Integer targetTypeId = entry.getKey();
+            Map<Integer, ReportFormTargetRecord> termReportFormTargetRecords = entry.getValue();
+            for (Map.Entry<Integer, ReportFormTargetRecord> entry1 : termReportFormTargetRecords.entrySet()) {
+                Integer termId = entry1.getKey();
+                ReportFormTargetRecord reportFormTargetRecord = entry1.getValue();
+                if (reportFormTargetRecord.getMonthValue() == null || reportFormTargetRecord.getMonthValue().equals(0.0)) {
+                    ReportFormTargetRecord lastTargetRecord = lastOtherTargetRecordMap.get(targetTypeId).get(termId);
+                    if (!ReportFormDateUtil.isMonthFirstDay(dutyStartTime)) {
+                        reportFormTargetRecord.setMonthValue(lastTargetRecord.getMonthValue());
+                    }
+                    if (!ReportFormDateUtil.isYearFirstDay(dutyStartTime)) {
+                        reportFormTargetRecord.setYearValue(lastTargetRecord.getMonthValue());
+                    }
+                }
+            }
+        }
     }
 
     private ReportFormTargetRecord getTargetRecordWithYearAndMonthValue(Date dutyStartTime, ReportFormTargetRecord lastReportFromTargetRecord, Double classValue) {
@@ -436,18 +458,18 @@ public class OutputStoreAndTargetService {
         return targetRecordMap;
     }
 
-    private void checkWaterConsume(Date dutyStartTime,Map<Integer, Map<Integer, ReportFormTargetRecord>> targetRecordMap) {
-        if (!targetRecordMap.containsKey(ReportFormTargetConstant.WATER_CONSUME)){
+    private void checkWaterConsume(Date dutyStartTime, Map<Integer, Map<Integer, ReportFormTargetRecord>> targetRecordMap) {
+        if (!targetRecordMap.containsKey(ReportFormTargetConstant.WATER_CONSUME)) {
             ReportFormTargetRecord waterConsumeRecordTermOne = createWaterConsumeRecord(dutyStartTime, 1);
             ReportFormTargetRecord waterConsumeRecordTermTwo = createWaterConsumeRecord(dutyStartTime, 2);
-            Map<Integer,ReportFormTargetRecord> termRecordMap = new HashMap<>();
-            termRecordMap.put(1,waterConsumeRecordTermOne);
-            termRecordMap.put(2,waterConsumeRecordTermTwo);
-            targetRecordMap.put(ReportFormTargetConstant.WATER_CONSUME,termRecordMap);
+            Map<Integer, ReportFormTargetRecord> termRecordMap = new HashMap<>();
+            termRecordMap.put(1, waterConsumeRecordTermOne);
+            termRecordMap.put(2, waterConsumeRecordTermTwo);
+            targetRecordMap.put(ReportFormTargetConstant.WATER_CONSUME, termRecordMap);
         }
     }
 
-    private ReportFormTargetRecord createWaterConsumeRecord(Date dutyStartTime,int term) {
+    private ReportFormTargetRecord createWaterConsumeRecord(Date dutyStartTime, int term) {
         ReportFormTargetRecord reportFormTargetRecordTermOne = new ReportFormTargetRecord();
         reportFormTargetRecordTermOne.setDutyStartTime(dutyStartTime);
         reportFormTargetRecordTermOne.setTerm(term);
@@ -490,7 +512,7 @@ public class OutputStoreAndTargetService {
      * @return
      */
     private Map<Integer, Map<Integer, ReportFormTargetRecord>> getTargetRecordFromTaskModule(Date dutyStartTime) {
-        Date firstDayOfYear = DateUtils.addHours(DateUtils.truncate(dutyStartTime, Calendar.YEAR),-4);
+        Date firstDayOfYear = DateUtils.addHours(DateUtils.truncate(dutyStartTime, Calendar.YEAR), -4);
 
         List<TaskFeedbackInfo> taskFeedbackInfoList = targetMapper.getTaskFeedbackInfoList(firstDayOfYear, DateUtils.addHours(dutyStartTime, 12));
         //outer key :targetTypeId  inner key : term
@@ -502,7 +524,7 @@ public class OutputStoreAndTargetService {
             }
         }
         checkNonExistTargetRecord(dutyStartTime, reportFormTargetRecordMap);
-        checkWaterConsume(dutyStartTime,reportFormTargetRecordMap);
+        checkWaterConsume(dutyStartTime, reportFormTargetRecordMap);
         return reportFormTargetRecordMap;
     }
 
@@ -515,7 +537,7 @@ public class OutputStoreAndTargetService {
      * @param taskFeedbackInfo
      */
     private void getTargetRecordFromFeedbackInfo(Date dutyStartTime, Map<Integer, Map<Integer, ReportFormTargetRecord>> reportFormTargetRecordMap, TaskFeedbackInfo taskFeedbackInfo) {
-        Date firstDayOfMonth = DateUtils.addHours(DateUtils.truncate(dutyStartTime, Calendar.MONTH),-4);
+        Date firstDayOfMonth = DateUtils.addHours(DateUtils.truncate(dutyStartTime, Calendar.MONTH), -4);
         Integer feedbackInfoId = taskFeedbackInfo.getFeedbackInfoId();
         FeedbackTargetRelation feedbackTargetRelation = feedbackTargetMap.get(feedbackInfoId);
         Integer targetTypeId = feedbackTargetRelation.getTargetTypeId();
@@ -621,8 +643,8 @@ public class OutputStoreAndTargetService {
     private void getWaterValueFromTaskModule(ReportFormTargetRecord reportFormTargetRecord, FeedbackTargetRelation feedbackTargetRelation) {
         Date dutyStartTime = reportFormTargetRecord.getDutyStartTime();
         Double currentWaterMeter = reportFormTargetRecord.getClassValue();
-        Date firstDayOfYear = DateUtils.addHours(DateUtils.truncate(dutyStartTime, Calendar.YEAR),-4);
-        Date firstDayOfMonth = DateUtils.addHours(DateUtils.truncate(dutyStartTime, Calendar.MONTH),-4);
+        Date firstDayOfYear = DateUtils.addHours(DateUtils.truncate(dutyStartTime, Calendar.YEAR), -4);
+        Date firstDayOfMonth = DateUtils.addHours(DateUtils.truncate(dutyStartTime, Calendar.MONTH), -4);
         TaskFeedbackInfo lastYearWaterMeterValue = targetMapper.getLastTaskFeedbackInfoBeforeDate(firstDayOfYear, feedbackTargetRelation.getFeedbackInfoId());
         TaskFeedbackInfo lastMonthWaterMeterValue = targetMapper.getLastTaskFeedbackInfoBeforeDate(firstDayOfMonth, feedbackTargetRelation.getFeedbackInfoId());
         TaskFeedbackInfo lastClassWaterMeterValue = targetMapper.getLastTaskFeedbackInfoBeforeDate(dutyStartTime, feedbackTargetRelation.getFeedbackInfoId());
@@ -653,7 +675,7 @@ public class OutputStoreAndTargetService {
     }
 
 
-    public List<ReportFormOutputStoreRecord> getOutputRecordsInDuration(Date startTime,Date endTime){
-       return outputStoreMapper.getOutputStoreRecordsInDuration(TYPE_OUTPUT,startTime,endTime);
+    public List<ReportFormOutputStoreRecord> getOutputRecordsInDuration(Date startTime, Date endTime) {
+        return outputStoreMapper.getOutputStoreRecordsInDuration(TYPE_OUTPUT, startTime, endTime);
     }
 }
