@@ -1,7 +1,10 @@
 package com.zgiot.app.server.module.alert;
 
+import com.zgiot.app.server.config.SocketSessionRegistry;
 import com.zgiot.app.server.module.alert.mapper.AlertMapper;
 import com.zgiot.app.server.module.alert.pojo.*;
+import com.zgiot.app.server.module.auth.controller.workshopPost.RelThingCodeUserInWorkshop;
+import com.zgiot.app.server.module.auth.service.UserService;
 import com.zgiot.app.server.service.CmdControlService;
 import com.zgiot.app.server.service.MetricService;
 import com.zgiot.app.server.service.ThingService;
@@ -16,9 +19,14 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.sockjs.client.WebSocketClientSockJsSession;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -63,6 +71,10 @@ public class AlertManager {
     private MetricService metricService;
     @Autowired
     private ThingService thingService;
+    @Autowired
+    private SocketSessionRegistry socketSessionRegistry;
+    @Autowired
+    private UserService userService;
     private static final Logger logger = LoggerFactory.getLogger(AlertManager.class);
     private static final int SORT_DESC = 0;
     private static final int SORT_ASC = 1;
@@ -73,6 +85,9 @@ public class AlertManager {
     //解除报警Map
     private Map<String, Map<String, AlertRelieveTime>> paramRelieveTimeMap = new ConcurrentHashMap<>();
 
+    //用户和设备关系
+    private Map<String, Set<String>> userThingRelMap = new HashMap<>();
+
 
     public void init() {
         initMetricAlertType();
@@ -81,6 +96,7 @@ public class AlertManager {
         initTargetRuleMap();
         initAlertDataMap();
         initParamRelieveTimeMap();
+        initUserThingRelation();
 
         Thread thread = new Thread(() -> {
             while (true) {
@@ -98,6 +114,23 @@ public class AlertManager {
         });
         thread.start();
     }
+
+
+    public void initUserThingRelation() {
+        List<RelThingCodeUserInWorkshop> thingCodesInWorkshopPostList = userService.getThingCodesInWorkshopPost();
+        for (RelThingCodeUserInWorkshop thingCodeUserInWorkshop : thingCodesInWorkshopPostList) {
+            String thingCode = thingCodeUserInWorkshop.getThingCode();
+            Set<String> userIds;
+            if (userThingRelMap.containsKey(thingCode)) {
+                userIds = userThingRelMap.get(thingCode);
+            } else {
+                userIds = new HashSet<>();
+                userThingRelMap.put(thingCode, userIds);
+            }
+            userIds.add(thingCodeUserInWorkshop.getUserId());
+        }
+    }
+
 
     /**
      * 获取当前报警信息
@@ -134,10 +167,34 @@ public class AlertManager {
         if (insertFlag) {
             alertMapper.createAlertData(alertData);
             alertMapper.createAlertDataBackup(alertData);
-            if (alertData.getAlertLevel() != null && AlertConstants.LEVEL_30 == alertData.getAlertLevel()) {
-                messagingTemplate.convertAndSend(ALERT_LEVEL_30_URI, alertData);
+            notifySeriousAlert(alertData);
+        }
+
+    }
+
+    /**
+     * 推送黄色报警，推送给能看到该报警的用户
+     *
+     * @param alertData
+     */
+    private void notifySeriousAlert(AlertData alertData) {
+        if (alertData.getAlertLevel() != null && AlertConstants.LEVEL_30 == alertData.getAlertLevel()) {
+            Set<String> userIds = userThingRelMap.get(alertData.getThingCode());
+            for (String userId : userIds) {
+                Set<String> sessionIds = socketSessionRegistry.getSessionIds(userId);
+                for (String sessionId : sessionIds) {
+                    messagingTemplate.convertAndSendToUser(sessionId, ALERT_LEVEL_30_URI, alertData, createHeaders(sessionId));
+
+                }
             }
         }
+    }
+
+    private MessageHeaders createHeaders(String sessionId) {
+        SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+        headerAccessor.setSessionId(sessionId);
+        headerAccessor.setLeaveMutable(true);
+        return headerAccessor.getMessageHeaders();
     }
 
     /**
@@ -161,6 +218,8 @@ public class AlertManager {
         alertData.setReporter(userId);
         alertData.setAlertSource(AlertConstants.SOURCE_USER);
         alertData.setAlertType(AlertConstants.TYPE_USER);
+        //todo  delete
+        alertData.setAlertLevel(AlertConstants.LEVEL_30);
         generateAlert(alertData);
         AlertMessage alertMessage = new AlertMessage();
         alertMessage.setAlertId(alertData.getId());
@@ -919,7 +978,8 @@ public class AlertManager {
     }
 
     /**
-     *  获取报警记录，按设备进行分组
+     * 获取报警记录，按设备进行分组
+     *
      * @param filterCondition
      * @return
      */
@@ -949,8 +1009,8 @@ public class AlertManager {
                 alertMapper.getAlertDataListGroupByThing(filterCondition);
         sortRecords(filterCondition.getSortType(), alertRecords);
 
-        if(alertRecords!=null && alertRecords.size()>0){
-            for (AlertRecord alertRecord:alertRecords) {
+        if (alertRecords != null && alertRecords.size() > 0) {
+            for (AlertRecord alertRecord : alertRecords) {
                 alertDataSetCauseList(alertRecord);
             }
         }
@@ -987,21 +1047,21 @@ public class AlertManager {
     }
 
     private void alertDataSetCauseList(AlertRecord alertRecord) {
-            if(alertRecord.getAlertDataList()!=null){
-                for (AlertData alertData:alertRecord.getAlertDataList()) {
-                    if(StringUtils.isNotBlank(alertData.getAlertCause())){
-                        String[] split = alertData.getAlertCause().split(",");
-                        List<String> causeList=new ArrayList<>();
-                        for (String causeId:split) {
-                            String cause=alertMapper.getAlertCauseById(causeId);
-                            if(cause!=null){
-                                causeList.add(cause);
-                            }
+        if (alertRecord.getAlertDataList() != null) {
+            for (AlertData alertData : alertRecord.getAlertDataList()) {
+                if (StringUtils.isNotBlank(alertData.getAlertCause())) {
+                    String[] split = alertData.getAlertCause().split(",");
+                    List<String> causeList = new ArrayList<>();
+                    for (String causeId : split) {
+                        String cause = alertMapper.getAlertCauseById(causeId);
+                        if (cause != null) {
+                            causeList.add(cause);
                         }
-                        alertData.setAlertCauseList(causeList);
                     }
+                    alertData.setAlertCauseList(causeList);
                 }
             }
+        }
     }
 
     private void disposeImageAndMessage(String stage, List<AlertRecord> alertRecordsPaged) {
@@ -1684,14 +1744,14 @@ public class AlertManager {
     }
 
     public String getAlertDataCauseByTCAndMC(AlertData alertData) {
-        if(alertData!=null && StringUtils.isNotBlank(alertData.getThingCode()) && StringUtils.isNotBlank(alertData.getMetricCode())){
-            List<Integer> list=alertMapper.getAlertDataCauseByTCAndMC(alertData);
-            if(list!=null && list.size()>0){
-                StringBuilder sb=new StringBuilder();
-                for (int i=0;i<list.size();i++) {
-                    if(i==list.size()-1){
+        if (alertData != null && StringUtils.isNotBlank(alertData.getThingCode()) && StringUtils.isNotBlank(alertData.getMetricCode())) {
+            List<Integer> list = alertMapper.getAlertDataCauseByTCAndMC(alertData);
+            if (list != null && list.size() > 0) {
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < list.size(); i++) {
+                    if (i == list.size() - 1) {
                         sb.append(list.get(i));
-                    }else{
+                    } else {
                         sb.append(list.get(i));
                         sb.append(",");
                     }
