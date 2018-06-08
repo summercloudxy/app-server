@@ -20,7 +20,7 @@ public class DensityControlListener2 implements DataListener {
     @Override
     public void onDataChange(DataModel dataModel) {
         if (TERM_TWO_THING_CODE.equals(dataModel.getThingCode()) && CURRENT_LEVEL_M.equals(dataModel.getMetricCode())) {
-            if (!densityControlManager2.isRunning()) {
+            if (densityControlManager2.isIControl() && !densityControlManager2.isRunning()) {
                 // 当前液位
                 densityControlManager2.handleLevel(dataModel);
             }
@@ -30,6 +30,10 @@ public class DensityControlListener2 implements DataListener {
     @Override
     public void onError(Throwable error) {
         logger.error("data invalid", error);
+    }
+
+    public void initParamCache () {
+        densityControlManager2.initParamCache();
     }
 
 }

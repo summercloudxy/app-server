@@ -199,6 +199,7 @@ public class ModuleListConfig {
             }
 
             if (containModule(ModuleListConfig.MODULE_DENSITY_CONTROL2)) {
+                densityControlListener2.initParamCache();
                 processor.addListener(densityControlListener2);
                 logIt(MODULE_DENSITY_CONTROL2);
             }

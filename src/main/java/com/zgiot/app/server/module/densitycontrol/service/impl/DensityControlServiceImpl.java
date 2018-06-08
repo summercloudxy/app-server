@@ -52,8 +52,6 @@ public class DensityControlServiceImpl implements DensityControlService {
         baseParamMap.put(LE_N_O_TIME, "");
         baseParamMap.put(LE_L_O_TIME, "");
         baseParamMap.put(LE_H_O_TIME, "");
-        baseParamMap.put(LE_H_EXECUTE_TIME, "");
-        baseParamMap.put(PRE_STOP_TIME, "");
     }
 
     @Override
@@ -87,13 +85,13 @@ public class DensityControlServiceImpl implements DensityControlService {
                     // 智能开启,初始化模块缓存和KepServer数据
                     paramCache.init();
 
-                    // 改点状态写入KepServer
+                    // 该点状态写入KepServer
                     CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(dataModel, "beginDensityControl");
                     if (cmdSendResponseData.getOkCount() <= 0) {
                         logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
                     }
                 } else if (Boolean.FALSE.toString().equals(dataModel.getValue())) {
-                    // 智能关闭,改点状态写入KepServer
+                    // 智能关闭,该点状态写入KepServer
                     CmdControlService.CmdSendResponseData cmdSendResponseData = cmdControlService.sendCmd(dataModel, "endDensityControl");
                     if (cmdSendResponseData.getOkCount() <= 0) {
                         logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);

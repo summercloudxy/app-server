@@ -10,6 +10,7 @@ public class DensitycontrolConstants {
 
     public static final String LE_JJ_SET = "LE_JJ_SET";// 加介液位设定
 
+    public static final String TERM_TWO_SYSTEM = "SYS_2_KM";// 二期密控
     public static final String TERM_TWO_THING_CODE = "2321";// 合介桶
     public static final String TERM_TWO_SYSTEM_A_THING_CODE = "2307";// 块煤系统A
     public static final String TERM_TWO_SYSTEM_B_THING_CODE = "2308";// 块煤系统B
@@ -39,7 +40,7 @@ public class DensitycontrolConstants {
     public static final String PRE_STOP_TIME = "PRE_STOP_TIME";// 停车前时间
 
     // 设备运行状态
-    public static final String RUN_STATE_1 = "1";// 运行
+    public static final String RUN_STATE_2 = "2";// 运行
 
     public static final Integer SYSTEM_STATUS_0 = 0;// 无系统运行
     public static final Integer SYSTEM_STATUS_1 = 1;// 单系统运行

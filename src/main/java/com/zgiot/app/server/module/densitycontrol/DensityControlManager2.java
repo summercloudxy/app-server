@@ -35,10 +35,36 @@ public class DensityControlManager2 {
 
     private static String CMD_FAILED_LOG = "下发信号失败，失败原因：";
     private AtomicLong timeExecuteHigh = new AtomicLong(0);
+    public static AtomicBoolean isIControl = new AtomicBoolean(false);
     public static AtomicBoolean isRunning = new AtomicBoolean(false);
 
+    /**
+     * 判断当前逻辑是否运行完
+     *
+     * @return
+     */
     public boolean isRunning() {
         return isRunning.get();
+    }
+
+    /**
+     * 判断当前是否为智能控制状态
+     *
+     * @return
+     */
+    public boolean isIControl() {
+        DataModelWrapper data = dataService.getData(TERM_TWO_SYSTEM, INTELLIGENT_CONTROL).orElse(null);
+        if (data != null && Boolean.TRUE.toString().equals(data.getValue())) {
+            isIControl.set(true);
+        }
+        return isIControl.get();
+    }
+
+    /**
+     * 初始化模块缓存
+     */
+    public void initParamCache () {
+        paramCache.init();
     }
 
     /**
@@ -49,22 +75,40 @@ public class DensityControlManager2 {
     public void handleLevel(DataModel dataModel) {
         isRunning.set(true);
 
+        // 当前液位数据
         String thingCode = dataModel.getThingCode();
         Double value = Double.valueOf(dataModel.getValue());
 
+        // 获取设定高/低液位
         String levelSetHigh = paramCache.getValue(thingCode, SETTED_HIGH_LEVEL).getValue();
         String levelSetLow = paramCache.getValue(thingCode, SETTED_LOW_LEVEL).getValue();
 
-        // 获取当前系统运行状态
+        // 记录密控系统状态
         DensityControlStatus densityControlStatus = new DensityControlStatus();
+        densityControlStatus.setMainThingCode(thingCode);
+        densityControlStatus.setThingCodeA(TERM_TWO_SYSTEM_A_THING_CODE);
+        densityControlStatus.setThingCodeB(TERM_TWO_SYSTEM_B_THING_CODE);
+        densityControlStatus.setFLThingCodeA(TERM_TWO_SYSTEM_A_FL_THING_CODE);
+        densityControlStatus.setFLThingCodeB(TERM_TWO_SYSTEM_B_FL_THING_CODE);
         densityControlStatus.setLevel(value);
+
+        // 获取当前系统运行状态
         getSystemStatus(densityControlStatus);
-        if (SYSTEM_STATUS_0.equals(densityControlStatus.getSystemStatus())) {
+        if (densityControlStatus.getSystemStatus() == null || SYSTEM_STATUS_0.equals(densityControlStatus.getSystemStatus())) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("当前智能密控无系统设备运行,结束此次调整!");
+            }
             return;
         }
 
         // 获取当前主控密度计密度
-        getDensityData(densityControlStatus);
+        if (StringUtils.isBlank(densityControlStatus.getDensityThingCode())){
+            return;
+        }
+        DataModelWrapper data = dataService.getData(densityControlStatus.getDensityThingCode(), CURRENT_DENSITY).orElse(null);
+        if (data != null) {
+            densityControlStatus.setDensity(StringUtils.isBlank(data.getValue()) ? 0.0 : Double.parseDouble(data.getValue()));
+        }
 
         String timeSet = paramCache.getValue(thingCode, LE_H_EXECUTE_TIME).getValue();
         if (new Date().getTime() > (timeExecuteHigh.get() + Long.parseLong(timeSet))) {
@@ -88,54 +132,182 @@ public class DensityControlManager2 {
      *
      * @return
      */
-    private void getSystemStatus(DensityControlStatus densityControlStatus) {
-        DataModelWrapper dataA = dataService.getData(TERM_TWO_SYSTEM_A_THING_CODE, RUN_STATE).orElse(null);
-        String runsA = dataA == null ? "0" : dataA.getValue();
-        String thingCodeA = dataA == null ? "" : dataA.getThingCode();
+    private void getSystemStatus(DensityControlStatus dcStatus) {
+        DataModelWrapper dataA = dataService.getData(dcStatus.getThingCodeA(), STATE).orElse(null);
+        DataModelWrapper dataB = dataService.getData(dcStatus.getThingCodeB(), STATE).orElse(null);
 
-        DataModelWrapper dataB = dataService.getData(TERM_TWO_SYSTEM_B_THING_CODE, RUN_STATE).orElse(null);
-        String runsB = dataB == null ? "0" : dataB.getValue();
-        String thingCodeB = dataB == null ? "" : dataB.getThingCode();
+        if (dataA == null && dataB == null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("无智能密控系统设备信号!");
+            }
+            return;
+        } else if (dataA != null && dataB == null) {
+            if (RUN_STATE_2.equals(dataA.getValue())) {
+                dcStatus.setSystemStatus(SYSTEM_STATUS_1);
+                dcStatus.setSystemThingCode1(dataA.getThingCode());
 
-        if (RUN_STATE_1.equals(runsA) && !RUN_STATE_1.equals(runsB)) {
-            densityControlStatus.setSystemStatus(SYSTEM_STATUS_1);
-            densityControlStatus.setSystemThingCode1(thingCodeA);
-        } else if (RUN_STATE_1.equals(runsB) && !RUN_STATE_1.equals(runsA)) {
-            densityControlStatus.setSystemStatus(SYSTEM_STATUS_1);
-            densityControlStatus.setSystemThingCode1(thingCodeB);
-        } else if (RUN_STATE_1.equals(runsA) && RUN_STATE_1.equals(runsB)) {
-            densityControlStatus.setSystemStatus(SYSTEM_STATUS_2);
-            densityControlStatus.setSystemThingCode1(thingCodeA);
-            densityControlStatus.setSystemThingCode2(thingCodeB);
+                // A系统在运行,检查主控状态
+                checkSingleSystemControl(dcStatus, dcStatus.getFLThingCodeA(), CONTROL_MODE, dcStatus.getThingCodeA(),
+                        DENSITY_CONTROL_MODE, dcStatus.getFLThingCodeB(), dcStatus.getThingCodeB());
+            }
+        } else if (dataB != null && dataA == null) {
+            if (RUN_STATE_2.equals(dataB.getValue())) {
+                dcStatus.setSystemStatus(SYSTEM_STATUS_1);
+                dcStatus.setSystemThingCode1(dataB.getThingCode());
+
+                // B系统在运行,检查主控状态
+                checkSingleSystemControl(dcStatus, dcStatus.getFLThingCodeB(), CONTROL_MODE, dcStatus.getThingCodeB(),
+                        DENSITY_CONTROL_MODE, dcStatus.getFLThingCodeA(), dcStatus.getThingCodeA());
+            }
         } else {
-            densityControlStatus.setSystemStatus(SYSTEM_STATUS_0);
+            // 两个系统均有信号
+            if (RUN_STATE_2.equals(dataA.getValue()) && !RUN_STATE_2.equals(dataB.getValue())) {
+                // A运行,切为A主控
+                dcStatus.setSystemStatus(SYSTEM_STATUS_1);
+                dcStatus.setSystemThingCode1(dataA.getThingCode());
+
+                checkSingleSystemControl(dcStatus, dcStatus.getFLThingCodeA(), CONTROL_MODE, dcStatus.getThingCodeA(),
+                        DENSITY_CONTROL_MODE, dcStatus.getFLThingCodeB(), dcStatus.getThingCodeB());
+            } else if (RUN_STATE_2.equals(dataB.getValue()) && !RUN_STATE_2.equals(dataA.getValue())) {
+                // B运行,切为B主控
+                dcStatus.setSystemStatus(SYSTEM_STATUS_1);
+                dcStatus.setSystemThingCode1(dataB.getThingCode());
+
+                checkSingleSystemControl(dcStatus, dcStatus.getFLThingCodeB(), CONTROL_MODE, dcStatus.getThingCodeB(),
+                        DENSITY_CONTROL_MODE, dcStatus.getFLThingCodeA(), dcStatus.getThingCodeA());
+            } else if (RUN_STATE_2.equals(dataA.getValue()) && RUN_STATE_2.equals(dataB.getValue())) {
+                // 都在运行
+                dcStatus.setSystemStatus(SYSTEM_STATUS_2);
+                dcStatus.setSystemThingCode1(dataA.getThingCode());
+                dcStatus.setSystemThingCode2(dataB.getThingCode());
+
+                // 检查双系统主控状态
+                checkDoubleSystemControl(dcStatus, dataA, dataB);
+            } else {
+                // 都不在运行
+                dcStatus.setSystemStatus(SYSTEM_STATUS_0);
+            }
         }
     }
 
     /**
-     * 获取当前主控密度计密度
+     * 检查单系统主控状态
      *
      * @param densityControlStatus
+     * @param thingCodeFL
+     * @param metricCodeFL
+     * @param thingCodeMD
+     * @param metricCodeMD
+     * @param thingCodeFLOther
+     * @param thingCodeMDOther
      */
-    private void getDensityData(DensityControlStatus densityControlStatus) {
-        DataModelWrapper dataA = dataService.getData(TERM_TWO_SYSTEM_A_THING_CODE, DENSITY_CONTROL_MODE).orElse(null);
-        String runsA = dataA == null ? "" : dataA.getValue();
-        String thingCodeA = dataA == null ? "" : dataA.getThingCode();
+    private void checkSingleSystemControl(DensityControlStatus densityControlStatus, String thingCodeFL, String metricCodeFL,
+                                          String thingCodeMD, String metricCodeMD, String thingCodeFLOther, String thingCodeMDOther) {
+        DataModelWrapper dataFL = dataService.getData(thingCodeFL, metricCodeFL).orElse(null);
+        if (dataFL != null && Boolean.FALSE.toString().equals(dataFL.getValue())) {
+            // 状态不符,切换分流阀为主控
+            changeFL(dataFL.getThingCode(), thingCodeFLOther, dataFL.getMetricCode());
+        }
 
-        DataModelWrapper dataB = dataService.getData(TERM_TWO_SYSTEM_B_THING_CODE, DENSITY_CONTROL_MODE).orElse(null);
-        String thingCodeB = dataB == null ? "" : dataB.getThingCode();
+        DataModelWrapper dataMD = dataService.getData(thingCodeMD, metricCodeMD).orElse(null);
+        if (dataMD != null && Boolean.FALSE.toString().equals(dataMD.getValue())) {
+            densityControlStatus.setDensityThingCode(dataMD.getThingCode());
+            // 状态不符,切换密度计为主控
+            changeMD(dataMD.getThingCode(), thingCodeMDOther, dataMD.getMetricCode());
+        }
+    }
 
-        if (Boolean.TRUE.toString().equals(runsA)) {
-            densityControlStatus.setDensityThingCode(thingCodeA);
-            DataModelWrapper data = dataService.getData(thingCodeA, CURRENT_DENSITY).orElse(null);
-            if (data != null) {
-                densityControlStatus.setDensity(StringUtils.isBlank(data.getValue()) ? 0.0 : Double.parseDouble(data.getValue()));
+    /**
+     * 切换分流阀
+     *
+     * @param thingCodeFL
+     * @param thingCodeFLOther
+     * @param metricCode
+     */
+    private void changeFL(String thingCodeFL, String thingCodeFLOther, String metricCode) {
+        CmdControlService.CmdSendResponseData data1 = cmdControlService.sendCmd(new DataModel(null,
+                thingCodeFL, null, metricCode, Boolean.TRUE.toString(), new Date()), "sendFLControl");
+        if (data1.getOkCount() <= 0) {
+            logger.error(CMD_FAILED_LOG + data1.getErrorMessage(), SysException.EC_CMD_FAILED);
+        }
+        //  另一设备切位非主控
+        CmdControlService.CmdSendResponseData data2 = cmdControlService.sendCmd(new DataModel(null,
+                thingCodeFLOther, null, metricCode, Boolean.FALSE.toString(), new Date()), "sendFLNotControl");
+        if (data2.getOkCount() <= 0) {
+            logger.error(CMD_FAILED_LOG + data2.getErrorMessage(), SysException.EC_CMD_FAILED);
+        }
+    }
+
+    /**
+     * 切换密度阀
+     *
+     * @param thingCodeMD
+     * @param thingCodeMDOther
+     * @param metricCode
+     */
+    private void changeMD(String thingCodeMD, String thingCodeMDOther, String metricCode) {
+        CmdControlService.CmdSendResponseData data1 = cmdControlService.sendCmd(new DataModel(null,
+                thingCodeMD, null, metricCode, Boolean.TRUE.toString(), new Date()), "sendMDControl");
+        if (data1.getOkCount() <= 0) {
+            logger.error(CMD_FAILED_LOG + data1.getErrorMessage(), SysException.EC_CMD_FAILED);
+        }
+        // 另一设备切位非主控
+        CmdControlService.CmdSendResponseData data2 = cmdControlService.sendCmd(new DataModel(null,
+                thingCodeMDOther, null, metricCode, Boolean.FALSE.toString(), new Date()), "sendMDNotControl");
+        if (data2.getOkCount() <= 0) {
+            logger.error(CMD_FAILED_LOG + data2.getErrorMessage(), SysException.EC_CMD_FAILED);
+        }
+    }
+
+    /**
+     * 检查双系统主控状态
+     *
+     * @param dataA
+     * @param dataB
+     */
+    private void checkDoubleSystemControl(DensityControlStatus scStatus, DataModelWrapper dataA, DataModelWrapper dataB) {
+        DataModelWrapper dataFLA = dataService.getData(scStatus.getFLThingCodeA(), CONTROL_MODE).orElse(null);
+        DataModelWrapper dataFLB = dataService.getData(scStatus.getFLThingCodeB(), CONTROL_MODE).orElse(null);
+        if (dataFLA == null && dataFLB == null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("两个分流阀均无信号!");
+            }
+        } else if (dataFLA != null && dataFLB == null) {
+            if (Boolean.FALSE.toString().equals(dataFLA.getValue())) {
+                changeFL(dataFLA.getThingCode(), scStatus.getFLThingCodeB(), dataFLA.getMetricCode());
+            }
+        } else if (dataFLA == null && dataFLB != null) {
+            if (Boolean.FALSE.toString().equals(dataFLB.getValue())) {
+                changeFL(dataFLB.getThingCode(), scStatus.getFLThingCodeA(), dataFLB.getMetricCode());
             }
         } else {
-            densityControlStatus.setDensityThingCode(thingCodeB);
-            DataModelWrapper data = dataService.getData(thingCodeB, CURRENT_DENSITY).orElse(null);
-            if (data != null) {
-                densityControlStatus.setDensity(StringUtils.isBlank(data.getValue()) ? 0.0 : Double.parseDouble(data.getValue()));
+            if (Boolean.TRUE.toString().equals(dataFLA.getValue()) || Boolean.TRUE.toString().equals(dataFLB.getValue())) {
+                // 两个均为主控状态,设置A为主控,B为非主控
+                changeFL(dataFLA.getThingCode(), dataFLB.getThingCode(), dataFLA.getMetricCode());
+            }
+        }
+
+        DataModelWrapper dataMDA = dataService.getData(dataA.getThingCode(), DENSITY_CONTROL_MODE).orElse(null);
+        DataModelWrapper dataMDB = dataService.getData(dataB.getThingCode(), DENSITY_CONTROL_MODE).orElse(null);
+        if (dataMDA == null && dataMDB == null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("两个密度计均无信号!");
+            }
+        } else if (dataMDA != null && dataMDB == null) {
+            scStatus.setDensityThingCode(dataMDA.getThingCode());
+            if (Boolean.FALSE.toString().equals(dataMDA.getValue())) {
+                changeMD(dataMDA.getThingCode(), dataB.getThingCode(), dataMDA.getMetricCode());
+            }
+        } else if (dataMDA == null && dataMDB != null) {
+            scStatus.setDensityThingCode(dataMDB.getThingCode());
+            if (Boolean.FALSE.toString().equals(dataMDB.getValue())) {
+                changeMD(dataMDB.getThingCode(), dataA.getThingCode(), dataMDB.getMetricCode());
+            }
+        } else {
+            scStatus.setDensityThingCode(dataMDA.getThingCode());
+            if (Boolean.TRUE.toString().equals(dataMDA.getValue()) || Boolean.TRUE.toString().equals(dataMDB.getValue())) {
+                // 两个均为主控状态,设置A为主控,B为非主控
+                changeFL(dataMDA.getThingCode(), dataMDB.getThingCode(), dataMDA.getMetricCode());
             }
         }
     }
@@ -293,40 +465,6 @@ public class DensityControlManager2 {
         if (cmdSendResponseData.getOkCount() <= 0) {
             logger.error(CMD_FAILED_LOG + cmdSendResponseData.getErrorMessage(), SysException.EC_CMD_FAILED);
         }
-    }
-
-    public void checkSystemRunState() {
-        // 判断是否为智能状态
-        DataModelWrapper data = dataService.getData(TERM_TWO_THING_CODE, RUN_STATE).orElse(null);
-        if (data == null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("无智能密控信号!");
-            }
-            return;
-        } else if (!RUN_STATE_1.equals(data.getValue())) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("智能密控不在运行状态!");
-            }
-            return;
-        }
-
-        // 判断系统状态
-        DataModelWrapper dataA = dataService.getData(TERM_TWO_SYSTEM_A_THING_CODE, RUN_STATE).orElse(null);
-        DataModelWrapper dataB = dataService.getData(TERM_TWO_SYSTEM_B_THING_CODE, RUN_STATE).orElse(null);
-        if (dataA == null && dataB == null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("无智能密控系统设备信号!");
-            }
-            return;
-        } else if (dataA != null && dataB == null) {
-            if (RUN_STATE_1.equals(dataA.getValue())) {
-                // A系统在运行,检查主控状态
-                DataModelWrapper dataAFL = dataService.getData(TERM_TWO_SYSTEM_A_FL_THING_CODE, CONTROL_MODE).orElse(null);
-                DataModelWrapper dataAMD = dataService.getData(TERM_TWO_SYSTEM_A_THING_CODE, DENSITY_CONTROL_MODE).orElse(null);
-
-            }
-        }
-
     }
 
 }
