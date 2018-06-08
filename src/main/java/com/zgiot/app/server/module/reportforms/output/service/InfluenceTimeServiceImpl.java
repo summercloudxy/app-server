@@ -53,7 +53,7 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
 
     @Override
     public void influenceTimeService(InfluenceTimeReq influenceTimeReq) {
-        updateRemarks(influenceTimeReq);
+        //updateRemarks(influenceTimeReq);
 
         List<InfluenceTime> influenceTimes = influenceTimeReq.getInfluenceTimeList();
         if(influenceTimes!=null && influenceTimes.size()>0){
@@ -219,6 +219,7 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
         InfluenceTimeRemarks personnel = influenceTimeBean.getInfluenceTimeRemarks();
         if(personnel!=null){
             personnel.setDutyStartTime(influenceTimeRemarks.getDutyStartTime());
+            personnel.setRemarks(influenceTimeRemarks.getRemarks());
             personnel.setDispatcher(influenceTimeRemarks.getDispatcher());
             personnel.setChecker(influenceTimeRemarks.getChecker());
             personnel.setFactoryDutyLeader(influenceTimeRemarks.getFactoryDutyLeader());
