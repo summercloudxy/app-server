@@ -174,7 +174,7 @@ public class ModuleListConfig {
                 QuartzManager.addJob("historyHourData", ModuleListConfig.MODULE_HIST_PERSIST, "historyHourData",
                         ModuleListConfig.MODULE_HIST_PERSIST, HistoryHourDataJob.class, "0 0 0/1 * * ?");
                 QuartzManager.addJob("historyDayData", ModuleListConfig.MODULE_HIST_PERSIST, "historyDayData",
-                        ModuleListConfig.MODULE_HIST_PERSIST, HistoryDayDataJob.class, "0 0 0 0/1 * ?");
+                        ModuleListConfig.MODULE_HIST_PERSIST, HistoryDayDataJob.class, "0 0 0 1/1 * ?");
                 logIt(MODULE_HIST_PERSIST);
             }
 
