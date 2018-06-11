@@ -63,7 +63,7 @@ public class DensityControlManager2 {
     /**
      * 初始化模块缓存
      */
-    public void initParamCache () {
+    public void initParamCache() {
         paramCache.init();
     }
 
@@ -75,56 +75,63 @@ public class DensityControlManager2 {
     public void handleLevel(DataModel dataModel) {
         isRunning.set(true);
 
-        // 当前液位数据
-        String thingCode = dataModel.getThingCode();
-        Double value = Double.valueOf(dataModel.getValue());
+        try {
+            // 当前液位数据
+            String thingCode = dataModel.getThingCode();
+            Double value = Double.valueOf(dataModel.getValue());
 
-        // 获取设定高/低液位
-        String levelSetHigh = paramCache.getValue(thingCode, SETTED_HIGH_LEVEL).getValue();
-        String levelSetLow = paramCache.getValue(thingCode, SETTED_LOW_LEVEL).getValue();
+            // 获取设定高/低液位
+            String levelSetHigh = paramCache.getValue(thingCode, SETTED_HIGH_LEVEL).getValue();
+            String levelSetLow = paramCache.getValue(thingCode, SETTED_LOW_LEVEL).getValue();
 
-        // 记录密控系统状态
-        DensityControlStatus densityControlStatus = new DensityControlStatus();
-        densityControlStatus.setMainThingCode(thingCode);
-        densityControlStatus.setThingCodeA(TERM_TWO_SYSTEM_A_THING_CODE);
-        densityControlStatus.setThingCodeB(TERM_TWO_SYSTEM_B_THING_CODE);
-        densityControlStatus.setFLThingCodeA(TERM_TWO_SYSTEM_A_FL_THING_CODE);
-        densityControlStatus.setFLThingCodeB(TERM_TWO_SYSTEM_B_FL_THING_CODE);
-        densityControlStatus.setLevel(value);
+            // 记录密控系统状态
+            DensityControlStatus densityControlStatus = new DensityControlStatus();
+            densityControlStatus.setMainThingCode(thingCode);
+            densityControlStatus.setThingCodeA(TERM_TWO_SYSTEM_A_THING_CODE);
+            densityControlStatus.setThingCodeB(TERM_TWO_SYSTEM_B_THING_CODE);
+            densityControlStatus.setFLThingCodeA(TERM_TWO_SYSTEM_A_FL_THING_CODE);
+            densityControlStatus.setFLThingCodeB(TERM_TWO_SYSTEM_B_FL_THING_CODE);
+            densityControlStatus.setLevel(value);
 
-        // 获取当前系统运行状态
-        getSystemStatus(densityControlStatus);
-        if (densityControlStatus.getSystemStatus() == null || SYSTEM_STATUS_0.equals(densityControlStatus.getSystemStatus())) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("当前智能密控无系统设备运行,结束此次调整!");
+            // 获取当前系统运行状态
+            getSystemStatus(densityControlStatus);
+            if (densityControlStatus.getSystemStatus() == null || SYSTEM_STATUS_0.equals(densityControlStatus.getSystemStatus())) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("当前智能密控无系统设备运行,结束此次调整!");
+                }
+                return;
             }
-            return;
-        }
 
-        // 获取当前主控密度计密度
-        if (StringUtils.isBlank(densityControlStatus.getDensityThingCode())){
-            return;
-        }
-        DataModelWrapper data = dataService.getData(densityControlStatus.getDensityThingCode(), CURRENT_DENSITY).orElse(null);
-        if (data != null) {
-            densityControlStatus.setDensity(StringUtils.isBlank(data.getValue()) ? 0.0 : Double.parseDouble(data.getValue()));
-        }
-
-        String timeSet = paramCache.getValue(thingCode, LE_H_EXECUTE_TIME).getValue();
-        if (new Date().getTime() > (timeExecuteHigh.get() + Long.parseLong(timeSet))) {
-            if (value > Double.parseDouble(levelSetHigh)) {
-                // 高液位处理
-                handleHighLevel();
-            } else if (value < Double.parseDouble(levelSetLow)) {
-                // 低液位处理
-                handleLowLevel(densityControlStatus);
-            } else {
-                // 正常液位处理
-                handleNormalLevel(densityControlStatus);
+            // 获取当前主控密度计密度
+            if (StringUtils.isBlank(densityControlStatus.getDensityThingCode())) {
+                return;
             }
+            DataModelWrapper data = dataService.getData(densityControlStatus.getDensityThingCode(), CURRENT_DENSITY).orElse(null);
+            if (data != null) {
+                densityControlStatus.setDensity(StringUtils.isBlank(data.getValue()) ? 0.0 : Double.parseDouble(data.getValue()));
+            }
+
+            String timeSet = paramCache.getValue(thingCode, LE_H_EXECUTE_TIME).getValue();
+            if (new Date().getTime() > (timeExecuteHigh.get() + Long.parseLong(timeSet))) {
+                if (value > Double.parseDouble(levelSetHigh)) {
+                    // 高液位处理
+                    handleHighLevel();
+                } else if (value < Double.parseDouble(levelSetLow)) {
+                    // 低液位处理
+                    handleLowLevel(densityControlStatus);
+                } else {
+                    // 正常液位处理
+                    handleNormalLevel(densityControlStatus);
+                }
+            }
+        } catch (Exception e) {
+            if (logger.isTraceEnabled()) {
+                logger.trace("智能密控出现异常", e);
+            }
+        } finally {
+            isRunning.set(false);
         }
 
-        isRunning.set(false);
     }
 
     /**
@@ -281,8 +288,9 @@ public class DensityControlManager2 {
                 changeFL(dataFLB.getThingCode(), scStatus.getFLThingCodeA(), dataFLB.getMetricCode());
             }
         } else {
-            if (Boolean.TRUE.toString().equals(dataFLA.getValue()) || Boolean.TRUE.toString().equals(dataFLB.getValue())) {
-                // 两个均为主控状态,设置A为主控,B为非主控
+            if ((Boolean.TRUE.toString().equals(dataFLA.getValue()) && Boolean.TRUE.toString().equals(dataFLB.getValue()))
+                    || (Boolean.FALSE.toString().equals(dataFLA.getValue()) && Boolean.FALSE.toString().equals(dataFLB.getValue()))) {
+                // 两个均为主控或均为非主控状态,设置A为主控,B为非主控
                 changeFL(dataFLA.getThingCode(), dataFLB.getThingCode(), dataFLA.getMetricCode());
             }
         }
@@ -305,9 +313,10 @@ public class DensityControlManager2 {
             }
         } else {
             scStatus.setDensityThingCode(dataMDA.getThingCode());
-            if (Boolean.TRUE.toString().equals(dataMDA.getValue()) || Boolean.TRUE.toString().equals(dataMDB.getValue())) {
-                // 两个均为主控状态,设置A为主控,B为非主控
-                changeFL(dataMDA.getThingCode(), dataMDB.getThingCode(), dataMDA.getMetricCode());
+            if ((Boolean.TRUE.toString().equals(dataMDA.getValue()) && Boolean.TRUE.toString().equals(dataMDB.getValue()))
+                    || (Boolean.FALSE.toString().equals(dataMDA.getValue()) && Boolean.FALSE.toString().equals(dataMDB.getValue()))) {
+                // 两个均为主控或均为非主控状态,设置A为主控,B为非主控
+                changeMD(dataMDA.getThingCode(), dataMDB.getThingCode(), dataMDA.getMetricCode());
             }
         }
     }
