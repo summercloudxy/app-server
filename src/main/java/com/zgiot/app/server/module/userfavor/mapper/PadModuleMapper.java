@@ -19,7 +19,8 @@ public interface PadModuleMapper {
     @Select("select * from tb_pad_module where is_default_favor=1")
     List<PadModule> getCommonPadModule();
 
-    @Insert("insert into rel_user_favor values(#{userUuid},#{moduleId},#{sort},#{clientId})")
+    @Insert("insert into rel_user_favor ('user_uuid','module_id','sort','client_id') " +
+            "values(#{userUuid},#{moduleId},#{sort},#{clientId})")
     void addUserFavor(UserFavor userFavor);
 
     @Delete("delete from rel_user_favor where user_uuid=#{userUuid} and client_id = #{clientId}")
