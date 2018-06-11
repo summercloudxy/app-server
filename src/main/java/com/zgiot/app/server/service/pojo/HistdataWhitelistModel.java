@@ -1,6 +1,7 @@
 package com.zgiot.app.server.service.pojo;
 
 public class HistdataWhitelistModel {
+    private Integer id;
     private String thingCode;
     private String metricCode;
     private int toStore;
@@ -10,6 +11,14 @@ public class HistdataWhitelistModel {
     private int hourAccu;
     private int dayAvg;
     private int dayAccu;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public String getThingCode() {
         return thingCode;
