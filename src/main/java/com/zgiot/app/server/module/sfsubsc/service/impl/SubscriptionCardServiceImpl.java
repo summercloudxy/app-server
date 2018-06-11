@@ -1239,6 +1239,9 @@ public class SubscriptionCardServiceImpl implements SubscCardTypeService {
                 mompressorMetric.setRunState("");
                 mompressorMetric.setRunStateName("");
             }
+        } else {
+            mompressorMetric.setRunState("");
+            mompressorMetric.setRunStateName("");
         }
     }
 
