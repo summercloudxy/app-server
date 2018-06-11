@@ -34,7 +34,9 @@ public class AlertProtectHandler implements AlertHandler {
     private static final String ENABLE_VALUE = Boolean.TRUE.toString();
     private static final String DISABLE_VALUE = Boolean.FALSE.toString();
     protected static final String STATE_RUN = "2";
-    private static final String STATE_STOP = "1";
+    protected static final String STATE_STOP = "1";
+
+    protected static final String STATE_FAULT = "4";
     private static final int WAIT_TIME = 1000;
     private final Logger logger = LoggerFactory.getLogger(AlertProtectHandler.class);
 
@@ -98,7 +100,7 @@ public class AlertProtectHandler implements AlertHandler {
             String currentState = dataModelWrapper.getValue();
             long stateTime = dataModelWrapper.getDataTimeStamp().getTime();
             long faultTime = dataModel.getDataTimeStamp().getTime();
-            if (Math.abs(faultTime - stateTime) <= WAIT_TIME) {
+            if (Math.abs(faultTime - stateTime) <= WAIT_TIME || STATE_FAULT.equals(currentState)) {
                 return preState;
             }
             return currentState;

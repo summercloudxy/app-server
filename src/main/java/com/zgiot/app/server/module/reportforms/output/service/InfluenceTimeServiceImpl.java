@@ -6,6 +6,7 @@ import com.zgiot.app.server.module.reportforms.output.enums.InfluenceTimeTypeEnu
 import com.zgiot.app.server.module.reportforms.output.dao.InfluenceTimeMapper;
 import com.zgiot.app.server.module.reportforms.output.pojo.*;
 import com.zgiot.app.server.module.reportforms.output.productionmonitor.pojo.ReportFormSystemStartRecord;
+import com.zgiot.app.server.module.reportforms.output.productionmonitor.service.ReportFormSystemStartService;
 import com.zgiot.app.server.module.reportforms.output.utils.ReportFormDateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -20,6 +21,9 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
     private InfluenceTimeMapper influenceTimeMapper;
 
     private static final InfluenceTimeBean influenceTimeBean=new InfluenceTimeBean();
+
+    @Autowired
+    private ReportFormSystemStartService reportFormSystemStartService;
 
     public void init(){
         //项目启动时初始化
@@ -49,7 +53,7 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
 
     @Override
     public void influenceTimeService(InfluenceTimeReq influenceTimeReq) {
-        updateRemarks(influenceTimeReq);
+        //updateRemarks(influenceTimeReq);
 
         List<InfluenceTime> influenceTimes = influenceTimeReq.getInfluenceTimeList();
         if(influenceTimes!=null && influenceTimes.size()>0){
@@ -66,7 +70,6 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
 
     }
 
-    @Override
     public void handle(List<ReportFormSystemStartRecord> reportList) {
         if(reportList!=null && reportList.size()>0){
             //因为都是一个班的数据,所以这里取出第一个的当班开始时间即可
@@ -76,13 +79,10 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
             //将数据进行封装
             List<InfluenceTime> influenceTimes=new ArrayList<>();
             for (ReportFormSystemStartRecord report:reportList) {
-                InfluenceTime influenceTime=new InfluenceTime();
-                influenceTime.setDutyStartTime(report.getDutyStartTime());
-                influenceTime.setInfluenceType(InfluenceTimeTypeEnum.getInfluenceTimeTypeByDesc(report.getProductionDescription()).getInfluenceType());
-                influenceTime.setTerm(report.getTerm());
-                influenceTime.setClassDuration(report.getDuration());
-                influenceTimes.add(influenceTime);
+                setInfluenceTimes(influenceTimes, report);
             }
+
+            setInfluenctTimeData(dutyStartTime, influenceTimes);
 
             //根据当班时间查询数据
             List<InfluenceTime> influenceTimeByDutyList = influenceTimeMapper.getInfluenceTimeByDutyDate(dutyStartTime);
@@ -95,9 +95,89 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
         }
     }
 
+    private void setInfluenctTimeData(Date dutyStartTime, List<InfluenceTime> influenceTimes) {
+        Set<Integer> integers = InfluenceTimeTypeEnum.influenceTypeCodes();
+        for (Integer type:integers) {
+            Integer oneNum=0;
+            Integer twoNum=0;
+            for (InfluenceTime influence:influenceTimes) {
+                if(influence.getInfluenceType().equals(type) && influence.getTerm().equals(ReportFormConstant.INFLUENCE_TIME_ONE_TERM)){
+                    oneNum=1;
+                }
+
+                if(influence.getInfluenceType().equals(type) && influence.getTerm().equals(ReportFormConstant.INFLUENCE_TIME_TWO_TERM)){
+                    twoNum=1;
+                }
+            }
+
+            if(oneNum==0){
+                InfluenceTime oneInfluence=new InfluenceTime();
+                oneInfluence.setDutyStartTime(dutyStartTime);
+                oneInfluence.setTerm(ReportFormConstant.INFLUENCE_TIME_ONE_TERM);
+                oneInfluence.setClassDuration(0L);
+                oneInfluence.setMonthDuration(0L);
+                oneInfluence.setYearDuration(0L);
+                oneInfluence.setInfluenceType(type);
+                influenceTimes.add(oneInfluence);
+            }
+
+            if(twoNum==0){
+                InfluenceTime twoInfluence=new InfluenceTime();
+                twoInfluence.setDutyStartTime(dutyStartTime);
+                twoInfluence.setTerm(ReportFormConstant.INFLUENCE_TIME_TWO_TERM);
+                twoInfluence.setClassDuration(0L);
+                twoInfluence.setMonthDuration(0L);
+                twoInfluence.setYearDuration(0L);
+                twoInfluence.setInfluenceType(type);
+                influenceTimes.add(twoInfluence);
+            }
+
+        }
+    }
+
+    private void setInfluenceTimes(List<InfluenceTime> influenceTimes, ReportFormSystemStartRecord report) {
+        if(report.getProductionDescription()==null){
+            return;
+        }
+        InfluenceTime influence=null;
+        for (InfluenceTime influenceTime:influenceTimes) {
+            if(influenceTime.getInfluenceType().equals(report.getProductionDescription().intValue()) && influenceTime.getTerm().equals(report.getTerm())){
+                influence=influenceTime;
+            }
+        }
+
+        if(influence!=null){
+            Long influenceClass=0L;
+            Long startCar=0L;
+            if(influence.getClassDuration()!=null){
+                influenceClass=influence.getClassDuration();
+            }
+            if(report.getDuration()!=null){
+                startCar=report.getDuration();
+            }
+            influence.setClassDuration(influenceClass+startCar);
+        }else {
+            influence=new InfluenceTime();
+            influence.setDutyStartTime(report.getDutyStartTime());
+            influence.setInfluenceType(report.getProductionDescription().intValue());
+            influence.setTerm(report.getTerm());
+            influence.setClassDuration(report.getDuration());
+            influenceTimes.add(influence);
+        }
+    }
+
     @Override
     public InfluenceTimeBean getData(Date date) {
         Date dutyStartTime = ReportFormDateUtil.getNowDutyStartTime(date);
+
+        //每次在获取报表数据之前需要将开车情况数据进行设置
+        Map<Integer, List<ReportFormSystemStartRecord>> systemStartRecords = reportFormSystemStartService.getSystemStartRecords(date);
+        List<ReportFormSystemStartRecord> list=new ArrayList<>();
+        for (Map.Entry<Integer,List<ReportFormSystemStartRecord>> entry:systemStartRecords.entrySet()) {
+            list.addAll(entry.getValue());
+        }
+        handle(list);
+
         Date nowDutyStartTime = ReportFormDateUtil.getNowDutyStartTime(new Date());
         if(nowDutyStartTime.equals(dutyStartTime) && influenceTimeBean.getInfluenceTimeRsps().size()>0){
             return influenceTimeBean;
@@ -126,8 +206,10 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
 
     @Override
     public void updatePersonnel(InfluenceTimeRemarks influenceTimeRemarks) {
-        if(influenceTimeRemarks!=null && influenceTimeRemarks.getId()!=null){
+        InfluenceTimeRemarks influence= influenceTimeMapper.InfluenceTimeRemarks(influenceTimeRemarks.getDutyStartTime());
+        if(influence!=null){
             //修改
+            influenceTimeRemarks.setId(influence.getId());
             influenceTimeMapper.editPersonnel(influenceTimeRemarks);
         }else{
             //新增
@@ -135,8 +217,9 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
         }
 
         InfluenceTimeRemarks personnel = influenceTimeBean.getInfluenceTimeRemarks();
-        if(personnel!=null && influenceTimeRemarks!=null){
+        if(personnel!=null){
             personnel.setDutyStartTime(influenceTimeRemarks.getDutyStartTime());
+            personnel.setRemarks(influenceTimeRemarks.getRemarks());
             personnel.setDispatcher(influenceTimeRemarks.getDispatcher());
             personnel.setChecker(influenceTimeRemarks.getChecker());
             personnel.setFactoryDutyLeader(influenceTimeRemarks.getFactoryDutyLeader());
@@ -167,6 +250,7 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
             for (InfluenceTime dutyinfluenceTime:dutyinfluenceTimeList) {
                 if(influenceTime.getInfluenceType().equals(dutyinfluenceTime.getInfluenceType()) && influenceTime.getTerm().equals(dutyinfluenceTime.getTerm()) && influenceTime.getClassDuration()!=null){
                     //类型和期数相同,设置月累计和年累计
+                    setInitMonthAndYear(dutyinfluenceTime);
                     influenceTime.setMonthDuration(influenceTime.getClassDuration()+dutyinfluenceTime.getMonthDuration());
                     influenceTime.setYearDuration(influenceTime.getClassDuration()+dutyinfluenceTime.getYearDuration());
                     break;
@@ -185,6 +269,15 @@ public class InfluenceTimeServiceImpl implements InfluenceTimeService {
         }
         if(ReportFormDateUtil.getNowDutyStartTime(new Date()).equals(dutyStartTime)){
             influenceTimeBeanUpdateData(influenceTimes,influenceTimeBean.getInfluenceTimeRsps());
+        }
+    }
+
+    private void setInitMonthAndYear(InfluenceTime dutyinfluenceTime) {
+        if(dutyinfluenceTime.getMonthDuration()==null){
+            dutyinfluenceTime.setMonthDuration(0L);
+        }
+        if(dutyinfluenceTime.getYearDuration()==null){
+            dutyinfluenceTime.setYearDuration(0L);
         }
     }
 

@@ -26,6 +26,7 @@ import com.zgiot.app.server.module.reportforms.output.service.InfluenceTimeServi
 import com.zgiot.app.server.module.reportforms.output.service.OutputStoreAndTargetService;
 import com.zgiot.app.server.module.reportforms.output.service.TransPortServiceImpl;
 import com.zgiot.app.server.module.sfstart.*;
+import com.zgiot.app.server.module.sfstop.StopExamineListener;
 import com.zgiot.app.server.module.sfsubsc.job.UploadHistorySubscCardDatas;
 import com.zgiot.app.server.module.sfsubsc.job.UploadProductionSubscCardDatas;
 import com.zgiot.app.server.module.sfsubsc.job.UploadSubscCardDatas;
@@ -56,6 +57,7 @@ public class ModuleListConfig {
     public static final String MODULE_COAL_ANALYSIS = "coal-analysis";
     public static final String MODULE_SUBSCRIPTION = "subscription";
     public static final String MODULE_REPORTFORM = "report-form";
+    public static final String MODULE_SFSTOP = "sfstop";
     public static final String MODULE_SEND_TRACE = "send-trace";
     public static final String MODULE_DENSITY_CONTROL2 = "density-control2";
 
@@ -80,6 +82,8 @@ public class ModuleListConfig {
     private boolean moduleSfStartEnabled;
     @Value("${sysmodule.report-form.enabled}")
     private boolean moduleReportEnabled;
+    @Value("${sysmodule.sfstop.enabled}")
+    private boolean moduleSfStopEnabled;
     @Value("${sysmodule.send-trace.enabled}")
     private boolean moduleSendTraceEnabled;
     @Value("${sysmodule.density-control2.enabled}")
@@ -140,6 +144,8 @@ public class ModuleListConfig {
     private SendTraceLogService sendTraceLogService;
     @Autowired
     private DensityControlListener2 densityControlListener2;
+    @Autowired
+    private StopExamineListener stopExamineListener;
 
     @PostConstruct
     void init() {
@@ -177,11 +183,11 @@ public class ModuleListConfig {
             if (containModule(ModuleListConfig.MODULE_HIST_PERSIST)) {
                 historyDataPersistDaemon.start();
                 QuartzManager.addJob("historyMinData", ModuleListConfig.MODULE_HIST_PERSIST, "historyMinData",
-                        ModuleListConfig.MODULE_HIST_PERSIST, HistoryMinDataJob.class, "0 */1 * * * ?");
+                        ModuleListConfig.MODULE_HIST_PERSIST, HistoryMinDataJob.class, "0 0/1 * * * ?");
                 QuartzManager.addJob("historyHourData", ModuleListConfig.MODULE_HIST_PERSIST, "historyHourData",
-                        ModuleListConfig.MODULE_HIST_PERSIST, HistoryHourDataJob.class, "0 0 */1 * * ?");
+                        ModuleListConfig.MODULE_HIST_PERSIST, HistoryHourDataJob.class, "0 0 0/1 * * ?");
                 QuartzManager.addJob("historyDayData", ModuleListConfig.MODULE_HIST_PERSIST, "historyDayData",
-                        ModuleListConfig.MODULE_HIST_PERSIST, HistoryDayDataJob.class, "0 0 0 */1 * ?");
+                        ModuleListConfig.MODULE_HIST_PERSIST, HistoryDayDataJob.class, "0 0 0 1/1 * ?");
                 logIt(MODULE_HIST_PERSIST);
             }
 
@@ -265,6 +271,10 @@ public class ModuleListConfig {
 
             }
 
+            if (containModule(ModuleListConfig.MODULE_SFSTOP)) {
+                processor.addListener(stopExamineListener);
+
+            }
 
 
             if (containModule(ModuleListConfig.MODULE_REPORTFORM)) {
@@ -291,7 +301,7 @@ public class ModuleListConfig {
             logger.info("Modules are all loaded successfully. ");
 
         } catch (Exception e) {
-            logger.error("Sys Modules failed to load. Pls check exception and restart again! ",e );
+            logger.error("Sys Modules failed to load. Pls check exception and restart again! ", e);
         }
 
     }

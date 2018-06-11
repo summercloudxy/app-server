@@ -28,7 +28,7 @@
     FROM
         `tb_report_form_influence_time_remarks`
     WHERE
-        duty_start_time = #{nowDutyStartTime};
+        duty_start_time = #{nowDutyStartTime} limit 1;
     </select>
 
     <select id="getMostNewinfluenceTimeByDate" parameterType="java.util.Date" resultType="com.zgiot.app.server.module.reportforms.output.pojo.InfluenceTime">
@@ -102,15 +102,15 @@
 
 
     <insert id="createPersonnel" keyColumn="id" keyProperty="id" useGeneratedKeys="true"  parameterType="com.zgiot.app.server.module.reportforms.output.pojo.InfluenceTimeRemarks">
-        INSERT INTO tb_report_form_influence_time_remarks (duty_start_time,factory_duty_leader,checker,dispatcher)
+        INSERT INTO tb_report_form_influence_time_remarks (duty_start_time,remarks,factory_duty_leader,checker,dispatcher)
         VALUES
-        (#{dutyStartTime},#{factoryDutyLeader},#{checker},#{dispatcher})
+        (#{dutyStartTime},#{remarks},#{factoryDutyLeader},#{checker},#{dispatcher})
     </insert>
 
 
     <update id="editPersonnel" parameterType="com.zgiot.app.server.module.reportforms.output.pojo.InfluenceTimeRemarks">
         UPDATE tb_report_form_influence_time_remarks
-        SET duty_start_time =#{dutyStartTime}, factory_duty_leader=#{factoryDutyLeader},checker=#{checker},dispatcher=#{dispatcher}
+        SET duty_start_time =#{dutyStartTime},remarks=#{remarks},factory_duty_leader=#{factoryDutyLeader},checker=#{checker},dispatcher=#{dispatcher}
         WHERE
         id=#{id}
     </update>
@@ -121,7 +121,7 @@
         FROM
         `tb_report_form_influence_time_remarks`
         WHERE
-        duty_start_time = #{dutyStartTime};
+        duty_start_time = #{dutyStartTime} limit 1;
     </select>
 
 </mapper>

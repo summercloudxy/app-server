@@ -38,10 +38,12 @@ public class WebSocketConfiguration extends AbstractWebSocketMessageBrokerConfig
         registration.setInterceptors(new ChannelInterceptorAdapter() {
             @Override
             public void afterSendCompletion(Message<?> message, MessageChannel channel, boolean sent, Exception ex) {
-                logger.debug("Received a STOMP Message:{}", message);
+                logger.info("Received a STOMP Message:{}", message);
             }
         });
     }
+
+
 
     @Override
     public void configureClientOutboundChannel(ChannelRegistration registration) {
@@ -49,7 +51,7 @@ public class WebSocketConfiguration extends AbstractWebSocketMessageBrokerConfig
         registration.setInterceptors(new ChannelInterceptorAdapter() {
             @Override
             public void afterSendCompletion(Message<?> message, MessageChannel channel, boolean sent, Exception ex) {
-                logger.debug("Sent a STOMP Message:{}", message);
+            logger.info("Sent a STOMP Message:{}", message);
             }
         });
 

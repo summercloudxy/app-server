@@ -6,54 +6,54 @@ import java.util.Set;
 public enum InfluenceTimeTypeEnum {
 
 
-    PRODUCTION_TIME(Short.parseShort("1"),2),
-    OVERHAUL_TIME(Short.parseShort("2"),1),
-    OWE_COAL_TIME(Short.parseShort("3"),3),
-    OWE_CAR_TIME(Short.parseShort("4"),4),
-    OWE_WATER_TIME(Short.parseShort("5"),5);
+    PRODUCTION_TIME(1,"生产时间"),
+    OVERHAUL_TIME(2,"检修时间"),
+    OWE_COAL_TIME(3,"欠煤时间"),
+    OWE_CAR_TIME(4,"欠车时间"),
+    OWE_WATER_TIME(5,"欠水时间");
+    private Integer influenceTypeCode;
 
-    private Short productionDesc;
-    private Integer influenceType;
+    private String influenceTypeName;
 
-    InfluenceTimeTypeEnum(Short productionDesc, Integer influenceType){
-        this.productionDesc=productionDesc;
-        this.influenceType=influenceType;
+    InfluenceTimeTypeEnum(Integer influenceTypeCode, String influenceTypeName){
+        this.influenceTypeCode=influenceTypeCode;
+        this.influenceTypeName=influenceTypeName;
     }
 
     /**
      * 获取influenceTypeCode Set
      * @return
      */
-    public static Set<Short> influenceTimeTypeEnumDescs() {
-        Set<Short> result = new HashSet<>(InfluenceTimeTypeEnum.values().length);
+    public static Set<Integer> influenceTypeCodes() {
+        Set<Integer> result = new HashSet<>(InfluenceTimeTypeEnum.values().length);
         for (InfluenceTimeTypeEnum e : InfluenceTimeTypeEnum.values()) {
-            result.add(e.getProductionDesc());
+            result.add(e.getinfluenceTypeCode());
         }
         return result;
     }
 
-    public static InfluenceTimeTypeEnum getInfluenceTimeTypeByDesc(Short productionDesc) {
+    public static InfluenceTimeTypeEnum getByInfluenceTypeCode(Integer influenceTypeCode) {
         for (InfluenceTimeTypeEnum e : InfluenceTimeTypeEnum.values()) {
-            if (e.getProductionDesc().equals(productionDesc)) {
+            if (e.getinfluenceTypeCode().equals(influenceTypeCode)) {
                 return e;
             }
         }
         return null;
     }
 
-    public Short getProductionDesc() {
-        return productionDesc;
+    public Integer getinfluenceTypeCode() {
+        return influenceTypeCode;
     }
 
-    public void setProductionDesc(Short productionDesc) {
-        this.productionDesc = productionDesc;
+    public void setinfluenceTypeCode(Integer influenceTypeCode) {
+        this.influenceTypeCode = influenceTypeCode;
     }
 
-    public Integer getInfluenceType() {
-        return influenceType;
+    public String getinfluenceTypeName() {
+        return influenceTypeName;
     }
 
-    public void setInfluenceType(Integer influenceType) {
-        this.influenceType = influenceType;
+    public void setinfluenceTypeName(String influenceTypeName) {
+        this.influenceTypeName = influenceTypeName;
     }
 }
