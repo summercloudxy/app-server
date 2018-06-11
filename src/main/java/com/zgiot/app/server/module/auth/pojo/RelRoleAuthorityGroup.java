@@ -1,9 +1,18 @@
 package com.zgiot.app.server.module.auth.pojo;
 
 public class RelRoleAuthorityGroup {
+    private Integer id;
     private int roleId;
     private int authorityGroupId;
     private boolean enable;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public int getRoleId() {
         return roleId;
