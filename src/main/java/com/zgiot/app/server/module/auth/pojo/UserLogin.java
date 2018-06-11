@@ -3,12 +3,21 @@ package com.zgiot.app.server.module.auth.pojo;
 import java.util.Date;
 
 public class UserLogin {
+    private Integer id;
     private String userUuid;
     private int platClientId;
     private String token;
     private Date updateDate;
     private String ipAddress;
     private String macAddress;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public String getUserUuid() {
         return userUuid;

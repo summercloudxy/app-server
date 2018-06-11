@@ -1,8 +1,17 @@
 package com.zgiot.app.server.module.auth.pojo;
 
 public class UserPlatformClient {
+    private Integer id;
     private long userId;
     private int platformClientId;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public long getUserId() {
         return userId;
