@@ -1,6 +1,7 @@
 package com.zgiot.app.server.module.reportforms.output.service;
 
 import com.zgiot.app.server.module.reportforms.output.constant.ReportFormConstant;
+import com.zgiot.app.server.module.reportforms.output.constant.ReportFormTransPortType;
 import com.zgiot.app.server.module.reportforms.output.dao.TransPortMapper;
 import com.zgiot.app.server.module.reportforms.output.pojo.*;
 import com.zgiot.app.server.module.reportforms.output.utils.ReportFormDateUtil;
@@ -88,7 +89,10 @@ public class TransPortServiceImpl implements TransPortService {
                 ts.setYearCoalVolunm(ts.getCoalVolunm());
             }
             transPortMapper.editTransportSaleStatistics(ts);
-            saleStatisticsLocalityMap.put(ts.getCoalType(),ts);
+            //缓存只变化是当班地销
+            if(ReportFormDateUtil.isCurrentDuty(ts.getDutyStartTime()) && ts.getStastisticsType().equals(ReportFormTransPortType.localSales)){
+                saleStatisticsLocalityMap.put(ts.getCoalType(),ts);
+            }
         }
         //更新库存
         updateOutputRecord();
