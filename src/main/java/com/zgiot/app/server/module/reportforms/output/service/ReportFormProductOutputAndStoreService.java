@@ -505,8 +505,8 @@ public class ReportFormProductOutputAndStoreService {
         CoalAnalysisRecord washedCoalAvgRecord = coalAnalysisManager.getAvgRecord(washedCoalRecords);
         CoalAnalysisRecord slimeAvgRecord = coalAnalysisManager.getAvgRecord(slimeRecords);
         CoalAnalysisRecord rawAvgRecord = coalAnalysisManager.getAvgRecord(rawCoalRecords);
-        generateClenedData(clenedCoalAvgRecord);
-        generateWashedData(washedCoalAvgRecord);
+        generateClenedData(clenedCoalAvgRecord, date);
+        generateWashedData(washedCoalAvgRecord, date);
         generateSlimeData(slimeAvgRecord);
         generateRawData(rawAvgRecord, clenedCoalAvgRecord, washedCoalAvgRecord, slimeAvgRecord, date);
         Map<Integer, ReportFormProductQuality> reportFormProductQualityMap = new HashMap<>();
@@ -518,14 +518,14 @@ public class ReportFormProductOutputAndStoreService {
     }
 
 
-    public void generateClenedData(CoalAnalysisRecord clenedCoalRecord) {
-        Random random = new Random();
+    public void generateClenedData(CoalAnalysisRecord clenedCoalRecord, Date date) {
+        Random random = new Random(date.getTime());
         int aad = random.nextInt(30) + 1050;
         clenedCoalRecord.setAad((double) aad / 100);
     }
 
-    public void generateWashedData(CoalAnalysisRecord washedCoalRecord) {
-        Random random = new Random();
+    public void generateWashedData(CoalAnalysisRecord washedCoalRecord, Date date) {
+        Random random = new Random(date.getTime());
         int mtRandom = random.nextInt(10) + 90;
         double mt = (double) mtRandom / 10;
         washedCoalRecord.setMt(mt);
