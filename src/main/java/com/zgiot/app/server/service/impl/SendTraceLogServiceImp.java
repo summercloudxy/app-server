@@ -2,7 +2,6 @@ package com.zgiot.app.server.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.zgiot.app.server.dataprocessor.DataListener;
 import com.zgiot.app.server.service.DataService;
 import com.zgiot.app.server.service.MetricService;
 import com.zgiot.app.server.service.SendTraceLogService;
@@ -13,10 +12,11 @@ import com.zgiot.common.pojo.DataModel;
 import com.zgiot.common.pojo.DataModelWrapper;
 import com.zgiot.common.pojo.MetricModel;
 import com.zgiot.common.pojo.ThingModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
 
 @Service
@@ -44,6 +44,7 @@ public class SendTraceLogServiceImp implements SendTraceLogService {
     @Autowired
     private ThingService thingService;
     public static final String SPLIT_CODE = "--";
+    public static final Logger logger = LoggerFactory.getLogger(SendTraceLogServiceImp.class);
 
 
     public void init() {
@@ -95,8 +96,13 @@ public class SendTraceLogServiceImp implements SendTraceLogService {
                     sendTraceLog.setInfluenceMetricCode(influenceMetricCode);
                     String influenceThingMetricKey = influenceThingCode + SPLIT_CODE + influenceMetricCode + SPLIT_CODE + expectedValue.toUpperCase();
                     sendTraceMapWaitForFeedback.put(influenceThingMetricKey, sendTraceLog);
+                    logger.debug("下发信号,thingCode:{},metricCode:{},value:{},user:{},platform:{},该信号需要记录日志,跟踪信号点thingCode:{},metricCode:{},期望值:{}"
+                            , sendInfo.getThingCode(), sendInfo.getMetricCode(), sendInfo.getSendValue(), sendInfo.getUserName(), sendInfo.getPlatform(), influenceThingCode, influenceMetricCode, expectedValue);
                 }
+
             }
+        } else {
+            logger.debug("下发信号，thingCode:{},metricCode:{},value:{},user:{},platform:{},该信号不需要记录日志，被忽略", sendInfo.getThingCode(), sendInfo.getMetricCode(), sendInfo.getSendValue(), sendInfo.getUserName(), sendInfo.getPlatform());
         }
     }
 
@@ -109,6 +115,7 @@ public class SendTraceLogServiceImp implements SendTraceLogService {
     public void onDataChange(DataModel dataModel) {
         String influenceThingMetricKey = dataModel.getThingCode() + SPLIT_CODE + dataModel.getMetricCode() + SPLIT_CODE + dataModel.getValue().toUpperCase();
         if (sendTraceMapWaitForFeedback.containsKey(influenceThingMetricKey)) {
+            logger.debug("收到信号，thingCode:{},metricCode:{},value:{},与用户:{}在平台:{}下发的信号thingCode:{},metricCode:{},value:{}相关联，记录日志");
             SendTraceLog sendTraceLog = sendTraceMapWaitForFeedback.get(influenceThingMetricKey);
             sendTraceLog.setCurrentValue(dataModel.getValue());
             sendTraceLog.setSendTime(dataModel.getDataTimeStamp());
@@ -122,8 +129,8 @@ public class SendTraceLogServiceImp implements SendTraceLogService {
     }
 
     @Override
-    public PageInfo<SendTraceLog>  getSendTraceLogList(SendTraceLog condition, Date startTime, Date endTime,Integer page,Integer count) {
-        PageHelper.startPage(page,count,true,false,null);
+    public PageInfo<SendTraceLog> getSendTraceLogList(SendTraceLog condition, Date startTime, Date endTime, Integer page, Integer count) {
+        PageHelper.startPage(page, count, true, false, null);
         List<SendTraceLog> sendTraceLogList = sendTraceLogMapper.getSendTraceLogList(condition, startTime, endTime);
         PageInfo<SendTraceLog> pageInfo = new PageInfo<>(sendTraceLogList);
         List<SendTraceLog> list = pageInfo.getList();

@@ -49,25 +49,11 @@ public class ReportFromsController {
     }
 
 
-    @ApiOperation("获取当班开始时间")
-    @GetMapping("/coal")
-    public ResponseEntity<String> getDutyStartTime(String time) throws Exception {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd-hhmmss");
-        Date parse = simpleDateFormat.parse(time);
-
-        List<ProductCoalStatistics> productCoalStatisticsList = coalAnalysisService.getProductCoalStatisticsListFromOtherModule(parse);
-        coalAnalysisService.insertProductCoalStatisticsRecords(productCoalStatisticsList);
-        return new ResponseEntity<>(ServerResponse.buildOkJsonWithNonStringKey(productCoalStatisticsList), HttpStatus.OK);
-
-    }
-
-
-    @ApiOperation("获取当班开始时间")
+    @ApiOperation("获取产品质量统计数据")
     @PostMapping("/product/coal/statistics/{pageNum}/{pageSize}")
     public ResponseEntity<String> getCoal(@RequestBody ProductCoalStatistics productCoalStatistics, @PathVariable int pageNum, @PathVariable int pageSize) throws Exception {
         PageInfo<ProductCoalStatistics> productCoalStatisticsListInDuration = coalAnalysisService.getProductCoalStatisticsListInDuration(productCoalStatistics, pageNum, pageSize);
         return new ResponseEntity<>(ServerResponse.buildOkJsonWithNonStringKey(productCoalStatisticsListInDuration), HttpStatus.OK);
-
     }
 
 }
