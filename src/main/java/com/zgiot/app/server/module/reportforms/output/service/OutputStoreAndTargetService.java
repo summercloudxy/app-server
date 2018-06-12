@@ -103,7 +103,7 @@ public class OutputStoreAndTargetService {
         Date dutyStartTime = ReportFormDateUtil.getNowDutyStartTime(new Date());
 
         ReportFormOutputStoreRecord currentStoreRecord = outputStoreMapper.getOutputStoreRecord(TYPE_STORE, dutyStartTime);
-        if(currentStoreRecord==null){
+        if (currentStoreRecord == null) {
             ReportFormOutputStoreRecord lastStoreRecord = dutyOutputStoreRecords.get(TYPE_STORE);
             currentStoreRecord = copyStoreValueFromLastRecord(dutyStartTime, lastStoreRecord);
             outputStoreMapper.insertRecord(currentStoreRecord);
@@ -353,6 +353,9 @@ public class OutputStoreAndTargetService {
             //从任务模块取数据
             List<TaskFeedbackInfo> currentDutyTaskFeedbackInfo = targetMapper.getTaskFeedbackInfoList(dutyStartTime, DateUtils.addHours(dutyStartTime, 12));
             for (TaskFeedbackInfo taskFeedbackInfo : currentDutyTaskFeedbackInfo) {
+                if (!feedbackTargetMap.containsKey(taskFeedbackInfo.getFeedbackInfoId())) {
+                    continue;
+                }
                 FeedbackTargetRelation feedbackTargetRelation = feedbackTargetMap.get(taskFeedbackInfo.getFeedbackInfoId());
                 Integer targetTypeId = feedbackTargetRelation.getTargetTypeId();
                 Integer term = feedbackTargetRelation.getTerm();
