@@ -1,9 +1,18 @@
 package com.zgiot.app.server.module.sfmonitor.pojo;
 
 public class RelSFMonTagDisplayZone {
+    private Integer id;
     private String metricTagCode;
     private int zoneId;
     private String code;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public String getMetricTagCode() {
         return metricTagCode;

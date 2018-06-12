@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.sfstop.mapper.StopDeviceBagMapper">
+
+    <select id="getStopDeviceBagByAreaId" parameterType="java.lang.Long" resultType="com.zgiot.app.server.module.sfstop.entity.pojo.StopDeviceBag">
+        SELECT
+            *
+        FROM
+            `tb_stop_device_bag`
+        WHERE
+            area_id = #{areaId}
+        AND is_deleted = 0
+    </select>
+
+    <select id="getStopDeviceBagByLineId" parameterType="java.lang.Long" resultType="com.zgiot.app.server.module.sfstop.entity.pojo.StopDeviceBag">
+        SELECT
+            *
+        FROM
+            `tb_stop_device_bag`
+        WHERE
+            stop_line_id = #{stopLineId}
+        AND is_deleted = 0
+    </select>
+
+    <select id="checkAreaHaveBagName" parameterType="com.zgiot.app.server.module.sfstop.entity.pojo.StopDeviceBag" resultType="com.zgiot.app.server.module.sfstop.entity.pojo.StopDeviceBag">
+        SELECT
+            *
+        FROM
+            `tb_stop_device_bag`
+        WHERE
+            bag_name = #{bagName}
+        AND area_id = #{areaId}
+        AND is_deleted = 0
+        <if test="id!=null">
+            AND id<![CDATA[ <> ]]>#{id}
+        </if>
+    </select>
+
+    <insert id="addStopDeviceBag" parameterType="com.zgiot.app.server.module.sfstop.entity.pojo.StopDeviceBag">
+        INSERT INTO tb_stop_device_bag
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="bagName!=null">
+                bag_name,
+            </if>
+            <if test="areaId!=null">
+                area_id,
+            </if>
+            <if test="createUser!=null">
+                create_user,
+            </if>
+            <if test="createTime!=null">
+                create_time,
+            </if>
+            <if test="updateUser!=null">
+                update_user,
+            </if>
+            <if test="updateTime!=null">
+                update_time,
+            </if>
+            <if test="number!=null">
+                number,
+            </if>
+            <if test="stopLineId!=null">
+                stop_line_id,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="bagName!=null">
+                #{bagName},
+            </if>
+            <if test="areaId!=null">
+                #{areaId},
+            </if>
+            <if test="createUser!=null">
+                #{createUser},
+            </if>
+            <if test="createTime!=null">
+                #{createTime},
+            </if>
+            <if test="updateUser!=null">
+                #{updateUser},
+            </if>
+            <if test="updateTime!=null">
+                #{updateTime},
+            </if>
+            <if test="number!=null">
+                #{number},
+            </if>
+            <if test="stopLineId!=null">
+                #{stopLineId},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateStopDeviceBag" parameterType="com.zgiot.app.server.module.sfstop.entity.pojo.StopDeviceBag">
+        UPDATE tb_stop_device_bag
+        <trim prefix="set" suffixOverrides=",">
+            <if test="bagName!=null">
+                bag_name=#{bagName},
+            </if>
+            <if test="areaId!=null">
+                area_id=#{areaId},
+            </if>
+            <if test="createUser!=null">
+                create_user=#{createUser},
+            </if>
+            <if test="createTime!=null">
+                create_time=#{createTime},
+            </if>
+            <if test="updateUser!=null">
+                update_user=#{updateUser},
+            </if>
+            <if test="updateTime!=null">
+                update_time=#{updateTime},
+            </if>
+            <if test="number!=null">
+                number=#{number},
+            </if>
+            <if test="stopLineId!=null">
+                stop_line_id=#{stopLineId},
+            </if>
+        </trim>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteStopDeviceBag" parameterType="com.zgiot.app.server.module.sfstop.entity.pojo.StopDeviceBag">
+        DELETE
+        FROM
+            tb_stop_device_bag
+        WHERE
+            id = #{id}
+    </delete>
+
+</mapper>

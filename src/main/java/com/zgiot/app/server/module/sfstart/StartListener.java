@@ -57,10 +57,15 @@ public class StartListener implements DataListener {
 
             //启车
             if (!startService.judgeStartingState(StartConstants.START_SEND_FINISH_STATE, StartConstants.START_FINISH_STATE)) {
-                logger.error("抛弃虚假启车标签数据{}的值{}", thingMetricLabel.getLabelPath(), metricValue);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("抛弃虚假启车标签数据{}的值{}", thingMetricLabel.getLabelPath(), metricValue);
+                }
+
                 return;
             } else {
-                logger.info("启车标签{}的值{}收到", thingMetricLabel.getLabelPath(), metricValue);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("启车标签{}的值{}收到", thingMetricLabel.getLabelPath(), metricValue);
+                }
                 // 返回获取数值
                 if (StartConstants.FINISH_STARTING_LABEL.equals(thingMetricLabel.getLabelPath())) {
                     if (metricValue == StartConstants.START_PLC_FINISH) {

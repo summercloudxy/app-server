@@ -1,10 +1,19 @@
 package com.zgiot.app.server.module.auth.pojo;
 
 public class UserDepartmentStation {
+    private Integer id;
     private int departmentId;
     private int stationId;
     private int workshopPostId;
     private long userId;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public int getDepartmentId() {
         return departmentId;

@@ -13,6 +13,7 @@ import com.zgiot.app.server.module.bellows.valve.ValveManager;
 import com.zgiot.app.server.module.demo.DemoBusiness;
 import com.zgiot.app.server.module.demo.DemoDataCompleter;
 import com.zgiot.app.server.module.densitycontrol.DensityControlListener;
+import com.zgiot.app.server.module.densitycontrol.DensityControlListener2;
 import com.zgiot.app.server.module.filterpress.FilterPressDataListener;
 import com.zgiot.app.server.module.filterpress.FilterPressManager;
 import com.zgiot.app.server.module.filterpress.FilterPressSignalOperateJob;
@@ -25,6 +26,7 @@ import com.zgiot.app.server.module.reportforms.output.service.InfluenceTimeServi
 import com.zgiot.app.server.module.reportforms.output.service.OutputStoreAndTargetService;
 import com.zgiot.app.server.module.reportforms.output.service.TransPortServiceImpl;
 import com.zgiot.app.server.module.sfstart.*;
+import com.zgiot.app.server.module.sfstop.StopExamineListener;
 import com.zgiot.app.server.module.sfsubsc.job.UploadHistorySubscCardDatas;
 import com.zgiot.app.server.module.sfsubsc.job.UploadProductionSubscCardDatas;
 import com.zgiot.app.server.module.sfsubsc.job.UploadSubscCardDatas;
@@ -55,7 +57,9 @@ public class ModuleListConfig {
     public static final String MODULE_COAL_ANALYSIS = "coal-analysis";
     public static final String MODULE_SUBSCRIPTION = "subscription";
     public static final String MODULE_REPORTFORM = "report-form";
+    public static final String MODULE_SFSTOP = "sfstop";
     public static final String MODULE_SEND_TRACE = "send-trace";
+    public static final String MODULE_DENSITY_CONTROL2 = "density-control2";
 
 
     @Value("${sysmodule.demo.enabled}")
@@ -78,8 +82,12 @@ public class ModuleListConfig {
     private boolean moduleSfStartEnabled;
     @Value("${sysmodule.report-form.enabled}")
     private boolean moduleReportEnabled;
+    @Value("${sysmodule.sfstop.enabled}")
+    private boolean moduleSfStopEnabled;
     @Value("${sysmodule.send-trace.enabled}")
     private boolean moduleSendTraceEnabled;
+    @Value("${sysmodule.density-control2.enabled}")
+    private boolean moduleDensityCtl2Enabled;
 
 
     private static final int FAULT_SCAN_RATE = 20;
@@ -134,6 +142,10 @@ public class ModuleListConfig {
     private StartListener startListener;
     @Autowired
     private SendTraceLogService sendTraceLogService;
+    @Autowired
+    private DensityControlListener2 densityControlListener2;
+    @Autowired
+    private StopExamineListener stopExamineListener;
 
     @PostConstruct
     void init() {
@@ -149,6 +161,7 @@ public class ModuleListConfig {
         configedModuleMap.put(MODULE_REPORTFORM, this.moduleReportEnabled);
 
         configedModuleMap.put(MODULE_SEND_TRACE, this.moduleSendTraceEnabled);
+        configedModuleMap.put(MODULE_DENSITY_CONTROL2, this.moduleDensityCtl2Enabled);
     }
 
     public boolean containModule(String moduleName) {
@@ -174,7 +187,7 @@ public class ModuleListConfig {
                 QuartzManager.addJob("historyHourData", ModuleListConfig.MODULE_HIST_PERSIST, "historyHourData",
                         ModuleListConfig.MODULE_HIST_PERSIST, HistoryHourDataJob.class, "0 0 0/1 * * ?");
                 QuartzManager.addJob("historyDayData", ModuleListConfig.MODULE_HIST_PERSIST, "historyDayData",
-                        ModuleListConfig.MODULE_HIST_PERSIST, HistoryDayDataJob.class, "0 0 0 0/1 * ?");
+                        ModuleListConfig.MODULE_HIST_PERSIST, HistoryDayDataJob.class, "0 0 0 1/1 * ?");
                 logIt(MODULE_HIST_PERSIST);
             }
 
@@ -189,6 +202,12 @@ public class ModuleListConfig {
             if (containModule(ModuleListConfig.MODULE_DENSITY_CONTROL)) {
                 processor.addListener(densityControlListener);
                 logIt(MODULE_DENSITY_CONTROL);
+            }
+
+            if (containModule(ModuleListConfig.MODULE_DENSITY_CONTROL2)) {
+                densityControlListener2.initParamCache();
+                processor.addListener(densityControlListener2);
+                logIt(MODULE_DENSITY_CONTROL2);
             }
 
             if (containModule(ModuleListConfig.MODULE_ALERT)) {
@@ -252,6 +271,10 @@ public class ModuleListConfig {
 
             }
 
+            if (containModule(ModuleListConfig.MODULE_SFSTOP)) {
+                processor.addListener(stopExamineListener);
+
+            }
 
 
             if (containModule(ModuleListConfig.MODULE_REPORTFORM)) {
@@ -278,7 +301,7 @@ public class ModuleListConfig {
             logger.info("Modules are all loaded successfully. ");
 
         } catch (Exception e) {
-            logger.error("Sys Modules failed to load. Pls check exception and restart again! ",e );
+            logger.error("Sys Modules failed to load. Pls check exception and restart again! ", e);
         }
 
     }

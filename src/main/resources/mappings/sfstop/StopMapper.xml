@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zgiot.app.server.module.sfstop.mapper.StopMapper">
+
+    <resultMap id="stopOperationRecordMap"
+               type="com.zgiot.app.server.module.sfstop.entity.pojo.StopOperationRecord">
+        <result property="operateId" column="operate_id"/>
+        <result property="operateUser" column="operate_user"/>
+        <result property="operateState" column="operate_state"/>
+        <result property="createdTime" column="created_time"/>
+        <result property="isDelete" column="is_delete"/>
+    </resultMap>
+
+    <resultMap id="stopExamineRecord" type="com.zgiot.app.server.module.sfstop.entity.pojo.StopExamineRecord">
+        <result property="examineId" column="examine_id"/>
+        <result property="operateId" column="operate_id"/>
+        <result property="startDeviceId" column="start_device_id"/>
+        <result property="ruleId" column="rule_id"/>
+        <result property="examineType" column="examine_type"/>
+        <result property="examineResult" column="examine_result"/>
+        <result property="examineInformation" column="examine_information"/>
+        <result property="examineDeviceId" column="examine_device_id"/>
+        <result property="examineDeviceCode" column="examine_device_code"/>
+        <result property="examineDeviceName" column="examine_device_name"/>
+    </resultMap>
+
+    <resultMap id="stopExamineRule" type="com.zgiot.app.server.module.sfstop.entity.pojo.StopExamineRule">
+        <result property="ruleId" column="rule_id"/>
+        <result property="stopThingCode" column="stop_thing_code"/>
+        <result property="examineType" column="examine_type"/>
+        <result property="examineThingCode" column="examine_thing_code"/>
+        <result property="examineName" column="examine_name"/>
+        <result property="operator" column="operator"/>
+        <result property="compareValue" column="compare_value"/>
+    </resultMap>
+    <select id="selectOperateRecordWithoutOperateState" resultMap="stopOperationRecordMap">
+        SELECT
+        operate_id,
+        operate_user,
+        operate_state,
+        operate_system,
+        created_time,
+        system,
+        is_delete
+        FROM
+        tb_stop_operation_record
+        WHERE
+        is_delete = 0
+        <if test="operateState != null">
+            AND operate_state &gt;#{operateState}
+        </if>
+        <if test="finishState != null">
+            AND operate_state &lt;#{finishState}
+        </if>
+        <if test="system != null">
+            AND system =#{system}
+        </if>
+    </select>
+
+    <insert id="saveStopOperationRecord" useGeneratedKeys="true" keyProperty="operateId">
+        INSERT tb_stop_operation_record (
+        create_user, operate_state, operate_system, created_time, is_delete,system
+        )
+        VALUES (#{createUser}, #{operateState}, #{operateSystem}, now(), '0',#{system})
+    </insert>
+
+
+    <select id="selectStopExamineRuleByThingCode" resultMap="stopExamineRule">
+        SELECT
+        rule_id,
+        stop_thing_code,
+        examine_type,
+        examine_thing_code,
+        examine_name,
+        operator,
+        compare_value
+        FROM
+        tb_stop_examine_rule
+        WHERE
+        1 = 1
+        <if test="deviceId != null">
+            AND stop_thing_code = #{thingCode}
+        </if>
+        AND is_delete = '0'
+    </select>
+
+    <update id="closeOperateStopByOperateId">
+        UPDATE tb_stop_operation_record
+        SET is_delete = #{isDelete}
+        WHERE operate_id = #{operateId}
+    </update>
+
+    <update id="updateStopManualInterventionRecord">
+        UPDATE tb_stop_manual_intervention_record
+        SET intervention_state = #{interventionState}
+        <if test="relievePersonId != null">
+            ,relieve_person_id = #{relievePersonId}
+        </if>
+        WHERE
+        thing_code = #{thingCode}
+        AND operate_id = #{operateId}
+    </update>
+
+    <update id="updateOperateStateByOperateId">
+        UPDATE tb_stop_operation_record
+        SET operate_state = #{operateState}
+        WHERE operate_id = #{operateId}
+    </update>
+</mapper>

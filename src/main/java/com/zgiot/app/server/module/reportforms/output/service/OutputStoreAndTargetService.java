@@ -101,9 +101,14 @@ public class OutputStoreAndTargetService {
     @Scheduled(cron = "0 0 8,20 * * ? ")
     public void checkDutyEndTime() {
         Date dutyStartTime = ReportFormDateUtil.getNowDutyStartTime(new Date());
-        ReportFormOutputStoreRecord lastStoreRecord = dutyOutputStoreRecords.get(TYPE_STORE);
-        ReportFormOutputStoreRecord currentStoreRecord = copyStoreValueFromLastRecord(dutyStartTime, lastStoreRecord);
-        outputStoreMapper.insertRecord(currentStoreRecord);
+
+        ReportFormOutputStoreRecord currentStoreRecord = outputStoreMapper.getOutputStoreRecord(TYPE_STORE, dutyStartTime);
+        if(currentStoreRecord==null){
+            ReportFormOutputStoreRecord lastStoreRecord = dutyOutputStoreRecords.get(TYPE_STORE);
+            currentStoreRecord = copyStoreValueFromLastRecord(dutyStartTime, lastStoreRecord);
+            outputStoreMapper.insertRecord(currentStoreRecord);
+        }
+
         dutyOutputStoreRecords.put(TYPE_STORE, currentStoreRecord);
         dutyOutputStoreRecords.put(TYPE_OUTPUT, null);
 
