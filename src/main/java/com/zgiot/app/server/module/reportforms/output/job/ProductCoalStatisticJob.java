@@ -6,6 +6,7 @@ import com.xxl.job.core.handler.annotation.JobHandler;
 import com.zgiot.app.server.module.reportforms.output.pojo.ProductCoalStatistics;
 import com.zgiot.app.server.module.reportforms.output.service.CoalAnalysisService;
 import com.zgiot.app.server.module.reportforms.output.utils.ReportFormDateUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,7 +26,9 @@ public class ProductCoalStatisticJob extends IJobHandler {
         Date dutyEndTime = DateUtils.addHours(dutyStartTime, 8);
         coalAnalysisService.clearAllProductCoalStatisticsInDuration(dutyStartTime, dutyEndTime);
         List<ProductCoalStatistics> productCoalStatisticsList = coalAnalysisService.getProductCoalStatisticsListFromOtherModule(ReportFormDateUtil.getNowDutyStartTime(new Date()));
-        coalAnalysisService.insertProductCoalStatisticsRecords(productCoalStatisticsList);
+        if (CollectionUtils.isNotEmpty(productCoalStatisticsList)) {
+            coalAnalysisService.insertProductCoalStatisticsRecords(productCoalStatisticsList);
+        }
         return ReturnT.SUCCESS;
     }
 }

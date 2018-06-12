@@ -151,7 +151,7 @@
 
     <insert id="insertProductCoalStatisticsRecords" keyProperty="id" keyColumn="id" useGeneratedKeys="true">
         INSERT INTO tb_report_form_product_coal_statistics (time, team_id,term, heavy_medium_lump, heavy_medium_slack,
-        ratio8, ratio13, raw_coal, target_coal, target_type, value) VALUES
+        ratio8, ratio13, raw_coal, target_coal, target_type, `value`) VALUES
         <foreach collection="list" item="item" open="(" close=")" separator="),(">
             #{item.time},#{item.teamId},#{item.term},#{item.heavyMediumLump},#{item.heavyMediumSlack},#{item.ratio8},#{item.ratio13},#{item.rawCoal},#{item.targetCoal},#{item.targetType},#{item.value}
         </foreach>
